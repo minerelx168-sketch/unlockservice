@@ -563,7 +563,10 @@
     display: grid;
   }
 
+  /* Collapsed by default so the panel is closed on first paint, with no
+     hidden-attribute flash while the header hydrates. */
   .site-nav {
+    display: none;
     position: absolute;
     top: 100%;
     left: 0;
@@ -578,8 +581,8 @@
     box-shadow: var(--shadow-soft);
   }
 
-  .site-nav[hidden] {
-    display: none;
+  .site-nav[data-open='true'] {
+    display: flex;
   }
 
   .site-nav a {

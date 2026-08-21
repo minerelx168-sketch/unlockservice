@@ -4,7 +4,7 @@ Transferred from the design canvas captured in the **Website design patterns** s
 documents a third-party page; what travels here is the system — the ratios, the rhythm, the
 component anatomy — while the palette, the type and the marks are ours.
 
-The live version of this document is `design-system.html`, where every specimen renders from the
+The live version of this document is the `/design-system` route, where every specimen renders from the
 real tokens and follows the theme toggle.
 
 ---
@@ -30,7 +30,7 @@ Copying hex values gets you a palette, not the feel.
 
 ## 2. Tokens
 
-All in `assets/css/tokens.css`. Light on `:root`; dark redefines the same names once under
+All in `styles/tokens.css`. Light on `:root`; dark redefines the same names once under
 `:root[data-theme='dark']`, re-pitched per role rather than inverted.
 
 ### Surfaces and ink
@@ -109,7 +109,7 @@ uses `rgba(255,255,255,.06)` fills and `rgba(255,255,255,.14)` borders instead o
 
 | Role | Size / leading | Weight | Tracking |
 | --- | --- | --- | --- |
-| Hero H1 | clamp(40 → 76px) / 0.98 | 700 | −0.058em |
+| Hero H1 | clamp(38 → 68px) / 0.98 | 700 | −0.058em |
 | Display H2 (band) | clamp(34 → 62px) / 1.04 | 620 | −0.048em |
 | Section H2 | clamp(31 → 52px) / 1.08 | 680 | −0.045em |
 | Card H3 | 20px / 1.35 | 680 | −0.025em |
@@ -127,7 +127,7 @@ Body copy sits in `--muted`; only headings earn the strong ink.
 
 ## 4. Components
 
-Class names live in `assets/css/components.css`.
+Class names live in `styles/components.css`.
 
 | Class | Anatomy |
 | --- | --- |
@@ -161,7 +161,7 @@ A page is assembled from these ten blocks, in this order.
 | # | Block | Notes |
 | --- | --- | --- |
 | 01 | Sticky header, 74px | page colour at 88% + blur, 1px bottom hairline, nav gap 28, actions toggle → quiet → accent |
-| 02 | Hero, min-height 690 | 1.05fr / 0.95fr, gap 92, pad-top 78; second headline line in `--primary`; two low-opacity radial washes, never a linear gradient |
+| 02 | Hero, min-height 620 | 1.15fr / 0.85fr, gap 80, pad-top 78; second headline line in `--primary`; two low-opacity radial washes, never a linear gradient |
 | 03 | Trust bar | one panel under the hero with no section padding above it |
 | 04 | Benefit grid | 3 × card, gap 28, min-height 310 |
 | 05 | Steps | numerals as texture; the one centred section head |

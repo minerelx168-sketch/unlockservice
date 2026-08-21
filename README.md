@@ -1,55 +1,64 @@
 # Openline — unlock service site
 
-A static marketing site for a device-identity and unlock service, built on the design system
-captured in the **Website design patterns** Cowork session.
+A Next.js app for a device-identity and unlock service, built on the design system captured in
+the **Website design patterns** Cowork session. The marketing pages are in place; the backend —
+API routes, schema and dashboard — is the next layer on the same shell.
 
 The session produced a design canvas (`BaseIMEI Design System`) with five artboards: foundations,
 component anatomy in light and dark, section patterns, and a rules/transfer sheet. That canvas
 documents a third-party page, so what is carried into this repo is the **system** — the ratios, the
 rhythm, the component anatomy — while the palette, the type and the marks are our own. The transfer
-is written out in `docs/design-system.md` and rendered live at `design-system.html`.
+is written out in `docs/design-system.md` and rendered live at `/design-system`.
 
 ## Layout
 
 ```
-index.html            Homepage — the ten section patterns, in order
-design-system.html    Living style guide: tokens, ramp, components, patterns, rules
-assets/css/tokens.css Every colour, radius, shadow and geometry value. Light + one dark block.
-assets/css/base.css   Reset, type ramp, shell and section rhythm
-assets/css/components.css  Component anatomy — buttons, cards, band, FAQ, footer …
-assets/css/docs.css   Chrome for the style guide only, not part of the product surface
-assets/fonts/         Self-hosted Bricolage Grotesque + Instrument Sans (OFL 1.1)
-assets/js/site.js     Theme toggle, mobile nav, local IMEI checksum validation
-docs/design-system.md The written system: principles, tokens, patterns, transfer table
-docs/reference/       The original canvas artboards, preserved as provenance
+app/layout.tsx           Root shell — theme guard, font preloads, header, footer
+app/page.tsx             Homepage — the ten section patterns, in order
+app/design-system/       Living style guide; specimens render from the real tokens
+components/              Header, footer, brand lockup, theme toggle, IMEI form, icons
+lib/imei.ts              Luhn validation, grouping and identifier masking (no DOM)
+styles/                  tokens.css · fonts.css · base.css · components.css · docs.css
+public/fonts/            Self-hosted Bricolage Grotesque + Instrument Sans (OFL 1.1)
+docs/design-system.md    The written system: principles, tokens, patterns, transfer table
+docs/reference/          The original canvas artboards
 ```
 
-No build step and no dependencies. Open `index.html`, or serve the folder:
+Next.js (App Router) with TypeScript. Both pages prerender as static content today; the
+backend — API routes, schema and dashboard — lands on top of this shell.
 
 ```sh
-python3 -m http.server 8000
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # production build + type-check + lint
+npm run typecheck
 ```
 
-The page makes no external request: both faces are served from `assets/fonts/`, and every icon is an
-inline SVG.
+Both faces are served from `public/fonts/` and every icon is inline SVG, so the pages make no
+external request.
 
 ## Conventions
 
-- **Tokens are the only place a colour is written.** No component hard-codes a hex.
+- **Tokens are the only place a colour is written.** No component hard-codes a hex, and
+  `styles/globals.css` is the one import that pulls the sheets in dependency order.
 - **Dark mode is one block.** `:root[data-theme='dark']` redefines the same names, re-pitched per
   role rather than inverted. A small inline script in each page head stamps the attribute before
-  first paint so a dark reload never flashes white.
+  first paint so a dark reload never flashes white — which is why `<html>` carries
+  `suppressHydrationWarning`.
 - **Geometry is not brand.** Radii, control heights, border weights and shadow spreads come from the
   captured system unchanged; changing the palette should never require touching them.
-- **The IMEI field never phones home on keystroke.** It validates the 15-digit Luhn checksum in the
-  browser. Wiring a real lookup provider is the one place a backend is needed.
+- **The IMEI field never phones home on keystroke.** `lib/imei.ts` validates the 15-digit Luhn
+  checksum in the browser and stays free of DOM and framework imports, so the same check can run in
+  a server route. Wiring a real lookup provider is the one place a backend is needed.
+- **Client components are the exception.** Only the header, the theme toggle and the IMEI field
+  are `'use client'`; everything else renders on the server.
 
 ## Re-skinning
 
 Palette, type and marks are the parts that are ours rather than the captured system's, so they are
 the parts meant to change. To re-skin: edit the palette and `--font-*` blocks in
-`assets/css/tokens.css`, drop replacement faces into `assets/fonts/`, and swap the shield glyph in
-the `.brand .mark` lockup. Nothing in `components.css` needs to change — its radii, control heights
+`styles/tokens.css`, drop replacement faces into `public/fonts/`, and swap the shield glyph in
+`components/icons.tsx`. Nothing in `styles/components.css` needs to change — its radii, control heights
 and shadow spreads are the transferred geometry.
 
 The brand name **Openline** is the one the design canvas already used for this swap; it appears in
