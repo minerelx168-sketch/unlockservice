@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#ffffff;color:#163f4d;
+      font-family:"Google Sans Flex","Google Sans","Plus Jakarta Sans",Arial,sans-serif;
+      font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:#1769e8;text-decoration:none} a:hover{color:#0f53bd}
+    .kick{font-size:11px;font-weight:740;letter-spacing:.09em;text-transform:uppercase;color:#087d82;
+      display:inline-flex;align-items:center;gap:7px;margin:0 0 12px}
+    .h{font-size:30px;line-height:1.1;letter-spacing:-1.2px;font-weight:680;color:#0b2f3d;margin:0}
+    .note{font-size:14px;line-height:1.6;color:#687b83;margin:8px 0 0;max-width:660px}
+    .rule{height:1px;background:#dce7e8;border:0;margin:0}
+
+    /* specimen frame */
+    .spec{border:1px solid #dce7e8;border-radius:20px;background:#fff;overflow:hidden;
+      box-shadow:0 14px 40px rgba(29,73,82,.08)}
+    .spec .stage{padding:28px;background:#f8fbfb;display:flex;flex-wrap:wrap;gap:14px;align-items:center;min-height:112px}
+    .spec .cap{padding:15px 18px;border-top:1px solid #dce7e8}
+    .spec .cap b{display:block;font-size:12.5px;color:#0b2f3d;letter-spacing:-.1px}
+    .spec .cap span{display:block;font-size:11.5px;color:#687b83;font-variant-numeric:tabular-nums;line-height:1.55;margin-top:3px}
+    .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+
+    /* the observed components */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 17px;
+      border:1px solid transparent;border-radius:14px;font-size:13px;font-weight:680;
+      font-family:inherit;cursor:default}
+    .btn svg{width:15px;height:15px}
+    .btn-quiet{background:#fff;color:#163f4d;border-color:#dce7e8}
+    .btn-coral{background:#ff785f;color:#fff;box-shadow:0 13px 30px rgba(255,120,95,.2)}
+    .btn-primary{background:#1769e8;color:#fff;min-height:52px;padding:10px 21px;box-shadow:0 13px 30px rgba(23,105,232,.2)}
+    .icon-action{width:40px;height:40px;display:grid;place-items:center;border:1px solid #dce7e8;border-radius:13px;background:#fff;color:#163f4d}
+    .icon-action svg{width:17px;height:17px}
+
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:720;letter-spacing:.045em;
+      text-transform:uppercase;color:#087d82;background:#e5f8f7;border:1px solid #a8d7d8;border-radius:999px;padding:7px 10px}
+    .eyebrow svg{width:13px;height:13px}
+    .kicker2{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:740;letter-spacing:.09em;
+      text-transform:uppercase;color:#087d82}
+    .kicker2 svg{width:14px;height:14px}
+
+    .tile{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;background:#e9f1ff;color:#1769e8}
+    .tile svg{width:28px;height:28px}
+    .tile-coral{background:#fff0ec;color:#df5d46}
+    .tile-teal{background:#e5f8f7;color:#087d82}
+
+    .bcard{background:#fff;border:1px solid #dce7e8;border-radius:26px;padding:30px;width:320px;
+      box-shadow:0 14px 40px rgba(29,73,82,.08)}
+    .bcard h4{margin:20px 0 0;font-size:20px;line-height:1.65;letter-spacing:-.5px;font-weight:680;color:#0b2f3d}
+    .bcard p{margin:9px 0 0;font-size:15px;line-height:1.65;color:#687b83}
+    .bcard a{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#1769e8;margin-top:18px}
+    .bcard a svg{width:13px;height:13px}
+
+    .float{background:rgba(255,255,255,.92);border:1px solid rgba(220,231,232,.84);border-radius:16px;
+      padding:12px 13px;display:flex;align-items:center;gap:10px;box-shadow:0 14px 40px rgba(29,73,82,.08)}
+    .float .ic{width:34px;height:34px;border-radius:11px;background:#e9f1ff;color:#1769e8;display:grid;place-items:center}
+    .float .ic svg{width:16px;height:16px}
+    .float .l{font-size:11px;color:#687b83;line-height:1.4}
+    .float .v{font-size:13.5px;font-weight:700;color:#0b2f3d;line-height:1.35}
+
+    .mini{background:#fff;border:1px solid #dce7e8;border-radius:11px;padding:11px;width:150px}
+    .mini .l{font-size:10px;color:#687b83;letter-spacing:.02em}
+    .mini .v{font-size:19px;font-weight:700;color:#0b2f3d;letter-spacing:-.4px;line-height:1.3}
+
+    .trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#fff;border:1px solid #dce7e8;
+      border-radius:22px;box-shadow:0 14px 40px rgba(29,73,82,.08);overflow:hidden;width:100%}
+    .trust > div{padding:22px 24px;border-left:1px solid #dce7e8}
+    .trust > div:first-child{border-left:0}
+    .trust b{display:block;font-size:19px;font-weight:700;letter-spacing:-.4px;color:#0b2f3d;line-height:1.3}
+    .trust span{display:block;font-size:12.5px;color:#687b83;margin-top:2px}
+
+    .faq{background:#fff;border:1px solid #dce7e8;border-radius:24px;padding:18px 22px;width:100%;
+      box-shadow:0 14px 40px rgba(29,73,82,.08);display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .faq b{font-size:15px;font-weight:700;color:#0b2f3d}
+    .faq .plus{width:26px;height:26px;border-radius:8px;background:#e9f1ff;color:#1769e8;display:grid;place-items:center;flex:0 0 auto}
+    .faq .plus svg{width:13px;height:13px}
+
+    .fld{width:290px}
+    .fld .lb{font-size:11px;font-weight:720;letter-spacing:.06em;text-transform:uppercase;color:#687b83;margin-bottom:7px}
+    .fld .in{min-height:50px;border:1px solid #dce7e8;border-radius:14px;background:#fff;padding:13px 14px;
+      font-size:15px;color:#8ea0a6;font-family:ui-monospace,Menlo,monospace;letter-spacing:.06em}
+
+    .row-tbl{width:100%;border:1px solid #dce7e8;border-radius:16px;overflow:hidden;background:#fff}
+    .row-tbl .th{display:grid;grid-template-columns:1fr 1fr 90px;gap:12px;padding:10px 16px;background:#f8fbfb;
+      font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#687b83;font-weight:700}
+    .row-tbl .tr{display:grid;grid-template-columns:1fr 1fr 90px;gap:12px;padding:13px 16px;border-top:1px solid #dce7e8;font-size:13px}
+    .row-tbl .tr b{font-weight:700;color:#0b2f3d;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+    .row-tbl .tr .ok{color:#16845d;font-weight:700;font-size:12px}
+  </style>
+</helmet>
+
+<div style="padding:56px 60px 72px">
+
+  <div class="kick">Component anatomy · light</div>
+  <h2 class="h">Measured, not eyeballed.</h2>
+  <p class="note">Every number below was read off the live page. Radii, border weights, shadow spreads
+    and control heights are the part of a design system people usually guess at — these are the
+    actual values.</p>
+
+  <div style="height:34px"></div>
+  <hr class="rule">
+  <div style="height:34px"></div>
+
+  <!-- Buttons -->
+  <div class="kick">Buttons</div>
+  <div class="g3">
+    <div class="spec">
+      <div class="stage">
+        <span class="btn btn-quiet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M14 4H6v16h12V9z"/><path d="M14 4v5h4"/></svg>Secondary</span>
+      </div>
+      <div class="cap"><b>.button-quiet</b><span>bg #FFF · border 1px #DCE7E8 · radius 14 · min-h 46 · pad 10/17 · 13px w680 · gap 8 · no shadow</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage">
+        <span class="btn btn-coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Secondary CTA</span>
+      </div>
+      <div class="cap"><b>.button-coral</b><span>bg #FF785F · white · radius 14 · min-h 46 · shadow 0 13px 30px rgba(255,120,95,.20)</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage">
+        <span class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-3.7-3.7"/></svg>Primary CTA</span>
+      </div>
+      <div class="cap"><b>.button-primary</b><span>bg #1769E8 · white · radius 14 · <strong>min-h 52</strong> · pad 10/21 · shadow 0 13px 30px rgba(23,105,232,.20)</span></div>
+    </div>
+  </div>
+
+  <div style="height:18px"></div>
+
+  <div class="g3">
+    <div class="spec">
+      <div class="stage">
+        <span class="icon-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 14.4A8.4 8.4 0 019.6 4 8.6 8.6 0 1020 14.4z"/></svg></span>
+        <span class="icon-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></span>
+      </div>
+      <div class="cap"><b>.icon-action</b><span>40×40 grid · radius 13 · border 1px #DCE7E8 · bg #FFF · glyph 17px</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage">
+        <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l7 3v6c0 4.4-3 7.9-7 9-4-1.1-7-4.6-7-9V6l7-3z"/></svg>Clear device lookup reports</span>
+      </div>
+      <div class="cap"><b>.eyebrow</b><span>pill 999 · pad 7/10 · 11px w720 +.045em upper · #087D82 on #E5F8F7 · 1px tinted border</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage">
+        <span class="kicker2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4l1.9 4 4.4.6-3.2 3 .8 4.4L12 14l-3.9 2 .8-4.4-3.2-3 4.4-.6z"/></svg>Common questions</span>
+      </div>
+      <div class="cap"><b>.section-kicker</b><span>11px w740 <strong>+.09em</strong> upper · #087D82 · icon 14px · gap 7 · no background</span></div>
+    </div>
+  </div>
+
+  <div style="height:34px"></div>
+
+  <!-- Icon tiles -->
+  <div class="kick">Icon tiles</div>
+  <div class="spec">
+    <div class="stage" style="gap:20px">
+      <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.6"/><path d="M10.6 18.6h2.8"/></svg></span>
+      <span class="tile tile-coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 18.5a4 4 0 01-.4-8A5.4 5.4 0 0117 9.6a3.9 3.9 0 01.6 8.9z"/><path d="M9.8 14.4l1.9 1.9 3.1-3.4"/></svg></span>
+      <span class="tile tile-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M13.2 3L5.4 13.4h5.3L10 21l7.9-10.4h-5.4z"/></svg></span>
+      <span style="font-size:12.5px;color:#687b83;line-height:1.6;max-width:330px">The tint is the category signal: blue = identity,
+        coral = accounts &amp; locks, teal = delivery. Same box, same glyph weight, only the pairing changes.</span>
+    </div>
+    <div class="cap"><b>.benefit-icon</b><span>68×68 · radius 22 · glyph 28px line-style · tints --primary-soft #E9F1FF / --coral-soft #FFF0EC / --teal-soft #E5F8F7 · no border, no shadow</span></div>
+  </div>
+
+  <div style="height:34px"></div>
+
+  <!-- Cards -->
+  <div class="kick">Cards &amp; panels</div>
+  <div class="g2">
+    <div class="spec">
+      <div class="stage" style="align-items:flex-start">
+        <div class="bcard">
+          <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.6"/><path d="M10.6 18.6h2.8"/></svg></span>
+          <h4>Device identity checks</h4>
+          <p>Copy sits at 15px on a 1.65 leading, in --muted, never in the strong ink.</p>
+          <a>Start a lookup <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+      <div class="cap"><b>.benefit-card</b><span>radius <strong>26</strong> · pad 30 · border 1px #DCE7E8 · shadow-soft 0 14px 40px rgba(29,73,82,.08) · min-h 310 · link 11px w700 #1769E8</span></div>
+    </div>
+
+    <div class="spec">
+      <div class="stage" style="flex-direction:column;align-items:flex-start;gap:16px">
+        <div class="float">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l7 3v6c0 4.4-3 7.9-7 9-4-1.1-7-4.6-7-9V6l7-3z"/></svg></span>
+          <span><span class="l">Blacklist status</span><span class="v">Clean</span></span>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div class="mini"><div class="l">Available credit</div><div class="v">$8.88</div></div>
+          <div class="mini"><div class="l">Completed checks</div><div class="v">24</div></div>
+        </div>
+      </div>
+      <div class="cap"><b>.float-card &amp; .mini-stat</b><span>float: radius 16 · pad 12/13 · gap 10 · bg rgba(255,255,255,.92) · border rgba(#DCE7E8,.84)<br>mini-stat: radius <strong>11</strong> · pad 11 · flat, no shadow</span></div>
+    </div>
+  </div>
+
+  <div style="height:18px"></div>
+
+  <div class="spec">
+    <div class="stage" style="padding:26px">
+      <div class="trust">
+        <div><b>IMEI + Serial</b><span>Flexible identifier checks</span></div>
+        <div><b>Apple + Android</b><span>Multiple device services</span></div>
+        <div><b>Worldwide</b><span>Built for global users</span></div>
+      </div>
+    </div>
+    <div class="cap"><b>.trust-bar</b><span>one panel, radius 22 · equal columns divided by 1px #DCE7E8 · item pad 22/24 · headline 19px w700 −0.4px · caption 12.5px --muted · shadow-soft</span></div>
+  </div>
+
+  <div style="height:18px"></div>
+
+  <div class="g2">
+    <div class="spec">
+      <div class="stage" style="padding:26px">
+        <div class="faq">
+          <b>What information can I check?</b>
+          <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 6v12"/><path d="M6 12h12"/></svg></span>
+        </div>
+      </div>
+      <div class="cap"><b>FAQ row</b><span>radius 24 · pad 18/22 · summary 15px w700 --ink-strong · toggle 26×26 radius 8 on --primary-soft · shadow-soft · rows gap ~12</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage" style="padding:26px">
+        <div class="fld">
+          <div class="lb">IMEI number</div>
+          <div class="in">35 4909 12 345678 9</div>
+        </div>
+      </div>
+      <div class="cap"><b>Input (derived)</b><span>The homepage shows no live form, so this follows the same language: 1px #DCE7E8 · radius 14 · min-h 50 · label 11px w720 +.06em upper --muted</span></div>
+    </div>
+  </div>
+
+  <div style="height:18px"></div>
+
+  <div class="spec">
+    <div class="stage" style="padding:26px">
+      <div class="row-tbl">
+        <div class="th"><span>Identifier</span><span>Service</span><span>Status</span></div>
+        <div class="tr"><b>35······2145</b><span>Basic info</span><span class="ok">Saved</span></div>
+        <div class="tr"><b>R5C····K2XV</b><span>Warranty</span><span class="ok">Saved</span></div>
+        <div class="tr"><b>86······7620</b><span>Blacklist</span><span class="ok">Saved</span></div>
+      </div>
+    </div>
+    <div class="cap"><b>Data table</b><span>head 10px +.09em upper --muted on --surface-strong · rows divided by 1px hairline · identifier in mono, masked to first 2 + last 4 · status in --success w700</span></div>
+  </div>
+
+  <div style="height:34px"></div>
+  <hr class="rule">
+  <div style="height:16px"></div>
+  <p style="margin:0;font-size:12px;color:#7b9096">Specimens redrawn from measured values to document the system, not to reproduce the
+    site. Items marked <em>derived</em> extend the language where the source page had no example.</p>
+
+</div>
+</x-dc>
+</body>
+</html>

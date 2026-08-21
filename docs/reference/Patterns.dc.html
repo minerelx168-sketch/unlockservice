@@ -1,0 +1,412 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f5fafa;color:#163f4d;
+      font-family:"Google Sans Flex","Google Sans","Plus Jakarta Sans",Arial,sans-serif;
+      font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:#1769e8;text-decoration:none} a:hover{color:#0f53bd}
+    .kick{font-size:11px;font-weight:740;letter-spacing:.09em;text-transform:uppercase;color:#087d82;margin:0 0 12px}
+    .h{font-size:32px;line-height:1.1;letter-spacing:-1.3px;font-weight:680;color:#0b2f3d;margin:0}
+    .note{font-size:14px;line-height:1.6;color:#687b83;margin:8px 0 0;max-width:700px}
+    .rule{height:1px;background:#dce7e8;border:0;margin:0}
+
+    .pat{background:#fff;border:1px solid #dce7e8;border-radius:22px;overflow:hidden;
+      box-shadow:0 14px 40px rgba(29,73,82,.08)}
+    .pat .hd{padding:16px 20px 14px;border-bottom:1px solid #dce7e8;display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+    .pat .hd b{font-size:14px;color:#0b2f3d;letter-spacing:-.2px}
+    .pat .hd span{font-size:11px;color:#7b9096;font-variant-numeric:tabular-nums}
+    .pat .wf{padding:22px;background:#f8fbfb}
+    .pat .ft{padding:13px 20px 16px;font-size:11.5px;color:#687b83;line-height:1.6;font-variant-numeric:tabular-nums}
+    .pat .ft strong{color:#0b2f3d}
+
+    /* wireframe primitives */
+    .bx{background:#fff;border:1px solid #dce7e8;border-radius:10px}
+    .fill{background:#edf8f8;border:1px solid #d3e8e8;border-radius:10px}
+    .ink{background:#0b2f3d;border-radius:4px}
+    .mut{background:#c9d9dc;border-radius:3px}
+    .blu{background:#1769e8;border-radius:6px}
+    .cor{background:#ff785f;border-radius:6px}
+    .lbl{position:absolute;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:#8aa0a6;background:#fff;padding:1px 5px;border-radius:5px;border:1px solid #e4eded}
+    .dim{font-size:9.5px;font-weight:700;color:#0aa6a6;font-variant-numeric:tabular-nums}
+    .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+    .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+    .flow{display:flex;flex-direction:column;gap:8px}
+  </style>
+</helmet>
+
+<div style="padding:56px 60px 72px">
+
+  <div class="kick">Section patterns</div>
+  <h2 class="h">The page is nine repeated blocks.</h2>
+  <p class="note">Almost every screen is assembled from the same short vocabulary of sections, and the
+    order barely changes between pages. These are the structures, with the measurements that make
+    them feel like one page rather than a stack of components.</p>
+
+  <div style="height:32px"></div>
+
+  <!-- rhythm ruler -->
+  <div class="pat">
+    <div class="hd"><b>Vertical rhythm</b><span>the spine everything hangs on</span></div>
+    <div class="wf" style="display:flex;gap:0;align-items:stretch;height:130px">
+      <div style="flex:0 0 108px;background:#edf8f8;border:1px dashed #a8d7d8;border-radius:8px;display:grid;place-items:center">
+        <span class="dim">108px</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:9px;padding:0 18px">
+        <div class="mut" style="width:120px;height:7px"></div>
+        <div class="ink" style="width:300px;height:16px"></div>
+        <div class="mut" style="width:420px;height:7px"></div>
+        <div class="mut" style="width:380px;height:7px"></div>
+      </div>
+      <div style="flex:0 0 108px;background:#edf8f8;border:1px dashed #a8d7d8;border-radius:8px;display:grid;place-items:center">
+        <span class="dim">108px</span>
+      </div>
+    </div>
+    <div class="ft"><strong>section padding 108px top and bottom</strong> · content shell max-width <strong>1180px</strong>, side gutter 72px ·
+      kicker → 14px → headline → 16–25px → lead. Sections alternate <strong>#FFFFFF</strong> and <strong>--page-soft #F5FAFA</strong>;
+      the gradient band and the footer are the only full-bleed colour breaks.</div>
+  </div>
+
+  <div style="height:20px"></div>
+
+  <div class="g2">
+    <!-- header -->
+    <div class="pat">
+      <div class="hd"><b>01 · Sticky header</b><span>74px tall</span></div>
+      <div class="wf">
+        <div class="bx" style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="fill" style="width:26px;height:26px;border-radius:9px"></div>
+            <div class="flow"><div class="ink" style="width:52px;height:7px"></div><div class="mut" style="width:38px;height:4px"></div></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-left:26px">
+            <div class="ink" style="width:26px;height:6px"></div>
+            <div class="mut" style="width:32px;height:6px"></div>
+            <div class="mut" style="width:38px;height:6px"></div>
+            <div class="mut" style="width:30px;height:6px"></div>
+          </div>
+          <div style="display:flex;gap:7px;margin-left:auto;align-items:center">
+            <div class="bx" style="width:24px;height:24px;border-radius:8px"></div>
+            <div class="bx" style="width:44px;height:24px;border-radius:8px"></div>
+            <div class="cor" style="width:60px;height:24px;border-radius:8px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">Translucent <strong>rgba(#FFF,.88)</strong> + backdrop blur, 1px bottom hairline. Nav gap <strong>28px</strong>,
+        header gap 24px. Active item takes a 2px teal underline. Actions read theme-toggle → quiet → coral, so the
+        strongest colour is furthest right.</div>
+    </div>
+
+    <!-- hero -->
+    <div class="pat">
+      <div class="hd"><b>02 · Hero</b><span>min-height 690px</span></div>
+      <div class="wf">
+        <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:center">
+          <div class="flow">
+            <div class="fill" style="width:120px;height:16px;border-radius:999px"></div>
+            <div class="ink" style="width:100%;height:22px;margin-top:4px"></div>
+            <div class="blu" style="width:82%;height:22px"></div>
+            <div class="mut" style="width:92%;height:6px;margin-top:6px"></div>
+            <div class="mut" style="width:78%;height:6px"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <div class="blu" style="width:78px;height:22px"></div>
+              <div class="cor" style="width:92px;height:22px"></div>
+            </div>
+          </div>
+          <div class="bx" style="height:150px;border-radius:16px;display:grid;place-items:center;
+            background:radial-gradient(circle at 80% 25%, rgba(55,211,220,.13), transparent 40%), #fff">
+            <div class="bx" style="width:74px;height:120px;border-radius:14px;border-width:3px;border-color:#164456"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">Two columns <strong>1.05fr / 0.95fr</strong>, gap <strong>92px</strong>, padding 78 top / 108 bottom.
+        Headline splits across two lines with the second in <strong>--primary</strong>. Backdrop is two very low-opacity
+        radial washes (13% teal at 83%/28%, blue at 17%/20%) — never a linear gradient.</div>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+
+  <div class="g3">
+    <!-- trust bar -->
+    <div class="pat">
+      <div class="hd"><b>03 · Trust bar</b><span>4 equal columns</span></div>
+      <div class="wf">
+        <div class="bx" style="display:grid;grid-template-columns:repeat(4,1fr);border-radius:14px;overflow:hidden">
+          <div style="padding:14px 12px"><div class="ink" style="width:80%;height:9px"></div><div class="mut" style="width:95%;height:5px;margin-top:6px"></div></div>
+          <div style="padding:14px 12px;border-left:1px solid #dce7e8"><div class="ink" style="width:85%;height:9px"></div><div class="mut" style="width:90%;height:5px;margin-top:6px"></div></div>
+          <div style="padding:14px 12px;border-left:1px solid #dce7e8"><div class="ink" style="width:75%;height:9px"></div><div class="mut" style="width:92%;height:5px;margin-top:6px"></div></div>
+          <div style="padding:14px 12px;border-left:1px solid #dce7e8"><div class="ink" style="width:70%;height:9px"></div><div class="mut" style="width:88%;height:5px;margin-top:6px"></div></div>
+        </div>
+      </div>
+      <div class="ft">One panel, radius 22, divided by hairlines — <strong>not</strong> four separate cards.
+        Sits directly under the hero with no section padding above it.</div>
+    </div>
+
+    <!-- benefit grid -->
+    <div class="pat">
+      <div class="hd"><b>04 · Benefit grid</b><span>3 × card, gap 28</span></div>
+      <div class="wf">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px">
+          <div class="bx" style="padding:12px;border-radius:14px;height:118px">
+            <div class="fill" style="width:26px;height:26px;border-radius:9px"></div>
+            <div class="ink" style="width:80%;height:8px;margin-top:14px"></div>
+            <div class="mut" style="width:95%;height:5px;margin-top:9px"></div>
+            <div class="mut" style="width:85%;height:5px;margin-top:5px"></div>
+            <div class="blu" style="width:42%;height:5px;margin-top:14px"></div>
+          </div>
+          <div class="bx" style="padding:12px;border-radius:14px;height:118px">
+            <div style="width:26px;height:26px;border-radius:9px;background:#fff0ec;border:1px solid #ffd9cf"></div>
+            <div class="ink" style="width:70%;height:8px;margin-top:14px"></div>
+            <div class="mut" style="width:92%;height:5px;margin-top:9px"></div>
+            <div class="mut" style="width:80%;height:5px;margin-top:5px"></div>
+            <div class="blu" style="width:50%;height:5px;margin-top:14px"></div>
+          </div>
+          <div class="bx" style="padding:12px;border-radius:14px;height:118px">
+            <div style="width:26px;height:26px;border-radius:9px;background:#e5f8f7;border:1px solid #bfe6e4"></div>
+            <div class="ink" style="width:85%;height:8px;margin-top:14px"></div>
+            <div class="mut" style="width:90%;height:5px;margin-top:9px"></div>
+            <div class="mut" style="width:70%;height:5px;margin-top:5px"></div>
+            <div class="blu" style="width:46%;height:5px;margin-top:14px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">Cards are <strong>min-height 310</strong> so ragged copy never breaks the row.
+        Each carries a different tint on the icon tile, and ends with an 11px link, not a button.</div>
+    </div>
+
+    <!-- steps -->
+    <div class="pat">
+      <div class="hd"><b>05 · Steps</b><span>3 × card, gap 18</span></div>
+      <div class="wf">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="bx" style="padding:12px;border-radius:14px;height:118px;position:relative;overflow:hidden">
+            <div style="position:absolute;top:4px;right:8px;font-size:30px;font-weight:800;color:#edf8f8;letter-spacing:-2px;line-height:1">01</div>
+            <div class="fill" style="width:22px;height:22px;border-radius:8px"></div>
+            <div class="ink" style="width:70%;height:8px;margin-top:16px"></div>
+            <div class="mut" style="width:92%;height:5px;margin-top:9px"></div>
+            <div class="mut" style="width:80%;height:5px;margin-top:5px"></div>
+          </div>
+          <div class="bx" style="padding:12px;border-radius:14px;height:118px;position:relative;overflow:hidden">
+            <div style="position:absolute;top:4px;right:8px;font-size:30px;font-weight:800;color:#edf8f8;letter-spacing:-2px;line-height:1">02</div>
+            <div style="width:22px;height:22px;border-radius:8px;background:#fff0ec"></div>
+            <div class="ink" style="width:62%;height:8px;margin-top:16px"></div>
+            <div class="mut" style="width:88%;height:5px;margin-top:9px"></div>
+            <div class="mut" style="width:74%;height:5px;margin-top:5px"></div>
+          </div>
+          <div class="bx" style="padding:12px;border-radius:14px;height:118px;position:relative;overflow:hidden">
+            <div style="position:absolute;top:4px;right:8px;font-size:30px;font-weight:800;color:#edf8f8;letter-spacing:-2px;line-height:1">03</div>
+            <div style="width:22px;height:22px;border-radius:8px;background:#e5f8f7"></div>
+            <div class="ink" style="width:58%;height:8px;margin-top:16px"></div>
+            <div class="mut" style="width:90%;height:5px;margin-top:9px"></div>
+            <div class="mut" style="width:66%;height:5px;margin-top:5px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">The numeral is the decoration: very large, weight 700+, tinted to
+        <strong>--page-tint #EDF8F8</strong> so it reads as texture rather than content. Section head is centred here,
+        left-aligned everywhere else.</div>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+
+  <div class="g2">
+    <!-- overview band -->
+    <div class="pat">
+      <div class="hd"><b>06 · Gradient band</b><span>full-bleed</span></div>
+      <div class="wf" style="padding:0">
+        <div style="padding:22px;background:radial-gradient(circle at 83% 32%, rgba(82,213,204,.30), transparent 24%),
+          linear-gradient(120deg,#103f50 0%,#145d70 48%,#176b78 100%)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center">
+            <div class="flow">
+              <div style="width:70px;height:6px;background:#7ce9e3;border-radius:3px"></div>
+              <div style="width:100%;height:16px;background:#fff;border-radius:4px;margin-top:4px"></div>
+              <div style="width:78%;height:16px;background:#fff;border-radius:4px"></div>
+              <div style="width:92%;height:5px;background:rgba(255,255,255,.34);border-radius:3px;margin-top:8px"></div>
+              <div style="display:flex;gap:6px;margin-top:8px">
+                <div style="width:52px;height:15px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:999px"></div>
+                <div style="width:60px;height:15px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:999px"></div>
+                <div style="width:46px;height:15px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:999px"></div>
+              </div>
+            </div>
+            <div style="background:rgba(5,43,51,.28);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:12px;display:grid;gap:7px">
+              <div style="display:grid;grid-template-columns:22px 1fr 34px;gap:8px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:8px">
+                <div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.10)"></div>
+                <div><div style="width:38px;height:4px;background:#9dc4b5;border-radius:2px"></div><div style="width:80%;height:6px;background:#fff;border-radius:3px;margin-top:4px"></div></div>
+                <div style="width:30px;height:5px;background:#8fe6bd;border-radius:3px"></div>
+              </div>
+              <div style="display:grid;grid-template-columns:22px 1fr 34px;gap:8px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:8px">
+                <div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.10)"></div>
+                <div><div style="width:32px;height:4px;background:#9dc4b5;border-radius:2px"></div><div style="width:72%;height:6px;background:#fff;border-radius:3px;margin-top:4px"></div></div>
+                <div style="width:26px;height:5px;background:#8fe6bd;border-radius:3px"></div>
+              </div>
+              <div style="display:grid;grid-template-columns:22px 1fr 34px;gap:8px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:8px">
+                <div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.10)"></div>
+                <div><div style="width:36px;height:4px;background:#9dc4b5;border-radius:2px"></div><div style="width:66%;height:6px;background:#fff;border-radius:3px;margin-top:4px"></div></div>
+                <div style="width:28px;height:5px;background:#8fe6bd;border-radius:3px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">The one saturated block on the page, and the only place the headline goes to
+        <strong>62px / weight 620</strong>. Panel inside is <strong>rgba(5,43,51,.28)</strong> with a
+        <strong>rgba(255,255,255,.14)</strong> border — glass on gradient, not a solid card.</div>
+    </div>
+
+    <!-- split -->
+    <div class="pat">
+      <div class="hd"><b>07 · Product split</b><span>scene + copy</span></div>
+      <div class="wf">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center">
+          <div class="bx" style="border-radius:14px;overflow:hidden;position:relative;height:150px">
+            <div style="height:16px;background:#f8fbfb;border-bottom:1px solid #dce7e8;display:flex;gap:4px;align-items:center;padding-left:8px">
+              <div style="width:5px;height:5px;border-radius:50%;background:#ff785f"></div>
+              <div style="width:5px;height:5px;border-radius:50%;background:#f0bd67"></div>
+              <div style="width:5px;height:5px;border-radius:50%;background:#16845d"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:52px 1fr;height:134px">
+              <div style="background:#0d2d37;padding:8px"><div style="width:70%;height:5px;background:rgba(255,255,255,.6);border-radius:2px"></div>
+                <div style="width:90%;height:12px;background:#1769e8;border-radius:5px;margin-top:9px"></div>
+                <div style="width:80%;height:5px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:8px"></div>
+                <div style="width:76%;height:5px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:6px"></div></div>
+              <div style="padding:9px">
+                <div class="ink" style="width:52%;height:7px"></div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px">
+                  <div class="bx" style="height:26px;border-radius:7px"></div>
+                  <div class="bx" style="height:26px;border-radius:7px"></div>
+                  <div class="bx" style="height:26px;border-radius:7px"></div>
+                </div>
+                <div class="bx" style="height:44px;border-radius:7px;margin-top:6px"></div>
+              </div>
+            </div>
+            <div class="bx" style="position:absolute;right:14px;bottom:-6px;width:44px;height:78px;border-radius:11px;border-width:3px;border-color:#164456;background:#fff"></div>
+          </div>
+          <div class="flow">
+            <div style="width:60px;height:6px;background:#0aa6a6;border-radius:3px"></div>
+            <div class="ink" style="width:100%;height:16px;margin-top:4px"></div>
+            <div class="ink" style="width:72%;height:16px"></div>
+            <div class="mut" style="width:92%;height:5px;margin-top:8px"></div>
+            <div style="display:grid;gap:8px;margin-top:10px">
+              <div style="display:grid;grid-template-columns:20px 1fr;gap:8px"><div class="fill" style="width:20px;height:20px;border-radius:7px"></div><div><div class="ink" style="width:56%;height:6px"></div><div class="mut" style="width:88%;height:4px;margin-top:4px"></div></div></div>
+              <div style="display:grid;grid-template-columns:20px 1fr;gap:8px"><div class="fill" style="width:20px;height:20px;border-radius:7px"></div><div><div class="ink" style="width:48%;height:6px"></div><div class="mut" style="width:80%;height:4px;margin-top:4px"></div></div></div>
+            </div>
+            <div class="blu" style="width:86px;height:22px;margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">A browser-chrome mock (radius 24, --shadow) with a phone frame overlapping its
+        lower-right corner — the overlap is what keeps the block from reading as a flat screenshot.
+        Copy side: kicker, two-line headline, lead, icon feature list, one primary button.</div>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+
+  <div class="g3">
+    <!-- faq -->
+    <div class="pat">
+      <div class="hd"><b>08 · FAQ</b><span>407 / 702, gap 70</span></div>
+      <div class="wf">
+        <div style="display:grid;grid-template-columns:.37fr .63fr;gap:12px">
+          <div class="flow">
+            <div style="width:56px;height:5px;background:#0aa6a6;border-radius:3px"></div>
+            <div class="ink" style="width:90%;height:13px;margin-top:4px"></div>
+            <div class="ink" style="width:70%;height:13px"></div>
+            <div class="mut" style="width:88%;height:5px;margin-top:8px"></div>
+          </div>
+          <div class="flow" style="gap:6px">
+            <div class="bx" style="border-radius:11px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center">
+              <div class="ink" style="width:60%;height:6px"></div><div class="fill" style="width:14px;height:14px;border-radius:5px"></div>
+            </div>
+            <div class="bx" style="border-radius:11px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center">
+              <div class="ink" style="width:48%;height:6px"></div><div class="fill" style="width:14px;height:14px;border-radius:5px"></div>
+            </div>
+            <div class="bx" style="border-radius:11px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center">
+              <div class="ink" style="width:66%;height:6px"></div><div class="fill" style="width:14px;height:14px;border-radius:5px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">Asymmetric: a narrow sticky-feeling intro column against a wide list. First row
+        opens by default so the pattern is legible without a click.</div>
+    </div>
+
+    <!-- cta -->
+    <div class="pat">
+      <div class="hd"><b>09 · CTA band</b><span>radius 28</span></div>
+      <div class="wf">
+        <div style="border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;
+          background:radial-gradient(circle at 92% 0%, rgba(10,166,166,.16), transparent 32%), #e9f1ff;border:1px solid #afcae8">
+          <div class="flow">
+            <div class="ink" style="width:130px;height:12px"></div>
+            <div class="mut" style="width:180px;height:5px;margin-top:6px"></div>
+          </div>
+          <div style="display:flex;gap:7px">
+            <div class="blu" style="width:66px;height:22px"></div>
+            <div class="bx" style="width:56px;height:22px;border-radius:7px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">Not full-bleed — a contained panel on <strong>--primary-soft #E9F1FF</strong> with a
+        <strong>#AFCAE8</strong> border, padding 40/44, plus a teal radial tint from the top-right corner.</div>
+    </div>
+
+    <!-- footer -->
+    <div class="pat">
+      <div class="hd"><b>10 · Footer</b><span>margin-top 100px</span></div>
+      <div class="wf" style="padding:0">
+        <div style="background:#0d2d37;padding:18px">
+          <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:14px">
+            <div>
+              <div style="display:flex;gap:6px;align-items:center"><div style="width:18px;height:18px;border-radius:6px;background:rgba(255,255,255,.14)"></div><div style="width:44px;height:6px;background:#fff;border-radius:3px"></div></div>
+              <div style="width:86%;height:4px;background:rgba(255,255,255,.22);border-radius:2px;margin-top:9px"></div>
+              <div style="width:70%;height:4px;background:rgba(255,255,255,.22);border-radius:2px;margin-top:5px"></div>
+            </div>
+            <div><div style="width:40px;height:4px;background:#fff;border-radius:2px"></div>
+              <div style="width:56px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:8px"></div>
+              <div style="width:48px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:5px"></div>
+              <div style="width:52px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:5px"></div></div>
+            <div><div style="width:34px;height:4px;background:#fff;border-radius:2px"></div>
+              <div style="width:50px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:8px"></div>
+              <div style="width:56px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:5px"></div></div>
+            <div><div style="width:44px;height:4px;background:#fff;border-radius:2px"></div>
+              <div style="width:46px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:8px"></div>
+              <div style="width:54px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-top:5px"></div></div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,.1);margin-top:14px;padding-top:10px;display:flex;justify-content:space-between">
+            <div style="width:90px;height:4px;background:rgba(255,255,255,.22);border-radius:2px"></div>
+            <div style="display:flex;gap:4px">
+              <div style="width:22px;height:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:3px"></div>
+              <div style="width:30px;height:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:3px"></div>
+              <div style="width:26px;height:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:3px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ft">Ground is <strong>#0D2D37</strong> — its own value, not a token. Body text
+        <strong>#A8BDC2</strong>, headings white, padding 65 top / 26 bottom. Column heads are 12px
+        uppercase at +.10em, links 13.5px.</div>
+    </div>
+  </div>
+
+  <div style="height:32px"></div>
+  <hr class="rule">
+  <div style="height:16px"></div>
+  <p style="margin:0;font-size:12px;color:#7b9096">Schematics, not screenshots — the boxes carry the structure and the measurements,
+    so the pattern transfers to a different brand without carrying the source's identity with it.</p>
+
+</div>
+</x-dc>
+</body>
+</html>

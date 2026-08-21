@@ -1,0 +1,180 @@
+/**
+ * Openline — design tokens.
+ *
+ * Transferred from the "BaseIMEI Design System" canvas captured in the
+ * Website design patterns session (see docs/design-system.md). The ratios,
+ * the rhythm and the component anatomy are carried over; the palette, the
+ * type and the marks are our own.
+ *
+ * Light values live on :root. Dark redefines the same names once, under a
+ * single selector, stamped on <html> by the FOUC guard in each page head.
+ * Nothing else in the codebase may hard-code a colour.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- surfaces --------------------------------------------------- */
+  /* Whites carry a warm cast rather than a neutral grey. */
+  --page: #ffffff;
+  --page-soft: #f8f7f3;
+  --page-tint: #f1efe6;
+  /* The steps numeral, which sits on --surface: page-tint is close enough to
+     the surface in dark that the numeral disappears entirely. */
+  --numeral: #f1efe6;
+  --surface: #ffffff;
+  --surface-strong: #faf9f5;
+
+  /* ---- ink -------------------------------------------------------- */
+  /* The darkest ink is a green-black. Nothing on the page is #000. */
+  --ink-strong: #14241b;
+  --ink: #2f3d34;
+  --muted: #68736a;
+  /* Decorative only — placeholders and the window-chrome dots. Anything a
+     reader needs takes --muted, which clears 4.5:1 on every surface. */
+  --faint: #79857e;
+
+  /* ---- lines ------------------------------------------------------ */
+  /* Every edge is 1px and always one of these two. */
+  --line: #e4e2d9;
+  --line-strong: #d2cfc2;
+
+  /* ---- primary: emerald ------------------------------------------- */
+  --primary: #0f7a52;
+  --primary-dark: #0b5f40;
+  --primary-soft: #e6f2ea;
+  --primary-border: #b6d8c5;
+  /* Label colour on a filled button. White reads on emerald but not on
+     amber (3.1:1), so amber carries ink in both themes. */
+  --on-primary: #ffffff;
+
+  /* ---- secondary: amber (the second action, never the first) ------- */
+  --accent: #d97b1e;
+  --accent-dark: #b86211;
+  --accent-soft: #fdf1e1;
+  --accent-border: #f0cfa4;
+  --on-accent: #14241b;
+
+  /* ---- tertiary: moss (kickers only, never a fill) ----------------- */
+  --moss: #516f34;
+  --moss-soft: #eef3e2;
+  --moss-border: #cadcae;
+
+  /* ---- status ----------------------------------------------------- */
+  --success: #16845d;
+  --warning: #b8640f;
+  --danger: #b03a2b;
+
+  /* ---- depth ------------------------------------------------------ */
+  /* One shadow, very wide and very soft, tinted with the ink colour.
+     There is no ramp: panels take this one or the larger version. */
+  --shadow-soft: 0 14px 40px rgba(20, 42, 30, 0.08);
+  --shadow: 0 30px 80px rgba(16, 38, 26, 0.14);
+  --shadow-primary: 0 13px 30px rgba(15, 122, 82, 0.2);
+  --shadow-accent: 0 13px 30px rgba(217, 123, 30, 0.2);
+
+  /* ---- the one gradient band -------------------------------------- */
+  /* One band per page is the whole budget. Identical in both themes. */
+  --band: linear-gradient(120deg, #0d3b29 0%, #14573a 48%, #1a6c46 100%);
+  --band-glow: radial-gradient(
+    circle at 83% 32%,
+    rgba(237, 165, 83, 0.26),
+    transparent 24%
+  );
+  --band-panel: rgba(4, 32, 22, 0.28);
+  --band-line: rgba(255, 255, 255, 0.14);
+  --band-fill: rgba(255, 255, 255, 0.06);
+  --band-ink: #ffffff;
+  --band-muted: rgba(233, 243, 236, 0.72);
+
+  /* ---- footer ground (its own value, not a surface token) --------- */
+  --footer-ground: #0d2018;
+  --footer-ink: #ffffff;
+  --footer-muted: #a9bdb1;
+  --footer-line: rgba(255, 255, 255, 0.12);
+
+  /* ---- geometry --------------------------------------------------- */
+  --shell: 1180px;
+  --gutter: 72px;
+  --section: 104px;
+  --radius-chip: 11px;
+  --radius-control: 14px;
+  --radius-float: 16px;
+  --radius-panel: 22px;
+  --radius-card: 26px;
+  --radius-band: 28px;
+  --radius-device: 40px;
+  --radius-pill: 999px;
+
+  /* ---- type ------------------------------------------------------- */
+  --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+  --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/**
+ * Dark theme. Re-pitched per role, not inverted: accents lighten so they
+ * stay legible on green-black, and the soft tints stop being pale washes
+ * and become deep chips behind a light glyph.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --page: #0e1310;
+  --page-soft: #121814;
+  --page-tint: #18201a;
+  --numeral: #26312a;
+  --surface: #161d18;
+  --surface-strong: #1b231d;
+
+  --ink-strong: #f2f7f2;
+  --ink: #dbe4dc;
+  --muted: #99a89d;
+  --faint: #7d8c82;
+
+  --line: #2a332c;
+  --line-strong: #3f4b42;
+
+  --primary: #4cc08a;
+  --primary-dark: #6fd3a3;
+  --primary-soft: #10301f;
+  --primary-border: #1e4a33;
+  --on-primary: #0b1410;
+
+  --accent: #eda553;
+  --accent-dark: #f4bb78;
+  --accent-soft: #362313;
+  --accent-border: #52381e;
+  --on-accent: #0b1410;
+
+  --moss: #a9c47a;
+  --moss-soft: #212b18;
+  --moss-border: #37452a;
+
+  --success: #72d9af;
+  --warning: #f0bd67;
+  --danger: #e58a7c;
+
+  /* Same structure, black-based so depth still reads on dark surfaces. */
+  --shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.18);
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+  --shadow-primary: 0 13px 30px rgba(0, 0, 0, 0.32);
+  --shadow-accent: 0 13px 30px rgba(0, 0, 0, 0.32);
+
+  --footer-ground: #091310;
+  --footer-muted: #93a89a;
+}
+
+@media (max-width: 1080px) {
+  :root {
+    --gutter: 40px;
+    --section: 88px;
+  }
+}
+
+@media (max-width: 620px) {
+  :root {
+    --gutter: 22px;
+    --section: 68px;
+  }
+}

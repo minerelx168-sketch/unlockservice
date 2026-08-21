@@ -1,0 +1,63 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 2760,
+      "title": "Foundations"
+    },
+    {
+      "file": "Components.dc.html",
+      "x": 1400,
+      "y": 0,
+      "w": 1280,
+      "h": 2160,
+      "title": "Components · light"
+    },
+    {
+      "file": "ComponentsDark.dc.html",
+      "x": 2800,
+      "y": 0,
+      "w": 1280,
+      "h": 1980,
+      "title": "Components · dark"
+    },
+    {
+      "file": "Patterns.dc.html",
+      "x": 1400,
+      "y": 2320,
+      "w": 1440,
+      "h": 2380,
+      "title": "Section patterns"
+    },
+    {
+      "file": "Rules.dc.html",
+      "x": 2960,
+      "y": 2320,
+      "w": 1060,
+      "h": 2280,
+      "title": "Rules & transfer"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "start-here",
+      "x": 0,
+      "y": -150,
+      "w": 420,
+      "text": "BaseIMEI.com — observed design system.\nStart on Foundations, then read Rules & transfer last: it is the part that tells you what to actually reuse."
+    },
+    {
+      "id": "third-party",
+      "x": 0,
+      "y": 2870,
+      "w": 420,
+      "text": "This is a third-party site.\nThe values here are documentation, measured from the live page. Reuse the ratios and the rhythm; keep palette, type and marks your own."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

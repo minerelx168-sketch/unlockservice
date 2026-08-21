@@ -1,0 +1,263 @@
+/** Chrome for the living style guide — not part of the product surface. */
+
+.doc-head {
+  padding-top: 72px;
+  padding-bottom: 56px;
+}
+
+.doc-section {
+  padding-block: 56px;
+  border-top: 1px solid var(--line);
+}
+
+.doc-section > .shell > .section-head {
+  margin-bottom: 34px;
+}
+
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.swatch {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-float);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.swatch .chip {
+  height: 74px;
+  border-bottom: 1px solid var(--line);
+}
+
+.swatch .meta {
+  padding: 11px 13px 13px;
+}
+
+.swatch .nm {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+}
+
+.swatch .hx {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ramp-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 200px;
+  gap: 24px;
+  align-items: baseline;
+  padding-block: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.ramp-row .lbl {
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--moss);
+}
+
+.ramp-row .spec {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.spec-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.spec-card .stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  min-height: 118px;
+  padding: 28px;
+  background: var(--surface-strong);
+}
+
+.spec-card .cap {
+  padding: 15px 18px;
+  border-top: 1px solid var(--line);
+}
+
+.spec-card .cap b {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-strong);
+}
+
+.spec-card .cap span {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.doc-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.doc-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.principle {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding-block: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.principle .n {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.principle p {
+  margin: 7px 0 0;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.principle strong,
+.map strong {
+  color: var(--ink-strong);
+}
+
+.map {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.map th,
+.map td {
+  text-align: left;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  line-height: 1.6;
+  vertical-align: top;
+}
+
+.map thead th {
+  border-top: 0;
+  padding-block: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.map td:first-child {
+  width: 42%;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.map td:nth-child(2) {
+  color: var(--muted);
+}
+
+code,
+.map code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+.tick {
+  display: grid;
+  gap: 11px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tick li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 11px;
+  align-items: start;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.tick svg {
+  width: 16px;
+  height: 16px;
+  margin-top: 4px;
+}
+
+.tick--yes svg {
+  color: var(--success);
+}
+
+.tick--no svg {
+  color: var(--danger);
+}
+
+.tick strong {
+  color: var(--ink-strong);
+}
+
+@media (max-width: 940px) {
+  .swatch-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .doc-grid-3,
+  .doc-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .ramp-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 620px) {
+  .swatch-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

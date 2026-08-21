@@ -1,0 +1,248 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <style>
+    :root{
+      --page:#ffffff; --page-soft:#f5fafa; --page-tint:#edf8f8;
+      --surface:#ffffff; --surface-strong:#f8fbfb;
+      --ink:#163f4d; --ink-strong:#0b2f3d; --muted:#687b83;
+      --line:#dce7e8; --line-strong:#c9d9dc;
+      --primary:#1769e8; --primary-dark:#0f53bd; --primary-soft:#e9f1ff;
+      --teal:#0aa6a6; --teal-dark:#087d82; --teal-soft:#e5f8f7;
+      --coral:#ff785f; --coral-dark:#df5d46; --coral-soft:#fff0ec;
+      --success:#16845d; --warning:#ca7c1d;
+      --font-main:"Google Sans Flex","Google Sans","Plus Jakarta Sans",Arial,sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--font-main);color:var(--ink);background:var(--page);
+      font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:#1769e8;text-decoration:none} a:hover{color:#0f53bd}
+    .kick{font-size:11px;font-weight:740;letter-spacing:.09em;text-transform:uppercase;color:#087d82;
+      display:inline-flex;align-items:center;gap:7px;margin:0 0 14px}
+    .h-sec{font-size:34px;line-height:1.08;letter-spacing:-1.4px;font-weight:680;color:#0b2f3d;margin:0}
+    .note{font-size:14px;line-height:1.6;color:#687b83;margin:8px 0 0;max-width:640px}
+    .rule{height:1px;background:#dce7e8;border:0;margin:0}
+    .sw{border:1px solid #dce7e8;border-radius:16px;overflow:hidden;background:#fff;
+      box-shadow:0 14px 40px rgba(29,73,82,.08)}
+    .sw .chip{height:74px}
+    .sw .meta{padding:11px 13px 13px}
+    .sw .nm{font-size:12px;font-weight:700;color:#0b2f3d;letter-spacing:-.1px}
+    .sw .hx{font-size:11px;font-weight:500;color:#687b83;font-variant-numeric:tabular-nums;margin-top:2px}
+    .grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+    .dark .sw{background:#102027;border-color:#263a41;box-shadow:0 16px 40px rgba(0,0,0,.18)}
+    .dark .sw .nm{color:#f3fbfc} .dark .sw .hx{color:#91a7ad}
+    .tr{display:grid;grid-template-columns:150px 1fr 190px;gap:24px;align-items:baseline;
+      padding:18px 0;border-top:1px solid #dce7e8}
+    .tr .lbl{font-size:11px;font-weight:720;letter-spacing:.045em;text-transform:uppercase;color:#087d82}
+    .tr .spec{font-size:12px;color:#687b83;font-variant-numeric:tabular-nums;line-height:1.5}
+    .tile{background:#fff;border:1px solid #dce7e8;border-radius:22px;padding:22px;
+      box-shadow:0 14px 40px rgba(29,73,82,.08)}
+    .tile h4{margin:0 0 4px;font-size:13px;font-weight:700;color:#0b2f3d;letter-spacing:-.1px}
+    .tile p{margin:0;font-size:12px;color:#687b83;line-height:1.55;font-variant-numeric:tabular-nums}
+  </style>
+</helmet>
+
+<div style="padding: 64px 72px 80px; max-width: 1280px; margin: 0 auto">
+
+  <!-- Cover -->
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:40px">
+    <div>
+      <div class="kick">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.4-3 7.9-7 9-4-1.1-7-4.6-7-9V6l7-3z"/></svg>
+        Design system · captured from baseimei.com
+      </div>
+      <h1 style="margin:0; font-size:62px; line-height:1.02; letter-spacing:-2.9px; font-weight:700; color:#0b2f3d">
+        BaseIMEI<span style="color:#1769e8">.com</span><br>design language.
+      </h1>
+      <p style="margin:20px 0 0; font-size:19px; line-height:1.7; color:#687b83; max-width:620px">
+        Calm teal-and-ink product marketing: white surfaces, hairline borders, wide soft shadows,
+        very large tight-tracked headlines, and a blue primary paired with a coral secondary.
+      </p>
+    </div>
+    <div style="flex-shrink:0; width:236px; border:1px solid #dce7e8; border-radius:18px; padding:18px 20px; background:#f8fbfb">
+      <div style="font-size:10px;font-weight:740;letter-spacing:.09em;text-transform:uppercase;color:#687b83">Source</div>
+      <div style="font-size:13px;font-weight:700;color:#0b2f3d;margin-top:6px;line-height:1.45">baseimei.com — homepage</div>
+      <div style="font-size:12px;color:#687b83;margin-top:10px;line-height:1.55">Read from the live stylesheet and computed styles, 21&nbsp;Aug&nbsp;2026.</div>
+      <div style="height:1px;background:#dce7e8;margin:14px 0"></div>
+      <div style="font-size:11.5px;color:#687b83;line-height:1.55">Observed reference only. Third-party site — study the structure, build your own identity.</div>
+    </div>
+  </div>
+
+  <div style="height:56px"></div>
+  <hr class="rule">
+  <div style="height:44px"></div>
+
+  <!-- Light palette -->
+  <div class="kick">01 · Color tokens — light (:root)</div>
+  <h2 class="h-sec">Warm-neutral whites, deep teal ink.</h2>
+  <p class="note">Whites carry a faint teal cast (<strong>#f5fafa</strong>, <strong>#edf8f8</strong>) rather than pure grey.
+    Text never goes black — the darkest ink is <strong>#0b2f3d</strong>.</p>
+  <div style="height:26px"></div>
+
+  <div class="grid5">
+    <div class="sw"><div class="chip" style="background:#ffffff;border-bottom:1px solid #dce7e8"></div><div class="meta"><div class="nm">--page / --surface</div><div class="hx">#FFFFFF</div></div></div>
+    <div class="sw"><div class="chip" style="background:#f8fbfb"></div><div class="meta"><div class="nm">--surface-strong</div><div class="hx">#F8FBFB</div></div></div>
+    <div class="sw"><div class="chip" style="background:#f5fafa"></div><div class="meta"><div class="nm">--page-soft</div><div class="hx">#F5FAFA</div></div></div>
+    <div class="sw"><div class="chip" style="background:#edf8f8"></div><div class="meta"><div class="nm">--page-tint</div><div class="hx">#EDF8F8</div></div></div>
+    <div class="sw"><div class="chip" style="background:#dce7e8"></div><div class="meta"><div class="nm">--line</div><div class="hx">#DCE7E8</div></div></div>
+
+    <div class="sw"><div class="chip" style="background:#c9d9dc"></div><div class="meta"><div class="nm">--line-strong</div><div class="hx">#C9D9DC</div></div></div>
+    <div class="sw"><div class="chip" style="background:#687b83"></div><div class="meta"><div class="nm">--muted</div><div class="hx">#687B83</div></div></div>
+    <div class="sw"><div class="chip" style="background:#163f4d"></div><div class="meta"><div class="nm">--ink</div><div class="hx">#163F4D</div></div></div>
+    <div class="sw"><div class="chip" style="background:#0b2f3d"></div><div class="meta"><div class="nm">--ink-strong</div><div class="hx">#0B2F3D</div></div></div>
+    <div class="sw"><div class="chip" style="background:#0d2d37"></div><div class="meta"><div class="nm">footer ground</div><div class="hx">#0D2D37</div></div></div>
+
+    <div class="sw"><div class="chip" style="background:#1769e8"></div><div class="meta"><div class="nm">--primary</div><div class="hx">#1769E8</div></div></div>
+    <div class="sw"><div class="chip" style="background:#0f53bd"></div><div class="meta"><div class="nm">--primary-dark</div><div class="hx">#0F53BD</div></div></div>
+    <div class="sw"><div class="chip" style="background:#e9f1ff"></div><div class="meta"><div class="nm">--primary-soft</div><div class="hx">#E9F1FF</div></div></div>
+    <div class="sw"><div class="chip" style="background:#0aa6a6"></div><div class="meta"><div class="nm">--teal</div><div class="hx">#0AA6A6</div></div></div>
+    <div class="sw"><div class="chip" style="background:#087d82"></div><div class="meta"><div class="nm">--teal-dark</div><div class="hx">#087D82</div></div></div>
+
+    <div class="sw"><div class="chip" style="background:#e5f8f7"></div><div class="meta"><div class="nm">--teal-soft</div><div class="hx">#E5F8F7</div></div></div>
+    <div class="sw"><div class="chip" style="background:#ff785f"></div><div class="meta"><div class="nm">--coral</div><div class="hx">#FF785F</div></div></div>
+    <div class="sw"><div class="chip" style="background:#df5d46"></div><div class="meta"><div class="nm">--coral-dark</div><div class="hx">#DF5D46</div></div></div>
+    <div class="sw"><div class="chip" style="background:#fff0ec"></div><div class="meta"><div class="nm">--coral-soft</div><div class="hx">#FFF0EC</div></div></div>
+    <div class="sw"><div class="chip" style="background:linear-gradient(90deg,#16845d 0 50%,#ca7c1d 50% 100%)"></div><div class="meta"><div class="nm">--success / --warning</div><div class="hx">#16845D · #CA7C1D</div></div></div>
+  </div>
+
+  <div style="height:56px"></div>
+
+  <!-- Dark palette -->
+  <div class="dark" style="background:#081216;border-radius:28px;padding:40px 40px 44px">
+    <div class="kick" style="color:#7ce9e3">02 · Color tokens — dark (html[data-theme="dark"])</div>
+    <h2 class="h-sec" style="color:#f3fbfc">Same roles, re-pitched — not inverted.</h2>
+    <p class="note" style="color:#91a7ad">Accents lighten so they stay legible on near-black teal
+      (<strong style="color:#d7e7e9">#1769E8 → #68A2FF</strong>, <strong style="color:#d7e7e9">#0AA6A6 → #50D5CE</strong>),
+      and the soft tints become deep chips instead of pale washes.</p>
+    <div style="height:26px"></div>
+    <div class="grid5">
+      <div class="sw"><div class="chip" style="background:#081216;border-bottom:1px solid #263a41"></div><div class="meta"><div class="nm">--page</div><div class="hx">#081216</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0d1a1f"></div><div class="meta"><div class="nm">--page-soft</div><div class="hx">#0D1A1F</div></div></div>
+      <div class="sw"><div class="chip" style="background:#102328"></div><div class="meta"><div class="nm">--page-tint</div><div class="hx">#102328</div></div></div>
+      <div class="sw"><div class="chip" style="background:#102027"></div><div class="meta"><div class="nm">--surface</div><div class="hx">#102027</div></div></div>
+      <div class="sw"><div class="chip" style="background:#13262d"></div><div class="meta"><div class="nm">--surface-strong</div><div class="hx">#13262D</div></div></div>
+
+      <div class="sw"><div class="chip" style="background:#263a41"></div><div class="meta"><div class="nm">--line</div><div class="hx">#263A41</div></div></div>
+      <div class="sw"><div class="chip" style="background:#36515a"></div><div class="meta"><div class="nm">--line-strong</div><div class="hx">#36515A</div></div></div>
+      <div class="sw"><div class="chip" style="background:#91a7ad"></div><div class="meta"><div class="nm">--muted</div><div class="hx">#91A7AD</div></div></div>
+      <div class="sw"><div class="chip" style="background:#d7e7e9"></div><div class="meta"><div class="nm">--ink</div><div class="hx">#D7E7E9</div></div></div>
+      <div class="sw"><div class="chip" style="background:#f3fbfc"></div><div class="meta"><div class="nm">--ink-strong</div><div class="hx">#F3FBFC</div></div></div>
+
+      <div class="sw"><div class="chip" style="background:#68a2ff"></div><div class="meta"><div class="nm">--primary</div><div class="hx">#68A2FF</div></div></div>
+      <div class="sw"><div class="chip" style="background:#91baff"></div><div class="meta"><div class="nm">--primary-dark</div><div class="hx">#91BAFF</div></div></div>
+      <div class="sw"><div class="chip" style="background:#172b48"></div><div class="meta"><div class="nm">--primary-soft</div><div class="hx">#172B48</div></div></div>
+      <div class="sw"><div class="chip" style="background:#50d5ce"></div><div class="meta"><div class="nm">--teal</div><div class="hx">#50D5CE</div></div></div>
+      <div class="sw"><div class="chip" style="background:#7ce9e3"></div><div class="meta"><div class="nm">--teal-dark</div><div class="hx">#7CE9E3</div></div></div>
+
+      <div class="sw"><div class="chip" style="background:#123432"></div><div class="meta"><div class="nm">--teal-soft</div><div class="hx">#123432</div></div></div>
+      <div class="sw"><div class="chip" style="background:#ff977f"></div><div class="meta"><div class="nm">--coral</div><div class="hx">#FF977F</div></div></div>
+      <div class="sw"><div class="chip" style="background:#ffb09e"></div><div class="meta"><div class="nm">--coral-dark</div><div class="hx">#FFB09E</div></div></div>
+      <div class="sw"><div class="chip" style="background:#40231f"></div><div class="meta"><div class="nm">--coral-soft</div><div class="hx">#40231F</div></div></div>
+      <div class="sw"><div class="chip" style="background:linear-gradient(90deg,#72d9af 0 50%,#f0bd67 50% 100%)"></div><div class="meta"><div class="nm">--success / --warning</div><div class="hx">#72D9AF · #F0BD67</div></div></div>
+    </div>
+  </div>
+
+  <div style="height:56px"></div>
+
+  <!-- Type -->
+  <div class="kick">03 · Type ramp</div>
+  <h2 class="h-sec">One family, weight 400–740, negative tracking at scale.</h2>
+  <p class="note"><strong>Google Sans Flex</strong> (self-hosted woff2), falling back to Google Sans → Arial.
+    Headlines carry heavy negative letter-spacing (up to −0.058em) and line-height below 1.0; body sits at a
+    generous 1.65.</p>
+  <div style="height:20px"></div>
+
+  <div class="tr" style="border-top:0">
+    <div class="lbl">Hero H1</div>
+    <div style="font-size:60px;line-height:.98;letter-spacing:-3.5px;font-weight:700;color:#0b2f3d">Know the device<br><span style="color:#1769e8">before you trust it.</span></div>
+    <div class="spec">76 / 74.5px · w700<br>tracking −4.4px (−.058em)<br>2nd line = --primary</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Display H2<br>on dark band</div>
+    <div style="font-size:50px;line-height:1.04;letter-spacing:-2.4px;font-weight:620;color:#0b2f3d">One workflow for the device details that matter.</div>
+    <div class="spec">62 / 64.5px · w620<br>tracking −2.98px (−.048em)</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Section H2</div>
+    <div style="font-size:44px;line-height:1.08;letter-spacing:-2px;font-weight:680;color:#0b2f3d">Helpful answers before your first check.</div>
+    <div class="spec">52 / 56.2px · w680<br>tracking −2.34px (−.045em)</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Card H3</div>
+    <div style="font-size:20px;line-height:1.65;letter-spacing:-.5px;font-weight:680;color:#0b2f3d">Device identity checks</div>
+    <div class="spec">20 / 33px · w680 · −0.5px</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Lead paragraph</div>
+    <div style="font-size:19px;line-height:1.7;color:#687b83">Check available IMEI, serial number, iCloud, MDM, warranty, blacklist, carrier and SIM-lock information.</div>
+    <div class="spec">19 / 32.3px · w400 · --muted</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Body</div>
+    <div style="font-size:16px;line-height:1.65;color:#163f4d">Complex provider data is organized into readable results so buyers, repair teams, sellers and resellers can find important details quickly.</div>
+    <div class="spec">16 / 26.4px (1.65) · w400 · --ink</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Body small</div>
+    <div style="font-size:15px;line-height:1.65;color:#687b83">Return to completed results without exposing provider cost data.</div>
+    <div class="spec">15 / 24.75px · w400 · --muted</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Nav / link</div>
+    <div style="font-size:13px;line-height:1.65;font-weight:620;color:#0b2f3d">Services · Dashboard · How it works</div>
+    <div class="spec">13 / 21.45px · w620<br>active = 2px teal underline</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Section kicker</div>
+    <div style="font-size:11px;font-weight:740;letter-spacing:.09em;text-transform:uppercase;color:#087d82">Common questions</div>
+    <div class="spec">11px · w740 · +.09em · uppercase<br>--teal-dark, icon 7px gap</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Eyebrow pill</div>
+    <div><span style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:720;letter-spacing:.045em;text-transform:uppercase;color:#087d82;background:#e5f8f7;border:1px solid #a8d7d8;border-radius:999px;padding:7px 10px">Clear device lookup reports</span></div>
+    <div class="spec">11px · w720 · +.045em<br>pill 999px · pad 7/10</div>
+  </div>
+  <div class="tr">
+    <div class="lbl">Micro caption</div>
+    <div style="font-size:9px;line-height:1.65;color:#7b9096;letter-spacing:.14em;text-transform:uppercase;font-weight:700">Device intelligence</div>
+    <div class="spec">9 / 14.85px · used in brand lockup &amp; table heads</div>
+  </div>
+
+  <div style="height:56px"></div>
+
+  <!-- Shape / depth / layout -->
+  <div class="kick">04 · Shape, depth &amp; layout</div>
+  <h2 class="h-sec">Big radii, hairline borders, one very wide shadow.</h2>
+  <div style="height:24px"></div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+    <div class="tile"><h4>Radius scale</h4><p>11 · 12 · 13 · 14 — chips, buttons, mini tiles<br>16 — float cards<br>22 · 24 · 26 · 27 · 28 — cards, panels, bands<br>40 — device frame<br>999 — pills</p></div>
+    <div class="tile"><h4>Borders</h4><p>Always 1px, never heavier.<br>--line #DCE7E8 default<br>--line-strong #C9D9DC for emphasis<br>On dark bands: rgba(255,255,255,.10–.14)</p></div>
+    <div class="tile"><h4>Shadows</h4><p>--shadow-soft<br>0 14px 40px rgba(29,73,82,.08)<br><br>--shadow<br>0 30px 80px rgba(22,66,77,.14)<br><br>Buttons: 0 13px 30px rgba(brand,.20)</p></div>
+    <div class="tile"><h4>Layout</h4><p>--max-width 1180px<br>Shell gutter 72px<br>Section padding 108px 0<br>Hero 2-col grid, gap 92px, min-h 690px<br>Nav gap 28px · header gap 24px</p></div>
+  </div>
+
+  <div style="height:16px"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+    <div class="tile"><h4>Hero backdrop</h4><p>Two low-opacity radial washes on white:<br>circle at 83% 28%, rgba(55,211,220,.13) → transparent 27%<br>circle at 17% 20%, cool blue, same falloff</p></div>
+    <div class="tile"><h4>Overview band</h4><p>linear-gradient(120deg, #103F50 0%, #145D70 48%, #176B78 100%)<br>+ radial at 83% 32%, rgba(82,213,204,.30) → transparent 24%</p></div>
+    <div class="tile"><h4>Iconography</h4><p>Bootstrap Icons, line style.<br>Sits in a soft-tint square: 68px box, radius 22px, 28px glyph, tint = --primary-soft / --coral-soft / --teal-soft by category.</p></div>
+  </div>
+
+  <div style="height:44px"></div>
+  <hr class="rule">
+  <div style="height:18px"></div>
+  <p style="margin:0;font-size:12px;color:#7b9096">Values read directly from the live stylesheet and computed styles at baseimei.com — 21 Aug 2026.
+    Specimens here use Plus Jakarta Sans as a metric stand-in; the site itself serves Google Sans Flex.</p>
+
+</div>
+</x-dc>
+</body>
+</html>

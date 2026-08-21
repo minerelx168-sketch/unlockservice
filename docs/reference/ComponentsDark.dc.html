@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#081216;color:#d7e7e9;
+      font-family:"Google Sans Flex","Google Sans","Plus Jakarta Sans",Arial,sans-serif;
+      font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:#68a2ff;text-decoration:none} a:hover{color:#91baff}
+    .kick{font-size:11px;font-weight:740;letter-spacing:.09em;text-transform:uppercase;color:#7ce9e3;
+      display:inline-flex;align-items:center;gap:7px;margin:0 0 12px}
+    .h{font-size:30px;line-height:1.1;letter-spacing:-1.2px;font-weight:680;color:#f3fbfc;margin:0}
+    .note{font-size:14px;line-height:1.6;color:#91a7ad;margin:8px 0 0;max-width:660px}
+    .rule{height:1px;background:#263a41;border:0;margin:0}
+
+    .spec{border:1px solid #263a41;border-radius:20px;background:#102027;overflow:hidden;
+      box-shadow:0 16px 40px rgba(0,0,0,.18)}
+    .spec .stage{padding:28px;background:#13262d;display:flex;flex-wrap:wrap;gap:14px;align-items:center;min-height:112px}
+    .spec .cap{padding:15px 18px;border-top:1px solid #263a41}
+    .spec .cap b{display:block;font-size:12.5px;color:#f3fbfc;letter-spacing:-.1px}
+    .spec .cap span{display:block;font-size:11.5px;color:#91a7ad;font-variant-numeric:tabular-nums;line-height:1.55;margin-top:3px}
+    .spec .cap strong{color:#d7e7e9}
+    .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 17px;
+      border:1px solid transparent;border-radius:14px;font-size:13px;font-weight:680;font-family:inherit}
+    .btn svg{width:15px;height:15px}
+    .btn-quiet{background:#102027;color:#d7e7e9;border-color:#263a41}
+    .btn-coral{background:#ff977f;color:#2a1410;box-shadow:0 13px 30px rgba(255,151,127,.16)}
+    .btn-primary{background:#68a2ff;color:#08182e;min-height:52px;padding:10px 21px;box-shadow:0 13px 30px rgba(104,162,255,.16)}
+    .icon-action{width:40px;height:40px;display:grid;place-items:center;border:1px solid #263a41;border-radius:13px;background:#102027;color:#d7e7e9}
+    .icon-action svg{width:17px;height:17px}
+
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:720;letter-spacing:.045em;
+      text-transform:uppercase;color:#7ce9e3;background:#123432;border:1px solid #1d514d;border-radius:999px;padding:7px 10px}
+    .eyebrow svg{width:13px;height:13px}
+
+    .tile{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;background:#172b48;color:#68a2ff}
+    .tile svg{width:28px;height:28px}
+    .tile-coral{background:#40231f;color:#ff977f}
+    .tile-teal{background:#123432;color:#50d5ce}
+
+    .bcard{background:#102027;border:1px solid #263a41;border-radius:26px;padding:30px;width:320px;
+      box-shadow:0 16px 40px rgba(0,0,0,.18)}
+    .bcard h4{margin:20px 0 0;font-size:20px;line-height:1.65;letter-spacing:-.5px;font-weight:680;color:#f3fbfc}
+    .bcard p{margin:9px 0 0;font-size:15px;line-height:1.65;color:#91a7ad}
+    .bcard a{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#68a2ff;margin-top:18px}
+    .bcard a svg{width:13px;height:13px}
+
+    .float{background:rgba(16,32,39,.92);border:1px solid rgba(38,58,65,.9);border-radius:16px;
+      padding:12px 13px;display:flex;align-items:center;gap:10px;box-shadow:0 16px 40px rgba(0,0,0,.18)}
+    .float .ic{width:34px;height:34px;border-radius:11px;background:#172b48;color:#68a2ff;display:grid;place-items:center}
+    .float .ic svg{width:16px;height:16px}
+    .float .l{font-size:11px;color:#91a7ad;line-height:1.4}
+    .float .v{font-size:13.5px;font-weight:700;color:#f3fbfc;line-height:1.35}
+
+    .trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#102027;border:1px solid #263a41;
+      border-radius:22px;box-shadow:0 16px 40px rgba(0,0,0,.18);overflow:hidden;width:100%}
+    .trust > div{padding:22px 24px;border-left:1px solid #263a41}
+    .trust > div:first-child{border-left:0}
+    .trust b{display:block;font-size:19px;font-weight:700;letter-spacing:-.4px;color:#f3fbfc;line-height:1.3}
+    .trust span{display:block;font-size:12.5px;color:#91a7ad;margin-top:2px}
+
+    .band{border-radius:26px;padding:26px;
+      background:radial-gradient(circle at 83% 32%, rgba(82,213,204,.30), transparent 24%),
+                 linear-gradient(120deg,#103f50 0%,#145d70 48%,#176b78 100%)}
+    .brow{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px}
+    .brow + .brow{margin-top:10px}
+    .brow .ic{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.08);color:#a5ead0;display:grid;place-items:center}
+    .brow .ic svg{width:17px;height:17px}
+    .brow .l{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#9dc4b5}
+    .brow .v{display:block;font-size:14px;font-weight:700;color:#fff}
+    .brow .s{font-size:12px;font-weight:700;color:#8fe6bd}
+
+    .cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #263a41;border-radius:18px;overflow:hidden}
+    .cmp > div{padding:16px 18px}
+    .cmp .lt{background:#ffffff;color:#163f4d}
+    .cmp .dk{background:#102027;color:#d7e7e9;border-left:1px solid #263a41}
+    .cmp .t{font-size:10px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;opacity:.6}
+    .cmp .v{font-size:13px;font-variant-numeric:tabular-nums;margin-top:6px;line-height:1.7}
+  </style>
+</helmet>
+
+<div style="padding:56px 60px 72px">
+
+  <div class="kick">Component anatomy · dark</div>
+  <h2 class="h">The same components, re-pitched.</h2>
+  <p class="note">Nothing about the geometry changes between themes — radii, padding, weights and
+    shadow offsets are identical. Only the token values move, and they move by role rather than by
+    inversion.</p>
+
+  <div style="height:34px"></div>
+  <hr class="rule">
+  <div style="height:34px"></div>
+
+  <div class="kick">Buttons</div>
+  <div class="g3">
+    <div class="spec">
+      <div class="stage"><span class="btn btn-quiet">Secondary</span></div>
+      <div class="cap"><b>.button-quiet</b><span>bg --surface #102027 · border #263A41 · text --ink · geometry unchanged</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage"><span class="btn btn-coral">Secondary CTA</span></div>
+      <div class="cap"><b>.button-coral</b><span>#FF785F → <strong>#FF977F</strong> · label flips to a dark ink so contrast holds on the lighter fill</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage"><span class="btn btn-primary">Primary CTA</span></div>
+      <div class="cap"><b>.button-primary</b><span>#1769E8 → <strong>#68A2FF</strong> · same min-h 52 / radius 14 · shadow alpha drops, offsets stay</span></div>
+    </div>
+  </div>
+
+  <div style="height:34px"></div>
+
+  <div class="kick">Tints &amp; surfaces</div>
+  <div class="g2">
+    <div class="spec">
+      <div class="stage" style="gap:20px">
+        <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.6"/><path d="M10.6 18.6h2.8"/></svg></span>
+        <span class="tile tile-coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7 18.5a4 4 0 01-.4-8A5.4 5.4 0 0117 9.6a3.9 3.9 0 01.6 8.9z"/></svg></span>
+        <span class="tile tile-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M13.2 3L5.4 13.4h5.3L10 21l7.9-10.4h-5.4z"/></svg></span>
+        <span class="eyebrow">Clear device lookup reports</span>
+      </div>
+      <div class="cap"><b>Soft tints invert their job</b><span>In light they are pale washes behind a saturated glyph. In dark they become <strong>deep chips</strong> (#172B48, #40231F, #123432) behind a light glyph — same contrast direction, opposite lightness.</span></div>
+    </div>
+    <div class="spec">
+      <div class="stage" style="align-items:flex-start">
+        <div class="bcard">
+          <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.4V12l3.1 1.9"/></svg></span>
+          <h4>Focused result delivery</h4>
+          <p>Body copy holds --muted #91A7AD; only headings take --ink-strong.</p>
+          <a>Open your workspace <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+      <div class="cap"><b>.benefit-card</b><span>bg --surface, border --line, radius 26, pad 30 — all unchanged. The shadow swaps from a tinted ink wash to a black one: 0 14px 40px rgba(29,73,82,.08) → 0 16px 40px rgba(0,0,0,.18)</span></div>
+    </div>
+  </div>
+
+  <div style="height:18px"></div>
+
+  <div class="spec">
+    <div class="stage" style="padding:26px">
+      <div class="trust">
+        <div><b>IMEI + Serial</b><span>Flexible identifier checks</span></div>
+        <div><b>Apple + Android</b><span>Multiple device services</span></div>
+        <div><b>Worldwide</b><span>Built for global users</span></div>
+      </div>
+    </div>
+    <div class="cap"><b>.trust-bar</b><span>Hairlines are the whole structure here, so --line carries the load in both themes: #DCE7E8 → #263A41.</span></div>
+  </div>
+
+  <div style="height:34px"></div>
+
+  <div class="kick">The gradient band</div>
+  <div class="spec">
+    <div class="stage" style="padding:26px;display:block">
+      <div class="band">
+        <div class="brow">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.6"/></svg></span>
+          <span><span class="l">Identity</span><span class="v">Model and device identifiers</span></span>
+          <span class="s">Ready</span>
+        </div>
+        <div class="brow">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l7 3v6c0 4.4-3 7.9-7 9-4-1.1-7-4.6-7-9V6l7-3z"/></svg></span>
+          <span><span class="l">Security</span><span class="v">Lock and account signals</span></span>
+          <span class="s">Clear</span>
+        </div>
+      </div>
+    </div>
+    <div class="cap"><b>.overview-band</b><span>The one place the palette breaks the surface rules — a fixed teal-to-slate gradient that is identical in both themes:<br>linear-gradient(120deg, #103F50 0%, #145D70 48%, #176B78 100%) + radial at 83% 32% rgba(82,213,204,.30) → transparent 24%<br>Rows on it use rgba(255,255,255,.06) fills and rgba(255,255,255,.10) borders instead of tokens.</span></div>
+  </div>
+
+  <div style="height:34px"></div>
+
+  <div class="kick">Side by side</div>
+  <div class="cmp">
+    <div class="lt">
+      <div class="t">Light</div>
+      <div class="v">page&nbsp;#FFFFFF · surface&nbsp;#FFFFFF<br>ink-strong&nbsp;#0B2F3D · muted&nbsp;#687B83<br>line&nbsp;#DCE7E8 · primary&nbsp;#1769E8<br>teal&nbsp;#0AA6A6 · coral&nbsp;#FF785F<br>shadow rgba(22,66,77,.14)</div>
+    </div>
+    <div class="dk">
+      <div class="t">Dark</div>
+      <div class="v">page&nbsp;#081216 · surface&nbsp;#102027<br>ink-strong&nbsp;#F3FBFC · muted&nbsp;#91A7AD<br>line&nbsp;#263A41 · primary&nbsp;#68A2FF<br>teal&nbsp;#50D5CE · coral&nbsp;#FF977F<br>shadow rgba(0,0,0,.32)</div>
+    </div>
+  </div>
+
+  <div style="height:24px"></div>
+  <hr class="rule">
+  <div style="height:16px"></div>
+  <p style="margin:0;font-size:12px;color:#7b9096">Theme is set by <code style="color:#91a7ad">html[data-theme="dark"]</code>, so every token is
+    redefined in one block and no component carries a theme-specific rule of its own.</p>
+
+</div>
+</x-dc>
+</body>
+</html>

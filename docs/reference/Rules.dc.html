@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#ffffff;color:#163f4d;
+      font-family:"Google Sans Flex","Google Sans","Plus Jakarta Sans",Arial,sans-serif;
+      font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:#1769e8;text-decoration:none} a:hover{color:#0f53bd}
+    .kick{font-size:11px;font-weight:740;letter-spacing:.09em;text-transform:uppercase;color:#087d82;margin:0 0 12px}
+    .h{font-size:32px;line-height:1.1;letter-spacing:-1.3px;font-weight:680;color:#0b2f3d;margin:0}
+    .h3{font-size:19px;line-height:1.3;letter-spacing:-.5px;font-weight:680;color:#0b2f3d;margin:0}
+    .note{font-size:14.5px;line-height:1.7;color:#687b83;margin:8px 0 0}
+    .rule{height:1px;background:#dce7e8;border:0;margin:0}
+
+    .prin{display:grid;grid-template-columns:34px 1fr;gap:16px;padding:20px 0;border-top:1px solid #dce7e8;align-items:start}
+    .prin .n{width:34px;height:34px;border-radius:12px;background:#e9f1ff;color:#1769e8;display:grid;place-items:center;
+      font-size:13px;font-weight:700}
+    .prin p{margin:7px 0 0;font-size:14.5px;line-height:1.7;color:#687b83}
+    .prin strong{color:#0b2f3d}
+
+    .card{background:#fff;border:1px solid #dce7e8;border-radius:24px;padding:26px;box-shadow:0 14px 40px rgba(29,73,82,.08)}
+    .card.soft{background:#f8fbfb;box-shadow:none}
+    .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+
+    ul.tick{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:11px}
+    ul.tick li{display:grid;grid-template-columns:18px 1fr;gap:11px;font-size:14px;line-height:1.6;align-items:start}
+    ul.tick li svg{width:16px;height:16px;margin-top:4px}
+    .yes svg{color:#16845d} .no svg{color:#c2544a}
+    ul.tick strong{color:#0b2f3d}
+
+    .map{width:100%;border-collapse:collapse;margin-top:16px}
+    .map th,.map td{text-align:left;padding:12px 14px;border-top:1px solid #dce7e8;font-size:13.5px;vertical-align:top}
+    .map thead th{border-top:0;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#687b83;font-weight:700;padding-block:8px}
+    .map td:first-child{font-weight:700;color:#0b2f3d;width:33%}
+    .map td:nth-child(2){color:#687b83}
+    .map code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#0f53bd;background:#e9f1ff;padding:1px 5px;border-radius:5px}
+  </style>
+</helmet>
+
+<div style="padding:56px 56px 72px">
+
+  <div class="kick">Using this</div>
+  <h2 class="h">What actually makes it work.</h2>
+  <p class="note" style="max-width:640px">Copying the hex values gets you a palette, not the feel. Six
+    decisions do most of the work here, and they are all transferable to a completely different brand.</p>
+
+  <div style="height:28px"></div>
+
+  <div class="prin" style="border-top:0">
+    <span class="n">1</span>
+    <div>
+      <h3 class="h3">Hairlines, never heavy borders</h3>
+      <p>Every edge on the page is <strong>1px</strong>, and always one of two values. Structure is
+        drawn with the lightest possible line and then separated by whitespace — which is why a page
+        this dense still reads as calm.</p>
+    </div>
+  </div>
+
+  <div class="prin">
+    <span class="n">2</span>
+    <div>
+      <h3 class="h3">Big radii, small padding ratio</h3>
+      <p>Cards run to <strong>radius 26–28 with 30px padding</strong> — the corner is nearly as large
+        as the inset. That combination is the single most recognisable thing about the look; drop the
+        radius to 8 and it becomes an ordinary dashboard.</p>
+    </div>
+  </div>
+
+  <div class="prin">
+    <span class="n">3</span>
+    <div>
+      <h3 class="h3">One shadow, very wide and very soft</h3>
+      <p><strong>0 14px 40px rgba(29,73,82,.08)</strong> — a 40px blur at 8% opacity, tinted with the
+        ink colour rather than pure black. It reads as ambient light, not as elevation. There is no
+        shadow ramp; panels either have this one or the larger 80px version, nothing in between.</p>
+    </div>
+  </div>
+
+  <div class="prin">
+    <span class="n">4</span>
+    <div>
+      <h3 class="h3">Headlines are huge and tracked tight</h3>
+      <p>76px at <strong>−0.058em with line-height 0.98</strong>. The negative tracking scales with the
+        size — 52px takes −0.045em, 20px takes −0.025em, body takes none. Get this ramp wrong and
+        everything else looks generic no matter how correct the colours are.</p>
+    </div>
+  </div>
+
+  <div class="prin">
+    <span class="n">5</span>
+    <div>
+      <h3 class="h3">Colour is rationed</h3>
+      <p>Long stretches of near-white, then one saturated moment: a blue CTA, a coral secondary, one
+        gradient band. Accents are load-bearing precisely because they are rare. The teal only ever
+        appears as a small uppercase kicker — it is never a fill.</p>
+    </div>
+  </div>
+
+  <div class="prin">
+    <span class="n">6</span>
+    <div>
+      <h3 class="h3">Whites are tinted, blacks are not black</h3>
+      <p>Surfaces carry a faint teal cast (<strong>#F5FAFA</strong>, <strong>#EDF8F8</strong>) and the
+        darkest text is <strong>#0B2F3D</strong>. Nothing on the page is <code>#000</code> or a neutral
+        grey, so the whole thing sits in one temperature.</p>
+    </div>
+  </div>
+
+  <div style="height:34px"></div>
+
+  <div class="g2">
+    <div class="card">
+      <h3 class="h3">Keep these</h3>
+      <ul class="tick yes">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6.5L9.5 17 4 11.6"/></svg><span>One shell width and one gutter for every page — <strong>1180 / 72</strong>.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6.5L9.5 17 4 11.6"/></svg><span>Section padding as a constant, not a per-section judgement call.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6.5L9.5 17 4 11.6"/></svg><span>Kicker → headline → lead, in that order, at the top of every block.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6.5L9.5 17 4 11.6"/></svg><span>Body copy in <strong>--muted</strong>; only headings earn the strong ink.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6.5L9.5 17 4 11.6"/></svg><span>Line-style icons on one grid, in a tinted rounded square.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6.5L9.5 17 4 11.6"/></svg><span>Every token redefined once under a single dark-theme selector.</span></li>
+      </ul>
+    </div>
+
+    <div class="card soft">
+      <h3 class="h3">Where it goes wrong</h3>
+      <ul class="tick no">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Rounding the measured values to a 4/8px grid. <strong>13, 11, 27, 46, 52</strong> are real numbers here — snapping them flattens the character.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Adding a second gradient. One band per page is the budget.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Using both the blue and the coral as primary in the same block — the coral is the second action, never the first.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Letting card copy set the row height. <strong>min-height</strong> is what keeps the grids honest.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Inverting the palette for dark mode instead of re-pitching it per role.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg><span>Keeping the 11px uppercase labels at that size on a phone without checking them on glass.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="height:34px"></div>
+
+  <div class="card">
+    <div class="kick" style="margin-bottom:8px">Transfer</div>
+    <h3 class="h3">Reusing the structure without borrowing the identity.</h3>
+    <p class="note">This is a third-party site, so what travels is the <strong>system</strong> — the
+      ratios, the rhythm, the component anatomy — while palette, type and marks stay your own. The
+      Openline build in this session is exactly that swap:</p>
+
+    <table class="map">
+      <thead>
+        <tr><th>What was kept</th><th>What was replaced</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1px hairlines, radius 10–28, one wide soft shadow</td>
+          <td>Nothing — geometry is not brand, it is craft.</td>
+        </tr>
+        <tr>
+          <td>Section padding constant, 1180px shell, kicker→headline→lead</td>
+          <td>Padding tuned to <code>104px</code> and a fluid gutter with three breakpoints.</td>
+        </tr>
+        <tr>
+          <td>Tinted whites, ink that is never black</td>
+          <td>Cast moved <strong>cool teal → warm</strong>: <code>#F8F7F3</code> instead of <code>#F5FAFA</code>.</td>
+        </tr>
+        <tr>
+          <td>One primary, one secondary, rationed accents</td>
+          <td>Blue + coral → <strong>emerald <code>#0F7A52</code> + amber <code>#D97B1E</code></strong>.</td>
+        </tr>
+        <tr>
+          <td>Display face paired with a plainer body face, tight tracking at scale</td>
+          <td>Google Sans Flex → <strong>Bricolage Grotesque + Instrument Sans</strong>.</td>
+        </tr>
+        <tr>
+          <td>Full dark theme driven by one token block</td>
+          <td>Same mechanism, own values — green-black instead of teal-black.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="height:28px"></div>
+  <hr class="rule">
+  <div style="height:16px"></div>
+  <p style="margin:0;font-size:12px;color:#7b9096">Foundations, component anatomy and section patterns are on the neighbouring
+    artboards. Values measured from baseimei.com on 21 Aug 2026 and current as of that date only.</p>
+
+</div>
+</x-dc>
+</body>
+</html>
