@@ -52,7 +52,7 @@ export function SiteHeader() {
 
         <div className="header-actions">
           <ThemeToggle />
-          <Link className="button button--quiet" href="/#services">
+          <Link className="button button--quiet" href="/login">
             Sign in
           </Link>
           <Link className="button button--accent" href="/#check">

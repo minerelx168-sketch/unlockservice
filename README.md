@@ -1,31 +1,35 @@
-# Openline — unlock service site
+# Openline — device checks and unlocks
 
-A Next.js app for a device-identity and unlock service, built on the design system captured in
-the **Website design patterns** Cowork session. The marketing pages are in place; the backend —
-API routes, schema and dashboard — is the next layer on the same shell.
+A Next.js app for a device-identity and unlock service. Two Cowork sessions fed it: **Website
+design patterns** produced the design canvas the front end is built on, and **Baseimei.com backend
+flow** produced the architecture reference the workspace is built on. Both are preserved in
+`docs/reference/`.
 
-The session produced a design canvas (`BaseIMEI Design System`) with five artboards: foundations,
-component anatomy in light and dark, section patterns, and a rules/transfer sheet. That canvas
-documents a third-party page, so what is carried into this repo is the **system** — the ratios, the
-rhythm, the component anatomy — while the palette, the type and the marks are our own. The transfer
-is written out in `docs/design-system.md` and rendered live at `/design-system`.
+Both references describe a third-party site, so what is carried across is the **system** — the
+ratios and component anatomy on the design side, the flows and the credit model on the backend side
+— while the palette, the type, the marks and every line of code here are our own. The design
+transfer is written out in `docs/design-system.md` and rendered live at `/design-system`.
 
 ## Layout
 
 ```
-app/layout.tsx           Root shell — theme guard, font preloads, header, footer
-app/page.tsx             Homepage — the ten section patterns, in order
-app/design-system/       Living style guide; specimens render from the real tokens
-components/              Header, footer, brand lockup, theme toggle, IMEI form, icons
-lib/imei.ts              Luhn validation, grouping and identifier masking (no DOM)
-styles/                  tokens.css · fonts.css · base.css · components.css · docs.css
-public/fonts/            Self-hosted Bricolage Grotesque + Instrument Sans (OFL 1.1)
-docs/design-system.md    The written system: principles, tokens, patterns, transfer table
-docs/reference/          The original canvas artboards
+app/layout.tsx              Root shell — theme guard, font preloads
+app/(marketing)/            Public pages: homepage, living style guide
+app/(auth)/                 Sign in, create account
+app/(app)/user/             The workspace: dashboard, check, history, payments, invoice
+app/api/checks/             Submit an order; /status polls one the provider accepted
+lib/db.ts                   SQLite schema, seeded with the 38-service catalog
+lib/credits.ts              The escrow ledger: hold → charge / refund
+lib/checks.ts               The check pipeline both endpoints call
+lib/payments.ts             Invoices: numbers locked at creation, credited on confirmation
+lib/provider.ts             Provider adapter + the mock that stands in for a real one
+lib/auth.ts                 Passwords, sessions, CSRF tokens
+lib/imei.ts                 Luhn validation, grouping, identifier masking (no DOM)
+styles/                     tokens · fonts · base · components · app · docs
+public/fonts/               Self-hosted Bricolage Grotesque + Instrument Sans (OFL 1.1)
+docs/design-system.md       The written design system
+docs/reference/             The two source documents from the Cowork sessions
 ```
-
-Next.js (App Router) with TypeScript. Both pages prerender as static content today; the
-backend — API routes, schema and dashboard — lands on top of this shell.
 
 ```sh
 npm install
@@ -34,8 +38,25 @@ npm run build    # production build + type-check + lint
 npm run typecheck
 ```
 
-Both faces are served from `public/fonts/` and every icon is inline SVG, so the pages make no
-external request.
+Data lands in `data/openline.db` (SQLite, gitignored) and the schema is created on first request —
+there is nothing to migrate or provision. The public pages make no external request: both faces are
+served from `public/fonts/` and every icon is inline SVG.
+
+## Trying the workspace
+
+Create an account at `/register`, add funds, then run a check. The mock provider branches on the
+last digit of the identifier, so all three outcomes are reachable:
+
+| Identifier | What happens |
+| --- | --- |
+| `354909000000095` | The provider answers immediately; credit is charged |
+| `354909000000012` | Accepted as pending, then resolves on a poll |
+| `354909000000020` | The provider fails; the held credit is refunded in full |
+
+Top-ups need a confirmation that would normally come from an administrator. In development the
+invoice page offers to stand in for one; in production that button only appears when
+`OPENLINE_ALLOW_SELF_APPROVE=1` is set. `OPENLINE_MAINTENANCE=1` puts the check form into
+maintenance mode.
 
 ## Conventions
 
@@ -47,9 +68,18 @@ external request.
   `suppressHydrationWarning`.
 - **Geometry is not brand.** Radii, control heights, border weights and shadow spreads come from the
   captured system unchanged; changing the palette should never require touching them.
+- **Credit is escrowed, never deducted straight away.** `hold → charge` on success, `hold → refund`
+  on failure, with a ledger row for every transition. A provider that times out must never cost the
+  customer anything. This is the single most important thing carried over from the reference.
+- **Two endpoints, not one.** `POST /api/checks` submits; `POST /api/checks/status` polls. Async
+  provider work needs no websocket, and a slow lookup does not hold a request open.
+- **The client never trusts the HTTP status alone** — it reads `success` off the parsed body, and
+  treats an unparseable response as a failure.
+- **Provider cost is never stored or shown.** `services.cost_price_cents` stays NULL until a real
+  contract fills it; inventing a margin would put a fake number in the ledger.
 - **The IMEI field never phones home on keystroke.** `lib/imei.ts` validates the 15-digit Luhn
-  checksum in the browser and stays free of DOM and framework imports, so the same check can run in
-  a server route. Wiring a real lookup provider is the one place a backend is needed.
+  checksum in the browser and stays free of DOM and framework imports, so the same check runs in the
+  server route.
 - **Client components are the exception.** Only the header, the theme toggle and the IMEI field
   are `'use client'`; everything else renders on the server.
 
@@ -63,6 +93,13 @@ and shadow spreads are the transferred geometry.
 
 The brand name **Openline** is the one the design canvas already used for this swap; it appears in
 page copy, the `<title>`, and the footer.
+
+## Not built yet
+
+The reference documents more than this build covers. Still open: the admin side (invoice approval,
+service and provider management), the API portal and its DHRU-compatible surface, reseller accounts
+and credit transfer, the 7-day activity chart on the dashboard, server-side pagination in History,
+email change and password reset, and rate limiting on the check endpoint.
 
 ## Accessibility
 

@@ -73,7 +73,7 @@ export function ImeiForm() {
     setNote({
       state: 'valid',
       icon: 'checkSmall',
-      text: 'Validated locally. Connect a lookup provider to return a report.',
+      text: 'Checksum accepted. Sign in to run this against a service.',
     })
   }
 

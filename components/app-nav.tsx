@@ -1,0 +1,47 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Icon, type IconName } from './icons'
+
+const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: string; icon: IconName }> }> = [
+  {
+    heading: 'Work',
+    items: [
+      { href: '/user/dashboard', label: 'Dashboard', icon: 'window' },
+      { href: '/user/check', label: 'Run a check', icon: 'search' },
+      { href: '/user/history', label: 'History', icon: 'clock' },
+    ],
+  },
+  {
+    heading: 'Money',
+    items: [
+      { href: '/user/add-funds', label: 'Add funds', icon: 'bolt' },
+      { href: '/user/payments', label: 'Payments', icon: 'file' },
+    ],
+  },
+]
+
+export function AppNav() {
+  const pathname = usePathname()
+
+  return (
+    <nav className="app-nav" aria-label="Workspace">
+      {SECTIONS.map((section) => (
+        <div key={section.heading}>
+          <h5>{section.heading}</h5>
+          {section.items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={pathname.startsWith(item.href) ? 'page' : undefined}
+            >
+              <Icon name={item.icon} />
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      ))}
+    </nav>
+  )
+}
