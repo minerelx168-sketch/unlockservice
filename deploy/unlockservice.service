@@ -1,0 +1,26 @@
+[Unit]
+Description=Unlockservice Next.js production application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/apps/unlockservice
+Environment=NODE_ENV=production
+Environment=HOSTNAME=127.0.0.1
+Environment=PORT=3000
+Environment=OPENLINE_DB=/home/ubuntu/apps/unlockservice/data/openline.db
+ExecStart=/usr/local/bin/npm run start -- --hostname 127.0.0.1
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=false
+ReadWritePaths=/home/ubuntu/apps/unlockservice/data /home/ubuntu/apps/unlockservice/.next
+
+[Install]
+WantedBy=multi-user.target
