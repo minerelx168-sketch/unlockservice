@@ -101,6 +101,11 @@
 .button--primary:hover {
   background: var(--primary-dark);
   color: var(--on-primary);
+  transform: translateY(-1px);
+}
+
+.button--primary:active {
+  transform: translateY(1px);
 }
 
 /* Amber is the second action, never the first. */
@@ -391,6 +396,24 @@
   border-color: var(--line-strong);
 }
 
+.field select {
+  min-height: 50px;
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink-strong);
+  font-size: 14px;
+  font-weight: 620;
+  cursor: pointer;
+  transition: border-color 0.18s ease;
+}
+
+.field select:hover {
+  border-color: var(--line-strong);
+}
+
 .field-note {
   display: flex;
   align-items: center;
@@ -412,6 +435,44 @@
 
 .field-note[data-state='invalid'] {
   color: var(--danger);
+}
+
+.unlock-quote {
+  display: grid;
+  gap: 15px;
+}
+
+.unlock-quote-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.unlock-submit {
+  min-height: 58px;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.unlock-submit svg {
+  transition: transform 0.18s ease;
+}
+
+.unlock-submit:hover svg {
+  transform: translateX(4px);
+}
+
+.unlock-quote-note {
+  margin: -4px 0 0;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+@media (max-width: 620px) {
+  .unlock-quote-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ==== data table ==================================================== */

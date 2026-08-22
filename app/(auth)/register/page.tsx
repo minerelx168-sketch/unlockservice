@@ -8,13 +8,13 @@ export const metadata: Metadata = { title: 'Create an account' }
 export const dynamic = 'force-dynamic'
 
 export default async function RegisterPage() {
-  if (await currentSession()) redirect('/user/dashboard')
+  if (await currentSession()) redirect('/user/unlock')
 
   return (
     <div className="auth-card">
       <Brand />
-      <h1>Create an account.</h1>
-      <p>Accounts start at zero credit. Add funds when you are ready to place an order.</p>
+      <h1>Start your unlock.</h1>
+      <p>Create an account to view service prices, place an unlock request and track the result.</p>
       <RegisterForm />
     </div>
   )

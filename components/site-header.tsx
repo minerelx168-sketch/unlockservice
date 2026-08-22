@@ -8,11 +8,11 @@ import { Icon } from './icons'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
-  { href: '/', label: 'Home' },
-  { href: '/#services', label: 'Services' },
+  { href: '/#check', label: 'Unlock Phone' },
+  { href: '/#services', label: 'Phone Check' },
   { href: '/#how', label: 'How it works' },
   { href: '/#faq', label: 'FAQ' },
-  { href: '/design-system', label: 'Design system' },
+  { href: '/login', label: 'Order Tracking' },
 ]
 
 /**
@@ -55,9 +55,9 @@ export function SiteHeader() {
           <Link className="button button--quiet" href="/login">
             Sign in
           </Link>
-          <Link className="button button--accent" href="/#check">
+          <Link className="button button--primary" href="/#check">
             <Icon name="bolt" strokeWidth={1.9} />
-            Unlock a phone
+            Unlock Phone
           </Link>
           <button
             type="button"

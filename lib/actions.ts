@@ -41,7 +41,7 @@ export async function registerAction(_: FormState, data: FormData): Promise<Form
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect('/user/dashboard')
+  redirect('/user/unlock')
 }
 
 export async function loginAction(_: FormState, data: FormData): Promise<FormState> {

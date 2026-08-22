@@ -3,10 +3,10 @@ import { ImeiForm } from '@/components/imei-form'
 import { Icon, type IconName } from '@/components/icons'
 
 const TRUST = [
-  { title: 'Permanent', caption: 'Survives updates and resets' },
-  { title: 'Official route', caption: 'Filed with the carrier, not a hack' },
-  { title: 'Any brand', caption: 'Apple, Samsung, Google and more' },
-  { title: 'Refused? Refunded', caption: 'You pay for unlocks that land' },
+  { title: 'Remote unlock', caption: 'No cables, software or shop visit' },
+  { title: 'Fast delivery', caption: 'Most services complete within hours' },
+  { title: 'Permanent result', caption: 'Use the phone with another network' },
+  { title: 'Live tracking', caption: 'Follow every order from your account' },
 ]
 
 const SERVICES: Array<{
@@ -19,23 +19,23 @@ const SERVICES: Array<{
   {
     icon: 'device',
     tint: '',
-    title: 'Network unlock',
-    body: 'The device leaves its carrier for good. We file the request against the IMEI with the network that holds the lock — no cables, no jailbreak, no trip to a shop.',
-    action: { href: '#how', label: 'See how it runs' },
+    title: 'Unlock by carrier',
+    body: 'Choose the network that currently holds the lock. We submit the official request against your IMEI and keep the whole process online.',
+    action: { href: '#check', label: 'Start an unlock' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
-    title: 'Locks left behind',
-    body: 'An iCloud activation lock, a management profile from a company laptop fleet, a Google FRP screen after a reset — the locks that make a device you own unusable.',
-    action: { href: '/login', label: 'Order a removal' },
+    title: 'Check your phone',
+    body: 'Not sure which carrier the phone is locked to? Run a carrier, blacklist or device-status check before placing the unlock order.',
+    action: { href: '/register', label: 'Run a phone check' },
   },
   {
     icon: 'search',
     tint: ' icon-tile--moss',
-    title: 'Check before you buy',
-    body: 'Which network a device is locked to, whether it has been reported lost, what the warranty says. A dollar to find out, before a purchase or an unlock order.',
-    action: { href: '/login', label: 'Run a check' },
+    title: 'Track every order',
+    body: 'See when a request is processing, delivered or refused. Delivered codes and instructions stay attached to the original order.',
+    action: { href: '/login', label: 'Track an order' },
   },
 ]
 
@@ -43,20 +43,20 @@ const STEPS: Array<{ icon: IconName; tint: string; title: string; body: string }
   {
     icon: 'keypad',
     tint: '',
-    title: 'Give us the IMEI',
-    body: 'Dial *#06# on the device. Pick the brand and the network it is locked to, and the price and turnaround appear before you commit to anything.',
+    title: 'Submit your phone details',
+    body: 'Choose the original carrier and enter the IMEI. We validate the number before it becomes an order.',
   },
   {
     icon: 'bolt',
     tint: ' icon-tile--accent',
-    title: 'We file the request',
-    body: 'The order goes into the carrier or manufacturer database against that IMEI. Your credit is held, not spent, for as long as it sits with them.',
+    title: 'We verify and process',
+    body: 'Review the price and delivery estimate, then confirm. Your funds are held while the provider checks eligibility.',
   },
   {
     icon: 'check',
     tint: ' icon-tile--moss',
-    title: 'The unlock arrives',
-    body: 'Apple devices are released remotely — connect to Wi-Fi and it is done. Everything else gets a code to enter when a new SIM goes in.',
+    title: 'Your phone is unlocked',
+    body: 'We update the order when it completes. Apple devices unlock remotely; supported devices receive clear code instructions.',
   },
 ]
 
@@ -138,29 +138,28 @@ export default function HomePage() {
           <div className="hero-copy">
             <span className="eyebrow">
               <Icon name="shield" strokeWidth={2} />
-              Permanent IMEI unlocking
+              Official remote phone unlocking
             </span>
 
             <h1 className="t-hero">
-              Unlock the phone
+              Unlock your phone today.
               <br />
-              <span className="accent">you already own.</span>
+              <span className="accent">Use it on any network.</span>
             </h1>
 
             <p className="t-lead">
-              One IMEI is all it takes. We file the request with the network that holds the lock, and
-              the device leaves that carrier for good — no cables, no jailbreak, nothing to install.
-              If the carrier refuses, you pay nothing.
+              Select the original carrier, enter your IMEI and see the service details before you
+              order. The unlock is remote, permanent and tracked from start to finish.
             </p>
 
             <div className="hero-actions">
-              <Link className="button button--primary" href="#how">
+              <Link className="button button--primary" href="#check">
                 <Icon name="bolt" strokeWidth={1.9} />
-                See how it works
+                Start your unlock
               </Link>
-              <Link className="button button--quiet" href="#services">
-                <Icon name="file" strokeWidth={1.9} />
-                Browse services
+              <Link className="button button--quiet" href="/login">
+                <Icon name="clock" strokeWidth={1.9} />
+                Track an order
               </Link>
             </div>
           </div>
@@ -169,9 +168,9 @@ export default function HomePage() {
             <div className="hero-panel-head">
               <span className="kicker">
                 <Icon name="device" strokeWidth={2} />
-                Start with the IMEI
+                Unlock your phone
               </span>
-              <span className="t-micro">Checked in your browser</span>
+              <span className="t-micro">Safe · legal · guaranteed</span>
             </div>
 
             <ImeiForm />
@@ -184,18 +183,18 @@ export default function HomePage() {
                   <Icon name="check" />
                 </span>
                 <span>
-                  <span className="label">After the unlock</span>
-                  <span className="value">Any network, permanently</span>
+                  <span className="label">Official unlock</span>
+                  <span className="value">Remote and permanent</span>
                 </span>
               </div>
               <div className="hero-mini">
                 <div className="mini-stat">
-                  <span className="label">Typical turnaround</span>
-                  <span className="value">Hours</span>
+                  <span className="label">Order access</span>
+                  <span className="value">Live status</span>
                 </div>
                 <div className="mini-stat">
-                  <span className="label">If refused</span>
-                  <span className="value">Full refund</span>
+                  <span className="label">If unavailable</span>
+                  <span className="value">Funds returned</span>
                 </div>
               </div>
             </div>
@@ -223,12 +222,12 @@ export default function HomePage() {
           <div className="section-head">
             <span className="kicker">
               <Icon name="sparkle" strokeWidth={2} />
-              What we unlock
+              Unlock services
             </span>
-            <h2 className="t-section">Three kinds of lock, one process.</h2>
+            <h2 className="t-section">Everything you need to unlock with confidence.</h2>
             <p className="t-lead">
-              A carrier lock, a lock somebody else left on the device, or the question of what is
-              locked in the first place. Each one is priced up front and tracked the same way.
+              Start with a network unlock, check an unknown phone first, then follow the order until
+              the result is delivered.
             </p>
           </div>
 
@@ -260,9 +259,9 @@ export default function HomePage() {
               <Icon name="pulse" strokeWidth={2} />
               How it works
             </span>
-            <h2 className="t-section">IMEI in, unlock out.</h2>
+            <h2 className="t-section">Unlock your phone in three simple steps.</h2>
             <p className="t-lead">
-              Three steps, and the device never leaves your hand.
+              Your phone stays with you throughout the process.
             </p>
           </div>
 
@@ -459,18 +458,19 @@ export default function HomePage() {
                 Ready when you are
               </span>
               <h2 className="t-card" style={{ fontSize: 30, letterSpacing: '-0.035em' }}>
-                Take the lock off before you sell, travel or switch.
+                Ready to use your phone on another network?
               </h2>
               <p className="t-small">
-                Price and turnaround are quoted before you order, and a refused device costs nothing.
+                Start with the country, original carrier and IMEI. You will see service details before
+                confirming the order.
               </p>
             </div>
             <div className="cta-actions">
-              <Link className="button button--primary" href="/register">
-                Create an account
+              <Link className="button button--primary" href="#check">
+                Unlock Phone Now
               </Link>
-              <Link className="button button--quiet" href="/design-system">
-                View the design system
+              <Link className="button button--quiet" href="/login">
+                Track an Order
               </Link>
             </div>
           </div>
