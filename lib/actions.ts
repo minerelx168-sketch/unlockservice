@@ -53,7 +53,7 @@ export async function loginAction(_: FormState, data: FormData): Promise<FormSta
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect('/user/check')
+  redirect('/user/unlock')
 }
 
 export async function logoutAction() {

@@ -9,14 +9,14 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
     heading: 'Work',
     items: [
       { href: '/user/dashboard', label: 'Dashboard', icon: 'window' },
-      { href: '/user/check', label: 'Run a check', icon: 'search' },
-      { href: '/user/history', label: 'History', icon: 'clock' },
+      { href: '/user/unlock', label: 'Unlock a device', icon: 'bolt' },
+      { href: '/user/orders', label: 'Orders', icon: 'clock' },
     ],
   },
   {
     heading: 'Money',
     items: [
-      { href: '/user/add-funds', label: 'Add funds', icon: 'bolt' },
+      { href: '/user/add-funds', label: 'Add funds', icon: 'search' },
       { href: '/user/payments', label: 'Payments', icon: 'file' },
     ],
   },

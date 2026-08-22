@@ -36,8 +36,8 @@ export default async function PaymentsPage() {
         <div>
           <h1>Payments</h1>
           <p>
-            Failed provider checks that restored the held credit are counted separately, so service
-            spending only reflects work that actually completed.
+            Orders a carrier refused put their held credit straight back, and are counted
+            separately — so spending only reflects unlocks that were actually delivered.
           </p>
         </div>
         <Link className="button button--accent" href="/user/add-funds">
@@ -52,14 +52,14 @@ export default async function PaymentsPage() {
           <span className="caption">{counts.successful} settled invoices</span>
         </div>
         <div className="stat">
-          <span className="label">Credit used</span>
+          <span className="label">Spent on unlocks</span>
           <span className="value">{formatUsd(money.usedCents)}</span>
-          <span className="caption">Completed checks only</span>
+          <span className="caption">Delivered orders only</span>
         </div>
         <div className="stat">
           <span className="label">Credit restored</span>
           <span className="value">{formatUsd(money.restoredCents)}</span>
-          <span className="caption">Refunded after a failed lookup</span>
+          <span className="caption">Returned on refused devices</span>
         </div>
         <div className="stat">
           <span className="label">Awaiting review</span>

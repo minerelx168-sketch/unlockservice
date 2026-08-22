@@ -30,7 +30,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <span className="label">Available credit</span>
           <span className="value">{formatUsd(available)}</span>
           {user.held_cents > 0 ? (
-            <span className="held">{formatUsd(user.held_cents)} held by checks in flight</span>
+            <span className="held">{formatUsd(user.held_cents)} held by open orders</span>
           ) : (
             <span className="held">Nothing held right now</span>
           )}

@@ -46,7 +46,7 @@ export function SiteHeader() {
             </Link>
           ))}
           <Link className="nav-cta" href="/#check" onClick={() => setOpen(false)}>
-            Run a check
+            Unlock a phone
           </Link>
         </nav>
 
@@ -56,8 +56,8 @@ export function SiteHeader() {
             Sign in
           </Link>
           <Link className="button button--accent" href="/#check">
-            <Icon name="search" strokeWidth={1.9} />
-            Run a check
+            <Icon name="bolt" strokeWidth={1.9} />
+            Unlock a phone
           </Link>
           <button
             type="button"

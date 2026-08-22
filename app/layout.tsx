@@ -4,11 +4,11 @@ import '@/styles/globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Openline — device identity and unlock status, in one report',
+    default: 'Openline — permanent IMEI phone unlocking',
     template: '%s — Openline',
   },
   description:
-    'Check IMEI and serial details, carrier and SIM-lock state, blacklist status and activation locks, then follow an unlock through to a readable result.',
+    'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, and refunded in full if the carrier refuses.',
 }
 
 export const viewport: Viewport = {

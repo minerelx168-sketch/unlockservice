@@ -45,7 +45,7 @@ export function ImeiForm() {
       setNote({
         state: 'valid',
         icon: 'checkSmall',
-        text: 'Checksum looks right — ready to look up.',
+        text: 'Checksum looks right — this device can be ordered.',
       })
     } else {
       setNote({
@@ -73,7 +73,7 @@ export function ImeiForm() {
     setNote({
       state: 'valid',
       icon: 'checkSmall',
-      text: 'Checksum accepted. Sign in to run this against a service.',
+      text: 'Checksum accepted. Sign in to order an unlock for this device.',
     })
   }
 

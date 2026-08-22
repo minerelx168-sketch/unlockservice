@@ -14,7 +14,7 @@ export default async function RegisterPage() {
     <div className="auth-card">
       <Brand />
       <h1>Create an account.</h1>
-      <p>Accounts start at zero credit. Add funds when you are ready to run a check.</p>
+      <p>Accounts start at zero credit. Add funds when you are ready to place an order.</p>
       <RegisterForm />
     </div>
   )

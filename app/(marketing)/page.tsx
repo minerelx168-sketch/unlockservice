@@ -3,14 +3,12 @@ import { ImeiForm } from '@/components/imei-form'
 import { Icon, type IconName } from '@/components/icons'
 
 const TRUST = [
-  { title: 'IMEI + Serial', caption: 'Flexible identifier checks' },
-  { title: 'Apple + Android', caption: 'Multiple device services' },
-  { title: 'Worldwide', caption: 'Built for global users' },
-  { title: 'No cost data', caption: 'Provider pricing stays hidden' },
+  { title: 'Permanent', caption: 'Survives updates and resets' },
+  { title: 'Official route', caption: 'Filed with the carrier, not a hack' },
+  { title: 'Any brand', caption: 'Apple, Samsung, Google and more' },
+  { title: 'Refused? Refunded', caption: 'You pay for unlocks that land' },
 ]
 
-/* The tint is the category signal: emerald = identity, amber = accounts
-   and locks, moss = delivery. */
 const SERVICES: Array<{
   icon: IconName
   tint: string
@@ -21,23 +19,23 @@ const SERVICES: Array<{
   {
     icon: 'device',
     tint: '',
-    title: 'Device identity',
-    body: 'Model, storage, colour, region and production window resolved from the identifier itself, so a listing can be checked against the hardware rather than the description.',
-    action: { href: '#check', label: 'Start a lookup' },
+    title: 'Network unlock',
+    body: 'The device leaves its carrier for good. We file the request against the IMEI with the network that holds the lock — no cables, no jailbreak, no trip to a shop.',
+    action: { href: '#how', label: 'See how it runs' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
-    title: 'Accounts & locks',
-    body: 'Activation lock, MDM enrolment, carrier and SIM-lock state, and whether the device has been reported lost or blocked on a network.',
-    action: { href: '#check', label: 'Check lock state' },
+    title: 'Locks left behind',
+    body: 'An iCloud activation lock, a management profile from a company laptop fleet, a Google FRP screen after a reset — the locks that make a device you own unusable.',
+    action: { href: '/login', label: 'Order a removal' },
   },
   {
-    icon: 'bolt',
+    icon: 'search',
     tint: ' icon-tile--moss',
-    title: 'Unlock delivery',
-    body: 'Eligible devices move straight from the report into a request, and completed results stay in your history — readable later, without exposing provider cost data.',
-    action: { href: '#how', label: 'See the flow' },
+    title: 'Check before you buy',
+    body: 'Which network a device is locked to, whether it has been reported lost, what the warranty says. A dollar to find out, before a purchase or an unlock order.',
+    action: { href: '/login', label: 'Run a check' },
   },
 ]
 
@@ -45,90 +43,89 @@ const STEPS: Array<{ icon: IconName; tint: string; title: string; body: string }
   {
     icon: 'keypad',
     tint: '',
-    title: 'Enter an identifier',
-    body: 'IMEI or serial. The checksum is validated in the browser first, so a mistyped digit never becomes a failed lookup.',
+    title: 'Give us the IMEI',
+    body: 'Dial *#06# on the device. Pick the brand and the network it is locked to, and the price and turnaround appear before you commit to anything.',
   },
   {
-    icon: 'search',
+    icon: 'bolt',
     tint: ' icon-tile--accent',
-    title: 'Pick the service',
-    body: 'Identity, locks or unlock delivery. Each one states what it returns before you start, so there are no surprise fields in the result.',
+    title: 'We file the request',
+    body: 'The order goes into the carrier or manufacturer database against that IMEI. Your credit is held, not spent, for as long as it sits with them.',
   },
   {
     icon: 'check',
     tint: ' icon-tile--moss',
-    title: 'Read the result',
-    body: 'Provider data is reorganised into plain rows and kept in your history, so a report you ran last month is still readable today.',
+    title: 'The unlock arrives',
+    body: 'Apple devices are released remotely — connect to Wi-Fi and it is done. Everything else gets a code to enter when a new SIM goes in.',
   },
 ]
 
 const BAND_ROWS: Array<{ icon: IconName; title: string; caption: string }> = [
   {
-    icon: 'device',
-    title: 'Hardware resolved',
-    caption: 'Model, storage, region, production window',
+    icon: 'shield',
+    title: 'Filed at the source',
+    caption: 'The carrier or manufacturer that holds the lock, not a workaround',
   },
   {
-    icon: 'lock',
-    title: 'Locks surfaced',
-    caption: 'Activation, MDM, carrier and SIM-lock state',
+    icon: 'clock',
+    title: 'Tracked while it runs',
+    caption: 'A live status per order, and the result by email',
   },
   {
     icon: 'window',
-    title: 'History kept',
-    caption: 'Completed results stay readable, costs stay hidden',
+    title: 'Held, then charged',
+    caption: 'Refused devices give the whole amount back',
   },
-]
-
-const RESULT_ROWS = [
-  { identifier: '35······2145', service: 'Basic info' },
-  { identifier: 'R5C····K2XV', service: 'Warranty' },
-  { identifier: '86······7620', service: 'Blacklist' },
 ]
 
 const FEATURES: Array<{ icon: IconName; title: string; body: string }> = [
   {
     icon: 'check',
-    title: 'Plain-language status',
-    body: 'Every field resolves to a word a customer can act on, not a provider code.',
+    title: 'The code, front and centre',
+    body: 'A delivered unlock puts the code where you cannot miss it, with what to do next in plain words.',
   },
   {
     icon: 'shield',
     title: 'Masked identifiers',
-    body: 'Full numbers are never displayed in shared views or exported summaries.',
+    body: 'Full IMEIs are never shown in lists or shared views — first two digits and last four only.',
   },
   {
     icon: 'clock',
-    title: 'Results that keep',
-    body: 'Return to a completed check later without re-running or re-paying for it.',
+    title: 'Orders that keep',
+    body: 'A code from three months ago is still there, on the order you bought it with.',
   },
 ]
 
 const FAQ = [
   {
-    question: 'What information can I check?',
+    question: 'Is this permanent, and is my warranty safe?',
     answer:
-      'Device model and specification, carrier and SIM-lock state, blacklist reports, activation lock and MDM enrolment, and warranty window — subject to what each service covers for that manufacturer. Every service states its fields before you start.',
+      'Yes to both. The unlock is recorded against the IMEI in the carrier or manufacturer database, so it survives updates, resets and new SIMs. Nothing is installed on the device and no software is modified, which is what puts a warranty at risk.',
+  },
+  {
+    question: 'How long does it take?',
+    answer:
+      'It depends on the network — some authorise within hours, others take a couple of days. The turnaround for your exact carrier is quoted before you order, and the order shows its live status until it lands.',
+  },
+  {
+    question: 'What if my device cannot be unlocked?',
+    answer:
+      'You get every cent back. Your credit is held while the order is with the carrier and only becomes a charge once the unlock is delivered — so a device that is under contract, reported lost or blocked for unpaid bills costs you nothing.',
   },
   {
     question: 'Where do I find my IMEI?',
     answer:
-      'Dial *#06# on the device — it works on both iOS and Android. The number is also printed on the SIM tray, on the original box, and shown in the settings app under the device’s About screen.',
+      'Dial *#06# on the device — it works on iOS and Android. It is also printed on the SIM tray, on the original box, and shown in the settings app under the device’s About screen.',
   },
   {
-    question: 'Is the IMEI I type sent anywhere?',
+    question: 'Do I have to send my phone anywhere?',
     answer:
-      'Not while you are typing. The field validates the 15-digit checksum locally in your browser; nothing leaves the page until you submit a lookup. In results, identifiers are masked to the first two and last four digits.',
+      'No. Everything is done remotely against the IMEI. Apple devices are released over the air — connect to Wi-Fi and follow the prompt. Other brands receive a code you enter once, with a SIM from the new network in the device.',
   },
   {
-    question: 'Which devices are supported?',
+    question: 'Can you unlock a phone that is still on contract?',
     answer:
-      'Apple and Android devices with a valid IMEI or serial number. Coverage differs per service and per network, so each one lists the manufacturers and regions it can answer for.',
-  },
-  {
-    question: 'What happens after an unlock request?',
-    answer:
-      'The request keeps its own status in your history. When it completes, the result is written into the same report you started from, so the device’s identity check and its unlock live in one place.',
+      'Usually not, and we will not pretend otherwise. Carriers refuse devices with an unpaid balance, an active contract, or a lost-or-stolen report. The order comes back refused and your credit is returned in full.',
   },
 ]
 
@@ -141,25 +138,25 @@ export default function HomePage() {
           <div className="hero-copy">
             <span className="eyebrow">
               <Icon name="shield" strokeWidth={2} />
-              Readable device reports
+              Permanent IMEI unlocking
             </span>
 
             <h1 className="t-hero">
-              Know the device
+              Unlock the phone
               <br />
-              <span className="accent">before you commit.</span>
+              <span className="accent">you already own.</span>
             </h1>
 
             <p className="t-lead">
-              One identifier returns everything worth knowing: model and specification, carrier and
-              SIM-lock state, blacklist and activation locks, warranty window. Then take the unlock
-              from the same place you checked it.
+              One IMEI is all it takes. We file the request with the network that holds the lock, and
+              the device leaves that carrier for good — no cables, no jailbreak, nothing to install.
+              If the carrier refuses, you pay nothing.
             </p>
 
             <div className="hero-actions">
               <Link className="button button--primary" href="#how">
-                <Icon name="search" strokeWidth={1.9} />
-                See how a check runs
+                <Icon name="bolt" strokeWidth={1.9} />
+                See how it works
               </Link>
               <Link className="button button--quiet" href="#services">
                 <Icon name="file" strokeWidth={1.9} />
@@ -172,7 +169,7 @@ export default function HomePage() {
             <div className="hero-panel-head">
               <span className="kicker">
                 <Icon name="device" strokeWidth={2} />
-                Start a lookup
+                Start with the IMEI
               </span>
               <span className="t-micro">Checked in your browser</span>
             </div>
@@ -184,21 +181,21 @@ export default function HomePage() {
             <div className="hero-floats">
               <div className="float-card">
                 <span className="icon-tile icon-tile--sm" aria-hidden="true">
-                  <Icon name="shield" />
+                  <Icon name="check" />
                 </span>
                 <span>
-                  <span className="label">Blacklist status</span>
-                  <span className="value">Reported per network</span>
+                  <span className="label">After the unlock</span>
+                  <span className="value">Any network, permanently</span>
                 </span>
               </div>
               <div className="hero-mini">
                 <div className="mini-stat">
-                  <span className="label">Identifier types</span>
-                  <span className="value">IMEI · SN</span>
+                  <span className="label">Typical turnaround</span>
+                  <span className="value">Hours</span>
                 </div>
                 <div className="mini-stat">
-                  <span className="label">Result format</span>
-                  <span className="value">Readable</span>
+                  <span className="label">If refused</span>
+                  <span className="value">Full refund</span>
                 </div>
               </div>
             </div>
@@ -226,12 +223,12 @@ export default function HomePage() {
           <div className="section-head">
             <span className="kicker">
               <Icon name="sparkle" strokeWidth={2} />
-              What you can check
+              What we unlock
             </span>
-            <h2 className="t-section">Three questions, one workflow.</h2>
+            <h2 className="t-section">Three kinds of lock, one process.</h2>
             <p className="t-lead">
-              Buyers, repair benches, sellers and resellers all ask the same things in a different
-              order. Each service answers one of them and returns the same shape of result.
+              A carrier lock, a lock somebody else left on the device, or the question of what is
+              locked in the first place. Each one is priced up front and tracked the same way.
             </p>
           </div>
 
@@ -263,9 +260,9 @@ export default function HomePage() {
               <Icon name="pulse" strokeWidth={2} />
               How it works
             </span>
-            <h2 className="t-section">Enter, check, act.</h2>
+            <h2 className="t-section">IMEI in, unlock out.</h2>
             <p className="t-lead">
-              Every service follows the same three steps, whichever question you started with.
+              Three steps, and the device never leaves your hand.
             </p>
           </div>
 
@@ -298,12 +295,13 @@ export default function HomePage() {
           <div className="stack" style={{ gap: 20 }}>
             <span className="kicker">
               <Icon name="shield" strokeWidth={2} />
-              Overview
+              Why it sticks
             </span>
-            <h2 className="t-display">One workflow for the device details that matter.</h2>
+            <h2 className="t-display">The lock is released where it was set.</h2>
             <p className="t-lead">
-              Complex provider responses are normalised into the same readable structure every time,
-              so a repair bench and a marketplace seller are reading the same report.
+              A carrier lock lives in the network&rsquo;s own database, against your IMEI. That is
+              where we file, which is why the unlock survives a factory reset and why nothing has to
+              be installed on the phone.
             </p>
           </div>
 
@@ -330,27 +328,35 @@ export default function HomePage() {
                 <i aria-hidden="true" />
                 <i aria-hidden="true" />
                 <i aria-hidden="true" />
-                <span className="addr">openline / results</span>
+                <span className="addr">openline / orders</span>
               </div>
               <div className="window-body">
                 <div className="data-table">
                   <div className="row row--head">
-                    <span>Identifier</span>
+                    <span>Device</span>
                     <span>Service</span>
                     <span>Status</span>
                   </div>
-                  {RESULT_ROWS.map((row) => (
-                    <div className="row" key={row.identifier}>
-                      <b>{row.identifier}</b>
-                      <span>{row.service}</span>
-                      <span className="status">Saved</span>
-                    </div>
-                  ))}
+                  <div className="row">
+                    <b>35······0095</b>
+                    <span>AT&amp;T unlock</span>
+                    <span className="status">Unlocked</span>
+                  </div>
+                  <div className="row">
+                    <b>35······4471</b>
+                    <span>O2 unlock</span>
+                    <span className="status">Unlocked</span>
+                  </div>
+                  <div className="row">
+                    <b>86······7620</b>
+                    <span>MDM removal</span>
+                    <span className="status">Unlocked</span>
+                  </div>
                 </div>
                 <div className="hero-mini">
                   <div className="mini-stat">
-                    <span className="label">Saved reports</span>
-                    <span className="value">History</span>
+                    <span className="label">Held for open orders</span>
+                    <span className="value">$0.00</span>
                   </div>
                   <div className="mini-stat">
                     <span className="label">Identifier shown</span>
@@ -368,13 +374,13 @@ export default function HomePage() {
                     <Icon name="check" />
                   </span>
                   <span>
-                    <span className="label">SIM lock</span>
+                    <span className="label">Network</span>
                     <span className="value">Unlocked</span>
                   </span>
                 </div>
                 <div className="mini-stat">
-                  <span className="label">Blacklist</span>
-                  <span className="value">Clean</span>
+                  <span className="label">Unlock code</span>
+                  <span className="value">4187 2290</span>
                 </div>
               </div>
             </div>
@@ -383,12 +389,12 @@ export default function HomePage() {
           <div className="stack" style={{ gap: 24 }}>
             <span className="kicker">
               <Icon name="window" strokeWidth={2} />
-              The result view
+              The order view
             </span>
-            <h2 className="t-section">Readable on the bench, readable on a phone.</h2>
+            <h2 className="t-section">Watch it run, then keep the result.</h2>
             <p className="t-lead">
-              The same report renders in the dashboard and on the device in your hand — identifiers
-              masked to the first two and last four digits, status in plain words.
+              Every order shows where it is while the carrier has it, and what came back once they
+              answer — the code, what to do with it, and whether the credit was charged or returned.
             </p>
 
             <ul className="feature-list">
@@ -405,9 +411,9 @@ export default function HomePage() {
               ))}
             </ul>
 
-            <Link className="button button--primary" href="#check" style={{ justifySelf: 'start' }}>
-              <Icon name="search" strokeWidth={1.9} />
-              Run your first check
+            <Link className="button button--primary" href="/register" style={{ justifySelf: 'start' }}>
+              <Icon name="bolt" strokeWidth={1.9} />
+              Unlock your first device
             </Link>
           </div>
         </div>
@@ -421,9 +427,9 @@ export default function HomePage() {
               <Icon name="question" strokeWidth={2} />
               Common questions
             </span>
-            <h2 className="t-section">Helpful answers before your first check.</h2>
+            <h2 className="t-section">Straight answers before you pay.</h2>
             <p className="t-lead">
-              If something here is still unclear, ask before you spend anything.
+              Including the one most unlock sites leave out — when it will not work.
             </p>
           </div>
 
@@ -453,15 +459,15 @@ export default function HomePage() {
                 Ready when you are
               </span>
               <h2 className="t-card" style={{ fontSize: 30, letterSpacing: '-0.035em' }}>
-                Check a device before the money moves.
+                Take the lock off before you sell, travel or switch.
               </h2>
               <p className="t-small">
-                One identifier is enough to start. No account needed to validate a number.
+                Price and turnaround are quoted before you order, and a refused device costs nothing.
               </p>
             </div>
             <div className="cta-actions">
-              <Link className="button button--primary" href="#check">
-                Run a check
+              <Link className="button button--primary" href="/register">
+                Create an account
               </Link>
               <Link className="button button--quiet" href="/design-system">
                 View the design system

@@ -5,10 +5,10 @@ const COLUMNS = [
   {
     heading: 'Services',
     links: [
-      { href: '/#services', label: 'Device identity' },
-      { href: '/#services', label: 'Accounts & locks' },
-      { href: '/#services', label: 'Unlock delivery' },
-      { href: '/#check', label: 'Run a check' },
+      { href: '/#services', label: 'Network unlock' },
+      { href: '/#services', label: 'Activation & MDM locks' },
+      { href: '/#services', label: 'Device checks' },
+      { href: '/register', label: 'Create an account' },
     ],
   },
   {
@@ -23,7 +23,7 @@ const COLUMNS = [
     heading: 'Contact',
     links: [
       { href: '/#faq', label: 'Support' },
-      { href: '/#check', label: 'Start a lookup' },
+      { href: '/login', label: 'Sign in' },
     ],
   },
 ]
@@ -36,8 +36,8 @@ export function SiteFooter() {
           <div>
             <Brand />
             <p className="blurb">
-              Device identity, lock state and unlock delivery in one readable report — for buyers,
-              repair teams, sellers and resellers.
+              Permanent IMEI unlocking, filed with the network that holds the lock. For people
+              selling a phone, switching network, or travelling with one they already own.
             </p>
           </div>
 
@@ -57,7 +57,7 @@ export function SiteFooter() {
 
         <div className="footer-base">
           <span>&copy; {new Date().getFullYear()} Openline. All rights reserved.</span>
-          <span>Checks return information about a device — they do not transfer ownership.</span>
+          <span>Unlocking releases a device you own — it does not remove a finance agreement or a theft report.</span>
         </div>
       </div>
     </footer>

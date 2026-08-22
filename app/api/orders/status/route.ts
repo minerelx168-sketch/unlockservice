@@ -1,26 +1,25 @@
 import { NextResponse } from 'next/server'
 import { guard } from '@/lib/api'
-import { CheckError, submitCheck } from '@/lib/checks'
+import { OrderError, pollOrder } from '@/lib/orders'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/** Submits an order: holds credit, then hands it to the provider. */
+/** Checks in on an order the supplier has accepted but not yet delivered. */
 export async function POST(request: Request) {
   const guarded = await guard(request)
   if ('error' in guarded) return guarded.error
   const { found, body } = guarded
 
-  const serviceId = Number(body.serviceId)
-  const identifier = String(body.identifier ?? '')
-  if (!Number.isInteger(serviceId)) {
-    return NextResponse.json({ success: false, error: 'Pick a service.' }, { status: 400 })
+  const orderId = Number(body.orderId)
+  if (!Number.isInteger(orderId)) {
+    return NextResponse.json({ success: false, error: 'Missing order id.' }, { status: 400 })
   }
 
   try {
-    return NextResponse.json(await submitCheck(found.user.id, serviceId, identifier))
+    return NextResponse.json(await pollOrder(found.user.id, orderId))
   } catch (error) {
-    if (error instanceof CheckError) {
+    if (error instanceof OrderError) {
       return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: 400 })
     }
     throw error

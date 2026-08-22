@@ -16,8 +16,9 @@ export default async function AddFundsPage() {
         <div>
           <h1>Add funds</h1>
           <p>
-            Fees, tax and the final amount are locked into the invoice the moment it is created, so
-            the number you see is the number you pay. Credit lands once the transfer is confirmed.
+            Credit pays for unlock orders. Fees, tax and the final amount are locked into the
+            invoice the moment it is created, so the number you see is the number you pay — and the
+            credit lands once the transfer is confirmed.
           </p>
         </div>
       </div>

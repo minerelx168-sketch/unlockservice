@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { StatusBadge } from '@/components/check-console'
+import { OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
-import { checkStats, listChecks } from '@/lib/checks'
 import { creditSummary } from '@/lib/credits'
 import { maskIdentifier } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
+import { listOrders, orderStats } from '@/lib/orders'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 export const dynamic = 'force-dynamic'
@@ -13,9 +13,9 @@ export const dynamic = 'force-dynamic'
 export default async function DashboardPage() {
   const { user } = await requireSession()
   const available = user.credit_cents - user.held_cents
-  const stats = checkStats(user.id)
+  const stats = orderStats(user.id)
   const money = creditSummary(user.id)
-  const recent = listChecks(user.id, 6)
+  const recent = listOrders(user.id, 6)
 
   return (
     <>
@@ -26,8 +26,8 @@ export default async function DashboardPage() {
             {user.membership_tier} · member since {user.created_at.slice(0, 10)}
           </p>
         </div>
-        <Link className="button button--primary" href="/user/check">
-          Run a check
+        <Link className="button button--primary" href="/user/unlock">
+          Unlock a device
         </Link>
       </div>
 
@@ -36,25 +36,27 @@ export default async function DashboardPage() {
           <span className="label">Available credit</span>
           <span className="value">{formatUsd(available)}</span>
           <span className="caption">
-            {user.held_cents > 0 ? `${formatUsd(user.held_cents)} held` : 'Nothing held'}
+            {user.held_cents > 0
+              ? `${formatUsd(user.held_cents)} held by ${stats.processing} order${stats.processing === 1 ? '' : 's'}`
+              : 'Nothing held'}
           </span>
         </div>
         <div className="stat">
-          <span className="label">Checks run</span>
+          <span className="label">Orders placed</span>
           <span className="value">{stats.total}</span>
-          <span className="caption">{stats.today} today · {stats.succeeded} completed</span>
-        </div>
-        <div className="stat">
-          <span className="label">Credit used</span>
-          <span className="value">{formatUsd(money.usedCents)}</span>
-          <span className="caption">{formatUsd(money.restoredCents)} restored by failed checks</span>
-        </div>
-        <div className="stat">
-          <span className="label">Most-used service</span>
-          <span className="value" style={{ fontSize: 17, lineHeight: 1.3 }}>
-            {stats.favourite ?? '—'}
+          <span className="caption">
+            {stats.delivered} unlocked · {stats.processing} with a carrier
           </span>
-          <span className="caption">Across all time</span>
+        </div>
+        <div className="stat">
+          <span className="label">Spent on unlocks</span>
+          <span className="value">{formatUsd(money.usedCents)}</span>
+          <span className="caption">{formatUsd(money.restoredCents)} returned on refused devices</span>
+        </div>
+        <div className="stat">
+          <span className="label">Placed today</span>
+          <span className="value">{stats.today}</span>
+          <span className="caption">Across every brand and network</span>
         </div>
       </div>
 
@@ -62,8 +64,8 @@ export default async function DashboardPage() {
 
       <section className="panel">
         <header>
-          <h2>Recent checks</h2>
-          <Link className="link-arrow" href="/user/history">
+          <h2>Recent orders</h2>
+          <Link className="link-arrow" href="/user/orders">
             See all
           </Link>
         </header>
@@ -71,28 +73,30 @@ export default async function DashboardPage() {
           <table className="grid">
             <thead>
               <tr>
-                <th>Identifier</th>
+                <th>Order</th>
+                <th>Device</th>
                 <th>Service</th>
                 <th>Status</th>
                 <th className="num">Price</th>
               </tr>
             </thead>
             <tbody>
-              {recent.map((row) => (
-                <tr key={row.id}>
-                  <td className="mono">{maskIdentifier(row.identifier)}</td>
-                  <td>{row.service_name}</td>
+              {recent.map((order) => (
+                <tr key={order.id}>
+                  <td className="mono">#{order.id}</td>
+                  <td className="mono">{maskIdentifier(order.imei)}</td>
+                  <td>{order.title}</td>
                   <td>
-                    <StatusBadge status={row.status} />
+                    <OrderStatusBadge status={order.status} />
                   </td>
-                  <td className="num">{formatUsd(row.sell_price_cents)}</td>
+                  <td className="num">{formatUsd(order.price_cents)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {recent.length === 0 ? (
             <p className="empty">
-              Nothing yet. <Link href="/user/check">Run your first check</Link>.
+              Nothing yet. <Link href="/user/unlock">Unlock your first device</Link>.
             </p>
           ) : null}
         </div>
