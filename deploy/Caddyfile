@@ -1,4 +1,12 @@
-unlockservice.34-138-231-163.sslip.io {
+# www sends people to the bare domain, so links and analytics only ever
+# see one origin.
+www.iunlockmobile.com {
+    redir https://iunlockmobile.com{uri} permanent
+}
+
+# The sslip.io host stays listed so the box keeps serving before DNS for
+# the real domain has propagated. Drop it once iunlockmobile.com resolves.
+iunlockmobile.com, unlockservice.34-138-231-163.sslip.io {
     encode zstd gzip
     reverse_proxy 127.0.0.1:3000
 
@@ -11,7 +19,7 @@ unlockservice.34-138-231-163.sslip.io {
     }
 
     log {
-        output file /var/log/caddy/unlockservice-access.log {
+        output file /var/log/caddy/iunlockmobile-access.log {
             roll_size 10MiB
             roll_keep 5
             roll_keep_for 168h

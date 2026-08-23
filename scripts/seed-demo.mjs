@@ -12,10 +12,10 @@ import { randomBytes, scryptSync } from 'node:crypto'
 import { join } from 'node:path'
 import Database from 'better-sqlite3'
 
-const DB_PATH = process.env.OPENLINE_DB ?? join(process.cwd(), 'data', 'local.db')
+const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'local.db')
 const USERNAME = 'demo'
 const PASSWORD = 'demo-password-123'
-const EMAIL = 'demo@openline.test'
+const EMAIL = 'demo@iunlockmobile.test'
 const START_CENTS = 25_000
 
 function hashPassword(password) {

@@ -5,7 +5,7 @@ import { Icon } from './icons'
 
 type Theme = 'light' | 'dark'
 
-export const THEME_STORAGE_KEY = 'openline-theme'
+export const THEME_STORAGE_KEY = 'iunlockmobile-theme'
 
 /**
  * The token block in tokens.css does the actual work; this only flips the

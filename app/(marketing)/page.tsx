@@ -327,7 +327,7 @@ export default function HomePage() {
                 <i aria-hidden="true" />
                 <i aria-hidden="true" />
                 <i aria-hidden="true" />
-                <span className="addr">openline / orders</span>
+                <span className="addr">iunlockmobile.com / orders</span>
               </div>
               <div className="window-body">
                 <div className="data-table">
@@ -367,7 +367,7 @@ export default function HomePage() {
 
             <div className="device" aria-hidden="true">
               <div className="screen">
-                <span className="t-micro">Openline</span>
+                <span className="t-micro">iUnlockMobile</span>
                 <div className="float-card" style={{ boxShadow: 'none' }}>
                   <span className="icon-tile icon-tile--sm">
                     <Icon name="check" />

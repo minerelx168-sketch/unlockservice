@@ -4,7 +4,7 @@ The app runs as a systemd service on the box and Caddy terminates TLS in
 front of it. One script does both the first-time provisioning and every
 update after it.
 
-    Caddy :443  ──reverse_proxy──▶  next start :3000  ──▶  data/openline.db
+    Caddy :443  ──reverse_proxy──▶  next start :3000  ──▶  data/iunlockmobile.db
 
 ## Before you point customers at it
 
@@ -27,7 +27,7 @@ Deploying is fine — running it as a public storefront is not, until those
 are real. To put it up with orders closed, add this to
 `unlockservice.service` and restart:
 
-    Environment=OPENLINE_MAINTENANCE=1
+    Environment=IUNLOCKMOBILE_MAINTENANCE=1
 
 The site stays browsable; the order form says the service is paused.
 
@@ -49,7 +49,7 @@ one delivered, one still with the carrier, one refused and refunded — so
 the workspace has something in it. It writes to `data/local.db`, separate
 from anything else, and only ever runs locally.
 
-The rehearsal sets `OPENLINE_ALLOW_SELF_APPROVE=1` so the top-up flow can be
+The rehearsal sets `IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` so the top-up flow can be
 walked without an admin. **That is a local-only switch** — it settles an
 invoice without a payment, and the server must never have it.
 
@@ -59,6 +59,26 @@ needs a public hostname. Check that config separately:
 ```sh
 caddy validate --config deploy/Caddyfile
 ```
+
+## Coming from an earlier deploy
+
+The database file and the environment variables were renamed with the
+brand. If a box is already running an older build with data worth keeping,
+rename the file before deploying — otherwise the app starts on an empty
+database and the old one just sits there unused:
+
+```sh
+cd ~/apps/unlockservice/data
+for f in openline.db openline.db-wal openline.db-shm; do
+  [ -f "$f" ] && mv "$f" "iunlockmobile.${f#openline.}"
+done
+```
+
+`OPENLINE_*` became `IUNLOCKMOBILE_*`. The unit file in this repo already
+uses the new names and `deploy.sh` reinstalls it, so nothing else to do —
+unless you set one of them somewhere else by hand.
+
+Signed-in sessions end once, because the cookie was renamed too.
 
 ## First time on a fresh Ubuntu box
 
@@ -100,11 +120,11 @@ It fetches the branch, reinstalls, rebuilds, reinstalls the units,
 restarts, and waits for a 200 before declaring success. If the app does
 not come up it prints the last 40 log lines and exits non-zero.
 
-`data/openline.db` lives inside the app directory and is untracked, so a
+`data/iunlockmobile.db` lives inside the app directory and is untracked, so a
 deploy never touches it. Back it up before anything destructive:
 
 ```sh
-sqlite3 ~/apps/unlockservice/data/openline.db ".backup '/home/ubuntu/openline-$(date +%F).db'"
+sqlite3 ~/apps/unlockservice/data/iunlockmobile.db ".backup '/home/ubuntu/iunlockmobile-$(date +%F).db'"
 ```
 
 ## Deploy on every push
@@ -149,6 +169,6 @@ Set these with `Environment=` lines in `unlockservice.service`.
 
 | Variable | Effect |
 | --- | --- |
-| `OPENLINE_DB` | Where the SQLite file lives. Already set to the app's `data/` directory. |
-| `OPENLINE_MAINTENANCE=1` | Pauses new orders; the rest of the site stays up. |
-| `OPENLINE_ALLOW_SELF_APPROVE=1` | Lets an invoice be confirmed from its own page. **Do not set this in production** — it mints credit without a payment. |
+| `IUNLOCKMOBILE_DB` | Where the SQLite file lives. Already set to the app's `data/` directory. |
+| `IUNLOCKMOBILE_MAINTENANCE=1` | Pauses new orders; the rest of the site stays up. |
+| `IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` | Lets an invoice be confirmed from its own page. **Do not set this in production** — it mints credit without a payment. |

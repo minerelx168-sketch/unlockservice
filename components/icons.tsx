@@ -7,6 +7,20 @@ import type { ReactNode } from 'react'
  */
 
 const PATHS = {
+  /**
+   * The brand mark: an open padlock whose body carries a phone's
+   * proportions and home bar. The shackle is a hook with no right leg at
+   * all — an earlier version stopped the leg just short of the body and
+   * at any real size the two strokes merged, so it read as locked. If the
+   * mark is redrawn, keep the shackle open to the air.
+   */
+  unlockMark: (
+    <>
+      <rect x="6.5" y="10" width="11" height="11.5" rx="3.2" />
+      <path d="M9.2 10V6.8a3.1 3.1 0 0 1 6.2 0" />
+      <path d="M10.6 18.2h2.8" />
+    </>
+  ),
   shieldCheck: (
     <>
       <path d="M12 3l7 3v6c0 4.4-3 7.9-7 9-4-1.1-7-4.6-7-9V6l7-3z" />

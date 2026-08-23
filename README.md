@@ -1,4 +1,4 @@
-# Openline — device checks and unlocks
+# iUnlockMobile — permanent IMEI phone unlocking
 
 A Next.js app for a phone unlocking service: a customer gives an IMEI and the network their
 device is locked to, the order is filed against that IMEI, and the unlock comes back as a remote
@@ -47,7 +47,7 @@ npm run build    # production build + type-check + lint
 npm run typecheck
 ```
 
-Data lands in `data/openline.db` (SQLite, gitignored) and the schema is created on first request —
+Data lands in `data/iunlockmobile.db` (SQLite, gitignored) and the schema is created on first request —
 there is nothing to migrate or provision. The public pages make no external request: both faces are
 served from `public/fonts/` and every icon is inline SVG.
 
@@ -80,7 +80,7 @@ without waiting a day.
 
 Top-ups need a confirmation that would normally come from an administrator. In development the
 invoice page offers to stand in for one; in production that button only appears when
-`OPENLINE_ALLOW_SELF_APPROVE=1` is set. `OPENLINE_MAINTENANCE=1` pauses new orders.
+`IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` is set. `IUNLOCKMOBILE_MAINTENANCE=1` pauses new orders.
 
 ## Conventions
 
@@ -117,8 +117,10 @@ the parts meant to change. To re-skin: edit the palette and `--font-*` blocks in
 `components/icons.tsx`. Nothing in `styles/components.css` needs to change — its radii, control heights
 and shadow spreads are the transferred geometry.
 
-The brand name **Openline** is the one the design canvas already used for this swap; it appears in
-page copy, the `<title>`, and the footer.
+The brand is **iUnlockMobile** (iunlockmobile.com). The name appears in page copy, the `<title>`,
+the footer and the lockup in `components/brand.tsx`; the mark itself is the `unlockMark` entry in
+`components/icons.tsx`, mirrored in `app/icon.svg`, `app/favicon.ico` and `public/logo-mark.svg`.
+Change it in those four places and the site follows.
 
 ## Not built yet
 

@@ -105,7 +105,7 @@ export function activeSupplier(): Supplier {
  * server clock rather than the device clock.
  */
 export function maintenanceState() {
-  const active = process.env.OPENLINE_MAINTENANCE === '1'
+  const active = process.env.IUNLOCKMOBILE_MAINTENANCE === '1'
   return {
     active,
     state: active ? 'active' : 'inactive',

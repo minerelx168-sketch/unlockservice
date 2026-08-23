@@ -51,8 +51,8 @@ npm run build
 # Local rehearsal only. This lets an invoice be settled from its own page,
 # which is what makes the top-up flow walkable without an admin. It is
 # never set on the server — see deploy/README.md.
-export OPENLINE_ALLOW_SELF_APPROVE=1
-export OPENLINE_DB="$DB"
+export IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1
+export IUNLOCKMOBILE_DB="$DB"
 export NODE_ENV=production
 export PORT
 
@@ -88,7 +88,7 @@ fi
 cat <<BANNER
 
   ────────────────────────────────────────────────────────────
-   Openline is running the production build
+   iUnlockMobile is running the production build
 
    Site        http://localhost:$PORT
    Sign in     http://localhost:$PORT/login

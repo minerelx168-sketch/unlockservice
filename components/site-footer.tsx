@@ -56,7 +56,7 @@ export function SiteFooter() {
         </div>
 
         <div className="footer-base">
-          <span>&copy; {new Date().getFullYear()} Openline. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} iUnlockMobile. All rights reserved.</span>
           <span>Unlocking releases a device you own — it does not remove a finance agreement or a theft report.</span>
         </div>
       </div>

@@ -11,7 +11,7 @@ WorkingDirectory=/home/ubuntu/apps/unlockservice
 Environment=NODE_ENV=production
 Environment=HOSTNAME=127.0.0.1
 Environment=PORT=3000
-Environment=OPENLINE_DB=/home/ubuntu/apps/unlockservice/data/openline.db
+Environment=IUNLOCKMOBILE_DB=/home/ubuntu/apps/unlockservice/data/iunlockmobile.db
 ExecStart=/usr/local/bin/npm run start -- --hostname 127.0.0.1
 Restart=always
 RestartSec=5

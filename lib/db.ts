@@ -11,7 +11,7 @@ import { toCents } from './money'
  * Postgres later is a driver swap rather than a redesign.
  */
 
-const DB_PATH = process.env.OPENLINE_DB ?? join(process.cwd(), 'data', 'openline.db')
+const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (

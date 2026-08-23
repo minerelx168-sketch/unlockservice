@@ -1,4 +1,4 @@
-# Openline design system
+# iUnlockMobile design system
 
 Transferred from the design canvas captured in the **Website design patterns** session. The canvas
 documents a third-party page; what travels here is the system — the ratios, the rhythm, the

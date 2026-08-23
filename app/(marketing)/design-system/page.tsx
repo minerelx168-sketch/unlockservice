@@ -7,7 +7,7 @@ import '@/styles/docs.css'
 export const metadata: Metadata = {
   title: 'Design system',
   description:
-    'The tokens, type ramp, component anatomy and section patterns behind the Openline site — transferred from the design canvas captured in the Website design patterns session.',
+    'The tokens, type ramp, component anatomy and section patterns behind the iUnlockMobile site — transferred from the design canvas captured in the Website design patterns session.',
 }
 
 const SWATCHES = [
@@ -243,7 +243,7 @@ const RAMP: Array<{ label: string; spec: string; sample: React.ReactNode }> = [
   {
     label: 'Micro caption',
     spec: '9px · +0.14em upper · w700 · brand lockup & table heads',
-    sample: <span className="t-micro">Device intelligence</span>,
+    sample: <span className="t-micro">IMEI unlocking</span>,
   },
 ]
 
@@ -254,7 +254,7 @@ export default function DesignSystemPage() {
         <div className="shell">
           <span className="kicker">
             <Icon name="shield" strokeWidth={2} />
-            Design system · Openline
+            Design system · iUnlockMobile
           </span>
           <div style={{ height: 14 }} />
           <h1 className="t-hero" style={{ maxWidth: '14ch' }}>

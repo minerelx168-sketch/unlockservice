@@ -116,7 +116,7 @@ export function submitPaymentReference(
  * without one.
  */
 export function selfApprovalEnabled(): boolean {
-  return process.env.OPENLINE_ALLOW_SELF_APPROVE === '1' || process.env.NODE_ENV !== 'production'
+  return process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE === '1' || process.env.NODE_ENV !== 'production'
 }
 
 export function approveInvoice(reference: string, userId: number): Invoice {

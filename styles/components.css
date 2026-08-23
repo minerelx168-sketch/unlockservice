@@ -1,5 +1,5 @@
 /**
- * Openline — component anatomy.
+ * iUnlockMobile — component anatomy.
  *
  * Geometry is craft, not brand: the radii, control heights, border weights
  * and shadow spreads are carried over from the captured system unchanged.
@@ -569,6 +569,11 @@
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.1;
+}
+
+/* The one accent in the wordmark. Everything else in the lockup is ink. */
+.brand .name-i {
+  color: var(--primary);
 }
 
 .site-nav {

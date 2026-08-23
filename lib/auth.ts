@@ -9,7 +9,7 @@ import { db } from './db'
  * token, and the cookie itself is same-origin only.
  */
 
-export const SESSION_COOKIE = 'openline_session'
+export const SESSION_COOKIE = 'iunlockmobile_session'
 const SESSION_DAYS = 14
 
 export type User = {
