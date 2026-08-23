@@ -1,0 +1,48 @@
+name: Deploy
+
+# Pushes to the deploy branch land on the server. Everything is gated on
+# the build passing first, so a broken commit never restarts the service.
+on:
+  push:
+    branches: [claude/website-design-patterns-5043ix]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    # Without the host and key configured there is nothing to deploy to,
+    # so the job skips instead of failing the run.
+    if: ${{ vars.DEPLOY_HOST != '' }}
+    environment: production
+    steps:
+      - name: Open an SSH session to the host
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i ~/.ssh/id_deploy -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+            'BRANCH=${{ github.ref_name }} /home/ubuntu/apps/unlockservice/deploy/deploy.sh'

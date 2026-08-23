@@ -34,7 +34,11 @@ styles/                     tokens · fonts · base · components · app · docs
 public/fonts/               Self-hosted Bricolage Grotesque + Instrument Sans (OFL 1.1)
 docs/design-system.md       The written design system
 docs/reference/             The two source documents from the Cowork sessions
+deploy/                     Caddy site, systemd units, and the deploy script
 ```
+
+Deploying is documented in [`deploy/README.md`](deploy/README.md), including what is still a
+placeholder and must be replaced before the site takes money.
 
 ```sh
 npm install
