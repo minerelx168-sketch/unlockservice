@@ -80,6 +80,93 @@ unless you set one of them somewhere else by hand.
 
 Signed-in sessions end once, because the cookie was renamed too.
 
+## Pointing the domain (GoDaddy)
+
+GoDaddy's Web Hosting and Managed WordPress plans run PHP on a shared
+server. This app is a long-running Node process with its own database and
+a reverse proxy in front, so it cannot live there — no shell, no systemd,
+no way to keep a process up. That hosting plan stays unused; GoDaddy's job
+here is the domain.
+
+The app keeps running on the VM, and `iunlockmobile.com` is pointed at it.
+
+### 1. Open port 80 and 443 on the VM
+
+Caddy needs **80** as well as 443 — that is how the certificate is issued
+and renewed, so it cannot be closed once TLS works.
+
+The IP suggests Google Cloud. In the console: *VPC network → Firewall →
+Create firewall rule*, ingress, source `0.0.0.0/0`, TCP `80,443`. Or:
+
+```sh
+gcloud compute firewall-rules create allow-web \
+  --direction=INGRESS --action=ALLOW --rules=tcp:80,tcp:443 \
+  --source-ranges=0.0.0.0/0 --network=default
+```
+
+If the box also runs its own firewall:
+
+```sh
+sudo ufw allow 80,443/tcp && sudo ufw status
+```
+
+### 2. Detach the domain from the GoDaddy hosting
+
+If `iunlockmobile.com` is attached to the cPanel or WordPress product,
+GoDaddy manages its A record and will put its own value back. Remove the
+domain from that product first, in *My Products → the hosting plan →
+Settings*.
+
+Then check *Domain Portfolio → the domain → Forwarding*: **any forwarding
+rule has to go.** Forwarding answers with a redirect before the request
+ever reaches the VM, and it is the single most common reason a correctly
+pointed domain still shows the wrong page.
+
+### 3. Set the records
+
+*My Products → the domain → DNS → DNS Records.* **Edit the records that
+are already there** rather than adding new ones — two A records for `@`
+will send half your visitors to the old host.
+
+| Type | Name | Value | TTL |
+| --- | --- | --- | --- |
+| A | `@` | `34.138.231.163` | 600 seconds |
+| CNAME | `www` | `@` | 1 hour |
+
+GoDaddy ships `www` as a CNAME to `@` already, so it usually needs no
+change; if yours is an A record instead, give it the same IP. Caddy
+redirects www to the bare domain either way.
+
+Leave the nameservers on GoDaddy's own, and leave `MX` and any mail
+records alone — changing an A record does not affect email.
+
+### 4. Deploy, then check
+
+DNS takes anywhere from a few minutes to an hour. Once it has moved, run
+the deploy so Caddy picks up the new site and requests a certificate:
+
+```sh
+~/apps/unlockservice/deploy/deploy.sh
+```
+
+Then, from your own machine — not the server, because what matters is what
+a customer's resolver sees:
+
+```sh
+./deploy/check-domain.sh
+```
+
+It reports DNS, the redirect on port 80, the certificate issuer and expiry,
+and whether the app's own health endpoint answers, and exits non-zero if
+anything is off.
+
+Certificates are issued on the first request for the new hostname, so give
+it a few seconds and re-run if the first attempt catches Caddy mid-issue.
+`sudo journalctl -u caddy -f` shows what it is doing.
+
+Once `iunlockmobile.com` is answering, drop the `sslip.io` host from
+`deploy/Caddyfile` and deploy again.
+
 ## First time on a fresh Ubuntu box
 
 Node 22 or newer, git, and Caddy. As `ubuntu`:
