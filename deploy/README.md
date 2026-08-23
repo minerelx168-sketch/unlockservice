@@ -31,6 +31,35 @@ are real. To put it up with orders closed, add this to
 
 The site stays browsable; the order form says the service is paused.
 
+## Rehearse it on your own machine first
+
+`deploy/local.sh` runs the same steps this deploy runs on the server — `npm
+ci`, a real production build, `next start` with `NODE_ENV=production` — but
+in the foreground, on its own database, with no sudo, no systemd and no
+Caddy. What you see is what the server will serve.
+
+```sh
+npm run deploy:local                    # build and serve on :3000
+./deploy/local.sh --fresh --demo        # wipe local data and seed an account
+./deploy/local.sh --port 4000
+```
+
+`--demo` seeds `demo` / `demo-password-123` with credit and three orders —
+one delivered, one still with the carrier, one refused and refunded — so
+the workspace has something in it. It writes to `data/local.db`, separate
+from anything else, and only ever runs locally.
+
+The rehearsal sets `OPENLINE_ALLOW_SELF_APPROVE=1` so the top-up flow can be
+walked without an admin. **That is a local-only switch** — it settles an
+invoice without a payment, and the server must never have it.
+
+The one layer it does not rehearse is Caddy and TLS, because a certificate
+needs a public hostname. Check that config separately:
+
+```sh
+caddy validate --config deploy/Caddyfile
+```
+
 ## First time on a fresh Ubuntu box
 
 Node 22 or newer, git, and Caddy. As `ubuntu`:

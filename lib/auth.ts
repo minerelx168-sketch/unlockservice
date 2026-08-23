@@ -1,5 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { db } from './db'
 
 /**
@@ -137,8 +138,14 @@ export async function currentSession(): Promise<{ session: Session; user: User }
   return { session: { id: row.id, userId: row.user_id, csrfToken: row.csrf_token }, user }
 }
 
+/**
+ * For pages behind the workspace layout. It redirects rather than throws:
+ * a page and its layout render in parallel, so a throw here races the
+ * layout's own redirect and leaves a 500 in the log even though the
+ * browser ends up in the right place.
+ */
 export async function requireSession() {
   const found = await currentSession()
-  if (!found) throw new AuthError('Sign in to continue.')
+  if (!found) redirect('/login')
   return found
 }

@@ -15,7 +15,7 @@ REPO="${REPO:-https://github.com/minerelx168-sketch/unlockservice.git}"
 BRANCH="${BRANCH:-claude/website-design-patterns-5043ix}"
 APP_DIR="${APP_DIR:-/home/ubuntu/apps/unlockservice}"
 APP_USER="${APP_USER:-ubuntu}"
-HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:3000/}"
+HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:3000/api/health}"
 
 say() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 
@@ -88,7 +88,7 @@ say "Waiting for the app to answer"
 for attempt in $(seq 1 30); do
   code="$(curl -s -o /dev/null -w '%{http_code}' "$HEALTH_URL" || true)"
   if [ "$code" = "200" ]; then
-    say "Live: $HEALTH_URL answered 200 after ${attempt}s"
+    say "Live: the app and its database answered after ${attempt}s"
     exit 0
   fi
   sleep 1
