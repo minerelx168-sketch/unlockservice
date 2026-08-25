@@ -80,17 +80,29 @@ export default async function InvoicePage({
             <span>{gateway ? `${gateway.asset} · ${gateway.network}` : invoice.gateway}</span>
           </header>
           <div className="panel-body" style={{ display: 'grid', gap: 14 }}>
-            <div className="field">
-              <label htmlFor="address">Wallet address</label>
-              <input id="address" className="mono" readOnly value={gateway?.address ?? ''} />
-            </div>
-            <p className="alert">
-              <Icon name="info" strokeWidth={1.9} />
-              <span>
-                Placeholder address and fee rate. Put your processor&rsquo;s real values in{' '}
-                <code>lib/payments.ts</code> before taking money.
-              </span>
-            </p>
+            {gateway ? (
+              <>
+                <div className="field">
+                  <label htmlFor="address">Wallet address</label>
+                  <input id="address" className="mono" readOnly value={gateway.address} />
+                </div>
+                <p className="alert">
+                  <Icon name="info" strokeWidth={1.9} />
+                  <span>
+                    Send only {gateway.asset} on {gateway.network}. Credit is issued after the
+                    transaction is verified; submitting a reference never credits the wallet by itself.
+                  </span>
+                </p>
+              </>
+            ) : (
+              <p className="alert alert--error" role="alert">
+                <Icon name="info" strokeWidth={1.9} />
+                <span>
+                  This payment method is no longer configured. Do not send funds using old instructions;
+                  contact support if you already paid.
+                </span>
+              </p>
+            )}
           </div>
         </section>
       </div>
@@ -115,7 +127,7 @@ export default async function InvoicePage({
                   <span className="t-mono">{invoice.payment_reference}</span>.
                 </p>
               ) : null}
-              <PaymentReferenceForm reference={invoice.reference} />
+              {gateway ? <PaymentReferenceForm reference={invoice.reference} /> : null}
               {selfApprovalEnabled() ? (
                 <>
                   <hr className="hairline" />

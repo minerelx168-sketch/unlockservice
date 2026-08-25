@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts",
     "deploy:local": "bash deploy/local.sh",
     "seed:demo": "node scripts/seed-demo.mjs"
   },
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19.1.7",
     "eslint": "^9.34.0",
     "eslint-config-next": "^15.5.4",
+    "tsx": "^4.23.12",
     "typescript": "^5.9.2"
   },
   "overrides": {

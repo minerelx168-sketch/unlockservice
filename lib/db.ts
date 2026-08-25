@@ -17,8 +17,12 @@ const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   username           TEXT    NOT NULL UNIQUE,
-  email              TEXT    NOT NULL UNIQUE,
-  password_hash      TEXT    NOT NULL,
+	  email              TEXT    NOT NULL UNIQUE,
+	  display_name       TEXT,
+	  email_verified_at  TEXT,
+	  password_hash      TEXT    NOT NULL,
+	  is_admin           INTEGER NOT NULL DEFAULT 0,
+	  banned_at          TEXT,
   -- credit_cents is everything the account owns; held_cents is the part
   -- reserved by orders still with a supplier. Available = the difference.
   credit_cents       INTEGER NOT NULL DEFAULT 0,
@@ -34,8 +38,11 @@ CREATE TABLE IF NOT EXISTS sessions (
   id         TEXT    PRIMARY KEY,
   user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   csrf_token TEXT    NOT NULL,
-  expires_at TEXT    NOT NULL,
-  created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+	  expires_at  TEXT    NOT NULL,
+	  last_seen_at TEXT  NOT NULL DEFAULT (datetime('now')),
+	  user_agent  TEXT,
+	  ip_address  TEXT,
+	  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS sessions_user ON sessions(user_id);
 
@@ -119,20 +126,91 @@ CREATE TABLE IF NOT EXISTS credit_ledger (
   type               TEXT    NOT NULL,
   ref_type           TEXT,
   ref_id             TEXT,
-  balance_after_cents INTEGER NOT NULL,
-  created_at         TEXT    NOT NULL DEFAULT (datetime('now'))
+	  balance_after_cents INTEGER NOT NULL,
+	  description        TEXT,
+	  affects_balance    INTEGER NOT NULL DEFAULT 1,
+	  created_at         TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS ledger_user ON credit_ledger(user_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS api_access (
-  user_id         INTEGER PRIMARY KEY REFERENCES users(id),
-  status          TEXT NOT NULL DEFAULT 'none',
-  website_url     TEXT,
-  contact_channel TEXT,
-  use_case        TEXT,
-  requested_at    TEXT
-);
-`
+	  user_id         INTEGER PRIMARY KEY REFERENCES users(id),
+	  status          TEXT NOT NULL DEFAULT 'none',
+	  website_url     TEXT,
+	  contact_channel TEXT,
+	  use_case        TEXT,
+	  requested_at    TEXT
+	);
+
+	CREATE TABLE IF NOT EXISTS email_verifications (
+	  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+	  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	  code_hash   TEXT    NOT NULL,
+	  purpose     TEXT    NOT NULL,
+	  attempts    INTEGER NOT NULL DEFAULT 0,
+	  consumed_at TEXT,
+	  expires_at  TEXT    NOT NULL,
+	  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+	);
+	CREATE INDEX IF NOT EXISTS email_verifications_active
+	  ON email_verifications(user_id, purpose, consumed_at, id DESC);
+	CREATE INDEX IF NOT EXISTS email_verifications_expiry ON email_verifications(expires_at);
+
+	CREATE TABLE IF NOT EXISTS auth_rate_limits (
+	  bucket       TEXT NOT NULL,
+	  subject_hash TEXT NOT NULL,
+	  window_start TEXT NOT NULL,
+	  attempts     INTEGER NOT NULL DEFAULT 0,
+	  PRIMARY KEY (bucket, subject_hash)
+	);
+
+	CREATE TABLE IF NOT EXISTS topup_orders (
+	  id                       INTEGER PRIMARY KEY AUTOINCREMENT,
+	  public_id                TEXT    NOT NULL UNIQUE,
+	  user_id                  INTEGER NOT NULL REFERENCES users(id),
+	  credit_amount_cents      INTEGER NOT NULL,
+	  fee_cents                INTEGER NOT NULL DEFAULT 0,
+	  tax_cents                INTEGER NOT NULL DEFAULT 0,
+	  total_due_cents          INTEGER NOT NULL,
+	  currency                 TEXT    NOT NULL DEFAULT 'USD',
+	  status                   TEXT    NOT NULL DEFAULT 'pending',
+	  provider                 TEXT    NOT NULL,
+	  provider_charge_id       TEXT,
+	  provider_payment_intent  TEXT,
+	  idempotency_key          TEXT    NOT NULL UNIQUE,
+	  payment_reference        TEXT,
+	  note                     TEXT,
+	  paid_at                  TEXT,
+	  credited_at              TEXT,
+	  created_at               TEXT    NOT NULL DEFAULT (datetime('now')),
+	  updated_at               TEXT    NOT NULL DEFAULT (datetime('now'))
+	);
+	CREATE INDEX IF NOT EXISTS topup_orders_user_status
+	  ON topup_orders(user_id, status, created_at DESC);
+	CREATE UNIQUE INDEX IF NOT EXISTS topup_orders_charge
+	  ON topup_orders(provider, provider_charge_id)
+	  WHERE provider_charge_id IS NOT NULL;
+
+	CREATE TABLE IF NOT EXISTS webhook_events (
+	  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+	  provider         TEXT    NOT NULL,
+	  event_id         TEXT,
+	  event_type       TEXT,
+	  signature_ok     INTEGER NOT NULL DEFAULT 0,
+	  processed        INTEGER NOT NULL DEFAULT 0,
+	  processing_error TEXT,
+	  raw_body         TEXT    NOT NULL,
+	  received_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+	  processed_at     TEXT,
+	  UNIQUE(provider, event_id)
+	);
+	CREATE INDEX IF NOT EXISTS webhook_events_processed ON webhook_events(processed, received_at);
+
+	CREATE TABLE IF NOT EXISTS schema_migrations (
+	  version    TEXT PRIMARY KEY,
+	  applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+	);
+	`
 
 let handle: Database.Database | null = null
 
@@ -143,14 +221,117 @@ export function db(): Database.Database {
   const connection = new Database(DB_PATH)
   connection.pragma('journal_mode = WAL')
   connection.pragma('foreign_keys = ON')
-  connection.exec(SCHEMA)
-  seedCatalog(connection)
+	  connection.exec(SCHEMA)
+	  migrate(connection)
+	  seedCatalog(connection)
 
   handle = connection
   return handle
 }
 
-/** Idempotent: names and prices follow the catalog, ids never move. */
+function hasColumn(connection: Database.Database, table: string, column: string): boolean {
+	  const rows = connection.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>
+	  return rows.some((row) => row.name === column)
+	}
+
+	function addColumn(connection: Database.Database, table: string, definition: string) {
+	  const [column] = definition.trim().split(/\s+/, 1)
+	  if (!hasColumn(connection, table, column)) {
+	    connection.exec(`ALTER TABLE ${table} ADD COLUMN ${definition}`)
+	  }
+	}
+
+	/**
+	 * Additive migrations only. Existing production rows are never deleted or
+	 * rewritten except to populate safe defaults for newly introduced columns.
+	 */
+	function migrate(connection: Database.Database) {
+	  connection.transaction(() => {
+	    addColumn(connection, 'users', 'display_name TEXT')
+	    addColumn(connection, 'users', 'email_verified_at TEXT')
+	    addColumn(connection, 'users', 'is_admin INTEGER NOT NULL DEFAULT 0')
+	    addColumn(connection, 'users', 'banned_at TEXT')
+
+	    addColumn(connection, 'sessions', "last_seen_at TEXT NOT NULL DEFAULT '1970-01-01T00:00:00.000Z'")
+	    addColumn(connection, 'sessions', 'user_agent TEXT')
+	    addColumn(connection, 'sessions', 'ip_address TEXT')
+
+	    addColumn(connection, 'credit_ledger', 'description TEXT')
+	    addColumn(connection, 'credit_ledger', 'affects_balance INTEGER NOT NULL DEFAULT 1')
+
+	    connection.prepare(
+	      `UPDATE users
+	          SET email_verified_at = COALESCE(email_verified_at, created_at)
+	        WHERE email_verified_at IS NULL`,
+	    ).run()
+	    connection.prepare(
+	      `UPDATE sessions
+	          SET last_seen_at = CASE
+	            WHEN last_seen_at = '1970-01-01T00:00:00.000Z' THEN created_at
+	            ELSE last_seen_at
+	          END`,
+	    ).run()
+    connection.prepare(
+      `UPDATE credit_ledger
+          SET affects_balance = CASE WHEN type IN ('hold', 'refund') THEN 0 ELSE 1 END`,
+    ).run()
+
+    connection.prepare(
+      `INSERT INTO credit_ledger
+         (user_id, amount_cents, type, ref_type, ref_id,
+          balance_after_cents, description, affects_balance)
+       SELECT u.id,
+              u.credit_cents - COALESCE(l.balance, 0),
+              'adjustment',
+              'migration',
+              'imeihub-backend-v1-' || u.id,
+              u.credit_cents,
+              'Opening balance imported during ledger migration',
+              1
+         FROM users u
+         LEFT JOIN (
+           SELECT user_id, SUM(amount_cents) AS balance
+             FROM credit_ledger
+            WHERE affects_balance = 1
+            GROUP BY user_id
+         ) l ON l.user_id = u.id
+        WHERE u.credit_cents != COALESCE(l.balance, 0)
+          AND NOT EXISTS (
+            SELECT 1 FROM credit_ledger existing
+             WHERE existing.ref_type = 'migration'
+               AND existing.ref_id = 'imeihub-backend-v1-' || u.id
+               AND existing.type = 'adjustment'
+          )`,
+    ).run()
+
+    connection.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS credit_ledger_unique_effect
+	        ON credit_ledger(ref_type, ref_id, type)
+	        WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL AND affects_balance = 1;
+	    `)
+
+	    connection.prepare(
+	      `INSERT OR IGNORE INTO topup_orders
+	         (public_id, user_id, credit_amount_cents, fee_cents, tax_cents,
+	          total_due_cents, currency, status, provider, idempotency_key,
+	          payment_reference, note, paid_at, credited_at, created_at, updated_at)
+	       SELECT reference, user_id, credit_amount_cents, fee_cents, tax_cents,
+	              total_due_cents, currency,
+	              CASE status WHEN 'success' THEN 'credited' ELSE status END,
+	              gateway, 'legacy-' || reference, payment_reference, note,
+	              CASE WHEN status = 'success' THEN updated_at ELSE NULL END,
+	              CASE WHEN status = 'success' THEN updated_at ELSE NULL END,
+	              created_at, updated_at
+	         FROM invoices`,
+	    ).run()
+
+	    connection.prepare(
+	      `INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)`,
+	    ).run('2026-08-imeihub-backend-v1')
+	  })()
+	}
+
+	/** Idempotent: names and prices follow the catalog, ids never move. */
 function seedCatalog(connection: Database.Database) {
   const brand = connection.prepare(`
     INSERT INTO brands (id, name, delivery) VALUES (@id, @name, @delivery)
