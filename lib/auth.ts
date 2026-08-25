@@ -112,6 +112,10 @@ export function getUser(id: number): User | undefined {
     .get(id) as User | undefined
 }
 
+export function hasAdminRole(user: Pick<User, 'account_type'>): boolean {
+  return user.account_type === 'admin'
+}
+
 /* ---- sessions -------------------------------------------------------- */
 
 export type Session = { id: string; userId: number; csrfToken: string }
@@ -169,5 +173,12 @@ export async function currentSession(): Promise<{ session: Session; user: User }
 export async function requireSession() {
   const found = await currentSession()
   if (!found) redirect('/login')
+  return found
+}
+
+/** Server-side RBAC guard. Regular users never receive administrator data. */
+export async function requireAdmin() {
+  const found = await requireSession()
+  if (!hasAdminRole(found.user)) redirect('/user/dashboard')
   return found
 }

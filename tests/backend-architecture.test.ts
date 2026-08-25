@@ -122,6 +122,7 @@ legacy.close()
 
 let auth: typeof import('../lib/auth')
 let accountSecurity: typeof import('../lib/account-security')
+let admin: typeof import('../lib/admin')
 let credits: typeof import('../lib/credits')
 let payments: typeof import('../lib/payments')
 let database: typeof import('../lib/db')
@@ -129,6 +130,7 @@ let database: typeof import('../lib/db')
 before(async () => {
   auth = await import('../lib/auth')
   accountSecurity = await import('../lib/account-security')
+  admin = await import('../lib/admin')
   credits = await import('../lib/credits')
   payments = await import('../lib/payments')
   database = await import('../lib/db')
@@ -182,6 +184,19 @@ test('registration keeps the original User contract and normal sign-in flow', ()
 
 test('verified accounts cannot use the verification endpoint as a passwordless login', () => {
   assert.throws(() => accountSecurity.verifyEmail('alice@example.test', '123456'), auth.AuthError)
+})
+
+test('administrator access requires the explicit admin account type', () => {
+  const user = auth.authenticate('alice', 'correct-horse-battery-staple')
+  assert.equal(auth.hasAdminRole(user), false)
+
+  database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(user.id)
+  const promoted = auth.getUser(user.id)!
+  assert.equal(auth.hasAdminRole(promoted), true)
+
+  const overview = admin.adminOverview()
+  assert.equal(overview.admins, 1)
+  assert.equal(admin.listAdminUsers().some((entry) => entry.id === user.id && entry.account_type === 'admin'), true)
 })
 
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
