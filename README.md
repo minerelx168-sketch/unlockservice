@@ -28,7 +28,9 @@ lib/orders.ts               The order pipeline both endpoints call
 lib/catalog.ts              Brands, carriers and their prices and turnarounds
 lib/payments.ts             Invoices: numbers locked at creation, credited on confirmation
 lib/provider.ts             Supplier adapter + the mock that stands in for a real one
-lib/auth.ts                 Passwords, sessions, CSRF tokens
+lib/auth.ts                 Passwords, accounts, sessions, CSRF tokens
+lib/account-security.ts     Optional email verification and password recovery
+lib/rate-limit.ts           Small SQLite-backed attempt windows
 lib/imei.ts                 Luhn validation, grouping, identifier masking (no DOM)
 styles/                     tokens · fonts · base · components · app · docs
 public/fonts/               Self-hosted Bricolage Grotesque + Instrument Sans (OFL 1.1)
@@ -48,8 +50,8 @@ npm run build    # production build + type-check + lint
 npm run typecheck
 ```
 
-Data lands in `data/iunlockmobile.db` (SQLite, gitignored) and the schema is created on first request —
-there is nothing to migrate or provision. The public pages make no external request: both faces are
+Data lands in `data/iunlockmobile.db` (SQLite, gitignored). The schema is created on first request and
+additive compatibility migrations run in-process, so there is still nothing separate to provision. The public pages make no external request: both faces are
 served from `public/fonts/` and every icon is inline SVG.
 
 ## What can be ordered
@@ -127,8 +129,7 @@ Change it in those four places and the site follows.
 
 Still open: the admin side (invoice approval, catalog and supplier management), emailing the result
 to the customer, the API portal and its DHRU-compatible surface, reseller accounts and credit
-transfer, the 7-day activity chart on the dashboard, server-side pagination in Orders, email change
-and password reset, and rate limiting on the order endpoint. There is also no background worker yet
+transfer, the 7-day activity chart on the dashboard, server-side pagination in Orders, email change, and rate limiting on the order endpoint. There is also no background worker yet
 — an order only advances when someone opens it or the console polls it.
 
 ## Accessibility

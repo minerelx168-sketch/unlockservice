@@ -1,44 +1,56 @@
-# imeihub Backend Architecture Migration
+# Unlockservice-first Backend Architecture
 
 **Author:** Manus AI  
 **Target:** `unlockservice`  
-**Source reference:** `imeihub` branch `production` at commit `d053cbe`
+**Security reference:** `imeihub` branch `production` at commit `d053cbe`
 
 ## Objective
 
-The migration adapts imeihub's production backend invariants to the existing Next.js and SQLite stack in `unlockservice`. It does not copy PHP or MySQL code directly, does not connect to the imeihub database, and does not modify imeihub data. Existing unlockservice users, sessions, orders, invoices, and credit history must remain readable throughout deployment.
+The backend keeps the original `unlockservice` architecture as its contract. The imeihub implementation contributes security and accounting invariants, but it does not replace unlockservice's module boundaries, invoice vocabulary, escrow flow, or SQLite-first deployment model. No PHP or MySQL code is copied, no imeihub database is connected, and no imeihub data is modified.
 
-## Architecture decision
+> The original unlockservice model remains authoritative: `lib/auth.ts` owns passwords and sessions, `lib/credits.ts` owns the escrow ledger, and `lib/payments.ts` owns invoices that are credited only after confirmation.
 
-| Concern | imeihub production pattern | unlockservice implementation |
+## Module boundaries
+
+| Module | Responsibility | Compatibility rule |
 |---|---|---|
-| Account identity | Email/password, optional OAuth, server-side sessions | Preserve username plus email/password; strengthen server-side sessions and account status checks |
-| Email verification | Six-digit OTP, hashed at rest, expiry, attempt cap, resend throttle | Add verification records and configurable email delivery; enforce verification only when the production flag and email provider are configured |
-| Password recovery | OTP reset and session revocation | Add reset OTP flow and revoke every active session after a successful reset |
-| Credit accounting | Append-only ledger is source of truth; cached balance is reconciled | Preserve integer cents; make balance-changing ledger rows authoritative and keep `users.credit_cents` as a reconciled cache |
-| In-flight orders | imeihub deducts and refunds atomically | Preserve unlockservice's stronger escrow model: reserve credit first, then charge or release it atomically |
-| Top-ups | Provider-neutral orders, idempotency keys, immutable credit issuance | Replace the unsafe invoice approval path with idempotent top-up orders and a single settlement function |
-| Payment callbacks | Verified provider webhook plus raw event audit and replay protection | Add a provider-neutral webhook event store and settlement boundary; a real provider is enabled only when credentials/configuration exist |
-| Schema evolution | Versioned SQL migrations | Add in-process, versioned SQLite migrations that only add compatible columns/tables/indexes |
+| `lib/db.ts` | SQLite bootstrap, additive schema compatibility, catalog seed | Existing tables and rows are never deleted or renamed |
+| `lib/auth.ts` | Password hashing, account registration/authentication, server sessions, CSRF | Preserve the original `User`, `Session`, `register`, `authenticate`, and session helper contracts |
+| `lib/account-security.ts` | Email OTP verification, password-reset OTP, Resend delivery | Security extension; it must not own sessions or account balance |
+| `lib/rate-limit.ts` | Small SQLite-backed attempt window helper | Shared by login and OTP flows without expanding `auth.ts` |
+| `lib/credits.ts` | `hold → charge / refund` escrow transitions and append-only audit rows | `users.credit_cents` and `held_cents` remain the runtime balance; the ledger verifies rather than replaces that contract |
+| `lib/payments.ts` | Invoice creation, reference submission, trusted confirmation | `Invoice`, legacy status names, `invoice` ledger references, and existing pages remain the public model |
+| `lib/actions.ts` | Thin form adapters, error mapping, redirects | Business rules remain in `lib/*`; actions do not become a second service layer |
 
-## Data model additions
+## Authentication compatibility
 
-The migration adds `email_verifications`, `auth_rate_limits`, `topup_orders`, `webhook_events`, and `schema_migrations`. Existing `invoices` remain as legacy records and are not deleted. Existing users gain verification/session metadata through additive migrations. Existing `credit_ledger` rows remain intact; new rows receive an `affects_balance` marker so owned credit can be reconciled independently from reservation events.
+Registration remains an account operation in `lib/auth.ts`. When email verification is enabled, the account is created unverified and `lib/account-security.ts` sends a short-lived six-digit code. Verification creates the normal unlockservice session and redirects into the workspace. Password reset uses the same OTP storage and revokes all existing sessions after changing the password.
 
-## Credit invariants
+The original production default remains safe: verification is enforced only when `IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION=1`, `RESEND_API_KEY`, and `IUNLOCKMOBILE_EMAIL_FROM` are configured. Existing accounts are marked verified by the additive migration so deployment cannot lock out prior users.
 
-> Owned balance equals the sum of balance-affecting ledger entries. Reserved credit is tracked separately and can never be negative or exceed owned balance.
+## Credit compatibility
 
-Every credit mutation runs in one SQLite transaction. A top-up settlement is idempotent by both top-up order status and a unique ledger reference. A duplicate callback returns the previously settled order without issuing credit again. A service order reserves available credit, charges only after successful fulfilment, and releases the reservation if the supplier refuses or fails.
+The original escrow semantics are preserved without reinterpretation:
 
-## Authentication invariants
+```text
+available --hold--> held --charge--> spent
+                       └--refund--> available
+```
 
-Session identifiers and CSRF tokens remain opaque random values stored server-side. Authentication rejects inactive accounts, removes expired sessions, and records last-seen metadata. Login errors remain generic to avoid account enumeration. Verification and reset codes are stored only as SHA-256 hashes, expire after ten minutes, and are invalidated after five failed attempts.
+`users.credit_cents` is the amount owned, `users.held_cents` is the reserved portion, and available credit is their difference. Every transition writes a ledger row. `hold` and `refund` remain availability movements; `charge`, `topup`, and `adjustment` change owned credit. Health checks compare balance-changing ledger rows with the cached owned balance but normal reads do not silently rewrite customer balances.
 
-## Payment availability
+Top-up crediting is idempotent through a unique `(ref_type, ref_id, type)` ledger effect. The canonical reference remains `ref_type = 'invoice'`, so the existing Orders and Payments pages continue to render references correctly.
 
-No placeholder wallet address may be shown to customers. A manual USDT method is exposed only when `IUNLOCKMOBILE_USDT_BEP20_ADDRESS` is configured. The settlement function is not callable by customers in production. Future Stripe, Lemon Squeezy, Binance Pay, or blockchain callbacks must verify their signatures before invoking settlement and must write the raw callback to `webhook_events` before processing.
+## Invoice compatibility
 
-## Deployment policy
+`invoices` is the canonical top-up table. It retains the original statuses `pending`, `review`, `success`, `failed`, and `refunded`. Provider identifiers, idempotency keys, and settlement timestamps are additive invoice columns rather than a second public order model.
 
-Production remains in maintenance mode until supplier integration, payment destination/provider credentials, catalog pricing, and an administrative payment-review path are verified. The deployment process creates a timestamped SQLite backup before applying migrations. Health checks must validate both database access and ledger consistency.
+The previously introduced `topup_orders` and `webhook_events` tables remain readable for backward compatibility. Compatibility migration imports any top-up row missing from `invoices`, maps it to the original status vocabulary, and preserves provider metadata. New application writes go only to `invoices`.
+
+No placeholder destination is exposed. The original `crypto_networks` gateway identifier is available only when `IUNLOCKMOBILE_USDT_BEP20_ADDRESS` is configured. Customer reference submission never credits an account; only trusted confirmation can call the idempotent settlement boundary.
+
+## Schema policy
+
+Schema evolution stays inside `lib/db.ts` because the application is intentionally provision-free SQLite. Compatibility changes are additive and idempotent. A migration may add columns, tables, indexes, or backfill a derived compatibility view, but it may not delete legacy data, alter an existing identifier, or rewrite completed financial rows.
+
+Before every production deployment, the SQLite online backup is created and checksummed. After restart, deployment verification must include `PRAGMA integrity_check`, the migration record, credit-ledger mismatch counts, service status, local health, and external HTTPS health.

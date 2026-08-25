@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import {
   authenticate,
   AuthError,
@@ -11,12 +10,16 @@ import {
   currentSession,
   destroySession,
   register,
+  setSessionCookie,
+} from './auth'
+import {
+  emailVerificationRequired,
   requestPasswordReset,
   resendVerification,
   resetPassword,
-  setSessionCookie,
+  startEmailVerification,
   verifyEmail,
-} from './auth'
+} from './account-security'
 import { parseUsd } from './money'
 import {
   approveInvoice,
@@ -33,30 +36,17 @@ export type FormState = { error?: string; message?: string }
  * form here: post, act, redirect. Only the check flow needs JSON.
  */
 
-async function sessionMetadata() {
-  const requestHeaders = await headers()
-  const forwarded = requestHeaders.get('x-forwarded-for')?.split(',')[0]?.trim()
-  return {
-    userAgent: requestHeaders.get('user-agent') ?? undefined,
-    ipAddress: forwarded ?? requestHeaders.get('x-real-ip') ?? undefined,
-  }
-}
-
 export async function registerAction(_: FormState, data: FormData): Promise<FormState> {
   const email = String(data.get('email') ?? '').trim().toLowerCase()
-  let verificationRequired = false
-  let userId = 0
+  const verificationRequired = emailVerificationRequired()
   try {
-    const result = await register(
+    const user = register(
       String(data.get('username') ?? ''),
       email,
       String(data.get('password') ?? ''),
     )
-    verificationRequired = result.verificationRequired
-    userId = result.user.id
-    if (!verificationRequired) {
-      await setSessionCookie(createSession(userId, await sessionMetadata()))
-    }
+    if (verificationRequired) await startEmailVerification(user.id, user.email)
+    else await setSessionCookie(createSession(user.id))
   } catch (error) {
     if (error instanceof AuthError) return { error: error.message }
     throw error
@@ -69,7 +59,7 @@ export async function registerAction(_: FormState, data: FormData): Promise<Form
 export async function loginAction(_: FormState, data: FormData): Promise<FormState> {
   try {
     const user = authenticate(String(data.get('identity') ?? ''), String(data.get('password') ?? ''))
-    await setSessionCookie(createSession(user.id, await sessionMetadata()))
+    await setSessionCookie(createSession(user.id))
   } catch (error) {
     if (error instanceof AuthError) return { error: error.message }
     throw error
@@ -81,8 +71,8 @@ export async function loginAction(_: FormState, data: FormData): Promise<FormSta
 export async function verifyEmailAction(_: FormState, data: FormData): Promise<FormState> {
   const email = String(data.get('email') ?? '').trim().toLowerCase()
   try {
-    const user = await verifyEmail(email, String(data.get('code') ?? ''))
-    await setSessionCookie(createSession(user.id, await sessionMetadata()))
+    const user = verifyEmail(email, String(data.get('code') ?? ''))
+    await setSessionCookie(createSession(user.id))
   } catch (error) {
     if (error instanceof AuthError) return { error: error.message }
     throw error

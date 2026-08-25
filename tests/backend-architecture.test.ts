@@ -59,18 +59,37 @@ legacy.exec(`
     balance_after_cents INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+  CREATE TABLE topup_orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    public_id TEXT NOT NULL UNIQUE,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    credit_amount_cents INTEGER NOT NULL,
+    fee_cents INTEGER NOT NULL DEFAULT 0,
+    tax_cents INTEGER NOT NULL DEFAULT 0,
+    total_due_cents INTEGER NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    status TEXT NOT NULL DEFAULT 'pending',
+    provider TEXT NOT NULL,
+    provider_charge_id TEXT,
+    provider_payment_intent TEXT,
+    idempotency_key TEXT NOT NULL UNIQUE,
+    payment_reference TEXT,
+    note TEXT,
+    paid_at TEXT,
+    credited_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `)
 legacy
   .prepare(
-    `INSERT INTO users
-       (username, email, password_hash, credit_cents, held_cents)
+    `INSERT INTO users (username, email, password_hash, credit_cents, held_cents)
      VALUES ('legacy', 'legacy@example.test', 'scrypt$00$00', 10000, 2000)`,
   )
   .run()
 legacy
   .prepare(
-    `INSERT INTO users
-       (username, email, password_hash, credit_cents, held_cents)
+    `INSERT INTO users (username, email, password_hash, credit_cents, held_cents)
      VALUES ('legacy-no-ledger', 'legacy-no-ledger@example.test', 'scrypt$00$00', 777, 0)`,
   )
   .run()
@@ -79,7 +98,7 @@ legacy
     `INSERT INTO credit_ledger
        (user_id, amount_cents, type, ref_type, ref_id, balance_after_cents)
      VALUES
-       (1, 10000, 'topup', 'seed', 'legacy', 10000),
+       (1, 10000, 'topup', 'invoice', 'legacy-paid', 10000),
        (1, -2000, 'hold', 'order', 'legacy-order', 8000)`,
   )
   .run()
@@ -90,15 +109,26 @@ legacy
      VALUES ('legacy-invoice', 1, 'crypto_networks', 5000, 5100, 'pending')`,
   )
   .run()
+legacy
+  .prepare(
+    `INSERT INTO topup_orders
+       (public_id, user_id, credit_amount_cents, total_due_cents, status,
+        provider, idempotency_key)
+     VALUES ('imeihub-topup', 1, 3000, 3000, 'review',
+             'crypto_networks', 'imeihub-key')`,
+  )
+  .run()
 legacy.close()
 
 let auth: typeof import('../lib/auth')
+let accountSecurity: typeof import('../lib/account-security')
 let credits: typeof import('../lib/credits')
 let payments: typeof import('../lib/payments')
 let database: typeof import('../lib/db')
 
 before(async () => {
   auth = await import('../lib/auth')
+  accountSecurity = await import('../lib/account-security')
   credits = await import('../lib/credits')
   payments = await import('../lib/payments')
   database = await import('../lib/db')
@@ -108,73 +138,94 @@ after(() => {
   rmSync(workDir, { recursive: true, force: true })
 })
 
-test('additive migration preserves legacy user, invoice and escrow balance', () => {
+test('additive migration preserves original rows and imports imeihub top-ups as invoices', () => {
   const connection = database.db()
   const legacyUser = auth.getUser(1)
   assert.equal(legacyUser?.email_verified_at !== null, true)
-
-  const balance = credits.getBalance(1)
-  assert.deepEqual(balance, { creditCents: 10000, heldCents: 2000, availableCents: 8000 })
-
-  const ledger = credits.listLedger(1)
-  assert.equal(ledger.find((row) => row.type === 'hold')?.affects_balance, 0)
-  assert.equal(payments.getInvoice('legacy-invoice', 1)?.status, 'pending')
+  assert.deepEqual(credits.getBalance(1), { creditCents: 10000, heldCents: 2000, availableCents: 8000 })
   assert.deepEqual(credits.getBalance(2), { creditCents: 777, heldCents: 0, availableCents: 777 })
-  const openingEntry = connection
-    .prepare(
-      `SELECT amount_cents, type FROM credit_ledger
-        WHERE user_id = 2 AND ref_type = 'migration' AND ref_id = 'imeihub-backend-v1-2'`,
-    )
-    .get() as { amount_cents: number; type: string }
-  assert.deepEqual({ amount: openingEntry.amount_cents, type: openingEntry.type }, { amount: 777, type: 'adjustment' })
-  const migration = connection
-    .prepare("SELECT COUNT(*) AS count FROM schema_migrations WHERE version = '2026-08-imeihub-backend-v1'")
-    .get() as { count: number }
-  assert.equal(migration.count, 1)
+
+  const hold = connection
+    .prepare("SELECT affects_balance FROM credit_ledger WHERE user_id = 1 AND type = 'hold'")
+    .get() as { affects_balance: number }
+  assert.equal(hold.affects_balance, 0)
+  assert.equal(payments.getInvoice('legacy-invoice', 1)?.status, 'pending')
+  assert.equal(payments.getInvoice('imeihub-topup', 1)?.status, 'review')
+
+  const invoiceMetadata = connection
+    .prepare('SELECT provider, idempotency_key FROM invoices WHERE reference = ?')
+    .get('legacy-invoice') as { provider: string; idempotency_key: string }
+  assert.deepEqual(
+    { provider: invoiceMetadata.provider, idempotencyKey: invoiceMetadata.idempotency_key },
+    { provider: 'crypto_networks', idempotencyKey: 'invoice-legacy-invoice' },
+  )
+
+  const migrations = connection
+    .prepare('SELECT version FROM schema_migrations ORDER BY version')
+    .all() as Array<{ version: string }>
+  assert.deepEqual(
+    migrations.map((row) => row.version),
+    ['2026-08-imeihub-backend-v1', '2026-08-unlockservice-native-v2'],
+  )
 })
 
-test('registration creates a verified account when verification is disabled', async () => {
-  const result = await auth.register('alice', 'Alice@Example.test', 'correct-horse-battery-staple')
-  assert.equal(result.verificationRequired, false)
-  assert.equal(result.user.email, 'alice@example.test')
-  assert.ok(result.user.email_verified_at)
+test('registration keeps the original User contract and normal sign-in flow', () => {
+  const user = auth.register('alice', 'Alice@Example.test', 'correct-horse-battery-staple')
+  assert.equal(user.email, 'alice@example.test')
+  assert.ok(user.email_verified_at)
 
   const signedIn = auth.authenticate('alice@example.test', 'correct-horse-battery-staple')
-  assert.equal(signedIn.id, result.user.id)
+  assert.equal(signedIn.id, user.id)
   assert.throws(() => auth.authenticate('alice@example.test', 'wrong-password'), auth.AuthError)
+  assert.throws(() => auth.register('alice', 'other@example.test', 'correct-horse-battery-staple'), auth.AuthError)
 })
 
-test('top-up settlement is idempotent and appends one balance-affecting ledger row', async () => {
+test('verified accounts cannot use the verification endpoint as a passwordless login', () => {
+  assert.throws(() => accountSecurity.verifyEmail('alice@example.test', '123456'), auth.AuthError)
+})
+
+test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
-  const invoice = payments.createInvoice(user.id, 'manual-usdt-bep20', 2500)
+  const invoice = payments.createInvoice(user.id, 'crypto_networks', 2500)
   payments.submitPaymentReference(invoice.reference, user.id, 'TX_REFERENCE_123456', 'integration test')
 
-  const first = payments.settleTopUp(invoice.reference, 'provider-charge-1')
-  const second = payments.settleTopUp(invoice.reference, 'provider-charge-1')
-  assert.equal(first.creditedNow, true)
-  assert.equal(second.creditedNow, false)
-  assert.equal(credits.getBalance(user.id).creditCents, 2500)
+  payments.approveInvoice(invoice.reference, user.id, 'provider-charge-1')
+  const afterFirst = credits.getBalance(user.id)
+  payments.approveInvoice(invoice.reference, user.id, 'provider-charge-1')
+  const afterSecond = credits.getBalance(user.id)
+  assert.equal(afterFirst.creditCents, 2500)
+  assert.deepEqual(afterSecond, afterFirst)
+  assert.equal(payments.getInvoice(invoice.reference, user.id)?.status, 'success')
 
   const count = database
     .db()
     .prepare(
       `SELECT COUNT(*) AS count FROM credit_ledger
-        WHERE user_id = ? AND ref_type = 'topup_order' AND ref_id = ? AND type = 'topup'`,
+        WHERE user_id = ? AND ref_type = 'invoice' AND ref_id = ? AND type = 'topup'`,
     )
     .get(user.id, invoice.reference) as { count: number }
   assert.equal(count.count, 1)
 })
 
-test('escrow reserve, release and charge preserve owned-credit invariants', () => {
+test('escrow hold, refund and charge preserve the original balance contract', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
 
-  const held = credits.hold(user.id, 1000, 'order', 'order-a')
-  assert.deepEqual(held, { creditCents: 2500, heldCents: 1000, availableCents: 1500 })
-  const released = credits.refund(user.id, 1000, 'order', 'order-a')
-  assert.deepEqual(released, { creditCents: 2500, heldCents: 0, availableCents: 2500 })
+  assert.deepEqual(credits.hold(user.id, 1000, 'order', 'order-a'), {
+    creditCents: 2500,
+    heldCents: 1000,
+    availableCents: 1500,
+  })
+  assert.deepEqual(credits.refund(user.id, 1000, 'order', 'order-a'), {
+    creditCents: 2500,
+    heldCents: 0,
+    availableCents: 2500,
+  })
 
   credits.hold(user.id, 1200, 'order', 'order-b')
-  const charged = credits.charge(user.id, 1200, 'order', 'order-b')
-  assert.deepEqual(charged, { creditCents: 1300, heldCents: 0, availableCents: 1300 })
+  assert.deepEqual(credits.charge(user.id, 1200, 'order', 'order-b'), {
+    creditCents: 1300,
+    heldCents: 0,
+    availableCents: 1300,
+  })
   assert.deepEqual(credits.creditIntegrity(), { users: 3, mismatches: 0, invalidHolds: 0 })
 })
