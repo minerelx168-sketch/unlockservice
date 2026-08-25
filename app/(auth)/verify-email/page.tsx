@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { VerifyEmailForm } from '@/components/auth-forms'
 import { Brand } from '@/components/brand'
-import { currentSession, emailVerificationRequired } from '@/lib/auth'
+import { emailVerificationRequired } from '@/lib/account-security'
+import { currentSession } from '@/lib/auth'
 
 export const metadata: Metadata = { title: 'Verify email' }
 export const dynamic = 'force-dynamic'
