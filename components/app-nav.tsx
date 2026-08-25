@@ -22,12 +22,21 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
   },
 ]
 
-export function AppNav() {
+export function AppNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname()
+  const sections = isAdmin
+    ? [
+        ...SECTIONS,
+        {
+          heading: 'Administration',
+          items: [{ href: '/admin', label: 'Control panel', icon: 'window' as IconName }],
+        },
+      ]
+    : SECTIONS
 
   return (
     <nav className="app-nav" aria-label="Workspace">
-      {SECTIONS.map((section) => (
+      {sections.map((section) => (
         <div key={section.heading}>
           <h5>{section.heading}</h5>
           {section.items.map((item) => (

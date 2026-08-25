@@ -20,7 +20,8 @@ transfer is written out in `docs/design-system.md` and rendered live at `/design
 app/layout.tsx              Root shell — theme guard, font preloads
 app/(marketing)/            Public pages: homepage, living style guide
 app/(auth)/                 Sign in, create account
-app/(app)/user/             The workspace: dashboard, unlock, orders, payments, invoice
+app/(app)/user/             The customer workspace: dashboard, unlock, orders, payments, invoice
+app/(app)/admin/            Server-protected administrator control panel
 app/api/orders/             Place an order; /status checks in on one the supplier accepted
 lib/db.ts                   SQLite schema, seeded with brands, carriers and device services
 lib/credits.ts              The escrow ledger: hold → charge / refund
@@ -28,7 +29,8 @@ lib/orders.ts               The order pipeline both endpoints call
 lib/catalog.ts              Brands, carriers and their prices and turnarounds
 lib/payments.ts             Invoices: numbers locked at creation, credited on confirmation
 lib/provider.ts             Supplier adapter + the mock that stands in for a real one
-lib/auth.ts                 Passwords, accounts, sessions, CSRF tokens
+lib/auth.ts                 Passwords, accounts, sessions, CSRF tokens, RBAC guards
+lib/admin.ts                Read models for the administrator control panel
 lib/account-security.ts     Optional email verification and password recovery
 lib/rate-limit.ts           Small SQLite-backed attempt windows
 lib/imei.ts                 Luhn validation, grouping, identifier masking (no DOM)
@@ -37,6 +39,7 @@ public/fonts/               Self-hosted Bricolage Grotesque + Instrument Sans (O
 docs/design-system.md       The written design system
 docs/reference/             The two source documents from the Cowork sessions
 deploy/                     Caddy site, systemd units, deploy and domain scripts
+scripts/promote-admin.mjs    Idempotently promotes an existing account; never handles its password
 ```
 
 Deploying is documented in [`deploy/README.md`](deploy/README.md) — including how the domain is
@@ -85,6 +88,12 @@ Top-ups need a confirmation that would normally come from an administrator. In d
 invoice page offers to stand in for one; in production that button only appears when
 `IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` is set. `IUNLOCKMOBILE_MAINTENANCE=1` pauses new orders.
 
+Administrator access is an explicit `account_type = 'admin'` role checked on the server. The
+`/admin` control panel never renders for a normal account. Create an account through `/register` so
+the owner sets the password directly, then promote that existing account with
+`npm run admin:promote -- <username-or-email>`. Promotion is idempotent and revokes existing
+sessions so the new role is loaded only after a fresh sign-in.
+
 ## Conventions
 
 - **Tokens are the only place a colour is written.** No component hard-codes a hex, and
@@ -127,7 +136,7 @@ Change it in those four places and the site follows.
 
 ## Not built yet
 
-Still open: the admin side (invoice approval, catalog and supplier management), emailing the result
+Still open: admin write operations (invoice approval, catalog and supplier management), emailing the result
 to the customer, the API portal and its DHRU-compatible surface, reseller accounts and credit
 transfer, the 7-day activity chart on the dashboard, server-side pagination in Orders, email change, and rate limiting on the order endpoint. There is also no background worker yet
 — an order only advances when someone opens it or the console polls it.

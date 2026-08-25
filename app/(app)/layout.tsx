@@ -36,7 +36,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           )}
         </div>
 
-        <AppNav />
+        <AppNav isAdmin={user.account_type === 'admin'} />
 
         <div style={{ marginTop: 'auto', display: 'grid', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
