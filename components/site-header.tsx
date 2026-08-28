@@ -24,7 +24,7 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const accountHref = isAuthenticated ? '/user/unlock' : '/login'
-  const accountLabel = isAuthenticated ? 'Workspace' : 'Sign in'
+  const accountLabel = isAuthenticated ? 'My account' : 'Sign in'
 
   return (
     <header className="site-header">

@@ -48,7 +48,7 @@ export function SiteFooter({ isAuthenticated = false }: { isAuthenticated?: bool
                 {column.links.map((link) => (
                   <li key={`${column.heading}-${link.label}`}>
                     <Link href={link.href === '/login' && isAuthenticated ? '/user/unlock' : link.href}>
-                      {link.href === '/login' && isAuthenticated ? 'Workspace' : link.label}
+                      {link.href === '/login' && isAuthenticated ? 'My account' : link.label}
                     </Link>
                   </li>
                 ))}
