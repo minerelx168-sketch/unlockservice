@@ -26,7 +26,7 @@ The backend keeps the original `unlockservice` architecture as its contract. The
 
 Registration remains an account operation in `lib/auth.ts`. When email verification is enabled, the account is created unverified and `lib/account-security.ts` sends a short-lived six-digit code. Verification creates the normal unlockservice session and redirects into the workspace. Password reset uses the same OTP storage and revokes all existing sessions after changing the password.
 
-The original production default remains safe: verification is enforced only when `IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION=1`, `RESEND_API_KEY`, and `IUNLOCKMOBILE_EMAIL_FROM` are configured. Existing accounts are marked verified by the additive migration so deployment cannot lock out prior users.
+The original production default remains safe: verification is enforced only when `IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION=1`, `RESEND_API_KEY`, and `IUNLOCKMOBILE_EMAIL_FROM` are configured. `IUNLOCKMOBILE_EMAIL_REPLY_TO` optionally routes replies from a transactional subdomain to the support mailbox without changing the sender domain. Existing accounts are marked verified by the additive migration so deployment cannot lock out prior users.
 
 ## Credit compatibility
 
