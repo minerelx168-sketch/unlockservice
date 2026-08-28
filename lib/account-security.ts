@@ -55,6 +55,7 @@ function requireEmailDelivery() {
 
 async function sendEmail(to: string, subject: string, html: string, text: string) {
   requireEmailDelivery()
+  const replyTo = process.env.IUNLOCKMOBILE_EMAIL_REPLY_TO?.trim()
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -64,6 +65,7 @@ async function sendEmail(to: string, subject: string, html: string, text: string
     body: JSON.stringify({
       from: process.env.IUNLOCKMOBILE_EMAIL_FROM,
       to: [to],
+      ...(replyTo ? { reply_to: replyTo } : {}),
       subject,
       html,
       text,

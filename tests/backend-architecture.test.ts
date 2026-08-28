@@ -186,6 +186,31 @@ test('verified accounts cannot use the verification endpoint as a passwordless l
   assert.throws(() => accountSecurity.verifyEmail('alice@example.test', '123456'), auth.AuthError)
 })
 
+test('security email uses the configured transactional sender and reply-to', async () => {
+  process.env.RESEND_API_KEY = 'test-key'
+  process.env.IUNLOCKMOBILE_EMAIL_FROM = 'iUnlockMobile <no-reply@auth.iunlockmobile.com>'
+  process.env.IUNLOCKMOBILE_EMAIL_REPLY_TO = 'support@iunlockmobile.com'
+
+  const originalFetch = globalThis.fetch
+  let payload: Record<string, unknown> | undefined
+  globalThis.fetch = async (_input, init) => {
+    payload = JSON.parse(String(init?.body)) as Record<string, unknown>
+    return new Response(JSON.stringify({ id: 'test-message' }), { status: 200 })
+  }
+
+  try {
+    await accountSecurity.requestPasswordReset('alice@example.test')
+    assert.equal(payload?.from, 'iUnlockMobile <no-reply@auth.iunlockmobile.com>')
+    assert.equal(payload?.reply_to, 'support@iunlockmobile.com')
+    assert.deepEqual(payload?.to, ['alice@example.test'])
+  } finally {
+    globalThis.fetch = originalFetch
+    delete process.env.RESEND_API_KEY
+    delete process.env.IUNLOCKMOBILE_EMAIL_FROM
+    delete process.env.IUNLOCKMOBILE_EMAIL_REPLY_TO
+  }
+})
+
 test('administrator access requires the explicit admin account type', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
   assert.equal(auth.hasAdminRole(user), false)
