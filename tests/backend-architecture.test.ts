@@ -126,6 +126,7 @@ let admin: typeof import('../lib/admin')
 let credits: typeof import('../lib/credits')
 let payments: typeof import('../lib/payments')
 let googleOAuth: typeof import('../lib/google-oauth')
+let imeiChecks: typeof import('../lib/imei-checks')
 let database: typeof import('../lib/db')
 
 before(async () => {
@@ -135,6 +136,7 @@ before(async () => {
   credits = await import('../lib/credits')
   payments = await import('../lib/payments')
   googleOAuth = await import('../lib/google-oauth')
+  imeiChecks = await import('../lib/imei-checks')
   database = await import('../lib/db')
 })
 
@@ -169,7 +171,12 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
     .all() as Array<{ version: string }>
   assert.deepEqual(
     migrations.map((row) => row.version),
-    ['2026-08-google-oauth-v1', '2026-08-imeihub-backend-v1', '2026-08-unlockservice-native-v2'],
+    [
+      '2026-08-google-oauth-v1',
+      '2026-08-imei-check-v1',
+      '2026-08-imeihub-backend-v1',
+      '2026-08-unlockservice-native-v2',
+    ],
   )
 })
 
@@ -310,6 +317,36 @@ test('Google OAuth creates protected authorization transactions and stable ident
     delete process.env.GOOGLE_CLIENT_SECRET
     delete process.env.GOOGLE_REDIRECT_URI
   }
+})
+
+test('free IMEI checks are repeatable, owner-scoped, and never touch credit', async () => {
+  const user = auth.authenticate('alice', 'correct-horse-battery-staple')
+  const before = credits.getBalance(user.id)
+
+  const first = await imeiChecks.createImeiCheck(user.id, { imei: '490154203237518' })
+  const repeat = await imeiChecks.createImeiCheck(user.id, { imei: '490154203237518' })
+  const replay = await imeiChecks.createImeiCheck(user.id, {
+    imei: '356938035643809',
+    idempotencyKey: 'free-check-replay',
+  })
+  const replayAgain = await imeiChecks.createImeiCheck(user.id, {
+    imei: '356938035643809',
+    idempotencyKey: 'free-check-replay',
+  })
+
+  assert.equal(first.status, 'completed')
+  assert.equal(first.result?.demo, true)
+  assert.equal(first.maskedImei, '49·········7518')
+  assert.equal('imei' in first, false)
+  assert.notEqual(first.id, repeat.id)
+  assert.equal(replay.id, replayAgain.id)
+  assert.equal(imeiChecks.getImeiCheck(2, first.id), undefined)
+  assert.equal(imeiChecks.listImeiChecks(user.id).length >= 3, true)
+  assert.deepEqual(credits.getBalance(user.id), before)
+  await assert.rejects(
+    imeiChecks.createImeiCheck(user.id, { imei: '123456789012345' }),
+    (error: unknown) => error instanceof imeiChecks.ImeiCheckError && error.code === 'imei_invalid',
+  )
 })
 
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {

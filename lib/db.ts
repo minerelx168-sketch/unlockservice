@@ -186,7 +186,25 @@ CREATE TABLE IF NOT EXISTS api_access (
 		  consumed_at   TEXT,
 		  created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
 		);
-		CREATE INDEX IF NOT EXISTS oauth_transactions_expiry ON oauth_transactions(expires_at);
+			CREATE INDEX IF NOT EXISTS oauth_transactions_expiry ON oauth_transactions(expires_at);
+
+			CREATE TABLE IF NOT EXISTS imei_checks (
+			  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+			  user_id           INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			  check_type        TEXT    NOT NULL DEFAULT 'basic',
+			  imei_fingerprint  TEXT    NOT NULL,
+			  masked_imei       TEXT    NOT NULL,
+			  status            TEXT    NOT NULL DEFAULT 'queued',
+			  provider          TEXT    NOT NULL DEFAULT 'local-validation',
+			  provider_check_id TEXT,
+			  idempotency_key   TEXT,
+			  result_json       TEXT,
+			  error_message     TEXT,
+			  created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
+			  updated_at        TEXT    NOT NULL DEFAULT (datetime('now'))
+			);
+			CREATE INDEX IF NOT EXISTS imei_checks_user ON imei_checks(user_id, created_at DESC);
+			CREATE INDEX IF NOT EXISTS imei_checks_fingerprint ON imei_checks(imei_fingerprint, created_at DESC);
 
 			CREATE TABLE IF NOT EXISTS schema_migrations (
 
@@ -346,15 +364,22 @@ function migrate(connection: Database.Database) {
         .run('2026-08-unlockservice-native-v2')
     }
 
-    if (!migrationApplied(connection, '2026-08-google-oauth-v1')) {
-      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-google-oauth-v1')
-    }
+	    if (!migrationApplied(connection, '2026-08-google-oauth-v1')) {
+	      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-google-oauth-v1')
+	    }
 
-    connection.exec(`
+	    if (!migrationApplied(connection, '2026-08-imei-check-v1')) {
+	      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-imei-check-v1')
+	    }
+
+	    connection.exec(`
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_idempotency
         ON invoices(idempotency_key) WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_provider_charge
         ON invoices(provider, provider_charge_id) WHERE provider_charge_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS imei_checks_idempotency
+        ON imei_checks(user_id, idempotency_key)
+        WHERE idempotency_key IS NOT NULL;
     `)
   })()
 }

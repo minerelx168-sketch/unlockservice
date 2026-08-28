@@ -9,7 +9,7 @@ import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
   { href: '/#check', label: 'Unlock Phone' },
-  { href: '/#services', label: 'Phone Check' },
+  { href: '/check', label: 'Phone Check' },
   { href: '/#how', label: 'How it works' },
   { href: '/#faq', label: 'FAQ' },
   { href: '/login', label: 'Order Tracking' },
