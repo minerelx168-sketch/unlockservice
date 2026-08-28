@@ -60,6 +60,20 @@ export function googleOAuthConfigured(): boolean {
   }
 }
 
+export function googleOAuthPublicUrl(path: string): URL {
+  if (!path.startsWith('/') || path.startsWith('//')) {
+    throw new AuthError('Google sign-in redirect is invalid.')
+  }
+
+  let publicOrigin: string
+  try {
+    publicOrigin = new URL(requiredConfig().redirectUri).origin
+  } catch {
+    throw new AuthError('Google sign-in is temporarily unavailable.')
+  }
+  return new URL(path, publicOrigin)
+}
+
 export function beginGoogleOAuth(): { authorizationUrl: string; transactionId: string } {
   const config = requiredConfig()
   const transactionId = randomBytes(24).toString('hex')
