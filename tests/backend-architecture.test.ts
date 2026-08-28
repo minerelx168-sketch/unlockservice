@@ -241,6 +241,12 @@ test('Google OAuth creates protected authorization transactions and stable ident
     assert.equal(authorization.searchParams.get('code_challenge_method'), 'S256')
     assert.ok(authorization.searchParams.get('state'))
     assert.ok(authorization.searchParams.get('nonce'))
+    assert.equal(googleOAuth.googleOAuthPublicUrl('/user/unlock').toString(), 'https://iunlockmobile.com/user/unlock')
+    assert.equal(
+      googleOAuth.googleOAuthPublicUrl('/login?oauth=failed').toString(),
+      'https://iunlockmobile.com/login?oauth=failed',
+    )
+    assert.throws(() => googleOAuth.googleOAuthPublicUrl('//malicious.example'), auth.AuthError)
 
     const transaction = database
       .db()
