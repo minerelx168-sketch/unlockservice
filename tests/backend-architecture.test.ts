@@ -125,6 +125,7 @@ let accountSecurity: typeof import('../lib/account-security')
 let admin: typeof import('../lib/admin')
 let credits: typeof import('../lib/credits')
 let payments: typeof import('../lib/payments')
+let googleOAuth: typeof import('../lib/google-oauth')
 let database: typeof import('../lib/db')
 
 before(async () => {
@@ -133,6 +134,7 @@ before(async () => {
   admin = await import('../lib/admin')
   credits = await import('../lib/credits')
   payments = await import('../lib/payments')
+  googleOAuth = await import('../lib/google-oauth')
   database = await import('../lib/db')
 })
 
@@ -167,7 +169,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
     .all() as Array<{ version: string }>
   assert.deepEqual(
     migrations.map((row) => row.version),
-    ['2026-08-imeihub-backend-v1', '2026-08-unlockservice-native-v2'],
+    ['2026-08-google-oauth-v1', '2026-08-imeihub-backend-v1', '2026-08-unlockservice-native-v2'],
   )
 })
 
@@ -224,6 +226,86 @@ test('administrator access requires the explicit admin account type', () => {
   assert.equal(admin.listAdminUsers().some((entry) => entry.id === user.id && entry.account_type === 'admin'), true)
 })
 
+test('Google OAuth creates protected authorization transactions and stable identity links', () => {
+  process.env.GOOGLE_CLIENT_ID = 'test-client.apps.googleusercontent.com'
+  process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret'
+  process.env.GOOGLE_REDIRECT_URI = 'https://iunlockmobile.com/auth/google/callback'
+
+  try {
+    const start = googleOAuth.beginGoogleOAuth()
+    const authorization = new URL(start.authorizationUrl)
+    assert.equal(authorization.origin, 'https://accounts.google.com')
+    assert.equal(authorization.searchParams.get('client_id'), process.env.GOOGLE_CLIENT_ID)
+    assert.equal(authorization.searchParams.get('redirect_uri'), process.env.GOOGLE_REDIRECT_URI)
+    assert.equal(authorization.searchParams.get('scope'), 'openid email profile')
+    assert.equal(authorization.searchParams.get('code_challenge_method'), 'S256')
+    assert.ok(authorization.searchParams.get('state'))
+    assert.ok(authorization.searchParams.get('nonce'))
+
+    const transaction = database
+      .db()
+      .prepare('SELECT state_hash, code_verifier, nonce, consumed_at FROM oauth_transactions WHERE id = ?')
+      .get(start.transactionId) as {
+      state_hash: string
+      code_verifier: string
+      nonce: string
+      consumed_at: string | null
+    }
+    assert.notEqual(transaction.state_hash, authorization.searchParams.get('state'))
+    assert.ok(transaction.code_verifier.length >= 43)
+    assert.equal(transaction.nonce, authorization.searchParams.get('nonce'))
+    assert.equal(transaction.consumed_at, null)
+
+    const alice = auth.authenticate('alice', 'correct-horse-battery-staple')
+    const linkedAlice = googleOAuth.linkGoogleIdentity({
+      subject: 'google-alice-subject',
+      email: 'alice@example.test',
+      emailVerified: true,
+    })
+    assert.equal(linkedAlice.id, alice.id)
+    assert.equal(linkedAlice.account_type, 'admin')
+
+    const googleUser = googleOAuth.linkGoogleIdentity({
+      subject: 'google-new-subject',
+      email: 'new.google.user@example.test',
+      emailVerified: true,
+    })
+    assert.equal(googleUser.email, 'new.google.user@example.test')
+    assert.equal(googleUser.account_type, 'customer')
+    assert.ok(googleUser.email_verified_at)
+    assert.equal(
+      googleOAuth.linkGoogleIdentity({
+        subject: 'google-new-subject',
+        email: 'new.google.user@example.test',
+        emailVerified: true,
+      }).id,
+      googleUser.id,
+    )
+    assert.throws(
+      () =>
+        googleOAuth.linkGoogleIdentity({
+          subject: 'different-google-subject',
+          email: 'new.google.user@example.test',
+          emailVerified: true,
+        }),
+      auth.AuthError,
+    )
+    assert.throws(
+      () =>
+        googleOAuth.linkGoogleIdentity({
+          subject: 'unverified-subject',
+          email: 'unverified@example.test',
+          emailVerified: false,
+        }),
+      auth.AuthError,
+    )
+  } finally {
+    delete process.env.GOOGLE_CLIENT_ID
+    delete process.env.GOOGLE_CLIENT_SECRET
+    delete process.env.GOOGLE_REDIRECT_URI
+  }
+})
+
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'crypto_networks', 2500)
@@ -267,5 +349,5 @@ test('escrow hold, refund and charge preserve the original balance contract', ()
     heldCents: 0,
     availableCents: 1300,
   })
-  assert.deepEqual(credits.creditIntegrity(), { users: 3, mismatches: 0, invalidHolds: 0 })
+  assert.deepEqual(credits.creditIntegrity(), { users: 4, mismatches: 0, invalidHolds: 0 })
 })

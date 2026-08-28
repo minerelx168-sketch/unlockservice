@@ -25,11 +25,43 @@ function Notice({ state }: { state: FormState }) {
   )
 }
 
-export function LoginForm({ resetComplete = false }: { resetComplete?: boolean }) {
+function GoogleAuthOption() {
+  return (
+    <>
+      <Link className="button button--quiet button--wide" href="/auth/google">
+        Continue with Google
+      </Link>
+      <div className="auth-divider" aria-hidden="true">
+        <span>or continue with email</span>
+      </div>
+    </>
+  )
+}
+
+const OAUTH_MESSAGES: Record<string, string> = {
+  cancelled: 'Google sign-in was cancelled.',
+  failed: 'Google sign-in could not be completed. Please try again.',
+  unavailable: 'Google sign-in is temporarily unavailable.',
+}
+
+export function LoginForm({
+  resetComplete = false,
+  oauthError,
+}: {
+  resetComplete?: boolean
+  oauthError?: string
+}) {
   const [state, action, pending] = useActionState(loginAction, EMPTY)
 
   return (
     <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
+      <GoogleAuthOption />
+      {oauthError && OAUTH_MESSAGES[oauthError] ? (
+        <p className="alert alert--error" role="alert">
+          <Icon name="info" strokeWidth={1.9} />
+          <span>{OAUTH_MESSAGES[oauthError]}</span>
+        </p>
+      ) : null}
       {resetComplete ? (
         <p className="alert alert--success" role="status">
           <Icon name="check" strokeWidth={1.9} />
@@ -63,6 +95,7 @@ export function RegisterForm() {
 
   return (
     <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
+      <GoogleAuthOption />
       <Notice state={state} />
       <div className="field">
         <label htmlFor="username">Username</label>

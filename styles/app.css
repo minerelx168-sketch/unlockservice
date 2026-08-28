@@ -392,12 +392,67 @@ table.grid td.num {
   color: var(--muted);
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.auth-divider span {
+  white-space: nowrap;
+}
+
 .auth-foot {
   margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid var(--line);
   font-size: 13.5px;
   color: var(--muted);
+}
+
+.legal-card {
+  max-width: 760px;
+}
+
+.legal-card > .legal-meta {
+  margin-bottom: 26px;
+}
+
+.legal-card section + section {
+  margin-top: 24px;
+}
+
+.legal-card h2 {
+  margin-bottom: 8px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.legal-card section p,
+.legal-card .legal-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.legal-card .legal-note {
+  margin-top: 28px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-subtle);
 }
 
 /* ---- service picker -------------------------------------------------- */

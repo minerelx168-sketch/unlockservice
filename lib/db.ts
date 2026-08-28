@@ -156,15 +156,40 @@ CREATE TABLE IF NOT EXISTS api_access (
 	  ON email_verifications(user_id, purpose, consumed_at, id DESC);
 	CREATE INDEX IF NOT EXISTS email_verifications_expiry ON email_verifications(expires_at);
 
-	CREATE TABLE IF NOT EXISTS auth_rate_limits (
-	  bucket       TEXT NOT NULL,
-	  subject_hash TEXT NOT NULL,
-	  window_start TEXT NOT NULL,
-	  attempts     INTEGER NOT NULL DEFAULT 0,
-	  PRIMARY KEY (bucket, subject_hash)
-			);
+			CREATE TABLE IF NOT EXISTS auth_rate_limits (
+		  bucket       TEXT NOT NULL,
+		  subject_hash TEXT NOT NULL,
+		  window_start TEXT NOT NULL,
+		  attempts     INTEGER NOT NULL DEFAULT 0,
+		  PRIMARY KEY (bucket, subject_hash)
+				);
 
-		CREATE TABLE IF NOT EXISTS schema_migrations (
+		CREATE TABLE IF NOT EXISTS oauth_accounts (
+		  provider         TEXT    NOT NULL,
+		  provider_subject TEXT    NOT NULL,
+		  user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		  provider_email   TEXT,
+		  created_at       TEXT    NOT NULL DEFAULT (datetime('now')),
+		  updated_at       TEXT    NOT NULL DEFAULT (datetime('now')),
+		  PRIMARY KEY (provider, provider_subject),
+		  UNIQUE (provider, user_id)
+		);
+		CREATE INDEX IF NOT EXISTS oauth_accounts_user ON oauth_accounts(user_id);
+
+		CREATE TABLE IF NOT EXISTS oauth_transactions (
+		  id            TEXT    PRIMARY KEY,
+		  provider      TEXT    NOT NULL,
+		  state_hash    TEXT    NOT NULL,
+		  code_verifier TEXT    NOT NULL,
+		  nonce         TEXT    NOT NULL,
+		  expires_at    TEXT    NOT NULL,
+		  consumed_at   TEXT,
+		  created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+		);
+		CREATE INDEX IF NOT EXISTS oauth_transactions_expiry ON oauth_transactions(expires_at);
+
+			CREATE TABLE IF NOT EXISTS schema_migrations (
+
 	  version    TEXT PRIMARY KEY,
 	  applied_at TEXT NOT NULL DEFAULT (datetime('now'))
 	);
@@ -319,6 +344,10 @@ function migrate(connection: Database.Database) {
       connection
         .prepare('INSERT INTO schema_migrations(version) VALUES (?)')
         .run('2026-08-unlockservice-native-v2')
+    }
+
+    if (!migrationApplied(connection, '2026-08-google-oauth-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-google-oauth-v1')
     }
 
     connection.exec(`
