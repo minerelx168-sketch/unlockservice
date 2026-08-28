@@ -20,9 +20,11 @@ const NAV = [
  * furthest right. Below 940px the nav becomes a panel and the buttons
  * step aside — see the media queries in components.css.
  */
-export function SiteHeader() {
+export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const accountHref = isAuthenticated ? '/user/unlock' : '/login'
+  const accountLabel = isAuthenticated ? 'Workspace' : 'Sign in'
 
   return (
     <header className="site-header">
@@ -35,16 +37,19 @@ export function SiteHeader() {
           aria-label="Primary"
           data-open={open ? 'true' : 'false'}
         >
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={item.href === pathname ? 'page' : undefined}
-              onClick={() => setOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV.map((item) => {
+            const href = item.label === 'Order Tracking' && isAuthenticated ? '/user/orders' : item.href
+            return (
+              <Link
+                key={item.label}
+                href={href}
+                aria-current={href === pathname ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
           <Link className="nav-cta" href="/#check" onClick={() => setOpen(false)}>
             Unlock a phone
           </Link>
@@ -52,8 +57,8 @@ export function SiteHeader() {
 
         <div className="header-actions">
           <ThemeToggle />
-          <Link className="button button--quiet" href="/login">
-            Sign in
+          <Link className="button button--quiet" href={accountHref}>
+            {accountLabel}
           </Link>
           <Link className="button button--primary" href="/#check">
             <Icon name="bolt" strokeWidth={1.9} />

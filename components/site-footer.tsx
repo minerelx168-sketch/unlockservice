@@ -28,7 +28,7 @@ const COLUMNS = [
   },
 ]
 
-export function SiteFooter() {
+export function SiteFooter({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   return (
     <footer className="site-footer">
       <div className="shell">
@@ -47,7 +47,9 @@ export function SiteFooter() {
               <ul className="footer-links">
                 {column.links.map((link) => (
                   <li key={`${column.heading}-${link.label}`}>
-                    <Link href={link.href}>{link.label}</Link>
+                    <Link href={link.href === '/login' && isAuthenticated ? '/user/unlock' : link.href}>
+                      {link.href === '/login' && isAuthenticated ? 'Workspace' : link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
