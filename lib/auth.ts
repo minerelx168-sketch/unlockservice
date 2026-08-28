@@ -93,13 +93,10 @@ export function authenticate(identity: string, password: string): User {
   if (!row || !verifyPassword(password, row.password_hash)) {
     throw new AuthError('Those details do not match an account.')
   }
-  if (row.email_verified_at === null) {
-    throw new AuthError('Please verify your email first. You can request a new code from the verification page.')
-  }
-  if (row.status !== 'active' || row.banned_at) throw new AuthError('This account is paused. Contact support.')
-
+  const user = getUser(row.id)!
+  assertSignInAllowed(user)
   clearAttempts('login', key || 'empty')
-  return getUser(row.id)!
+  return user
 }
 
 export function getUser(id: number): User | undefined {
@@ -110,6 +107,14 @@ export function getUser(id: number): User | undefined {
          FROM users WHERE id = ?`,
     )
     .get(id) as User | undefined
+}
+
+export function assertSignInAllowed(user: User): User {
+  if (user.email_verified_at === null) {
+    throw new AuthError('Please verify your email first. You can request a new code from the verification page.')
+  }
+  if (user.status !== 'active' || user.banned_at) throw new AuthError('This account is paused. Contact support.')
+  return user
 }
 
 export function hasAdminRole(user: Pick<User, 'account_type'>): boolean {
@@ -134,15 +139,19 @@ export function destroySession(id: string) {
   db().prepare('DELETE FROM sessions WHERE id = ?').run(id)
 }
 
-export async function setSessionCookie(session: Session) {
-  const jar = await cookies()
-  jar.set(SESSION_COOKIE, session.id, {
+export function sessionCookieOptions() {
+  return {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'lax' as const,
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     maxAge: SESSION_DAYS * 86_400,
-  })
+  }
+}
+
+export async function setSessionCookie(session: Session) {
+  const jar = await cookies()
+  jar.set(SESSION_COOKIE, session.id, sessionCookieOptions())
 }
 
 export async function clearSessionCookie() {
