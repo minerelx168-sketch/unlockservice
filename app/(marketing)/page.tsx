@@ -28,7 +28,7 @@ const SERVICES: Array<{
     tint: ' icon-tile--accent',
     title: 'Check your phone',
     body: 'Not sure which carrier the phone is locked to? Run a carrier, blacklist or device-status check before placing the unlock order.',
-    action: { href: '/register', label: 'Run a phone check' },
+    action: { href: '/check', label: 'Run a phone check' },
   },
   {
     icon: 'search',
