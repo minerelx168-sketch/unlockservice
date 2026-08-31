@@ -8,7 +8,9 @@ import {
 } from './db'
 import { charge, getBalance, hold, InsufficientCredit, refund } from './credits'
 import { IMEI_LENGTH, luhnValid, normalizeImei } from './imei'
-import { activeSupplier, maintenanceState, type UnlockRequest } from './provider'
+import { activeSupplier, maintenanceState, type SupplierResult, type UnlockRequest } from './provider'
+import { providerConfiguration, unlockProviderService } from './provider-api'
+import { recordProviderEvent } from './provider-events'
 
 /**
  * The order pipeline.
@@ -46,6 +48,12 @@ export type Order = {
   source: string
   provider_order_id: string | null
   provider_ready_at: string | null
+  provider_name: string | null
+  provider_mode: string | null
+  provider_service_id: string | null
+  provider_last_polled_at: string | null
+  provider_attempts: number
+  provider_error_code: string | null
   error_message: string | null
   created_at: string
   updated_at: string
@@ -165,8 +173,57 @@ function requestFor(order: OrderView, brand: BrandRow): UnlockRequest {
     brand: brand.name,
     carrier: order.carrier_name ?? undefined,
     service: order.title,
+    mappingKey:
+      order.kind === 'carrier_unlock'
+        ? `carrier:${order.carrier_id!}`
+        : `service:${order.service_id!}`,
     delivery: order.delivery,
   }
+}
+
+function persistProviderOutcome(order: OrderView, result: SupplierResult, polled: boolean) {
+  if (!result.provider) return
+  db()
+    .prepare(
+      `UPDATE orders
+          SET provider_name = ?, provider_mode = ?, provider_service_id = ?,
+              provider_error_code = ?, provider_attempts = provider_attempts + 1,
+              provider_last_polled_at = CASE WHEN ? = 1 THEN datetime('now') ELSE provider_last_polled_at END,
+              updated_at = datetime('now')
+        WHERE id = ? AND status = 'processing'`,
+    )
+    .run(
+      result.provider.name,
+      result.provider.mode,
+      result.provider.serviceId,
+      result.provider.errorCode ?? null,
+      polled ? 1 : 0,
+      order.id,
+    )
+
+  const eventType =
+    result.status === 'delivered'
+      ? 'completed'
+      : result.status === 'accepted'
+        ? 'processing'
+        : 'unavailable'
+  recordProviderEvent({
+    resourceType: 'order',
+    resourceId: order.id,
+    provider: result.provider.name,
+    providerMode: result.provider.mode,
+    eventType,
+    idempotencyKey: `${polled ? 'poll' : 'submit'}:${result.orderId ?? order.id}:${eventType}`,
+    durationMs: result.provider.durationMs,
+    errorCode: result.provider.errorCode,
+    metadata: { status: result.status, serviceId: result.provider.serviceId },
+  })
+}
+
+function providerPollDebounced(order: OrderView) {
+  if (!order.provider_last_polled_at) return false
+  const timestamp = Date.parse(`${order.provider_last_polled_at}Z`)
+  return Number.isFinite(timestamp) && Date.now() - timestamp < 5_000
 }
 
 export type SubmitInput = {
@@ -247,7 +304,19 @@ export async function submitOrder(
     throw error
   }
 
-  const order = getOrder(orderId, userId)!
+  let order = getOrder(orderId, userId)!
+  const config = providerConfiguration()
+  const mapping = unlockProviderService(requestFor(order, brand).mappingKey)
+  if (config.enabled && mapping) {
+    db()
+      .prepare(
+        `UPDATE orders
+            SET provider_name = ?, provider_mode = ?, provider_service_id = ?, updated_at = datetime('now')
+          WHERE id = ? AND status = 'processing'`,
+      )
+      .run(config.name, mapping.mode, mapping.id, orderId)
+    order = getOrder(orderId, userId)!
+  }
   const supplier = activeSupplier()
   let result
   try {
@@ -255,6 +324,8 @@ export async function submitOrder(
   } catch {
     result = { status: 'unavailable' as const, orderId: null, message: 'The supplier could not be reached.' }
   }
+
+  persistProviderOutcome(order, result, false)
 
   if (result.status === 'unavailable') {
     return settleUnavailable(orderId, userId, result.message, before.availableCents)
@@ -299,7 +370,7 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
   if (order.status !== 'processing') return payload(order, resting)
 
   const readyAt = order.provider_ready_at ? new Date(order.provider_ready_at).getTime() : 0
-  if (Date.now() < readyAt) return payload(order, resting)
+  if (Date.now() < readyAt || providerPollDebounced(order)) return payload(order, resting)
 
   const brand = order.brand_id ? getBrand(order.brand_id) : undefined
   if (!brand) return payload(order, resting)
@@ -309,8 +380,30 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
   try {
     result = await supplier.poll(order.provider_order_id ?? '', requestFor(order, brand))
   } catch {
+    if (order.provider_name) {
+      db()
+        .prepare(
+          `UPDATE orders
+              SET provider_attempts = provider_attempts + 1,
+                  provider_last_polled_at = datetime('now'),
+                  provider_error_code = 'poll_exception', updated_at = datetime('now')
+            WHERE id = ? AND status = 'processing'`,
+        )
+        .run(order.id)
+      recordProviderEvent({
+        resourceType: 'order',
+        resourceId: order.id,
+        provider: order.provider_name,
+        providerMode: order.provider_mode ?? 'unknown',
+        eventType: 'poll_error',
+        idempotencyKey: `poll-error:${order.provider_attempts + 1}`,
+        errorCode: 'poll_exception',
+      })
+    }
     return payload(order, resting)
   }
+
+  persistProviderOutcome(order, result, true)
 
   if (result.status === 'delivered') {
     return settleDelivered(order.id, userId, result.orderId, result.unlockCode, result.result)
@@ -318,7 +411,16 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
   if (result.status === 'unavailable') {
     return settleUnavailable(order.id, userId, result.message, balance.availableCents)
   }
-  return payload(order, resting)
+  if (result.provider) {
+    const readyAt = new Date(Date.now() + result.readyInMs).toISOString()
+    db()
+      .prepare(
+        `UPDATE orders SET provider_ready_at = ?, updated_at = datetime('now')
+          WHERE id = ? AND status = 'processing'`,
+      )
+      .run(readyAt, order.id)
+  }
+  return payload(getOrder(order.id, userId)!, resting)
 }
 
 function settleDelivered(

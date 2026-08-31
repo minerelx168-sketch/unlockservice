@@ -1,13 +1,19 @@
 import { randomUUID } from 'node:crypto'
+import {
+  pollProviderRequest,
+  providerConfiguration,
+  submitProviderRequest,
+  unlockProviderService,
+} from './provider-api'
 
 /**
  * Supplier adapter.
  *
- * A real unlock goes out to a carrier or manufacturer database and comes
- * back hours later — never in the same request. Nothing here talks to a
- * real supplier; a mock stands in behind the same interface so the whole
- * flow, ledger included, can be exercised. Swapping in a real supplier is
- * this one module.
+ * The application owns order, escrow, and delivery semantics. A supplier only
+ * accepts a normalized request and returns an accepted, delivered, or
+ * unavailable outcome. The configured adapter supports synchronous provider
+ * APIs and asynchronous DHRU placement/polling without leaking those protocols
+ * into the order service.
  */
 
 export type UnlockRequest = {
@@ -16,13 +22,29 @@ export type UnlockRequest = {
   /** Absent for a device service that does not depend on a network. */
   carrier?: string
   service: string
+  /** Stable internal catalog key used to resolve an operator-approved mapping. */
+  mappingKey: `carrier:${number}` | `service:${number}`
   delivery: 'remote' | 'code'
 }
 
+export type SupplierProviderMeta = {
+  name: string
+  mode: 'sync' | 'dhru'
+  serviceId: string
+  durationMs: number
+  errorCode?: string
+}
+
 export type SupplierResult =
-  | { status: 'accepted'; orderId: string; readyInMs: number }
-  | { status: 'delivered'; orderId: string; unlockCode: string | null; result: Record<string, unknown> }
-  | { status: 'unavailable'; orderId: string | null; message: string }
+  | { status: 'accepted'; orderId: string; readyInMs: number; provider?: SupplierProviderMeta }
+  | {
+      status: 'delivered'
+      orderId: string
+      unlockCode: string | null
+      result: Record<string, unknown>
+      provider?: SupplierProviderMeta
+    }
+  | { status: 'unavailable'; orderId: string | null; message: string; provider?: SupplierProviderMeta }
 
 export interface Supplier {
   readonly name: string
@@ -47,7 +69,7 @@ function refusedByCarrier(imei: string): boolean {
   return imei.trim().slice(-1) === '0'
 }
 
-function unlockCode(imei: string): string {
+function mockUnlockCode(imei: string): string {
   let seed = 0
   for (const char of imei) seed = (seed * 31 + char.charCodeAt(0)) % 100_000_000
   return String(seed).padStart(8, '0')
@@ -78,7 +100,7 @@ export const mockSupplier: Supplier = {
     return {
       status: 'delivered',
       orderId,
-      unlockCode: remote ? null : unlockCode(request.imei),
+      unlockCode: remote ? null : mockUnlockCode(request.imei),
       result: {
         source: 'mock-supplier',
         note: 'Sample result. Connect a real supplier to return live authorisations.',
@@ -96,8 +118,90 @@ export const mockSupplier: Supplier = {
   },
 }
 
+function unlockCodeFrom(data: Record<string, unknown>) {
+  const aliases = ['unlockCode', 'unlock_code', 'Unlock Code', 'UNLOCKCODE', 'code', 'CODE']
+  for (const alias of aliases) {
+    const value = data[alias]
+    if (typeof value === 'string' && value.trim()) return value.trim().slice(0, 256)
+    if (typeof value === 'number') return String(value)
+  }
+  return null
+}
+
+const configuredSupplier: Supplier = {
+  get name() {
+    return providerConfiguration().name
+  },
+
+  async submit(request) {
+    const service = unlockProviderService(request.mappingKey)
+    if (!service) {
+      return {
+        status: 'unavailable',
+        orderId: null,
+        message: 'This service is not mapped to an active supplier.',
+      }
+    }
+
+    const outcome = await submitProviderRequest({ imei: request.imei, service })
+    const provider = {
+      name: providerConfiguration().name,
+      mode: service.mode,
+      serviceId: service.id,
+      durationMs: outcome.timing.totalMs,
+      ...(outcome.status === 'unavailable' ? { errorCode: outcome.code } : {}),
+    }
+    if (outcome.status === 'processing') {
+      return { status: 'accepted', orderId: outcome.providerId, readyInMs: outcome.retryAfterMs, provider }
+    }
+    if (outcome.status === 'completed') {
+      return {
+        status: 'delivered',
+        orderId: outcome.providerId ?? `sync_${randomUUID()}`,
+        unlockCode: request.delivery === 'code' ? unlockCodeFrom(outcome.data) : null,
+        result: { source: providerConfiguration().name, ...outcome.data },
+        provider,
+      }
+    }
+    return { status: 'unavailable', orderId: outcome.providerId, message: outcome.message, provider }
+  },
+
+  async poll(orderId, request) {
+    const service = unlockProviderService(request.mappingKey)
+    if (!service) {
+      return { status: 'unavailable', orderId, message: 'This service is no longer mapped to an active supplier.' }
+    }
+    const outcome = await pollProviderRequest(orderId)
+    const provider = {
+      name: providerConfiguration().name,
+      mode: service.mode,
+      serviceId: service.id,
+      durationMs: outcome.timing.totalMs,
+      ...(outcome.status === 'unavailable' ? { errorCode: outcome.code } : {}),
+    }
+    if (outcome.status === 'processing') {
+      return { status: 'accepted', orderId: outcome.providerId, readyInMs: outcome.retryAfterMs, provider }
+    }
+    if (outcome.status === 'completed') {
+      return {
+        status: 'delivered',
+        orderId: outcome.providerId ?? orderId,
+        unlockCode: request.delivery === 'code' ? unlockCodeFrom(outcome.data) : null,
+        result: { source: providerConfiguration().name, ...outcome.data },
+        provider,
+      }
+    }
+    return {
+      status: 'unavailable',
+      orderId: outcome.providerId ?? orderId,
+      message: outcome.message,
+      provider,
+    }
+  },
+}
+
 export function activeSupplier(): Supplier {
-  return mockSupplier
+  return providerConfiguration().enabled ? configuredSupplier : mockSupplier
 }
 
 /**

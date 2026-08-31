@@ -88,10 +88,16 @@ CREATE TABLE IF NOT EXISTS orders (
   price_cents       INTEGER NOT NULL,
   eta_hours         INTEGER NOT NULL,
   source            TEXT    NOT NULL DEFAULT 'website',
-  provider_order_id TEXT,
+  provider_order_id      TEXT,
   -- Mock supplier only: when the order becomes resolvable.
-  provider_ready_at TEXT,
-  error_message     TEXT,
+  provider_ready_at      TEXT,
+  provider_name          TEXT,
+  provider_mode          TEXT,
+  provider_service_id    TEXT,
+  provider_last_polled_at TEXT,
+  provider_attempts      INTEGER NOT NULL DEFAULT 0,
+  provider_error_code    TEXT,
+  error_message          TEXT,
   created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at        TEXT    NOT NULL DEFAULT (datetime('now'))
 );
@@ -188,25 +194,47 @@ CREATE TABLE IF NOT EXISTS api_access (
 		);
 			CREATE INDEX IF NOT EXISTS oauth_transactions_expiry ON oauth_transactions(expires_at);
 
-			CREATE TABLE IF NOT EXISTS imei_checks (
-			  id                INTEGER PRIMARY KEY AUTOINCREMENT,
-			  user_id           INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-			  check_type        TEXT    NOT NULL DEFAULT 'basic',
-			  imei_fingerprint  TEXT    NOT NULL,
-			  masked_imei       TEXT    NOT NULL,
-			  status            TEXT    NOT NULL DEFAULT 'queued',
-			  provider          TEXT    NOT NULL DEFAULT 'local-validation',
-			  provider_check_id TEXT,
-			  idempotency_key   TEXT,
-			  result_json       TEXT,
-			  error_message     TEXT,
-			  created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
-			  updated_at        TEXT    NOT NULL DEFAULT (datetime('now'))
-			);
-			CREATE INDEX IF NOT EXISTS imei_checks_user ON imei_checks(user_id, created_at DESC);
-			CREATE INDEX IF NOT EXISTS imei_checks_fingerprint ON imei_checks(imei_fingerprint, created_at DESC);
+		CREATE TABLE IF NOT EXISTS imei_checks (
+		  id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+		  user_id                 INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		  check_type              TEXT    NOT NULL DEFAULT 'basic',
+		  imei_fingerprint        TEXT    NOT NULL,
+		  masked_imei             TEXT    NOT NULL,
+		  status                  TEXT    NOT NULL DEFAULT 'queued',
+		  provider                TEXT    NOT NULL DEFAULT 'local-validation',
+		  provider_check_id       TEXT,
+		  provider_mode           TEXT,
+		  provider_service_id     TEXT,
+		  provider_last_polled_at TEXT,
+		  provider_attempts       INTEGER NOT NULL DEFAULT 0,
+		  provider_error_code     TEXT,
+		  idempotency_key         TEXT,
+		  result_json             TEXT,
+		  error_message           TEXT,
+		  created_at              TEXT    NOT NULL DEFAULT (datetime('now')),
+		  updated_at              TEXT    NOT NULL DEFAULT (datetime('now'))
+		);
+		CREATE INDEX IF NOT EXISTS imei_checks_user ON imei_checks(user_id, created_at DESC);
+		CREATE INDEX IF NOT EXISTS imei_checks_fingerprint ON imei_checks(imei_fingerprint, created_at DESC);
 
-			CREATE TABLE IF NOT EXISTS schema_migrations (
+				CREATE TABLE IF NOT EXISTS provider_events (
+				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+				  resource_type   TEXT    NOT NULL,
+				  resource_id     INTEGER NOT NULL,
+				  provider        TEXT    NOT NULL,
+				  provider_mode   TEXT    NOT NULL,
+				  event_type      TEXT    NOT NULL,
+				  idempotency_key TEXT,
+				  status_code     INTEGER,
+				  duration_ms     INTEGER,
+				  error_code      TEXT,
+				  metadata_json   TEXT,
+				  created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+				);
+				CREATE INDEX IF NOT EXISTS provider_events_resource
+				  ON provider_events(resource_type, resource_id, created_at DESC);
+
+				CREATE TABLE IF NOT EXISTS schema_migrations (
 
 	  version    TEXT PRIMARY KEY,
 	  applied_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -266,8 +294,20 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'invoices', 'idempotency_key TEXT')
     addColumn(connection, 'invoices', 'paid_at TEXT')
     addColumn(connection, 'invoices', 'credited_at TEXT')
+    addColumn(connection, 'orders', 'provider_name TEXT')
+    addColumn(connection, 'orders', 'provider_mode TEXT')
+    addColumn(connection, 'orders', 'provider_service_id TEXT')
+    addColumn(connection, 'orders', 'provider_last_polled_at TEXT')
+    addColumn(connection, 'orders', 'provider_attempts INTEGER NOT NULL DEFAULT 0')
+    addColumn(connection, 'orders', 'provider_error_code TEXT')
+    addColumn(connection, 'imei_checks', 'provider_mode TEXT')
+    addColumn(connection, 'imei_checks', 'provider_service_id TEXT')
+    addColumn(connection, 'imei_checks', 'provider_last_polled_at TEXT')
+    addColumn(connection, 'imei_checks', 'provider_attempts INTEGER NOT NULL DEFAULT 0')
+    addColumn(connection, 'imei_checks', 'provider_error_code TEXT')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
+
       connection
         .prepare(
           `UPDATE users
@@ -364,21 +404,28 @@ function migrate(connection: Database.Database) {
         .run('2026-08-unlockservice-native-v2')
     }
 
-	    if (!migrationApplied(connection, '2026-08-google-oauth-v1')) {
-	      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-google-oauth-v1')
-	    }
+    if (!migrationApplied(connection, '2026-08-google-oauth-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-google-oauth-v1')
+    }
 
-	    if (!migrationApplied(connection, '2026-08-imei-check-v1')) {
-	      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-imei-check-v1')
-	    }
+    if (!migrationApplied(connection, '2026-08-imei-check-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-imei-check-v1')
+    }
 
-	    connection.exec(`
+    if (!migrationApplied(connection, '2026-08-provider-architecture-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-provider-architecture-v1')
+    }
+
+    connection.exec(`
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_idempotency
         ON invoices(idempotency_key) WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_provider_charge
         ON invoices(provider, provider_charge_id) WHERE provider_charge_id IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS imei_checks_idempotency
         ON imei_checks(user_id, idempotency_key)
+        WHERE idempotency_key IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS provider_events_idempotency
+        ON provider_events(resource_type, resource_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
     `)
   })()
