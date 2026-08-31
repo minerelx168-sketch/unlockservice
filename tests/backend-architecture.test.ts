@@ -127,6 +127,9 @@ let credits: typeof import('../lib/credits')
 let payments: typeof import('../lib/payments')
 let googleOAuth: typeof import('../lib/google-oauth')
 let imeiChecks: typeof import('../lib/imei-checks')
+let orders: typeof import('../lib/orders')
+let providerApi: typeof import('../lib/provider-api')
+let providerJobs: typeof import('../lib/provider-jobs')
 let database: typeof import('../lib/db')
 
 before(async () => {
@@ -137,6 +140,9 @@ before(async () => {
   payments = await import('../lib/payments')
   googleOAuth = await import('../lib/google-oauth')
   imeiChecks = await import('../lib/imei-checks')
+  orders = await import('../lib/orders')
+  providerApi = await import('../lib/provider-api')
+  providerJobs = await import('../lib/provider-jobs')
   database = await import('../lib/db')
 })
 
@@ -175,7 +181,24 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-google-oauth-v1',
       '2026-08-imei-check-v1',
       '2026-08-imeihub-backend-v1',
+      '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
+    ],
+  )
+
+  const providerColumns = database
+    .db()
+    .prepare("SELECT name FROM pragma_table_info('imei_checks') WHERE name LIKE 'provider_%' ORDER BY name")
+    .all() as Array<{ name: string }>
+  assert.deepEqual(
+    providerColumns.map((row) => row.name),
+    [
+      'provider_attempts',
+      'provider_check_id',
+      'provider_error_code',
+      'provider_last_polled_at',
+      'provider_mode',
+      'provider_service_id',
     ],
   )
 })
@@ -347,6 +370,167 @@ test('free IMEI checks are repeatable, owner-scoped, and never touch credit', as
     imeiChecks.createImeiCheck(user.id, { imei: '123456789012345' }),
     (error: unknown) => error instanceof imeiChecks.ImeiCheckError && error.code === 'imei_invalid',
   )
+})
+
+test('provider adapters normalize sync and DHRU flows without leaking secrets or bypassing credit invariants', async () => {
+  const originalFetch = globalThis.fetch
+  const saved = {
+    mode: process.env.IUNLOCKMOBILE_PROVIDER_MODE,
+    name: process.env.IUNLOCKMOBILE_PROVIDER_NAME,
+    url: process.env.IUNLOCKMOBILE_PROVIDER_URL,
+    apiKey: process.env.IUNLOCKMOBILE_PROVIDER_API_KEY,
+    dhruKey: process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY,
+    username: process.env.IUNLOCKMOBILE_PROVIDER_USERNAME,
+    unlockMap: process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP,
+    imeiMap: process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP,
+    maintenance: process.env.IUNLOCKMOBILE_MAINTENANCE,
+  }
+
+  try {
+    process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'enabled'
+    process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'unlock-service'
+    process.env.IUNLOCKMOBILE_PROVIDER_URL = 'https://provider.example/api'
+    process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = 'sync-secret-key'
+    process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
+      'check:basic': { id: '343', mode: 'sync' },
+    })
+
+    globalThis.fetch = async (input) => {
+      const url = new URL(String(input))
+      assert.equal(url.origin, 'https://provider.example')
+      assert.equal(url.searchParams.get('key'), 'sync-secret-key')
+      return new Response(
+        JSON.stringify({ status: true, response: '', object: { Brand: 'Apple', Model: 'iPhone' } }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      )
+    }
+
+    const alice = auth.authenticate('alice', 'correct-horse-battery-staple')
+    const aliceCredit = credits.getBalance(alice.id)
+    const syncCheck = await imeiChecks.createImeiCheck(alice.id, {
+      imei: '490154203237518',
+      idempotencyKey: 'provider-sync-check',
+    })
+    assert.equal(syncCheck.status, 'completed')
+    assert.equal(syncCheck.provider, 'unlock-service')
+    assert.equal(syncCheck.result?.Brand, 'Apple')
+    assert.deepEqual(credits.getBalance(alice.id), aliceCredit)
+
+    process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'dhru'
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = 'dhru-secret-key'
+    process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = 'provider-user'
+    process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
+      'check:basic': { id: '900', mode: 'dhru' },
+    })
+    process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP = JSON.stringify({
+      'carrier:103': { id: '901', mode: 'dhru' },
+    })
+    process.env.IUNLOCKMOBILE_MAINTENANCE = '0'
+
+    let checkPlaced = false
+    let orderPlaced = false
+    globalThis.fetch = async (input) => {
+      const url = new URL(String(input))
+      assert.equal(url.searchParams.get('apiaccesskey'), 'dhru-secret-key')
+      const action = url.searchParams.get('action')
+      if (action === 'placeimeiorder' && url.searchParams.get('service') === '900') {
+        checkPlaced = true
+        return new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'dhru-check-1' }] }), { status: 200 })
+      }
+      if (action === 'placeimeiorder' && url.searchParams.get('service') === '901') {
+        orderPlaced = true
+        return new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'dhru-order-1' }] }), { status: 200 })
+      }
+      if (action === 'getimeiorder' && url.searchParams.get('id') === 'dhru-check-1') {
+        return new Response(
+          JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Brand: Apple\\nModel: iPhone 14' }] }),
+          { status: 200 },
+        )
+      }
+      if (action === 'getimeiorder' && url.searchParams.get('id') === 'dhru-order-1') {
+        return new Response(
+          JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Status: Unlocked\\nPermanent: Yes' }] }),
+          { status: 200 },
+        )
+      }
+      return new Response(JSON.stringify({ ERROR: [{ MESSAGE: 'unexpected request' }] }), { status: 400 })
+    }
+
+    const asyncCheck = await imeiChecks.createImeiCheck(alice.id, {
+      imei: '356938035643809',
+      idempotencyKey: 'provider-dhru-check',
+    })
+    assert.equal(checkPlaced, true)
+    assert.equal(asyncCheck.status, 'processing')
+    database
+      .db()
+      .prepare("UPDATE imei_checks SET provider_last_polled_at = datetime('now', '-1 minute') WHERE id = ?")
+      .run(asyncCheck.id)
+    const finishedCheck = await imeiChecks.pollImeiCheck(alice.id, asyncCheck.id)
+    assert.equal(finishedCheck.status, 'completed')
+    assert.equal(finishedCheck.result?.Brand, 'Apple')
+    assert.deepEqual(credits.getBalance(alice.id), aliceCredit)
+
+    const legacyBefore = credits.getBalance(1)
+    const order = await orders.submitOrder(1, {
+      kind: 'carrier_unlock',
+      brandId: 1,
+      carrierId: 103,
+      imei: '490154203237518',
+      email: 'legacy@example.test',
+    })
+    assert.equal(orderPlaced, true)
+    assert.equal(order.status, 'processing')
+    assert.equal(credits.getBalance(1).heldCents, legacyBefore.heldCents + order.priceCents)
+    database
+      .db()
+      .prepare(
+        "UPDATE orders SET provider_ready_at = datetime('now', '-1 minute'), provider_last_polled_at = datetime('now', '-1 minute') WHERE id = ?",
+      )
+      .run(order.orderId)
+    const delivered = await orders.pollOrder(1, order.orderId)
+    assert.equal(delivered.status, 'delivered')
+    assert.equal(credits.getBalance(1).heldCents, legacyBefore.heldCents)
+    assert.equal(credits.getBalance(1).creditCents, legacyBefore.creditCents - order.priceCents)
+
+    const events = database
+      .db()
+      .prepare('SELECT metadata_json FROM provider_events ORDER BY id')
+      .all() as Array<{ metadata_json: string | null }>
+    assert.equal(events.length >= 4, true)
+    const auditText = events.map((event) => event.metadata_json ?? '').join(' ')
+    assert.equal(auditText.includes('sync-secret-key'), false)
+    assert.equal(auditText.includes('dhru-secret-key'), false)
+    assert.equal(auditText.includes('490154203237518'), false)
+    assert.equal(auditText.includes('356938035643809'), false)
+
+    process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled'
+    assert.equal(providerApi.providerConfiguration().enabled, false)
+    assert.deepEqual(await providerJobs.pollProviderJobs(), {
+      enabled: false,
+      ordersSeen: 0,
+      checksSeen: 0,
+      completed: 0,
+      unavailable: 0,
+      processing: 0,
+      errors: 0,
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+    const restore = (key: string, value: string | undefined) => {
+      if (value === undefined) delete process.env[key]
+      else process.env[key] = value
+    }
+    restore('IUNLOCKMOBILE_PROVIDER_MODE', saved.mode)
+    restore('IUNLOCKMOBILE_PROVIDER_NAME', saved.name)
+    restore('IUNLOCKMOBILE_PROVIDER_URL', saved.url)
+    restore('IUNLOCKMOBILE_PROVIDER_API_KEY', saved.apiKey)
+    restore('IUNLOCKMOBILE_PROVIDER_DHRU_KEY', saved.dhruKey)
+    restore('IUNLOCKMOBILE_PROVIDER_USERNAME', saved.username)
+    restore('IUNLOCKMOBILE_UNLOCK_SERVICE_MAP', saved.unlockMap)
+    restore('IUNLOCKMOBILE_IMEI_SERVICE_MAP', saved.imeiMap)
+    restore('IUNLOCKMOBILE_MAINTENANCE', saved.maintenance)
+  }
 })
 
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
