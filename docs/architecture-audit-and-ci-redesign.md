@@ -450,3 +450,43 @@ focus ring จะเปลี่ยนเป็นวงแหวนสองช
 
 **ความเสี่ยงที่ยังเปิดอยู่และรับรู้แล้ว** — ไม่มี background worker ผูกกับ systemd (F-B22) จึงมี hold
 ที่อาจค้าง เจ้าของสั่งห้ามเปิด timer จนกว่าจะอนุมัติ จึงบันทึกไว้แทนการแก้
+
+
+---
+
+## 13. สถานะการแก้ (อัปเดตหลังเฟส 0–2)
+
+Branch `feat/architecture-audit-and-ci-redesign` · PR #1 · CI `verify` เขียว
+
+### ปิดแล้ว
+
+| กลุ่ม | Findings |
+| --- | --- |
+| Critical | F-F01 · F-B01 · F-B02 · F-B03 |
+| High | F-F02 · F-F03 · F-F04 · F-F05 · F-F19 · F-B04 · F-B05 · F-B06 · F-B07 · F-B08 · F-B09 · F-B10 |
+| Medium | F-F07 · F-F09 · F-F11 · F-F13 · F-F20 · F-F22 · F-F23 · F-B11 · F-B12 (บางส่วน) · F-B13 · F-B14 · F-B15 · F-B21 · F-B29 · F-B30 |
+| Low | F-F14 · F-F16 · F-F21 · F-B23 · F-B24 · F-B25 |
+| ตรวจแล้วไม่ใช่ปัญหา | F-F10 (ไม่มี overflow ที่ 320px — วัดจริงแล้ว) |
+
+### ยังเปิดอยู่ และเหตุผล
+
+| ID | ประเด็น | ทำไมยังไม่แก้ |
+| --- | --- | --- |
+| F-B19 | `/admin` ยัง read-only → invoice ที่จ่ายเงินจริงไม่มีทาง approve | ต้องออกแบบ audit trail และนโยบายอนุมัติร่วมกับเจ้าของก่อน — เขียนโค้ดที่ mint เครดิตโดยไม่มีข้อตกลงเรื่องนี้เป็นความเสี่ยงที่ใหญ่กว่าตัวปัญหา |
+| F-B22 | ไม่มี background worker → hold อาจค้างถ้าลูกค้าปิดเบราว์เซอร์ | **คำสั่งห้ามเปิด timer** จนกว่าจะอนุมัติ บันทึกเป็นความเสี่ยงที่รับรู้แล้ว |
+| F-F06 | `site-header` เป็น client component ทั้งก้อน | ต้องใช้ `usePathname` + toggle จริง ๆ การผ่าเป็น island เสี่ยงทำ mobile menu พังมากกว่าที่จะได้ bundle คืน (ปัจจุบัน shared JS 103 kB) — เลือกไม่แตะ และรายงานตรง ๆ ดีกว่าแก้แล้วเสี่ยง |
+| F-B16 | `migrate()` ไม่มี advisory lock | ปลอดภัยตราบใดที่ยังเป็นโปรเซสเดียว ต้องแก้ก่อนขยายเป็นหลายอินสแตนซ์ |
+| F-B17 | `device_services.brand_ids` เป็น CSV | ยังไม่เป็นช่องโหว่ (ไม่ได้ประกอบเป็น SQL) แต่ควร normalize เป็นตารางเชื่อมในรอบ schema ถัดไป |
+| F-B18 | ไม่มี runtime schema validation (zod) | เป็นงานที่แตะทุก endpoint ควรทำเป็นรอบของตัวเองพร้อมเทสต์ ไม่ใช่แทรกกลางเฟสความปลอดภัย |
+| F-B20 | systemd ยัง `ProtectSystem=full` ไม่ใช่ `strict` | `strict` ต้องระบุ `ReadWritePaths` ให้ครบ และผมทดสอบบนเครื่องจริงไม่ได้ — เปลี่ยนแบบเดาแล้วบริการไม่ขึ้นคือความเสียหายที่มากกว่า |
+| F-B26 | `balance_after_cents` เก็บ `availableCents` ชื่อไม่ตรงค่า | เปลี่ยนชื่อคอลัมน์ = destructive migration ซึ่งถูกห้าม ควรทำตอนย้าย schema รอบใหญ่ |
+| F-B27 | API key ของ provider เดินทางใน query string | เป็นข้อกำหนดของ DHRU เอง ป้องกันด้วยการไม่ log URL — ต้องคงกฎนี้ไว้เป็นข้อตกลง |
+| F-B28 | ยังไม่มี audit log ของเหตุการณ์สิทธิ์/การเงิน | ผูกกับ F-B19 ควรออกแบบพร้อมกัน |
+| F-F15 · F-F17 · F-F18 | รายละเอียด UX เล็ก ๆ | คิวเฟสถัดไป |
+
+### สิ่งที่ยังต้องขอจากเจ้าของระบบ
+
+1. `systemctl show unlockservice -p Environment` บนเซิร์ฟเวอร์ — ยืนยันว่า `IUNLOCKMOBILE_MAINTENANCE=1` และ `IUNLOCKMOBILE_PROVIDER_MODE=disabled` ตั้งอยู่จริง (ผมเข้า production ไม่ได้)
+2. screenshot ของ `mobileunlocks.com` หรือเปิด egress ให้โดเมนนั้น — ถ้าต้องการให้เทียบ CI กับเว็บอ้างอิงจริง
+3. ยืนยันว่าราคาและ ETA ใน `lib/catalog.ts` เป็นของจริงหรือยัง placeholder
+4. อนุมัติผล audit + screenshots ก่อน merge เข้า deploy branch และ deploy
