@@ -28,9 +28,15 @@ function Notice({ state }: { state: FormState }) {
 function GoogleAuthOption() {
   return (
     <>
-      <Link className="button button--quiet button--wide" href="/auth/google">
+      {/* A plain anchor, not a Link. /auth/google is not a page: it mints an
+          OAuth transaction, writes a row and sets a cookie. Next prefetches
+          Links that are on screen, so as a Link it started a fresh
+          transaction for every visitor who merely looked at this form, and a
+          prefetch landing mid-flow would replace the cookie the real attempt
+          was relying on. */}
+      <a className="button button--quiet button--wide" href="/auth/google">
         Continue with Google
-      </Link>
+      </a>
       <div className="auth-divider" aria-hidden="true">
         <span>or continue with email</span>
       </div>
@@ -106,7 +112,11 @@ export function RegisterForm() {
           required
           minLength={3}
           maxLength={32}
-          pattern="[A-Za-z0-9._-]+"
+          /* The hyphen is escaped because the pattern attribute compiles with
+             the v flag, which reserves a bare one inside a character class.
+             Unescaped, the whole attribute is discarded and the field is
+             never checked in the browser at all. */
+          pattern="[A-Za-z0-9._\-]+"
         />
       </div>
       <div className="field">

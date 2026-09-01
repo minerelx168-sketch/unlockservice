@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import '@/styles/globals.css'
@@ -24,14 +25,19 @@ const THEME_GUARD = `(function(){try{var s=localStorage.getItem('iunlockmobile-t
 
 const PRELOADED_FONTS = ['/fonts/bricolage-grotesque-3.woff2', '/fonts/instrument-sans-2.woff2']
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  /* Minted per request in middleware.ts, which is also where the policy that
+     makes it mean anything is written. Next.js stamps its own streamed
+     scripts with it; this one has to be given the nonce by hand. */
+  const nonce = (await headers()).get('x-nonce') ?? undefined
+
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
         {PRELOADED_FONTS.map((href) => (
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}
-        <script dangerouslySetInnerHTML={{ __html: THEME_GUARD }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_GUARD }} />
       </head>
       <body>{children}</body>
     </html>
