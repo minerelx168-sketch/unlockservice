@@ -2,14 +2,22 @@ name: Deploy
 
 # Pushes to the deploy branch land on the server. Everything is gated on
 # the build passing first, so a broken commit never restarts the service.
+#
+# Pull requests run the same verify job. Without it the first time code is
+# checked is when it is already on the branch that deploys, which is one
+# step too late to be useful.
 on:
   push:
     branches: [claude/website-design-patterns-5043ix]
+  pull_request:
   workflow_dispatch:
 
+# Production deploys serialise against each other; a pull request gets its
+# own group so a verify run never queues behind a deploy, and a new push to
+# the same PR supersedes the run it replaces.
 concurrency:
-  group: deploy-production
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('verify-{0}', github.ref) || 'deploy-production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -23,14 +31,16 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm test
       - run: npm run build
 
   deploy:
     needs: verify
     runs-on: ubuntu-latest
-    # Without the host and key configured there is nothing to deploy to,
-    # so the job skips instead of failing the run.
-    if: ${{ vars.DEPLOY_HOST != '' }}
+    # A pull request verifies but never deploys, and without the host and
+    # key configured there is nothing to deploy to — so the job skips
+    # instead of failing the run.
+    if: ${{ github.event_name != 'pull_request' && vars.DEPLOY_HOST != '' }}
     environment: production
     steps:
       - name: Open an SSH session to the host
