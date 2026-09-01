@@ -34,6 +34,28 @@ export function getBalance(userId: number): Balance {
   }
 }
 
+/**
+ * The balance as stored, with no assertion.
+ *
+ * getBalance refuses to answer when held exceeds credit, which is right
+ * when money is about to move — the caller must not act on a balance that
+ * cannot be true. But a customer looking at an order is not moving money,
+ * and refusing to render their order because a number elsewhere is wrong
+ * takes away the one page that would show them what happened. Reads take
+ * this; anything that writes takes getBalance.
+ */
+export function readBalance(userId: number): Balance {
+  const row = db()
+    .prepare('SELECT credit_cents, held_cents FROM users WHERE id = ?')
+    .get(userId) as { credit_cents: number; held_cents: number } | undefined
+  if (!row) throw new Error(`no such user: ${userId}`)
+  return {
+    creditCents: row.credit_cents,
+    heldCents: row.held_cents,
+    availableCents: row.credit_cents - row.held_cents,
+  }
+}
+
 function affectsOwnedBalance(type: LedgerType): boolean {
   return type === 'topup' || type === 'charge' || type === 'adjustment'
 }
@@ -188,16 +210,23 @@ export type LedgerRow = {
   created_at: string
 }
 
-export function listLedger(userId: number, limit = 50): LedgerRow[] {
+export function listLedger(userId: number, limit = 50, offset = 0): LedgerRow[] {
   return db()
     .prepare(
       `SELECT id, amount_cents,
               CASE type WHEN 'bonus' THEN 'topup' ELSE type END AS type,
               CASE ref_type WHEN 'topup_order' THEN 'invoice' ELSE ref_type END AS ref_type,
               ref_id, balance_after_cents, created_at
-         FROM credit_ledger WHERE user_id = ? ORDER BY id DESC LIMIT ?`,
+         FROM credit_ledger WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`,
     )
-    .all(userId, limit) as LedgerRow[]
+    .all(userId, limit, offset) as LedgerRow[]
+}
+
+export function countLedger(userId: number): number {
+  const row = db()
+    .prepare('SELECT COUNT(*) AS count FROM credit_ledger WHERE user_id = ?')
+    .get(userId) as { count: number }
+  return row.count
 }
 
 export function creditSummary(userId: number) {

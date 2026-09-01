@@ -74,7 +74,9 @@ async function sendEmail(to: string, subject: string, html: string, text: string
   })
 
   if (!response.ok) {
-    console.error('[account-security] email delivery failed', response.status, (await response.text()).slice(0, 300))
+    /* The status is the diagnostic. The body echoes the recipient address
+       back, and a log line is not the place for one. */
+    console.error('[account-security] email delivery failed', response.status)
     throw new AuthError('We could not send the email right now. Please try again.')
   }
 }
@@ -120,8 +122,11 @@ export async function resendVerification(email: string) {
   const user = db()
     .prepare('SELECT id, email_verified_at FROM users WHERE email = ? LIMIT 1')
     .get(mail) as { id: number; email_verified_at: string | null } | undefined
-  if (!user) return
-  if (user.email_verified_at) throw new AuthError('This email is already verified. Try signing in.')
+  /* Returns the same way whether the address is unknown or already
+     verified. Saying "already verified" told anyone who asked that an
+     account exists — the one thing requestPasswordReset below is careful
+     not to say. */
+  if (!user || user.email_verified_at) return
 
   await sendOtpEmail(mail, issueOtp(user.id, 'signup'), 'signup')
 }

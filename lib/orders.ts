@@ -6,7 +6,7 @@ import {
   serviceCoversBrand,
   type BrandRow,
 } from './db'
-import { charge, getBalance, hold, InsufficientCredit, refund } from './credits'
+import { charge, getBalance, hold, InsufficientCredit, readBalance, refund } from './credits'
 import { IMEI_LENGTH, luhnValid, normalizeImei } from './imei'
 import { activeSupplier, maintenanceState, type SupplierResult, type UnlockRequest } from './provider'
 import { providerConfiguration, unlockProviderService } from './provider-api'
@@ -297,7 +297,7 @@ export async function submitOrder(
   const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
   if (idempotencyKey) {
     const existing = orderForKey(userId, idempotencyKey)
-    if (existing) return restingPayload(existing, getBalance(userId).availableCents)
+    if (existing) return restingPayload(existing, readBalance(userId).availableCents)
   }
 
   /* Each accepted order costs a real supplier request, so the endpoint gets
@@ -415,7 +415,9 @@ export async function submitOrder(
     )
     .run(result.orderId, readyAt, orderId)
 
-  const balance = getBalance(userId)
+  /* The hold above already asserted the invariant; this only reports what
+     the customer now has. */
+  const balance = readBalance(userId)
   return payload(getOrder(orderId, userId)!, {
     beforeCents: before.availableCents,
     heldCents: priceCents,
@@ -430,7 +432,7 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
   const order = getOrder(orderId, userId)
   if (!order) throw new OrderError('No such order.', 'order_unknown')
 
-  const balance = getBalance(userId)
+  const balance = readBalance(userId)
   const resting = restingPayload(order, balance.availableCents)
 
   if (order.status !== 'processing') return resting
@@ -556,7 +558,7 @@ function settleDelivered(
       .run(unlockCode, JSON.stringify(result), providerOrderId, orderId)
   })
 
-  const after = getBalance(userId)
+  const after = readBalance(userId)
   const order = getOrder(orderId, userId)!
   if (!claimed) return restingPayload(order, after.availableCents)
 
@@ -585,7 +587,7 @@ function settleUnavailable(
       .run(message, orderId)
   })
 
-  const after = getBalance(userId)
+  const after = readBalance(userId)
   const order = getOrder(orderId, userId)!
   if (!claimed) return restingPayload(order, after.availableCents)
 
@@ -600,6 +602,13 @@ function settleUnavailable(
     },
     message,
   )
+}
+
+export function countOrders(userId: number): number {
+  const row = db()
+    .prepare('SELECT COUNT(*) AS count FROM orders WHERE user_id = ?')
+    .get(userId) as { count: number }
+  return row.count
 }
 
 export function orderStats(userId: number) {

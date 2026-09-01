@@ -809,3 +809,46 @@ test('the production switches are closed unless they are opened by hand', async 
   if (originalNodeEnv === undefined) delete env.NODE_ENV
   else Object.assign(process.env, { NODE_ENV: originalNodeEnv })
 })
+
+test('a broken balance stops a write but not a read', () => {
+  const user = auth.register('degrade', 'degrade@example.invalid', 'correct-horse-battery-staple')
+  credits.credit(user.id, 4_000, 'topup', 'test', `degrade-${user.id}`)
+
+  /* Whatever put it there — a bug we have not found, a hand-edited row —
+     held cannot exceed credit. */
+  database.db().prepare('UPDATE users SET held_cents = 9_000 WHERE id = ?').run(user.id)
+
+  assert.throws(() => credits.getBalance(user.id), /credit invariant failed/)
+  assert.deepEqual(credits.readBalance(user.id), {
+    creditCents: 4_000,
+    heldCents: 9_000,
+    availableCents: -5_000,
+  })
+
+  /* Moving money on a balance that cannot be true is refused; reading the
+     order that would explain it is not. */
+  assert.throws(() => credits.hold(user.id, 100, 'order', `degrade-${user.id}-a`), /credit invariant failed/)
+
+  database.db().prepare('UPDATE users SET held_cents = 0 WHERE id = ?').run(user.id)
+})
+
+test('registration and resend do not confirm that an email is registered', async () => {
+  auth.register('enum', 'enum@example.invalid', 'correct-horse-battery-staple')
+
+  assert.throws(
+    () => auth.register('enum', 'someone.else@example.invalid', 'correct-horse-battery-staple'),
+    (error: unknown) => error instanceof auth.AuthError && /username is taken/.test(error.message),
+  )
+  assert.throws(
+    () => auth.register('enum-two', 'enum@example.invalid', 'correct-horse-battery-staple'),
+    (error: unknown) =>
+      error instanceof auth.AuthError &&
+      /cannot be used to register/.test(error.message) &&
+      !/already registered/.test(error.message),
+  )
+
+  /* A verified account used to be told apart from an unknown address by
+     the error it produced. Both return the same way now. */
+  await assert.doesNotReject(accountSecurity.resendVerification('enum@example.invalid'))
+  await assert.doesNotReject(accountSecurity.resendVerification('nobody@example.invalid'))
+})

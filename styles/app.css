@@ -305,6 +305,26 @@ table.grid td.num {
   border-color: color-mix(in srgb, var(--danger) 26%, transparent);
 }
 
+/* ---- pagination ------------------------------------------------------ */
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 20px 0;
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+}
+
+/* At the ends of the range the control stays in place rather than
+   disappearing, so the row does not reflow as you page through. */
+.pager [aria-disabled='true'] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 /* ---- loading placeholders ------------------------------------------- */
 /* Shaped like the thing they stand in for, so the layout does not jump when
    the real content arrives. */

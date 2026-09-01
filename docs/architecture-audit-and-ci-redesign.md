@@ -177,7 +177,7 @@ creditIntegrity(): SUM(amount WHERE affects_balance=1) must equal users.credit_c
 | F-B12 | Medium | `lib/auth.ts:88` `authenticate()` | rate limit ผูกกับ identity อย่างเดียว ไม่มีตัวนับต่อ IP → password spraying ข้ามหลายบัญชีไม่ถูกจำกัด |
 | F-B13 | Medium | `lib/auth.ts` sessions | ไม่มีการลบ session ที่หมดอายุ (ตารางโตทางเดียว) และไม่มี session rotation ตอน login |
 | F-B14 | Medium | `app/api/health/route.ts` | endpoint สาธารณะเปิดเผย `creditLedger.users` (จำนวนบัญชีทั้งระบบ) และข้อความ error ภายในใน 503 |
-| F-B15 | Medium | `lib/credits.ts:26` `getBalance()` | throw เมื่อ invariant พัง แต่ถูกเรียกจาก read path (dashboard, sidebar) → แถวเดียวเสีย ทั้ง workspace 500 |
+| F-B15 | Medium **(แก้คำอธิบายแล้ว)** | `lib/credits.ts` `getBalance()` | ผมเขียนไว้แต่แรกว่า dashboard และ sidebar จะ 500 — **ตรวจซ้ำแล้วไม่จริง**: ทั้งสองหน้าคำนวณจากแถว `users` โดยตรง ไม่ได้เรียก `getBalance` เลย ผลกระทบจริงแคบกว่านั้นคือ `pollOrder` เรียก `getBalance` ก่อนตัดสินใจอะไร → ลูกค้าที่ยอดเสียจะ **เปิดดูออร์เดอร์ตัวเองไม่ได้** (500 ที่ `/api/orders/status`) ซึ่งเป็นหน้าเดียวที่จะบอกเขาได้ว่าเกิดอะไรขึ้น |
 | F-B16 | Medium | `lib/db.ts:270` `migrate()` | รันทุกครั้งที่เปิด connection ภายใน `db()` — ปลอดภัยเพราะ additive ทั้งหมด แต่ไม่มี advisory lock ถ้าอนาคตมีหลายโปรเซส |
 | F-B17 | Medium | `lib/db.ts` `device_services.brand_ids` | เก็บเป็น CSV และแตกด้วย `split(',')` ในโค้ด — ยังไม่ประกอบเป็น SQL จึงยังไม่เป็นช่องโหว่ แต่เป็นรูปแบบที่กลายเป็นช่องโหว่ได้ง่ายเมื่อมีคนเขียน `IN (...)` |
 | F-B18 | Medium | ทุก route handler | ไม่มี runtime schema validation (zod/valibot) — TypeScript ถูกลบตอน runtime, body ถูก cast ด้วย `String()`/`Number()` |

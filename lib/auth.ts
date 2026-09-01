@@ -69,10 +69,15 @@ export function register(username: string, email: string, password: string): Use
     throw new AuthError('Registration is temporarily unavailable because email delivery is not configured.')
   }
 
-  const taken = db()
-    .prepare('SELECT id FROM users WHERE lower(username) = lower(?) OR email = ?')
-    .get(clean, mail)
-  if (taken) throw new AuthError('That username or email is already registered.')
+  /* Separated so the message can name the username — which is public, and
+     which the person has to change to get past this — without confirming
+     that a given email address has an account here, which it cannot. */
+  const usernameTaken = db().prepare('SELECT id FROM users WHERE lower(username) = lower(?)').get(clean)
+  if (usernameTaken) throw new AuthError('That username is taken. Try another.')
+  const emailTaken = db().prepare('SELECT id FROM users WHERE email = ?').get(mail)
+  if (emailTaken) {
+    throw new AuthError('That email cannot be used to register. Try signing in, or reset your password.')
+  }
 
   const info = db()
     .prepare(
@@ -127,7 +132,25 @@ export function hasAdminRole(user: Pick<User, 'account_type'>): boolean {
 
 export type Session = { id: string; userId: number; csrfToken: string }
 
+/**
+ * Rows whose time has passed. Nothing read them any more — currentSession
+ * checks expiry itself — but the tables only grew, and a signed-in session
+ * is the natural moment to sweep: it is already a write, and it happens
+ * often enough to keep up without a timer to install and forget.
+ */
+function sweepExpired() {
+  const now = new Date().toISOString()
+  db().prepare('DELETE FROM sessions WHERE expires_at <= ?').run(now)
+  db()
+    .prepare(
+      `DELETE FROM email_verifications
+        WHERE expires_at <= ? OR (consumed_at IS NOT NULL AND consumed_at <= ?)`,
+    )
+    .run(now, new Date(Date.now() - 7 * 86_400_000).toISOString())
+}
+
 export function createSession(userId: number): Session {
+  sweepExpired()
   const id = randomBytes(24).toString('hex')
   const csrfToken = randomBytes(32).toString('hex')
   const expires = new Date(Date.now() + SESSION_DAYS * 86_400_000).toISOString()
