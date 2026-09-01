@@ -305,6 +305,50 @@ table.grid td.num {
   border-color: color-mix(in srgb, var(--danger) 26%, transparent);
 }
 
+/* ---- loading placeholders ------------------------------------------- */
+/* Shaped like the thing they stand in for, so the layout does not jump when
+   the real content arrives. */
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--page-tint) 0%,
+    var(--surface-strong) 40%,
+    var(--page-tint) 80%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+.skeleton--title {
+  width: min(320px, 70%);
+  height: 30px;
+  margin: 0 0 12px;
+}
+
+.skeleton--line {
+  width: min(460px, 90%);
+  height: 15px;
+  margin: 0;
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--page-tint);
+  }
+}
+
 .badge--muted {
   color: var(--muted);
   background: var(--surface-strong);

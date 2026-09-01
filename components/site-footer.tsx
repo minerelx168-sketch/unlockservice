@@ -5,9 +5,9 @@ const COLUMNS = [
   {
     heading: 'Services',
     links: [
-      { href: '/#services', label: 'Network unlock' },
+      { href: '/#check', label: 'Network unlock' },
       { href: '/#services', label: 'Activation & MDM locks' },
-      { href: '/#services', label: 'Device checks' },
+      { href: '/check', label: 'Device checks' },
       { href: '/register', label: 'Create an account' },
     ],
   },

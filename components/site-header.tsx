@@ -39,11 +39,18 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
         >
           {NAV.map((item) => {
             const href = item.label === 'Order Tracking' && isAuthenticated ? '/user/orders' : item.href
+            /* Comparing the whole href to the pathname never matched,
+               because four of the five links are anchors into the homepage —
+               so nothing was ever marked current. Matching on the path alone
+               marks all four at once on the homepage, which is no more
+               useful. An anchor into a section is not the current page, so
+               only a link that is itself a page carries the mark. */
+            const [path, hash] = href.split('#')
             return (
               <Link
                 key={item.label}
                 href={href}
-                aria-current={href === pathname ? 'page' : undefined}
+                aria-current={!hash && path === pathname ? 'page' : undefined}
                 onClick={() => setOpen(false)}
               >
                 {item.label}
