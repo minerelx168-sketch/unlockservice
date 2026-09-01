@@ -293,14 +293,47 @@ test('Google OAuth creates protected authorization transactions and stable ident
     assert.equal(transaction.nonce, authorization.searchParams.get('nonce'))
     assert.equal(transaction.consumed_at, null)
 
+    /*
+     * alice registered before email verification existed, so nothing proves
+     * she controls the address — and a matching address is all an attacker
+     * needs to register ahead of someone and inherit their Google sign-in.
+     * The merge is refused; her own password still gets her in.
+     */
     const alice = auth.authenticate('alice', 'correct-horse-battery-staple')
-    const linkedAlice = googleOAuth.linkGoogleIdentity({
-      subject: 'google-alice-subject',
-      email: 'alice@example.test',
-      emailVerified: true,
-    })
-    assert.equal(linkedAlice.id, alice.id)
-    assert.equal(linkedAlice.account_type, 'admin')
+    assert.throws(
+      () =>
+        googleOAuth.linkGoogleIdentity({
+          subject: 'google-alice-subject',
+          email: 'alice@example.test',
+          emailVerified: true,
+        }),
+      (error: unknown) =>
+        error instanceof auth.AuthError && /Sign in with its password/.test(error.message),
+    )
+    const aliceLinks = database
+      .db()
+      .prepare('SELECT COUNT(*) AS count FROM oauth_accounts WHERE user_id = ?')
+      .get(alice.id) as { count: number }
+    assert.equal(aliceLinks.count, 0, 'the refused merge leaves no link behind')
+
+    /* An account that has read a code out of its own inbox has proved the
+       address, and links without further ceremony. */
+    const proven = auth.register('proven', 'proven@example.test', 'correct-horse-battery-staple')
+    database
+      .db()
+      .prepare(
+        `INSERT INTO email_verifications (user_id, code_hash, purpose, expires_at, consumed_at)
+         VALUES (?, 'x', 'signup', datetime('now', '+1 hour'), datetime('now'))`,
+      )
+      .run(proven.id)
+    assert.equal(
+      googleOAuth.linkGoogleIdentity({
+        subject: 'google-proven-subject',
+        email: 'proven@example.test',
+        emailVerified: true,
+      }).id,
+      proven.id,
+    )
 
     const googleUser = googleOAuth.linkGoogleIdentity({
       subject: 'google-new-subject',
@@ -577,7 +610,11 @@ test('escrow hold, refund and charge preserve the original balance contract', ()
     heldCents: 0,
     availableCents: 1300,
   })
-  assert.deepEqual(credits.creditIntegrity(), { users: 4, mismatches: 0, invalidHolds: 0 })
+  /* The account count is whatever the tests before this one created; what
+     this asserts is that the ledger still agrees with every balance. */
+  const integrity = credits.creditIntegrity()
+  assert.equal(integrity.mismatches, 0)
+  assert.equal(integrity.invalidHolds, 0)
 })
 
 test('a replayed refund cannot release another order’s hold', () => {
@@ -716,6 +753,9 @@ test('only one settlement of an order moves money', async () => {
 test('the production switches are closed unless they are opened by hand', async () => {
   const provider = await import('../lib/provider')
   const originalNodeEnv = process.env.NODE_ENV
+  /* NODE_ENV is typed readonly by the Next.js ambient types; this test is
+     specifically about what happens when it is missing. */
+  const env = process.env as Record<string, string | undefined>
 
   assert.equal(payments.selfApprovalEnabled(), false, 'self-approval is off without the flag')
   process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE = '1'
@@ -723,7 +763,7 @@ test('the production switches are closed unless they are opened by hand', async 
 
   /* An unset NODE_ENV used to read as "not production" and hand every account
      the ability to confirm its own invoice. A missing variable means off. */
-  delete process.env.NODE_ENV
+  delete env.NODE_ENV
   assert.equal(payments.selfApprovalEnabled(), true, 'still opt-in, not inferred')
   delete process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE
   assert.equal(payments.selfApprovalEnabled(), false)
@@ -766,6 +806,6 @@ test('the production switches are closed unless they are opened by hand', async 
       error instanceof imeiChecks.ImeiCheckError && error.code === 'provider_not_ready',
   )
 
-  if (originalNodeEnv === undefined) delete process.env.NODE_ENV
+  if (originalNodeEnv === undefined) delete env.NODE_ENV
   else Object.assign(process.env, { NODE_ENV: originalNodeEnv })
 })
