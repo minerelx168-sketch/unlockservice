@@ -1,6 +1,7 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { SESSION_COOKIE } from './cookie-names'
 import { db } from './db'
 import { clearAttempts, consumeAttempt } from './rate-limit'
 
@@ -10,7 +11,8 @@ import { clearAttempts, consumeAttempt } from './rate-limit'
  * original unlockservice contract.
  */
 
-export const SESSION_COOKIE = 'iunlockmobile_session'
+export { SESSION_COOKIE }
+
 const SESSION_DAYS = 14
 
 export type User = {

@@ -5,6 +5,7 @@ import { requireSession } from '@/lib/auth'
 import { listBrands, listCarriers, listDeviceServices } from '@/lib/db'
 import { formatUsd } from '@/lib/money'
 import { maintenanceState } from '@/lib/provider'
+import { readQuote } from '@/lib/quote'
 
 export const metadata: Metadata = { title: 'Unlock a device' }
 export const dynamic = 'force-dynamic'
@@ -12,6 +13,10 @@ export const dynamic = 'force-dynamic'
 export default async function UnlockPage() {
   const { user, session } = await requireSession()
   const available = user.credit_cents - user.held_cents
+
+  /* Whatever they entered on the homepage. middleware.ts drops the cookie
+     as soon as they move anywhere else in the workspace. */
+  const quote = await readQuote()
 
   return (
     <>
@@ -58,6 +63,8 @@ export default async function UnlockPage() {
         availableCents={available}
         defaultEmail={user.email}
         maintenance={maintenanceState()}
+        initialImei={quote?.imei}
+        initialCarrierId={quote?.carrierId}
       />
     </>
   )

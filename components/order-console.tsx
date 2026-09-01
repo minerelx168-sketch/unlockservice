@@ -59,6 +59,8 @@ export function OrderConsole({
   availableCents,
   defaultEmail,
   maintenance,
+  initialImei,
+  initialCarrierId,
 }: {
   brands: Brand[]
   carriers: Carrier[]
@@ -67,11 +69,18 @@ export function OrderConsole({
   availableCents: number
   defaultEmail: string
   maintenance: { active: boolean; message: string }
+  /** Carried over from the homepage quote, so the phone is entered once. */
+  initialImei?: string
+  initialCarrierId?: number
 }) {
   const [kind, setKind] = useState<'carrier_unlock' | 'device_service'>('carrier_unlock')
-  const [imei, setImei] = useState('')
+  const [imei, setImei] = useState(initialImei ?? '')
   const [brandId, setBrandId] = useState<number>(brands[0]?.id ?? 0)
-  const [carrierId, setCarrierId] = useState<number>(carriers[0]?.id ?? 0)
+  const [carrierId, setCarrierId] = useState<number>(
+    initialCarrierId && carriers.some((entry) => entry.id === initialCarrierId)
+      ? initialCarrierId
+      : (carriers[0]?.id ?? 0),
+  )
   const [serviceId, setServiceId] = useState<number | null>(null)
   const [email, setEmail] = useState(defaultEmail)
   const [busy, setBusy] = useState(false)

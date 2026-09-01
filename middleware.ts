@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { QUOTE_COOKIE } from '@/lib/cookie-names'
 
 /**
  * Content-Security-Policy.
@@ -63,6 +64,19 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers } })
   response.headers.set('content-security-policy', csp)
+
+  /* The homepage quote is dropped as soon as the visitor is somewhere that
+     does not need it. It cannot be dropped by the order form itself: a
+     render is not allowed to write cookies, and clearing it here on that
+     request would take it out of the request forwarded downstream too, so
+     the form would never see the quote it is being handed. Anywhere else in
+     the workspace is past the hand-off, and clearing it there means the
+     order form starts clean the next time it is opened. */
+  const path = request.nextUrl.pathname
+  if (path !== '/user/unlock' && path.startsWith('/user/') && request.cookies.has(QUOTE_COOKIE)) {
+    response.cookies.set(QUOTE_COOKIE, '', { path: '/', maxAge: 0, httpOnly: true, secure })
+  }
+
   return response
 }
 

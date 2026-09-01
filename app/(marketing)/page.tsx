@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ImeiForm } from '@/components/imei-form'
+import { CARRIERS } from '@/lib/catalog'
 import { Icon, type IconName } from '@/components/icons'
 
 const TRUST = [
@@ -173,7 +174,15 @@ export default function HomePage() {
               <span className="t-micro">Safe · legal · guaranteed</span>
             </div>
 
-            <ImeiForm />
+            {/* The same list the order form is built from, so the network a
+                visitor picks here is one they can actually order against. */}
+            <ImeiForm
+              carriers={CARRIERS.map((carrier) => ({
+                id: carrier.id,
+                name: carrier.name,
+                country: carrier.country,
+              }))}
+            />
 
             <hr className="hairline" />
 

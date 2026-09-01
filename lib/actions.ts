@@ -20,7 +20,10 @@ import {
   startEmailVerification,
   verifyEmail,
 } from './account-security'
+import { CARRIERS } from './catalog'
+import { isValidImei, normalizeImei } from './imei'
 import { parseUsd } from './money'
+import { writeQuote } from './quote'
 import {
   approveInvoice,
   createInvoice,
@@ -35,6 +38,24 @@ export type FormState = { error?: string; message?: string }
  * Everything that is a plain form in the observed system stays a plain
  * form here: post, act, redirect. Only the check flow needs JSON.
  */
+
+/**
+ * The homepage quote. Validated here rather than trusted from the field,
+ * then put somewhere the next page can read it that is not the URL.
+ */
+export async function startUnlockQuoteAction(_: FormState, data: FormData): Promise<FormState> {
+  const imei = normalizeImei(String(data.get('imei') ?? ''))
+  if (!isValidImei(imei)) return { error: 'Enter a valid 15-digit IMEI to continue.' }
+
+  const carrierId = Number(data.get('carrierId'))
+  if (!CARRIERS.some((carrier) => carrier.id === carrierId)) {
+    return { error: 'Pick the network the phone is locked to.' }
+  }
+
+  await writeQuote(imei, carrierId)
+  const signedIn = (await currentSession()) !== null
+  redirect(signedIn ? '/user/unlock' : '/register')
+}
 
 export async function registerAction(_: FormState, data: FormData): Promise<FormState> {
   const email = String(data.get('email') ?? '').trim().toLowerCase()

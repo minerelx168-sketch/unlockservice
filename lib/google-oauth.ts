@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { createRemoteJWKSet, jwtVerify } from 'jose'
 import { assertSignInAllowed, AuthError, getUser, hashPassword, type User } from './auth'
+import { GOOGLE_OAUTH_COOKIE } from './cookie-names'
 import { db } from './db'
 
 const PROVIDER = 'google'
@@ -9,7 +10,8 @@ const AUTHORIZATION_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth'
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token'
 const GOOGLE_JWKS = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
 
-export const GOOGLE_OAUTH_COOKIE = 'iunlockmobile_google_oauth'
+export { GOOGLE_OAUTH_COOKIE }
+
 export const GOOGLE_OAUTH_COOKIE_MAX_AGE = TRANSACTION_TTL_SECONDS
 
 type GoogleConfig = {

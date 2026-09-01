@@ -1,36 +1,14 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useRef, useState, type FormEvent } from 'react'
+import { useActionState, useMemo, useRef, useState, type FormEvent } from 'react'
+import { startUnlockQuoteAction, type FormState } from '@/lib/actions'
 import { groupImei, IMEI_LENGTH, luhnValid, normalizeImei } from '@/lib/imei'
 import { Icon, type IconName } from './icons'
 
 type NoteState = 'idle' | 'valid' | 'invalid'
 type Note = { state: NoteState; icon: IconName; text: string }
 
-type Market = {
-  country: string
-  carriers: string[]
-}
-
-const MARKETS: Market[] = [
-  {
-    country: 'United States',
-    carriers: ['AT&T', 'T-Mobile', 'Verizon', 'Cricket Wireless', 'Metro by T-Mobile'],
-  },
-  {
-    country: 'United Kingdom',
-    carriers: ['EE', 'O2', 'Three', 'Vodafone UK'],
-  },
-  {
-    country: 'Canada',
-    carriers: ['Bell', 'Rogers', 'Telus', 'Freedom Mobile'],
-  },
-  {
-    country: 'Australia',
-    carriers: ['Optus', 'Telstra', 'Vodafone Australia'],
-  },
-]
+export type QuoteCarrier = { id: number; name: string; country: string }
 
 const RESTING: Note = {
   state: 'idle',
@@ -38,90 +16,97 @@ const RESTING: Note = {
   text: 'Find your IMEI in Settings or dial *#06# on the phone.',
 }
 
+const EMPTY: FormState = {}
+
 /**
- * The identifier is checked in the browser before the customer is taken into
- * the authenticated order flow. Country and carrier are intentionally part of
- * the first step so the landing-page promise matches the order experience.
+ * The first step of the funnel: check the identifier in the browser, then
+ * hand the whole quote to the server.
+ *
+ * The networks come from lib/catalog.ts — the same list the order form is
+ * built from — because a hardcoded list here quoted networks the order form
+ * did not offer, and offered none of the ones it did.
+ *
+ * It posts rather than navigating, so the IMEI never reaches the URL. The
+ * server puts it in a short-lived cookie and the order form picks it up
+ * after sign-in; the customer types it once.
  */
-export function ImeiForm() {
-  const router = useRouter()
+export function ImeiForm({ carriers }: { carriers: QuoteCarrier[] }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState('')
-  const [marketIndex, setMarketIndex] = useState(0)
-  const [carrier, setCarrier] = useState(MARKETS[0].carriers[0])
   const [note, setNote] = useState<Note>(RESTING)
+  const [state, action, pending] = useActionState(startUnlockQuoteAction, EMPTY)
 
-  const market = MARKETS[marketIndex]
+  const countries = useMemo(() => {
+    const seen: string[] = []
+    for (const carrier of carriers) if (!seen.includes(carrier.country)) seen.push(carrier.country)
+    return seen
+  }, [carriers])
+
+  const [country, setCountry] = useState(countries[0] ?? '')
+  const offered = useMemo(
+    () => carriers.filter((carrier) => carrier.country === country),
+    [carriers, country],
+  )
+  const [carrierId, setCarrierId] = useState<number>(offered[0]?.id ?? 0)
+  const selected = offered.some((carrier) => carrier.id === carrierId) ? carrierId : (offered[0]?.id ?? 0)
+
+  const digits = normalizeImei(value)
 
   function handleChange(event: FormEvent<HTMLInputElement>) {
     const input = event.currentTarget
     const caretAtEnd = input.selectionStart === input.value.length
-    const digits = normalizeImei(input.value)
-    const grouped = groupImei(digits)
+    const next = normalizeImei(input.value)
+    const grouped = groupImei(next)
 
     setValue(grouped)
     if (caretAtEnd) {
-      requestAnimationFrame(() => {
-        input.setSelectionRange(grouped.length, grouped.length)
-      })
+      requestAnimationFrame(() => input.setSelectionRange(grouped.length, grouped.length))
     }
 
-    if (digits.length === 0) {
+    if (next.length === 0) {
       setNote(RESTING)
-    } else if (digits.length < IMEI_LENGTH) {
-      setNote({ state: 'idle', icon: 'info', text: `${digits.length} of ${IMEI_LENGTH} digits entered.` })
-    } else if (luhnValid(digits)) {
+    } else if (next.length < IMEI_LENGTH) {
+      setNote({ state: 'idle', icon: 'info', text: `${next.length} of ${IMEI_LENGTH} digits entered.` })
+    } else if (luhnValid(next)) {
       setNote({
         state: 'valid',
         icon: 'checkSmall',
         text: 'IMEI looks valid. Continue to see price and turnaround.',
       })
     } else {
-      setNote({
-        state: 'invalid',
-        icon: 'cross',
-        text: 'That IMEI does not look right. Check the final digit.',
-      })
+      setNote({ state: 'invalid', icon: 'cross', text: 'That IMEI does not look right. Check the final digit.' })
     }
   }
 
-  function handleMarketChange(event: FormEvent<HTMLSelectElement>) {
-    const nextIndex = Number(event.currentTarget.value)
-    setMarketIndex(nextIndex)
-    setCarrier(MARKETS[nextIndex].carriers[0])
+  function handleCountryChange(event: FormEvent<HTMLSelectElement>) {
+    const next = event.currentTarget.value
+    setCountry(next)
+    setCarrierId(carriers.find((carrier) => carrier.country === next)?.id ?? 0)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const digits = normalizeImei(value)
-
-    if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) {
-      setNote({
-        state: 'invalid',
-        icon: 'cross',
-        text: `Enter a valid ${IMEI_LENGTH}-digit IMEI to continue.`,
-      })
+    if (!luhnValid(digits) || digits.length !== IMEI_LENGTH) {
+      event.preventDefault()
+      setNote({ state: 'invalid', icon: 'cross', text: `Enter a valid ${IMEI_LENGTH}-digit IMEI to continue.` })
       inputRef.current?.focus()
-      return
     }
-
-    const query = new URLSearchParams({
-      imei: digits,
-      country: market.country,
-      carrier,
-    })
-    router.push(`/register?${query.toString()}`)
   }
 
+  const shown = state.error ? { state: 'invalid' as const, icon: 'cross' as IconName, text: state.error } : note
+
   return (
-    <form className="unlock-quote" onSubmit={handleSubmit} noValidate>
+    <form className="unlock-quote" action={action} onSubmit={handleSubmit} noValidate>
+      {/* The digits, ungrouped — the visible field carries the spacing. */}
+      <input type="hidden" name="imei" value={digits} />
+      <input type="hidden" name="carrierId" value={selected} />
+
       <div className="unlock-quote-grid">
         <div className="field">
           <label htmlFor="country">Country</label>
-          <select id="country" value={marketIndex} onChange={handleMarketChange}>
-            {MARKETS.map((entry, index) => (
-              <option key={entry.country} value={index}>
-                {entry.country}
+          <select id="country" value={country} onChange={handleCountryChange}>
+            {countries.map((entry) => (
+              <option key={entry} value={entry}>
+                {entry}
               </option>
             ))}
           </select>
@@ -129,10 +114,14 @@ export function ImeiForm() {
 
         <div className="field">
           <label htmlFor="carrier">Original carrier</label>
-          <select id="carrier" value={carrier} onChange={(event) => setCarrier(event.currentTarget.value)}>
-            {market.carriers.map((entry) => (
-              <option key={entry} value={entry}>
-                {entry}
+          <select
+            id="carrier"
+            value={selected}
+            onChange={(event) => setCarrierId(Number(event.currentTarget.value))}
+          >
+            {offered.map((carrier) => (
+              <option key={carrier.id} value={carrier.id}>
+                {carrier.name}
               </option>
             ))}
           </select>
@@ -143,7 +132,6 @@ export function ImeiForm() {
         <label htmlFor="imei">IMEI number</label>
         <input
           id="imei"
-          name="imei"
           ref={inputRef}
           type="text"
           inputMode="numeric"
@@ -153,14 +141,14 @@ export function ImeiForm() {
           value={value}
           onChange={handleChange}
         />
-        <p className="field-note" data-state={note.state} aria-live="polite">
-          <Icon name={note.icon} strokeWidth={note.state === 'idle' ? 1.9 : 2.2} />
-          <span>{note.text}</span>
+        <p className="field-note" data-state={shown.state} aria-live="polite">
+          <Icon name={shown.icon} strokeWidth={shown.state === 'idle' ? 1.9 : 2.2} />
+          <span>{shown.text}</span>
         </p>
       </div>
 
-      <button className="button button--primary button--wide unlock-submit" type="submit">
-        Unlock Phone
+      <button className="button button--primary button--wide unlock-submit" type="submit" disabled={pending}>
+        {pending ? 'Checking…' : 'Unlock Phone'}
         <Icon name="arrowRight" strokeWidth={2.2} />
       </button>
 
