@@ -258,11 +258,22 @@ sudo systemctl restart unlockservice
 ## Environment
 
 Everything except the three fixed values in the unit lives in
-**`/etc/iunlockmobile.env`**, owned by root, mode 0600. The unit requires
-it — no leading dash on `EnvironmentFile=` — because a service that starts
-without its configuration is a service running unconfigured without saying
-so. `deploy.sh` installs it from `deploy/iunlockmobile.env.example` with
-paused defaults on a first run, and never touches an existing one.
+**`/etc/iunlockmobile.env`**, owned by root, mode 0600. `deploy.sh` installs
+it from `deploy/iunlockmobile.env.example` with paused defaults on a first
+run, and never touches an existing one.
+
+`EnvironmentFile=` carries a leading dash, so a missing file does not stop
+the service from starting. That is deliberate and it is not a soft default:
+every dangerous switch fails closed on its own, so with no file at all the
+supplier is disabled and orders are refused outright, no payment method is
+offered, self-approval is off, and IMEI checks refuse to run. A service that
+will not start is the worse failure, and it is the one an operator hits when
+a new unit lands a moment before its configuration does. After a deploy,
+check what the service actually read rather than what you meant it to:
+
+```sh
+sudo systemctl show unlockservice -p Environment
+```
 
 ```sh
 sudo nano /etc/iunlockmobile.env

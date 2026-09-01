@@ -13,11 +13,16 @@ Environment=HOSTNAME=127.0.0.1
 Environment=PORT=3000
 Environment=IUNLOCKMOBILE_DB=/home/ubuntu/apps/unlockservice/data/iunlockmobile.db
 # Everything else — the maintenance flag, the supplier, the fingerprint key,
-# the wallet, the mail and OAuth credentials — is read from here. No leading
-# dash: a box with no environment file has none of those set, and starting
-# anyway is how a service ends up quietly running unconfigured. deploy.sh
-# installs the file with paused defaults on a first run.
-EnvironmentFile=/etc/iunlockmobile.env
+# the wallet, the mail and OAuth credentials — is read from here. deploy.sh
+# installs it with paused defaults on a first run.
+#
+# The leading dash tolerates it being missing, which is the right trade now
+# that each dangerous switch fails closed on its own: with no file the
+# supplier is disabled so orders are refused outright, no payment method is
+# offered at all, self-approval is off, and IMEI checks refuse to run. A
+# service that will not start is the worse failure, and it is the one an
+# operator hits when the unit lands a moment before the file does.
+EnvironmentFile=-/etc/iunlockmobile.env
 ExecStart=/usr/local/bin/npm run start -- --hostname 127.0.0.1
 Restart=always
 RestartSec=5
