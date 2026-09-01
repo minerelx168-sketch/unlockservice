@@ -130,7 +130,7 @@ creditIntegrity(): SUM(amount WHERE affects_balance=1) must equal users.credit_c
 | F-F07 | Medium | `components/site-header.tsx:48` | `aria-current` เทียบ `href === pathname` แต่ 4 ใน 5 ลิงก์เป็น hash (`/#check`) จึงไม่มีวัน active → ผู้ใช้ screen reader ไม่รู้ตำแหน่ง |
 | F-F08 | Medium | `styles/base.css:64` | focus ring ใช้ `var(--primary)` ซึ่งเป็นสีเดียวกับพื้นปุ่ม primary → โฟกัสบนปุ่มหลักมองไม่เห็น ยังไม่มี `--color-focus` แยก |
 | F-F09 | Medium | `styles/tokens.css` `--line: #e4e2d9` | ขอบ `input`/`select` ได้ contrast ~1.2:1 กับพื้นขาว ต่ำกว่า WCAG 2.2 **1.4.11 Non-text Contrast (3:1)** — README อ้าง AA แต่ตรวจเฉพาะข้อความ |
-| F-F10 | Medium | `styles/*` | breakpoint ต่ำสุดคือ 620px ไม่มีการตรวจที่ **320px** ตามที่โจทย์กำหนด |
+| F-F10 | ~~Medium~~ **ตรวจแล้ว: ผ่าน** | `styles/*` | breakpoint ต่ำสุดคือ 620px จึงตั้งข้อสงสัยไว้ แต่วัดจริงใน Chromium ที่ 1280 / 390 / **320px** แล้ว `scrollWidth` เท่ากับ `innerWidth` ทุกความกว้าง — ไม่มี horizontal overflow ปิดประเด็นนี้ |
 | F-F11 | Medium | `components/imei-check-form.tsx:118` | แสดง `badge--success` เสมอ แม้ `status` จะเป็น `unavailable` → บอกผลผิด |
 | F-F12 | Medium | `app/(app)/layout.tsx:26` | CSRF token ถูกเขียนลง DOM (`<meta>`) — จำเป็นตามสถาปัตยกรรมเดิม แต่ยังไม่มี CSP จึงไม่มีชั้นกันหากเกิด XSS |
 | F-F13 | Medium | `app/(app)/user/orders/page.tsx` | ไม่มี pagination ฝั่ง server (`listOrders` limit 50) — บัญชี reseller จะเห็นไม่ครบ |
@@ -139,6 +139,15 @@ creditIntegrity(): SUM(amount WHERE affects_balance=1) must equal users.credit_c
 | F-F16 | Low | `app/` | ไม่มี `robots.ts`/`sitemap.ts`/OpenGraph image |
 | F-F17 | Low | `components/order-console.tsx:145-158` | เรียก `router.refresh()` สามจุด อาจซ้อนกันระหว่าง poll |
 | F-F18 | Low | `app/(marketing)/layout.tsx` | เรียก `currentSession()` แล้วส่งต่อทั้ง header และ footer — ปัจจุบันเรียกครั้งเดียว ถูกต้องแล้ว แต่หน้า `/check` เรียก `currentSession()` ซ้ำอีกรอบใน page |
+
+### พบเพิ่มระหว่างลงมือแก้ (จากการเปิดเว็บจริงใน Chromium ไม่ใช่จากการอ่านโค้ด)
+
+| ID | Severity | ตำแหน่ง | ประเด็น | สถานะ |
+| --- | --- | --- | --- | --- |
+| F-F19 | **High** | `components/auth-forms.tsx` `GoogleAuthOption` | ปุ่ม Google เป็น `next/link` แต่ `/auth/google` ไม่ใช่หน้า — มันสร้าง OAuth transaction เขียนแถวลง DB และ set cookie Next prefetch ลิงก์ที่อยู่ในจอ **ทุกคนที่แค่เปิดหน้า login จึงเปิด transaction ใหม่หนึ่งรายการ** และ prefetch ที่มาถึงระหว่าง flow จริงจะทับ cookie ที่ flow นั้นใช้อยู่ | แก้แล้ว — เปลี่ยนเป็น `<a>` |
+| F-F20 | Medium | `components/auth-forms.tsx` username field | `pattern="[A-Za-z0-9._-]+"` ไม่ถูกต้องภายใต้ `v` flag ที่ browser ใช้คอมไพล์ attribute นี้ → เบราว์เซอร์ทิ้งทั้ง attribute และ **ไม่ตรวจ field เลย** (ฝั่ง server ยังตรวจอยู่ จึงเป็นการเสีย client-side check เงียบ ๆ ไม่ใช่ช่องโหว่) | แก้แล้ว — escape `\-` |
+| F-F21 | Low | `styles/app.css` | `.alert--success` ถูกอ้างถึงใน `auth-forms.tsx` แต่ **ไม่มี CSS** → ข้อความว่า "สำเร็จ" แสดงด้วยสีเหลืองอำพันของ warning | แก้แล้ว |
+| F-B31 | Medium | `deploy/deploy.sh` · unit | ไม่มี `EnvironmentFile` ทำให้ธงทั้งหมดไม่มีที่ตั้ง (นี่คือ F-B01) และไม่มีขั้นตอนสร้างไฟล์นั้นในสคริปต์ deploy เลย | แก้แล้ว |
 
 ### หมายเหตุ Content UX
 

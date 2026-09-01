@@ -340,6 +340,17 @@ table.grid td.num {
   color: var(--danger);
 }
 
+/* Referenced by the auth forms and the carried-over quote. Without it they
+   rendered in the amber of a warning while saying something had gone right. */
+.alert--success {
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.alert--success svg {
+  color: var(--primary);
+}
+
 /* ---- forms ---------------------------------------------------------- */
 
 .form-grid {

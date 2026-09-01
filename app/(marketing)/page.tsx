@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { ImeiForm } from '@/components/imei-form'
 import { CARRIERS } from '@/lib/catalog'
+import { serviceStatus } from '@/lib/provider'
 import { Icon, type IconName } from '@/components/icons'
 
 const TRUST = [
   { title: 'Remote unlock', caption: 'No cables, software or shop visit' },
-  { title: 'Fast delivery', caption: 'Most services complete within hours' },
+  { title: 'Quoted turnaround', caption: 'The estimate for your network, before you order' },
   { title: 'Permanent result', caption: 'Use the phone with another network' },
   { title: 'Live tracking', caption: 'Follow every order from your account' },
 ]
@@ -21,14 +22,14 @@ const SERVICES: Array<{
     icon: 'device',
     tint: '',
     title: 'Unlock by carrier',
-    body: 'Choose the network that currently holds the lock. We submit the official request against your IMEI and keep the whole process online.',
+    body: 'Choose the network that currently holds the lock. The request is filed against your IMEI with the network that holds it, and the whole process stays online.',
     action: { href: '#check', label: 'Start an unlock' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
     title: 'Check your phone',
-    body: 'Not sure which carrier the phone is locked to? Run a carrier, blacklist or device-status check before placing the unlock order.',
+    body: 'Confirm the IMEI you are about to order against. The free check validates the number itself; carrier, blacklist and device history arrive once an authorised data provider is connected.',
     action: { href: '/check', label: 'Run a phone check' },
   },
   {
@@ -131,6 +132,10 @@ const FAQ = [
 ]
 
 export default function HomePage() {
+  /* Said at the top rather than at the order form. A visitor who cannot
+     order should learn that before they enter their IMEI, not after. */
+  const status = serviceStatus()
+
   return (
     <>
       {/* 02 · Hero */}
@@ -139,8 +144,17 @@ export default function HomePage() {
           <div className="hero-copy">
             <span className="eyebrow">
               <Icon name="shield" strokeWidth={2} />
-              Official remote phone unlocking
+              Remote phone unlocking by IMEI
             </span>
+
+            {status ? (
+              <p className="alert" role="status">
+                <Icon name="info" strokeWidth={1.9} />
+                <span>
+                  <b>{status.heading}.</b> {status.detail}
+                </span>
+              </p>
+            ) : null}
 
             <h1 className="t-hero">
               Unlock your phone today.
@@ -171,7 +185,7 @@ export default function HomePage() {
                 <Icon name="device" strokeWidth={2} />
                 Unlock your phone
               </span>
-              <span className="t-micro">Safe · legal · guaranteed</span>
+              <span className="t-micro">Safe · legal · refunded if refused</span>
             </div>
 
             {/* The same list the order form is built from, so the network a

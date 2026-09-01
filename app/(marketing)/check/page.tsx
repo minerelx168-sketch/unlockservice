@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ImeiCheckForm } from '@/components/imei-check-form'
 import { currentSession } from '@/lib/auth'
+import { serviceStatus } from '@/lib/provider'
 import { Icon } from '@/components/icons'
 
 export const metadata: Metadata = { title: 'Phone Check' }
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function CheckPage() {
   const found = await currentSession()
+  const status = serviceStatus()
 
   return (
     <main className="section">
@@ -23,6 +25,14 @@ export default async function CheckPage() {
             Start with a free format and checksum check. A future authorized provider can add carrier,
             blacklist, warranty and device history data without changing your account or order flow.
           </p>
+          {status ? (
+            <p className="alert" role="status">
+              <Icon name="info" strokeWidth={1.9} />
+              <span>
+                <b>{status.heading}.</b> {status.detail} The free check below is unaffected.
+              </span>
+            </p>
+          ) : null}
           <div className="feature-list">
             <div>
               <span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="shield" /></span>

@@ -223,6 +223,36 @@ export function activeSupplier(): Supplier {
 }
 
 /**
+ * Whether the service can actually place an order right now, and what to
+ * say when it cannot.
+ *
+ * The public pages describe how the unlock works — filed against the IMEI
+ * with the network that holds the lock — and that description is only
+ * honest while a page reading it also says whether the service is running.
+ * Without this, a visitor met the whole funnel and only found out at the
+ * order form.
+ */
+export function serviceStatus(): { accepting: boolean; heading: string; detail: string } | null {
+  if (maintenanceState().active) {
+    return {
+      accepting: false,
+      heading: 'New orders are paused',
+      detail:
+        'We are working on the service. You can still browse, sign in and follow any order already placed.',
+    }
+  }
+  if (!providerConfiguration().enabled) {
+    return {
+      accepting: false,
+      heading: 'Not accepting orders yet',
+      detail:
+        'We are still connecting the supplier that files unlocks with the networks. Nothing can be ordered or charged until that is done.',
+    }
+  }
+  return null
+}
+
+/**
  * Maintenance mode, shaped so the client can count down against the
  * server clock rather than the device clock.
  */
