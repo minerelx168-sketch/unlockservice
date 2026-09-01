@@ -583,7 +583,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(paidReports.listPaidReportProducts().length, 0)
     const seeded = paidReports.getPaidReportProduct('APPLE_BASIC')
     assert.equal(seeded?.isActive, false)
-    assert.equal(seeded?.priceCents, 15)
+    assert.equal(seeded?.priceCents, 5)
     connection
       .prepare("UPDATE paid_report_products SET is_active = 1 WHERE code IN ('APPLE_BASIC', 'BLACKLIST_SIMPLE')")
       .run()
@@ -647,8 +647,8 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     })
     assert.equal(delivered.order.status, 'completed')
     assert.equal(delivered.credit.heldCents, 0)
-    assert.equal(delivered.credit.chargedCents, 15)
-    assert.equal(credits.getBalance(alice.id).creditCents, beforeSuccess.creditCents - 15)
+    assert.equal(delivered.credit.chargedCents, 5)
+    assert.equal(credits.getBalance(alice.id).creditCents, beforeSuccess.creditCents - 5)
     assert.equal(credits.getBalance(alice.id).heldCents, beforeSuccess.heldCents)
     assert.equal(providerCalls, 1)
     assert.equal(paidReports.getPaidReport(1, delivered.order.id), undefined)
@@ -714,7 +714,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
       idempotencyKey: 'paid-refund-1',
     })
     assert.equal(refunded.order.status, 'refunded')
-    assert.equal(refunded.credit.refundedCents, 5)
+    assert.equal(refunded.credit.refundedCents, 1)
     assert.deepEqual(credits.getBalance(alice.id), beforeFailure)
 
     globalThis.fetch = async () => {
@@ -727,10 +727,10 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
       idempotencyKey: 'paid-review-1',
     })
     assert.equal(review.order.status, 'manual_review')
-    assert.equal(credits.getBalance(alice.id).heldCents, beforeAmbiguous.heldCents + 5)
+    assert.equal(credits.getBalance(alice.id).heldCents, beforeAmbiguous.heldCents + 1)
 
-    credits.refund(alice.id, 5, 'paid_imei_report', String(review.order.id))
-    credits.refund(alice.id, 5, 'paid_imei_report', String(review.order.id))
+    credits.refund(alice.id, 1, 'paid_imei_report', String(review.order.id))
+    credits.refund(alice.id, 1, 'paid_imei_report', String(review.order.id))
     assert.equal(paidReports.getPaidReport(alice.id, review.order.id)?.status, 'refunded')
     assert.deepEqual(credits.getBalance(alice.id), beforeAmbiguous)
 
@@ -745,14 +745,14 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.deepEqual(
       paidLedger,
       [
-        { type: 'hold', amount_cents: -15, affects_balance: 0 },
-        { type: 'charge', amount_cents: -15, affects_balance: 1 },
-        { type: 'hold', amount_cents: -15, affects_balance: 0 },
-        { type: 'charge', amount_cents: -15, affects_balance: 1 },
         { type: 'hold', amount_cents: -5, affects_balance: 0 },
-        { type: 'refund', amount_cents: 5, affects_balance: 0 },
+        { type: 'charge', amount_cents: -5, affects_balance: 1 },
         { type: 'hold', amount_cents: -5, affects_balance: 0 },
-        { type: 'refund', amount_cents: 5, affects_balance: 0 },
+        { type: 'charge', amount_cents: -5, affects_balance: 1 },
+        { type: 'hold', amount_cents: -1, affects_balance: 0 },
+        { type: 'refund', amount_cents: 1, affects_balance: 0 },
+        { type: 'hold', amount_cents: -1, affects_balance: 0 },
+        { type: 'refund', amount_cents: 1, affects_balance: 0 },
       ],
     )
 

@@ -14,10 +14,10 @@ export type PaidReportProductSeed = {
 /**
  * Curated candidate products adapted from the imeihub production catalog.
  *
- * The customer price is a proposed integer-cent snapshot, not an activation.
- * Every row is intentionally seeded inactive. An operator must explicitly
- * approve the product/price and add the matching Provider service map before it
- * can accept money or make a Provider request.
+ * The customer price is an integer-cent snapshot from the user-supplied selling
+ * price catalog, not an activation. Every row is intentionally seeded inactive.
+ * An operator must explicitly approve activation and add the matching Provider
+ * service map before it can accept money or make a Provider request.
  */
 export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
   {
@@ -26,7 +26,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Apple iCloud ON / OFF',
     summary: 'Checks whether Find My activation lock is reported as on or off.',
     inputType: 'imei',
-    priceCents: 5,
+    priceCents: 1,
     providerCostMicros: 8_000,
     etaMinutes: 1,
     isActive: false,
@@ -38,7 +38,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Worldwide Blacklist — Simple',
     summary: 'Returns the current worldwide blacklist status reported by the Provider.',
     inputType: 'imei',
-    priceCents: 5,
+    priceCents: 1,
     providerCostMicros: 8_000,
     etaMinutes: 1,
     isActive: false,
@@ -50,7 +50,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Apple Basic Info',
     summary: 'Model and supported device-state fields returned by the Provider.',
     inputType: 'imei',
-    priceCents: 15,
+    priceCents: 5,
     providerCostMicros: 30_000,
     etaMinutes: 1,
     isActive: false,
@@ -62,7 +62,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Apple Warranty & Activation',
     summary: 'Activation, coverage and purchase-date fields returned by the Provider.',
     inputType: 'imei',
-    priceCents: 10,
+    priceCents: 4,
     providerCostMicros: 15_000,
     etaMinutes: 1,
     isActive: false,
@@ -74,7 +74,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Apple Carrier Lite',
     summary: 'Carrier, activation-policy and SIM-lock fields returned by the Provider.',
     inputType: 'imei',
-    priceCents: 20,
+    priceCents: 6,
     providerCostMicros: 40_000,
     etaMinutes: 1,
     isActive: false,
@@ -86,7 +86,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Worldwide Blacklist — Full',
     summary: 'Blacklist status plus supported source, country, date and reason fields.',
     inputType: 'imei',
-    priceCents: 20,
+    priceCents: 5,
     providerCostMicros: 40_000,
     etaMinutes: 5,
     isActive: false,
@@ -98,7 +98,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Samsung Info',
     summary: 'Model, warranty, carrier and country fields returned by the Provider.',
     inputType: 'imei',
-    priceCents: 15,
+    priceCents: 5,
     providerCostMicros: 30_000,
     etaMinutes: 1,
     isActive: false,
@@ -110,7 +110,7 @@ export const PAID_REPORT_PRODUCTS: PaidReportProductSeed[] = [
     name: 'Google Pixel Info',
     summary: 'Model, purchase, warranty and device-age fields returned by the Provider.',
     inputType: 'imei',
-    priceCents: 35,
+    priceCents: 10,
     providerCostMicros: 100_000,
     etaMinutes: 1,
     isActive: false,

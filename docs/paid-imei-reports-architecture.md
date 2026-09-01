@@ -49,7 +49,7 @@ The database stores `imei_fingerprint` and `masked_imei`, never a raw IMEI/seria
 
 ## Catalog and activation
 
-The initial catalog contains the candidate Provider products as inactive rows. Product codes are stable (`APPLE_BASIC`, `APPLE_ICLOUD_STATUS`, `APPLE_WARRANTY`, `APPLE_CARRIER_LITE`, `BLACKLIST_SIMPLE`, `BLACKLIST_FULL`, `SAMSUNG_INFO`, `PIXEL_INFO`). Proposed prices are snapshots only until the owner approves them. Activation requires both an approved catalog flag and an exact `check:<lowercase_code>` mapping. Provider mode remains disabled until an authorized live test.
+The initial catalog contains the candidate Provider products as inactive rows. Product codes are stable (`APPLE_BASIC`, `APPLE_ICLOUD_STATUS`, `APPLE_WARRANTY`, `APPLE_CARRIER_LITE`, `BLACKLIST_SIMPLE`, `BLACKLIST_FULL`, `SAMSUNG_INFO`, `PIXEL_INFO`). Customer price snapshots follow the owner's 2026-09-01 `Selling_price` reference, while activation remains a separate explicit decision. Activation requires both an approved catalog flag and an exact `check:<lowercase_code>` mapping. Provider mode remains disabled until an authorized live test.
 
 ## API and pages
 
