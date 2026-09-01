@@ -47,7 +47,7 @@
 | **ความสมบูรณ์ของเงิน** | `refund`/`hold` ไม่อยู่ใน unique index ที่กัน replay → พิสูจน์ได้ว่าการ refund ซ้ำถูกยอมรับ และไป **ปลดล็อก hold ของออร์เดอร์อื่น** |
 | **Funnel และความเป็นส่วนตัว** | ฟอร์มหน้าแรกส่ง **raw IMEI ผ่าน query string** ไป `/register` ซึ่ง **ไม่อ่านค่านั้นเลย** — ทั้งรั่วและทั้งทำให้ลูกค้าต้องกรอกใหม่ |
 
-สรุปตัวเลข: **Critical 3 · High 9 · Medium 14 · Low 8**
+สรุปตัวเลข: **Critical 4 · High 11 · Medium 22 · Low 11** (frontend 18 · backend 30)
 
 **ยังไม่ควรเปิดรับเงินหรือปลดล็อกจริง** จนกว่า Critical ทั้งสามจะปิด
 
@@ -180,6 +180,8 @@ creditIntegrity(): SUM(amount WHERE affects_balance=1) must equal users.credit_c
 | F-B26 | Low | `lib/credits.ts:56` | คอลัมน์ชื่อ `balance_after_cents` แต่เก็บ `availableCents` — ชื่อกับค่าไม่ตรงกัน ทำให้รายงานอ่านผิดได้ |
 | F-B27 | Low | `lib/provider-api.ts:305` | API key เดินทางใน query string ของ provider (ตามที่ DHRU กำหนด) — เราไม่ได้ log URL จึงยังปลอดภัย แต่ต้องมีกฎห้าม log URL อย่างชัดเจน |
 | F-B28 | Low | ไม่มี audit log ของเหตุการณ์สิทธิ์/การเงิน | `provider_events` ครอบเฉพาะฝั่ง supplier ยังไม่มีตารางบันทึก login/approve/adjust |
+| F-B29 | Medium | `.github/workflows/deploy.yml:5-8` | trigger มีเฉพาะ `push` ไปยัง deploy branch และ `workflow_dispatch` — **ไม่มี `pull_request`** จึงไม่มี CI รันบน PR ใด ๆ เลย โค้ดถูกตรวจครั้งแรกตอนที่มันอยู่บนสายที่จะ deploy แล้ว |
+| F-B30 | Medium | `.github/workflows/deploy.yml:24-26` | job `verify` รัน `lint` + `typecheck` + `build` แต่ **ไม่รัน `npm test`** — เทสต์ทั้ง 11 ตัวไม่เคยถูกรันใน CI (ประกอบกับ F-B21 ที่ทำให้คำสั่งนี้ล้มแบบเงียบอยู่แล้ว) |
 
 ### หลักฐานของ F-B03
 
@@ -385,7 +387,8 @@ focus ring จะเปลี่ยนเป็นวงแหวนสองช
 | 0.7 | OAuth: ไม่ auto-merge เข้าบัญชีที่มีรหัสผ่านและยังไม่พิสูจน์อีเมล | F-B09 |
 | 0.8 | Caddy: CSP (nonce) + Permissions-Policy + COOP + rate limit · Origin check ใน `guard()` | F-B10, F-B11, F-F12 |
 | 0.9 | แก้สำเนาหน้าแรกให้ตรงข้อเท็จจริง + แสดงสถานะ maintenance/provider-disabled บนหน้าแรก | F-F01 |
-| 0.10 | เอา raw IMEI ออกจาก URL (ใช้ short-lived quote id ฝั่ง server) และให้ `/register` รับค่าต่อ | F-F02, F-F03 |
+| 0.10 | เพิ่ม `pull_request` trigger และ `npm test` ลงใน workflow `verify` เพื่อให้เฟสถัด ๆ ไปมีตาข่ายรองรับ | F-B21, F-B29, F-B30 |
+| 0.11 | เอา raw IMEI ออกจาก URL (ใช้ short-lived quote id ฝั่ง server) และให้ `/register` รับค่าต่อ | F-F02, F-F03 |
 
 **เฟส 1 — Design tokens** (ต้องได้อนุมัติหัวข้อ 7 ก่อน): เพิ่มชุด token ใหม่ + alias + focus ring + `--color-border-control`
 
