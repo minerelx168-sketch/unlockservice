@@ -148,6 +148,8 @@ creditIntegrity(): SUM(amount WHERE affects_balance=1) must equal users.credit_c
 | F-F20 | Medium | `components/auth-forms.tsx` username field | `pattern="[A-Za-z0-9._-]+"` ไม่ถูกต้องภายใต้ `v` flag ที่ browser ใช้คอมไพล์ attribute นี้ → เบราว์เซอร์ทิ้งทั้ง attribute และ **ไม่ตรวจ field เลย** (ฝั่ง server ยังตรวจอยู่ จึงเป็นการเสีย client-side check เงียบ ๆ ไม่ใช่ช่องโหว่) | แก้แล้ว — escape `\-` |
 | F-F21 | Low | `styles/app.css` | `.alert--success` ถูกอ้างถึงใน `auth-forms.tsx` แต่ **ไม่มี CSS** → ข้อความว่า "สำเร็จ" แสดงด้วยสีเหลืองอำพันของ warning | แก้แล้ว |
 | F-B31 | Medium | `deploy/deploy.sh` · unit | ไม่มี `EnvironmentFile` ทำให้ธงทั้งหมดไม่มีที่ตั้ง (นี่คือ F-B01) และไม่มีขั้นตอนสร้างไฟล์นั้นในสคริปต์ deploy เลย | แก้แล้ว |
+| F-F22 | Medium | `styles/components.css` 693-694, 770, 781, 820 · `styles/app.css` 636 | README ระบุว่า "Tokens are the only place a colour is written · No component hard-codes a hex" แต่**ไม่จริง** — มี 5 จุดที่ hardcode สี (radial wash ของ hero, พื้น `.band` `#0d3b29`, `.band .kicker`, `.band-row svg`, และ fallback ของ `--shadow-xs` ที่ token นั้นไม่มีอยู่จริง) ทำให้เปลี่ยน palette แล้วสีเดิมค้าง | แก้แล้ว — tokenise ครบ ตอนนี้ `grep` หา hex นอก `tokens.css` ได้ศูนย์รายการ |
+| F-F23 | Medium | `styles/base.css` focus | `:focus-visible` มี specificity เท่ากับ `.button--primary` และอยู่ก่อนใน source order → **box-shadow ของปุ่มทับ focus ring** บนปุ่มหลักของทุกหน้า | แก้แล้ว — two-ring + specificity ที่ชนะ |
 
 ### หมายเหตุ Content UX
 

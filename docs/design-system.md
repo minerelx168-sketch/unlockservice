@@ -21,7 +21,7 @@ Copying hex values gets you a palette, not the feel.
    black. It reads as ambient light, not elevation. No ramp: this one or the 80px version.
 4. **Headlines are huge and tracked tight.** −0.058em at the hero with line-height 0.98, and the
    negative tracking scales down with the size to nothing at body.
-5. **Colour is rationed.** Long stretches of near-white, then one saturated moment. The moss hue
+5. **Colour is rationed.** Long stretches of near-white, then one saturated moment. The slate hue
    appears only as a small uppercase kicker — never as a fill.
 6. **Whites are tinted, blacks are not black.** Surfaces carry a warm cast; the darkest ink is
    `#14241B`. Nothing is `#000` or a neutral grey, so the page sits in one temperature.
@@ -35,45 +35,64 @@ All in `styles/tokens.css`. Light on `:root`; dark redefines the same names once
 
 ### Surfaces and ink
 
-| Token | Light | Dark |
-| --- | --- | --- |
-| `--page` | `#FFFFFF` | `#0E1310` |
-| `--page-soft` | `#F8F7F3` | `#121814` |
-| `--page-tint` | `#F1EFE6` | `#18201A` |
-| `--numeral` | `#F1EFE6` | `#26312A` |
-| `--surface` | `#FFFFFF` | `#161D18` |
-| `--surface-strong` | `#FAF9F5` | `#1B231D` |
-| `--line` | `#E4E2D9` | `#2A332C` |
-| `--line-strong` | `#D2CFC2` | `#3F4B42` |
-| `--faint` | `#79857E` | `#7D8C82` |
-| `--muted` | `#68736A` | `#99A89D` |
-| `--ink` | `#2F3D34` | `#DBE4DC` |
-| `--ink-strong` | `#14241B` | `#F2F7F2` |
+Values live on the `--color-*` names; the names below are what the components
+were written in and resolve to them, so a palette change is one block in
+`styles/tokens.css` and nothing in `components.css` moves.
+
+| Token | Palette name | Light | Dark |
+| --- | --- | --- | --- |
+| `--page` | `--color-bg` | `#F4F6FA` | `#0C1219` |
+| `--page-soft` | `--color-bg-soft` | `#EEF2F8` | `#101820` |
+| `--page-tint` | `--color-bg-tint` | `#E4EAF3` | `#1D2833` |
+| `--numeral` | `--color-bg-tint` | `#E4EAF3` | `#1D2833` |
+| `--surface` | `--color-surface` | `#FFFFFF` | `#12181F` |
+| `--surface-strong` | `--color-surface-elevated` | `#F8FAFC` | `#171F28` |
+| `--line` | `--color-border` | `#DDE3EC` | `#232C36` |
+| `--line-strong` | `--color-border-strong` | `#C3CCDA` | `#38434F` |
+| — | `--color-border-control` | `#7C8BA3` | `#647280` |
+| `--faint` | `--color-text-faint` | `#7B8AA0` | `#7C8EA4` |
+| `--muted` | `--color-text-muted` | `#55647A` | `#9FB0C4` |
+| `--ink` | `--color-text-body` | `#26364A` | `#CBD7E4` |
+| `--ink-strong` | `--color-text` | `#0E1A2B` | `#E6EDF6` |
+
+`--line` is a hairline between panels and is decorative, so it may be quiet.
+`--color-border-control` is the edge of something you type into, which WCAG
+2.2 counts as a non-text component and holds to 3:1 — it is visibly darker
+for that reason, not by accident.
 
 ### Accents
 
-| Role | Token | Light | Dark |
-| --- | --- | --- | --- |
-| Primary (emerald) | `--primary` | `#0F7A52` | `#4CC08A` |
-| Primary hover | `--primary-dark` | `#0B5F40` | `#6FD3A3` |
-| Primary tint | `--primary-soft` | `#E6F2EA` | `#10301F` |
-| Secondary (amber) | `--accent` | `#D97B1E` | `#EDA553` |
-| Secondary hover | `--accent-dark` | `#B86211` | `#F4BB78` |
-| Secondary tint | `--accent-soft` | `#FDF1E1` | `#362313` |
-| Kicker (moss) | `--moss` | `#516F34` | `#A9C47A` |
-| Kicker tint | `--moss-soft` | `#EEF3E2` | `#212B18` |
-| Success | `--success` | `#16845D` | `#72D9AF` |
-| Warning | `--warning` | `#B8640F` | `#F0BD67` |
-| Danger | `--danger` | `#B03A2B` | `#E58A7C` |
-| Label on emerald fill | `--on-primary` | `#FFFFFF` | `#0B1410` |
-| Label on amber fill | `--on-accent` | `#14241B` | `#0B1410` |
+| Role | Token | Light | Dark | On surface |
+| --- | --- | --- | --- | --- |
+| Primary (signal blue) | `--primary` | `#1A4FD6` | `#5B9BFF` | 6.70 / 8.26 |
+| Primary hover | `--primary-dark` | `#143FAD` | `#7FB2FF` | — |
+| Primary tint | `--primary-soft` | `#E8EEFC` | `#12233D` | — |
+| Secondary (teal) | `--accent` | `#00707F` | `#4FD8F0` | 5.79 / — |
+| Secondary hover | `--accent-dark` | `#005A66` | `#86E6F7` | — |
+| Secondary tint | `--accent-soft` | `#E2F3F6` | `#0D2A30` | — |
+| Kicker (slate) | `--moss` | `#33507A` | `#9DB8DD` | 8.17 / — |
+| Kicker tint | `--moss-soft` | `#EAEFF7` | `#182432` | — |
+| Band and footer ground | `--color-brand-secondary` | `#0B1F3A` | `#0B1F3A` | white 16.52 |
+| Success | `--success` | `#0E7A4B` | `#4FD39B` | 5.38 / 9.46 |
+| Warning | `--warning` | `#8A4B00` | `#F0B95C` | 6.80 / 10.03 |
+| Danger | `--danger` | `#B3261E` | `#F08C7F` | 6.54 / 7.45 |
+| Focus ring | `--color-focus` | `#1A4FD6` | `#7FB2FF` | 6.19 / 8.70 |
+| Label on primary fill | `--on-primary` | `#FFFFFF` | `#08121F` | 6.70 / 6.79 |
+| Label on secondary fill | `--on-accent` | `#FFFFFF` | `#04191D` | 5.79 / 10.68 |
 
-White on amber is only 3.1:1, so a filled amber button carries ink in both themes — that is what
-`--on-accent` exists for. Every other text pair clears 4.5:1 on the surface it sits on; `--faint` is
-the one exception and is decorative only (placeholders, window chrome), never copy a reader needs.
+Every text pair clears 4.5:1 against the surface it actually sits on rather
+than against white, and every control edge and the focus ring clear 3:1.
+`--faint` is the one exception and is decorative only — placeholders and
+window chrome, never copy a reader needs.
 
-Amber is the **second** action, never the first. Emerald and amber never both act as primary in the
-same block.
+Teal is the **second** action, never the first, and never a large field: it
+belongs to kickers, underlines and the one secondary button in a block. The
+navy is a ground, not a button. Success, warning and danger are far enough
+from all three that a state is never read as a brand colour.
+
+The focus ring is **two rings** — the page ground, then the focus colour —
+because a single ring in the brand colour disappears on a button filled with
+that same colour, which is the primary action on every page.
 
 ### Depth
 
@@ -117,7 +136,7 @@ uses `rgba(255,255,255,.06)` fills and `rgba(255,255,255,.14)` borders instead o
 | Body | 16px / 1.65 `--ink` | 400 | — |
 | Body small | 15px / 1.65 `--muted` | 400 | — |
 | Nav / link | 13px | 620 | — |
-| Kicker | 11px uppercase `--moss` | 740 | +0.09em |
+| Kicker | 11px uppercase `--moss` (slate) | 740 | +0.09em |
 | Eyebrow pill | 11px uppercase | 720 | +0.045em |
 | Micro caption | 9px uppercase `--faint` | 700 | +0.14em |
 
@@ -135,8 +154,8 @@ Class names live in `styles/components.css`.
 | `.button--accent` | `--accent` fill, radius 14, min-height 46, shadow at 20% of its own hue |
 | `.button--primary` | `--primary` fill, radius 14, **min-height 52**, pad 10/21 — the only 52px control |
 | `.icon-action` | 40×40, radius 13, 1px `--line`, glyph 17px |
-| `.eyebrow` | pill 999, pad 7/10, moss on `--moss-soft`, 1px tinted border |
-| `.kicker` | 11px w740 +0.09em uppercase, moss, icon 14px, gap 7, no background |
+| `.eyebrow` | pill 999, pad 7/10, slate on `--moss-soft`, 1px tinted border |
+| `.kicker` | 11px w740 +0.09em uppercase, slate, icon 14px, gap 7, no background |
 | `.icon-tile` | 68×68, radius 22, glyph 28px line-style, tint by category, no border or shadow |
 | `.card` | radius 26, pad 30, 1px `--line`, `--shadow-soft` |
 | `.card--benefit` | min-height 310 so ragged copy never breaks the row; ends with an 11px link |
@@ -147,9 +166,9 @@ Class names live in `styles/components.css`.
 | `.field` | radius 14, min-height 50, mono value at +0.06em, 11px uppercase label |
 | `.data-table` | 10px uppercase head on `--surface-strong`, mono identifiers masked to first 2 + last 4 |
 | `.faq-item` | radius 24, pad 18/22, 26×26 toggle on `--primary-soft`, rotated 45° when open |
-| `.cta` | contained panel, radius 28, pad 40/44 on `--primary-soft` with a moss radial |
+| `.cta` | contained panel, radius 28, pad 40/44 on `--primary-soft` with a slate radial |
 
-The icon tint is the category signal: emerald = identity, amber = accounts and locks, moss =
+The icon tint is the category signal: blue = identity, teal = accounts and locks, slate =
 delivery. Same box, same glyph weight; only the pairing changes.
 
 ---
@@ -185,7 +204,7 @@ What was kept from the captured system, and what was replaced to make it ours.
 | 1px hairlines, radius 11–28, one wide soft shadow | Nothing — geometry is craft, not brand |
 | Constant section padding, 1180px shell, kicker → headline → lead | Padding tuned to 104px, fluid gutter across three breakpoints |
 | Tinted whites, ink that is never black | Cast moved cool teal → warm: `#F8F7F3` instead of `#F5FAFA` |
-| One primary, one secondary, rationed accents | Blue + coral → emerald `#0F7A52` + amber `#D97B1E`, moss for kickers |
+| One primary, one secondary, rationed accents | Blue + coral → signal blue `#1A4FD6` + teal `#00707F`, slate for kickers, navy `#0B1F3A` for the band |
 | Display face over a plainer body face, tight tracking at scale | Google Sans Flex → Bricolage Grotesque + Instrument Sans |
 | Full dark theme from one token block | Same mechanism, own values — green-black instead of teal-black |
 

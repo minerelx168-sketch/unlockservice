@@ -97,7 +97,9 @@ sessions so the new role is loaded only after a fresh sign-in.
 ## Conventions
 
 - **Tokens are the only place a colour is written.** No component hard-codes a hex, and
-  `styles/globals.css` is the one import that pulls the sheets in dependency order.
+  `styles/globals.css` is the one import that pulls the sheets in dependency order. Within
+  `tokens.css` there are two layers: the `--color-*` palette holds the values, and the names the
+  components were written in resolve to it — so re-skinning is one block, not a sweep.
 - **Dark mode is one block.** `:root[data-theme='dark']` redefines the same names, re-pitched per
   role rather than inverted. A small inline script in each page head stamps the attribute before
   first paint so a dark reload never flashes white — which is why `<html>` carries
@@ -124,10 +126,16 @@ sessions so the new role is loaded only after a fresh sign-in.
 ## Re-skinning
 
 Palette, type and marks are the parts that are ours rather than the captured system's, so they are
-the parts meant to change. To re-skin: edit the palette and `--font-*` blocks in
-`styles/tokens.css`, drop replacement faces into `public/fonts/`, and swap the shield glyph in
-`components/icons.tsx`. Nothing in `styles/components.css` needs to change — its radii, control heights
-and shadow spreads are the transferred geometry.
+the parts meant to change. To re-skin: edit the `--color-*` block and the `--font-*` block in
+`styles/tokens.css`, drop replacement faces into `public/fonts/`, and swap the mark in
+`components/icons.tsx`. Only the `--color-*` names hold values; everything else in that file points
+at them, so a whole new identity is one block. Nothing in `styles/components.css` needs to change —
+its radii, control heights and shadow spreads are the transferred geometry.
+
+The current identity is **Signal Blue**: a deep navy (`#0B1F3A`) carries the band and the footer,
+the call to action is a saturated blue (`#1A4FD6`) with white on it, and a teal (`#00707F`) is
+rationed to kickers, underlines and the second action — never a large field. Forms sit on white so
+they stay the easiest thing on the page to read.
 
 The brand is **iUnlockMobile** (iunlockmobile.com). The name appears in page copy, the `<title>`,
 the footer and the lockup in `components/brand.tsx`; the mark itself is the `unlockMark` entry in
@@ -144,6 +152,12 @@ transfer, the 7-day activity chart on the dashboard, server-side pagination in O
 ## Accessibility
 
 Every text/background pair clears 4.5:1 in both themes, checked against the surface each one
-actually sits on. `--faint` is the single exception and is decorative only — placeholders and window
-chrome, never copy a reader needs. White on amber is 3.1:1, so a filled amber button carries ink
-instead; that is what `--on-accent` is for.
+actually sits on, and every control edge and the focus ring clear the 3:1 that WCAG 2.2 asks of a
+non-text component. `--faint` is the single exception and is decorative only — placeholders and
+window chrome, never copy a reader needs.
+
+Two decisions come out of that. Form controls take `--color-border-control` rather than the panel
+hairline, because a hairline quiet enough to sit between two cards is far too quiet to be the edge
+of something you type into. And the focus ring is two rings — the page ground, then the focus colour
+— because a single ring in the brand colour vanishes on a button filled with that same colour,
+which is the primary action on every page.

@@ -61,10 +61,29 @@ button {
   cursor: pointer;
 }
 
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 3px;
-  border-radius: 6px;
+/**
+ * Two rings, not one. A single ring in the brand colour vanished the moment
+ * it landed on a button filled with that same colour — which is the primary
+ * action on every page. The inner ring is the page ground, so there is an
+ * edge between the control and the ring whatever the control is filled
+ * with.
+ */
+/* Doubled deliberately. A single :focus-visible ties with .button--primary
+   on specificity and loses on source order, so the button's own drop shadow
+   replaced the ring — on the one control that most needed it. */
+:focus-visible:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--page),
+    0 0 0 4px var(--color-focus);
+}
+
+/* Forced-colours modes discard box-shadow; give them a real outline. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
 }
 
 ::selection {
