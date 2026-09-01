@@ -712,3 +712,60 @@ test('only one settlement of an order moves money', async () => {
   assert.equal(balance.creditCents, 50_000 - placed.priceCents)
   assert.equal(credits.creditIntegrity().mismatches, 0)
 })
+
+test('the production switches are closed unless they are opened by hand', async () => {
+  const provider = await import('../lib/provider')
+  const originalNodeEnv = process.env.NODE_ENV
+
+  assert.equal(payments.selfApprovalEnabled(), false, 'self-approval is off without the flag')
+  process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE = '1'
+  assert.equal(payments.selfApprovalEnabled(), true)
+
+  /* An unset NODE_ENV used to read as "not production" and hand every account
+     the ability to confirm its own invoice. A missing variable means off. */
+  delete process.env.NODE_ENV
+  assert.equal(payments.selfApprovalEnabled(), true, 'still opt-in, not inferred')
+  delete process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE
+  assert.equal(payments.selfApprovalEnabled(), false)
+
+  Object.assign(process.env, { NODE_ENV: 'production' })
+  process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE = '1'
+  assert.equal(payments.selfApprovalEnabled(), false, 'production never self-approves')
+  delete process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE
+
+  /* The mock invents unlock codes, and the pipeline charges for them either
+     way, so production refuses to hand it back at all. */
+  assert.throws(() => provider.activeSupplier(), /no supplier is configured/)
+
+  const user = auth.authenticate('alice', 'correct-horse-battery-staple')
+  const heldBefore = credits.getBalance(user.id).heldCents
+  const ordersBefore = database.db().prepare('SELECT COUNT(*) AS count FROM orders').get() as {
+    count: number
+  }
+  await assert.rejects(
+    orders.submitOrder(user.id, {
+      kind: 'carrier_unlock',
+      brandId: 1,
+      carrierId: 101,
+      imei: '354909000000095',
+      email: 'alice@example.com',
+    }),
+    (error: unknown) => error instanceof orders.OrderError && error.code === 'supplier_unconfigured',
+  )
+  const ordersAfter = database.db().prepare('SELECT COUNT(*) AS count FROM orders').get() as {
+    count: number
+  }
+  assert.equal(ordersAfter.count, ordersBefore.count, 'no order is left held against no supplier')
+  assert.equal(credits.getBalance(user.id).heldCents, heldBefore)
+
+  /* An HMAC keyed with a constant from the source is reversible over the
+     million serials behind a known TAC, so production needs a real key. */
+  await assert.rejects(
+    imeiChecks.createImeiCheck(user.id, { imei: '354909000000095' }),
+    (error: unknown) =>
+      error instanceof imeiChecks.ImeiCheckError && error.code === 'provider_not_ready',
+  )
+
+  if (originalNodeEnv === undefined) delete process.env.NODE_ENV
+  else Object.assign(process.env, { NODE_ENV: originalNodeEnv })
+})

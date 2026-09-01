@@ -159,8 +159,17 @@ export function submitPaymentReference(
   return getInvoice(reference, userId)!
 }
 
+/**
+ * This button mints credit, so it is switched on by hand or not at all.
+ *
+ * It used to fall back to `NODE_ENV !== 'production'`, which reads as a
+ * development convenience but is a default-open switch: an unset NODE_ENV
+ * — a systemd unit missing one line — handed every account the ability to
+ * confirm its own invoice. A missing variable now means off.
+ */
 export function selfApprovalEnabled(): boolean {
-  return process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE === '1' || process.env.NODE_ENV !== 'production'
+  if (process.env.NODE_ENV === 'production') return false
+  return process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE === '1'
 }
 
 /** Trusted confirmation. Duplicate confirmation is a no-op. */

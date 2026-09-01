@@ -27,7 +27,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, check }, { status: 201 })
   } catch (error) {
     if (error instanceof ImeiCheckError) {
-      const status = error.code === 'rate_limited' ? 429 : 400
+      const status =
+        error.code === 'rate_limited' ? 429 : error.code === 'provider_not_ready' ? 503 : 400
       return NextResponse.json({ success: false, error: error.message, code: error.code }, { status })
     }
     throw error

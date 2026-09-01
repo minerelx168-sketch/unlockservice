@@ -200,8 +200,26 @@ const configuredSupplier: Supplier = {
   },
 }
 
+/**
+ * The mock derives an unlock code from a hash of the IMEI. That is exactly
+ * what a demo needs and exactly what a paying customer must never receive,
+ * and the order pipeline charges credit either way — so production refuses
+ * it outright rather than quietly selling a fabricated code.
+ *
+ * This throws instead of returning an unavailable result because an
+ * unavailable order refunds and closes, which would read as "the carrier
+ * said no". The truth is that the operator has not finished configuring the
+ * service, and the order should stay unplaced until they have.
+ */
 export function activeSupplier(): Supplier {
-  return providerConfiguration().enabled ? configuredSupplier : mockSupplier
+  if (providerConfiguration().enabled) return configuredSupplier
+  if (process.env.NODE_ENV === 'production' && process.env.IUNLOCKMOBILE_ALLOW_MOCK_SUPPLIER !== '1') {
+    throw new Error(
+      'no supplier is configured: set IUNLOCKMOBILE_PROVIDER_MODE and its credentials, ' +
+        'or keep IUNLOCKMOBILE_MAINTENANCE=1 so no order is accepted',
+    )
+  }
+  return mockSupplier
 }
 
 /**

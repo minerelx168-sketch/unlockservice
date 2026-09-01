@@ -62,10 +62,29 @@ export class ImeiCheckError extends Error {
 const CHECK_RATE_LIMIT = 12
 const CHECK_WINDOW_SECONDS = 60 * 60
 const POLL_DEBOUNCE_MS = 5_000
-const FINGERPRINT_SECRET = process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET ?? 'local-imei-check-fingerprint-v1'
+const DEVELOPMENT_FINGERPRINT_SECRET = 'local-imei-check-fingerprint-v1'
+
+/**
+ * The point of storing a fingerprint rather than the IMEI is that the row
+ * cannot be turned back into the number. An HMAC keyed with a constant that
+ * ships in the source gives that away: the serial space behind a known TAC
+ * is only a million wide, so anyone holding the database and this file can
+ * enumerate it. In production the key has to be a real one.
+ */
+function fingerprintSecret(): string {
+  const configured = process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET?.trim()
+  if (configured && configured.length >= 32) return configured
+  if (process.env.NODE_ENV === 'production') {
+    throw new ImeiCheckError(
+      'IMEI checks are unavailable until the service is fully configured.',
+      'provider_not_ready',
+    )
+  }
+  return configured || DEVELOPMENT_FINGERPRINT_SECRET
+}
 
 function fingerprint(imei: string) {
-  return createHmac('sha256', FINGERPRINT_SECRET).update(imei).digest('hex')
+  return createHmac('sha256', fingerprintSecret()).update(imei).digest('hex')
 }
 
 function parseResult(value: string | null): Record<string, unknown> | null {

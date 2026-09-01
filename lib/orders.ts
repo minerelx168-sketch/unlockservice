@@ -277,6 +277,19 @@ export async function submitOrder(
 ): Promise<OrderPayload> {
   if (maintenanceState().active) throw new OrderError(maintenanceState().message, 'maintenance')
 
+  /* Resolved before a row exists. activeSupplier() refuses to hand back the
+     mock in production, and discovering that after the hold was taken would
+     leave an order held against a supplier that was never going to run. */
+  let supplier
+  try {
+    supplier = activeSupplier()
+  } catch {
+    throw new OrderError(
+      'New orders are paused while the service is being configured. Nothing has been charged.',
+      'supplier_unconfigured',
+    )
+  }
+
   const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
   if (idempotencyKey) {
     const existing = orderForKey(userId, idempotencyKey)
@@ -364,7 +377,6 @@ export async function submitOrder(
       .run(config.name, mapping.mode, mapping.id, orderId)
     order = getOrder(orderId, userId)!
   }
-  const supplier = activeSupplier()
   let result
   try {
     result = await supplier.submit(requestFor(order, brand))
@@ -416,7 +428,15 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
   const brand = order.brand_id ? getBrand(order.brand_id) : undefined
   if (!brand) return resting
 
-  const supplier = activeSupplier()
+  let supplier
+  try {
+    supplier = activeSupplier()
+  } catch {
+    /* Reading an order must keep working while the operator sorts the
+       supplier out; the order simply stays where it is. */
+    return resting
+  }
+
   let result
   try {
     result = await supplier.poll(order.provider_order_id ?? '', requestFor(order, brand))
