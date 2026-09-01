@@ -26,7 +26,13 @@ export async function POST(request: Request) {
     return NextResponse.json(payload)
   } catch (error) {
     if (error instanceof OrderError) {
-      return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: 400 })
+      const status =
+        error.code === 'rate_limited'
+          ? 429
+          : error.code === 'maintenance' || error.code === 'supplier_unconfigured'
+            ? 503
+            : 400
+      return NextResponse.json({ success: false, error: error.message, code: error.code }, { status })
     }
     throw error
   }

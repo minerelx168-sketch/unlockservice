@@ -15,6 +15,8 @@ iunlockmobile.com, unlockservice.34-138-231-163.sslip.io {
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
         Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+        Cross-Origin-Opener-Policy "same-origin"
         -Server
     }
 

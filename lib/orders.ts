@@ -11,6 +11,7 @@ import { IMEI_LENGTH, luhnValid, normalizeImei } from './imei'
 import { activeSupplier, maintenanceState, type SupplierResult, type UnlockRequest } from './provider'
 import { providerConfiguration, unlockProviderService } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { consumeAttempt } from './rate-limit'
 
 /**
  * The order pipeline.
@@ -20,6 +21,9 @@ import { recordProviderEvent } from './provider-events'
  * releases the hold untouched — that is the money-back guarantee, enforced
  * by the ledger rather than by a promise on a page.
  */
+
+const ORDER_RATE_LIMIT = 60
+const ORDER_RATE_WINDOW_SECONDS = 60 * 60
 
 export class OrderError extends Error {
   constructor(message: string, readonly code: string) {
@@ -294,6 +298,15 @@ export async function submitOrder(
   if (idempotencyKey) {
     const existing = orderForKey(userId, idempotencyKey)
     if (existing) return restingPayload(existing, getBalance(userId).availableCents)
+  }
+
+  /* Each accepted order costs a real supplier request, so the endpoint gets
+     a ceiling of its own. It is set well above what a person ordering for
+     themselves would reach; a reseller working through a batch will feel it
+     before an abusive script gets anywhere expensive. A resend recognised
+     by its key never reaches this. */
+  if (!consumeAttempt('order-submit', String(userId), ORDER_RATE_LIMIT, ORDER_RATE_WINDOW_SECONDS)) {
+    throw new OrderError('Too many orders in the last hour. Please try again shortly.', 'rate_limited')
   }
 
   const brand = getBrand(input.brandId)

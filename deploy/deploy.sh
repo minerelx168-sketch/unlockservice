@@ -64,6 +64,19 @@ npm ci
 say "Building"
 npm run build
 
+# ---- environment ------------------------------------------------------
+# The unit requires this file, so put the paused defaults in place before
+# the first start. An existing file is never touched: it holds the
+# operator's real values and this script must not overwrite them.
+ENV_FILE="${ENV_FILE:-/etc/iunlockmobile.env}"
+if [ -f "$ENV_FILE" ]; then
+  say "Keeping the existing $ENV_FILE"
+else
+  say "Installing $ENV_FILE with paused defaults"
+  sudo install -m 600 -o root -g root "$APP_DIR/deploy/iunlockmobile.env.example" "$ENV_FILE"
+  echo "  Edit it before the service takes money: sudo nano $ENV_FILE"
+fi
+
 # ---- system units -----------------------------------------------------
 say "Installing systemd units and the Caddy site"
 sudo install -m 644 "$APP_DIR/deploy/unlockservice.service" /etc/systemd/system/unlockservice.service

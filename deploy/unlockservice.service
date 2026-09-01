@@ -12,15 +12,33 @@ Environment=NODE_ENV=production
 Environment=HOSTNAME=127.0.0.1
 Environment=PORT=3000
 Environment=IUNLOCKMOBILE_DB=/home/ubuntu/apps/unlockservice/data/iunlockmobile.db
+# Everything else — the maintenance flag, the supplier, the fingerprint key,
+# the wallet, the mail and OAuth credentials — is read from here. No leading
+# dash: a box with no environment file has none of those set, and starting
+# anyway is how a service ends up quietly running unconfigured. deploy.sh
+# installs the file with paused defaults on a first run.
+EnvironmentFile=/etc/iunlockmobile.env
 ExecStart=/usr/local/bin/npm run start -- --hostname 127.0.0.1
 Restart=always
 RestartSec=5
 TimeoutStopSec=30
 NoNewPrivileges=true
 PrivateTmp=true
+# ProtectSystem stays at full and ProtectHome at false because the app, its
+# build output and its database all live under /home/ubuntu.
 ProtectSystem=full
 ProtectHome=false
 ReadWritePaths=/home/ubuntu/apps/unlockservice/data /home/ubuntu/apps/unlockservice/.next
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+SystemCallArchitectures=native
+UMask=0077
 
 [Install]
 WantedBy=multi-user.target
