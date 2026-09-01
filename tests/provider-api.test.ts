@@ -80,7 +80,7 @@ test('provider core keeps disabled mode safe and normalizes sync plus DHRU respo
       assert.equal(sync.data.Brand, 'Apple')
       assert.equal(sync.data.Model, 'iPhone 15')
       assert.equal(sync.data.IMEI, '490154203237518')
-      const report = buildProviderReport('apple_warranty', 'unlock-service', sync.data)
+      const report = buildProviderReport('APPLE_BASIC', 'unlock-service', sync.data)
       const serialized = JSON.stringify(report)
       assert.equal(report.schemaVersion, 1)
       assert.match(report.title, /iPhone 15/i)

@@ -1,6 +1,6 @@
-import { createHmac } from 'node:crypto'
 import { db } from './db'
 import { isValidImei, maskIdentifier, normalizeImei } from './imei'
+import { fingerprintImei } from './imei-privacy'
 import { activeImeiCheckProvider, type ImeiCheckResult } from './imei-check-provider'
 import { imeiProviderService, providerConfiguration } from './provider-api'
 import { recordProviderEvent } from './provider-events'
@@ -62,12 +62,6 @@ export class ImeiCheckError extends Error {
 const CHECK_RATE_LIMIT = 12
 const CHECK_WINDOW_SECONDS = 60 * 60
 const POLL_DEBOUNCE_MS = 5_000
-const FINGERPRINT_SECRET = process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET ?? 'local-imei-check-fingerprint-v1'
-
-function fingerprint(imei: string) {
-  return createHmac('sha256', FINGERPRINT_SECRET).update(imei).digest('hex')
-}
-
 function parseResult(value: string | null): Record<string, unknown> | null {
   if (!value) return null
   try {
@@ -202,7 +196,7 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
     )
     .run(
       userId,
-      fingerprint(imei),
+      fingerprintImei(imei),
       maskIdentifier(imei),
       provider.name,
       providerMode,

@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import Database from 'better-sqlite3'
 import { BRANDS, CARRIERS, DEVICE_SERVICES } from './catalog'
 import { toCents } from './money'
+import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 
 /**
  * SQLite so the whole thing runs with `npm run dev` and nothing to
@@ -215,9 +216,58 @@ CREATE TABLE IF NOT EXISTS api_access (
 		  updated_at              TEXT    NOT NULL DEFAULT (datetime('now'))
 		);
 		CREATE INDEX IF NOT EXISTS imei_checks_user ON imei_checks(user_id, created_at DESC);
-		CREATE INDEX IF NOT EXISTS imei_checks_fingerprint ON imei_checks(imei_fingerprint, created_at DESC);
+			CREATE INDEX IF NOT EXISTS imei_checks_fingerprint ON imei_checks(imei_fingerprint, created_at DESC);
 
-				CREATE TABLE IF NOT EXISTS provider_events (
+      CREATE TABLE IF NOT EXISTS paid_report_products (
+        code                 TEXT PRIMARY KEY,
+        slug                 TEXT NOT NULL UNIQUE,
+        name                 TEXT NOT NULL,
+        summary              TEXT NOT NULL,
+        input_type           TEXT NOT NULL DEFAULT 'imei',
+        price_cents          INTEGER NOT NULL CHECK (price_cents > 0),
+        provider_cost_micros INTEGER NOT NULL DEFAULT 0 CHECK (provider_cost_micros >= 0),
+        eta_minutes          INTEGER NOT NULL DEFAULT 1 CHECK (eta_minutes > 0),
+        is_active            INTEGER NOT NULL DEFAULT 0 CHECK (is_active IN (0, 1)),
+        sort_order           INTEGER NOT NULL DEFAULT 0,
+        created_at           TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at           TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      CREATE INDEX IF NOT EXISTS paid_report_products_active
+        ON paid_report_products(is_active, sort_order, code);
+
+      CREATE TABLE IF NOT EXISTS paid_report_orders (
+        id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id                 INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        product_code            TEXT NOT NULL REFERENCES paid_report_products(code) ON DELETE RESTRICT,
+        product_name            TEXT NOT NULL,
+        input_type              TEXT NOT NULL DEFAULT 'imei',
+        imei_fingerprint        TEXT NOT NULL,
+        masked_imei             TEXT NOT NULL,
+        status                  TEXT NOT NULL DEFAULT 'processing',
+        price_cents             INTEGER NOT NULL CHECK (price_cents > 0),
+        provider_cost_micros    INTEGER NOT NULL DEFAULT 0 CHECK (provider_cost_micros >= 0),
+        source                  TEXT NOT NULL DEFAULT 'website',
+        idempotency_key         TEXT,
+        report_json             TEXT,
+        provider_order_id       TEXT,
+        provider_name           TEXT,
+        provider_mode           TEXT,
+        provider_service_id     TEXT,
+        provider_last_polled_at TEXT,
+        provider_attempts       INTEGER NOT NULL DEFAULT 0,
+        provider_error_code     TEXT,
+        error_message           TEXT,
+        completed_at            TEXT,
+        created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+        CHECK (status IN ('processing', 'completed', 'refunded', 'manual_review'))
+      );
+      CREATE INDEX IF NOT EXISTS paid_report_orders_user
+        ON paid_report_orders(user_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS paid_report_orders_status
+        ON paid_report_orders(status, provider_last_polled_at);
+
+					CREATE TABLE IF NOT EXISTS provider_events (
 				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
 				  resource_type   TEXT    NOT NULL,
 				  resource_id     INTEGER NOT NULL,
@@ -252,7 +302,8 @@ export function db(): Database.Database {
   connection.pragma('foreign_keys = ON')
 	  connection.exec(SCHEMA)
 	  migrate(connection)
-	  seedCatalog(connection)
+		  seedCatalog(connection)
+      seedPaidReportCatalog(connection)
 
   handle = connection
   return handle
@@ -353,6 +404,9 @@ function migrate(connection: Database.Database) {
       CREATE UNIQUE INDEX IF NOT EXISTS credit_ledger_unique_effect
         ON credit_ledger(ref_type, ref_id, type)
         WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL AND affects_balance = 1;
+      CREATE UNIQUE INDEX IF NOT EXISTS credit_ledger_unique_transition
+        ON credit_ledger(ref_type, ref_id, type)
+        WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL;
     `)
 
     if (!migrationApplied(connection, '2026-08-unlockservice-native-v2')) {
@@ -416,6 +470,10 @@ function migrate(connection: Database.Database) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-provider-architecture-v1')
     }
 
+    if (!migrationApplied(connection, '2026-09-paid-imei-reports-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-imei-reports-v1')
+    }
+
     connection.exec(`
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_idempotency
         ON invoices(idempotency_key) WHERE idempotency_key IS NOT NULL;
@@ -426,6 +484,9 @@ function migrate(connection: Database.Database) {
         WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS provider_events_idempotency
         ON provider_events(resource_type, resource_id, idempotency_key)
+        WHERE idempotency_key IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS paid_report_orders_idempotency
+        ON paid_report_orders(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
     `)
   })()
@@ -473,6 +534,33 @@ function seedCatalog(connection: Database.Database) {
         eta: entry.etaHours,
         brandIds: entry.brandIds.join(','),
       })
+    }
+  })()
+}
+
+/** Seed candidate paid-report products without activating or repricing existing rows. */
+function seedPaidReportCatalog(connection: Database.Database) {
+  const statement = connection.prepare(`
+    INSERT INTO paid_report_products
+      (code, slug, name, summary, input_type, price_cents, provider_cost_micros,
+       eta_minutes, is_active, sort_order)
+    VALUES
+      (@code, @slug, @name, @summary, @inputType, @priceCents, @providerCostMicros,
+       @etaMinutes, @isActive, @sortOrder)
+    ON CONFLICT(code) DO UPDATE SET
+      slug = excluded.slug,
+      name = excluded.name,
+      summary = excluded.summary,
+      input_type = excluded.input_type,
+      provider_cost_micros = excluded.provider_cost_micros,
+      eta_minutes = excluded.eta_minutes,
+      sort_order = excluded.sort_order,
+      updated_at = datetime('now')
+  `)
+
+  connection.transaction(() => {
+    for (const product of PAID_REPORT_PRODUCTS) {
+      statement.run({ ...product, isActive: product.isActive ? 1 : 0 })
     }
   })()
 }

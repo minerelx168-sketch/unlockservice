@@ -127,6 +127,7 @@ let credits: typeof import('../lib/credits')
 let payments: typeof import('../lib/payments')
 let googleOAuth: typeof import('../lib/google-oauth')
 let imeiChecks: typeof import('../lib/imei-checks')
+let paidReports: typeof import('../lib/paid-reports')
 let orders: typeof import('../lib/orders')
 let providerApi: typeof import('../lib/provider-api')
 let providerJobs: typeof import('../lib/provider-jobs')
@@ -140,6 +141,7 @@ before(async () => {
   payments = await import('../lib/payments')
   googleOAuth = await import('../lib/google-oauth')
   imeiChecks = await import('../lib/imei-checks')
+  paidReports = await import('../lib/paid-reports')
   orders = await import('../lib/orders')
   providerApi = await import('../lib/provider-api')
   providerJobs = await import('../lib/provider-jobs')
@@ -183,6 +185,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-imeihub-backend-v1',
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
+      '2026-09-paid-imei-reports-v1',
     ],
   )
 
@@ -553,6 +556,244 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     restore('IUNLOCKMOBILE_UNLOCK_SERVICE_MAP', saved.unlockMap)
     restore('IUNLOCKMOBILE_IMEI_SERVICE_MAP', saved.imeiMap)
     restore('IUNLOCKMOBILE_MAINTENANCE', saved.maintenance)
+  }
+})
+
+test('paid IMEI reports stay separate from free checks and preserve escrow, privacy and idempotency', async () => {
+  const originalFetch = globalThis.fetch
+  const saved = {
+    mode: process.env.IUNLOCKMOBILE_PROVIDER_MODE,
+    name: process.env.IUNLOCKMOBILE_PROVIDER_NAME,
+    url: process.env.IUNLOCKMOBILE_PROVIDER_URL,
+    apiKey: process.env.IUNLOCKMOBILE_PROVIDER_API_KEY,
+    imeiMap: process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP,
+  }
+
+  const restore = (key: string, value: string | undefined) => {
+    if (value === undefined) delete process.env[key]
+    else process.env[key] = value
+  }
+
+  try {
+    const connection = database.db()
+    const alice = auth.authenticate('alice', 'correct-horse-battery-staple')
+    const startingAliceBalance = credits.getBalance(alice.id)
+    const freeChecksBefore = imeiChecks.listImeiChecks(alice.id).length
+
+    assert.equal(paidReports.listPaidReportProducts().length, 0)
+    const seeded = paidReports.getPaidReportProduct('APPLE_BASIC')
+    assert.equal(seeded?.isActive, false)
+    assert.equal(seeded?.priceCents, 15)
+    connection
+      .prepare("UPDATE paid_report_products SET is_active = 1 WHERE code IN ('APPLE_BASIC', 'BLACKLIST_SIMPLE')")
+      .run()
+
+    process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled'
+    await assert.rejects(
+      paidReports.createPaidReport(alice.id, {
+        productCode: 'APPLE_BASIC',
+        imei: '490154203237518',
+        idempotencyKey: 'paid-disabled',
+      }),
+      (error: unknown) => error instanceof paidReports.PaidReportError && error.code === 'provider_not_ready',
+    )
+    assert.equal(
+      (connection.prepare('SELECT COUNT(*) AS count FROM paid_report_orders').get() as { count: number }).count,
+      0,
+    )
+
+    credits.credit(alice.id, 1_000, 'adjustment', 'test', 'paid-report-wallet')
+    process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'enabled'
+    process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'unlock-service'
+    process.env.IUNLOCKMOBILE_PROVIDER_URL = 'https://provider.example/api'
+    process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = 'paid-report-secret'
+    process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
+      'check:apple_basic': { id: '214', mode: 'sync' },
+      'check:blacklist_simple': { id: '419', mode: 'sync' },
+    })
+
+    let providerCalls = 0
+    globalThis.fetch = async (input, init) => {
+      providerCalls += 1
+      const url = new URL(String(input))
+      assert.equal(url.searchParams.get('key'), null)
+      assert.equal(url.searchParams.get('imei'), null)
+      assert.equal(init?.method, 'POST')
+      const body = new URLSearchParams(String(init?.body))
+      assert.equal(body.get('key'), 'paid-report-secret')
+      assert.equal(body.get('service'), '214')
+      assert.equal(body.get('imei'), '490154203237518')
+      return new Response(
+        JSON.stringify({
+          success: true,
+          response: '',
+          object: [{
+            Model: 'iPhone 15 Pro',
+            IMEI: '490154203237518',
+            'Serial Number': 'PAID-RAW-SERIAL-1234',
+            'Blacklist Status': 'Clean',
+            providerInternalNote: 'must never be stored',
+          }],
+        }),
+        { status: 200 },
+      )
+    }
+
+    const beforeSuccess = credits.getBalance(alice.id)
+    const delivered = await paidReports.createPaidReport(alice.id, {
+      productCode: 'APPLE_BASIC',
+      imei: '490154203237518',
+      idempotencyKey: 'paid-success-1',
+    })
+    assert.equal(delivered.order.status, 'completed')
+    assert.equal(delivered.credit.heldCents, 0)
+    assert.equal(delivered.credit.chargedCents, 15)
+    assert.equal(credits.getBalance(alice.id).creditCents, beforeSuccess.creditCents - 15)
+    assert.equal(credits.getBalance(alice.id).heldCents, beforeSuccess.heldCents)
+    assert.equal(providerCalls, 1)
+    assert.equal(paidReports.getPaidReport(1, delivered.order.id), undefined)
+
+    const storedDelivered = JSON.stringify(paidReports.getPaidReport(alice.id, delivered.order.id))
+    assert.equal(storedDelivered.includes('490154203237518'), false)
+    assert.equal(storedDelivered.includes('PAID-RAW-SERIAL-1234'), false)
+    assert.equal(storedDelivered.includes('must never be stored'), false)
+    assert.match(storedDelivered, /iPhone 15 Pro/)
+
+    const replay = await paidReports.createPaidReport(alice.id, {
+      productCode: 'APPLE_BASIC',
+      imei: '490154203237518',
+      idempotencyKey: 'paid-success-1',
+    })
+    assert.equal(replay.order.id, delivered.order.id)
+    assert.equal(providerCalls, 1)
+    await assert.rejects(
+      paidReports.createPaidReport(alice.id, {
+        productCode: 'APPLE_BASIC',
+        imei: '356938035643809',
+        idempotencyKey: 'paid-success-1',
+      }),
+      (error: unknown) => error instanceof paidReports.PaidReportError && error.code === 'idempotency_conflict',
+    )
+
+    providerCalls = 0
+    globalThis.fetch = async () => {
+      providerCalls += 1
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      return new Response(
+        JSON.stringify({ success: true, object: [{ Model: 'iPhone 14' }] }),
+        { status: 200 },
+      )
+    }
+    const [concurrentA, concurrentB] = await Promise.all([
+      paidReports.createPaidReport(alice.id, {
+        productCode: 'APPLE_BASIC',
+        imei: '356938035643809',
+        idempotencyKey: 'paid-concurrent-1',
+      }),
+      paidReports.createPaidReport(alice.id, {
+        productCode: 'APPLE_BASIC',
+        imei: '356938035643809',
+        idempotencyKey: 'paid-concurrent-1',
+      }),
+    ])
+    assert.equal(concurrentA.order.id, concurrentB.order.id)
+    assert.equal(providerCalls, 1)
+    const concurrentTransitions = connection
+      .prepare("SELECT type FROM credit_ledger WHERE ref_type = 'paid_imei_report' AND ref_id = ? ORDER BY id")
+      .all(String(concurrentA.order.id)) as Array<{ type: string }>
+    assert.deepEqual(concurrentTransitions.map((row) => row.type), ['hold', 'charge'])
+
+    globalThis.fetch = async () => new Response(
+      JSON.stringify({ success: false, response: 'Unsupported device', object: {} }),
+      { status: 200 },
+    )
+    const beforeFailure = credits.getBalance(alice.id)
+    const refunded = await paidReports.createPaidReport(alice.id, {
+      productCode: 'BLACKLIST_SIMPLE',
+      imei: '356938035643809',
+      idempotencyKey: 'paid-refund-1',
+    })
+    assert.equal(refunded.order.status, 'refunded')
+    assert.equal(refunded.credit.refundedCents, 5)
+    assert.deepEqual(credits.getBalance(alice.id), beforeFailure)
+
+    globalThis.fetch = async () => {
+      throw new Error('simulated ambiguous network failure')
+    }
+    const beforeAmbiguous = credits.getBalance(alice.id)
+    const review = await paidReports.createPaidReport(alice.id, {
+      productCode: 'BLACKLIST_SIMPLE',
+      imei: '356938035643809',
+      idempotencyKey: 'paid-review-1',
+    })
+    assert.equal(review.order.status, 'manual_review')
+    assert.equal(credits.getBalance(alice.id).heldCents, beforeAmbiguous.heldCents + 5)
+
+    credits.refund(alice.id, 5, 'paid_imei_report', String(review.order.id))
+    credits.refund(alice.id, 5, 'paid_imei_report', String(review.order.id))
+    assert.equal(paidReports.getPaidReport(alice.id, review.order.id)?.status, 'refunded')
+    assert.deepEqual(credits.getBalance(alice.id), beforeAmbiguous)
+
+    const paidLedger = connection
+      .prepare(
+        `SELECT type, amount_cents, affects_balance
+           FROM credit_ledger
+          WHERE ref_type = 'paid_imei_report'
+          ORDER BY id`,
+      )
+      .all() as Array<{ type: string; amount_cents: number; affects_balance: number }>
+    assert.deepEqual(
+      paidLedger,
+      [
+        { type: 'hold', amount_cents: -15, affects_balance: 0 },
+        { type: 'charge', amount_cents: -15, affects_balance: 1 },
+        { type: 'hold', amount_cents: -15, affects_balance: 0 },
+        { type: 'charge', amount_cents: -15, affects_balance: 1 },
+        { type: 'hold', amount_cents: -5, affects_balance: 0 },
+        { type: 'refund', amount_cents: 5, affects_balance: 0 },
+        { type: 'hold', amount_cents: -5, affects_balance: 0 },
+        { type: 'refund', amount_cents: 5, affects_balance: 0 },
+      ],
+    )
+
+    const columns = connection
+      .prepare("SELECT name FROM pragma_table_info('paid_report_orders') ORDER BY cid")
+      .all() as Array<{ name: string }>
+    assert.equal(columns.some((column) => column.name === 'imei'), false)
+    assert.equal(columns.some((column) => column.name === 'raw_response'), false)
+    assert.equal(columns.some((column) => column.name === 'imei_fingerprint'), true)
+    assert.equal(columns.some((column) => column.name === 'masked_imei'), true)
+
+    const paidRows = connection
+      .prepare('SELECT imei_fingerprint, masked_imei, report_json FROM paid_report_orders')
+      .all() as Array<{ imei_fingerprint: string; masked_imei: string; report_json: string | null }>
+    const persistedText = JSON.stringify(paidRows)
+    assert.equal(persistedText.includes('490154203237518'), false)
+    assert.equal(persistedText.includes('356938035643809'), false)
+    assert.equal(persistedText.includes('paid-report-secret'), false)
+
+    const auditRows = connection
+      .prepare("SELECT metadata_json FROM provider_events WHERE resource_type = 'paid_imei_report'")
+      .all() as Array<{ metadata_json: string | null }>
+    const auditText = JSON.stringify(auditRows)
+    assert.equal(auditText.includes('490154203237518'), false)
+    assert.equal(auditText.includes('356938035643809'), false)
+    assert.equal(auditText.includes('paid-report-secret'), false)
+    assert.equal(imeiChecks.listImeiChecks(alice.id).length, freeChecksBefore)
+
+    const balanceBeforeCleanup = credits.getBalance(alice.id)
+    const cleanupDelta = startingAliceBalance.creditCents - balanceBeforeCleanup.creditCents
+    if (cleanupDelta !== 0) {
+      credits.credit(alice.id, cleanupDelta, 'adjustment', 'test', 'paid-report-wallet-cleanup')
+    }
+    assert.deepEqual(credits.getBalance(alice.id), startingAliceBalance)
+  } finally {
+    globalThis.fetch = originalFetch
+    restore('IUNLOCKMOBILE_PROVIDER_MODE', saved.mode)
+    restore('IUNLOCKMOBILE_PROVIDER_NAME', saved.name)
+    restore('IUNLOCKMOBILE_PROVIDER_URL', saved.url)
+    restore('IUNLOCKMOBILE_PROVIDER_API_KEY', saved.apiKey)
+    restore('IUNLOCKMOBILE_IMEI_SERVICE_MAP', saved.imeiMap)
   }
 })
 

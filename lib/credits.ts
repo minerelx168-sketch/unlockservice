@@ -66,6 +66,18 @@ function writeLedger(
     )
 }
 
+export function hasCreditTransition(refType: string, refId: string, type: LedgerType): boolean {
+  return Boolean(
+    db()
+      .prepare(
+        `SELECT 1 FROM credit_ledger
+          WHERE ref_type = ? AND ref_id = ? AND type = ?
+          LIMIT 1`,
+      )
+      .get(refType, refId, type),
+  )
+}
+
 function hasEffect(refType: string, refId: string, type: LedgerType): boolean {
   return Boolean(
     db()
@@ -88,6 +100,7 @@ export class InsufficientCredit extends Error {
 export function hold(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('hold amount must be positive cents')
   return db().transaction(() => {
+    if (hasCreditTransition(refType, refId, 'hold')) return getBalance(userId)
     const before = getBalance(userId)
     if (before.availableCents < amountCents) {
       throw new InsufficientCredit(before.availableCents, amountCents)
@@ -102,6 +115,7 @@ export function hold(userId: number, amountCents: number, refType: string, refId
 export function charge(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('charge amount must be positive cents')
   return db().transaction(() => {
+    if (hasCreditTransition(refType, refId, 'charge')) return getBalance(userId)
     const before = getBalance(userId)
     if (before.heldCents < amountCents || before.creditCents < amountCents) {
       throw new Error('cannot charge more credit than is reserved')
@@ -118,6 +132,7 @@ export function charge(userId: number, amountCents: number, refType: string, ref
 export function refund(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('refund amount must be positive cents')
   return db().transaction(() => {
+    if (hasCreditTransition(refType, refId, 'refund')) return getBalance(userId)
     const before = getBalance(userId)
     if (before.heldCents < amountCents) throw new Error('cannot release more credit than is reserved')
     db().prepare('UPDATE users SET held_cents = held_cents - ? WHERE id = ?').run(amountCents, userId)
