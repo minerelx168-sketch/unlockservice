@@ -19,16 +19,16 @@ const SERVICES: Array<{
   {
     icon: 'device',
     tint: '',
-    title: 'Unlock by carrier',
-    body: 'Choose the network that currently holds the lock. We submit the official request against your IMEI and keep the whole process online.',
-    action: { href: '#check', label: 'Start an unlock' },
+    title: 'Unlock services',
+    body: 'Browse carrier, activation-lock, MDM and device-unlock products with fixed prices. Online ordering opens only after each Provider API contract is verified.',
+    action: { href: '/services', label: 'Browse unlock services' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
-    title: 'Check your phone',
-    body: 'Not sure which carrier the phone is locked to? Run a carrier, blacklist or device-status check before placing the unlock order.',
-    action: { href: '/check', label: 'Run a phone check' },
+    title: 'IMEI check reports',
+    body: 'Order Provider-backed Apple, Samsung, carrier, blacklist and device-status reports, or use the separate Free Check for format validation only.',
+    action: { href: '/services', label: 'Browse IMEI reports' },
   },
   {
     icon: 'search',

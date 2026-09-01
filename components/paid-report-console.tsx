@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRef, useState, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { groupImei, IMEI_LENGTH, luhnValid, normalizeImei } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
@@ -10,6 +10,7 @@ type Product = {
   code: string
   name: string
   summary: string
+  group: string
   priceCents: number
   etaMinutes: number
   providerReady: boolean
@@ -46,19 +47,32 @@ export function PaidReportConsole({
   products,
   csrfToken,
   availableCents,
+  initialProductCode,
 }: {
   products: Product[]
   csrfToken: string
   availableCents: number
+  initialProductCode?: string
 }) {
-  const [productCode, setProductCode] = useState(products[0]?.code ?? '')
+  const initialCode = products.some((product) => product.code === initialProductCode)
+    ? initialProductCode ?? ''
+    : products[0]?.code ?? ''
+  const [productCode, setProductCode] = useState(initialCode)
   const [imei, setImei] = useState('')
+  const [search, setSearch] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [payload, setPayload] = useState<PaidReportPayload | null>(null)
   const idempotencyRef = useRef<string | null>(null)
 
   const product = products.find((entry) => entry.code === productCode) ?? null
+  const visibleProducts = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return products
+    return products.filter((entry) =>
+      `${entry.name} ${entry.summary} ${entry.group}`.toLowerCase().includes(query),
+    )
+  }, [products, search])
   const balanceCents = payload?.credit.balanceCents ?? availableCents
   const affordable = !product || product.priceCents <= balanceCents
 
@@ -142,8 +156,24 @@ export function PaidReportConsole({
         <div className="panel-body" style={{ display: 'grid', gap: 20 }}>
           {error ? <p className="alert alert--error" role="alert"><Icon name="cross" /> <span>{error}</span></p> : null}
 
+          <div className="field">
+            <label htmlFor="paid-report-search">Search paid IMEI reports</label>
+            <input
+              id="paid-report-search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.currentTarget.value)}
+              placeholder="Apple, Samsung, blacklist, carrier…"
+              autoComplete="off"
+            />
+            <p className="field-note">
+              <Icon name="search" strokeWidth={1.9} />
+              <span>{visibleProducts.length} of {products.length} reports shown</span>
+            </p>
+          </div>
+
           <div className="picker-list">
-            {products.map((entry) => (
+            {visibleProducts.map((entry) => (
               <button
                 key={entry.code}
                 type="button"
@@ -156,6 +186,8 @@ export function PaidReportConsole({
                 }}
               >
                 <span>
+                  <span className="t-micro">{entry.group}</span>
+                  <br />
                   <strong>{entry.name}</strong>
                   <br />
                   <span className="t-small" style={{ fontSize: 12.5 }}>{entry.summary}</span>
@@ -163,6 +195,9 @@ export function PaidReportConsole({
                 <span className="price">{formatUsd(entry.priceCents)}</span>
               </button>
             ))}
+            {visibleProducts.length === 0 ? (
+              <p className="alert" role="status"><Icon name="info" /> <span>No paid IMEI reports match that search.</span></p>
+            ) : null}
           </div>
 
           <div className="field">

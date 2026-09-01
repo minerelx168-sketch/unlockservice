@@ -20,6 +20,7 @@ import {
   type ProviderService,
 } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
 
 export type PaidReportStatus = 'processing' | 'completed' | 'refunded' | 'manual_review'
@@ -29,6 +30,7 @@ export type PaidReportProduct = {
   slug: string
   name: string
   summary: string
+  group: string
   inputType: 'imei'
   priceCents: number
   providerCostMicros: number
@@ -184,17 +186,24 @@ function parseReport(value: string | null): ProviderReport | null {
 function productFromRow(row: PaidReportProductRow): PaidReportProduct {
   const config = providerConfiguration()
   const mapping = imeiProviderService(mappingKey(row.code))
+  const catalogProduct = providerProductByCode(row.code)
+  const approvedMapping = Boolean(
+    catalogProduct?.status === 'available'
+      && mapping?.mode === 'sync'
+      && mapping.id === catalogProduct.serviceId,
+  )
   return {
     code: row.code,
     slug: row.slug,
     name: row.name,
     summary: row.summary,
+    group: catalogProduct?.group ?? 'Device checks',
     inputType: row.input_type,
     priceCents: row.price_cents,
     providerCostMicros: row.provider_cost_micros,
     etaMinutes: row.eta_minutes,
     isActive: row.is_active === 1,
-    providerReady: row.is_active === 1 && config.enabled && Boolean(mapping),
+    providerReady: row.is_active === 1 && config.enabled && approvedMapping,
     sortOrder: row.sort_order,
   }
 }
@@ -419,7 +428,14 @@ function handleOutcome(
 function providerReadyFor(product: PaidReportProductRow): { config: ReturnType<typeof providerConfiguration>; service: ProviderService } {
   const config = providerConfiguration()
   const service = imeiProviderService(mappingKey(product.code))
-  if (!config.enabled || !service) {
+  const catalogProduct = providerProductByCode(product.code)
+  if (
+    !config.enabled
+    || !service
+    || catalogProduct?.status !== 'available'
+    || service.mode !== 'sync'
+    || service.id !== catalogProduct.serviceId
+  ) {
     throw new PaidReportError('This paid report is not available yet.', 'provider_not_ready')
   }
   return { config, service }

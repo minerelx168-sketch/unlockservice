@@ -27,12 +27,12 @@ export type ProviderReport = {
 const FIELD_ALIASES: Record<string, string[]> = {
   brand: ['brand', 'manufacturer', 'make'],
   model: ['model', 'device', 'product', 'productname', 'product name', 'model name', 'model info'],
-  modelDescription: ['model description', 'model configuration', 'model desc', 'product description'],
+  modelDescription: ['model description', 'model configuration', 'model desc', 'product description', 'config description'],
   modelNumber: ['model number', 'part number'],
   imei: ['imei', 'imei number', 'imei/sn'],
   imei2: ['imei2', 'imei2 number', 'imei 2'],
   meid: ['meid', 'meid number'],
-  serial: ['serial', 'serial number', 'serialnumber', 'sn'],
+  serial: ['serial', 'serial number', 'serialnumber', 'sn', 's/n'],
   carrier: ['carrier', 'network', 'network name', 'operator'],
   country: ['country', 'purchase country', 'purchased in'],
   purchaseDate: ['estimated purchase date', 'purchasedate', 'purchase date', 'date'],
@@ -59,8 +59,44 @@ const FIELD_ALIASES: Record<string, string[]> = {
   blacklistedCountry: ['blacklisted country', 'blacklisted (fraud) country'],
   blacklistedOn: ['blacklisted on', 'blacklisted (fraud) on'],
   blacklistReason: ['blacklist reason', 'blacklist description', 'note', 'details'],
-  mdm: ['mdm', 'mdm status', 'mdm enrollment status', 'mobile device management'],
+  mdm: ['mdm', 'mdm status', 'mdm enrollment status', 'mobile device management', 'mdm lock'],
   knox: ['knox', 'knox guard', 'knox guard status', 'samsung lock', 'samsung status'],
+  partNumber: ['part number', 'mpn'],
+  partType: ['part type', 'part number type'],
+  modelRegion: ['model region', 'part number country', 'purchase region'],
+  configCode: ['config code'],
+  productLine: ['product line'],
+  productVersion: ['product version'],
+  validPurchaseDate: ['valid purchase date', 'is valid purchase date'],
+  technicalSupport: ['telephone technical support'],
+  technicalSupportEnd: ['telephone technical support expiration date'],
+  repairCoverage: ['repairs and service coverage'],
+  repairCoverageEnd: ['repairs and service coverage expiration date', 'repairs and service expiration date'],
+  openRepairCase: ['open repair case'],
+  caseHistory: ['cases history', 'case history', 'case details', 'cases'],
+  repairHistory: ['repair history', 'repairs history'],
+  replacementDetails: ['replacement details', 'replacement history'],
+  status: ['status', 'eligibility status'],
+  statusDescription: ['status description', 'eligibility description'],
+  esnStatus: ['esn status'],
+  esimSupported: ['esim supported'],
+  fsn: ['unlock number (fsn)', 'fsn'],
+  warrantyDescription: ['warranty description'],
+  miActivationLock: ['mi activation lock'],
+  keyLock: ['imei/keylock', 'keylock'],
+  modelCode: ['model code'],
+  itemCode: ['item code', 'item'],
+  offerCode: ['offer code'],
+  activationDate: ['activation date', 'first activation date'],
+  shipmentDate: ['shipment date'],
+  orderDate: ['order date'],
+  warrantyDetails: ['warranty details', 'warranty entitlements', 'warranty history'],
+  factoryCode: ['factory code'],
+  fullModel: ['full model'],
+  series: ['series'],
+  subSeries: ['sub series'],
+  machineType: ['machine type', 'mtm'],
+  shipToCountry: ['ship to country', 'ship to country code'],
 }
 
 const LABELS: Record<string, string> = {
@@ -100,20 +136,73 @@ const LABELS: Record<string, string> = {
   blacklistReason: 'Blacklist details',
   mdm: 'MDM',
   knox: 'Knox Guard',
+  partNumber: 'Part number',
+  partType: 'Part type',
+  modelRegion: 'Model region',
+  configCode: 'Configuration code',
+  productLine: 'Product line',
+  productVersion: 'Product version',
+  validPurchaseDate: 'Valid purchase date',
+  technicalSupport: 'Telephone support',
+  technicalSupportEnd: 'Telephone support until',
+  repairCoverage: 'Repairs and service coverage',
+  repairCoverageEnd: 'Repairs and service coverage until',
+  openRepairCase: 'Open repair case',
+  caseHistory: 'Case history',
+  repairHistory: 'Repair history',
+  replacementDetails: 'Replacement details',
+  status: 'Status',
+  statusDescription: 'Status details',
+  esnStatus: 'ESN status',
+  esimSupported: 'eSIM supported',
+  fsn: 'Unlock number (FSN)',
+  warrantyDescription: 'Warranty description',
+  miActivationLock: 'MI activation lock',
+  keyLock: 'IMEI / key lock',
+  modelCode: 'Model code',
+  itemCode: 'Item code',
+  offerCode: 'Offer code',
+  activationDate: 'Activation date',
+  shipmentDate: 'Shipment date',
+  orderDate: 'Order date',
+  warrantyDetails: 'Warranty details',
+  factoryCode: 'Factory code',
+  fullModel: 'Full model',
+  series: 'Series',
+  subSeries: 'Sub-series',
+  machineType: 'Machine type',
+  shipToCountry: 'Ship-to country',
 }
 
 const SECTION_FIELDS = [
-  ['Device', ['brand', 'model', 'modelDescription', 'modelNumber', 'imei', 'imei2', 'meid', 'serial']],
-  ['Network and activation', ['carrier', 'simLock', 'activationStatus', 'activationPolicy', 'soldBy']],
-  ['Coverage and origin', ['warranty', 'warrantyStart', 'warrantyEnd', 'purchaseDate', 'productionDate', 'country', 'deviceAge', 'appleCare']],
-  ['Device history', ['refurbished', 'demo', 'replacement', 'registered', 'loaner']],
+  ['Device', ['brand', 'model', 'fullModel', 'modelDescription', 'modelNumber', 'modelCode', 'modelRegion', 'partNumber', 'partType', 'configCode', 'productLine', 'productVersion', 'series', 'subSeries', 'machineType', 'imei', 'imei2', 'meid', 'serial']],
+  ['Network and activation', ['carrier', 'simLock', 'activationStatus', 'activationPolicy', 'status', 'statusDescription', 'esnStatus', 'esimSupported', 'fsn', 'miActivationLock', 'keyLock', 'soldBy']],
+  ['Coverage and origin', ['warranty', 'warrantyDescription', 'warrantyStart', 'warrantyEnd', 'warrantyDetails', 'technicalSupport', 'technicalSupportEnd', 'repairCoverage', 'repairCoverageEnd', 'validPurchaseDate', 'purchaseDate', 'activationDate', 'productionDate', 'shipmentDate', 'orderDate', 'country', 'shipToCountry', 'deviceAge', 'appleCare']],
+  ['Device history', ['refurbished', 'demo', 'replacement', 'registered', 'loaner', 'openRepairCase', 'caseHistory', 'repairHistory', 'replacementDetails']],
+  ['Device codes', ['factoryCode', 'itemCode', 'offerCode']],
   ['Blacklist details', ['blacklistedBy', 'blacklistedCountry', 'blacklistedOn', 'blacklistReason']],
 ] as const
 
 const CHECK_FIELDS = ['fmi', 'icloud', 'lostMode', 'blacklist', 'mdm', 'knox'] as const
 
+const APPLE_CARRIER_FIELDS = [
+  'model', 'modelDescription', 'modelNumber', 'modelRegion', 'activationStatus',
+  'technicalSupport', 'technicalSupportEnd', 'repairCoverage', 'repairCoverageEnd',
+  'appleCare', 'validPurchaseDate', 'registered', 'refurbished', 'demo', 'replacement',
+  'fmi', 'icloud', 'blacklist', 'warranty', 'purchaseDate', 'country',
+  'activationPolicy', 'simLock', 'carrier',
+] as const
+
+const APPLE_GSX_FIELDS = [
+  'model', 'modelDescription', 'modelNumber', 'configCode', 'productLine',
+  'productVersion', 'imei', 'imei2', 'serial', 'purchaseDate', 'activationDate',
+  'warranty', 'soldBy', 'country', 'activationPolicy', 'simLock', 'mdm', 'icloud',
+  'caseHistory', 'repairHistory', 'replacementDetails',
+] as const
+
 const PRODUCT_FIELDS: Record<string, readonly string[]> = {
   APPLE_ICLOUD_STATUS: ['fmi', 'icloud'],
+  APPLE_ICLOUD_CLEAN: ['fmi', 'icloud'],
   BLACKLIST_SIMPLE: ['blacklist'],
   APPLE_BASIC: [
     'model', 'modelDescription', 'refurbished', 'demo', 'replacement',
@@ -123,17 +212,66 @@ const PRODUCT_FIELDS: Record<string, readonly string[]> = {
     'model', 'imei', 'serial', 'activationStatus', 'warranty', 'warrantyEnd',
     'appleCare', 'purchaseDate', 'registered', 'loaner',
   ],
+  APPLE_PART_NUMBER: ['model', 'imei', 'partNumber', 'modelRegion', 'partType'],
   APPLE_CARRIER_LITE: [
     'model', 'modelDescription', 'refurbished', 'demo', 'replacement',
     'purchaseDate', 'country', 'activationPolicy', 'simLock', 'carrier',
   ],
+  APPLE_CARRIER_PRO: APPLE_CARRIER_FIELDS,
+  APPLE_CARRIER_PRO_PLUS: [...APPLE_CARRIER_FIELDS, 'openRepairCase', 'partNumber', 'partType'],
+  APPLE_MAX_INFO: [
+    ...APPLE_CARRIER_FIELDS, 'openRepairCase', 'mdm', 'blacklistedBy',
+    'blacklistedCountry', 'blacklistedOn', 'blacklistReason', 'partNumber', 'partType',
+  ],
+  APPLE_MDM: ['model', 'imei', 'mdm'],
+  APPLE_MDM_FMI: ['model', 'imei', 'mdm', 'fmi'],
+  APPLE_GSX_TETHER: ['model', 'imei', 'serial', 'fmi', 'activationPolicy', 'simLock'],
+  APPLE_CASE_REPAIR_HISTORY: [
+    'model', 'modelDescription', 'imei', 'imei2', 'serial', 'caseHistory', 'replacementDetails',
+  ],
+  APPLE_SOLD_BY_COVERAGE: [
+    'model', 'modelDescription', 'imei', 'imei2', 'meid', 'serial', 'productVersion',
+    'carrier', 'mdm', 'icloud', 'caseHistory', 'replacementDetails', 'warranty',
+    'purchaseDate', 'soldBy', 'country', 'activationPolicy', 'simLock',
+  ],
+  APPLE_FULL_GSX: APPLE_GSX_FIELDS,
+  APPLE_GSX_LIGHT: APPLE_GSX_FIELDS,
+  APPLE_GSX_MAX: APPLE_GSX_FIELDS,
   BLACKLIST_FULL: [
     'brand', 'model', 'modelNumber', 'imei', 'blacklist', 'blacklistedBy',
     'blacklistedCountry', 'blacklistedOn', 'blacklistReason',
   ],
+  TMOBILE_USA: ['model', 'brand', 'imei', 'imei2', 'status', 'esnStatus'],
+  TMOBILE_USA_PRO: ['model', 'brand', 'imei', 'imei2', 'esimSupported', 'status', 'statusDescription', 'esnStatus'],
+  VERIZON_USA_PRO: ['model', 'imei', 'status', 'statusDescription', 'partNumber'],
+  XIAOMI_STATUS: [
+    'model', 'imei', 'serial', 'fsn', 'warranty', 'warrantyDescription',
+    'warrantyStart', 'warrantyEnd', 'country', 'miActivationLock', 'keyLock',
+  ],
+  HUAWEI_INFO: [
+    'modelDescription', 'modelCode', 'imei', 'serial', 'itemCode', 'offerCode',
+    'country', 'warranty', 'activationDate', 'shipmentDate', 'orderDate', 'warrantyDetails',
+  ],
+  HONOR_INFO: [
+    'modelDescription', 'modelCode', 'imei', 'serial', 'itemCode', 'offerCode',
+    'country', 'warranty', 'activationDate', 'shipmentDate', 'orderDate', 'warrantyDetails',
+  ],
   SAMSUNG_INFO: [
     'brand', 'model', 'modelDescription', 'modelNumber', 'imei', 'serial',
     'carrier', 'country', 'warranty', 'warrantyEnd', 'productionDate', 'soldBy', 'knox',
+  ],
+  SAMSUNG_KNOX: [
+    'brand', 'model', 'modelDescription', 'modelNumber', 'imei', 'serial',
+    'carrier', 'warranty', 'warrantyEnd', 'productionDate', 'knox',
+  ],
+  MOTOROLA_INFO: [
+    'model', 'imei', 'imei2', 'serial', 'factoryCode', 'itemCode',
+    'shipmentDate', 'shipToCountry', 'country', 'warranty', 'warrantyDetails',
+  ],
+  LENOVO_INFO: [
+    'brand', 'model', 'fullModel', 'serial', 'series', 'subSeries', 'machineType',
+    'warranty', 'warrantyStart', 'warrantyEnd', 'shipmentDate', 'shipToCountry',
+    'country', 'warrantyDetails',
   ],
   PIXEL_INFO: [
     'model', 'modelDescription', 'modelNumber', 'imei', 'imei2', 'serial',
@@ -142,13 +280,35 @@ const PRODUCT_FIELDS: Record<string, readonly string[]> = {
 }
 
 const PRODUCT_TITLES: Record<string, string> = {
-  APPLE_ICLOUD_STATUS: 'Apple iCloud status report',
-  BLACKLIST_SIMPLE: 'Worldwide blacklist report',
   APPLE_BASIC: 'Apple basic information report',
-  APPLE_WARRANTY: 'Apple warranty and activation report',
   APPLE_CARRIER_LITE: 'Apple carrier report',
+  APPLE_CARRIER_PRO: 'Apple carrier pro report',
+  APPLE_CARRIER_PRO_PLUS: 'Apple carrier pro plus report',
+  APPLE_MAX_INFO: 'Apple maximum information report',
+  APPLE_WARRANTY: 'Apple warranty and activation report',
+  APPLE_PART_NUMBER: 'Apple part number report',
+  APPLE_ICLOUD_STATUS: 'Apple iCloud status report',
+  APPLE_ICLOUD_CLEAN: 'Apple iCloud clean or lost report',
+  APPLE_MDM: 'Apple MDM status report',
+  APPLE_MDM_FMI: 'Apple MDM and Find My report',
+  APPLE_GSX_TETHER: 'Apple next-tether policy report',
+  APPLE_CASE_REPAIR_HISTORY: 'Apple case and replacement report',
+  APPLE_SOLD_BY_COVERAGE: 'Apple sold-by and coverage report',
+  APPLE_FULL_GSX: 'Apple full GSX report',
+  APPLE_GSX_LIGHT: 'Apple GSX report',
+  APPLE_GSX_MAX: 'Apple GSX maximum report',
+  BLACKLIST_SIMPLE: 'Worldwide blacklist report',
   BLACKLIST_FULL: 'Worldwide blacklist detail report',
+  TMOBILE_USA: 'T-Mobile USA status report',
+  TMOBILE_USA_PRO: 'T-Mobile USA pro status report',
+  VERIZON_USA_PRO: 'Verizon USA status report',
+  XIAOMI_STATUS: 'Xiaomi device status report',
+  HUAWEI_INFO: 'Huawei device report',
+  HONOR_INFO: 'Honor device report',
   SAMSUNG_INFO: 'Samsung device report',
+  SAMSUNG_KNOX: 'Samsung Knox Guard report',
+  MOTOROLA_INFO: 'Motorola device report',
+  LENOVO_INFO: 'Lenovo device report',
   PIXEL_INFO: 'Google Pixel device report',
 }
 
@@ -223,14 +383,14 @@ export function providerReportHasContent(report: ProviderReport) {
 
 export function buildProviderReport(checkType: string, source: string, data: Record<string, unknown>): ProviderReport {
   const productCode = normalizedCheckType(checkType)
-  const allowed = PRODUCT_FIELDS[productCode] ? new Set(PRODUCT_FIELDS[productCode]) : null
+  const allowed = new Set(PRODUCT_FIELDS[productCode] ?? [])
   const indexed = indexFields(data)
   const sections: ProviderReport['sections'] = []
 
   for (const [title, fields] of SECTION_FIELDS) {
     const items: ReportItem[] = []
     for (const field of fields) {
-      if (allowed && !allowed.has(field)) continue
+      if (!allowed.has(field)) continue
       const raw = firstValue(indexed, field)
       if (raw === undefined) continue
       const value = displayValue(field, raw)
@@ -241,7 +401,7 @@ export function buildProviderReport(checkType: string, source: string, data: Rec
 
   const checks: ReportCheck[] = []
   for (const field of CHECK_FIELDS) {
-    if (allowed && !allowed.has(field)) continue
+    if (!allowed.has(field)) continue
     const raw = firstValue(indexed, field)
     if (raw === undefined) continue
     const value = displayValue(field, raw)

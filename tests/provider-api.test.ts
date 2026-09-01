@@ -157,3 +157,75 @@ test('provider core keeps disabled mode safe and normalizes sync plus DHRU respo
     }
   }
 })
+
+
+test('expanded paid-report profiles remain service-specific, masked and fail-closed', () => {
+  const carrier = buildProviderReport('APPLE_CARRIER_PRO_PLUS', 'unlock-service', {
+    Model: 'iPhone 15 Pro',
+    IMEI: '490154203237518',
+    'Serial Number': 'SERIAL-CARRIER-PRIVATE',
+    'Next Activation Policy': 'US Reseller Flex Policy',
+    'Open Repair Case': 'No',
+    providerInternalNote: 'never publish this',
+  })
+  const carrierJson = JSON.stringify(carrier)
+  assert.match(carrierJson, /US Reseller Flex Policy/)
+  assert.match(carrierJson, /Open repair case/)
+  assert.equal(carrierJson.includes('490154203237518'), false)
+  assert.equal(carrierJson.includes('SERIAL-CARRIER-PRIVATE'), false)
+  assert.equal(carrierJson.includes('never publish this'), false)
+
+  const gsx = buildProviderReport('APPLE_FULL_GSX', 'unlock-service', {
+    'Config Description': 'IPHONE 15 PRO BLACK 256GB',
+    IMEI: '490154203237518',
+    'Serial Number': 'SERIAL-GSX-PRIVATE',
+    'Wireless Mac Address': '00:11:22:33:44:55',
+    ICCID: '8901000000000000000',
+    'Warranty Status': 'Limited Warranty',
+    'Purchase Country': 'United States',
+  })
+  const gsxJson = JSON.stringify(gsx)
+  assert.match(gsxJson, /IPHONE 15 PRO BLACK 256GB/)
+  assert.match(gsxJson, /Limited Warranty/)
+  assert.equal(gsxJson.includes('490154203237518'), false)
+  assert.equal(gsxJson.includes('SERIAL-GSX-PRIVATE'), false)
+  assert.equal(gsxJson.includes('00:11:22:33:44:55'), false)
+  assert.equal(gsxJson.includes('8901000000000000000'), false)
+
+  const huawei = buildProviderReport('HUAWEI_INFO', 'unlock-service', {
+    'Model Description': 'Huawei P60 Pro',
+    IMEI: '490154203237518',
+    'S/N': 'SERIAL-HUAWEI-PRIVATE',
+    'Warranty Status': 'Active',
+    'Ship To Customer Name': 'Private Customer Name',
+  })
+  const huaweiJson = JSON.stringify(huawei)
+  assert.match(huaweiJson, /Huawei P60 Pro/)
+  assert.match(huaweiJson, /Active/)
+  assert.equal(huaweiJson.includes('490154203237518'), false)
+  assert.equal(huaweiJson.includes('SERIAL-HUAWEI-PRIVATE'), false)
+  assert.equal(huaweiJson.includes('Private Customer Name'), false)
+
+  const tmobile = buildProviderReport('TMOBILE_USA_PRO', 'unlock-service', {
+    Model: 'Galaxy S24',
+    IMEI: '490154203237518',
+    'eSIM CSN': 'PRIVATE-CSN-123',
+    'eSIM Supported': 'Yes',
+    Status: 'Eligible',
+    'Status Description': 'Device is eligible',
+  })
+  const tmobileJson = JSON.stringify(tmobile)
+  assert.match(tmobileJson, /Device is eligible/)
+  assert.match(tmobileJson, /eSIM supported/)
+  assert.equal(tmobileJson.includes('490154203237518'), false)
+  assert.equal(tmobileJson.includes('PRIVATE-CSN-123'), false)
+
+  const unknown = buildProviderReport('CHECK_928', 'unlock-service', {
+    Model: 'iPhone 15',
+    IMEI: '490154203237518',
+    'Sold By': 'Private reseller',
+  })
+  assert.equal(unknown.sections.length, 0)
+  assert.equal(unknown.checks.length, 0)
+  assert.match(unknown.summary, /did not return any supported public report fields/i)
+})

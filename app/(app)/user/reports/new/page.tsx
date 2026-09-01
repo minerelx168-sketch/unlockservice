@@ -8,10 +8,19 @@ import { listPaidReportProducts } from '@/lib/paid-reports'
 export const metadata: Metadata = { title: 'Buy an IMEI report' }
 export const dynamic = 'force-dynamic'
 
-export default async function NewPaidReportPage() {
+export default async function NewPaidReportPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string | string[] }>
+}) {
   const { user, session } = await requireSession()
   const available = user.credit_cents - user.held_cents
   const products = listPaidReportProducts()
+  const query = await searchParams
+  const requestedProduct = Array.isArray(query.product) ? query.product[0] : query.product
+  const initialProductCode = products.some((product) => product.code === requestedProduct)
+    ? requestedProduct
+    : undefined
 
   return (
     <>
@@ -35,12 +44,14 @@ export default async function NewPaidReportPage() {
           code: product.code,
           name: product.name,
           summary: product.summary,
+          group: product.group,
           priceCents: product.priceCents,
           etaMinutes: product.etaMinutes,
           providerReady: product.providerReady,
         }))}
         csrfToken={session.csrfToken}
         availableCents={available}
+        initialProductCode={initialProductCode}
       />
 
       <p className="t-small" style={{ marginTop: 18 }}>

@@ -301,11 +301,12 @@ export function db(): Database.Database {
   connection.pragma('journal_mode = WAL')
   connection.pragma('foreign_keys = ON')
 	  connection.exec(SCHEMA)
-	  migrate(connection)
-		  seedCatalog(connection)
-      seedPaidReportCatalog(connection)
+		  migrate(connection)
+			  seedCatalog(connection)
+	      seedPaidReportCatalog(connection)
+      applyProviderProductCatalogRollout(connection)
 
-  handle = connection
+	  handle = connection
   return handle
 }
 
@@ -562,6 +563,24 @@ function seedPaidReportCatalog(connection: Database.Database) {
     for (const product of PAID_REPORT_PRODUCTS) {
       statement.run({ ...product, isActive: product.isActive ? 1 : 0 })
     }
+  })()
+}
+
+function applyProviderProductCatalogRollout(connection: Database.Database) {
+  const version = '2026-09-provider-product-catalog-v2'
+  if (migrationApplied(connection, version)) return
+
+  connection.transaction(() => {
+    connection.prepare("UPDATE paid_report_products SET is_active = 0, updated_at = datetime('now')").run()
+    const activate = connection.prepare(
+      "UPDATE paid_report_products SET is_active = 1, updated_at = datetime('now') WHERE code = ? AND price_cents * 10000 > provider_cost_micros",
+    )
+    let activated = 0
+    for (const product of PAID_REPORT_PRODUCTS) activated += activate.run(product.code).changes
+    if (activated !== PAID_REPORT_PRODUCTS.length) {
+      throw new Error(`provider product activation mismatch: ${activated}/${PAID_REPORT_PRODUCTS.length}`)
+    }
+    connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run(version)
   })()
 }
 

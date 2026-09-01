@@ -128,6 +128,7 @@ let payments: typeof import('../lib/payments')
 let googleOAuth: typeof import('../lib/google-oauth')
 let imeiChecks: typeof import('../lib/imei-checks')
 let paidReports: typeof import('../lib/paid-reports')
+let providerProducts: typeof import('../lib/provider-products')
 let orders: typeof import('../lib/orders')
 let providerApi: typeof import('../lib/provider-api')
 let providerJobs: typeof import('../lib/provider-jobs')
@@ -142,6 +143,7 @@ before(async () => {
   googleOAuth = await import('../lib/google-oauth')
   imeiChecks = await import('../lib/imei-checks')
   paidReports = await import('../lib/paid-reports')
+  providerProducts = await import('../lib/provider-products')
   orders = await import('../lib/orders')
   providerApi = await import('../lib/provider-api')
   providerJobs = await import('../lib/provider-jobs')
@@ -186,6 +188,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
       '2026-09-paid-imei-reports-v1',
+      '2026-09-provider-product-catalog-v2',
     ],
   )
 
@@ -204,6 +207,33 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       'provider_service_id',
     ],
   )
+})
+
+test('provider product catalog publishes only reviewed products and keeps activation fail-closed', () => {
+  assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 129)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 109)
+  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 25)
+  assert.equal(providerProducts.COMING_SOON_PROVIDER_PRODUCTS.length, 84)
+  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 12)
+  assert.equal(providerProducts.RESTRICTED_PROVIDER_PRODUCTS.length, 8)
+  assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map((product) => product.productCode)).size, 129)
+  assert.equal(
+    providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter((product) => product.domain === 'unlock').length,
+    55,
+  )
+  assert.equal(
+    providerProducts.AVAILABLE_PROVIDER_PRODUCTS.every((product) =>
+      product.domain === 'imei_check'
+      && product.inputType === 'imei'
+      && product.priceCents * 10_000 > product.providerCostMicros,
+    ),
+    true,
+  )
+
+  const paidRows = database.db()
+    .prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products')
+    .get() as { total: number; active: number }
+  assert.deepEqual(paidRows, { total: 25, active: 25 })
 })
 
 test('registration keeps the original User contract and normal sign-in flow', () => {
@@ -580,13 +610,13 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     const startingAliceBalance = credits.getBalance(alice.id)
     const freeChecksBefore = imeiChecks.listImeiChecks(alice.id).length
 
-    assert.equal(paidReports.listPaidReportProducts().length, 0)
+    const activeCatalog = paidReports.listPaidReportProducts()
+    assert.equal(activeCatalog.length, 25)
+    assert.equal(activeCatalog.every((product) => product.isActive), true)
+    assert.equal(activeCatalog.every((product) => !product.providerReady), true)
     const seeded = paidReports.getPaidReportProduct('APPLE_BASIC')
-    assert.equal(seeded?.isActive, false)
+    assert.equal(seeded?.isActive, true)
     assert.equal(seeded?.priceCents, 5)
-    connection
-      .prepare("UPDATE paid_report_products SET is_active = 1 WHERE code IN ('APPLE_BASIC', 'BLACKLIST_SIMPLE')")
-      .run()
 
     process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled'
     await assert.rejects(
@@ -607,6 +637,24 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'unlock-service'
     process.env.IUNLOCKMOBILE_PROVIDER_URL = 'https://provider.example/api'
     process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = 'paid-report-secret'
+    process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
+      'check:apple_basic': { id: '999', mode: 'sync' },
+    })
+    const beforeWrongMapping = credits.getBalance(alice.id)
+    await assert.rejects(
+      paidReports.createPaidReport(alice.id, {
+        productCode: 'APPLE_BASIC',
+        imei: '490154203237518',
+        idempotencyKey: 'paid-wrong-service-id',
+      }),
+      (error: unknown) => error instanceof paidReports.PaidReportError && error.code === 'provider_not_ready',
+    )
+    assert.deepEqual(credits.getBalance(alice.id), beforeWrongMapping)
+    assert.equal(
+      (connection.prepare('SELECT COUNT(*) AS count FROM paid_report_orders').get() as { count: number }).count,
+      0,
+    )
+
     process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
       'check:apple_basic': { id: '214', mode: 'sync' },
       'check:blacklist_simple': { id: '419', mode: 'sync' },
