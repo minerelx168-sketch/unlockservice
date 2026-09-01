@@ -213,9 +213,21 @@ function pluck(node: unknown, keys: string[]) {
   return ''
 }
 
+function firstObjectRecord(value: unknown): Record<string, unknown> {
+  if (Array.isArray(value)) {
+    const first = value.find((item) => item && typeof item === 'object' && !Array.isArray(item))
+    return first ? (first as Record<string, unknown>) : {}
+  }
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
+}
+
 function normalizedData(decoded: Record<string, unknown>, bodyField: unknown) {
   const details = typeof bodyField === 'string' ? extractTextDetails(bodyField) : scalarEntries(bodyField)
-  Object.assign(details, scalarEntries(decoded.object), scalarEntries(decoded.properties))
+  Object.assign(
+    details,
+    scalarEntries(firstObjectRecord(decoded.object)),
+    scalarEntries(firstObjectRecord(decoded.properties)),
+  )
   return details
 }
 
@@ -241,17 +253,23 @@ function parseJson(text: string): Record<string, unknown> | null {
   }
 }
 
-async function requestText(url: URL, config: ProviderConfiguration) {
+async function requestText(
+  url: URL,
+  config: ProviderConfiguration,
+  request: { method?: 'GET' | 'POST'; body?: URLSearchParams } = {},
+) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), config.timeoutMs)
   const startedAt = Date.now()
   try {
     const response = await fetch(url, {
-      method: 'GET',
+      method: request.method ?? 'GET',
+      body: request.body,
       redirect: 'error',
       signal: controller.signal,
       headers: {
         Accept: 'application/json, text/plain;q=0.9, text/html;q=0.5',
+        ...(request.body ? { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' } : {}),
         'User-Agent': 'iunlockmobile-provider/1.0',
       },
       cache: 'no-store',
@@ -288,25 +306,27 @@ async function requestText(url: URL, config: ProviderConfiguration) {
   }
 }
 
-function syncUrl(config: ProviderConfiguration, request: ProviderRequest) {
+function syncRequest(config: ProviderConfiguration, request: ProviderRequest) {
   const url = new URL(config.endpoint)
   if (config.name === 'imei.info' || config.name === 'imeiinfo') {
     url.pathname = `${url.pathname.replace(/\/$/, '')}/${encodeURIComponent(request.service.id)}/${encodeURIComponent(request.imei)}/`
     url.searchParams.set('API_KEY', config.apiKey)
     url.searchParams.set('format', 'json')
-    return url
+    return { url, method: 'GET' as const }
   }
   if (config.name === 'unlock-service' || config.name === 'unlockservice') {
-    url.searchParams.set('service', request.service.id)
-    url.searchParams.set('imei', request.imei)
-    url.searchParams.set('key', config.apiKey)
-    return url
+    const body = new URLSearchParams({
+      service: request.service.id,
+      imei: request.imei,
+      key: config.apiKey,
+    })
+    return { url, method: 'POST' as const, body }
   }
   url.searchParams.set('format', 'beta')
   url.searchParams.set('key', config.apiKey)
   url.searchParams.set('imei', request.imei)
   url.searchParams.set('service', request.service.id)
-  return url
+  return { url, method: 'GET' as const }
 }
 
 function dhruUrl(config: ProviderConfiguration, action: 'placeimeiorder' | 'getimeiorder', values: Record<string, string>) {
@@ -320,7 +340,8 @@ function dhruUrl(config: ProviderConfiguration, action: 'placeimeiorder' | 'geti
 
 async function submitSync(config: ProviderConfiguration, request: ProviderRequest): Promise<ProviderOutcome> {
   if (!config.apiKey) return providerFailure(Date.now(), 'provider_disabled', 'The synchronous provider key is not configured.', false)
-  const response = await requestText(syncUrl(config, request), config)
+  const requestDetails = syncRequest(config, request)
+  const response = await requestText(requestDetails.url, config, requestDetails)
   if (!response.ok) return providerFailure(response.startedAt, response.code, response.message, response.retryable)
 
   const decoded = parseJson(response.text)
@@ -344,7 +365,9 @@ async function submitSync(config: ProviderConfiguration, request: ProviderReques
     }
   }
 
-  const message = pluck(decoded, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description', 'error']) || 'The provider rejected the request.'
+  const message =
+    pluck(decoded, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description', 'error', 'response']) ||
+    'The provider rejected the request.'
   return providerFailure(response.startedAt, 'provider_rejected', message, !failureStatus(normalized))
 }
 

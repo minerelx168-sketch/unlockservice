@@ -395,12 +395,29 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
       'check:basic': { id: '343', mode: 'sync' },
     })
 
-    globalThis.fetch = async (input) => {
+    globalThis.fetch = async (input, init) => {
       const url = new URL(String(input))
       assert.equal(url.origin, 'https://provider.example')
-      assert.equal(url.searchParams.get('key'), 'sync-secret-key')
+      assert.equal(url.searchParams.get('key'), null)
+      assert.equal(url.searchParams.get('imei'), null)
+      assert.equal(init?.method, 'POST')
+      const body = new URLSearchParams(String(init?.body))
+      assert.equal(body.get('key'), 'sync-secret-key')
+      assert.equal(body.get('service'), '343')
+      assert.equal(body.get('imei'), '490154203237518')
       return new Response(
-        JSON.stringify({ status: true, response: '', object: { Brand: 'Apple', Model: 'iPhone' } }),
+        JSON.stringify({
+          success: true,
+          response: 'Model: iPhone 15\\nBlacklist Status: Clean',
+          object: [{
+            Brand: 'Apple',
+            Model: 'iPhone 15',
+            IMEI: '490154203237518',
+            'Serial Number': 'SERIAL-SECRET-1234',
+            blacklistStatus: 'Clean',
+            unknownProviderField: 'not public',
+          }],
+        }),
         { status: 200, headers: { 'content-type': 'application/json' } },
       )
     }
@@ -413,7 +430,12 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     })
     assert.equal(syncCheck.status, 'completed')
     assert.equal(syncCheck.provider, 'unlock-service')
-    assert.equal(syncCheck.result?.Brand, 'Apple')
+    assert.equal(syncCheck.result?.schemaVersion, 1)
+    assert.match(String(syncCheck.result?.title), /iPhone 15/i)
+    const storedSyncReport = JSON.stringify(syncCheck.result)
+    assert.equal(storedSyncReport.includes('490154203237518'), false)
+    assert.equal(storedSyncReport.includes('SERIAL-SECRET-1234'), false)
+    assert.equal(storedSyncReport.includes('not public'), false)
     assert.deepEqual(credits.getBalance(alice.id), aliceCredit)
 
     process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'dhru'
@@ -468,7 +490,8 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
       .run(asyncCheck.id)
     const finishedCheck = await imeiChecks.pollImeiCheck(alice.id, asyncCheck.id)
     assert.equal(finishedCheck.status, 'completed')
-    assert.equal(finishedCheck.result?.Brand, 'Apple')
+    assert.equal(finishedCheck.result?.schemaVersion, 1)
+    assert.match(String(finishedCheck.result?.title), /iPhone 14/i)
     assert.deepEqual(credits.getBalance(alice.id), aliceCredit)
 
     const legacyBefore = credits.getBalance(1)

@@ -242,7 +242,7 @@ export async function pollImeiCheck(userId: number, id: number): Promise<ImeiChe
   const provider = activeImeiCheckProvider()
   if (!provider.poll || !row.provider_check_id || !providerConfiguration().enabled) return toView(row)
 
-  const outcome = await provider.poll(row.provider_check_id)
+  const outcome = await provider.poll(row.provider_check_id, row.check_type)
   updateResult(id, outcome, true)
   auditOutcome(id, row.provider_mode ?? 'dhru', outcome, `poll:${row.provider_attempts + 1}:${outcome.status}`)
   return getImeiCheck(userId, id)!
