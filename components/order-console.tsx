@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
 import { formatEta, OrderStatusBadge } from './order-status'
@@ -38,6 +38,16 @@ type OrderPayload = {
  * courtesy — it catches the fast ones while the customer is still on the
  * page, and everything else waits in Orders.
  */
+/**
+ * Identifies one attempt at placing an order, so the server can recognise a
+ * resend. randomUUID needs a secure context, which every page that reaches
+ * this console already has; the fallback keeps a plain-HTTP dev host working.
+ */
+function newAttemptKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return `attempt-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+}
+
 const POLL_INTERVAL_MS = 2_000
 const POLL_COURTESY_MS = 30_000
 
@@ -68,7 +78,19 @@ export function OrderConsole({
   const [error, setError] = useState<string | null>(null)
   const [order, setOrder] = useState<OrderPayload | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  /* Held across retries of the same attempt so a double click or a resend
+     after a dropped connection resolves to the order already placed rather
+     than a second one with a second hold. Cleared once an order comes back,
+     and whenever the customer changes what they are ordering. */
+  const attemptKeyRef = useRef<string | null>(null)
   const router = useRouter()
+
+  /* Changing what is being ordered starts a new attempt: the old key would
+     otherwise resolve a retry to the order the customer just edited away
+     from. */
+  useEffect(() => {
+    attemptKeyRef.current = null
+  }, [kind, imei, brandId, carrierId, serviceId, email])
 
   const brand = brands.find((entry) => entry.id === brandId) ?? null
   const carrier = carriers.find((entry) => entry.id === carrierId) ?? null
@@ -128,6 +150,8 @@ export function OrderConsole({
     setError(null)
     setOrder(null)
 
+    attemptKeyRef.current ??= newAttemptKey()
+
     try {
       let payload = await post(
         '/api/orders',
@@ -138,9 +162,11 @@ export function OrderConsole({
           serviceId: kind === 'device_service' ? serviceId : undefined,
           imei,
           email,
+          idempotencyKey: attemptKeyRef.current,
         },
         controller.signal,
       )
+      attemptKeyRef.current = null
       setOrder(payload)
       router.refresh()
 

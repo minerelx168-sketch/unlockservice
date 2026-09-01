@@ -21,6 +21,7 @@ export async function POST(request: Request) {
       serviceId: body.serviceId === undefined ? undefined : Number(body.serviceId),
       imei: String(body.imei ?? ''),
       email: String(body.email ?? ''),
+      idempotencyKey: body.idempotencyKey === undefined ? undefined : String(body.idempotencyKey),
     })
     return NextResponse.json(payload)
   } catch (error) {

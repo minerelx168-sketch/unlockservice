@@ -71,11 +71,34 @@ function hasEffect(refType: string, refId: string, type: LedgerType): boolean {
     db()
       .prepare(
         `SELECT 1 FROM credit_ledger
-          WHERE ref_type = ? AND ref_id = ? AND type = ? AND affects_balance = 1
+          WHERE ref_type = ? AND ref_id = ? AND type = ?
           LIMIT 1`,
       )
       .get(refType, refId, type),
   )
+}
+
+/**
+ * Raised when an effect that has already been applied is applied again.
+ *
+ * Every caller runs inside a transaction, so throwing rolls the whole
+ * settlement back and leaves the order where it was. The alternative —
+ * quietly doing nothing — would let an order call itself delivered while
+ * no money moved, which is the one outcome the ledger exists to prevent.
+ */
+export class DuplicateLedgerEffect extends Error {
+  constructor(
+    readonly refType: string,
+    readonly refId: string,
+    readonly effect: LedgerType,
+  ) {
+    super(`a ${effect} effect already exists for ${refType} ${refId}`)
+    this.name = 'DuplicateLedgerEffect'
+  }
+}
+
+function refuseReplay(refType: string, refId: string, type: LedgerType) {
+  if (hasEffect(refType, refId, type)) throw new DuplicateLedgerEffect(refType, refId, type)
 }
 
 export class InsufficientCredit extends Error {
@@ -88,6 +111,7 @@ export class InsufficientCredit extends Error {
 export function hold(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('hold amount must be positive cents')
   return db().transaction(() => {
+    refuseReplay(refType, refId, 'hold')
     const before = getBalance(userId)
     if (before.availableCents < amountCents) {
       throw new InsufficientCredit(before.availableCents, amountCents)
@@ -102,6 +126,7 @@ export function hold(userId: number, amountCents: number, refType: string, refId
 export function charge(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('charge amount must be positive cents')
   return db().transaction(() => {
+    refuseReplay(refType, refId, 'charge')
     const before = getBalance(userId)
     if (before.heldCents < amountCents || before.creditCents < amountCents) {
       throw new Error('cannot charge more credit than is reserved')
@@ -118,6 +143,7 @@ export function charge(userId: number, amountCents: number, refType: string, ref
 export function refund(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('refund amount must be positive cents')
   return db().transaction(() => {
+    refuseReplay(refType, refId, 'refund')
     const before = getBalance(userId)
     if (before.heldCents < amountCents) throw new Error('cannot release more credit than is reserved')
     db().prepare('UPDATE users SET held_cents = held_cents - ? WHERE id = ?').run(amountCents, userId)

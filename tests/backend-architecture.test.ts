@@ -183,6 +183,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-imeihub-backend-v1',
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
+      '2026-09-ledger-effect-uniqueness-v1',
     ],
   )
 
@@ -577,4 +578,137 @@ test('escrow hold, refund and charge preserve the original balance contract', ()
     availableCents: 1300,
   })
   assert.deepEqual(credits.creditIntegrity(), { users: 4, mismatches: 0, invalidHolds: 0 })
+})
+
+test('a replayed refund cannot release another order’s hold', () => {
+  const user = auth.register('replay', 'replay@example.com', 'correct-horse-battery-staple')
+  credits.credit(user.id, 10_000, 'topup', 'test', `seed-${user.id}`)
+
+  credits.hold(user.id, 3_000, 'order', `${user.id}-a`)
+  credits.hold(user.id, 3_000, 'order', `${user.id}-b`)
+  credits.refund(user.id, 3_000, 'order', `${user.id}-b`)
+
+  /* Before the effect index covered hold and refund, this second release was
+     accepted and took order A's hold with it, leaving A unable ever to be
+     charged. */
+  assert.throws(
+    () => credits.refund(user.id, 3_000, 'order', `${user.id}-b`),
+    (error: unknown) => error instanceof credits.DuplicateLedgerEffect,
+  )
+  assert.throws(
+    () => credits.hold(user.id, 3_000, 'order', `${user.id}-a`),
+    (error: unknown) => error instanceof credits.DuplicateLedgerEffect,
+  )
+
+  assert.deepEqual(credits.getBalance(user.id), {
+    creditCents: 10_000,
+    heldCents: 3_000,
+    availableCents: 7_000,
+  })
+
+  /* A still holds its own credit, so it can still settle. */
+  credits.charge(user.id, 3_000, 'order', `${user.id}-a`)
+  assert.deepEqual(credits.getBalance(user.id), {
+    creditCents: 7_000,
+    heldCents: 0,
+    availableCents: 7_000,
+  })
+  assert.equal(credits.creditIntegrity().mismatches, 0)
+  assert.equal(credits.creditIntegrity().invalidHolds, 0)
+})
+
+test('a failed hold leaves no order behind, and a resent order is not placed twice', async () => {
+  const user = auth.register('atomic', 'atomic@example.com', 'correct-horse-battery-staple')
+  const before = database
+    .db()
+    .prepare('SELECT COUNT(*) AS count FROM orders')
+    .get() as { count: number }
+
+  await assert.rejects(
+    orders.submitOrder(user.id, {
+      kind: 'carrier_unlock',
+      brandId: 1,
+      carrierId: 101,
+      imei: '354909000000095',
+      email: 'atomic@example.com',
+    }),
+    (error: unknown) => error instanceof orders.OrderError && error.code === 'insufficient_credit',
+  )
+
+  /* The row and its hold commit together, so a refused hold rolls the row
+     back rather than leaving an orphan for the sweep to find. */
+  const after = database
+    .db()
+    .prepare('SELECT COUNT(*) AS count FROM orders')
+    .get() as { count: number }
+  assert.equal(after.count, before.count)
+
+  credits.credit(user.id, 50_000, 'topup', 'test', `atomic-${user.id}`)
+  const key = `attempt-${user.id}-0001`
+  const first = await orders.submitOrder(user.id, {
+    kind: 'carrier_unlock',
+    brandId: 1,
+    carrierId: 101,
+    imei: '354909000000095',
+    email: 'atomic@example.com',
+    idempotencyKey: key,
+  })
+  const resent = await orders.submitOrder(user.id, {
+    kind: 'carrier_unlock',
+    brandId: 1,
+    carrierId: 101,
+    imei: '354909000000095',
+    email: 'atomic@example.com',
+    idempotencyKey: key,
+  })
+
+  assert.equal(resent.orderId, first.orderId)
+  const placed = database
+    .db()
+    .prepare('SELECT COUNT(*) AS count FROM orders WHERE user_id = ?')
+    .get(user.id) as { count: number }
+  assert.equal(placed.count, 1)
+  assert.equal(credits.creditIntegrity().mismatches, 0)
+})
+
+test('only one settlement of an order moves money', async () => {
+  const user = auth.register('settle', 'settle@example.com', 'correct-horse-battery-staple')
+  credits.credit(user.id, 50_000, 'topup', 'test', `settle-${user.id}`)
+
+  const placed = await orders.submitOrder(user.id, {
+    kind: 'carrier_unlock',
+    brandId: 1,
+    carrierId: 101,
+    imei: '354909000000095',
+    email: 'settle@example.com',
+  })
+  assert.equal(placed.status, 'processing')
+
+  /* The console polls while the sweep reads the same row, so both see
+     `processing` before either settles. Only the poll that actually changes
+     the status may charge. */
+  database
+    .db()
+    .prepare("UPDATE orders SET provider_ready_at = datetime('now', '-1 minute') WHERE id = ?")
+    .run(placed.orderId)
+  const [a, b] = await Promise.all([
+    orders.pollOrder(user.id, placed.orderId),
+    orders.pollOrder(user.id, placed.orderId),
+  ])
+
+  assert.equal(a.status, 'delivered')
+  assert.equal(b.status, 'delivered')
+  const charges = database
+    .db()
+    .prepare(
+      `SELECT COUNT(*) AS count FROM credit_ledger
+        WHERE ref_type = 'order' AND ref_id = ? AND type = 'charge'`,
+    )
+    .get(String(placed.orderId)) as { count: number }
+  assert.equal(charges.count, 1)
+
+  const balance = credits.getBalance(user.id)
+  assert.equal(balance.heldCents, 0)
+  assert.equal(balance.creditCents, 50_000 - placed.priceCents)
+  assert.equal(credits.creditIntegrity().mismatches, 0)
 })

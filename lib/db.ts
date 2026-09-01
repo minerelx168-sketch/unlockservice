@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS orders (
   provider_last_polled_at TEXT,
   provider_attempts      INTEGER NOT NULL DEFAULT 0,
   provider_error_code    TEXT,
+  idempotency_key        TEXT,
   error_message          TEXT,
   created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at        TEXT    NOT NULL DEFAULT (datetime('now'))
@@ -305,6 +306,7 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'imei_checks', 'provider_last_polled_at TEXT')
     addColumn(connection, 'imei_checks', 'provider_attempts INTEGER NOT NULL DEFAULT 0')
     addColumn(connection, 'imei_checks', 'provider_error_code TEXT')
+    addColumn(connection, 'orders', 'idempotency_key TEXT')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
 
@@ -354,6 +356,44 @@ function migrate(connection: Database.Database) {
         ON credit_ledger(ref_type, ref_id, type)
         WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL AND affects_balance = 1;
     `)
+
+    /*
+     * The index above only ever covered affects_balance = 1, which leaves
+     * hold and refund replayable: a refund applied twice releases a second
+     * order's hold, and that order can then never be charged. Widen it to
+     * every effect.
+     *
+     * A database that already contains a duplicate cannot take the index,
+     * and failing to open the database is worse than the narrower index —
+     * so check first and leave the old one in place if there is anything to
+     * reconcile. lib/credits.ts refuses a duplicate effect on its own, so
+     * correctness does not depend on which index is present; this is the
+     * backstop, not the control.
+     */
+    if (!migrationApplied(connection, '2026-09-ledger-effect-uniqueness-v1')) {
+      const duplicates = connection
+        .prepare(
+          `SELECT COUNT(*) AS count FROM (
+             SELECT 1 FROM credit_ledger
+              WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL
+              GROUP BY ref_type, ref_id, type
+             HAVING COUNT(*) > 1
+           )`,
+        )
+        .get() as { count: number }
+
+      if (duplicates.count === 0) {
+        connection.exec(`
+          DROP INDEX IF EXISTS credit_ledger_unique_effect;
+          CREATE UNIQUE INDEX credit_ledger_unique_effect
+            ON credit_ledger(ref_type, ref_id, type)
+            WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL;
+        `)
+        connection
+          .prepare('INSERT INTO schema_migrations(version) VALUES (?)')
+          .run('2026-09-ledger-effect-uniqueness-v1')
+      }
+    }
 
     if (!migrationApplied(connection, '2026-08-unlockservice-native-v2')) {
       if (hasTable(connection, 'topup_orders')) {
@@ -426,6 +466,9 @@ function migrate(connection: Database.Database) {
         WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS provider_events_idempotency
         ON provider_events(resource_type, resource_id, idempotency_key)
+        WHERE idempotency_key IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS orders_idempotency
+        ON orders(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
     `)
   })()
