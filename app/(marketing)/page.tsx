@@ -138,24 +138,28 @@ export default function HomePage() {
           <div className="hero-copy">
             <span className="eyebrow">
               <Icon name="shield" strokeWidth={2} />
-              Official remote phone unlocking
+              IMEI checks and remote unlock services
             </span>
 
             <h1 className="t-hero">
-              Unlock your phone today.
+              Find the right phone service.
               <br />
-              <span className="accent">Use it on any network.</span>
+              <span className="accent">See the price before you order.</span>
             </h1>
 
             <p className="t-lead">
-              Select the original carrier, enter your IMEI and see the service details before you
-              order. The unlock is remote, permanent and tracked from start to finish.
+              Compare every published Unlock and IMEI Check service in one catalog. Available reports
+              can be ordered online; services awaiting Provider API verification are clearly marked.
             </p>
 
             <div className="hero-actions">
-              <Link className="button button--primary" href="#check">
-                <Icon name="bolt" strokeWidth={1.9} />
-                Start your unlock
+              <Link className="button button--primary" href="/services">
+                <Icon name="search" strokeWidth={1.9} />
+                Browse services and prices
+              </Link>
+              <Link className="button button--secondary" href="/check">
+                <Icon name="device" strokeWidth={1.9} />
+                Free IMEI Check
               </Link>
               <Link className="button button--quiet" href="/login">
                 <Icon name="clock" strokeWidth={1.9} />

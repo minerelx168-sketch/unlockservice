@@ -140,6 +140,32 @@ CREATE TABLE IF NOT EXISTS credit_ledger (
 );
 CREATE INDEX IF NOT EXISTS ledger_user ON credit_ledger(user_id, created_at DESC);
 
+CREATE TABLE IF NOT EXISTS admin_credit_adjustments (
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  public_id            TEXT    NOT NULL UNIQUE,
+  admin_user_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  target_user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  amount_cents         INTEGER NOT NULL CHECK(amount_cents != 0),
+  reason               TEXT    NOT NULL CHECK(length(reason) BETWEEN 8 AND 240),
+  idempotency_key      TEXT    NOT NULL,
+  credit_before_cents  INTEGER NOT NULL,
+  held_before_cents    INTEGER NOT NULL,
+  credit_after_cents   INTEGER NOT NULL,
+  held_after_cents     INTEGER NOT NULL,
+  created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(admin_user_id, idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS admin_credit_adjustments_target
+  ON admin_credit_adjustments(target_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS admin_credit_adjustments_admin
+  ON admin_credit_adjustments(admin_user_id, created_at DESC);
+CREATE TRIGGER IF NOT EXISTS admin_credit_adjustments_no_update
+  BEFORE UPDATE ON admin_credit_adjustments
+  BEGIN SELECT RAISE(ABORT, 'admin credit adjustments are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS admin_credit_adjustments_no_delete
+  BEFORE DELETE ON admin_credit_adjustments
+  BEGIN SELECT RAISE(ABORT, 'admin credit adjustments are append-only'); END;
+
 CREATE TABLE IF NOT EXISTS api_access (
 	  user_id         INTEGER PRIMARY KEY REFERENCES users(id),
 	  status          TEXT NOT NULL DEFAULT 'none',
@@ -473,6 +499,10 @@ function migrate(connection: Database.Database) {
 
     if (!migrationApplied(connection, '2026-09-paid-imei-reports-v1')) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-imei-reports-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-admin-credit-adjustments-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-admin-credit-adjustments-v1')
     }
 
     connection.exec(`

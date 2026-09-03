@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test, { after, before } from 'node:test'
@@ -123,6 +123,7 @@ legacy.close()
 let auth: typeof import('../lib/auth')
 let accountSecurity: typeof import('../lib/account-security')
 let admin: typeof import('../lib/admin')
+let adminCreditAdjustments: typeof import('../lib/admin-credit-adjustments')
 let credits: typeof import('../lib/credits')
 let payments: typeof import('../lib/payments')
 let googleOAuth: typeof import('../lib/google-oauth')
@@ -138,6 +139,7 @@ before(async () => {
   auth = await import('../lib/auth')
   accountSecurity = await import('../lib/account-security')
   admin = await import('../lib/admin')
+  adminCreditAdjustments = await import('../lib/admin-credit-adjustments')
   credits = await import('../lib/credits')
   payments = await import('../lib/payments')
   googleOAuth = await import('../lib/google-oauth')
@@ -187,6 +189,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-imeihub-backend-v1',
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
+      '2026-09-admin-credit-adjustments-v1',
       '2026-09-paid-imei-reports-v1',
       '2026-09-provider-product-catalog-v2',
     ],
@@ -234,6 +237,23 @@ test('provider product catalog publishes only reviewed products and keeps activa
     .prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products')
     .get() as { total: number; active: number }
   assert.deepEqual(paidRows, { total: 25, active: 25 })
+})
+
+test('Signal Blue tokens, button hierarchy and service dropdown remain explicit', () => {
+  const tokens = readFileSync(join(process.cwd(), 'styles/tokens.css'), 'utf8')
+  const buttons = readFileSync(join(process.cwd(), 'styles/components.css'), 'utf8')
+  const header = readFileSync(join(process.cwd(), 'components/site-header.tsx'), 'utf8')
+  const catalog = readFileSync(join(process.cwd(), 'components/product-catalog.tsx'), 'utf8')
+
+  assert.match(tokens, /--primary:\s*#0057b8/)
+  assert.match(tokens, /--primary-dark:\s*#003f87/)
+  assert.match(tokens, /--primary-soft:\s*#e8f2ff/)
+  assert.match(buttons, /\.button--secondary/)
+  assert.match(header, /button button--primary[^>]*href="\/services"|className="button button--primary" href="\/services"/)
+  assert.match(catalog, /id="product-service"/)
+  assert.match(catalog, /All services and prices/)
+  assert.match(catalog, /Coming-soon Unlock Services/)
+  assert.match(catalog, /formatUsd\(product\.priceCents\)/)
 })
 
 test('registration keeps the original User contract and normal sign-in flow', () => {
@@ -287,6 +307,118 @@ test('administrator access requires the explicit admin account type', () => {
   const overview = admin.adminOverview()
   assert.equal(overview.admins, 1)
   assert.equal(admin.listAdminUsers().some((entry) => entry.id === user.id && entry.account_type === 'admin'), true)
+})
+
+test('administrator credit adjustments are RBAC-only, idempotent, append-only and ledger-safe', () => {
+  const administrator = auth.authenticate('alice', 'correct-horse-battery-staple')
+  const target = auth.getUser(2)!
+  const before = credits.getBalance(target.id)
+
+  assert.throws(
+    () => adminCreditAdjustments.adjustUserCredit(1, {
+      targetUserId: target.id,
+      amountCents: 250,
+      reason: 'Approved support correction',
+      idempotencyKey: 'admin-credit-non-admin',
+    }),
+    (error: unknown) => error instanceof adminCreditAdjustments.AdminCreditAdjustmentError && error.code === 'forbidden',
+  )
+
+  const added = adminCreditAdjustments.adjustUserCredit(administrator.id, {
+    targetUserId: target.id,
+    amountCents: 250,
+    reason: 'Approved support correction',
+    idempotencyKey: 'admin-credit-add-001',
+  })
+  assert.equal(added.replayed, false)
+  assert.equal(added.adjustment.amount_cents, 250)
+  assert.equal(added.balance.creditCents, before.creditCents + 250)
+  assert.equal(added.balance.heldCents, before.heldCents)
+
+  const replay = adminCreditAdjustments.adjustUserCredit(administrator.id, {
+    targetUserId: target.id,
+    amountCents: 250,
+    reason: 'Approved support correction',
+    idempotencyKey: 'admin-credit-add-001',
+  })
+  assert.equal(replay.replayed, true)
+  assert.equal(replay.adjustment.public_id, added.adjustment.public_id)
+  assert.equal(credits.getBalance(target.id).creditCents, before.creditCents + 250)
+
+  assert.throws(
+    () => adminCreditAdjustments.adjustUserCredit(administrator.id, {
+      targetUserId: target.id,
+      amountCents: 300,
+      reason: 'Different amount on replay',
+      idempotencyKey: 'admin-credit-add-001',
+    }),
+    (error: unknown) => error instanceof adminCreditAdjustments.AdminCreditAdjustmentError && error.code === 'idempotency_conflict',
+  )
+
+  const removed = adminCreditAdjustments.adjustUserCredit(administrator.id, {
+    targetUserId: target.id,
+    amountCents: -100,
+    reason: 'Reverse duplicate goodwill amount',
+    idempotencyKey: 'admin-credit-remove-001',
+  })
+  assert.equal(removed.balance.creditCents, before.creditCents + 150)
+
+  assert.throws(
+    () => adminCreditAdjustments.adjustUserCredit(administrator.id, {
+      targetUserId: 1,
+      amountCents: -9_000,
+      reason: 'Must not consume held order funds',
+      idempotencyKey: 'admin-credit-held-001',
+    }),
+    (error: unknown) => error instanceof adminCreditAdjustments.AdminCreditAdjustmentError && error.code === 'held_credit_conflict',
+  )
+  assert.deepEqual(credits.getBalance(1), { creditCents: 10_000, heldCents: 2_000, availableCents: 8_000 })
+
+  assert.throws(
+    () => adminCreditAdjustments.adjustUserCredit(administrator.id, {
+      targetUserId: target.id,
+      amountCents: 0,
+      reason: 'Zero is invalid',
+      idempotencyKey: 'admin-credit-zero-001',
+    }),
+    (error: unknown) => error instanceof adminCreditAdjustments.AdminCreditAdjustmentError && error.code === 'invalid_amount',
+  )
+  assert.throws(
+    () => adminCreditAdjustments.adjustUserCredit(administrator.id, {
+      targetUserId: target.id,
+      amountCents: 100,
+      reason: 'short',
+      idempotencyKey: 'admin-credit-reason-001',
+    }),
+    (error: unknown) => error instanceof adminCreditAdjustments.AdminCreditAdjustmentError && error.code === 'invalid_reason',
+  )
+
+  const auditCount = database.db()
+    .prepare('SELECT COUNT(*) AS count FROM admin_credit_adjustments')
+    .get() as { count: number }
+  assert.equal(auditCount.count, 2)
+  const ledger = database.db()
+    .prepare("SELECT amount_cents, type, ref_type, ref_id FROM credit_ledger WHERE ref_type = 'admin_credit_adjustment' ORDER BY id")
+    .all() as Array<{ amount_cents: number; type: string; ref_type: string; ref_id: string }>
+  assert.deepEqual(ledger.map((row) => [row.amount_cents, row.type]), [[250, 'adjustment'], [-100, 'adjustment']])
+  assert.equal(ledger[0]?.ref_id, added.adjustment.public_id)
+  assert.equal(ledger[1]?.ref_id, removed.adjustment.public_id)
+
+  assert.throws(
+    () => database.db().prepare('UPDATE admin_credit_adjustments SET reason = ? WHERE public_id = ?').run('Tampered reason', added.adjustment.public_id),
+    /append-only/,
+  )
+  assert.throws(
+    () => database.db().prepare('DELETE FROM admin_credit_adjustments WHERE public_id = ?').run(added.adjustment.public_id),
+    /append-only/,
+  )
+  assert.equal(adminCreditAdjustments.listAdminCreditAdjustments().length, 2)
+  assert.deepEqual(credits.creditIntegrity(), { users: 3, mismatches: 0, invalidHolds: 0 })
+
+  const routeSource = readFileSync(join(process.cwd(), 'app/api/admin/credit-adjustments/route.ts'), 'utf8')
+  assert.match(routeSource, /await guard\(request\)/)
+  assert.match(routeSource, /hasAdminRole\(found\.user\)/)
+  assert.match(routeSource, /adjustUserCredit\(found\.user\.id/)
 })
 
 test('Google OAuth creates protected authorization transactions and stable identity links', () => {

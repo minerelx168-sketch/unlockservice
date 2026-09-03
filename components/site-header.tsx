@@ -8,17 +8,16 @@ import { Icon } from './icons'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
-  { href: '/#check', label: 'Unlock Phone' },
-  { href: '/check', label: 'Phone Check' },
   { href: '/services', label: 'Services' },
+  { href: '/check', label: 'Free IMEI Check' },
   { href: '/#how', label: 'How it works' },
   { href: '/#faq', label: 'FAQ' },
   { href: '/login', label: 'Order Tracking' },
 ]
 
 /**
- * Actions read toggle → quiet → accent, so the strongest colour sits
- * furthest right. Below 940px the nav becomes a panel and the buttons
+ * Actions read toggle → quiet account → Signal Blue catalog CTA, so the
+ * strongest action sits furthest right. Below 940px the nav becomes a panel and the buttons
  * step aside — see the media queries in components.css.
  */
 export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
@@ -51,8 +50,8 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
               </Link>
             )
           })}
-          <Link className="nav-cta" href="/#check" onClick={() => setOpen(false)}>
-            Unlock a phone
+          <Link className="nav-cta" href="/services" onClick={() => setOpen(false)}>
+            Browse services
           </Link>
         </nav>
 
@@ -61,9 +60,9 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
           <Link className="button button--quiet" href={accountHref}>
             {accountLabel}
           </Link>
-          <Link className="button button--primary" href="/#check">
-            <Icon name="bolt" strokeWidth={1.9} />
-            Unlock Phone
+          <Link className="button button--primary" href="/services">
+            <Icon name="search" strokeWidth={1.9} />
+            Browse services
           </Link>
           <button
             type="button"

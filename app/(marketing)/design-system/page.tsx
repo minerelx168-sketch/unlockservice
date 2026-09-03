@@ -11,34 +11,34 @@ export const metadata: Metadata = {
 }
 
 const SWATCHES = [
-  ['--page', '#FFFFFF', '#0E1310'],
-  ['--page-soft', '#F8F7F3', '#121814'],
-  ['--page-tint', '#F1EFE6', '#18201A'],
-  ['--surface-strong', '#FAF9F5', '#1B231D'],
-  ['--line', '#E4E2D9', '#2A332C'],
-  ['--line-strong', '#D2CFC2', '#3F4B42'],
-  ['--faint', '#79857E', '#7D8C82'],
-  ['--muted', '#68736A', '#99A89D'],
-  ['--ink', '#2F3D34', '#DBE4DC'],
-  ['--ink-strong', '#14241B', '#F2F7F2'],
-  ['--primary', '#0F7A52', '#4CC08A'],
-  ['--primary-dark', '#0B5F40', '#6FD3A3'],
-  ['--primary-soft', '#E6F2EA', '#10301F'],
-  ['--accent', '#D97B1E', '#EDA553'],
-  ['--accent-soft', '#FDF1E1', '#362313'],
-  ['--moss', '#516F34', '#A9C47A'],
-  ['--moss-soft', '#EEF3E2', '#212B18'],
+  ['--page', '#FFFFFF', '#07111E'],
+  ['--page-soft', '#F6F9FD', '#0B1828'],
+  ['--page-tint', '#EDF4FC', '#10243A'],
+  ['--surface-strong', '#F8FBFF', '#12243A'],
+  ['--line', '#DCE5EF', '#22374D'],
+  ['--line-strong', '#C2D0DF', '#3A536D'],
+  ['--faint', '#718399', '#748AA1'],
+  ['--muted', '#5E7186', '#9BB0C5'],
+  ['--ink', '#2B3F55', '#DCE8F5'],
+  ['--ink-strong', '#0C223A', '#F4F8FC'],
+  ['--primary', '#0057B8', '#5BB5FF'],
+  ['--primary-dark', '#003F87', '#8ACBFF'],
+  ['--primary-soft', '#E8F2FF', '#0C2E52'],
+  ['--accent', '#1B76D1', '#49A7F5'],
+  ['--accent-soft', '#EAF5FF', '#102C48'],
+  ['--moss', '#315E8A', '#85B9E8'],
+  ['--moss-soft', '#EAF1F8', '#132A40'],
   ['--success', '#16845D', '#72D9AF'],
   ['--danger', '#B03A2B', '#E58A7C'],
-  ['--band', '#0D3B29', '#1A6C46'],
-  ['--numeral', '#F1EFE6', '#26312A'],
-  ['--on-accent', '#14241B', '#0B1410'],
+  ['--band', '#021D3A', '#0759A8'],
+  ['--numeral', '#EDF4FC', '#19344F'],
+  ['--on-accent', '#FFFFFF', '#06182A'],
 ] as const
 
 const PATTERNS: Array<[string, string]> = [
   [
     '01 · Sticky header — 74px',
-    'Translucent page colour at 88% + backdrop blur, 1px bottom hairline. Nav gap 28, header gap 24. Actions read toggle → quiet → accent, so the strongest colour sits furthest right.',
+    'Translucent page colour at 88% + backdrop blur, 1px bottom hairline. Nav gap 28, header gap 24. Actions read theme toggle → quiet account → Signal Blue catalog CTA.',
   ],
   [
     '02 · Hero — min-height 620',
@@ -97,11 +97,11 @@ const PRINCIPLES: Array<[string, string]> = [
   ],
   [
     'Colour is rationed',
-    'Long stretches of near-white, then one saturated moment: an emerald CTA, an amber secondary, one gradient band. Accents are load-bearing precisely because they are rare — the moss only ever appears as a small uppercase kicker, never as a fill.',
+    'Long stretches of blue-white, then one saturated moment: a Signal Blue CTA, an Azure outline action, and one deep-blue gradient band. Accents remain load-bearing because they are deliberately rare.',
   ],
   [
     'Whites are tinted, blacks are not black',
-    'Surfaces carry a warm cast and the darkest text is #14241B. Nothing is #000 or a neutral grey, so the whole page sits in one temperature.',
+    'Surfaces carry a crisp blue-white cast and the darkest text is #0C223A. Nothing is pure black, so the interface stays inside one Signal Blue temperature.',
   ],
 ]
 
@@ -117,7 +117,7 @@ const KEEP = [
 const WRONG = [
   'Rounding the values to a 4/8px grid. 11, 13, 26, 46, 52 are real numbers here — snapping them flattens the character.',
   'Adding a second gradient. One band per page is the budget.',
-  'Using emerald and amber as primary in the same block — amber is the second action, never the first.',
+  'Using two filled brand buttons in the same block — Signal Blue is primary, outline blue is secondary, and quiet is tertiary.',
   'Letting card copy set the row height. min-height is what keeps the grids honest.',
   'Inverting the palette for dark mode instead of re-pitching it per role.',
   'Keeping the 11px uppercase labels at that size on a phone without checking them on glass.',
@@ -129,16 +129,16 @@ const TRANSFER: Array<[string, string]> = [
     'Constant section padding, 1180px shell, kicker→headline→lead',
     'Padding tuned to 104px and a fluid gutter with three breakpoints.',
   ],
-  ['Tinted whites, ink that is never black', 'Cast moved cool teal → warm: #F8F7F3 instead of #F5FAFA.'],
+  ['Tinted whites, ink that is never black', 'Crisp blue-white #F6F9FD with blue-black #0C223A.'],
   [
     'One primary, one secondary, rationed accents',
-    'Blue + coral → emerald #0F7A52 + amber #D97B1E, with moss for kickers.',
+    'Signal Blue #0057B8 + Azure #1B76D1, with Steel Blue for kickers and quiet emphasis.',
   ],
   [
     'Display face paired with a plainer body face, tight tracking at scale',
     'Google Sans Flex → Bricolage Grotesque + Instrument Sans.',
   ],
-  ['Full dark theme driven by one token block', 'Same mechanism, own values — green-black instead of teal-black.'],
+  ['Full dark theme driven by one token block', 'Same mechanism, re-pitched as blue-black with a high-contrast light Signal Blue.'],
 ]
 
 const BUTTON_SPECS: Array<{ className: string; icon: IconName; label: string; name: string; note: string }> = [
@@ -274,10 +274,10 @@ export default function DesignSystemPage() {
         <div className="shell">
           <div className="section-head">
             <span className="kicker">01 · Colour tokens</span>
-            <h2 className="t-section">Warm-tinted whites, green-black ink.</h2>
+            <h2 className="t-section">Blue-white surfaces, Signal Blue actions.</h2>
             <p className="t-lead">
-              Surfaces carry a warm cast rather than a neutral grey, and the darkest ink is{' '}
-              <code>#14241B</code> — nothing on the page is <code>#000</code>. Chips render the
+              Surfaces carry a crisp blue-white cast, and the darkest ink is{' '}
+              <code>#0C223A</code> — nothing on the page is pure black. Chips render the
               token for the theme you are in; hexes list light, then dark.
             </p>
           </div>
@@ -298,8 +298,8 @@ export default function DesignSystemPage() {
 
           <div style={{ height: 20 }} />
           <p className="t-small">
-            Dark is re-pitched per role, never inverted: accents lighten so they stay legible on
-            green-black, and the soft tints stop being pale washes and become deep chips behind a
+            Dark is re-pitched per role, never inverted: Signal Blue lightens so it stays legible on
+            blue-black, and the soft tints stop being pale washes and become deep chips behind a
             light glyph. Every text pair clears 4.5:1 on the surface it sits on;{' '}
             <code>--faint</code> is decorative only — placeholders and window chrome, never copy a
             reader needs.
@@ -418,8 +418,8 @@ export default function DesignSystemPage() {
                 <Icon name="bolt" strokeWidth={1.7} />
               </span>
               <span className="t-small" style={{ maxWidth: 340 }}>
-                The tint is the category signal: emerald = identity, amber = accounts &amp; locks,
-                moss = delivery. Same box, same glyph weight, only the pairing changes.
+                The tint is the category signal: Signal Blue = identity, Azure = supporting action,
+                Steel Blue = quiet metadata. Same box, same glyph weight, only the pairing changes.
               </span>
             </div>
             <div className="cap">

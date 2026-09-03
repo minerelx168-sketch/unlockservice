@@ -15,50 +15,48 @@
   color-scheme: light;
 
   /* ---- surfaces --------------------------------------------------- */
-  /* Whites carry a warm cast rather than a neutral grey. */
+  /* Crisp blue-white surfaces keep the Signal Blue system clear and technical. */
   --page: #ffffff;
-  --page-soft: #f8f7f3;
-  --page-tint: #f1efe6;
+  --page-soft: #f6f9fd;
+  --page-tint: #edf4fc;
   /* The steps numeral, which sits on --surface: page-tint is close enough to
      the surface in dark that the numeral disappears entirely. */
-  --numeral: #f1efe6;
+  --numeral: #edf4fc;
   --surface: #ffffff;
-  --surface-strong: #faf9f5;
+  --surface-strong: #f8fbff;
 
   /* ---- ink -------------------------------------------------------- */
-  /* The darkest ink is a green-black. Nothing on the page is #000. */
-  --ink-strong: #14241b;
-  --ink: #2f3d34;
-  --muted: #68736a;
+  /* Blue-black ink keeps body copy neutral while reinforcing the brand. */
+  --ink-strong: #0c223a;
+  --ink: #2b3f55;
+  --muted: #5e7186;
   /* Decorative only — placeholders and the window-chrome dots. Anything a
      reader needs takes --muted, which clears 4.5:1 on every surface. */
-  --faint: #79857e;
+  --faint: #718399;
 
   /* ---- lines ------------------------------------------------------ */
   /* Every edge is 1px and always one of these two. */
-  --line: #e4e2d9;
-  --line-strong: #d2cfc2;
+  --line: #dce5ef;
+  --line-strong: #c2d0df;
 
-  /* ---- primary: emerald ------------------------------------------- */
-  --primary: #0f7a52;
-  --primary-dark: #0b5f40;
-  --primary-soft: #e6f2ea;
-  --primary-border: #b6d8c5;
-  /* Label colour on a filled button. White reads on emerald but not on
-     amber (3.1:1), so amber carries ink in both themes. */
+  /* ---- primary: Signal Blue --------------------------------------- */
+  --primary: #0057b8;
+  --primary-dark: #003f87;
+  --primary-soft: #e8f2ff;
+  --primary-border: #abcdf2;
   --on-primary: #ffffff;
 
-  /* ---- secondary: amber (the second action, never the first) ------- */
-  --accent: #d97b1e;
-  --accent-dark: #b86211;
-  --accent-soft: #fdf1e1;
-  --accent-border: #f0cfa4;
-  --on-accent: #14241b;
+  /* ---- secondary: Azure -------------------------------------------- */
+  --accent: #1b76d1;
+  --accent-dark: #0b5ea8;
+  --accent-soft: #eaf5ff;
+  --accent-border: #b8d9f7;
+  --on-accent: #ffffff;
 
-  /* ---- tertiary: moss (kickers only, never a fill) ----------------- */
-  --moss: #516f34;
-  --moss-soft: #eef3e2;
-  --moss-border: #cadcae;
+  /* ---- tertiary: Steel Blue (kickers and quiet emphasis) ---------- */
+  --moss: #315e8a;
+  --moss-soft: #eaf1f8;
+  --moss-border: #c5d5e4;
 
   /* ---- status ----------------------------------------------------- */
   --success: #16845d;
@@ -68,29 +66,29 @@
   /* ---- depth ------------------------------------------------------ */
   /* One shadow, very wide and very soft, tinted with the ink colour.
      There is no ramp: panels take this one or the larger version. */
-  --shadow-soft: 0 14px 40px rgba(20, 42, 30, 0.08);
-  --shadow: 0 30px 80px rgba(16, 38, 26, 0.14);
-  --shadow-primary: 0 13px 30px rgba(15, 122, 82, 0.2);
-  --shadow-accent: 0 13px 30px rgba(217, 123, 30, 0.2);
+  --shadow-soft: 0 14px 40px rgba(12, 34, 58, 0.08);
+  --shadow: 0 30px 80px rgba(6, 35, 68, 0.14);
+  --shadow-primary: 0 13px 30px rgba(0, 87, 184, 0.22);
+  --shadow-accent: 0 13px 30px rgba(27, 118, 209, 0.2);
 
   /* ---- the one gradient band -------------------------------------- */
   /* One band per page is the whole budget. Identical in both themes. */
-  --band: linear-gradient(120deg, #0d3b29 0%, #14573a 48%, #1a6c46 100%);
+  --band: linear-gradient(120deg, #021d3a 0%, #063b78 48%, #0759a8 100%);
   --band-glow: radial-gradient(
     circle at 83% 32%,
-    rgba(237, 165, 83, 0.26),
+    rgba(80, 177, 255, 0.28),
     transparent 24%
   );
-  --band-panel: rgba(4, 32, 22, 0.28);
+  --band-panel: rgba(2, 26, 54, 0.32);
   --band-line: rgba(255, 255, 255, 0.14);
   --band-fill: rgba(255, 255, 255, 0.06);
   --band-ink: #ffffff;
-  --band-muted: rgba(233, 243, 236, 0.72);
+  --band-muted: rgba(226, 240, 255, 0.78);
 
   /* ---- footer ground (its own value, not a surface token) --------- */
-  --footer-ground: #0d2018;
+  --footer-ground: #06192e;
   --footer-ink: #ffffff;
-  --footer-muted: #a9bdb1;
+  --footer-muted: #a7bed5;
   --footer-line: rgba(255, 255, 255, 0.12);
 
   /* ---- geometry --------------------------------------------------- */
@@ -114,42 +112,42 @@
 
 /**
  * Dark theme. Re-pitched per role, not inverted: accents lighten so they
- * stay legible on green-black, and the soft tints stop being pale washes
+ * stay legible on blue-black, and the soft tints stop being pale washes
  * and become deep chips behind a light glyph.
  */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --page: #0e1310;
-  --page-soft: #121814;
-  --page-tint: #18201a;
-  --numeral: #26312a;
-  --surface: #161d18;
-  --surface-strong: #1b231d;
+  --page: #07111e;
+  --page-soft: #0b1828;
+  --page-tint: #10243a;
+  --numeral: #19344f;
+  --surface: #0d1d2f;
+  --surface-strong: #12243a;
 
-  --ink-strong: #f2f7f2;
-  --ink: #dbe4dc;
-  --muted: #99a89d;
-  --faint: #7d8c82;
+  --ink-strong: #f4f8fc;
+  --ink: #dce8f5;
+  --muted: #9bb0c5;
+  --faint: #748aa1;
 
-  --line: #2a332c;
-  --line-strong: #3f4b42;
+  --line: #22374d;
+  --line-strong: #3a536d;
 
-  --primary: #4cc08a;
-  --primary-dark: #6fd3a3;
-  --primary-soft: #10301f;
-  --primary-border: #1e4a33;
-  --on-primary: #0b1410;
+  --primary: #5bb5ff;
+  --primary-dark: #8acbff;
+  --primary-soft: #0c2e52;
+  --primary-border: #1e4d78;
+  --on-primary: #06182a;
 
-  --accent: #eda553;
-  --accent-dark: #f4bb78;
-  --accent-soft: #362313;
-  --accent-border: #52381e;
-  --on-accent: #0b1410;
+  --accent: #49a7f5;
+  --accent-dark: #78c1ff;
+  --accent-soft: #102c48;
+  --accent-border: #255478;
+  --on-accent: #06182a;
 
-  --moss: #a9c47a;
-  --moss-soft: #212b18;
-  --moss-border: #37452a;
+  --moss: #85b9e8;
+  --moss-soft: #132a40;
+  --moss-border: #2f4d68;
 
   --success: #72d9af;
   --warning: #f0bd67;
@@ -161,8 +159,8 @@
   --shadow-primary: 0 13px 30px rgba(0, 0, 0, 0.32);
   --shadow-accent: 0 13px 30px rgba(0, 0, 0, 0.32);
 
-  --footer-ground: #091310;
-  --footer-muted: #93a89a;
+  --footer-ground: #06111f;
+  --footer-muted: #91a9c2;
 }
 
 @media (max-width: 1080px) {
