@@ -148,18 +148,18 @@ export default function HomePage() {
             </h1>
 
             <p className="t-lead">
-              Compare every published Unlock and IMEI Check service in one catalog. Available reports
-              can be ordered online; services awaiting Provider API verification are clearly marked.
+              Phone Check and Unlock Services now have separate catalogs. Choose the service type you
+              need to see only its products, prices and next steps.
             </p>
 
             <div className="hero-actions">
-              <Link className="button button--primary" href="/services">
+              <Link className="button button--primary" href="/services/imei-check">
                 <Icon name="search" strokeWidth={1.9} />
-                Browse services and prices
+                Browse Phone Checks
               </Link>
-              <Link className="button button--secondary" href="/check">
-                <Icon name="device" strokeWidth={1.9} />
-                Free IMEI Check
+              <Link className="button button--secondary" href="/services/unlock">
+                <Icon name="lock" strokeWidth={1.9} />
+                Browse Unlock Services
               </Link>
               <Link className="button button--quiet" href="/login">
                 <Icon name="clock" strokeWidth={1.9} />

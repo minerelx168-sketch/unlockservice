@@ -1,28 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ProductCatalog } from '@/components/product-catalog'
 import { Icon } from '@/components/icons'
-import { PUBLIC_PROVIDER_PRODUCTS, PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
+import { CUSTOMER_PRODUCT_COUNTS } from '@/lib/customer-provider-products'
+import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Unlock & IMEI Check Services — iUnlockMobile',
-  description: 'Browse IMEI Check and phone Unlock services in clearly separated categories with transparent prices and availability.',
+  title: 'Unlock & Phone Check Services — iUnlockMobile',
+  description: 'Choose Phone Check or Unlock Services before browsing products, prices and availability.',
 }
-
-function customerText(value: string) {
-  return value
-    .replace(/[\p{Extended_Pictographic}\uFE0F]/gu, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim()
-}
-
-const CUSTOMER_PRODUCTS = PUBLIC_PROVIDER_PRODUCTS.map((product) => ({
-  ...product,
-  name: customerText(product.name),
-  group: customerText(product.group),
-  summary: customerText(product.summary),
-  etaLabel: customerText(product.etaLabel),
-}))
 
 export default function ServicesPage() {
   return (
@@ -30,27 +15,57 @@ export default function ServicesPage() {
       <section className="section section--tint">
         <div className="shell">
           <div className="section-head">
-            <span className="kicker"><Icon name="sparkle" /> Product catalog</span>
-            <h1 className="t-display">Unlock and IMEI check services.</h1>
+            <span className="kicker"><Icon name="grid" /> Service categories</span>
+            <h1 className="t-display">Choose what you need.</h1>
             <p className="t-lead">
-              Browse IMEI Check and Unlock services in clearly separated categories with fixed USD prices. Available reports can be ordered online; Coming soon services remain view-only until online ordering is verified.
+              Phone checks and unlocking are different services. Select one category first so you only see relevant products, prices and next steps.
             </p>
-            <div className="hero-actions" style={{ marginTop: 24 }}>
-              <Link className="button button--primary" href="/user/reports/new">
-                <Icon name="file" /> Order an IMEI report
-              </Link>
-              <Link className="button button--quiet" href="/check">
-                Use the Free IMEI Check
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
       <section className="section">
         <div className="shell">
-          <ProductCatalog products={CUSTOMER_PRODUCTS} />
-          <p className="t-micro" style={{ marginTop: 20 }}>
+          <div className="service-hub-grid">
+            <article className="card service-hub-card service-hub-card--checks">
+              <div className="service-hub-icon"><Icon name="search" /></div>
+              <div className="service-hub-copy">
+                <span className="kicker">Device information</span>
+                <h2>Phone Check</h2>
+                <p>Check device, carrier, warranty, blacklist and lock-status information before buying, selling or unlocking a phone.</p>
+              </div>
+              <div className="service-hub-stats">
+                <div><strong>{CUSTOMER_PRODUCT_COUNTS.imeiCheck}</strong><span>published checks</span></div>
+                <div><strong>25</strong><span>available online</span></div>
+              </div>
+              <div className="service-hub-actions">
+                <Link className="button button--primary" href="/services/imei-check">
+                  Browse phone checks <Icon name="arrowRight" />
+                </Link>
+                <Link className="button button--quiet" href="/check">Free IMEI Check</Link>
+              </div>
+            </article>
+
+            <article className="card service-hub-card service-hub-card--unlock">
+              <div className="service-hub-icon"><Icon name="lock" /></div>
+              <div className="service-hub-copy">
+                <span className="kicker">Network and device access</span>
+                <h2>Unlock Services</h2>
+                <p>Browse published network, activation-lock and device-unlock prices by carrier, country and device type.</p>
+              </div>
+              <div className="service-hub-stats">
+                <div><strong>{CUSTOMER_PRODUCT_COUNTS.unlock}</strong><span>published services</span></div>
+                <div><strong>View only</strong><span>online ordering pending</span></div>
+              </div>
+              <div className="service-hub-actions">
+                <Link className="button button--primary" href="/services/unlock">
+                  Browse unlock services <Icon name="arrowRight" />
+                </Link>
+              </div>
+            </article>
+          </div>
+
+          <p className="t-micro service-hub-version">
             Catalog version {PROVIDER_PRODUCT_CATALOG_VERSION}. Service information is point-in-time and does not prove ownership or guarantee unlock eligibility.
           </p>
         </div>

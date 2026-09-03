@@ -6,35 +6,36 @@ import { formatUsd } from '@/lib/money'
 import type { ProviderProduct, ProviderProductDomain } from '@/lib/provider-products'
 import { Icon } from './icons'
 
-type DomainFilter = 'all' | ProviderProductDomain
-
-type CatalogSection = {
+type ProductCatalogProps = {
+  products: ProviderProduct[]
   domain: ProviderProductDomain
-  label: string
-  title: string
-  description: string
 }
 
-const DOMAIN_OPTIONS: Array<{ value: DomainFilter; label: string }> = [
-  { value: 'all', label: 'All service categories' },
-  { value: 'imei_check', label: 'IMEI Check services' },
-  { value: 'unlock', label: 'Unlock services' },
-]
-
-const CATALOG_SECTIONS: CatalogSection[] = [
-  {
-    domain: 'imei_check',
-    label: 'Device information',
-    title: 'IMEI Check services',
-    description: 'Review device, carrier, warranty, blacklist and lock-status reports with clear prices and availability.',
+const DOMAIN_COPY: Record<ProviderProductDomain, {
+  label: string
+  allServicesLabel: string
+  groupLabel: string
+  searchPlaceholder: string
+  availableLabel: string
+  notice: string
+}> = {
+  imei_check: {
+    label: 'Phone Check',
+    allServicesLabel: 'All phone check services',
+    groupLabel: 'Check category',
+    searchPlaceholder: 'Apple, Samsung, carrier or blacklist',
+    availableLabel: 'Reports available online',
+    notice: 'Phone Check prices are shown in USD. Available reports can be ordered online; coming-soon checks remain view-only until their input and report formats are verified.',
   },
-  {
-    domain: 'unlock',
-    label: 'Network and device access',
-    title: 'Unlock services',
-    description: 'Compare published network, activation-lock and device-unlock prices. Online ordering opens only after each service is verified.',
+  unlock: {
+    label: 'Unlock',
+    allServicesLabel: 'All unlock services',
+    groupLabel: 'Unlock category',
+    searchPlaceholder: 'Country, network, Apple or Android',
+    availableLabel: 'Services available online',
+    notice: 'Unlock prices are shown in USD. These services remain view-only until online ordering is verified for each network and device service.',
   },
-]
+}
 
 function customerText(value: string) {
   return value
@@ -89,106 +90,125 @@ function ProductCard({ product }: { product: ProviderProduct }) {
   )
 }
 
-export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
+export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   const [query, setQuery] = useState('')
-  const [domain, setDomain] = useState<DomainFilter>('all')
+  const [selectedGroup, setSelectedGroup] = useState('all')
   const [selectedProductCode, setSelectedProductCode] = useState('all')
+  const copy = DOMAIN_COPY[domain]
+
+  const groups = useMemo(() => {
+    return Array.from(new Set(products.map((product) => customerText(product.group))))
+      .filter(Boolean)
+      .sort((left, right) => {
+        if (left.toLowerCase() === 'featured') return -1
+        if (right.toLowerCase() === 'featured') return 1
+        return left.localeCompare(right)
+      })
+  }, [products])
 
   const visible = useMemo(() => {
     const search = query.trim().toLowerCase()
     return products.filter((product) => {
-      if (domain !== 'all' && product.domain !== domain) return false
+      const productGroup = customerText(product.group)
+      if (selectedGroup !== 'all' && productGroup !== selectedGroup) return false
       if (selectedProductCode !== 'all' && product.productCode !== selectedProductCode) return false
       if (!search) return true
-      return `${customerText(product.name)} ${customerText(product.group)} ${customerText(product.summary)}`
+      return `${customerText(product.name)} ${productGroup} ${customerText(product.summary)}`
         .toLowerCase()
         .includes(search)
     })
-  }, [domain, products, query, selectedProductCode])
+  }, [products, query, selectedGroup, selectedProductCode])
+
+  const visibleGroups = useMemo(() => {
+    return groups
+      .map((group) => ({
+        group,
+        products: visible.filter((product) => customerText(product.group) === group),
+      }))
+      .filter((entry) => entry.products.length > 0)
+  }, [groups, visible])
 
   const availableCount = products.filter((product) => product.status === 'available').length
-  const unlockCount = products.filter((product) => product.domain === 'unlock').length
-  const imeiCount = products.filter((product) => product.domain === 'imei_check').length
-  const filtersActive = query.trim() !== '' || domain !== 'all' || selectedProductCode !== 'all'
+  const comingSoonCount = products.length - availableCount
+  const filtersActive = query.trim() !== '' || selectedGroup !== 'all' || selectedProductCode !== 'all'
 
   function clearFilters() {
     setQuery('')
-    setDomain('all')
+    setSelectedGroup('all')
     setSelectedProductCode('all')
   }
 
   return (
-    <div className="product-catalog">
-      <div className="trust-bar" aria-label="Product catalog summary">
-        <div><b>{products.length} products</b><span>Every published price</span></div>
-        <div><b>{availableCount} available</b><span>Paid IMEI reports</span></div>
-        <div><b>{imeiCount} IMEI checks</b><span>Device information services</span></div>
-        <div><b>{unlockCount} unlock services</b><span>Published prices</span></div>
+    <div className={`product-catalog product-catalog--${domain}`}>
+      <div className="trust-bar" aria-label={`${copy.label} catalog summary`}>
+        <div><b>{products.length} services</b><span>Published in this category</span></div>
+        <div><b>{availableCount} available</b><span>{copy.availableLabel}</span></div>
+        <div><b>{comingSoonCount} coming soon</b><span>View-only until verified</span></div>
+        <div><b>USD prices</b><span>Shown before ordering</span></div>
       </div>
 
       <section className="panel catalog-filter-panel">
         <header>
           <div>
-            <h2>Find a service</h2>
-            <p className="t-small">Choose a category first, then jump directly to a service and its published price.</p>
+            <h2>Find a {copy.label.toLowerCase()} service</h2>
+            <p className="t-small">Choose a subcategory, search by name or jump directly to a service and its price.</p>
           </div>
           <span>{visible.length} of {products.length} shown</span>
         </header>
         <div className="panel-body catalog-filter-grid">
           <div className="field catalog-search-field">
-            <label htmlFor="product-search">Search services</label>
+            <label htmlFor={`${domain}-product-search`}>Search services</label>
             <input
-              id="product-search"
+              id={`${domain}-product-search`}
               type="search"
               value={query}
               onChange={(event) => setQuery(event.currentTarget.value)}
-              placeholder="Apple, Samsung, blacklist or carrier"
+              placeholder={copy.searchPlaceholder}
               autoComplete="off"
             />
           </div>
 
           <div className="field">
-            <label htmlFor="product-domain">Service category</label>
+            <label htmlFor={`${domain}-product-group`}>{copy.groupLabel}</label>
             <select
-              id="product-domain"
-              value={domain}
+              id={`${domain}-product-group`}
+              value={selectedGroup}
               onChange={(event) => {
-                const nextDomain = event.currentTarget.value as DomainFilter
-                setDomain(nextDomain)
+                const group = event.currentTarget.value
+                setSelectedGroup(group)
                 const selected = products.find((product) => product.productCode === selectedProductCode)
-                if (selected && nextDomain !== 'all' && selected.domain !== nextDomain) setSelectedProductCode('all')
+                if (selected && group !== 'all' && customerText(selected.group) !== group) setSelectedProductCode('all')
               }}
             >
-              {DOMAIN_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
+              <option value="all">All {copy.label.toLowerCase()} categories</option>
+              {groups.map((group) => <option key={group} value={group}>{group}</option>)}
             </select>
           </div>
 
           <div className="field catalog-service-dropdown">
-            <label htmlFor="product-service">Choose a service</label>
+            <label htmlFor={`${domain}-product-service`}>Choose a service</label>
             <select
-              id="product-service"
+              id={`${domain}-product-service`}
               value={selectedProductCode}
               onChange={(event) => {
                 const code = event.currentTarget.value
                 setSelectedProductCode(code)
                 const selected = products.find((product) => product.productCode === code)
-                if (selected) setDomain(selected.domain)
+                if (selected) setSelectedGroup(customerText(selected.group))
               }}
             >
-              <option value="all">All services and prices</option>
-              {CATALOG_SECTIONS.map((section) => {
-                const options = products.filter((product) => product.domain === section.domain)
-                return options.length ? (
-                  <optgroup key={section.domain} label={section.title}>
+              <option value="all">{copy.allServicesLabel}</option>
+              {groups.map((group) => {
+                const options = products.filter((product) => customerText(product.group) === group)
+                return (
+                  <optgroup key={group} label={group}>
                     {options.map((product) => (
                       <option key={product.productCode} value={product.productCode}>
                         {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
                       </option>
                     ))}
                   </optgroup>
-                ) : null
+                )
               })}
             </select>
           </div>
@@ -202,31 +222,27 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
       </section>
 
       {visible.length === 0 ? (
-        <p className="alert" role="status"><Icon name="info" /> <span>No products match those filters.</span></p>
+        <p className="alert" role="status"><Icon name="info" /> <span>No services match those filters.</span></p>
       ) : (
-        <div className="product-domain-list">
-          {CATALOG_SECTIONS.map((section) => {
-            const sectionProducts = visible.filter((product) => product.domain === section.domain)
-            if (sectionProducts.length === 0) return null
-            const sectionAvailable = sectionProducts.filter((product) => product.status === 'available').length
-
+        <div className="product-subcategory-list">
+          {visibleGroups.map(({ group, products: groupProducts }) => {
+            const groupAvailable = groupProducts.filter((product) => product.status === 'available').length
             return (
-              <section className={`product-domain-section product-domain-section--${section.domain}`} key={section.domain} aria-labelledby={`${section.domain}-title`}>
-                <header className="product-domain-header">
+              <section className="product-subcategory-section" key={group} aria-labelledby={`${domain}-${group.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}>
+                <header className="product-subcategory-header">
                   <div>
-                    <span className="kicker"><Icon name={section.domain === 'unlock' ? 'lock' : 'search'} /> {section.label}</span>
-                    <h2 id={`${section.domain}-title`}>{section.title}</h2>
-                    <p>{section.description}</p>
+                    <span className="kicker"><Icon name={domain === 'unlock' ? 'lock' : 'search'} /> {copy.label}</span>
+                    <h2 id={`${domain}-${group.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}>{group}</h2>
                   </div>
-                  <div className="product-domain-count" aria-label={`${sectionProducts.length} services in this category`}>
-                    <strong>{sectionProducts.length}</strong>
-                    <span>services shown</span>
-                    <small>{sectionAvailable} available now</small>
+                  <div className="product-subcategory-count">
+                    <strong>{groupProducts.length}</strong>
+                    <span>{groupProducts.length === 1 ? 'service' : 'services'}</span>
+                    <small>{groupAvailable} available now</small>
                   </div>
                 </header>
 
                 <div className="product-card-grid">
-                  {sectionProducts.map((product) => <ProductCard product={product} key={product.productCode} />)}
+                  {groupProducts.map((product) => <ProductCard product={product} key={product.productCode} />)}
                 </div>
               </section>
             )
@@ -236,9 +252,7 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
 
       <p className="alert" role="status">
         <Icon name="shield" />
-        <span>
-          Every published Unlock and IMEI Check price is shown. Unlock services remain view-only until online ordering is verified for each service.
-        </span>
+        <span>{copy.notice}</span>
       </p>
     </div>
   )
