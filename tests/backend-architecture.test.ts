@@ -239,11 +239,13 @@ test('provider product catalog publishes only reviewed products and keeps activa
   assert.deepEqual(paidRows, { total: 25, active: 25 })
 })
 
-test('Signal Blue tokens, button hierarchy and service dropdown remain explicit', () => {
+test('Signal Blue catalog separates categories and keeps customer-facing service controls readable', () => {
   const tokens = readFileSync(join(process.cwd(), 'styles/tokens.css'), 'utf8')
   const buttons = readFileSync(join(process.cwd(), 'styles/components.css'), 'utf8')
+  const appStyles = readFileSync(join(process.cwd(), 'styles/app.css'), 'utf8')
   const header = readFileSync(join(process.cwd(), 'components/site-header.tsx'), 'utf8')
   const catalog = readFileSync(join(process.cwd(), 'components/product-catalog.tsx'), 'utf8')
+  const servicesPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/page.tsx'), 'utf8')
 
   assert.match(tokens, /--primary:\s*#0057b8/)
   assert.match(tokens, /--primary-dark:\s*#003f87/)
@@ -252,8 +254,22 @@ test('Signal Blue tokens, button hierarchy and service dropdown remain explicit'
   assert.match(header, /button button--primary[^>]*href="\/services"|className="button button--primary" href="\/services"/)
   assert.match(catalog, /id="product-service"/)
   assert.match(catalog, /All services and prices/)
-  assert.match(catalog, /Coming-soon Unlock Services/)
+  assert.match(catalog, /title: 'IMEI Check services'/)
+  assert.match(catalog, /title: 'Unlock services'/)
+  assert.match(catalog, /product-domain-section--\$\{section\.domain\}/)
+  assert.match(catalog, /customerText\(product\.name\)/)
   assert.match(catalog, /formatUsd\(product\.priceCents\)/)
+  assert.doesNotMatch(catalog, /Provider ID/)
+  assert.doesNotMatch(catalog, /product\.serviceId/)
+  assert.doesNotMatch(catalog, /⭐|🌟|✅|🔍|🔒/u)
+  assert.match(servicesPage, /const CUSTOMER_PRODUCTS = PUBLIC_PROVIDER_PRODUCTS\.map/)
+  assert.match(servicesPage, /Extended_Pictographic/)
+  assert.match(servicesPage, /<ProductCatalog products=\{CUSTOMER_PRODUCTS\}/)
+  assert.doesNotMatch(servicesPage, /⭐|🌟|✅|🔍|🔒/u)
+  assert.match(appStyles, /\.product-domain-list\s*\{[^}]*gap:\s*56px/s)
+  assert.match(appStyles, /\.product-card\s*\{[^}]*gap:\s*20px/s)
+  assert.match(appStyles, /\.product-card-action\s*\{[^}]*min-height:\s*54px/s)
+  assert.match(appStyles, /\.catalog-filter-grid input,[\s\S]*min-height:\s*52px/)
 })
 
 test('registration keeps the original User contract and normal sign-in flow', () => {

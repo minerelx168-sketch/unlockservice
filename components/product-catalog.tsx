@@ -8,33 +8,86 @@ import { Icon } from './icons'
 
 type DomainFilter = 'all' | ProviderProductDomain
 
+type CatalogSection = {
+  domain: ProviderProductDomain
+  label: string
+  title: string
+  description: string
+}
+
 const DOMAIN_OPTIONS: Array<{ value: DomainFilter; label: string }> = [
-  { value: 'all', label: 'All Unlock & IMEI services' },
+  { value: 'all', label: 'All service categories' },
   { value: 'imei_check', label: 'IMEI Check services' },
   { value: 'unlock', label: 'Unlock services' },
 ]
 
-const SERVICE_GROUPS: Array<{
-  key: 'available' | 'coming-imei' | 'coming-unlock'
-  label: string
-  filter: (product: ProviderProduct) => boolean
-}> = [
+const CATALOG_SECTIONS: CatalogSection[] = [
   {
-    key: 'available',
-    label: 'Available IMEI Reports',
-    filter: (product) => product.status === 'available',
+    domain: 'imei_check',
+    label: 'Device information',
+    title: 'IMEI Check services',
+    description: 'Review device, carrier, warranty, blacklist and lock-status reports with clear prices and availability.',
   },
   {
-    key: 'coming-imei',
-    label: 'Coming-soon IMEI Checks',
-    filter: (product) => product.status !== 'available' && product.domain === 'imei_check',
-  },
-  {
-    key: 'coming-unlock',
-    label: 'Coming-soon Unlock Services',
-    filter: (product) => product.domain === 'unlock',
+    domain: 'unlock',
+    label: 'Network and device access',
+    title: 'Unlock services',
+    description: 'Compare published network, activation-lock and device-unlock prices. Online ordering opens only after each service is verified.',
   },
 ]
+
+function customerText(value: string) {
+  return value
+    .replace(/[\p{Extended_Pictographic}\uFE0F]/gu, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+function ProductCard({ product }: { product: ProviderProduct }) {
+  const available = product.status === 'available'
+  const productName = customerText(product.name)
+  const productGroup = customerText(product.group)
+
+  return (
+    <article className="card product-card">
+      <div className="card-topline product-card-topline">
+        <span className="kicker">
+          <Icon name={product.domain === 'unlock' ? 'lock' : 'search'} />
+          {productGroup}
+        </span>
+        <span className={available ? 'badge badge--success' : 'badge badge--muted'}>
+          {available ? 'Available' : 'Coming soon'}
+        </span>
+      </div>
+
+      <div className="product-card-copy">
+        <h3 className="t-card">{productName}</h3>
+        <p className="t-small">{customerText(product.summary)}</p>
+      </div>
+
+      <div className="product-card-commercial" aria-label={`Price and delivery estimate for ${productName}`}>
+        <div>
+          <span className="label">Price</span>
+          <strong className="product-price">{formatUsd(product.priceCents)}</strong>
+        </div>
+        <div>
+          <span className="label">Estimated delivery</span>
+          <span className="product-eta"><Icon name="clock" /> {customerText(product.etaLabel)}</span>
+        </div>
+      </div>
+
+      {available ? (
+        <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
+          View and order report <Icon name="arrowRight" />
+        </Link>
+      ) : (
+        <span className="button button--quiet product-card-action" aria-disabled="true">
+          Not available for online order yet
+        </span>
+      )}
+    </article>
+  )
+}
 
 export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
   const [query, setQuery] = useState('')
@@ -47,7 +100,7 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
       if (domain !== 'all' && product.domain !== domain) return false
       if (selectedProductCode !== 'all' && product.productCode !== selectedProductCode) return false
       if (!search) return true
-      return `${product.name} ${product.group} ${product.summary} ${product.serviceId}`
+      return `${customerText(product.name)} ${customerText(product.group)} ${customerText(product.summary)}`
         .toLowerCase()
         .includes(search)
     })
@@ -65,37 +118,37 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 24 }}>
+    <div className="product-catalog">
       <div className="trust-bar" aria-label="Product catalog summary">
         <div><b>{products.length} products</b><span>Every published price</span></div>
         <div><b>{availableCount} available</b><span>Paid IMEI reports</span></div>
-        <div><b>{imeiCount} IMEI checks</b><span>Available and coming soon</span></div>
-        <div><b>{unlockCount} unlock services</b><span>Prices published · API pending</span></div>
+        <div><b>{imeiCount} IMEI checks</b><span>Device information services</span></div>
+        <div><b>{unlockCount} unlock services</b><span>Published prices</span></div>
       </div>
 
       <section className="panel catalog-filter-panel">
         <header>
           <div>
             <h2>Find a service</h2>
-            <p className="t-small">Use the dropdown to jump directly to any published Unlock or IMEI Check price.</p>
+            <p className="t-small">Choose a category first, then jump directly to a service and its published price.</p>
           </div>
           <span>{visible.length} of {products.length} shown</span>
         </header>
         <div className="panel-body catalog-filter-grid">
           <div className="field catalog-search-field">
-            <label htmlFor="product-search">Search</label>
+            <label htmlFor="product-search">Search services</label>
             <input
               id="product-search"
               type="search"
               value={query}
               onChange={(event) => setQuery(event.currentTarget.value)}
-              placeholder="Apple, Samsung, blacklist, carrier, 214…"
+              placeholder="Apple, Samsung, blacklist or carrier"
               autoComplete="off"
             />
           </div>
 
           <div className="field">
-            <label htmlFor="product-domain">Service type</label>
+            <label htmlFor="product-domain">Service category</label>
             <select
               id="product-domain"
               value={domain}
@@ -113,7 +166,7 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
           </div>
 
           <div className="field catalog-service-dropdown">
-            <label htmlFor="product-service">Service dropdown</label>
+            <label htmlFor="product-service">Choose a service</label>
             <select
               id="product-service"
               value={selectedProductCode}
@@ -125,13 +178,13 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
               }}
             >
               <option value="all">All services and prices</option>
-              {SERVICE_GROUPS.map((group) => {
-                const options = products.filter(group.filter)
+              {CATALOG_SECTIONS.map((section) => {
+                const options = products.filter((product) => product.domain === section.domain)
                 return options.length ? (
-                  <optgroup key={group.key} label={group.label}>
+                  <optgroup key={section.domain} label={section.title}>
                     {options.map((product) => (
                       <option key={product.productCode} value={product.productCode}>
-                        {product.name} — {formatUsd(product.priceCents)} — ID {product.serviceId}
+                        {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
                       </option>
                     ))}
                   </optgroup>
@@ -151,46 +204,31 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
       {visible.length === 0 ? (
         <p className="alert" role="status"><Icon name="info" /> <span>No products match those filters.</span></p>
       ) : (
-        <div className="product-card-grid">
-          {visible.map((product) => {
-            const available = product.status === 'available'
+        <div className="product-domain-list">
+          {CATALOG_SECTIONS.map((section) => {
+            const sectionProducts = visible.filter((product) => product.domain === section.domain)
+            if (sectionProducts.length === 0) return null
+            const sectionAvailable = sectionProducts.filter((product) => product.status === 'available').length
+
             return (
-              <article className="card product-card" key={product.productCode}>
-                <div className="card-topline">
-                  <span className="kicker">
-                    <Icon name={product.domain === 'unlock' ? 'lock' : 'search'} />
-                    {product.group}
-                  </span>
-                  <span className={available ? 'badge badge--success' : 'badge badge--muted'}>
-                    {available ? 'Available' : 'Coming soon'}
-                  </span>
+              <section className={`product-domain-section product-domain-section--${section.domain}`} key={section.domain} aria-labelledby={`${section.domain}-title`}>
+                <header className="product-domain-header">
+                  <div>
+                    <span className="kicker"><Icon name={section.domain === 'unlock' ? 'lock' : 'search'} /> {section.label}</span>
+                    <h2 id={`${section.domain}-title`}>{section.title}</h2>
+                    <p>{section.description}</p>
+                  </div>
+                  <div className="product-domain-count" aria-label={`${sectionProducts.length} services in this category`}>
+                    <strong>{sectionProducts.length}</strong>
+                    <span>services shown</span>
+                    <small>{sectionAvailable} available now</small>
+                  </div>
+                </header>
+
+                <div className="product-card-grid">
+                  {sectionProducts.map((product) => <ProductCard product={product} key={product.productCode} />)}
                 </div>
-
-                <div>
-                  <h3 className="t-card">{product.name}</h3>
-                  <p className="t-small" style={{ marginTop: 8 }}>{product.summary}</p>
-                </div>
-
-                <div className="quote" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-                  <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
-                  <div><span className="label">Provider ID</span><span className="value t-mono">{product.serviceId}</span></div>
-                </div>
-
-                <p className="field-note">
-                  <Icon name="clock" />
-                  <span>{product.etaLabel}</span>
-                </p>
-
-                {available ? (
-                  <Link className="button button--primary" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
-                    Order IMEI report <Icon name="arrowRight" />
-                  </Link>
-                ) : (
-                  <span className="button button--quiet" aria-disabled="true">
-                    Service API verification in progress
-                  </span>
-                )}
-              </article>
+              </section>
             )
           })}
         </div>
@@ -199,7 +237,7 @@ export function ProductCatalog({ products }: { products: ProviderProduct[] }) {
       <p className="alert" role="status">
         <Icon name="shield" />
         <span>
-          All published Unlock and IMEI Check prices are shown. Unlock products remain catalog-only until the Provider supplies a confirmed API contract; we never automate Provider web forms or guess unsupported mappings.
+          Every published Unlock and IMEI Check price is shown. Unlock services remain view-only until online ordering is verified for each service.
         </span>
       </p>
     </div>
