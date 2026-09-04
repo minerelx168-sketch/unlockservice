@@ -6,7 +6,7 @@ import { CUSTOMER_UNLOCK_PRODUCTS } from '@/lib/customer-provider-products'
 import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Phone Unlock Service & Prices — iUnlockMobile',
+  title: 'Phone unlock services and prices',
   description: 'Browse phone unlock services and published prices by network, country and device type.',
 }
 

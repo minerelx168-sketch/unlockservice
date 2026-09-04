@@ -6,7 +6,7 @@ import { CUSTOMER_IMEI_CHECK_PRODUCTS } from '@/lib/customer-provider-products'
 import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Phone Check Services & Prices — iUnlockMobile',
+  title: 'Phone Check services and prices',
   description: 'Browse Phone Check services with prices, availability and delivery estimates.',
 }
 

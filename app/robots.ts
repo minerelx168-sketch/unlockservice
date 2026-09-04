@@ -9,7 +9,7 @@ import { publicOrigin } from '@/lib/site'
  */
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: '*', allow: '/', disallow: ['/user/', '/admin', '/api/', '/auth/'] }],
+    rules: [{ userAgent: '*', allow: '/', disallow: ['/user/', '/admin', '/api/', '/auth/', '/design-system'] }],
     sitemap: `${publicOrigin()}/sitemap.xml`,
   }
 }

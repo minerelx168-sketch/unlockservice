@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ImeiForm } from '@/components/imei-form'
 import { CARRIERS } from '@/lib/catalog'
 import { serviceStatus } from '@/lib/provider'
+import { StructuredData } from './structured-data'
 import { Icon, type IconName } from '@/components/icons'
 
 const TRUST = [
@@ -138,6 +139,8 @@ export default function HomePage() {
 
   return (
     <>
+      <StructuredData faq={FAQ} />
+
       {/* 02 · Hero */}
       <section className="hero" id="check">
         <div className="shell">

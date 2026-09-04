@@ -5,7 +5,7 @@ import { CUSTOMER_PRODUCT_COUNTS } from '@/lib/customer-provider-products'
 import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Unlock Service & Phone Check — iUnlockMobile',
+  title: 'Unlock Service and Phone Check',
   description: 'Choose Phone Check or Unlock Service before browsing products, prices and availability.',
 }
 

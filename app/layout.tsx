@@ -1,15 +1,30 @@
 import { headers } from 'next/headers'
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
+import { publicOrigin } from '@/lib/site'
 import '@/styles/globals.css'
 
+const DESCRIPTION =
+  'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, and refunded in full if the carrier refuses.'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(publicOrigin()),
   title: {
     default: 'iUnlockMobile — permanent IMEI phone unlocking',
     template: '%s — iUnlockMobile',
   },
-  description:
-    'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, and refunded in full if the carrier refuses.',
+  description: DESCRIPTION,
+  /* Without these a link pasted into WhatsApp, LINE or Telegram — which is
+     how most of this market shares anything — arrives as a bare URL. */
+  openGraph: {
+    type: 'website',
+    siteName: 'iUnlockMobile',
+    title: 'iUnlockMobile — permanent IMEI phone unlocking',
+    description: DESCRIPTION,
+    url: '/',
+  },
+  twitter: { card: 'summary_large_image' },
+  alternates: { canonical: '/' },
 }
 
 export const viewport: Viewport = {

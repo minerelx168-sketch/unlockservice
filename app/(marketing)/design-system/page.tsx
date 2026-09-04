@@ -5,6 +5,9 @@ import { Icon, type IconName } from '@/components/icons'
 import '@/styles/docs.css'
 
 export const metadata: Metadata = {
+  /* A reference for whoever builds the site, not a page a customer is
+     looking for. It stays reachable by URL and stays out of the index. */
+  robots: { index: false, follow: false },
   title: 'Design system',
   description:
     'The tokens, type ramp, component anatomy and section patterns behind the iUnlockMobile site — transferred from the design canvas captured in the Website design patterns session.',
