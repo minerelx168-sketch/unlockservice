@@ -93,7 +93,7 @@ const PRINCIPLES: Array<[string, string]> = [
   ],
   [
     'Headlines are huge and tracked tight',
-    'The hero runs at −0.058em with line-height 0.98, and the negative tracking scales down with the size. Get this ramp wrong and everything else looks generic no matter how correct the colours are.',
+    'The hero runs at −0.032em with line-height 1.02, and the tracking relaxes to nothing by body size. Tight enough to look drawn rather than typed; loose enough that a 15px label does not run together.',
   ],
   [
     'Colour is rationed',
@@ -136,7 +136,7 @@ const TRANSFER: Array<[string, string]> = [
   ],
   [
     'Display face paired with a plainer body face, tight tracking at scale',
-    'Google Sans Flex → Bricolage Grotesque + Instrument Sans.',
+    'Google Sans Flex → Inter Tight for display, Inter for reading.',
   ],
   ['Full dark theme driven by one token block', 'Same mechanism, re-pitched as blue-black with a high-contrast light Signal Blue.'],
 ]
@@ -168,7 +168,7 @@ const BUTTON_SPECS: Array<{ className: string; icon: IconName; label: string; na
 const RAMP: Array<{ label: string; spec: string; sample: React.ReactNode }> = [
   {
     label: 'Hero H1',
-    spec: 'clamp(38 → 68px) · lh 0.98 · ls −0.058em · w700 · 2nd line = --primary',
+    spec: 'clamp(38 → 68px) · lh 1.02 · ls −0.032em · w700 · 2nd line = --primary',
     sample: (
       <div className="t-hero" style={{ fontSize: 52 }}>
         Know the device
@@ -179,7 +179,7 @@ const RAMP: Array<{ label: string; spec: string; sample: React.ReactNode }> = [
   },
   {
     label: 'Display H2 · band',
-    spec: 'clamp(34 → 62px) · lh 1.04 · ls −0.048em · w620',
+    spec: 'clamp(34 → 62px) · lh 1.08 · ls −0.028em · w640',
     sample: (
       <div className="t-display" style={{ fontSize: 40 }}>
         One workflow for the device details that matter.
@@ -188,14 +188,14 @@ const RAMP: Array<{ label: string; spec: string; sample: React.ReactNode }> = [
   },
   {
     label: 'Section H2',
-    spec: 'clamp(31 → 52px) · lh 1.08 · ls −0.045em · w680',
+    spec: 'clamp(30 → 50px) · lh 1.14 · ls −0.024em · w680',
     sample: (
       <div className="t-section" style={{ fontSize: 36 }}>
         Helpful answers before your first check.
       </div>
     ),
   },
-  { label: 'Card H3', spec: '20px · lh 1.35 · ls −0.025em · w680', sample: <div className="t-card">Device identity checks</div> },
+  { label: 'Card H3', spec: '20px · lh 1.4 · ls −0.012em · w660', sample: <div className="t-card">Device identity checks</div> },
   {
     label: 'Lead',
     spec: '19 / 1.7 · w400 · --muted',
@@ -242,7 +242,7 @@ const RAMP: Array<{ label: string; spec: string; sample: React.ReactNode }> = [
   },
   {
     label: 'Micro caption',
-    spec: '9px · +0.14em upper · w700 · brand lockup & table heads',
+    spec: '11px · +0.1em upper · w650 · brand lockup & table heads',
     sample: <span className="t-micro">IMEI unlocking</span>,
   },
 ]
@@ -311,11 +311,13 @@ export default function DesignSystemPage() {
         <div className="shell">
           <div className="section-head">
             <span className="kicker">02 · Type ramp</span>
-            <h2 className="t-section">Two faces, negative tracking that scales.</h2>
+            <h2 className="t-section">One superfamily, tracking that relaxes as it falls.</h2>
             <p className="t-lead">
-              <strong>Bricolage Grotesque</strong> for display, <strong>Instrument Sans</strong> for
-              body. The tracking is the ramp&rsquo;s whole character: −0.058em at the hero,
-              −0.045em at a section head, −0.025em on a card title, none at body size.
+              <strong>Inter Tight</strong> for display, <strong>Inter</strong> for reading —
+              one superfamily, so a headline and the paragraph under it never disagree about
+              proportion. Tracking is a function of size, not a house style: −0.032em at the
+              hero, −0.024em at a section head, −0.012em on a card title, and none at all by
+              the time the text is meant to be read rather than seen.
             </p>
           </div>
 

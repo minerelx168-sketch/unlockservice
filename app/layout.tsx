@@ -23,7 +23,9 @@ export const viewport: Viewport = {
  */
 const THEME_GUARD = `(function(){try{var s=localStorage.getItem('iunlockmobile-theme');var m=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',s||m)}catch(e){}})()`
 
-const PRELOADED_FONTS = ['/fonts/bricolage-grotesque-3.woff2', '/fonts/instrument-sans-2.woff2']
+/* The latin subsets only — latin-ext covers accented names and is fetched
+   on demand by the browser when a glyph in it is actually used. */
+const PRELOADED_FONTS = ['/fonts/inter-latin.woff2', '/fonts/inter-tight-latin.woff2']
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   /* Minted per request in middleware.ts, which is also where the policy that

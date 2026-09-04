@@ -35,7 +35,7 @@ lib/account-security.ts     Optional email verification and password recovery
 lib/rate-limit.ts           Small SQLite-backed attempt windows
 lib/imei.ts                 Luhn validation, grouping, identifier masking (no DOM)
 styles/                     tokens · fonts · base · components · app · docs
-public/fonts/               Self-hosted Bricolage Grotesque + Instrument Sans (OFL 1.1)
+public/fonts/               Self-hosted Inter + Inter Tight (OFL 1.1), latin and latin-ext
 docs/design-system.md       The written design system
 docs/reference/             The two source documents from the Cowork sessions
 deploy/                     Caddy site, systemd units, deploy and domain scripts
