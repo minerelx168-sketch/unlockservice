@@ -276,13 +276,43 @@ export function PaidReportConsole({
               </div>
             </section>
           ) : (
-            <button className="button button--primary" type="submit" disabled={busy || !product?.providerReady || !affordable}>
-              <Icon name="file" strokeWidth={1.9} />
-              {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a report'}
-            </button>
-          )}
+            <>
+              {/* When credit is the only thing in the way, the button says so
+                  and does the thing that clears it. A greyed-out control with
+                  a small "add funds" link beside it asks the customer to work
+                  out for themselves why they cannot buy. */}
+              {product && product.providerReady && !affordable ? (
+                <Link className="button button--primary" href="/user/add-funds">
+                  <Icon name="arrowRight" strokeWidth={1.9} />
+                  Add funds and order this report
+                </Link>
+              ) : (
+                <button
+                  className="button button--primary"
+                  type="submit"
+                  disabled={busy || !product?.providerReady}
+                >
+                  <Icon name="file" strokeWidth={1.9} />
+                  {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a report'}
+                </button>
+              )}
 
-          {!affordable ? <Link className="link-arrow" href="/user/add-funds">Add funds <Icon name="arrowRight" /></Link> : null}
+              {/* Every reason a control above is unavailable, stated next to
+                  it rather than left to be inferred from the grey. */}
+              {product && !product.providerReady ? (
+                <p className="t-small" role="status">
+                  This report is not open for ordering yet — the supplier behind it has not been
+                  verified. Nothing here can be charged in the meantime.
+                </p>
+              ) : null}
+              {product && product.providerReady && !affordable ? (
+                <p className="t-small" role="status">
+                  Your balance is {formatUsd(balanceCents)} and this report costs{' '}
+                  {formatUsd(product.priceCents)}.
+                </p>
+              ) : null}
+            </>
+          )}
           <p className="t-small" style={{ fontSize: 12.5 }}>
             Credit is held before submission and charged only after a usable report is delivered. A clear terminal failure releases the hold. A timeout or uncertain Provider response goes to manual review and is never retried automatically.
           </p>

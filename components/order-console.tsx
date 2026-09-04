@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatUsd } from '@/lib/money'
@@ -363,18 +364,30 @@ export function OrderConsole({
           ) : null}
 
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
-            <button className="button button--primary" type="submit" disabled={busy || !affordable}>
-              <Icon name="bolt" strokeWidth={1.9} />
-              {busy ? 'Placing the order…' : chosen ? `Order for ${formatUsd(priceCents)}` : 'Place order'}
-            </button>
+            {/* Short of credit, the primary action becomes the step that
+                fixes it. Disabling the button and putting the remedy in
+                small red text beside it leaves the customer to work out the
+                connection. */}
+            {!affordable && chosen ? (
+              <Link className="button button--primary" href="/user/add-funds">
+                <Icon name="arrowRight" strokeWidth={1.9} />
+                Add funds and order
+              </Link>
+            ) : (
+              <button className="button button--primary" type="submit" disabled={busy}>
+                <Icon name="bolt" strokeWidth={1.9} />
+                {busy ? 'Placing the order…' : chosen ? `Order for ${formatUsd(priceCents)}` : 'Place order'}
+              </button>
+            )}
             {busy ? (
               <button className="button button--quiet" type="button" onClick={() => abortRef.current?.abort()}>
                 Stop waiting
               </button>
             ) : null}
-            {!affordable ? (
-              <span className="t-small" style={{ color: 'var(--danger)' }}>
-                Not enough credit for this order.
+            {!affordable && chosen ? (
+              <span className="t-small" role="status">
+                Your balance is {formatUsd(availableCents)} and this order costs{' '}
+                {formatUsd(priceCents)}.
               </span>
             ) : null}
           </div>

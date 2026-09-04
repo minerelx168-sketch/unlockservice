@@ -201,6 +201,21 @@ export function AdminCreditAdjustment({
         {error ? <p className="alert alert--error" role="alert">{error}</p> : null}
         {success ? <p className="alert" role="status">{success}</p> : null}
 
+        {/* The button already refuses these; saying which one is missing is
+            what turns a grey control into an instruction. The
+            below-held-funds case has its own alert above. */}
+        {!canSubmit && !busy ? (
+          <p className="t-small" role="status">
+            {!selected
+              ? 'Pick the account to adjust.'
+              : amountCents === null
+                ? 'Enter an amount, like 25 or -12.50.'
+                : reason.trim().length < 8
+                  ? 'Write a reason of at least eight characters — it goes on the ledger row.'
+                  : 'This adjustment cannot be recorded as entered.'}
+          </p>
+        ) : null}
+
         <button className="button button--primary button--wide" type="submit" disabled={!canSubmit || busy}>
           {busy ? 'Recording adjustment…' : amountCents && amountCents < 0 ? 'Remove credit' : 'Add credit'}
         </button>
