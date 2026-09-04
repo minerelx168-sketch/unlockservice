@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ImeiForm } from '@/components/imei-form'
 import { CARRIERS } from '@/lib/catalog'
-import { serviceStatus } from '@/lib/provider'
+import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
 import { StructuredData } from './structured-data'
 import { Icon, type IconName } from '@/components/icons'
 
@@ -136,6 +136,7 @@ export default function HomePage() {
   /* Said at the top rather than at the order form. A visitor who cannot
      order should learn that before they enter their IMEI, not after. */
   const status = serviceStatus()
+  const ordering = unlockOrderingEnabled()
 
   return (
     <>
@@ -154,7 +155,8 @@ export default function HomePage() {
               <p className="alert" role="status">
                 <Icon name="info" strokeWidth={1.9} />
                 <span>
-                  <b>{status.heading}.</b> {status.detail}
+                  <b>{status.heading}.</b> {status.detail}{' '}
+                  <Link href="/unlock-waitlist">Get told when it opens</Link>.
                 </span>
               </p>
             ) : null}
@@ -194,6 +196,7 @@ export default function HomePage() {
             {/* The same list the order form is built from, so the network a
                 visitor picks here is one they can actually order against. */}
             <ImeiForm
+              ordering={ordering}
               carriers={CARRIERS.map((carrier) => ({
                 id: carrier.id,
                 name: carrier.name,
@@ -487,13 +490,14 @@ export default function HomePage() {
                 Ready to use your phone on another network?
               </h2>
               <p className="t-small">
-                Start with the country, original carrier and IMEI. You will see service details before
-                confirming the order.
+                {ordering
+                  ? 'Start with the country, original carrier and IMEI. You will see service details before confirming the order.'
+                  : 'Unlock ordering is not open yet. Leave an address and you will hear the day it is — phone checks and reports can be ordered today.'}
               </p>
             </div>
             <div className="cta-actions">
-              <Link className="button button--primary" href="#check">
-                Unlock Phone Now
+              <Link className="button button--primary" href={ordering ? '#check' : '/unlock-waitlist'}>
+                {ordering ? 'Unlock Phone Now' : 'Notify me when unlocking opens'}
               </Link>
               <Link className="button button--quiet" href="/login">
                 Track an Order

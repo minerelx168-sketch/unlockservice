@@ -23,7 +23,9 @@ import {
 import { CARRIERS } from './catalog'
 import { isValidImei, normalizeImei } from './imei'
 import { parseUsd } from './money'
+import { landingRoute, unlockOrderingEnabled } from './provider'
 import { writeQuote } from './quote'
+import { joinUnlockWaitlist, WaitlistError } from './waitlist'
 import {
   approveInvoice,
   createInvoice,
@@ -53,8 +55,43 @@ export async function startUnlockQuoteAction(_: FormState, data: FormData): Prom
   }
 
   await writeQuote(imei, carrierId)
+
+  /* Never hand the visitor to a page that cannot take their order. While
+     unlock ordering is closed the quote goes to the reports catalogue,
+     which can be bought today; the IMEI travels with them either way. */
+  if (!unlockOrderingEnabled()) redirect('/services/imei-check')
+
   const signedIn = (await currentSession()) !== null
   redirect(signedIn ? '/user/unlock' : '/register')
+}
+
+/**
+ * The list of people to tell when unlock ordering opens.
+ *
+ * The page this posts from is the one that used to say only that orders
+ * were closed. Taking an address is the smallest thing that turns that
+ * page from an ending into a step.
+ */
+export async function joinUnlockWaitlistAction(_: FormState, data: FormData): Promise<FormState> {
+  if (unlockOrderingEnabled()) {
+    return { error: 'Unlock ordering is open — you can place the order now.' }
+  }
+
+  const session = await currentSession()
+  try {
+    const carrierId = Number(data.get('carrierId'))
+    await joinUnlockWaitlist({
+      email: String(data.get('email') ?? ''),
+      imei: String(data.get('imei') ?? ''),
+      carrierId: CARRIERS.some((carrier) => carrier.id === carrierId) ? carrierId : undefined,
+      userId: session?.user.id,
+    })
+  } catch (error) {
+    if (error instanceof WaitlistError) return { error: error.message }
+    throw error
+  }
+
+  return { message: 'You are on the list. We will email you the day unlock ordering opens.' }
 }
 
 export async function registerAction(_: FormState, data: FormData): Promise<FormState> {
@@ -74,7 +111,7 @@ export async function registerAction(_: FormState, data: FormData): Promise<Form
   }
   revalidatePath('/', 'layout')
   if (verificationRequired) redirect(`/verify-email?email=${encodeURIComponent(email)}`)
-  redirect('/user/unlock')
+  redirect(landingRoute())
 }
 
 export async function loginAction(_: FormState, data: FormData): Promise<FormState> {
@@ -86,7 +123,7 @@ export async function loginAction(_: FormState, data: FormData): Promise<FormSta
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect('/user/unlock')
+  redirect(landingRoute())
 }
 
 export async function verifyEmailAction(_: FormState, data: FormData): Promise<FormState> {
@@ -99,7 +136,7 @@ export async function verifyEmailAction(_: FormState, data: FormData): Promise<F
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect('/user/unlock')
+  redirect(landingRoute())
 }
 
 export async function resendVerificationAction(_: FormState, data: FormData): Promise<FormState> {

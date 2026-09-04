@@ -1372,3 +1372,60 @@ test('registration and resend do not confirm that an email is registered', async
   await assert.doesNotReject(accountSecurity.resendVerification('enum@example.invalid'))
   await assert.doesNotReject(accountSecurity.resendVerification('nobody@example.invalid'))
 })
+
+test('the unlock waitlist keeps a place in the queue without keeping the IMEI', async () => {
+  const waitlist = await import('../lib/waitlist')
+  const provider = await import('../lib/provider')
+  const connection = database.db()
+  const imei = '354909000000095'
+
+  /* Ordering is closed in this environment — no supplier is configured —
+     so the funnel has somewhere to send people other than an apology. */
+  assert.equal(provider.unlockOrderingEnabled(), false)
+  assert.equal(provider.landingRoute(), '/user/reports/new')
+
+  const first = await waitlist.joinUnlockWaitlist({ email: 'Queue@Example.invalid', imei, carrierId: 101 })
+  assert.equal(first.added, true)
+  assert.equal(first.maskedImei, '35·········0095')
+
+  const row = connection
+    .prepare('SELECT email, imei_fingerprint, masked_imei, carrier_id FROM unlock_waitlist')
+    .get() as { email: string; imei_fingerprint: string; masked_imei: string; carrier_id: number }
+  assert.equal(row.email, 'queue@example.invalid', 'the address is stored in one case only')
+  assert.equal(row.masked_imei, '35·········0095')
+  assert.equal(row.carrier_id, 101)
+  assert.notEqual(row.imei_fingerprint, imei)
+  assert.match(row.imei_fingerprint, /^[0-9a-f]{64}$/)
+
+  /* Someone who taps twice is one person, not two — and is not emailed
+     a second time either, which is what `added` guards. */
+  const again = await waitlist.joinUnlockWaitlist({ email: 'queue@example.invalid', imei })
+  assert.equal(again.added, false)
+
+  /* The same holds without an IMEI, where a NULL would have made every
+     row distinct to the unique index. */
+  assert.equal((await waitlist.joinUnlockWaitlist({ email: 'plain@example.invalid' })).added, true)
+  assert.equal((await waitlist.joinUnlockWaitlist({ email: 'plain@example.invalid' })).added, false)
+
+  await assert.rejects(
+    waitlist.joinUnlockWaitlist({ email: 'not-an-address' }),
+    (error: unknown) => error instanceof waitlist.WaitlistError && error.code === 'email_invalid',
+  )
+  await assert.rejects(
+    waitlist.joinUnlockWaitlist({ email: 'queue@example.invalid', imei: '354909000000094' }),
+    (error: unknown) => error instanceof waitlist.WaitlistError && error.code === 'imei_invalid',
+  )
+
+  /* And it cannot be used to harvest a mailing list, or to mail-bomb one
+     address, faster than five attempts an hour. */
+  const attempts = []
+  for (let index = 0; index < 6; index += 1) {
+    attempts.push(
+      await waitlist
+        .joinUnlockWaitlist({ email: 'flood@example.invalid', imei })
+        .then(() => 'ok')
+        .catch((error: unknown) => (error instanceof waitlist.WaitlistError ? error.code : 'other')),
+    )
+  }
+  assert.equal(attempts.at(-1), 'rate_limited')
+})

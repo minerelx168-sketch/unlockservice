@@ -81,6 +81,17 @@ async function sendEmail(to: string, subject: string, html: string, text: string
   }
 }
 
+/**
+ * Delivery for mail that is not account security.
+ *
+ * Exported so there is still exactly one place that knows how mail leaves
+ * this system — the alternative was a second fetch to Resend somewhere
+ * else, with its own idea of what happens when the key is missing.
+ */
+export async function sendTransactionalEmail(to: string, subject: string, html: string, text: string) {
+  await sendEmail(to, subject, html, text)
+}
+
 function issueOtp(userId: number, purpose: OtpPurpose): string {
   const code = String(randomInt(0, 1_000_000)).padStart(6, '0')
   const expires = new Date(Date.now() + OTP_TTL_MINUTES * 60_000).toISOString()

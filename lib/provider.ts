@@ -253,6 +253,19 @@ export function serviceStatus(): { accepting: boolean; heading: string; detail: 
 }
 
 /**
+ * Whether an unlock can actually be ordered right now.
+ *
+ * Derived from serviceStatus rather than kept as a separate switch. A flag
+ * of its own would be a second thing to remember: someone opens ordering,
+ * forgets the flag, and the site advertises a button that answers 503 —
+ * or worse, leaves it flipped on while the supplier is disabled. This
+ * cannot disagree with reality because it is reality.
+ */
+export function unlockOrderingEnabled(): boolean {
+  return serviceStatus() === null
+}
+
+/**
  * Maintenance mode, shaped so the client can count down against the
  * server clock rather than the device clock.
  */
@@ -264,4 +277,17 @@ export function maintenanceState() {
     serverNow: Math.floor(Date.now() / 1000),
     message: 'New unlock orders are paused while we work on the service. Existing orders are unaffected.',
   }
+}
+
+/**
+ * Where someone lands the moment they have an account, and where an
+ * already-signed-in visitor is sent from the auth pages.
+ *
+ * It used to be the unlock console unconditionally, which is the one page
+ * that cannot take an order while unlocking is closed — so the reward for
+ * finishing the sign-up was a dead end. Send them to whatever can
+ * actually be bought today.
+ */
+export function landingRoute(): string {
+  return unlockOrderingEnabled() ? '/user/unlock' : '/user/reports/new'
 }

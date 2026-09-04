@@ -30,7 +30,15 @@ const EMPTY: FormState = {}
  * server puts it in a short-lived cookie and the order form picks it up
  * after sign-in; the customer types it once.
  */
-export function ImeiForm({ carriers }: { carriers: QuoteCarrier[] }) {
+export function ImeiForm({
+  carriers,
+  ordering = true,
+}: {
+  carriers: QuoteCarrier[]
+  /** False while unlock ordering is closed — the button then leads to the
+      reports catalogue, so it must not promise an unlock. */
+  ordering?: boolean
+}) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState('')
   const [note, setNote] = useState<Note>(RESTING)
@@ -148,12 +156,14 @@ export function ImeiForm({ carriers }: { carriers: QuoteCarrier[] }) {
       </div>
 
       <button className="button button--primary button--wide unlock-submit" type="submit" disabled={pending}>
-        {pending ? 'Checking…' : 'Unlock Phone'}
+        {pending ? 'Checking…' : ordering ? 'Unlock Phone' : 'Check this phone'}
         <Icon name="arrowRight" strokeWidth={2.2} />
       </button>
 
       <p className="unlock-quote-note">
-        Price and estimated delivery time are shown before you place the order.
+        {ordering
+          ? 'Price and estimated delivery time are shown before you place the order.'
+          : 'Unlock orders are not open yet. This takes you to the reports you can order today, with the IMEI already filled in.'}
       </p>
     </form>
   )

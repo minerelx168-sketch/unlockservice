@@ -29,7 +29,8 @@ export default async function CheckPage() {
             <p className="alert" role="status">
               <Icon name="info" strokeWidth={1.9} />
               <span>
-                <b>{status.heading}.</b> {status.detail} The free check below is unaffected.
+                <b>{status.heading}.</b> {status.detail} The free check below is unaffected.{' '}
+                <Link href="/unlock-waitlist">Get told when unlocking opens</Link>.
               </span>
             </p>
           ) : null}

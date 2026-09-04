@@ -490,3 +490,44 @@ Branch `feat/architecture-audit-and-ci-redesign` · PR #1 · CI `verify` เข�
 2. screenshot ของ `mobileunlocks.com` หรือเปิด egress ให้โดเมนนั้น — ถ้าต้องการให้เทียบ CI กับเว็บอ้างอิงจริง
 3. ยืนยันว่าราคาและ ETA ใน `lib/catalog.ts` เป็นของจริงหรือยัง placeholder
 4. อนุมัติผล audit + screenshots ก่อน merge เข้า deploy branch และ deploy
+
+## 14. สถานะงานตาม CRO audit (D-tickets)
+
+รอบนี้ทำตามรายการที่เจ้าของระบบส่งมา (artifact CRO audit) ไม่ใช่จาก findings ของ §3–§4
+
+| ID | เรื่อง | สถานะ | หมายเหตุ |
+| --- | --- | --- | --- |
+| D10 | copy ที่พูดถึงสิ่งที่ลูกค้าได้ ไม่ใช่วิธีที่เราสร้าง | ปิด | `c9f1af4` |
+| D12 | mobile — control 16px, ฟอร์มขึ้นก่อน, เมนูที่กดถึง | ปิด | `1902521` |
+| D14 | 404 ที่ออกไปได้ + metadata/JSON-LD | ปิด | `8438d27` |
+| D15 | ทุกปุ่มที่กดไม่ได้ต้องบอกว่าติดอะไร | ปิด | `47d5a29` |
+| D2 · D3 · D4 | funnel ต้องไม่จบที่หน้า "orders paused" | ปิด | ตารางด้านล่าง |
+| D1 | payment rails | รอเจ้าของ | ต้องเลือก gateway และนโยบายอนุมัติ (ผูกกับ F-B19) |
+| D5 | Quote API + TAC lookup | รอเจ้าของ | ต้องมี provider ที่เปิดใช้จริงก่อน |
+| D6 | guest / passwordless checkout | รอเจ้าของ | เปลี่ยนโมเดล session — ขอตัดสินใจก่อนลงมือ |
+| D7 · D8 · D9 | product display layer · guest tracking · trust module | รอเจ้าของ | ขึ้นกับ D1/D5 |
+| D11 | GA4 / Clarity | รอเจ้าของ | ต้องการ measurement ID และการตัดสินใจเรื่อง CSP + consent |
+
+### D2/D3/D4 — สิ่งที่เปลี่ยน
+
+ตัวสวิตช์คือ `unlockOrderingEnabled()` ใน `lib/provider.ts` ซึ่ง derive จาก `serviceStatus()`
+ไม่ใช่ env flag ตัวใหม่ — flag ตัวที่สองจะขัดกับความจริงได้เมื่อมีคนลืมสลับ
+
+| จุด | ตอน ordering ปิด | ตอนเปิด (ไม่ต้อง deploy ใหม่) |
+| --- | --- | --- |
+| `/user/unlock` | ฟอร์ม waitlist (email + network + IMEI ที่ไม่บังคับ) | `OrderConsole` ตามเดิม |
+| `/unlock-waitlist` (หน้าใหม่, public) | หน้า waitlist เต็มรูปแบบ | `redirect('/services/unlock')` |
+| การ์ดใน `/services/unlock` | ปุ่ม "Notify me when this opens" | ปุ่มสั่งซื้อตามเดิม |
+| CTA band หน้าแรก · hero alert · `/check` | ลิงก์ไป waitlist | "Unlock Phone Now" ตามเดิม |
+| dashboard · orders empty state | "Run a phone check" → `/user/reports/new` | "Unlock a device" |
+| หลัง register / login / verify | `landingRoute()` → `/user/reports/new` | `/user/unlock` |
+| `startUnlockQuoteAction` | redirect ไป `/services/imei-check` พร้อม IMEI ที่กรอกไว้ | ไป `/user/unlock` |
+| `sitemap.xml` | มี `/unlock-waitlist` | ไม่มี |
+
+`unlock_waitlist` เก็บ `imei_fingerprint` (HMAC) + `masked_imei` เท่านั้น ไม่เก็บ IMEI ดิบ
+unique index `(email, imei_fingerprint)` ทำให้กดซ้ำเป็น no-op และไม่ส่งอีเมลซ้ำ
+rate limit 5 ครั้ง/ชั่วโมงต่ออีเมล อีเมลยืนยันส่งเฉพาะเมื่อ `emailDeliveryConfigured()` และถ้าส่งไม่ผ่าน
+แถวยังอยู่ — การเสียใบเสร็จไม่ควรทำให้เสียรายชื่อ
+
+หมายเหตุ: ticket ขอให้แสดง "วันที่คาดว่าจะเปิด" ด้วย ตรงนี้ไม่ได้ใส่ เพราะยังไม่มีวันที่จริง
+หน้าเว็บบอกตรง ๆ ว่ายังไม่ได้กำหนดวัน ดีกว่าใส่วันที่ที่อาจพลาด

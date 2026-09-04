@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { LoginForm } from '@/components/auth-forms'
 import { Brand } from '@/components/brand'
 import { currentSession } from '@/lib/auth'
+import { landingRoute } from '@/lib/provider'
 
 export const metadata: Metadata = { title: 'Sign in' }
 export const dynamic = 'force-dynamic'
@@ -12,7 +13,7 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ reset?: string; oauth?: string }>
 }) {
-  if (await currentSession()) redirect('/user/unlock')
+  if (await currentSession()) redirect(landingRoute())
   const { reset, oauth } = await searchParams
 
   return (

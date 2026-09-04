@@ -311,6 +311,21 @@ CREATE TABLE IF NOT EXISTS api_access (
 				CREATE INDEX IF NOT EXISTS provider_events_resource
 				  ON provider_events(resource_type, resource_id, created_at DESC);
 
+				CREATE TABLE IF NOT EXISTS unlock_waitlist (
+				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+				  user_id         INTEGER REFERENCES users(id) ON DELETE SET NULL,
+				  email           TEXT    NOT NULL,
+				  -- Same rule as everywhere else: the number is never stored in
+				  -- the clear, only fingerprinted and masked for display.
+				  imei_fingerprint TEXT,
+				  masked_imei     TEXT,
+				  carrier_id      INTEGER,
+				  notified_at     TEXT,
+				  created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+				);
+				CREATE UNIQUE INDEX IF NOT EXISTS unlock_waitlist_unique
+				  ON unlock_waitlist(email, imei_fingerprint);
+
 				CREATE TABLE IF NOT EXISTS schema_migrations (
 
 	  version    TEXT PRIMARY KEY,

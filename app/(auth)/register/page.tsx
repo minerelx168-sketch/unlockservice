@@ -4,13 +4,14 @@ import { RegisterForm } from '@/components/auth-forms'
 import { Brand } from '@/components/brand'
 import { Icon } from '@/components/icons'
 import { currentSession } from '@/lib/auth'
+import { landingRoute } from '@/lib/provider'
 import { describeQuote, readQuote } from '@/lib/quote'
 
 export const metadata: Metadata = { title: 'Create an account' }
 export const dynamic = 'force-dynamic'
 
 export default async function RegisterPage() {
-  if (await currentSession()) redirect('/user/unlock')
+  if (await currentSession()) redirect(landingRoute())
 
   /* What they asked for on the homepage. It was previously sent here in the
      query string and then ignored, so the phone and the network had to be

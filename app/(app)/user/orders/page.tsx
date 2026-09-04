@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
+import { unlockOrderingEnabled } from '@/lib/provider'
 import { countLedger, listLedger } from '@/lib/credits'
 import { maskIdentifier } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
@@ -36,6 +37,7 @@ export default async function OrdersPage({
   searchParams: Promise<{ tab?: string; page?: string }>
 }) {
   const { user } = await requireSession()
+  const ordering = unlockOrderingEnabled()
   const params = await searchParams
   const tab = params.tab === 'credit' ? 'credit' : 'orders'
 
@@ -104,7 +106,11 @@ export default async function OrdersPage({
             </table>
             {orders.length === 0 ? (
               <p className="empty">
-                Nothing yet. <Link href="/user/unlock">Unlock a device</Link>.
+                Nothing yet.{' '}
+                <Link href={ordering ? '/user/unlock' : '/user/reports/new'}>
+                  {ordering ? 'Unlock a device' : 'Run a phone check'}
+                </Link>
+                .
               </p>
             ) : null}
           </div>
