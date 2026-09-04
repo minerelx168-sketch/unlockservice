@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { Icon } from '@/components/icons'
 import { CUSTOMER_IMEI_CHECK_PRODUCTS } from '@/lib/customer-provider-products'
-import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
   title: 'Phone Check services and prices',
@@ -41,7 +40,7 @@ export default function ImeiCheckServicesPage() {
         <div className="shell">
           <ProductCatalog products={CUSTOMER_IMEI_CHECK_PRODUCTS} domain="imei_check" />
           <p className="t-micro service-catalog-version">
-            Catalog version {PROVIDER_PRODUCT_CATALOG_VERSION}. Report information is point-in-time and does not prove ownership.
+            A report describes the phone at the moment it is run, and does not prove who owns it.
           </p>
         </div>
       </section>

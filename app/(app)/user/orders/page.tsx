@@ -62,7 +62,7 @@ export default async function OrdersPage({
             Orders
           </a>
           <a className={`button ${tab === 'credit' ? 'button--primary' : 'button--quiet'}`} href="?tab=credit&page=1">
-            Credit movement
+            Credit history
           </a>
         </div>
       </div>
@@ -138,7 +138,7 @@ export default async function OrdersPage({
                 ))}
               </tbody>
             </table>
-            {ledger.length === 0 ? <p className="empty">No credit movement yet.</p> : null}
+            {ledger.length === 0 ? <p className="empty">Nothing yet — top-ups and charges will appear here.</p> : null}
           </div>
         )}
 

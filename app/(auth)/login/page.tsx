@@ -18,8 +18,8 @@ export default async function LoginPage({
   return (
     <div className="auth-card">
       <Brand />
-      <h1>Sign in to your workspace.</h1>
-      <p>Your credit, your orders and every unlock you have bought are behind this door.</p>
+      <h1>Sign in to see your orders.</h1>
+      <p>Your orders, your reports and the codes you have already bought.</p>
       <LoginForm resetComplete={reset === '1'} oauthError={oauth} />
     </div>
   )

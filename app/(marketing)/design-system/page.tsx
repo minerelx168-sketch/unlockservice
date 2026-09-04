@@ -96,7 +96,7 @@ const PRINCIPLES: Array<[string, string]> = [
   ],
   [
     'Headlines are huge and tracked tight',
-    'The hero runs at −0.032em with line-height 1.02, and the tracking relaxes to nothing by body size. Tight enough to look drawn rather than typed; loose enough that a 15px label does not run together.',
+    'The hero runs at −0.03em with line-height 1.06, and the tracking relaxes to nothing by body size. Tight enough to look drawn rather than typed; loose enough that a 15px label does not run together.',
   ],
   [
     'Colour is rationed',
@@ -171,7 +171,7 @@ const BUTTON_SPECS: Array<{ className: string; icon: IconName; label: string; na
 const RAMP: Array<{ label: string; spec: string; sample: React.ReactNode }> = [
   {
     label: 'Hero H1',
-    spec: 'clamp(38 → 68px) · lh 1.02 · ls −0.032em · w700 · 2nd line = --primary',
+    spec: 'clamp(34 → 58px) · lh 1.06 · ls −0.03em · w700 · 2nd line = --primary',
     sample: (
       <div className="t-hero" style={{ fontSize: 52 }}>
         Know the device

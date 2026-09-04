@@ -23,14 +23,14 @@ const SERVICES: Array<{
     icon: 'device',
     tint: '',
     title: 'Unlock services',
-    body: 'Browse carrier, activation-lock, MDM and device-unlock products with fixed prices. Online ordering opens only after each Provider API contract is verified.',
+    body: 'Carrier, activation-lock, MDM and device unlocks, each at a fixed price. Anything you can order today is marked as such; the rest is still being checked.',
     action: { href: '/services', label: 'Browse unlock services' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
     title: 'IMEI check reports',
-    body: 'Order Provider-backed Apple, Samsung, carrier, blacklist and device-status reports, or use the separate Free Check for format validation only.',
+    body: 'Apple, Samsung, carrier, blacklist and device-status reports on a phone you are about to buy or sell. The free check validates the number itself.',
     action: { href: '/services', label: 'Browse IMEI reports' },
   },
   {
@@ -160,30 +160,26 @@ export default function HomePage() {
             ) : null}
 
             <h1 className="t-hero">
-              Find the right phone service.
+              Unlock your phone by IMEI.
               <br />
-              <span className="accent">See the price before you order.</span>
+              <span className="accent">Price and delivery time before you pay.</span>
             </h1>
 
             <p className="t-lead">
-              Phone Check and Unlock Service now have separate customer paths. Choose the service type
-              you need to see only its products, prices and next steps.
+              Enter the IMEI and the network the phone is locked to. You see what it costs and how
+              long it takes before anything is charged.
             </p>
 
-            <div className="hero-actions">
-              <Link className="button button--primary" href="/services/imei-check">
-                <Icon name="search" strokeWidth={1.9} />
-                Open Phone Check
-              </Link>
-              <Link className="button button--secondary" href="/services/unlock">
-                <Icon name="lock" strokeWidth={1.9} />
-                Open Unlock Service
-              </Link>
-              <Link className="button button--quiet" href="/login">
-                <Icon name="clock" strokeWidth={1.9} />
-                Track an order
-              </Link>
-            </div>
+            {/* One filled button per screen. These were three competing calls
+                to action pointing three different ways, in a row that also
+                asked the visitor to learn our service taxonomy first. The
+                form to the right is the primary action; these are the two
+                ways past it. */}
+            <p className="hero-asides">
+              <Link href="/services/imei-check">Just want a device report?</Link>
+              <span aria-hidden="true">·</span>
+              <Link href="/login">Track an order</Link>
+            </p>
           </div>
 
           <div className="hero-panel">

@@ -23,7 +23,7 @@ export default async function DashboardPage() {
         <div>
           <h1>Welcome back, {user.username}.</h1>
           <p>
-            {user.membership_tier} · member since {user.created_at.slice(0, 10)}
+            Member since {user.created_at.slice(0, 10)}
           </p>
         </div>
         <Link className="button button--primary" href="/user/unlock">

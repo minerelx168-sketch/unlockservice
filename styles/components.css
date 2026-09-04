@@ -799,6 +799,23 @@
   }
 }
 
+/* The two ways past the hero form, as links rather than buttons. Three
+   filled buttons in a row is three primary actions, which is none. */
+.hero-asides {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.hero-asides a {
+  color: var(--primary);
+  font-weight: 560;
+}
+
 /* The head of a card: a kicker on the left, an optional action on the
    right. It is used on five screens and had no rule at all, so on /check
    the label and the History link sat on top of each other. */

@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { Icon } from '@/components/icons'
 import { CUSTOMER_UNLOCK_PRODUCTS } from '@/lib/customer-provider-products'
-import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
   title: 'Phone unlock services and prices',
@@ -40,7 +39,7 @@ export default function UnlockServicesPage() {
         <div className="shell">
           <ProductCatalog products={CUSTOMER_UNLOCK_PRODUCTS} domain="unlock" />
           <p className="t-micro service-catalog-version">
-            Catalog version {PROVIDER_PRODUCT_CATALOG_VERSION}. Unlock products remain view-only until online ordering is verified for each service.
+            Prices are current as shown. A service you cannot order yet is one we have not finished checking with the network behind it.
           </p>
         </div>
       </section>

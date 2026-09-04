@@ -238,7 +238,7 @@ export function PaidReportConsole({
             />
             <p className="field-note">
               <Icon name="shield" strokeWidth={1.9} />
-              <span>The raw IMEI is sent only for this Provider request. The database keeps a fingerprint and masked display value.</span>
+              <span>We never store your full IMEI and never show it in full — only the first two digits and the last four.</span>
             </p>
           </div>
 
@@ -264,7 +264,7 @@ export function PaidReportConsole({
                 <div><span className="label">Estimated delivery</span><span className="value">{deliveryLabel(product.etaMinutes)}</span></div>
                 <div><span className="label">Billing</span><span className="value">Charge on delivery</span></div>
               </div>
-              <p className="t-small">Confirming creates the credit hold and sends one Provider request. Uncertain responses are never retried automatically.</p>
+              <p className="t-small">Your credit is held, not spent. You are charged only when the report is delivered; if it cannot be, the hold is released.</p>
               <div className="order-review-actions">
                 <button className="button button--primary" type="button" disabled={busy} onClick={confirmOrder}>
                   <Icon name="file" strokeWidth={1.9} />
