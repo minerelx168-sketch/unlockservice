@@ -148,18 +148,18 @@ export default function HomePage() {
             </h1>
 
             <p className="t-lead">
-              Phone Check and Unlock Services now have separate catalogs. Choose the service type you
-              need to see only its products, prices and next steps.
+              Phone Check and Unlock Service now have separate customer paths. Choose the service type
+              you need to see only its products, prices and next steps.
             </p>
 
             <div className="hero-actions">
               <Link className="button button--primary" href="/services/imei-check">
                 <Icon name="search" strokeWidth={1.9} />
-                Browse Phone Checks
+                Open Phone Check
               </Link>
               <Link className="button button--secondary" href="/services/unlock">
                 <Icon name="lock" strokeWidth={1.9} />
-                Browse Unlock Services
+                Open Unlock Service
               </Link>
               <Link className="button button--quiet" href="/login">
                 <Icon name="clock" strokeWidth={1.9} />

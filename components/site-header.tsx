@@ -8,7 +8,7 @@ import { Icon } from './icons'
 import { ThemeToggle } from './theme-toggle'
 
 const NAV = [
-  { href: '/services/unlock', label: 'Unlock Services' },
+  { href: '/services/unlock', label: 'Unlock Service' },
   { href: '/services/imei-check', label: 'Phone Check' },
   { href: '/#how', label: 'How it works' },
   { href: '/#faq', label: 'FAQ' },

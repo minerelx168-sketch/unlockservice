@@ -249,12 +249,13 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   const servicesHub = readFileSync(join(process.cwd(), 'app/(marketing)/services/page.tsx'), 'utf8')
   const imeiPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/imei-check/page.tsx'), 'utf8')
   const unlockPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/unlock/page.tsx'), 'utf8')
+  const basicCheckPage = readFileSync(join(process.cwd(), 'app/(marketing)/check/page.tsx'), 'utf8')
 
   assert.match(tokens, /--primary:\s*#0057b8/)
   assert.match(tokens, /--primary-dark:\s*#003f87/)
   assert.match(tokens, /--primary-soft:\s*#e8f2ff/)
   assert.match(buttons, /\.button--secondary/)
-  assert.match(header, /href: '\/services\/unlock', label: 'Unlock Services'/)
+  assert.match(header, /href: '\/services\/unlock', label: 'Unlock Service'/)
   assert.match(header, /href: '\/services\/imei-check', label: 'Phone Check'/)
   assert.match(header, /className="button button--primary" href="\/services"/)
 
@@ -264,7 +265,11 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.match(imeiPage, /products=\{CUSTOMER_IMEI_CHECK_PRODUCTS\} domain="imei_check"/)
   assert.doesNotMatch(imeiPage, /CUSTOMER_UNLOCK_PRODUCTS/)
   assert.match(unlockPage, /products=\{CUSTOMER_UNLOCK_PRODUCTS\} domain="unlock"/)
+  assert.match(unlockPage, /<h1 className="t-display">Unlock Service\.<\/h1>/)
   assert.doesNotMatch(unlockPage, /CUSTOMER_IMEI_CHECK_PRODUCTS/)
+  assert.match(imeiPage, /<h1 className="t-display">Phone Check\.<\/h1>/)
+  assert.match(basicCheckPage, /Basic IMEI validation/)
+  assert.doesNotMatch(basicCheckPage, /Free IMEI check/i)
   assert.match(customerProducts, /product\.domain === 'imei_check'/)
   assert.match(customerProducts, /product\.domain === 'unlock'/)
 

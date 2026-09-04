@@ -6,8 +6,8 @@ import { CUSTOMER_IMEI_CHECK_PRODUCTS } from '@/lib/customer-provider-products'
 import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Phone Check & IMEI Check Services — iUnlockMobile',
-  description: 'Browse Phone Check and IMEI report services with prices, availability and delivery estimates.',
+  title: 'Phone Check Services & Prices — iUnlockMobile',
+  description: 'Browse Phone Check services with prices, availability and delivery estimates.',
 }
 
 export default function ImeiCheckServicesPage() {
@@ -22,16 +22,16 @@ export default function ImeiCheckServicesPage() {
               <span>Phone Check</span>
             </nav>
             <span className="kicker"><Icon name="search" /> Device information</span>
-            <h1 className="t-display">Phone Check services.</h1>
+            <h1 className="t-display">Phone Check.</h1>
             <p className="t-lead">
-              Check device, carrier, warranty, blacklist and lock-status information. This page contains Phone Check products only.
+              Check device, carrier, warranty, blacklist and lock-status information. Every product on this page is a Phone Check service.
             </p>
             <div className="hero-actions service-page-actions">
               <Link className="button button--primary" href="/user/reports/new">
-                <Icon name="file" /> Order an IMEI report
+                <Icon name="file" /> Order a Phone Check
               </Link>
-              <Link className="button button--quiet" href="/check">Use the Free IMEI Check</Link>
-              <Link className="button button--secondary" href="/services/unlock">View Unlock Services</Link>
+              <Link className="button button--secondary" href="/services/unlock">Go to Unlock Service</Link>
+              <Link className="button button--quiet" href="/check">Run basic IMEI validation</Link>
             </div>
           </div>
         </div>

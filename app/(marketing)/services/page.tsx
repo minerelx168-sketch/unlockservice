@@ -5,8 +5,8 @@ import { CUSTOMER_PRODUCT_COUNTS } from '@/lib/customer-provider-products'
 import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Unlock & Phone Check Services — iUnlockMobile',
-  description: 'Choose Phone Check or Unlock Services before browsing products, prices and availability.',
+  title: 'Unlock Service & Phone Check — iUnlockMobile',
+  description: 'Choose Phone Check or Unlock Service before browsing products, prices and availability.',
 }
 
 export default function ServicesPage() {
@@ -40,9 +40,9 @@ export default function ServicesPage() {
               </div>
               <div className="service-hub-actions">
                 <Link className="button button--primary" href="/services/imei-check">
-                  Browse phone checks <Icon name="arrowRight" />
+                  Open Phone Check <Icon name="arrowRight" />
                 </Link>
-                <Link className="button button--quiet" href="/check">Free IMEI Check</Link>
+                <Link className="button button--quiet" href="/check">Basic IMEI validation</Link>
               </div>
             </article>
 
@@ -50,7 +50,7 @@ export default function ServicesPage() {
               <div className="service-hub-icon"><Icon name="lock" /></div>
               <div className="service-hub-copy">
                 <span className="kicker">Network and device access</span>
-                <h2>Unlock Services</h2>
+                <h2>Unlock Service</h2>
                 <p>Browse published network, activation-lock and device-unlock prices by carrier, country and device type.</p>
               </div>
               <div className="service-hub-stats">
@@ -59,7 +59,7 @@ export default function ServicesPage() {
               </div>
               <div className="service-hub-actions">
                 <Link className="button button--primary" href="/services/unlock">
-                  Browse unlock services <Icon name="arrowRight" />
+                  Open Unlock Service <Icon name="arrowRight" />
                 </Link>
               </div>
             </article>

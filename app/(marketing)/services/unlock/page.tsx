@@ -6,7 +6,7 @@ import { CUSTOMER_UNLOCK_PRODUCTS } from '@/lib/customer-provider-products'
 import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Phone Unlock Services & Prices — iUnlockMobile',
+  title: 'Phone Unlock Service & Prices — iUnlockMobile',
   description: 'Browse phone unlock services and published prices by network, country and device type.',
 }
 
@@ -19,10 +19,10 @@ export default function UnlockServicesPage() {
             <nav className="service-breadcrumb" aria-label="Breadcrumb">
               <Link href="/services">Services</Link>
               <span aria-hidden="true">/</span>
-              <span>Unlock Services</span>
+              <span>Unlock Service</span>
             </nav>
             <span className="kicker"><Icon name="lock" /> Network and device access</span>
-            <h1 className="t-display">Unlock Services.</h1>
+            <h1 className="t-display">Unlock Service.</h1>
             <p className="t-lead">
               Browse network, activation-lock and device-unlock prices by carrier, country and device type. This page contains Unlock products only.
             </p>
@@ -30,7 +30,7 @@ export default function UnlockServicesPage() {
               <Link className="button button--primary" href="#unlock-catalog">
                 Browse unlock prices <Icon name="arrowRight" />
               </Link>
-              <Link className="button button--secondary" href="/services/imei-check">View Phone Checks</Link>
+              <Link className="button button--secondary" href="/services/imei-check">Go to Phone Check</Link>
             </div>
           </div>
         </div>

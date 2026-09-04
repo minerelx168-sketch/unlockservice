@@ -6,8 +6,8 @@ const COLUMNS = [
     heading: 'Services',
     links: [
       { href: '/services', label: 'Service categories' },
-      { href: '/services/unlock', label: 'Unlock services' },
-      { href: '/services/imei-check', label: 'Phone checks' },
+      { href: '/services/unlock', label: 'Unlock Service' },
+      { href: '/services/imei-check', label: 'Phone Check' },
       { href: '/user/reports/new', label: 'Paid IMEI reports' },
       { href: '/register', label: 'Create an account' },
     ],
