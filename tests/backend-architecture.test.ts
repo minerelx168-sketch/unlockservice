@@ -250,6 +250,7 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   const imeiPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/imei-check/page.tsx'), 'utf8')
   const unlockPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/unlock/page.tsx'), 'utf8')
   const basicCheckPage = readFileSync(join(process.cwd(), 'app/(marketing)/check/page.tsx'), 'utf8')
+  const basicCheckForm = readFileSync(join(process.cwd(), 'components/imei-check-form.tsx'), 'utf8')
 
   assert.match(tokens, /--primary:\s*#0057b8/)
   assert.match(tokens, /--primary-dark:\s*#003f87/)
@@ -270,6 +271,8 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.match(imeiPage, /<h1 className="t-display">Phone Check\.<\/h1>/)
   assert.match(basicCheckPage, /Basic IMEI validation/)
   assert.doesNotMatch(basicCheckPage, /Free IMEI check/i)
+  assert.match(basicCheckForm, /Choose a paid Phone Check/)
+  assert.doesNotMatch(basicCheckForm, /Provider data will be added/)
   assert.match(customerProducts, /product\.domain === 'imei_check'/)
   assert.match(customerProducts, /product\.domain === 'unlock'/)
 
