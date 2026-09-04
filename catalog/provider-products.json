@@ -1,6 +1,6 @@
 {
-  "version": "2026-09-01",
-  "source": "Owner-approved Selling_price-ชีต1.csv joined to authenticated Provider catalog",
+  "version": "2026-09-04",
+  "source": "Owner-approved Selling_price-ชีต1.csv joined to authenticated Provider catalog; live PHP service-list refreshed 2026-09-04",
   "products": [
     {
       "serviceId": "214",
@@ -631,6 +631,21 @@
       "providerCostMicros": 40000,
       "etaLabel": "1-5 Minutes (Instant)",
       "sortOrder": 420
+    },
+    {
+      "serviceId": "988",
+      "productCode": "CHECK_988",
+      "slug": "check-988",
+      "name": "Japan AU/KDDI/UQ/Softbank/YMobile/Mineo/Rakuten Blacklist Check",
+      "summary": "Japan carrier blacklist status check. Online ordering will open after retail pricing, input and report fields are verified.",
+      "group": "Status Check Services",
+      "domain": "imei_check",
+      "inputType": "imei",
+      "status": "hidden_reprice",
+      "priceCents": 0,
+      "providerCostMicros": 20000,
+      "etaLabel": "Instant",
+      "sortOrder": 425
     },
     {
       "serviceId": "346",

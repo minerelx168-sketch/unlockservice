@@ -213,13 +213,22 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
 })
 
 test('provider product catalog publishes only reviewed products and keeps activation fail-closed', () => {
-  assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 129)
+  assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 130)
   assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 109)
   assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 25)
   assert.equal(providerProducts.COMING_SOON_PROVIDER_PRODUCTS.length, 84)
-  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 12)
+  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 13)
   assert.equal(providerProducts.RESTRICTED_PROVIDER_PRODUCTS.length, 8)
-  assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map((product) => product.productCode)).size, 129)
+  assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map((product) => product.productCode)).size, 130)
+  assert.partialDeepStrictEqual(
+    providerProducts.providerProductByCode('CHECK_988'),
+    {
+      serviceId: '988',
+      status: 'hidden_reprice',
+      priceCents: 0,
+      providerCostMicros: 20_000,
+    },
+  )
   assert.equal(
     providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter((product) => product.domain === 'unlock').length,
     55,
@@ -245,6 +254,7 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   const appStyles = readFileSync(join(process.cwd(), 'styles/app.css'), 'utf8')
   const header = readFileSync(join(process.cwd(), 'components/site-header.tsx'), 'utf8')
   const catalog = readFileSync(join(process.cwd(), 'components/product-catalog.tsx'), 'utf8')
+  const paidReportConsole = readFileSync(join(process.cwd(), 'components/paid-report-console.tsx'), 'utf8')
   const customerProducts = readFileSync(join(process.cwd(), 'lib/customer-provider-products.ts'), 'utf8')
   const servicesHub = readFileSync(join(process.cwd(), 'app/(marketing)/services/page.tsx'), 'utf8')
   const imeiPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/imei-check/page.tsx'), 'utf8')
@@ -281,15 +291,35 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.match(catalog, /product-subcategory-list/)
   assert.match(catalog, /customerText\(product\.name\)/)
   assert.match(catalog, /formatUsd\(product\.priceCents\)/)
+  assert.match(catalog, /Choose report/)
+  assert.doesNotMatch(catalog, /Estimated delivery/)
+  assert.doesNotMatch(catalog, /product\.etaLabel/)
   assert.doesNotMatch(catalog, /Provider ID/)
   assert.doesNotMatch(catalog, /product\.serviceId/)
   assert.doesNotMatch(catalog, /⭐|🌟|✅|🔍|🔒/u)
+  assert.match(paidReportConsole, /function reviewOrder/)
+  assert.match(paidReportConsole, /setReviewing\(true\)/)
+  assert.match(paidReportConsole, /Estimated delivery/)
+  assert.match(paidReportConsole, /Confirm and order/)
+  const reviewFunction = paidReportConsole.slice(
+    paidReportConsole.indexOf('function reviewOrder'),
+    paidReportConsole.indexOf('async function confirmOrder'),
+  )
+  assert.doesNotMatch(reviewFunction, /post\(|idempotencyKey|crypto\.randomUUID/)
+  const confirmFunction = paidReportConsole.slice(
+    paidReportConsole.indexOf('async function confirmOrder'),
+    paidReportConsole.indexOf('async function refreshStatus'),
+  )
+  assert.match(confirmFunction, /post\('\/api\/imei\/reports'/)
+  assert.match(confirmFunction, /crypto\.randomUUID\(\)/)
   assert.match(customerProducts, /Extended_Pictographic/)
   assert.doesNotMatch(customerProducts, /⭐|🌟|✅|🔍|🔒/u)
   assert.match(appStyles, /\.service-hub-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2/s)
   assert.match(appStyles, /\.product-subcategory-list\s*\{[^}]*gap:\s*52px/s)
-  assert.match(appStyles, /\.product-card\s*\{[^}]*gap:\s*20px/s)
-  assert.match(appStyles, /\.product-card-action\s*\{[^}]*min-height:\s*54px/s)
+  assert.match(appStyles, /\.product-card-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3/s)
+  assert.match(appStyles, /\.product-card\s*\{[^}]*gap:\s*14px[^}]*padding:\s*20px/s)
+  assert.match(appStyles, /\.product-card-action\s*\{[^}]*min-height:\s*46px/s)
+  assert.match(appStyles, /\.order-review-actions\s*\{[^}]*grid-template-columns:/s)
 })
 
 test('registration keeps the original User contract and normal sign-in flow', () => {

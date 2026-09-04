@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useRef, useState, type FormEvent } from 'react'
-import { groupImei, IMEI_LENGTH, luhnValid, normalizeImei } from '@/lib/imei'
+import { groupImei, IMEI_LENGTH, luhnValid, maskIdentifier, normalizeImei } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
 
@@ -61,6 +61,7 @@ export function PaidReportConsole({
   const [imei, setImei] = useState('')
   const [search, setSearch] = useState('')
   const [busy, setBusy] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [payload, setPayload] = useState<PaidReportPayload | null>(null)
   const idempotencyRef = useRef<string | null>(null)
@@ -79,6 +80,14 @@ export function PaidReportConsole({
   function resetRequestIdentity() {
     idempotencyRef.current = null
     setPayload(null)
+    setReviewing(false)
+  }
+
+  function deliveryLabel(minutes: number) {
+    if (minutes <= 1) return 'Usually instant'
+    if (minutes < 60) return `Up to ${minutes} minutes`
+    const hours = Math.ceil(minutes / 60)
+    return `Up to ${hours} ${hours === 1 ? 'hour' : 'hours'}`
   }
 
   async function post(path: string, body: Record<string, unknown>) {
@@ -101,11 +110,20 @@ export function PaidReportConsole({
     return data
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  function reviewOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const digits = normalizeImei(imei)
     if (!product) return setError('Choose a paid report first.')
     if (!product.providerReady) return setError('This report is not available yet.')
+    if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+    if (!affordable) return setError('Not enough credit for this report.')
+    setError(null)
+    setReviewing(true)
+  }
+
+  async function confirmOrder() {
+    const digits = normalizeImei(imei)
+    if (!product || !product.providerReady) return setError('This report is not available yet.')
     if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
     if (!affordable) return setError('Not enough credit for this report.')
 
@@ -116,6 +134,7 @@ export function PaidReportConsole({
     try {
       const result = await post('/api/imei/reports', { productCode: product.code, imei: digits, idempotencyKey })
       setPayload(result)
+      setReviewing(false)
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : 'The paid report could not be submitted.')
     } finally {
@@ -147,7 +166,7 @@ export function PaidReportConsole({
 
   return (
     <div style={{ display: 'grid', gap: 20 }}>
-      <form className="panel" onSubmit={submit} noValidate>
+      <form className="panel" onSubmit={reviewOrder} noValidate>
         <header>
           <h2>New paid report</h2>
           <span>{formatUsd(balanceCents)} available</span>
@@ -226,15 +245,42 @@ export function PaidReportConsole({
           {product ? (
             <div className="quote">
               <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
-              <div><span className="label">Catalog ETA</span><span className="value">Up to {product.etaMinutes} min</span></div>
-              <div><span className="label">Billing</span><span className="value">Charge on delivery</span></div>
+              <div><span className="label">Available credit</span><span className="value">{formatUsd(balanceCents)}</span></div>
             </div>
           ) : null}
 
-          <button className="button button--primary" type="submit" disabled={busy || !product?.providerReady || !affordable}>
-            <Icon name="file" strokeWidth={1.9} />
-            {busy ? 'Submitting…' : product ? `Order report for ${formatUsd(product.priceCents)}` : 'Choose a report'}
-          </button>
+          {reviewing && product ? (
+            <section className="order-review" aria-labelledby="paid-report-review-title">
+              <div className="card-topline">
+                <div>
+                  <span className="kicker">Confirm order</span>
+                  <h3 className="t-card" id="paid-report-review-title">{product.name}</h3>
+                </div>
+                <span className="badge">Review</span>
+              </div>
+              <p className="t-small">IMEI {maskIdentifier(normalizeImei(imei))}</p>
+              <div className="quote">
+                <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
+                <div><span className="label">Estimated delivery</span><span className="value">{deliveryLabel(product.etaMinutes)}</span></div>
+                <div><span className="label">Billing</span><span className="value">Charge on delivery</span></div>
+              </div>
+              <p className="t-small">Confirming creates the credit hold and sends one Provider request. Uncertain responses are never retried automatically.</p>
+              <div className="order-review-actions">
+                <button className="button button--primary" type="button" disabled={busy} onClick={confirmOrder}>
+                  <Icon name="file" strokeWidth={1.9} />
+                  {busy ? 'Submitting…' : `Confirm and order ${formatUsd(product.priceCents)}`}
+                </button>
+                <button className="button button--quiet" type="button" disabled={busy} onClick={() => setReviewing(false)}>
+                  Back to edit
+                </button>
+              </div>
+            </section>
+          ) : (
+            <button className="button button--primary" type="submit" disabled={busy || !product?.providerReady || !affordable}>
+              <Icon name="file" strokeWidth={1.9} />
+              {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a report'}
+            </button>
+          )}
 
           {!affordable ? <Link className="link-arrow" href="/user/add-funds">Add funds <Icon name="arrowRight" /></Link> : null}
           <p className="t-small" style={{ fontSize: 12.5 }}>

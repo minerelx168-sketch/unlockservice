@@ -66,24 +66,18 @@ function ProductCard({ product }: { product: ProviderProduct }) {
         <p className="t-small">{customerText(product.summary)}</p>
       </div>
 
-      <div className="product-card-commercial" aria-label={`Price and delivery estimate for ${productName}`}>
-        <div>
-          <span className="label">Price</span>
-          <strong className="product-price">{formatUsd(product.priceCents)}</strong>
-        </div>
-        <div>
-          <span className="label">Estimated delivery</span>
-          <span className="product-eta"><Icon name="clock" /> {customerText(product.etaLabel)}</span>
-        </div>
+      <div className="product-card-price-row" aria-label={`Price for ${productName}`}>
+        <span className="label">Price</span>
+        <strong className="product-price">{formatUsd(product.priceCents)}</strong>
       </div>
 
       {available ? (
         <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
-          View and order report <Icon name="arrowRight" />
+          Choose report <Icon name="arrowRight" />
         </Link>
       ) : (
         <span className="button button--quiet product-card-action" aria-disabled="true">
-          Not available for online order yet
+          Unavailable online
         </span>
       )}
     </article>

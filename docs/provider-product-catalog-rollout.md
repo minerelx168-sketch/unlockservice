@@ -6,13 +6,13 @@ Production will publish the owner's current **Unlock** and **IMEI Check** catalo
 
 ## Source and reconciliation
 
-The catalog source is the 129-row IMEI Order selector captured from the authenticated `unlock-service.net` UI on 2026-09-01, joined to the owner-supplied `Selling_price-ชีต1.csv`. All 129 rows matched, 117 prices are above Provider cost, 12 equal Provider cost, and none are below cost.
+The base catalog source is the 129-row IMEI Order selector captured from the authenticated `unlock-service.net` UI on 2026-09-01, joined to the owner-supplied `Selling_price-ชีต1.csv`. A read-only PHP service-list refresh on 2026-09-04 returned one additional Service ID (`988`), bringing the canonical catalog to 130 rows. The new service remains hidden and unpriced until the owner supplies a retail price and its input/report behavior is verified.
 
 | Status | Count | Production behavior |
 |---|---:|---|
 | Available paid IMEI reports | 25 | Positive margin, IMEI input, PHP Instant API, service mapping, service-specific report allowlist, and `Instant` delivery metadata |
 | Coming soon | 84 | Visible in the catalog but not orderable; includes Unlock products without a confirmed PHP API contract, serial/phone input services, and IMEI services that lack a safe execution/report contract |
-| Reprice | 12 | Hidden from the customer catalog until a price above cost is approved |
+| Reprice | 13 | Hidden from the customer catalog until a price above cost is approved; includes newly detected Service ID 988 |
 | Restricted | 8 | Hidden; sensitive owner/phone/iCloud-ID lookup products require a separate privacy/legal approval |
 
 The public catalog therefore exposes 109 products: 25 available IMEI reports and 84 coming-soon products across IMEI Check and Unlock. Server Services remain outside scope.
@@ -29,7 +29,7 @@ Only service-specific allowlisted fields are stored in paid reports. IMEI, IMEI2
 
 ## Activation gates
 
-The product catalog file may contain all 129 reviewed rows, but `available` is permitted only when all of the following are true: positive margin; non-sensitive product; correct input validator; confirmed PHP API presence; synchronous `Instant` metadata; stable product code; exact service ID mapping; and a service-specific report allowlist. Changes to price or Provider cost never silently activate a product. Production activation remains database- and environment-controlled and must keep the number of active products equal to the number of active mappings.
+The product catalog file may contain all 130 tracked rows, but `available` is permitted only when all of the following are true: positive margin; non-sensitive product; correct input validator; confirmed PHP API presence; synchronous `Instant` metadata; stable product code; exact service ID mapping; and a service-specific report allowlist. Changes to price or Provider cost never silently activate a product. Production activation remains database- and environment-controlled and must keep the number of active products equal to the number of active mappings.
 
 ## Deployment verification
 
