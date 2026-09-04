@@ -67,9 +67,13 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
           <Link className="button button--quiet" href={accountHref}>
             {accountLabel}
           </Link>
-          <Link className="button button--primary" href="/services">
+          {/* The label collapses on a phone and the icon carries the button,
+              so the call to action survives without pushing the navigation
+              toggle off the edge of the screen. aria-label keeps the name
+              for anyone not reading the icon. */}
+          <Link className="button button--primary" href="/services" aria-label="Browse services">
             <Icon name="search" strokeWidth={1.9} />
-            Browse services
+            <span className="button-label">Browse services</span>
           </Link>
           <button
             type="button"

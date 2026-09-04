@@ -741,7 +741,8 @@ table.grid td.num {
   background-size: 6px 6px;
   background-repeat: no-repeat;
   color: var(--ink-strong);
-  font-size: 15px;
+  /* 16px for the same reason as .field input — see components.css. */
+  font-size: 16px;
   appearance: none;
 }
 
@@ -784,6 +785,24 @@ table.grid td.num {
   gap: 36px;
 }
 
+/* The catalogue runs to several screens, so the controls that narrow it
+   follow you down rather than being something to scroll back up to. The
+   header is sticky at the top of the viewport, so this sits below it. */
+.catalog-filter-panel {
+  position: sticky;
+  top: 73px;
+  z-index: 20;
+  background: color-mix(in srgb, var(--page) 92%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .catalog-filter-panel {
+    background: var(--page);
+    backdrop-filter: none;
+  }
+}
+
 .catalog-filter-panel > header {
   gap: 24px;
   align-items: flex-start;
@@ -812,7 +831,8 @@ table.grid td.num {
 .catalog-filter-grid select {
   min-height: 52px;
   padding-block: 12px;
-  font-size: 15px;
+  /* 16px for the same reason as every other control — see .field input. */
+  font-size: 16px;
   line-height: 1.45;
 }
 

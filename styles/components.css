@@ -399,6 +399,10 @@
   color: var(--muted);
 }
 
+/* 16px, not 15. Safari on iOS zooms the whole viewport when a control it is
+   focusing is smaller than that, and the page never zooms back out — the
+   customer is left scrolling sideways through a form. One pixel is the
+   entire fix. */
 .field input {
   min-height: 50px;
   padding: 13px 14px;
@@ -407,7 +411,7 @@
   background: var(--surface);
   color: var(--ink-strong);
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: 0.06em;
   transition: border-color 0.18s ease;
 }
@@ -778,13 +782,33 @@
 @media (max-width: 1080px) {
   .hero .shell {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 40px;
     min-height: 0;
   }
 
   .hero {
     padding-top: 56px;
   }
+
+  /* One column puts the headline, the paragraph and three buttons above the
+     form, which lands the only thing on this page a customer came to use
+     below the fold. The form goes first; the copy still reads underneath
+     it. */
+  .hero-panel {
+    order: -1;
+  }
+}
+
+/* The head of a card: a kicker on the left, an optional action on the
+   right. It is used on five screens and had no rule at all, so on /check
+   the label and the History link sat on top of each other. */
+.card-topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
 }
 
 /* ==== gradient band ================================================= */
@@ -1182,8 +1206,41 @@
     display: none;
   }
 
-  .header-actions .button {
+  /* The quiet button goes and the primary one keeps only its icon. Leaving
+     a phone with nothing but a hamburger buries the one action we want
+     taken; leaving the full-width button in place pushed the hamburger off
+     the screen entirely, which is worse. */
+  .header-actions .button--quiet {
     display: none;
+  }
+
+  .header-actions .button--primary {
+    padding-inline: 0;
+    width: 44px;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .header-actions .button--primary .button-label {
+    display: none;
+  }
+
+  .site-header .shell {
+    gap: 12px;
+  }
+}
+
+/* Below about 360 the wordmark is the widest thing competing for a row that
+   also has to hold a theme toggle, a call to action and the navigation
+   toggle. The mark keeps the link home; a name nobody can reach the menu
+   past is the worse trade. */
+@media (max-width: 380px) {
+  .brand .name {
+    display: none;
+  }
+
+  .site-header .shell {
+    gap: 8px;
   }
 
   .grid-3 {
