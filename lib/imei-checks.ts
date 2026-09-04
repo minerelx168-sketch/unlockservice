@@ -1,6 +1,6 @@
-import { createHmac } from 'node:crypto'
 import { db } from './db'
 import { isValidImei, maskIdentifier, normalizeImei } from './imei'
+import { fingerprintImei } from './imei-privacy'
 import { activeImeiCheckProvider, type ImeiCheckResult } from './imei-check-provider'
 import { imeiProviderService, providerConfiguration } from './provider-api'
 import { recordProviderEvent } from './provider-events'
@@ -62,31 +62,6 @@ export class ImeiCheckError extends Error {
 const CHECK_RATE_LIMIT = 12
 const CHECK_WINDOW_SECONDS = 60 * 60
 const POLL_DEBOUNCE_MS = 5_000
-const DEVELOPMENT_FINGERPRINT_SECRET = 'local-imei-check-fingerprint-v1'
-
-/**
- * The point of storing a fingerprint rather than the IMEI is that the row
- * cannot be turned back into the number. An HMAC keyed with a constant that
- * ships in the source gives that away: the serial space behind a known TAC
- * is only a million wide, so anyone holding the database and this file can
- * enumerate it. In production the key has to be a real one.
- */
-function fingerprintSecret(): string {
-  const configured = process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET?.trim()
-  if (configured && configured.length >= 32) return configured
-  if (process.env.NODE_ENV === 'production') {
-    throw new ImeiCheckError(
-      'IMEI checks are unavailable until the service is fully configured.',
-      'provider_not_ready',
-    )
-  }
-  return configured || DEVELOPMENT_FINGERPRINT_SECRET
-}
-
-function fingerprint(imei: string) {
-  return createHmac('sha256', fingerprintSecret()).update(imei).digest('hex')
-}
-
 function parseResult(value: string | null): Record<string, unknown> | null {
   if (!value) return null
   try {
@@ -221,7 +196,7 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
     )
     .run(
       userId,
-      fingerprint(imei),
+      fingerprintImei(imei),
       maskIdentifier(imei),
       provider.name,
       providerMode,
@@ -261,7 +236,7 @@ export async function pollImeiCheck(userId: number, id: number): Promise<ImeiChe
   const provider = activeImeiCheckProvider()
   if (!provider.poll || !row.provider_check_id || !providerConfiguration().enabled) return toView(row)
 
-  const outcome = await provider.poll(row.provider_check_id)
+  const outcome = await provider.poll(row.provider_check_id, row.check_type)
   updateResult(id, outcome, true)
   auditOutcome(id, row.provider_mode ?? 'dhru', outcome, `poll:${row.provider_attempts + 1}:${outcome.status}`)
   return getImeiCheck(userId, id)!

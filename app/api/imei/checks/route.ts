@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { guard } from '@/lib/api'
 import { createImeiCheck, ImeiCheckError, listImeiChecks } from '@/lib/imei-checks'
+import { FingerprintUnavailable } from '@/lib/imei-privacy'
 import { currentSession } from '@/lib/auth'
 
 export const runtime = 'nodejs'
@@ -26,6 +27,14 @@ export async function POST(request: Request) {
     })
     return NextResponse.json({ success: true, check }, { status: 201 })
   } catch (error) {
+    /* Not the customer's fault and not fixable by retrying with a different
+       IMEI — the service has not been given its fingerprint key. */
+    if (error instanceof FingerprintUnavailable) {
+      return NextResponse.json(
+        { success: false, error: error.message, code: 'provider_not_ready' },
+        { status: 503 },
+      )
+    }
     if (error instanceof ImeiCheckError) {
       const status =
         error.code === 'rate_limited' ? 429 : error.code === 'provider_not_ready' ? 503 : 400

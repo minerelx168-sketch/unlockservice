@@ -64,6 +64,8 @@
   transition:
     background-color 0.18s ease,
     border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
     transform 0.18s ease;
 }
 
@@ -89,11 +91,33 @@
   color: var(--ink);
 }
 
+.button--secondary {
+  background: var(--surface);
+  border-color: var(--primary-border);
+  color: var(--primary-dark);
+}
+
+.button--secondary:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.button:disabled,
+.button[aria-disabled='true'] {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.58;
+  transform: none;
+}
+
 /* The primary is the only 52px control on the page. */
 .button--primary {
   min-height: 52px;
   padding: 10px 21px;
   background: var(--primary);
+  border-color: var(--primary);
   color: var(--on-primary);
   box-shadow: var(--shadow-primary);
 }
@@ -108,7 +132,7 @@
   transform: translateY(1px);
 }
 
-/* Amber is the second action, never the first. */
+/* Azure is a supporting action, never the first. */
 .button--accent {
   background: var(--accent);
   color: var(--on-accent);

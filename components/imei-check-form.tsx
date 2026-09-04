@@ -91,7 +91,7 @@ export function ImeiCheckForm({ csrfToken }: { csrfToken: string }) {
           <Icon name="search" strokeWidth={1.9} />
           {busy ? 'Checking…' : 'Check IMEI'}
         </button>
-        <p className="unlock-quote-note">Free format and checksum check. Provider data will be added when an authorized source is connected.</p>
+        <p className="unlock-quote-note">Free format and checksum validation only. Choose a paid Phone Check for carrier, blacklist, warranty and device data.</p>
       </form>
 
       {check ? (

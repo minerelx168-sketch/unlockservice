@@ -11,7 +11,8 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
       { href: '/user/dashboard', label: 'Dashboard', icon: 'window' },
       { href: '/user/unlock', label: 'Unlock a device', icon: 'bolt' },
       { href: '/user/orders', label: 'Orders', icon: 'clock' },
-      { href: '/user/checks', label: 'Checks', icon: 'search' },
+      { href: '/user/reports', label: 'Paid reports', icon: 'file' },
+      { href: '/user/checks', label: 'Free checks', icon: 'search' },
     ],
   },
   {

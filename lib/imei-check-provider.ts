@@ -5,11 +5,12 @@ import {
   providerConfiguration,
   submitProviderRequest,
 } from './provider-api'
+import { buildProviderReport } from './imei-report'
 
 /** Provider-neutral request for a non-payment IMEI report. */
 export type ImeiCheckRequest = {
   imei: string
-  checkType: 'basic'
+  checkType: string
 }
 
 export type ImeiCheckResult = {
@@ -25,7 +26,7 @@ export type ImeiCheckResult = {
 export interface ImeiCheckProvider {
   readonly name: string
   check(request: ImeiCheckRequest): Promise<ImeiCheckResult>
-  poll?(providerCheckId: string): Promise<ImeiCheckResult>
+  poll?(providerCheckId: string, checkType: string): Promise<ImeiCheckResult>
 }
 
 /**
@@ -65,11 +66,12 @@ const configuredImeiProvider: ImeiCheckProvider = {
     const service = imeiProviderService(request.checkType)
     if (!service) return localValidationCheckProvider.check(request)
 
+    const config = providerConfiguration()
     const outcome = await submitProviderRequest({ imei: request.imei, service })
     if (outcome.status === 'processing') {
       return {
         status: 'processing',
-        provider: providerConfiguration().name,
+        provider: config.name,
         providerCheckId: outcome.providerId,
         retryAfterMs: outcome.retryAfterMs,
         result: null,
@@ -78,14 +80,14 @@ const configuredImeiProvider: ImeiCheckProvider = {
     if (outcome.status === 'completed') {
       return {
         status: 'completed',
-        provider: providerConfiguration().name,
+        provider: config.name,
         providerCheckId: outcome.providerId,
-        result: { source: providerConfiguration().name, ...outcome.data },
+        result: buildProviderReport(request.checkType, config.name, outcome.data),
       }
     }
     return {
       status: 'unavailable',
-      provider: providerConfiguration().name,
+      provider: config.name,
       providerCheckId: outcome.providerId,
       result: null,
       message: outcome.message,
@@ -93,12 +95,13 @@ const configuredImeiProvider: ImeiCheckProvider = {
     }
   },
 
-  async poll(providerCheckId) {
+  async poll(providerCheckId, checkType) {
+    const config = providerConfiguration()
     const outcome = await pollProviderRequest(providerCheckId)
     if (outcome.status === 'processing') {
       return {
         status: 'processing',
-        provider: providerConfiguration().name,
+        provider: config.name,
         providerCheckId: outcome.providerId,
         retryAfterMs: outcome.retryAfterMs,
         result: null,
@@ -107,14 +110,14 @@ const configuredImeiProvider: ImeiCheckProvider = {
     if (outcome.status === 'completed') {
       return {
         status: 'completed',
-        provider: providerConfiguration().name,
+        provider: config.name,
         providerCheckId: outcome.providerId,
-        result: { source: providerConfiguration().name, ...outcome.data },
+        result: buildProviderReport(checkType, config.name, outcome.data),
       }
     }
     return {
       status: 'unavailable',
-      provider: providerConfiguration().name,
+      provider: config.name,
       providerCheckId: outcome.providerId,
       result: null,
       message: outcome.message,

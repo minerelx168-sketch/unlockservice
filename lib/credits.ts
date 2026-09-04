@@ -88,7 +88,7 @@ function writeLedger(
     )
 }
 
-function hasEffect(refType: string, refId: string, type: LedgerType): boolean {
+export function hasCreditTransition(refType: string, refId: string, type: LedgerType): boolean {
   return Boolean(
     db()
       .prepare(
@@ -101,12 +101,14 @@ function hasEffect(refType: string, refId: string, type: LedgerType): boolean {
 }
 
 /**
- * Raised when an effect that has already been applied is applied again.
+ * Raised when a hold is applied twice for the same reference.
  *
- * Every caller runs inside a transaction, so throwing rolls the whole
- * settlement back and leaves the order where it was. The alternative —
- * quietly doing nothing — would let an order call itself delivered while
- * no money moved, which is the one outcome the ledger exists to prevent.
+ * Charging and refunding are settlements, and a settlement that arrives
+ * twice means the order already settled — returning the balance unchanged
+ * is the right answer there, and it is what makes a retried poll harmless.
+ * A hold is different: it happens once, against an order id that has just
+ * been created, so a second one cannot be a retry of anything. Letting it
+ * pass silently would hand out an order nobody reserved credit for.
  */
 export class DuplicateLedgerEffect extends Error {
   constructor(
@@ -120,7 +122,7 @@ export class DuplicateLedgerEffect extends Error {
 }
 
 function refuseReplay(refType: string, refId: string, type: LedgerType) {
-  if (hasEffect(refType, refId, type)) throw new DuplicateLedgerEffect(refType, refId, type)
+  if (hasCreditTransition(refType, refId, type)) throw new DuplicateLedgerEffect(refType, refId, type)
 }
 
 export class InsufficientCredit extends Error {
@@ -148,7 +150,7 @@ export function hold(userId: number, amountCents: number, refType: string, refId
 export function charge(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('charge amount must be positive cents')
   return db().transaction(() => {
-    refuseReplay(refType, refId, 'charge')
+    if (hasCreditTransition(refType, refId, 'charge')) return getBalance(userId)
     const before = getBalance(userId)
     if (before.heldCents < amountCents || before.creditCents < amountCents) {
       throw new Error('cannot charge more credit than is reserved')
@@ -165,7 +167,7 @@ export function charge(userId: number, amountCents: number, refType: string, ref
 export function refund(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('refund amount must be positive cents')
   return db().transaction(() => {
-    refuseReplay(refType, refId, 'refund')
+    if (hasCreditTransition(refType, refId, 'refund')) return getBalance(userId)
     const before = getBalance(userId)
     if (before.heldCents < amountCents) throw new Error('cannot release more credit than is reserved')
     db().prepare('UPDATE users SET held_cents = held_cents - ? WHERE id = ?').run(amountCents, userId)
@@ -188,7 +190,7 @@ export function credit(
   }
 
   return db().transaction(() => {
-    if (hasEffect(refType, refId, type)) return getBalance(userId)
+    if (hasCreditTransition(refType, refId, type)) return getBalance(userId)
     const before = getBalance(userId)
     if (before.creditCents + amountCents < before.heldCents) {
       throw new InsufficientCredit(before.availableCents, Math.abs(amountCents))

@@ -1,7 +1,14 @@
 import { db } from './db'
 
-export type ProviderResourceType = 'order' | 'imei_check'
-export type ProviderEventType = 'submitted' | 'processing' | 'completed' | 'unavailable' | 'poll_error' | 'timeout'
+export type ProviderResourceType = 'order' | 'imei_check' | 'paid_imei_report'
+export type ProviderEventType =
+  | 'submitted'
+  | 'processing'
+  | 'completed'
+  | 'unavailable'
+  | 'manual_review'
+  | 'poll_error'
+  | 'timeout'
 
 export type ProviderEvent = {
   resourceType: ProviderResourceType

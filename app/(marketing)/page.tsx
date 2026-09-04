@@ -21,16 +21,16 @@ const SERVICES: Array<{
   {
     icon: 'device',
     tint: '',
-    title: 'Unlock by carrier',
-    body: 'Choose the network that currently holds the lock. The request is filed against your IMEI with the network that holds it, and the whole process stays online.',
-    action: { href: '#check', label: 'Start an unlock' },
+    title: 'Unlock services',
+    body: 'Browse carrier, activation-lock, MDM and device-unlock products with fixed prices. Online ordering opens only after each Provider API contract is verified.',
+    action: { href: '/services', label: 'Browse unlock services' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
-    title: 'Check your phone',
-    body: 'Confirm the IMEI you are about to order against. The free check validates the number itself; carrier, blacklist and device history arrive once an authorised data provider is connected.',
-    action: { href: '/check', label: 'Run a phone check' },
+    title: 'IMEI check reports',
+    body: 'Order Provider-backed Apple, Samsung, carrier, blacklist and device-status reports, or use the separate Free Check for format validation only.',
+    action: { href: '/services', label: 'Browse IMEI reports' },
   },
   {
     icon: 'search',
@@ -144,7 +144,7 @@ export default function HomePage() {
           <div className="hero-copy">
             <span className="eyebrow">
               <Icon name="shield" strokeWidth={2} />
-              Remote phone unlocking by IMEI
+              IMEI checks and remote unlock services
             </span>
 
             {status ? (
@@ -157,20 +157,24 @@ export default function HomePage() {
             ) : null}
 
             <h1 className="t-hero">
-              Unlock your phone today.
+              Find the right phone service.
               <br />
-              <span className="accent">Use it on any network.</span>
+              <span className="accent">See the price before you order.</span>
             </h1>
 
             <p className="t-lead">
-              Select the original carrier, enter your IMEI and see the service details before you
-              order. The unlock is remote, permanent and tracked from start to finish.
+              Phone Check and Unlock Service now have separate customer paths. Choose the service type
+              you need to see only its products, prices and next steps.
             </p>
 
             <div className="hero-actions">
-              <Link className="button button--primary" href="#check">
-                <Icon name="bolt" strokeWidth={1.9} />
-                Start your unlock
+              <Link className="button button--primary" href="/services/imei-check">
+                <Icon name="search" strokeWidth={1.9} />
+                Open Phone Check
+              </Link>
+              <Link className="button button--secondary" href="/services/unlock">
+                <Icon name="lock" strokeWidth={1.9} />
+                Open Unlock Service
               </Link>
               <Link className="button button--quiet" href="/login">
                 <Icon name="clock" strokeWidth={1.9} />

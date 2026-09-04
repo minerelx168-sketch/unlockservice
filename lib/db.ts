@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import Database from 'better-sqlite3'
 import { BRANDS, CARRIERS, DEVICE_SERVICES } from './catalog'
 import { toCents } from './money'
+import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 
 /**
  * SQLite so the whole thing runs with `npm run dev` and nothing to
@@ -140,6 +141,32 @@ CREATE TABLE IF NOT EXISTS credit_ledger (
 );
 CREATE INDEX IF NOT EXISTS ledger_user ON credit_ledger(user_id, created_at DESC);
 
+CREATE TABLE IF NOT EXISTS admin_credit_adjustments (
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  public_id            TEXT    NOT NULL UNIQUE,
+  admin_user_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  target_user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  amount_cents         INTEGER NOT NULL CHECK(amount_cents != 0),
+  reason               TEXT    NOT NULL CHECK(length(reason) BETWEEN 8 AND 240),
+  idempotency_key      TEXT    NOT NULL,
+  credit_before_cents  INTEGER NOT NULL,
+  held_before_cents    INTEGER NOT NULL,
+  credit_after_cents   INTEGER NOT NULL,
+  held_after_cents     INTEGER NOT NULL,
+  created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(admin_user_id, idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS admin_credit_adjustments_target
+  ON admin_credit_adjustments(target_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS admin_credit_adjustments_admin
+  ON admin_credit_adjustments(admin_user_id, created_at DESC);
+CREATE TRIGGER IF NOT EXISTS admin_credit_adjustments_no_update
+  BEFORE UPDATE ON admin_credit_adjustments
+  BEGIN SELECT RAISE(ABORT, 'admin credit adjustments are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS admin_credit_adjustments_no_delete
+  BEFORE DELETE ON admin_credit_adjustments
+  BEGIN SELECT RAISE(ABORT, 'admin credit adjustments are append-only'); END;
+
 CREATE TABLE IF NOT EXISTS api_access (
 	  user_id         INTEGER PRIMARY KEY REFERENCES users(id),
 	  status          TEXT NOT NULL DEFAULT 'none',
@@ -216,9 +243,58 @@ CREATE TABLE IF NOT EXISTS api_access (
 		  updated_at              TEXT    NOT NULL DEFAULT (datetime('now'))
 		);
 		CREATE INDEX IF NOT EXISTS imei_checks_user ON imei_checks(user_id, created_at DESC);
-		CREATE INDEX IF NOT EXISTS imei_checks_fingerprint ON imei_checks(imei_fingerprint, created_at DESC);
+			CREATE INDEX IF NOT EXISTS imei_checks_fingerprint ON imei_checks(imei_fingerprint, created_at DESC);
 
-				CREATE TABLE IF NOT EXISTS provider_events (
+      CREATE TABLE IF NOT EXISTS paid_report_products (
+        code                 TEXT PRIMARY KEY,
+        slug                 TEXT NOT NULL UNIQUE,
+        name                 TEXT NOT NULL,
+        summary              TEXT NOT NULL,
+        input_type           TEXT NOT NULL DEFAULT 'imei',
+        price_cents          INTEGER NOT NULL CHECK (price_cents > 0),
+        provider_cost_micros INTEGER NOT NULL DEFAULT 0 CHECK (provider_cost_micros >= 0),
+        eta_minutes          INTEGER NOT NULL DEFAULT 1 CHECK (eta_minutes > 0),
+        is_active            INTEGER NOT NULL DEFAULT 0 CHECK (is_active IN (0, 1)),
+        sort_order           INTEGER NOT NULL DEFAULT 0,
+        created_at           TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at           TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      CREATE INDEX IF NOT EXISTS paid_report_products_active
+        ON paid_report_products(is_active, sort_order, code);
+
+      CREATE TABLE IF NOT EXISTS paid_report_orders (
+        id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id                 INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        product_code            TEXT NOT NULL REFERENCES paid_report_products(code) ON DELETE RESTRICT,
+        product_name            TEXT NOT NULL,
+        input_type              TEXT NOT NULL DEFAULT 'imei',
+        imei_fingerprint        TEXT NOT NULL,
+        masked_imei             TEXT NOT NULL,
+        status                  TEXT NOT NULL DEFAULT 'processing',
+        price_cents             INTEGER NOT NULL CHECK (price_cents > 0),
+        provider_cost_micros    INTEGER NOT NULL DEFAULT 0 CHECK (provider_cost_micros >= 0),
+        source                  TEXT NOT NULL DEFAULT 'website',
+        idempotency_key         TEXT,
+        report_json             TEXT,
+        provider_order_id       TEXT,
+        provider_name           TEXT,
+        provider_mode           TEXT,
+        provider_service_id     TEXT,
+        provider_last_polled_at TEXT,
+        provider_attempts       INTEGER NOT NULL DEFAULT 0,
+        provider_error_code     TEXT,
+        error_message           TEXT,
+        completed_at            TEXT,
+        created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+        CHECK (status IN ('processing', 'completed', 'refunded', 'manual_review'))
+      );
+      CREATE INDEX IF NOT EXISTS paid_report_orders_user
+        ON paid_report_orders(user_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS paid_report_orders_status
+        ON paid_report_orders(status, provider_last_polled_at);
+
+					CREATE TABLE IF NOT EXISTS provider_events (
 				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
 				  resource_type   TEXT    NOT NULL,
 				  resource_id     INTEGER NOT NULL,
@@ -252,10 +328,12 @@ export function db(): Database.Database {
   connection.pragma('journal_mode = WAL')
   connection.pragma('foreign_keys = ON')
 	  connection.exec(SCHEMA)
-	  migrate(connection)
-	  seedCatalog(connection)
+		  migrate(connection)
+			  seedCatalog(connection)
+	      seedPaidReportCatalog(connection)
+      applyProviderProductCatalogRollout(connection)
 
-  handle = connection
+	  handle = connection
   return handle
 }
 
@@ -358,17 +436,17 @@ function migrate(connection: Database.Database) {
     `)
 
     /*
-     * The index above only ever covered affects_balance = 1, which leaves
-     * hold and refund replayable: a refund applied twice releases a second
-     * order's hold, and that order can then never be charged. Widen it to
-     * every effect.
+     * credit_ledger_unique_transition covers every effect, not just the
+     * balance-changing ones — without it a refund applied twice releases a
+     * second order's hold and that order can never be charged.
      *
-     * A database that already contains a duplicate cannot take the index,
-     * and failing to open the database is worse than the narrower index —
-     * so check first and leave the old one in place if there is anything to
-     * reconcile. lib/credits.ts refuses a duplicate effect on its own, so
-     * correctness does not depend on which index is present; this is the
-     * backstop, not the control.
+     * It is created here rather than beside the index above because a
+     * database that already contains a duplicate cannot take it, and an
+     * unguarded CREATE UNIQUE INDEX in the connection path means the
+     * application cannot open its own database at all. Check first, and
+     * leave the narrower index alone if there is anything to reconcile:
+     * lib/credits.ts refuses a duplicate on its own, so this is the
+     * backstop rather than the control.
      */
     if (!migrationApplied(connection, '2026-09-ledger-effect-uniqueness-v1')) {
       const duplicates = connection
@@ -384,14 +462,18 @@ function migrate(connection: Database.Database) {
 
       if (duplicates.count === 0) {
         connection.exec(`
-          DROP INDEX IF EXISTS credit_ledger_unique_effect;
-          CREATE UNIQUE INDEX credit_ledger_unique_effect
+          CREATE UNIQUE INDEX IF NOT EXISTS credit_ledger_unique_transition
             ON credit_ledger(ref_type, ref_id, type)
             WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL;
         `)
         connection
           .prepare('INSERT INTO schema_migrations(version) VALUES (?)')
           .run('2026-09-ledger-effect-uniqueness-v1')
+      } else {
+        console.error(
+          `[db] ${duplicates.count} duplicate credit_ledger transitions — ` +
+            'credit_ledger_unique_transition not created; reconcile them and restart',
+        )
       }
     }
 
@@ -456,6 +538,14 @@ function migrate(connection: Database.Database) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-08-provider-architecture-v1')
     }
 
+    if (!migrationApplied(connection, '2026-09-paid-imei-reports-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-imei-reports-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-admin-credit-adjustments-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-admin-credit-adjustments-v1')
+    }
+
     connection.exec(`
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_idempotency
         ON invoices(idempotency_key) WHERE idempotency_key IS NOT NULL;
@@ -469,6 +559,9 @@ function migrate(connection: Database.Database) {
         WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS orders_idempotency
         ON orders(user_id, idempotency_key)
+        WHERE idempotency_key IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS paid_report_orders_idempotency
+        ON paid_report_orders(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
     `)
   })()
@@ -517,6 +610,51 @@ function seedCatalog(connection: Database.Database) {
         brandIds: entry.brandIds.join(','),
       })
     }
+  })()
+}
+
+/** Seed candidate paid-report products without activating or repricing existing rows. */
+function seedPaidReportCatalog(connection: Database.Database) {
+  const statement = connection.prepare(`
+    INSERT INTO paid_report_products
+      (code, slug, name, summary, input_type, price_cents, provider_cost_micros,
+       eta_minutes, is_active, sort_order)
+    VALUES
+      (@code, @slug, @name, @summary, @inputType, @priceCents, @providerCostMicros,
+       @etaMinutes, @isActive, @sortOrder)
+    ON CONFLICT(code) DO UPDATE SET
+      slug = excluded.slug,
+      name = excluded.name,
+      summary = excluded.summary,
+      input_type = excluded.input_type,
+      provider_cost_micros = excluded.provider_cost_micros,
+      eta_minutes = excluded.eta_minutes,
+      sort_order = excluded.sort_order,
+      updated_at = datetime('now')
+  `)
+
+  connection.transaction(() => {
+    for (const product of PAID_REPORT_PRODUCTS) {
+      statement.run({ ...product, isActive: product.isActive ? 1 : 0 })
+    }
+  })()
+}
+
+function applyProviderProductCatalogRollout(connection: Database.Database) {
+  const version = '2026-09-provider-product-catalog-v2'
+  if (migrationApplied(connection, version)) return
+
+  connection.transaction(() => {
+    connection.prepare("UPDATE paid_report_products SET is_active = 0, updated_at = datetime('now')").run()
+    const activate = connection.prepare(
+      "UPDATE paid_report_products SET is_active = 1, updated_at = datetime('now') WHERE code = ? AND price_cents * 10000 > provider_cost_micros",
+    )
+    let activated = 0
+    for (const product of PAID_REPORT_PRODUCTS) activated += activate.run(product.code).changes
+    if (activated !== PAID_REPORT_PRODUCTS.length) {
+      throw new Error(`provider product activation mismatch: ${activated}/${PAID_REPORT_PRODUCTS.length}`)
+    }
+    connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run(version)
   })()
 }
 
