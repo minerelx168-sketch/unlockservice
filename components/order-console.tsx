@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
 import { formatEta, OrderStatusBadge } from './order-status'
@@ -38,6 +39,16 @@ type OrderPayload = {
  * courtesy — it catches the fast ones while the customer is still on the
  * page, and everything else waits in Orders.
  */
+/**
+ * Identifies one attempt at placing an order, so the server can recognise a
+ * resend. randomUUID needs a secure context, which every page that reaches
+ * this console already has; the fallback keeps a plain-HTTP dev host working.
+ */
+function newAttemptKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  return `attempt-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+}
+
 const POLL_INTERVAL_MS = 2_000
 const POLL_COURTESY_MS = 30_000
 
@@ -49,6 +60,8 @@ export function OrderConsole({
   availableCents,
   defaultEmail,
   maintenance,
+  initialImei,
+  initialCarrierId,
 }: {
   brands: Brand[]
   carriers: Carrier[]
@@ -57,18 +70,37 @@ export function OrderConsole({
   availableCents: number
   defaultEmail: string
   maintenance: { active: boolean; message: string }
+  /** Carried over from the homepage quote, so the phone is entered once. */
+  initialImei?: string
+  initialCarrierId?: number
 }) {
   const [kind, setKind] = useState<'carrier_unlock' | 'device_service'>('carrier_unlock')
-  const [imei, setImei] = useState('')
+  const [imei, setImei] = useState(initialImei ?? '')
   const [brandId, setBrandId] = useState<number>(brands[0]?.id ?? 0)
-  const [carrierId, setCarrierId] = useState<number>(carriers[0]?.id ?? 0)
+  const [carrierId, setCarrierId] = useState<number>(
+    initialCarrierId && carriers.some((entry) => entry.id === initialCarrierId)
+      ? initialCarrierId
+      : (carriers[0]?.id ?? 0),
+  )
   const [serviceId, setServiceId] = useState<number | null>(null)
   const [email, setEmail] = useState(defaultEmail)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [order, setOrder] = useState<OrderPayload | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  /* Held across retries of the same attempt so a double click or a resend
+     after a dropped connection resolves to the order already placed rather
+     than a second one with a second hold. Cleared once an order comes back,
+     and whenever the customer changes what they are ordering. */
+  const attemptKeyRef = useRef<string | null>(null)
   const router = useRouter()
+
+  /* Changing what is being ordered starts a new attempt: the old key would
+     otherwise resolve a retry to the order the customer just edited away
+     from. */
+  useEffect(() => {
+    attemptKeyRef.current = null
+  }, [kind, imei, brandId, carrierId, serviceId, email])
 
   const brand = brands.find((entry) => entry.id === brandId) ?? null
   const carrier = carriers.find((entry) => entry.id === carrierId) ?? null
@@ -128,6 +160,9 @@ export function OrderConsole({
     setError(null)
     setOrder(null)
 
+    attemptKeyRef.current ??= newAttemptKey()
+    let placed = false
+
     try {
       let payload = await post(
         '/api/orders',
@@ -138,24 +173,38 @@ export function OrderConsole({
           serviceId: kind === 'device_service' ? serviceId : undefined,
           imei,
           email,
+          idempotencyKey: attemptKeyRef.current,
         },
         controller.signal,
       )
+      attemptKeyRef.current = null
+      placed = true
       setOrder(payload)
+
+      /* The hold is on the balance the moment the order exists, so the
+         sidebar is already wrong. */
       router.refresh()
 
       const deadline = Date.now() + POLL_COURTESY_MS
+      let polled = false
       while (payload.status === 'processing' && Date.now() < deadline) {
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
         if (controller.signal.aborted) return
         payload = await post('/api/orders/status', { orderId: payload.orderId }, controller.signal)
+        polled = true
         setOrder(payload)
       }
-      router.refresh()
+
+      /* Only if a poll actually ran. An order that came back settled first
+         time used to fire this the same tick as the refresh above — two
+         round trips racing each other for one state. */
+      if (polled) router.refresh()
     } catch (thrown) {
       if (!controller.signal.aborted) {
         setError(thrown instanceof Error ? thrown.message : 'Something went wrong.')
-        router.refresh()
+        /* A failure before the order existed moved no money; refreshing
+           for it just costs a round trip on the unhappiest path. */
+        if (placed) router.refresh()
       }
     } finally {
       setBusy(false)
@@ -328,18 +377,30 @@ export function OrderConsole({
           ) : null}
 
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
-            <button className="button button--primary" type="submit" disabled={busy || !affordable}>
-              <Icon name="bolt" strokeWidth={1.9} />
-              {busy ? 'Placing the order…' : chosen ? `Order for ${formatUsd(priceCents)}` : 'Place order'}
-            </button>
+            {/* Short of credit, the primary action becomes the step that
+                fixes it. Disabling the button and putting the remedy in
+                small red text beside it leaves the customer to work out the
+                connection. */}
+            {!affordable && chosen ? (
+              <Link className="button button--primary" href="/user/add-funds">
+                <Icon name="arrowRight" strokeWidth={1.9} />
+                Add funds and order
+              </Link>
+            ) : (
+              <button className="button button--primary" type="submit" disabled={busy}>
+                <Icon name="bolt" strokeWidth={1.9} />
+                {busy ? 'Placing the order…' : chosen ? `Order for ${formatUsd(priceCents)}` : 'Place order'}
+              </button>
+            )}
             {busy ? (
               <button className="button button--quiet" type="button" onClick={() => abortRef.current?.abort()}>
                 Stop waiting
               </button>
             ) : null}
-            {!affordable ? (
-              <span className="t-small" style={{ color: 'var(--danger)' }}>
-                Not enough credit for this order.
+            {!affordable && chosen ? (
+              <span className="t-small" role="status">
+                Your balance is {formatUsd(availableCents)} and this order costs{' '}
+                {formatUsd(priceCents)}.
               </span>
             ) : null}
           </div>

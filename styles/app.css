@@ -305,6 +305,70 @@ table.grid td.num {
   border-color: color-mix(in srgb, var(--danger) 26%, transparent);
 }
 
+/* ---- pagination ------------------------------------------------------ */
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 20px 0;
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+}
+
+/* At the ends of the range the control stays in place rather than
+   disappearing, so the row does not reflow as you page through. */
+.pager [aria-disabled='true'] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ---- loading placeholders ------------------------------------------- */
+/* Shaped like the thing they stand in for, so the layout does not jump when
+   the real content arrives. */
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--page-tint) 0%,
+    var(--surface-strong) 40%,
+    var(--page-tint) 80%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+.skeleton--title {
+  width: min(320px, 70%);
+  height: 30px;
+  margin: 0 0 12px;
+}
+
+.skeleton--line {
+  width: min(460px, 90%);
+  height: 15px;
+  margin: 0;
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--page-tint);
+  }
+}
+
 .badge--muted {
   color: var(--muted);
   background: var(--surface-strong);
@@ -338,6 +402,17 @@ table.grid td.num {
 
 .alert--error svg {
   color: var(--danger);
+}
+
+/* Referenced by the auth forms and the carried-over quote. Without it they
+   rendered in the amber of a warning while saying something had gone right. */
+.alert--success {
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.alert--success svg {
+  color: var(--primary);
 }
 
 /* ---- forms ---------------------------------------------------------- */
@@ -442,9 +517,32 @@ table.grid td.num {
 .auth-page {
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 22px;
   min-height: 100vh;
   padding: 40px 22px;
   background: var(--page-soft);
+}
+
+/* The way back out. Small, below the card, and never competing with the
+   one thing the page is asking for. */
+.auth-aside {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.auth-aside a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.auth-aside a:hover {
+  color: var(--ink);
+  text-decoration: underline;
 }
 
 .auth-card {
@@ -657,7 +755,7 @@ table.grid td.num {
 .field select {
   min-height: 50px;
   padding: 13px 40px 13px 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-border-control);
   border-radius: var(--radius-control);
   background-color: var(--surface);
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
@@ -666,7 +764,8 @@ table.grid td.num {
   background-size: 6px 6px;
   background-repeat: no-repeat;
   color: var(--ink-strong);
-  font-size: 15px;
+  /* 16px for the same reason as .field input — see components.css. */
+  font-size: 16px;
   appearance: none;
 }
 
@@ -701,12 +800,30 @@ table.grid td.num {
 .segmented button[aria-pressed='true'] {
   background: var(--surface);
   color: var(--ink-strong);
-  box-shadow: var(--shadow-xs, 0 1px 2px rgba(12, 34, 58, 0.08));
+  box-shadow: var(--shadow-sm);
 }
 
 .product-catalog {
   display: grid;
   gap: 36px;
+}
+
+/* The catalogue runs to several screens, so the controls that narrow it
+   follow you down rather than being something to scroll back up to. The
+   header is sticky at the top of the viewport, so this sits below it. */
+.catalog-filter-panel {
+  position: sticky;
+  top: 73px;
+  z-index: 20;
+  background: color-mix(in srgb, var(--page) 92%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .catalog-filter-panel {
+    background: var(--page);
+    backdrop-filter: none;
+  }
 }
 
 .catalog-filter-panel > header {
@@ -737,7 +854,8 @@ table.grid td.num {
 .catalog-filter-grid select {
   min-height: 52px;
   padding-block: 12px;
-  font-size: 15px;
+  /* 16px for the same reason as every other control — see .field input. */
+  font-size: 16px;
   line-height: 1.45;
 }
 

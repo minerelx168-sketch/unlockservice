@@ -2,10 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
 import { CUSTOMER_PRODUCT_COUNTS } from '@/lib/customer-provider-products'
-import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
 
 export const metadata: Metadata = {
-  title: 'Unlock Service & Phone Check — iUnlockMobile',
+  title: 'Unlock Service and Phone Check',
   description: 'Choose Phone Check or Unlock Service before browsing products, prices and availability.',
 }
 
@@ -66,7 +65,7 @@ export default function ServicesPage() {
           </div>
 
           <p className="t-micro service-hub-version">
-            Catalog version {PROVIDER_PRODUCT_CATALOG_VERSION}. Service information is point-in-time and does not prove ownership or guarantee unlock eligibility.
+            Prices and availability are current as shown. A report describes the phone at the moment it is run; it does not prove who owns it, and it does not guarantee the network will release it.
           </p>
         </div>
       </section>

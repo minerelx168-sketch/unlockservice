@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ImeiCheckForm } from '@/components/imei-check-form'
 import { currentSession } from '@/lib/auth'
+import { serviceStatus } from '@/lib/provider'
 import { Icon } from '@/components/icons'
 
 export const metadata: Metadata = { title: 'Phone Check' }
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function CheckPage() {
   const found = await currentSession()
+  const status = serviceStatus()
 
   return (
     <main className="section">
@@ -23,6 +25,15 @@ export default async function CheckPage() {
             This free tool validates IMEI format and checksum only. For carrier, blacklist, warranty,
             lock-status and device reports, choose a paid Phone Check service.
           </p>
+          {status ? (
+            <p className="alert" role="status">
+              <Icon name="info" strokeWidth={1.9} />
+              <span>
+                <b>{status.heading}.</b> {status.detail} The free check below is unaffected.{' '}
+                <Link href="/unlock-waitlist">Get told when unlocking opens</Link>.
+              </span>
+            </p>
+          ) : null}
           <div className="cta-actions">
             <Link className="button button--primary" href="/services/imei-check">
               Browse Phone Check services <Icon name="arrowRight" />

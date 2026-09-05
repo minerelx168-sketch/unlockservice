@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS orders (
   provider_last_polled_at TEXT,
   provider_attempts      INTEGER NOT NULL DEFAULT 0,
   provider_error_code    TEXT,
+  idempotency_key        TEXT,
   error_message          TEXT,
   created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at        TEXT    NOT NULL DEFAULT (datetime('now'))
@@ -310,6 +311,21 @@ CREATE TABLE IF NOT EXISTS api_access (
 				CREATE INDEX IF NOT EXISTS provider_events_resource
 				  ON provider_events(resource_type, resource_id, created_at DESC);
 
+				CREATE TABLE IF NOT EXISTS unlock_waitlist (
+				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+				  user_id         INTEGER REFERENCES users(id) ON DELETE SET NULL,
+				  email           TEXT    NOT NULL,
+				  -- Same rule as everywhere else: the number is never stored in
+				  -- the clear, only fingerprinted and masked for display.
+				  imei_fingerprint TEXT,
+				  masked_imei     TEXT,
+				  carrier_id      INTEGER,
+				  notified_at     TEXT,
+				  created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+				);
+				CREATE UNIQUE INDEX IF NOT EXISTS unlock_waitlist_unique
+				  ON unlock_waitlist(email, imei_fingerprint);
+
 				CREATE TABLE IF NOT EXISTS schema_migrations (
 
 	  version    TEXT PRIMARY KEY,
@@ -383,6 +399,7 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'imei_checks', 'provider_last_polled_at TEXT')
     addColumn(connection, 'imei_checks', 'provider_attempts INTEGER NOT NULL DEFAULT 0')
     addColumn(connection, 'imei_checks', 'provider_error_code TEXT')
+    addColumn(connection, 'orders', 'idempotency_key TEXT')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
 
@@ -431,10 +448,49 @@ function migrate(connection: Database.Database) {
       CREATE UNIQUE INDEX IF NOT EXISTS credit_ledger_unique_effect
         ON credit_ledger(ref_type, ref_id, type)
         WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL AND affects_balance = 1;
-      CREATE UNIQUE INDEX IF NOT EXISTS credit_ledger_unique_transition
-        ON credit_ledger(ref_type, ref_id, type)
-        WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL;
     `)
+
+    /*
+     * credit_ledger_unique_transition covers every effect, not just the
+     * balance-changing ones — without it a refund applied twice releases a
+     * second order's hold and that order can never be charged.
+     *
+     * It is created here rather than beside the index above because a
+     * database that already contains a duplicate cannot take it, and an
+     * unguarded CREATE UNIQUE INDEX in the connection path means the
+     * application cannot open its own database at all. Check first, and
+     * leave the narrower index alone if there is anything to reconcile:
+     * lib/credits.ts refuses a duplicate on its own, so this is the
+     * backstop rather than the control.
+     */
+    if (!migrationApplied(connection, '2026-09-ledger-effect-uniqueness-v1')) {
+      const duplicates = connection
+        .prepare(
+          `SELECT COUNT(*) AS count FROM (
+             SELECT 1 FROM credit_ledger
+              WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL
+              GROUP BY ref_type, ref_id, type
+             HAVING COUNT(*) > 1
+           )`,
+        )
+        .get() as { count: number }
+
+      if (duplicates.count === 0) {
+        connection.exec(`
+          CREATE UNIQUE INDEX IF NOT EXISTS credit_ledger_unique_transition
+            ON credit_ledger(ref_type, ref_id, type)
+            WHERE ref_type IS NOT NULL AND ref_id IS NOT NULL;
+        `)
+        connection
+          .prepare('INSERT INTO schema_migrations(version) VALUES (?)')
+          .run('2026-09-ledger-effect-uniqueness-v1')
+      } else {
+        console.error(
+          `[db] ${duplicates.count} duplicate credit_ledger transitions — ` +
+            'credit_ledger_unique_transition not created; reconcile them and restart',
+        )
+      }
+    }
 
     if (!migrationApplied(connection, '2026-08-unlockservice-native-v2')) {
       if (hasTable(connection, 'topup_orders')) {
@@ -515,6 +571,9 @@ function migrate(connection: Database.Database) {
         WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS provider_events_idempotency
         ON provider_events(resource_type, resource_id, idempotency_key)
+        WHERE idempotency_key IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS orders_idempotency
+        ON orders(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS paid_report_orders_idempotency
         ON paid_report_orders(user_id, idempotency_key)

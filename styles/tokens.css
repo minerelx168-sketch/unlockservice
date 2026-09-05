@@ -1,163 +1,251 @@
 /**
  * iUnlockMobile — design tokens.
  *
- * Transferred from the "BaseIMEI Design System" canvas captured in the
- * Website design patterns session (see docs/design-system.md). The ratios,
- * the rhythm and the component anatomy are carried over; the palette, the
- * type and the marks are our own.
+ * Two layers, deliberately.
  *
- * Light values live on :root. Dark redefines the same names once, under a
- * single selector, stamped on <html> by the FOUC guard in each page head.
- * Nothing else in the codebase may hard-code a colour.
+ * The --color-*, --shadow-* and --radius-* names are the palette: the
+ * vocabulary the brand is described in, and the only place a colour is
+ * written down. The names below them — --primary, --ink, --line and the
+ * rest — are the vocabulary the components were built in, carried over
+ * with the geometry from the captured system. They resolve to the palette
+ * rather than to values of their own, so a palette change is one block
+ * here and nothing in components.css moves.
+ *
+ * Corporate identity: Signal Blue. A blue-black carries the header band and
+ * the footer, the call to action is a saturated blue with white on it, and
+ * azure is rationed to kickers, underlines and the second action — never a
+ * large field. Forms sit on white so they stay the easiest thing on the
+ * page to read.
+ *
+ * Every text pair here clears 4.5:1 and every control edge clears 3:1,
+ * measured against the surface it actually sits on rather than against
+ * white. Light lives on :root; dark redefines the same names once, under a
+ * single selector stamped on <html> before first paint.
  */
 
 :root {
   color-scheme: light;
 
-  /* ---- surfaces --------------------------------------------------- */
-  /* Crisp blue-white surfaces keep the Signal Blue system clear and technical. */
-  --page: #ffffff;
-  --page-soft: #f6f9fd;
-  --page-tint: #edf4fc;
-  /* The steps numeral, which sits on --surface: page-tint is close enough to
-     the surface in dark that the numeral disappears entirely. */
-  --numeral: #edf4fc;
-  --surface: #ffffff;
-  --surface-strong: #f8fbff;
+  /* ---- palette: brand ---------------------------------------------- */
+  --color-brand-primary: #0057b8;
+  --color-brand-primary-strong: #003f87;
+  --color-brand-primary-soft: #e8f2ff;
+  --color-brand-primary-edge: #abcdf2;
+  --color-on-brand-primary: #ffffff;
 
-  /* ---- ink -------------------------------------------------------- */
-  /* Blue-black ink keeps body copy neutral while reinforcing the brand. */
-  --ink-strong: #0c223a;
-  --ink: #2b3f55;
-  --muted: #5e7186;
-  /* Decorative only — placeholders and the window-chrome dots. Anything a
-     reader needs takes --muted, which clears 4.5:1 on every surface. */
-  --faint: #718399;
+  /* The blue-black the band and the footer are built on. Never a button. */
+  --color-brand-secondary: #06192e;
+  --color-brand-secondary-mid: #063b78;
+  --color-brand-secondary-lift: #0759a8;
 
-  /* ---- lines ------------------------------------------------------ */
-  /* Every edge is 1px and always one of these two. */
-  --line: #dce5ef;
-  --line-strong: #c2d0df;
+  /* Rationed: kickers, underlines, the second action. Never a large field. */
+  --color-brand-accent: #1b76d1;
+  --color-brand-accent-strong: #0b5ea8;
+  --color-brand-accent-soft: #eaf5ff;
+  --color-brand-accent-edge: #b8d9f7;
+  --color-on-brand-accent: #ffffff;
 
-  /* ---- primary: Signal Blue --------------------------------------- */
-  --primary: #0057b8;
-  --primary-dark: #003f87;
-  --primary-soft: #e8f2ff;
-  --primary-border: #abcdf2;
-  --on-primary: #ffffff;
+  /* ---- palette: surfaces ------------------------------------------- */
+  --color-bg: #ffffff;
+  --color-bg-soft: #f6f9fd;
+  --color-bg-tint: #edf4fc;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f8fbff;
 
-  /* ---- secondary: Azure -------------------------------------------- */
-  --accent: #1b76d1;
-  --accent-dark: #0b5ea8;
-  --accent-soft: #eaf5ff;
-  --accent-border: #b8d9f7;
-  --on-accent: #ffffff;
+  /* ---- palette: text ----------------------------------------------- */
+  --color-text: #0c223a;
+  --color-text-body: #2b3f55;
+  --color-text-muted: #5e7186;
+  /* Decorative only — placeholders and window chrome. Never copy. */
+  --color-text-faint: #718399;
 
-  /* ---- tertiary: Steel Blue (kickers and quiet emphasis) ---------- */
+  /* ---- palette: lines ---------------------------------------------- */
+  /* A hairline between panels, which is decorative and may be quiet. */
+  --color-border: #dce5ef;
+  --color-border-strong: #c2d0df;
+  /* The edge of something you type into, which WCAG 2.2 counts as a
+     non-text component and holds to 3:1. It is visibly darker than the
+     hairline for that reason, not by accident. */
+  --color-border-control: #7c8ea3;
+
+  --color-focus: #0057b8;
+
+  /* ---- palette: state ---------------------------------------------- */
+  --color-success: #16845d;
+  /* #b8640f, the shade this replaces, measured 4.31:1 on white — under the
+     4.5 a warning most needs to clear. */
+  --color-warning: #ad5d0c;
+  --color-danger: #b03a2b;
+
+  /* ---- palette: depth ---------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgb(12 34 58 / 6%), 0 2px 8px rgb(12 34 58 / 4%);
+  --shadow-md: 0 14px 40px rgb(12 34 58 / 8%);
+  --shadow-lg: 0 30px 80px rgb(6 35 68 / 14%);
+
+  /* ---- palette: radii ---------------------------------------------- */
+  --radius-sm: 11px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* ================================================================== */
+  /* Component vocabulary. Values live above; these only point at them.  */
+  /* ================================================================== */
+
+  --page: var(--color-bg);
+  --page-soft: var(--color-bg-soft);
+  --page-tint: var(--color-bg-tint);
+  /* The step numeral sits on --surface, and needs to read as a tint of the
+     page rather than disappear into it. */
+  --numeral: var(--color-bg-tint);
+  --surface: var(--color-surface);
+  --surface-strong: var(--color-surface-elevated);
+
+  --ink-strong: var(--color-text);
+  --ink: var(--color-text-body);
+  --muted: var(--color-text-muted);
+  --faint: var(--color-text-faint);
+
+  --line: var(--color-border);
+  --line-strong: var(--color-border-strong);
+
+  --primary: var(--color-brand-primary);
+  --primary-dark: var(--color-brand-primary-strong);
+  --primary-soft: var(--color-brand-primary-soft);
+  --primary-border: var(--color-brand-primary-edge);
+  --on-primary: var(--color-on-brand-primary);
+
+  --accent: var(--color-brand-accent);
+  --accent-dark: var(--color-brand-accent-strong);
+  --accent-soft: var(--color-brand-accent-soft);
+  --accent-border: var(--color-brand-accent-edge);
+  --on-accent: var(--color-on-brand-accent);
+
+  /* Tertiary: kickers and quiet tiles, never a fill behind a button. */
   --moss: #315e8a;
   --moss-soft: #eaf1f8;
   --moss-border: #c5d5e4;
 
-  /* ---- status ----------------------------------------------------- */
-  --success: #16845d;
-  --warning: #b8640f;
-  --danger: #b03a2b;
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --danger: var(--color-danger);
 
-  /* ---- depth ------------------------------------------------------ */
-  /* One shadow, very wide and very soft, tinted with the ink colour.
-     There is no ramp: panels take this one or the larger version. */
-  --shadow-soft: 0 14px 40px rgba(12, 34, 58, 0.08);
-  --shadow: 0 30px 80px rgba(6, 35, 68, 0.14);
-  --shadow-primary: 0 13px 30px rgba(0, 87, 184, 0.22);
-  --shadow-accent: 0 13px 30px rgba(27, 118, 209, 0.2);
+  --shadow-soft: var(--shadow-md);
+  --shadow: var(--shadow-lg);
+  --shadow-primary: 0 13px 30px rgb(0 87 184 / 22%);
+  --shadow-accent: 0 13px 30px rgb(27 118 209 / 20%);
 
-  /* ---- the one gradient band -------------------------------------- */
+  /* ---- the one gradient band --------------------------------------- */
   /* One band per page is the whole budget. Identical in both themes. */
-  --band: linear-gradient(120deg, #021d3a 0%, #063b78 48%, #0759a8 100%);
-  --band-glow: radial-gradient(
-    circle at 83% 32%,
-    rgba(80, 177, 255, 0.28),
-    transparent 24%
+  --band: linear-gradient(
+    120deg,
+    #021d3a 0%,
+    var(--color-brand-secondary-mid) 48%,
+    var(--color-brand-secondary-lift) 100%
   );
-  --band-panel: rgba(2, 26, 54, 0.32);
-  --band-line: rgba(255, 255, 255, 0.14);
-  --band-fill: rgba(255, 255, 255, 0.06);
+  --band-glow: radial-gradient(circle at 83% 32%, rgb(91 181 255 / 22%), transparent 24%);
+  --band-panel: rgb(2 26 54 / 32%);
+  --band-line: rgb(255 255 255 / 14%);
+  --band-fill: rgb(255 255 255 / 6%);
   --band-ink: #ffffff;
-  --band-muted: rgba(226, 240, 255, 0.78);
+  --band-muted: #cfe2f7;
 
-  /* ---- footer ground (its own value, not a surface token) --------- */
-  --footer-ground: #06192e;
+  --footer-ground: var(--color-brand-secondary);
   --footer-ink: #ffffff;
   --footer-muted: #a7bed5;
-  --footer-line: rgba(255, 255, 255, 0.12);
+  --footer-line: rgb(255 255 255 / 12%);
 
-  /* ---- geometry --------------------------------------------------- */
+  /* The two very low-opacity washes behind the hero. Never a linear
+     gradient, and never strong enough to change what sits on top. */
+  --hero-wash-a: rgb(0 87 184 / 9%);
+  --hero-wash-b: rgb(27 118 209 / 7%);
+
+  /* ---- geometry ----------------------------------------------------- */
+  /* Carried from the captured system unchanged. Changing the palette
+     should never require touching a single one of these. */
   --shell: 1180px;
   --gutter: 72px;
   --section: 104px;
-  --radius-chip: 11px;
-  --radius-control: 14px;
+  --radius-chip: var(--radius-sm);
+  --radius-control: var(--radius-md);
   --radius-float: 16px;
-  --radius-panel: 22px;
+  --radius-panel: var(--radius-lg);
   --radius-card: 26px;
   --radius-band: 28px;
   --radius-device: 40px;
   --radius-pill: 999px;
 
-  /* ---- type ------------------------------------------------------- */
-  --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
-  --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* ---- type ---------------------------------------------------------
+   * Inter for reading, Inter Tight for headlines. One superfamily, so the
+   * two never disagree about proportion, and both are drawn for screens:
+   * a tall x-height and open apertures are what keep a 15px label legible
+   * on a phone in daylight, which is where most of this is read.
+   *
+   * The fallbacks are metric-matched (see fonts.css), so the first paint
+   * and the swapped paint occupy the same space and nothing reflows.
+   */
+  --font-display: 'Inter Tight', 'Inter Tight Fallback', system-ui, sans-serif;
+  --font-body: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /**
- * Dark theme. Re-pitched per role, not inverted: accents lighten so they
- * stay legible on blue-black, and the soft tints stop being pale washes
- * and become deep chips behind a light glyph.
+ * Dark. Re-pitched per role rather than inverted: the blue lightens so it
+ * still reads as an action on a near-black ground, the soft tints stop
+ * being pale washes and become deep chips behind a light glyph, and the
+ * band keeps its own value because it was already dark.
  */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --page: #07111e;
-  --page-soft: #0b1828;
-  --page-tint: #10243a;
+  --color-brand-primary: #5bb5ff;
+  --color-brand-primary-strong: #8acbff;
+  --color-brand-primary-soft: #0c2e52;
+  --color-brand-primary-edge: #1e4d78;
+  --color-on-brand-primary: #06182a;
+
+  --color-brand-accent: #49a7f5;
+  --color-brand-accent-strong: #78c1ff;
+  --color-brand-accent-soft: #102c48;
+  --color-brand-accent-edge: #255478;
+  --color-on-brand-accent: #06182a;
+
+  --color-bg: #07111e;
+  --color-bg-soft: #0b1828;
+  --color-bg-tint: #10243a;
+  --color-surface: #0d1d2f;
+  --color-surface-elevated: #12243a;
+
+  --color-text: #f4f8fc;
+  --color-text-body: #dce8f5;
+  --color-text-muted: #9bb0c5;
+  --color-text-faint: #748aa1;
+
+  --color-border: #22374d;
+  --color-border-strong: #3a536d;
+  --color-border-control: #5b7a97;
+
+  --color-focus: #5bb5ff;
+
+  --color-success: #72d9af;
+  --color-warning: #f0bd67;
+  --color-danger: #e58a7c;
+
+  /* Black-based so depth still reads on a dark surface. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 8px rgb(0 0 0 / 20%);
+  --shadow-md: 0 16px 40px rgb(0 0 0 / 18%);
+  --shadow-lg: 0 30px 80px rgb(0 0 0 / 34%);
+
   --numeral: #19344f;
-  --surface: #0d1d2f;
-  --surface-strong: #12243a;
-
-  --ink-strong: #f4f8fc;
-  --ink: #dce8f5;
-  --muted: #9bb0c5;
-  --faint: #748aa1;
-
-  --line: #22374d;
-  --line-strong: #3a536d;
-
-  --primary: #5bb5ff;
-  --primary-dark: #8acbff;
-  --primary-soft: #0c2e52;
-  --primary-border: #1e4d78;
-  --on-primary: #06182a;
-
-  --accent: #49a7f5;
-  --accent-dark: #78c1ff;
-  --accent-soft: #102c48;
-  --accent-border: #255478;
-  --on-accent: #06182a;
 
   --moss: #85b9e8;
   --moss-soft: #132a40;
   --moss-border: #2f4d68;
 
-  --success: #72d9af;
-  --warning: #f0bd67;
-  --danger: #e58a7c;
+  --shadow-primary: 0 13px 30px rgb(0 0 0 / 32%);
+  --shadow-accent: 0 13px 30px rgb(0 0 0 / 32%);
 
-  /* Same structure, black-based so depth still reads on dark surfaces. */
-  --shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.18);
-  --shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
-  --shadow-primary: 0 13px 30px rgba(0, 0, 0, 0.32);
-  --shadow-accent: 0 13px 30px rgba(0, 0, 0, 0.32);
+  --hero-wash-a: rgb(91 181 255 / 10%);
+  --hero-wash-b: rgb(73 167 245 / 7%);
 
   --footer-ground: #06111f;
   --footer-muted: #91a9c2;

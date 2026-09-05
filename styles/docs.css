@@ -98,6 +98,26 @@
   border-top: 1px solid var(--line);
 }
 
+/**
+ * A style guide shows components at the size they were drawn for, and some
+ * of them are wider than a 320px phone. The stage scrolls rather than
+ * pushing the page sideways — a horizontal scrollbar on the whole document
+ * breaks every other page on the way past.
+ */
+@media (max-width: 620px) {
+  .spec-card .stage {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 20px;
+  }
+
+  /* Tables are the other thing that will not fold. Same treatment. */
+  .map {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
 .spec-card .cap b {
   display: block;
   font-family: var(--font-mono);

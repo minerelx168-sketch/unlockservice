@@ -1,6 +1,8 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 import { redirect } from 'next/navigation'
+import { SESSION_COOKIE } from './cookie-names'
 import { db } from './db'
 import { clearAttempts, consumeAttempt } from './rate-limit'
 
@@ -10,7 +12,8 @@ import { clearAttempts, consumeAttempt } from './rate-limit'
  * original unlockservice contract.
  */
 
-export const SESSION_COOKIE = 'iunlockmobile_session'
+export { SESSION_COOKIE }
+
 const SESSION_DAYS = 14
 
 export type User = {
@@ -67,10 +70,15 @@ export function register(username: string, email: string, password: string): Use
     throw new AuthError('Registration is temporarily unavailable because email delivery is not configured.')
   }
 
-  const taken = db()
-    .prepare('SELECT id FROM users WHERE lower(username) = lower(?) OR email = ?')
-    .get(clean, mail)
-  if (taken) throw new AuthError('That username or email is already registered.')
+  /* Separated so the message can name the username — which is public, and
+     which the person has to change to get past this — without confirming
+     that a given email address has an account here, which it cannot. */
+  const usernameTaken = db().prepare('SELECT id FROM users WHERE lower(username) = lower(?)').get(clean)
+  if (usernameTaken) throw new AuthError('That username is taken. Try another.')
+  const emailTaken = db().prepare('SELECT id FROM users WHERE email = ?').get(mail)
+  if (emailTaken) {
+    throw new AuthError('That email cannot be used to register. Try signing in, or reset your password.')
+  }
 
   const info = db()
     .prepare(
@@ -125,7 +133,25 @@ export function hasAdminRole(user: Pick<User, 'account_type'>): boolean {
 
 export type Session = { id: string; userId: number; csrfToken: string }
 
+/**
+ * Rows whose time has passed. Nothing read them any more — currentSession
+ * checks expiry itself — but the tables only grew, and a signed-in session
+ * is the natural moment to sweep: it is already a write, and it happens
+ * often enough to keep up without a timer to install and forget.
+ */
+function sweepExpired() {
+  const now = new Date().toISOString()
+  db().prepare('DELETE FROM sessions WHERE expires_at <= ?').run(now)
+  db()
+    .prepare(
+      `DELETE FROM email_verifications
+        WHERE expires_at <= ? OR (consumed_at IS NOT NULL AND consumed_at <= ?)`,
+    )
+    .run(now, new Date(Date.now() - 7 * 86_400_000).toISOString())
+}
+
 export function createSession(userId: number): Session {
+  sweepExpired()
   const id = randomBytes(24).toString('hex')
   const csrfToken = randomBytes(32).toString('hex')
   const expires = new Date(Date.now() + SESSION_DAYS * 86_400_000).toISOString()
@@ -159,8 +185,7 @@ export async function clearSessionCookie() {
   jar.delete(SESSION_COOKIE)
 }
 
-/** Resolves the caller, or null when signed out, paused, unverified or expired. */
-export async function currentSession(): Promise<{ session: Session; user: User } | null> {
+async function readSession(): Promise<{ session: Session; user: User } | null> {
   const jar = await cookies()
   const id = jar.get(SESSION_COOKIE)?.value
   if (!id || !/^[0-9a-f]{48,64}$/.test(id)) return null
@@ -178,6 +203,18 @@ export async function currentSession(): Promise<{ session: Session; user: User }
   if (!user || user.status !== 'active' || user.banned_at || user.email_verified_at === null) return null
   return { session: { id: row.id, userId: row.user_id, csrfToken: row.csrf_token }, user }
 }
+
+/**
+ * Resolves the caller, or null when signed out, paused, unverified or expired.
+ *
+ * Wrapped in React's per-request `cache` because a single page asks more
+ * than once: the layout resolves it for the header and the footer, and the
+ * page resolves it again for whatever it needs the CSRF token for — a
+ * layout cannot hand a prop to a page. The scope is one request, so a
+ * sign-in or sign-out is never answered from a previous one, and nothing
+ * here writes a session and then reads it back inside the same request.
+ */
+export const currentSession = cache(readSession)
 
 export async function requireSession() {
   const found = await currentSession()

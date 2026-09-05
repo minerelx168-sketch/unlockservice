@@ -25,7 +25,7 @@ export default async function PaidReportsPage() {
         <div>
           <span className="kicker">Paid reports</span>
           <h1>Paid IMEI reports</h1>
-          <p>Review Provider-backed reports and their charge, hold or refund status.</p>
+          <p>Every report you have ordered, and whether it was charged, is still held, or was refunded.</p>
         </div>
         <Link className="button button--primary" href="/user/reports/new">
           <Icon name="file" strokeWidth={1.9} />

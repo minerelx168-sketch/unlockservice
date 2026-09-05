@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { createRemoteJWKSet, jwtVerify } from 'jose'
 import { assertSignInAllowed, AuthError, getUser, hashPassword, type User } from './auth'
+import { GOOGLE_OAUTH_COOKIE } from './cookie-names'
 import { db } from './db'
 
 const PROVIDER = 'google'
@@ -9,7 +10,8 @@ const AUTHORIZATION_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth'
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token'
 const GOOGLE_JWKS = createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs'))
 
-export const GOOGLE_OAUTH_COOKIE = 'iunlockmobile_google_oauth'
+export { GOOGLE_OAUTH_COOKIE }
+
 export const GOOGLE_OAUTH_COOKIE_MAX_AGE = TRANSACTION_TTL_SECONDS
 
 type GoogleConfig = {
@@ -194,6 +196,26 @@ async function verifyIdentity(idToken: string, nonce: string, clientId: string):
   return { subject: payload.sub, email, emailVerified: true }
 }
 
+/**
+ * Whether the person holding this mailbox has ever proved it to us.
+ *
+ * A consumed signup or reset code is that proof: both are read out of the
+ * inbox. Anything else — an account created while email verification was
+ * switched off — only asserts the address, and asserting is what makes the
+ * merge below dangerous.
+ */
+function emailOwnershipProven(userId: number): boolean {
+  return Boolean(
+    db()
+      .prepare(
+        `SELECT 1 FROM email_verifications
+          WHERE user_id = ? AND purpose IN ('signup', 'reset') AND consumed_at IS NOT NULL
+          LIMIT 1`,
+      )
+      .get(userId),
+  )
+}
+
 function availableUsername(email: string): string {
   const localPart = email.split('@', 1)[0] ?? ''
   let base = localPart.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^[._-]+|[._-]+$/g, '')
@@ -236,6 +258,22 @@ export function linkGoogleIdentity(identity: GoogleIdentity): User {
         .prepare('SELECT 1 FROM oauth_accounts WHERE provider = ? AND user_id = ?')
         .get(PROVIDER, existing.id)
       if (differentGoogleAccount) throw new AuthError('This local account is linked to a different Google account.')
+
+      /*
+       * Merging on a matching address alone is how accounts get taken before
+       * they are ever used: register with someone else's address while email
+       * verification is off, wait for them to arrive through Google, and the
+       * account they land in is the one whose password you chose. So the
+       * local account has to have proved the address itself. Its owner can
+       * still get in — with the password they set — which is exactly the
+       * step an attacker cannot take.
+       */
+      if (!emailOwnershipProven(existing.id)) {
+        throw new AuthError(
+          'An account already uses this email address. Sign in with its password to continue.',
+        )
+      }
+
       db()
         .prepare('UPDATE users SET email_verified_at = COALESCE(email_verified_at, ?) WHERE id = ?')
         .run(nowIso(), existing.id)

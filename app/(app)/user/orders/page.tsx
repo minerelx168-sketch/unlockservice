@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
-import { listLedger } from '@/lib/credits'
+import { unlockOrderingEnabled } from '@/lib/provider'
+import { countLedger, listLedger } from '@/lib/credits'
 import { maskIdentifier } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
-import { listOrders } from '@/lib/orders'
+import { countOrders, listOrders } from '@/lib/orders'
 
 export const metadata: Metadata = { title: 'Orders' }
 export const dynamic = 'force-dynamic'
@@ -18,16 +19,35 @@ const LEDGER_LABEL: Record<string, string> = {
   adjustment: 'Adjustment',
 }
 
+const PER_PAGE = 25
+
+/* The rows are read one page at a time rather than capped at fifty. A
+   reseller's fifty-first order was simply not in the table, with nothing to
+   say so. */
+function pageNumber(raw: string | undefined, total: number): number {
+  const asked = Number(raw)
+  const last = Math.max(1, Math.ceil(total / PER_PAGE))
+  if (!Number.isInteger(asked) || asked < 1) return 1
+  return Math.min(asked, last)
+}
+
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; page?: string }>
 }) {
   const { user } = await requireSession()
-  const tab = (await searchParams).tab === 'credit' ? 'credit' : 'orders'
+  const ordering = unlockOrderingEnabled()
+  const params = await searchParams
+  const tab = params.tab === 'credit' ? 'credit' : 'orders'
 
-  const orders = listOrders(user.id, 50)
-  const ledger = listLedger(user.id, 50)
+  const total = tab === 'orders' ? countOrders(user.id) : countLedger(user.id)
+  const page = pageNumber(params.page, total)
+  const offset = (page - 1) * PER_PAGE
+  const lastPage = Math.max(1, Math.ceil(total / PER_PAGE))
+
+  const orders = tab === 'orders' ? listOrders(user.id, PER_PAGE, offset) : []
+  const ledger = tab === 'credit' ? listLedger(user.id, PER_PAGE, offset) : []
 
   return (
     <>
@@ -40,11 +60,11 @@ export default async function OrdersPage({
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <a className={`button ${tab === 'orders' ? 'button--primary' : 'button--quiet'}`} href="?tab=orders">
+          <a className={`button ${tab === 'orders' ? 'button--primary' : 'button--quiet'}`} href="?tab=orders&page=1">
             Orders
           </a>
-          <a className={`button ${tab === 'credit' ? 'button--primary' : 'button--quiet'}`} href="?tab=credit">
-            Credit movement
+          <a className={`button ${tab === 'credit' ? 'button--primary' : 'button--quiet'}`} href="?tab=credit&page=1">
+            Credit history
           </a>
         </div>
       </div>
@@ -86,7 +106,11 @@ export default async function OrdersPage({
             </table>
             {orders.length === 0 ? (
               <p className="empty">
-                Nothing yet. <Link href="/user/unlock">Unlock a device</Link>.
+                Nothing yet.{' '}
+                <Link href={ordering ? '/user/unlock' : '/user/reports/new'}>
+                  {ordering ? 'Unlock a device' : 'Run a phone check'}
+                </Link>
+                .
               </p>
             ) : null}
           </div>
@@ -120,9 +144,35 @@ export default async function OrdersPage({
                 ))}
               </tbody>
             </table>
-            {ledger.length === 0 ? <p className="empty">No credit movement yet.</p> : null}
+            {ledger.length === 0 ? <p className="empty">Nothing yet — top-ups and charges will appear here.</p> : null}
           </div>
         )}
+
+        {lastPage > 1 ? (
+          <nav className="pager" aria-label="Pagination">
+            {page > 1 ? (
+              <a className="button button--quiet" href={`?tab=${tab}&page=${page - 1}`} rel="prev">
+                Newer
+              </a>
+            ) : (
+              <span className="button button--quiet" aria-disabled="true">
+                Newer
+              </span>
+            )}
+            <span className="t-small">
+              Page {page} of {lastPage} · {total} in total
+            </span>
+            {page < lastPage ? (
+              <a className="button button--quiet" href={`?tab=${tab}&page=${page + 1}`} rel="next">
+                Older
+              </a>
+            ) : (
+              <span className="button button--quiet" aria-disabled="true">
+                Older
+              </span>
+            )}
+          </nav>
+        ) : null}
       </div>
     </>
   )

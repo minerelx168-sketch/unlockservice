@@ -3,12 +3,13 @@ import { redirect } from 'next/navigation'
 import { ForgotPasswordForm } from '@/components/auth-forms'
 import { Brand } from '@/components/brand'
 import { currentSession } from '@/lib/auth'
+import { landingRoute } from '@/lib/provider'
 
 export const metadata: Metadata = { title: 'Forgot password' }
 export const dynamic = 'force-dynamic'
 
 export default async function ForgotPasswordPage() {
-  if (await currentSession()) redirect('/user/unlock')
+  if (await currentSession()) redirect(landingRoute())
 
   return (
     <div className="auth-card">

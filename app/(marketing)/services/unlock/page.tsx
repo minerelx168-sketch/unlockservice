@@ -3,14 +3,18 @@ import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { Icon } from '@/components/icons'
 import { CUSTOMER_UNLOCK_PRODUCTS } from '@/lib/customer-provider-products'
-import { PROVIDER_PRODUCT_CATALOG_VERSION } from '@/lib/provider-products'
+import { unlockOrderingEnabled } from '@/lib/provider'
 
 export const metadata: Metadata = {
-  title: 'Phone Unlock Service & Prices — iUnlockMobile',
+  title: 'Phone unlock services and prices',
   description: 'Browse phone unlock services and published prices by network, country and device type.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function UnlockServicesPage() {
+  const ordering = unlockOrderingEnabled()
+
   return (
     <>
       <section className="section section--tint">
@@ -30,7 +34,13 @@ export default function UnlockServicesPage() {
               <Link className="button button--primary" href="#unlock-catalog">
                 Browse unlock prices <Icon name="arrowRight" />
               </Link>
-              <Link className="button button--secondary" href="/services/imei-check">Go to Phone Check</Link>
+              {ordering ? (
+                <Link className="button button--secondary" href="/services/imei-check">Go to Phone Check</Link>
+              ) : (
+                <Link className="button button--secondary" href="/unlock-waitlist">
+                  Notify me when ordering opens
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -40,7 +50,9 @@ export default function UnlockServicesPage() {
         <div className="shell">
           <ProductCatalog products={CUSTOMER_UNLOCK_PRODUCTS} domain="unlock" />
           <p className="t-micro service-catalog-version">
-            Catalog version {PROVIDER_PRODUCT_CATALOG_VERSION}. Unlock products remain view-only until online ordering is verified for each service.
+            Prices are current as shown. A service you cannot order yet is one we have not finished
+            checking with the network behind it.{' '}
+            {ordering ? null : <Link href="/unlock-waitlist">Get told when ordering opens</Link>}
           </p>
         </div>
       </section>

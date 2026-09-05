@@ -75,6 +75,13 @@ function ProductCard({ product }: { product: ProviderProduct }) {
         <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
           Choose report <Icon name="arrowRight" />
         </Link>
+      ) : product.domain === 'unlock' ? (
+        /* A dead grey label was the whole of the offer on every unlock
+           card. The service is coming; the card can say so and take an
+           address instead of ending the visit. */
+        <Link className="button button--secondary product-card-action" href="/unlock-waitlist">
+          Notify me when this opens <Icon name="arrowRight" />
+        </Link>
       ) : (
         <span className="button button--quiet product-card-action" aria-disabled="true">
           Unavailable online

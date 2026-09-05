@@ -2,14 +2,22 @@ name: Deploy
 
 # Pushes to the deploy branch land on the server. Everything is gated on
 # the build passing first, so a broken commit never restarts the service.
+#
+# Pull requests run the same verify job. Without it the first time code is
+# checked is when it is already on the branch that deploys, which is one
+# step too late to be useful.
 on:
   push:
     branches: [claude/website-design-patterns-5043ix]
+  pull_request:
   workflow_dispatch:
 
+# Production deploys serialise against each other; a pull request gets its
+# own group so a verify run never queues behind a deploy, and a new push to
+# the same PR supersedes the run it replaces.
 concurrency:
-  group: deploy-production
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('verify-{0}', github.ref) || 'deploy-production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -23,14 +31,24 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm test
       - run: npm run build
 
   deploy:
     needs: verify
     runs-on: ubuntu-latest
-    # Without the host and key configured there is nothing to deploy to,
-    # so the job skips instead of failing the run.
-    if: ${{ vars.DEPLOY_HOST != '' }}
+    # A pull request verifies but never deploys, and without the host and
+    # key configured there is nothing to deploy to — so the job skips
+    # instead of failing the run.
+    #
+    # DEPLOY_ENABLED is a hand-set switch, currently off. Merging into this
+    # branch is how code lands, and until now that also meant it went to the
+    # live site the same minute — with no chance to look at it first. Set the
+    # repository variable DEPLOY_ENABLED to 1 (Settings → Secrets and
+    # variables → Actions → Variables) to turn deploys back on, or run this
+    # workflow by hand from the Actions tab, which is gated on the same
+    # switch. Nothing else about the deploy changes.
+    if: ${{ github.event_name != 'pull_request' && vars.DEPLOY_HOST != '' && vars.DEPLOY_ENABLED == '1' }}
     environment: production
     steps:
       - name: Open an SSH session to the host

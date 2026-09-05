@@ -6,11 +6,12 @@ import {
   serviceCoversBrand,
   type BrandRow,
 } from './db'
-import { charge, getBalance, hold, InsufficientCredit, refund } from './credits'
+import { charge, getBalance, hold, InsufficientCredit, readBalance, refund } from './credits'
 import { IMEI_LENGTH, luhnValid, normalizeImei } from './imei'
 import { activeSupplier, maintenanceState, type SupplierResult, type UnlockRequest } from './provider'
 import { providerConfiguration, unlockProviderService } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { consumeAttempt } from './rate-limit'
 
 /**
  * The order pipeline.
@@ -20,6 +21,9 @@ import { recordProviderEvent } from './provider-events'
  * releases the hold untouched — that is the money-back guarantee, enforced
  * by the ledger rather than by a promise on a page.
  */
+
+const ORDER_RATE_LIMIT = 60
+const ORDER_RATE_WINDOW_SECONDS = 60 * 60
 
 export class OrderError extends Error {
   constructor(message: string, readonly code: string) {
@@ -54,6 +58,7 @@ export type Order = {
   provider_last_polled_at: string | null
   provider_attempts: number
   provider_error_code: string | null
+  idempotency_key: string | null
   error_message: string | null
   created_at: string
   updated_at: string
@@ -233,6 +238,40 @@ export type SubmitInput = {
   serviceId?: number
   imei: string
   email: string
+  /**
+   * Optional client-supplied key. A retried submission — a double click, a
+   * connection that dropped after the request left — resolves to the order
+   * that was already placed instead of a second one with a second hold,
+   * which would cost the customer twice and us two supplier requests.
+   */
+  idempotencyKey?: string
+}
+
+function cleanIdempotencyKey(value: string | undefined): string | undefined {
+  const clean = value?.trim() ?? ''
+  if (!clean) return undefined
+  if (!/^[A-Za-z0-9._:-]{8,128}$/.test(clean)) {
+    throw new OrderError('The request key is not valid.', 'idempotency_invalid')
+  }
+  return clean
+}
+
+function orderForKey(userId: number, idempotencyKey: string): OrderView | undefined {
+  const row = db()
+    .prepare(`${VIEW_SELECT} WHERE o.user_id = ? AND o.idempotency_key = ?`)
+    .get(userId, idempotencyKey) as Omit<OrderView, 'title'> | undefined
+  return row ? decorate(row) : undefined
+}
+
+/** The payload for an order that is simply read back, moving no money. */
+function restingPayload(order: OrderView, availableCents: number): OrderPayload {
+  return payload(order, {
+    beforeCents: availableCents,
+    heldCents: order.status === 'processing' ? order.price_cents : 0,
+    chargedCents: order.status === 'delivered' ? order.price_cents : 0,
+    refundedCents: order.status === 'unavailable' ? order.price_cents : 0,
+    balanceCents: availableCents,
+  })
 }
 
 export async function submitOrder(
@@ -241,6 +280,34 @@ export async function submitOrder(
   source: 'website' | 'api' = 'website',
 ): Promise<OrderPayload> {
   if (maintenanceState().active) throw new OrderError(maintenanceState().message, 'maintenance')
+
+  /* Resolved before a row exists. activeSupplier() refuses to hand back the
+     mock in production, and discovering that after the hold was taken would
+     leave an order held against a supplier that was never going to run. */
+  let supplier
+  try {
+    supplier = activeSupplier()
+  } catch {
+    throw new OrderError(
+      'New orders are paused while the service is being configured. Nothing has been charged.',
+      'supplier_unconfigured',
+    )
+  }
+
+  const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
+  if (idempotencyKey) {
+    const existing = orderForKey(userId, idempotencyKey)
+    if (existing) return restingPayload(existing, readBalance(userId).availableCents)
+  }
+
+  /* Each accepted order costs a real supplier request, so the endpoint gets
+     a ceiling of its own. It is set well above what a person ordering for
+     themselves would reach; a reseller working through a batch will feel it
+     before an abusive script gets anywhere expensive. A resend recognised
+     by its key never reaches this. */
+  if (!consumeAttempt('order-submit', String(userId), ORDER_RATE_LIMIT, ORDER_RATE_WINDOW_SECONDS)) {
+    throw new OrderError('Too many orders in the last hour. Please try again shortly.', 'rate_limited')
+  }
 
   const brand = getBrand(input.brandId)
   if (!brand) throw new OrderError('Pick the device brand.', 'brand_unknown')
@@ -272,32 +339,38 @@ export async function submitOrder(
 
   const before = getBalance(userId)
 
-  const insert = db()
-    .prepare(
-      `INSERT INTO orders
-         (user_id, kind, brand_id, carrier_id, service_id, imei, delivery_email,
-          status, delivery, price_cents, eta_hours, source)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'processing', ?, ?, ?, ?)`,
-    )
-    .run(
-      userId,
-      input.kind,
-      brand.id,
-      carrierId,
-      serviceId,
-      imei,
-      email,
-      brand.delivery,
-      priceCents,
-      etaHours,
-      source,
-    )
-  const orderId = Number(insert.lastInsertRowid)
-
+  /* The row and its hold go in together. Inserting first and deleting on a
+     failed hold left an orphan behind whenever the process died in between;
+     a rollback cannot. */
+  let orderId: number
   try {
-    hold(userId, priceCents, 'order', String(orderId))
+    orderId = db().transaction(() => {
+      const insert = db()
+        .prepare(
+          `INSERT INTO orders
+             (user_id, kind, brand_id, carrier_id, service_id, imei, delivery_email,
+              status, delivery, price_cents, eta_hours, source, idempotency_key)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'processing', ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          userId,
+          input.kind,
+          brand.id,
+          carrierId,
+          serviceId,
+          imei,
+          email,
+          brand.delivery,
+          priceCents,
+          etaHours,
+          source,
+          idempotencyKey ?? null,
+        )
+      const id = Number(insert.lastInsertRowid)
+      hold(userId, priceCents, 'order', String(id))
+      return id
+    })()
   } catch (error) {
-    db().prepare('DELETE FROM orders WHERE id = ?').run(orderId)
     if (error instanceof InsufficientCredit) {
       throw new OrderError('Not enough credit for this order. Add funds and try again.', 'insufficient_credit')
     }
@@ -317,7 +390,6 @@ export async function submitOrder(
       .run(config.name, mapping.mode, mapping.id, orderId)
     order = getOrder(orderId, userId)!
   }
-  const supplier = activeSupplier()
   let result
   try {
     result = await supplier.submit(requestFor(order, brand))
@@ -343,7 +415,9 @@ export async function submitOrder(
     )
     .run(result.orderId, readyAt, orderId)
 
-  const balance = getBalance(userId)
+  /* The hold above already asserted the invariant; this only reports what
+     the customer now has. */
+  const balance = readBalance(userId)
   return payload(getOrder(orderId, userId)!, {
     beforeCents: before.availableCents,
     heldCents: priceCents,
@@ -358,24 +432,26 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
   const order = getOrder(orderId, userId)
   if (!order) throw new OrderError('No such order.', 'order_unknown')
 
-  const balance = getBalance(userId)
-  const resting = {
-    beforeCents: balance.availableCents,
-    heldCents: order.status === 'processing' ? order.price_cents : 0,
-    chargedCents: order.status === 'delivered' ? order.price_cents : 0,
-    refundedCents: 0,
-    balanceCents: balance.availableCents,
-  }
+  const balance = readBalance(userId)
+  const resting = restingPayload(order, balance.availableCents)
 
-  if (order.status !== 'processing') return payload(order, resting)
+  if (order.status !== 'processing') return resting
 
   const readyAt = order.provider_ready_at ? new Date(order.provider_ready_at).getTime() : 0
-  if (Date.now() < readyAt || providerPollDebounced(order)) return payload(order, resting)
+  if (Date.now() < readyAt || providerPollDebounced(order)) return resting
 
   const brand = order.brand_id ? getBrand(order.brand_id) : undefined
-  if (!brand) return payload(order, resting)
+  if (!brand) return resting
 
-  const supplier = activeSupplier()
+  let supplier
+  try {
+    supplier = activeSupplier()
+  } catch {
+    /* Reading an order must keep working while the operator sorts the
+       supplier out; the order simply stays where it is. */
+    return resting
+  }
+
   let result
   try {
     result = await supplier.poll(order.provider_order_id ?? '', requestFor(order, brand))
@@ -400,7 +476,7 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
         errorCode: 'poll_exception',
       })
     }
-    return payload(order, resting)
+    return resting
   }
 
   persistProviderOutcome(order, result, true)
@@ -420,7 +496,47 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
       )
       .run(readyAt, order.id)
   }
-  return payload(getOrder(order.id, userId)!, resting)
+  return restingPayload(getOrder(order.id, userId)!, balance.availableCents)
+}
+
+/**
+ * Claims the transition out of `processing` and moves the money in the same
+ * transaction.
+ *
+ * Two polls of the same order run concurrently as a matter of course — the
+ * console polls while the background sweep reads the same row — and both see
+ * `processing` before either settles. Only the UPDATE that actually changes a
+ * row may move credit; the loser reads the order back and reports it. Money
+ * and status commit together, so a process that dies mid-settle leaves the
+ * order exactly where it was rather than charged but unfinished.
+ */
+function settle(
+  orderId: number,
+  userId: number,
+  next: 'delivered' | 'unavailable',
+  apply: () => void,
+): { claimed: boolean; priceCents: number } {
+  return db().transaction(() => {
+    const row = db()
+      .prepare('SELECT price_cents, status FROM orders WHERE id = ? AND user_id = ?')
+      .get(orderId, userId) as { price_cents: number; status: OrderStatus } | undefined
+    if (!row) throw new OrderError('No such order.', 'order_unknown')
+    if (row.status !== 'processing') return { claimed: false, priceCents: row.price_cents }
+
+    apply()
+
+    const moved = db()
+      .prepare(`UPDATE orders SET status = ? WHERE id = ? AND status = 'processing'`)
+      .run(next, orderId)
+    if (moved.changes !== 1) throw new OrderError('The order was settled elsewhere.', 'order_conflict')
+
+    if (next === 'delivered') {
+      charge(userId, row.price_cents, 'order', String(orderId))
+    } else {
+      refund(userId, row.price_cents, 'order', String(orderId))
+    }
+    return { claimed: true, priceCents: row.price_cents }
+  })()
 }
 
 function settleDelivered(
@@ -431,21 +547,22 @@ function settleDelivered(
   result: Record<string, unknown>,
 ): OrderPayload {
   const before = getBalance(userId)
-  const priceCents = (
-    db().prepare('SELECT price_cents FROM orders WHERE id = ?').get(orderId) as { price_cents: number }
-  ).price_cents
-  const after = charge(userId, priceCents, 'order', String(orderId))
+  const { claimed, priceCents } = settle(orderId, userId, 'delivered', () => {
+    db()
+      .prepare(
+        `UPDATE orders
+            SET unlock_code = ?, result_json = ?, provider_order_id = ?,
+                provider_ready_at = NULL, updated_at = datetime('now')
+          WHERE id = ? AND status = 'processing'`,
+      )
+      .run(unlockCode, JSON.stringify(result), providerOrderId, orderId)
+  })
 
-  db()
-    .prepare(
-      `UPDATE orders
-          SET status = 'delivered', unlock_code = ?, result_json = ?, provider_order_id = ?,
-              provider_ready_at = NULL, updated_at = datetime('now')
-        WHERE id = ?`,
-    )
-    .run(unlockCode, JSON.stringify(result), providerOrderId, orderId)
+  const after = readBalance(userId)
+  const order = getOrder(orderId, userId)!
+  if (!claimed) return restingPayload(order, after.availableCents)
 
-  return payload(getOrder(orderId, userId)!, {
+  return payload(order, {
     beforeCents: before.availableCents,
     heldCents: 0,
     chargedCents: priceCents,
@@ -460,22 +577,22 @@ function settleUnavailable(
   message: string,
   beforeCents: number,
 ): OrderPayload {
-  const priceCents = (
-    db().prepare('SELECT price_cents FROM orders WHERE id = ?').get(orderId) as { price_cents: number }
-  ).price_cents
-  const after = refund(userId, priceCents, 'order', String(orderId))
+  const { claimed, priceCents } = settle(orderId, userId, 'unavailable', () => {
+    db()
+      .prepare(
+        `UPDATE orders
+            SET error_message = ?, provider_ready_at = NULL, updated_at = datetime('now')
+          WHERE id = ? AND status = 'processing'`,
+      )
+      .run(message, orderId)
+  })
 
-  db()
-    .prepare(
-      `UPDATE orders
-          SET status = 'unavailable', error_message = ?, provider_ready_at = NULL,
-              updated_at = datetime('now')
-        WHERE id = ?`,
-    )
-    .run(message, orderId)
+  const after = readBalance(userId)
+  const order = getOrder(orderId, userId)!
+  if (!claimed) return restingPayload(order, after.availableCents)
 
   return payload(
-    getOrder(orderId, userId)!,
+    order,
     {
       beforeCents,
       heldCents: 0,
@@ -485,6 +602,13 @@ function settleUnavailable(
     },
     message,
   )
+}
+
+export function countOrders(userId: number): number {
+  const row = db()
+    .prepare('SELECT COUNT(*) AS count FROM orders WHERE user_id = ?')
+    .get(userId) as { count: number }
+  return row.count
 }
 
 export function orderStats(userId: number) {

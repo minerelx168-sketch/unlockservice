@@ -15,6 +15,12 @@ type CheckPayload = {
   createdAt: string
 }
 
+const STATUS: Record<CheckPayload['status'], { kicker: string; badge: string; label: string }> = {
+  completed: { kicker: 'Check complete', badge: 'badge--success', label: 'Complete' },
+  queued: { kicker: 'Check queued', badge: 'badge--pending', label: 'Queued' },
+  unavailable: { kicker: 'Check unavailable', badge: 'badge--error', label: 'Unavailable' },
+}
+
 export function ImeiCheckForm({ csrfToken }: { csrfToken: string }) {
   const [value, setValue] = useState('')
   const [busy, setBusy] = useState(false)
@@ -91,13 +97,20 @@ export function ImeiCheckForm({ csrfToken }: { csrfToken: string }) {
       {check ? (
         <div className="card" style={{ marginTop: 18 }} role="status">
           <div className="card-topline">
-            <span className="kicker"><Icon name="check" /> Check complete</span>
-            <span className="badge badge--success">{check.status}</span>
+            <span className="kicker">
+              <Icon name={check.status === 'completed' ? 'check' : 'info'} />
+              {STATUS[check.status].kicker}
+            </span>
+            {/* Follows the status. It was hardcoded to the success variant,
+                so a check the provider could not complete came back in
+                green saying "unavailable". */}
+            <span className={`badge ${STATUS[check.status].badge}`}>{STATUS[check.status].label}</span>
           </div>
           <h3 className="t-card">IMEI {check.maskedImei}</h3>
           <p className="t-small">{String(check.result?.summary ?? check.message ?? 'The report is ready.')}</p>
           <Link className="link-arrow" href={`/user/checks/${check.id}`}>
-            View full report <Icon name="arrowRight" strokeWidth={2.2} />
+            {check.status === 'completed' ? 'View full report' : 'Open this check'}{' '}
+            <Icon name="arrowRight" strokeWidth={2.2} />
           </Link>
         </div>
       ) : null}

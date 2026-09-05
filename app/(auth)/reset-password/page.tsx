@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ResetPasswordForm } from '@/components/auth-forms'
 import { Brand } from '@/components/brand'
 import { currentSession } from '@/lib/auth'
+import { landingRoute } from '@/lib/provider'
 
 export const metadata: Metadata = { title: 'Reset password' }
 export const dynamic = 'force-dynamic'
@@ -12,7 +13,7 @@ export default async function ResetPasswordPage({
 }: {
   searchParams: Promise<{ email?: string }>
 }) {
-  if (await currentSession()) redirect('/user/unlock')
+  if (await currentSession()) redirect(landingRoute())
   const { email = '' } = await searchParams
 
   return (

@@ -9,27 +9,32 @@ update after it.
 ## Before you point customers at it
 
 The build is complete as software and **not ready to take money**. Four
-things are still placeholders, and each one is a real problem in
-production:
+things are still unfinished, and each one is a real problem in production.
+The first three now refuse rather than improvise, so the service fails
+visibly instead of quietly doing the wrong thing — but refusing is not the
+same as working:
 
-1. **The supplier is a mock.** `lib/provider.ts` invents unlock codes; no
-   carrier is contacted. A customer who pays gets a code that does not
-   work.
-2. **The payment address is `0x0000…0000`.** It is a placeholder in
-   `lib/payments.ts`. Crypto sent there is destroyed, not received.
-3. **Nothing can confirm a top-up.** Confirmation is an admin action and
-   there is no admin UI yet. Under `NODE_ENV=production` the stand-in
-   button is off, so paid invoices sit in review forever.
+1. **No supplier is configured.** Under `NODE_ENV=production` the app will
+   not fall back to the demo supplier, because that one derives an unlock
+   code from a hash of the IMEI and the order pipeline charges for it
+   either way. Orders are refused until `IUNLOCKMOBILE_PROVIDER_MODE`, the
+   endpoint, the credentials and a checked service map are set.
+2. **No payment address is set.** With `IUNLOCKMOBILE_USDT_BEP20_ADDRESS`
+   empty no payment method is offered at all. Before setting it, send a
+   small transfer and confirm it arrives: a wrong address sends customer
+   funds somewhere unrecoverable.
+3. **Nothing can confirm a top-up.** Confirmation is an administrator
+   action and `/admin` is still read-only, so a paid invoice sits in
+   review until someone confirms it by hand. The stand-in button is off in
+   production and stays off — it mints credit.
 4. **Prices and turnarounds are invented.** Everything in
-   `lib/catalog.ts` is a plausible schedule, not a quoted one.
+   `lib/catalog.ts` is a plausible schedule, not a quoted one. Nothing in
+   the code can tell that this one is wrong.
 
 Deploying is fine — running it as a public storefront is not, until those
-are real. To put it up with orders closed, add this to
-`unlockservice.service` and restart:
-
-    Environment=IUNLOCKMOBILE_MAINTENANCE=1
-
-The site stays browsable; the order form says the service is paused.
+are real. `IUNLOCKMOBILE_MAINTENANCE=1` in `/etc/iunlockmobile.env` is the
+shipped default and keeps orders closed: the site stays browsable and the
+order form says the service is paused.
 
 ## Rehearse it on your own machine first
 
@@ -252,10 +257,40 @@ sudo systemctl restart unlockservice
 
 ## Environment
 
-Set these with `Environment=` lines in `unlockservice.service`.
+Everything except the three fixed values in the unit lives in
+**`/etc/iunlockmobile.env`**, owned by root, mode 0600. `deploy.sh` installs
+it from `deploy/iunlockmobile.env.example` with paused defaults on a first
+run, and never touches an existing one.
+
+`EnvironmentFile=` carries a leading dash, so a missing file does not stop
+the service from starting. That is deliberate and it is not a soft default:
+every dangerous switch fails closed on its own, so with no file at all the
+supplier is disabled and orders are refused outright, no payment method is
+offered, self-approval is off, and IMEI checks refuse to run. A service that
+will not start is the worse failure, and it is the one an operator hits when
+a new unit lands a moment before its configuration does. After a deploy,
+check what the service actually read rather than what you meant it to:
+
+```sh
+sudo systemctl show unlockservice -p Environment
+```
+
+```sh
+sudo nano /etc/iunlockmobile.env
+sudo systemctl restart unlockservice
+sudo systemctl show unlockservice -p Environment   # confirm what it actually read
+```
+
+`deploy/iunlockmobile.env.example` is the annotated list. The ones that
+decide whether the service is safe:
 
 | Variable | Effect |
 | --- | --- |
-| `IUNLOCKMOBILE_DB` | Where the SQLite file lives. Already set to the app's `data/` directory. |
-| `IUNLOCKMOBILE_MAINTENANCE=1` | Pauses new orders; the rest of the site stays up. |
-| `IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` | Lets an invoice be confirmed from its own page. **Do not set this in production** — it mints credit without a payment. |
+| `IUNLOCKMOBILE_DB` | Where the SQLite file lives. Set in the unit, already pointing at the app's `data/` directory. |
+| `IUNLOCKMOBILE_MAINTENANCE=1` | Pauses new orders; the rest of the site stays up. The shipped default. |
+| `IUNLOCKMOBILE_PROVIDER_MODE` | `disabled` until a real supplier is configured. While disabled, production refuses orders rather than serving invented codes. |
+| `IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET` | Keys the fingerprint that stands in for a stored IMEI. At least 32 characters. Without it, production refuses to run checks. Changing it orphans every existing fingerprint. |
+| `IUNLOCKMOBILE_USDT_BEP20_ADDRESS` | The receiving wallet. Unset means no payment method is offered, which is the right state until a test transfer has arrived. |
+| `IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION=1` | Makes an account prove its address. Turn it on once mail works: it also closes the path where a Google sign-in adopts an account that only asserted the address. |
+| `IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` | Lets an account confirm its own invoice. Ignored in production, and it should never be set anywhere that holds real balances — it mints credit without a payment. |
+| `IUNLOCKMOBILE_ALLOW_MOCK_SUPPLIER=1` | Serves invented unlock codes in production. For a staging box that deliberately wants the demo, and nothing else. |

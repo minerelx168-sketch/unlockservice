@@ -34,6 +34,28 @@ export function getBalance(userId: number): Balance {
   }
 }
 
+/**
+ * The balance as stored, with no assertion.
+ *
+ * getBalance refuses to answer when held exceeds credit, which is right
+ * when money is about to move — the caller must not act on a balance that
+ * cannot be true. But a customer looking at an order is not moving money,
+ * and refusing to render their order because a number elsewhere is wrong
+ * takes away the one page that would show them what happened. Reads take
+ * this; anything that writes takes getBalance.
+ */
+export function readBalance(userId: number): Balance {
+  const row = db()
+    .prepare('SELECT credit_cents, held_cents FROM users WHERE id = ?')
+    .get(userId) as { credit_cents: number; held_cents: number } | undefined
+  if (!row) throw new Error(`no such user: ${userId}`)
+  return {
+    creditCents: row.credit_cents,
+    heldCents: row.held_cents,
+    availableCents: row.credit_cents - row.held_cents,
+  }
+}
+
 function affectsOwnedBalance(type: LedgerType): boolean {
   return type === 'topup' || type === 'charge' || type === 'adjustment'
 }
@@ -78,16 +100,29 @@ export function hasCreditTransition(refType: string, refId: string, type: Ledger
   )
 }
 
-function hasEffect(refType: string, refId: string, type: LedgerType): boolean {
-  return Boolean(
-    db()
-      .prepare(
-        `SELECT 1 FROM credit_ledger
-          WHERE ref_type = ? AND ref_id = ? AND type = ? AND affects_balance = 1
-          LIMIT 1`,
-      )
-      .get(refType, refId, type),
-  )
+/**
+ * Raised when a hold is applied twice for the same reference.
+ *
+ * Charging and refunding are settlements, and a settlement that arrives
+ * twice means the order already settled — returning the balance unchanged
+ * is the right answer there, and it is what makes a retried poll harmless.
+ * A hold is different: it happens once, against an order id that has just
+ * been created, so a second one cannot be a retry of anything. Letting it
+ * pass silently would hand out an order nobody reserved credit for.
+ */
+export class DuplicateLedgerEffect extends Error {
+  constructor(
+    readonly refType: string,
+    readonly refId: string,
+    readonly effect: LedgerType,
+  ) {
+    super(`a ${effect} effect already exists for ${refType} ${refId}`)
+    this.name = 'DuplicateLedgerEffect'
+  }
+}
+
+function refuseReplay(refType: string, refId: string, type: LedgerType) {
+  if (hasCreditTransition(refType, refId, type)) throw new DuplicateLedgerEffect(refType, refId, type)
 }
 
 export class InsufficientCredit extends Error {
@@ -100,7 +135,7 @@ export class InsufficientCredit extends Error {
 export function hold(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('hold amount must be positive cents')
   return db().transaction(() => {
-    if (hasCreditTransition(refType, refId, 'hold')) return getBalance(userId)
+    refuseReplay(refType, refId, 'hold')
     const before = getBalance(userId)
     if (before.availableCents < amountCents) {
       throw new InsufficientCredit(before.availableCents, amountCents)
@@ -155,7 +190,7 @@ export function credit(
   }
 
   return db().transaction(() => {
-    if (hasEffect(refType, refId, type)) return getBalance(userId)
+    if (hasCreditTransition(refType, refId, type)) return getBalance(userId)
     const before = getBalance(userId)
     if (before.creditCents + amountCents < before.heldCents) {
       throw new InsufficientCredit(before.availableCents, Math.abs(amountCents))
@@ -177,16 +212,23 @@ export type LedgerRow = {
   created_at: string
 }
 
-export function listLedger(userId: number, limit = 50): LedgerRow[] {
+export function listLedger(userId: number, limit = 50, offset = 0): LedgerRow[] {
   return db()
     .prepare(
       `SELECT id, amount_cents,
               CASE type WHEN 'bonus' THEN 'topup' ELSE type END AS type,
               CASE ref_type WHEN 'topup_order' THEN 'invoice' ELSE ref_type END AS ref_type,
               ref_id, balance_after_cents, created_at
-         FROM credit_ledger WHERE user_id = ? ORDER BY id DESC LIMIT ?`,
+         FROM credit_ledger WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?`,
     )
-    .all(userId, limit) as LedgerRow[]
+    .all(userId, limit, offset) as LedgerRow[]
+}
+
+export function countLedger(userId: number): number {
+  const row = db()
+    .prepare('SELECT COUNT(*) AS count FROM credit_ledger WHERE user_id = ?')
+    .get(userId) as { count: number }
+  return row.count
 }
 
 export function creditSummary(userId: number) {

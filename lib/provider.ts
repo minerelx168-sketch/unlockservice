@@ -200,8 +200,69 @@ const configuredSupplier: Supplier = {
   },
 }
 
+/**
+ * The mock derives an unlock code from a hash of the IMEI. That is exactly
+ * what a demo needs and exactly what a paying customer must never receive,
+ * and the order pipeline charges credit either way — so production refuses
+ * it outright rather than quietly selling a fabricated code.
+ *
+ * This throws instead of returning an unavailable result because an
+ * unavailable order refunds and closes, which would read as "the carrier
+ * said no". The truth is that the operator has not finished configuring the
+ * service, and the order should stay unplaced until they have.
+ */
 export function activeSupplier(): Supplier {
-  return providerConfiguration().enabled ? configuredSupplier : mockSupplier
+  if (providerConfiguration().enabled) return configuredSupplier
+  if (process.env.NODE_ENV === 'production' && process.env.IUNLOCKMOBILE_ALLOW_MOCK_SUPPLIER !== '1') {
+    throw new Error(
+      'no supplier is configured: set IUNLOCKMOBILE_PROVIDER_MODE and its credentials, ' +
+        'or keep IUNLOCKMOBILE_MAINTENANCE=1 so no order is accepted',
+    )
+  }
+  return mockSupplier
+}
+
+/**
+ * Whether the service can actually place an order right now, and what to
+ * say when it cannot.
+ *
+ * The public pages describe how the unlock works — filed against the IMEI
+ * with the network that holds the lock — and that description is only
+ * honest while a page reading it also says whether the service is running.
+ * Without this, a visitor met the whole funnel and only found out at the
+ * order form.
+ */
+export function serviceStatus(): { accepting: boolean; heading: string; detail: string } | null {
+  if (maintenanceState().active) {
+    return {
+      accepting: false,
+      heading: 'New orders are paused',
+      detail:
+        'We are working on the service. You can still browse, sign in and follow any order already placed.',
+    }
+  }
+  if (!providerConfiguration().enabled) {
+    return {
+      accepting: false,
+      heading: 'Not accepting orders yet',
+      detail:
+        'We are still connecting the supplier that files unlocks with the networks. Nothing can be ordered or charged until that is done.',
+    }
+  }
+  return null
+}
+
+/**
+ * Whether an unlock can actually be ordered right now.
+ *
+ * Derived from serviceStatus rather than kept as a separate switch. A flag
+ * of its own would be a second thing to remember: someone opens ordering,
+ * forgets the flag, and the site advertises a button that answers 503 —
+ * or worse, leaves it flipped on while the supplier is disabled. This
+ * cannot disagree with reality because it is reality.
+ */
+export function unlockOrderingEnabled(): boolean {
+  return serviceStatus() === null
 }
 
 /**
@@ -216,4 +277,17 @@ export function maintenanceState() {
     serverNow: Math.floor(Date.now() / 1000),
     message: 'New unlock orders are paused while we work on the service. Existing orders are unaffected.',
   }
+}
+
+/**
+ * Where someone lands the moment they have an account, and where an
+ * already-signed-in visitor is sent from the auth pages.
+ *
+ * It used to be the unlock console unconditionally, which is the one page
+ * that cannot take an order while unlocking is closed — so the reward for
+ * finishing the sign-up was a dead end. Send them to whatever can
+ * actually be bought today.
+ */
+export function landingRoute(): string {
+  return unlockOrderingEnabled() ? '/user/unlock' : '/user/reports/new'
 }

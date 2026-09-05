@@ -190,6 +190,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
       '2026-09-admin-credit-adjustments-v1',
+      '2026-09-ledger-effect-uniqueness-v1',
       '2026-09-paid-imei-reports-v1',
       '2026-09-provider-product-catalog-v2',
     ],
@@ -262,9 +263,13 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   const basicCheckPage = readFileSync(join(process.cwd(), 'app/(marketing)/check/page.tsx'), 'utf8')
   const basicCheckForm = readFileSync(join(process.cwd(), 'components/imei-check-form.tsx'), 'utf8')
 
-  assert.match(tokens, /--primary:\s*#0057b8/)
-  assert.match(tokens, /--primary-dark:\s*#003f87/)
-  assert.match(tokens, /--primary-soft:\s*#e8f2ff/)
+  /* The hexes live on the --color-* palette layer and the component names
+     resolve to it, so the assertion follows the value to where it is now
+     written rather than pinning the old shape. */
+  assert.match(tokens, /--color-brand-primary:\s*#0057b8/)
+  assert.match(tokens, /--color-brand-primary-strong:\s*#003f87/)
+  assert.match(tokens, /--color-brand-primary-soft:\s*#e8f2ff/)
+  assert.match(tokens, /--primary:\s*var\(--color-brand-primary\)/)
   assert.match(buttons, /\.button--secondary/)
   assert.match(header, /href: '\/services\/unlock', label: 'Unlock Service'/)
   assert.match(header, /href: '\/services\/imei-check', label: 'Phone Check'/)
@@ -523,14 +528,47 @@ test('Google OAuth creates protected authorization transactions and stable ident
     assert.equal(transaction.nonce, authorization.searchParams.get('nonce'))
     assert.equal(transaction.consumed_at, null)
 
+    /*
+     * alice registered before email verification existed, so nothing proves
+     * she controls the address — and a matching address is all an attacker
+     * needs to register ahead of someone and inherit their Google sign-in.
+     * The merge is refused; her own password still gets her in.
+     */
     const alice = auth.authenticate('alice', 'correct-horse-battery-staple')
-    const linkedAlice = googleOAuth.linkGoogleIdentity({
-      subject: 'google-alice-subject',
-      email: 'alice@example.test',
-      emailVerified: true,
-    })
-    assert.equal(linkedAlice.id, alice.id)
-    assert.equal(linkedAlice.account_type, 'admin')
+    assert.throws(
+      () =>
+        googleOAuth.linkGoogleIdentity({
+          subject: 'google-alice-subject',
+          email: 'alice@example.test',
+          emailVerified: true,
+        }),
+      (error: unknown) =>
+        error instanceof auth.AuthError && /Sign in with its password/.test(error.message),
+    )
+    const aliceLinks = database
+      .db()
+      .prepare('SELECT COUNT(*) AS count FROM oauth_accounts WHERE user_id = ?')
+      .get(alice.id) as { count: number }
+    assert.equal(aliceLinks.count, 0, 'the refused merge leaves no link behind')
+
+    /* An account that has read a code out of its own inbox has proved the
+       address, and links without further ceremony. */
+    const proven = auth.register('proven', 'proven@example.test', 'correct-horse-battery-staple')
+    database
+      .db()
+      .prepare(
+        `INSERT INTO email_verifications (user_id, code_hash, purpose, expires_at, consumed_at)
+         VALUES (?, 'x', 'signup', datetime('now', '+1 hour'), datetime('now'))`,
+      )
+      .run(proven.id)
+    assert.equal(
+      googleOAuth.linkGoogleIdentity({
+        subject: 'google-proven-subject',
+        email: 'proven@example.test',
+        emailVerified: true,
+      }).id,
+      proven.id,
+    )
 
     const googleUser = googleOAuth.linkGoogleIdentity({
       subject: 'google-new-subject',
@@ -1086,5 +1124,308 @@ test('escrow hold, refund and charge preserve the original balance contract', ()
     heldCents: 0,
     availableCents: 1300,
   })
-  assert.deepEqual(credits.creditIntegrity(), { users: 4, mismatches: 0, invalidHolds: 0 })
+  /* The account count is whatever the tests before this one created; what
+     this asserts is that the ledger still agrees with every balance. */
+  const integrity = credits.creditIntegrity()
+  assert.equal(integrity.mismatches, 0)
+  assert.equal(integrity.invalidHolds, 0)
+})
+
+test('a replayed refund cannot release another order’s hold', () => {
+  const user = auth.register('replay', 'replay@example.com', 'correct-horse-battery-staple')
+  credits.credit(user.id, 10_000, 'topup', 'test', `seed-${user.id}`)
+
+  credits.hold(user.id, 3_000, 'order', `${user.id}-a`)
+  credits.hold(user.id, 3_000, 'order', `${user.id}-b`)
+  credits.refund(user.id, 3_000, 'order', `${user.id}-b`)
+
+  /* Before the ledger recognised a repeated transition, this second release
+     was applied and took order A's hold with it, leaving A unable ever to be
+     charged. A settlement that arrives twice is a retry, so it returns the
+     balance unchanged rather than throwing. */
+  assert.deepEqual(credits.refund(user.id, 3_000, 'order', `${user.id}-b`), {
+    creditCents: 10_000,
+    heldCents: 3_000,
+    availableCents: 7_000,
+  })
+
+  /* A hold is not a retry of anything — the order id was just minted — so a
+     repeat is refused outright rather than silently handing out an order
+     nobody reserved credit for. */
+  assert.throws(
+    () => credits.hold(user.id, 3_000, 'order', `${user.id}-a`),
+    (error: unknown) => error instanceof credits.DuplicateLedgerEffect,
+  )
+
+  assert.deepEqual(credits.getBalance(user.id), {
+    creditCents: 10_000,
+    heldCents: 3_000,
+    availableCents: 7_000,
+  })
+
+  /* A still holds its own credit, so it can still settle. */
+  credits.charge(user.id, 3_000, 'order', `${user.id}-a`)
+  assert.deepEqual(credits.getBalance(user.id), {
+    creditCents: 7_000,
+    heldCents: 0,
+    availableCents: 7_000,
+  })
+  assert.equal(credits.creditIntegrity().mismatches, 0)
+  assert.equal(credits.creditIntegrity().invalidHolds, 0)
+})
+
+test('a failed hold leaves no order behind, and a resent order is not placed twice', async () => {
+  const user = auth.register('atomic', 'atomic@example.com', 'correct-horse-battery-staple')
+  const before = database
+    .db()
+    .prepare('SELECT COUNT(*) AS count FROM orders')
+    .get() as { count: number }
+
+  await assert.rejects(
+    orders.submitOrder(user.id, {
+      kind: 'carrier_unlock',
+      brandId: 1,
+      carrierId: 101,
+      imei: '354909000000095',
+      email: 'atomic@example.com',
+    }),
+    (error: unknown) => error instanceof orders.OrderError && error.code === 'insufficient_credit',
+  )
+
+  /* The row and its hold commit together, so a refused hold rolls the row
+     back rather than leaving an orphan for the sweep to find. */
+  const after = database
+    .db()
+    .prepare('SELECT COUNT(*) AS count FROM orders')
+    .get() as { count: number }
+  assert.equal(after.count, before.count)
+
+  credits.credit(user.id, 50_000, 'topup', 'test', `atomic-${user.id}`)
+  const key = `attempt-${user.id}-0001`
+  const first = await orders.submitOrder(user.id, {
+    kind: 'carrier_unlock',
+    brandId: 1,
+    carrierId: 101,
+    imei: '354909000000095',
+    email: 'atomic@example.com',
+    idempotencyKey: key,
+  })
+  const resent = await orders.submitOrder(user.id, {
+    kind: 'carrier_unlock',
+    brandId: 1,
+    carrierId: 101,
+    imei: '354909000000095',
+    email: 'atomic@example.com',
+    idempotencyKey: key,
+  })
+
+  assert.equal(resent.orderId, first.orderId)
+  const placed = database
+    .db()
+    .prepare('SELECT COUNT(*) AS count FROM orders WHERE user_id = ?')
+    .get(user.id) as { count: number }
+  assert.equal(placed.count, 1)
+  assert.equal(credits.creditIntegrity().mismatches, 0)
+})
+
+test('only one settlement of an order moves money', async () => {
+  const user = auth.register('settle', 'settle@example.com', 'correct-horse-battery-staple')
+  credits.credit(user.id, 50_000, 'topup', 'test', `settle-${user.id}`)
+
+  const placed = await orders.submitOrder(user.id, {
+    kind: 'carrier_unlock',
+    brandId: 1,
+    carrierId: 101,
+    imei: '354909000000095',
+    email: 'settle@example.com',
+  })
+  assert.equal(placed.status, 'processing')
+
+  /* The console polls while the sweep reads the same row, so both see
+     `processing` before either settles. Only the poll that actually changes
+     the status may charge. */
+  database
+    .db()
+    .prepare("UPDATE orders SET provider_ready_at = datetime('now', '-1 minute') WHERE id = ?")
+    .run(placed.orderId)
+  const [a, b] = await Promise.all([
+    orders.pollOrder(user.id, placed.orderId),
+    orders.pollOrder(user.id, placed.orderId),
+  ])
+
+  assert.equal(a.status, 'delivered')
+  assert.equal(b.status, 'delivered')
+  const charges = database
+    .db()
+    .prepare(
+      `SELECT COUNT(*) AS count FROM credit_ledger
+        WHERE ref_type = 'order' AND ref_id = ? AND type = 'charge'`,
+    )
+    .get(String(placed.orderId)) as { count: number }
+  assert.equal(charges.count, 1)
+
+  const balance = credits.getBalance(user.id)
+  assert.equal(balance.heldCents, 0)
+  assert.equal(balance.creditCents, 50_000 - placed.priceCents)
+  assert.equal(credits.creditIntegrity().mismatches, 0)
+})
+
+test('the production switches are closed unless they are opened by hand', async () => {
+  const provider = await import('../lib/provider')
+  const originalNodeEnv = process.env.NODE_ENV
+  /* NODE_ENV is typed readonly by the Next.js ambient types; this test is
+     specifically about what happens when it is missing. */
+  const env = process.env as Record<string, string | undefined>
+
+  assert.equal(payments.selfApprovalEnabled(), false, 'self-approval is off without the flag')
+  process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE = '1'
+  assert.equal(payments.selfApprovalEnabled(), true)
+
+  /* An unset NODE_ENV used to read as "not production" and hand every account
+     the ability to confirm its own invoice. A missing variable means off. */
+  delete env.NODE_ENV
+  assert.equal(payments.selfApprovalEnabled(), true, 'still opt-in, not inferred')
+  delete process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE
+  assert.equal(payments.selfApprovalEnabled(), false)
+
+  Object.assign(process.env, { NODE_ENV: 'production' })
+  process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE = '1'
+  assert.equal(payments.selfApprovalEnabled(), false, 'production never self-approves')
+  delete process.env.IUNLOCKMOBILE_ALLOW_SELF_APPROVE
+
+  /* The mock invents unlock codes, and the pipeline charges for them either
+     way, so production refuses to hand it back at all. */
+  assert.throws(() => provider.activeSupplier(), /no supplier is configured/)
+
+  const user = auth.authenticate('alice', 'correct-horse-battery-staple')
+  const heldBefore = credits.getBalance(user.id).heldCents
+  const ordersBefore = database.db().prepare('SELECT COUNT(*) AS count FROM orders').get() as {
+    count: number
+  }
+  await assert.rejects(
+    orders.submitOrder(user.id, {
+      kind: 'carrier_unlock',
+      brandId: 1,
+      carrierId: 101,
+      imei: '354909000000095',
+      email: 'alice@example.com',
+    }),
+    (error: unknown) => error instanceof orders.OrderError && error.code === 'supplier_unconfigured',
+  )
+  const ordersAfter = database.db().prepare('SELECT COUNT(*) AS count FROM orders').get() as {
+    count: number
+  }
+  assert.equal(ordersAfter.count, ordersBefore.count, 'no order is left held against no supplier')
+  assert.equal(credits.getBalance(user.id).heldCents, heldBefore)
+
+  /* An HMAC keyed with a constant from the source is reversible over the
+     million serials behind a known TAC, so production needs a real key. */
+  const imeiPrivacy = await import('../lib/imei-privacy')
+  await assert.rejects(
+    imeiChecks.createImeiCheck(user.id, { imei: '354909000000095' }),
+    (error: unknown) => error instanceof imeiPrivacy.FingerprintUnavailable,
+  )
+
+  if (originalNodeEnv === undefined) delete env.NODE_ENV
+  else Object.assign(process.env, { NODE_ENV: originalNodeEnv })
+})
+
+test('a broken balance stops a write but not a read', () => {
+  const user = auth.register('degrade', 'degrade@example.invalid', 'correct-horse-battery-staple')
+  credits.credit(user.id, 4_000, 'topup', 'test', `degrade-${user.id}`)
+
+  /* Whatever put it there — a bug we have not found, a hand-edited row —
+     held cannot exceed credit. */
+  database.db().prepare('UPDATE users SET held_cents = 9_000 WHERE id = ?').run(user.id)
+
+  assert.throws(() => credits.getBalance(user.id), /credit invariant failed/)
+  assert.deepEqual(credits.readBalance(user.id), {
+    creditCents: 4_000,
+    heldCents: 9_000,
+    availableCents: -5_000,
+  })
+
+  /* Moving money on a balance that cannot be true is refused; reading the
+     order that would explain it is not. */
+  assert.throws(() => credits.hold(user.id, 100, 'order', `degrade-${user.id}-a`), /credit invariant failed/)
+
+  database.db().prepare('UPDATE users SET held_cents = 0 WHERE id = ?').run(user.id)
+})
+
+test('registration and resend do not confirm that an email is registered', async () => {
+  auth.register('enum', 'enum@example.invalid', 'correct-horse-battery-staple')
+
+  assert.throws(
+    () => auth.register('enum', 'someone.else@example.invalid', 'correct-horse-battery-staple'),
+    (error: unknown) => error instanceof auth.AuthError && /username is taken/.test(error.message),
+  )
+  assert.throws(
+    () => auth.register('enum-two', 'enum@example.invalid', 'correct-horse-battery-staple'),
+    (error: unknown) =>
+      error instanceof auth.AuthError &&
+      /cannot be used to register/.test(error.message) &&
+      !/already registered/.test(error.message),
+  )
+
+  /* A verified account used to be told apart from an unknown address by
+     the error it produced. Both return the same way now. */
+  await assert.doesNotReject(accountSecurity.resendVerification('enum@example.invalid'))
+  await assert.doesNotReject(accountSecurity.resendVerification('nobody@example.invalid'))
+})
+
+test('the unlock waitlist keeps a place in the queue without keeping the IMEI', async () => {
+  const waitlist = await import('../lib/waitlist')
+  const provider = await import('../lib/provider')
+  const connection = database.db()
+  const imei = '354909000000095'
+
+  /* Ordering is closed in this environment — no supplier is configured —
+     so the funnel has somewhere to send people other than an apology. */
+  assert.equal(provider.unlockOrderingEnabled(), false)
+  assert.equal(provider.landingRoute(), '/user/reports/new')
+
+  const first = await waitlist.joinUnlockWaitlist({ email: 'Queue@Example.invalid', imei, carrierId: 101 })
+  assert.equal(first.added, true)
+  assert.equal(first.maskedImei, '35·········0095')
+
+  const row = connection
+    .prepare('SELECT email, imei_fingerprint, masked_imei, carrier_id FROM unlock_waitlist')
+    .get() as { email: string; imei_fingerprint: string; masked_imei: string; carrier_id: number }
+  assert.equal(row.email, 'queue@example.invalid', 'the address is stored in one case only')
+  assert.equal(row.masked_imei, '35·········0095')
+  assert.equal(row.carrier_id, 101)
+  assert.notEqual(row.imei_fingerprint, imei)
+  assert.match(row.imei_fingerprint, /^[0-9a-f]{64}$/)
+
+  /* Someone who taps twice is one person, not two — and is not emailed
+     a second time either, which is what `added` guards. */
+  const again = await waitlist.joinUnlockWaitlist({ email: 'queue@example.invalid', imei })
+  assert.equal(again.added, false)
+
+  /* The same holds without an IMEI, where a NULL would have made every
+     row distinct to the unique index. */
+  assert.equal((await waitlist.joinUnlockWaitlist({ email: 'plain@example.invalid' })).added, true)
+  assert.equal((await waitlist.joinUnlockWaitlist({ email: 'plain@example.invalid' })).added, false)
+
+  await assert.rejects(
+    waitlist.joinUnlockWaitlist({ email: 'not-an-address' }),
+    (error: unknown) => error instanceof waitlist.WaitlistError && error.code === 'email_invalid',
+  )
+  await assert.rejects(
+    waitlist.joinUnlockWaitlist({ email: 'queue@example.invalid', imei: '354909000000094' }),
+    (error: unknown) => error instanceof waitlist.WaitlistError && error.code === 'imei_invalid',
+  )
+
+  /* And it cannot be used to harvest a mailing list, or to mail-bomb one
+     address, faster than five attempts an hour. */
+  const attempts = []
+  for (let index = 0; index < 6; index += 1) {
+    attempts.push(
+      await waitlist
+        .joinUnlockWaitlist({ email: 'flood@example.invalid', imei })
+        .then(() => 'ok')
+        .catch((error: unknown) => (error instanceof waitlist.WaitlistError ? error.code : 'other')),
+    )
+  }
+  assert.equal(attempts.at(-1), 'rate_limited')
 })

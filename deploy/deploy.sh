@@ -53,6 +53,15 @@ fi
 cd "$APP_DIR"
 say "Now at $(git rev-parse --short HEAD) — $(git log -1 --pretty=%s)"
 
+# The checkout above rewrote this file underneath the shell running it. Bash
+# reads a script in chunks and keeps a byte offset, so from here on the old
+# copy would either run stale steps or resume mid-line in the new one. Hand
+# over to the version we just fetched, once.
+if [ "${DEPLOY_REEXEC:-}" != '1' ]; then
+  say "Continuing with the deploy script from this commit"
+  DEPLOY_REEXEC=1 exec bash "$APP_DIR/deploy/deploy.sh"
+fi
+
 # The database lives inside the app directory and is not tracked, so a
 # reset never touches it. Make sure it survives a first-time clone too.
 mkdir -p "$APP_DIR/data"
@@ -63,6 +72,19 @@ npm ci
 
 say "Building"
 npm run build
+
+# ---- environment ------------------------------------------------------
+# The unit requires this file, so put the paused defaults in place before
+# the first start. An existing file is never touched: it holds the
+# operator's real values and this script must not overwrite them.
+ENV_FILE="${ENV_FILE:-/etc/iunlockmobile.env}"
+if [ -f "$ENV_FILE" ]; then
+  say "Keeping the existing $ENV_FILE"
+else
+  say "Installing $ENV_FILE with paused defaults"
+  sudo install -m 600 -o root -g root "$APP_DIR/deploy/iunlockmobile.env.example" "$ENV_FILE"
+  NEW_ENV_FILE=1
+fi
 
 # ---- system units -----------------------------------------------------
 say "Installing systemd units and the Caddy site"
@@ -89,6 +111,20 @@ for attempt in $(seq 1 30); do
   code="$(curl -s -o /dev/null -w '%{http_code}' "$HEALTH_URL" || true)"
   if [ "$code" = "200" ]; then
     say "Live: the app and its database answered after ${attempt}s"
+    if [ "${NEW_ENV_FILE:-}" = '1' ]; then
+      printf '\n\033[1m!! %s\033[0m\n' "$ENV_FILE was created with paused defaults"
+      cat <<BANNER
+   The service is up and deliberately refusing to trade: no supplier is
+   configured so orders are rejected, and no payment method is offered.
+   Nothing can be ordered or charged until you fill this in:
+
+     sudo nano $ENV_FILE
+     sudo systemctl restart unlockservice
+
+   Check what it actually read with:
+     sudo systemctl show unlockservice -p Environment
+BANNER
+    fi
     exit 0
   fi
   sleep 1

@@ -238,7 +238,7 @@ export function PaidReportConsole({
             />
             <p className="field-note">
               <Icon name="shield" strokeWidth={1.9} />
-              <span>The raw IMEI is sent only for this Provider request. The database keeps a fingerprint and masked display value.</span>
+              <span>We never store your full IMEI and never show it in full — only the first two digits and the last four.</span>
             </p>
           </div>
 
@@ -264,7 +264,7 @@ export function PaidReportConsole({
                 <div><span className="label">Estimated delivery</span><span className="value">{deliveryLabel(product.etaMinutes)}</span></div>
                 <div><span className="label">Billing</span><span className="value">Charge on delivery</span></div>
               </div>
-              <p className="t-small">Confirming creates the credit hold and sends one Provider request. Uncertain responses are never retried automatically.</p>
+              <p className="t-small">Your credit is held, not spent. You are charged only when the report is delivered; if it cannot be, the hold is released.</p>
               <div className="order-review-actions">
                 <button className="button button--primary" type="button" disabled={busy} onClick={confirmOrder}>
                   <Icon name="file" strokeWidth={1.9} />
@@ -276,13 +276,43 @@ export function PaidReportConsole({
               </div>
             </section>
           ) : (
-            <button className="button button--primary" type="submit" disabled={busy || !product?.providerReady || !affordable}>
-              <Icon name="file" strokeWidth={1.9} />
-              {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a report'}
-            </button>
-          )}
+            <>
+              {/* When credit is the only thing in the way, the button says so
+                  and does the thing that clears it. A greyed-out control with
+                  a small "add funds" link beside it asks the customer to work
+                  out for themselves why they cannot buy. */}
+              {product && product.providerReady && !affordable ? (
+                <Link className="button button--primary" href="/user/add-funds">
+                  <Icon name="arrowRight" strokeWidth={1.9} />
+                  Add funds and order this report
+                </Link>
+              ) : (
+                <button
+                  className="button button--primary"
+                  type="submit"
+                  disabled={busy || !product?.providerReady}
+                >
+                  <Icon name="file" strokeWidth={1.9} />
+                  {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a report'}
+                </button>
+              )}
 
-          {!affordable ? <Link className="link-arrow" href="/user/add-funds">Add funds <Icon name="arrowRight" /></Link> : null}
+              {/* Every reason a control above is unavailable, stated next to
+                  it rather than left to be inferred from the grey. */}
+              {product && !product.providerReady ? (
+                <p className="t-small" role="status">
+                  This report is not open for ordering yet — the supplier behind it has not been
+                  verified. Nothing here can be charged in the meantime.
+                </p>
+              ) : null}
+              {product && product.providerReady && !affordable ? (
+                <p className="t-small" role="status">
+                  Your balance is {formatUsd(balanceCents)} and this report costs{' '}
+                  {formatUsd(product.priceCents)}.
+                </p>
+              ) : null}
+            </>
+          )}
           <p className="t-small" style={{ fontSize: 12.5 }}>
             Credit is held before submission and charged only after a usable report is delivered. A clear terminal failure releases the hold. A timeout or uncertain Provider response goes to manual review and is never retried automatically.
           </p>
