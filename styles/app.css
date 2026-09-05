@@ -517,9 +517,32 @@ table.grid td.num {
 .auth-page {
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 22px;
   min-height: 100vh;
   padding: 40px 22px;
   background: var(--page-soft);
+}
+
+/* The way back out. Small, below the card, and never competing with the
+   one thing the page is asking for. */
+.auth-aside {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.auth-aside a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.auth-aside a:hover {
+  color: var(--ink);
+  text-decoration: underline;
 }
 
 .auth-card {

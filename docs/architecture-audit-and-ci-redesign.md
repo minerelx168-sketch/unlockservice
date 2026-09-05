@@ -465,7 +465,7 @@ Branch `feat/architecture-audit-and-ci-redesign` · PR #1 · CI `verify` เข�
 | Critical | F-F01 · F-B01 · F-B02 · F-B03 |
 | High | F-F02 · F-F03 · F-F04 · F-F05 · F-F19 · F-B04 · F-B05 · F-B06 · F-B07 · F-B08 · F-B09 · F-B10 |
 | Medium | F-F07 · F-F09 · F-F11 · F-F13 · F-F20 · F-F22 · F-F23 · F-B11 · F-B12 (บางส่วน) · F-B13 · F-B14 · F-B15 · F-B21 · F-B29 · F-B30 |
-| Low | F-F14 · F-F16 · F-F21 · F-B23 · F-B24 · F-B25 |
+| Low | F-F14 · F-F15 · F-F16 · F-F17 · F-F18 · F-F21 · F-B23 · F-B24 · F-B25 |
 | ตรวจแล้วไม่ใช่ปัญหา | F-F10 (ไม่มี overflow ที่ 320px — วัดจริงแล้ว) |
 
 ### ยังเปิดอยู่ และเหตุผล
@@ -482,7 +482,6 @@ Branch `feat/architecture-audit-and-ci-redesign` · PR #1 · CI `verify` เข�
 | F-B26 | `balance_after_cents` เก็บ `availableCents` ชื่อไม่ตรงค่า | เปลี่ยนชื่อคอลัมน์ = destructive migration ซึ่งถูกห้าม ควรทำตอนย้าย schema รอบใหญ่ |
 | F-B27 | API key ของ provider เดินทางใน query string | เป็นข้อกำหนดของ DHRU เอง ป้องกันด้วยการไม่ log URL — ต้องคงกฎนี้ไว้เป็นข้อตกลง |
 | F-B28 | ยังไม่มี audit log ของเหตุการณ์สิทธิ์/การเงิน | ผูกกับ F-B19 ควรออกแบบพร้อมกัน |
-| F-F15 · F-F17 · F-F18 | รายละเอียด UX เล็ก ๆ | คิวเฟสถัดไป |
 
 ### สิ่งที่ยังต้องขอจากเจ้าของระบบ
 
@@ -531,3 +530,18 @@ rate limit 5 ครั้ง/ชั่วโมงต่ออีเมล อ�
 
 หมายเหตุ: ticket ขอให้แสดง "วันที่คาดว่าจะเปิด" ด้วย ตรงนี้ไม่ได้ใส่ เพราะยังไม่มีวันที่จริง
 หน้าเว็บบอกตรง ๆ ว่ายังไม่ได้กำหนดวัน ดีกว่าใส่วันที่ที่อาจพลาด
+
+### F-F15 · F-F17 · F-F18 — สิ่งที่ปิดในรอบเก็บงาน
+
+| ID | แก้อย่างไร |
+| --- | --- |
+| F-F15 | `app/(auth)/layout.tsx` มีแถวลิงก์ใต้การ์ด (Home · Phone Check · Privacy · Terms) — ยังไม่ใส่ header/footer เต็ม เพราะ navigation bar ข้างช่องรหัสผ่านคือสิ่งที่กดพลาดได้อีกหนึ่งอย่าง |
+| F-F17 | `order-console` refresh หลังสั่งซื้อเสมอ (เงินถูก hold แล้ว), หลัง poll เฉพาะเมื่อ poll ทำงานจริง, และในกรณี error เฉพาะเมื่อ order ถูกสร้างไปแล้ว — เดิมออเดอร์ที่จบทันทีจะยิง refresh สองครั้งชนกันใน tick เดียว |
+| F-F18 | `currentSession()` ห่อด้วย `cache()` ของ React — layout กับ page ต่างต้องอ่าน session เอง (layout ส่ง prop ให้ page ไม่ได้) ตอนนี้ต่อหนึ่ง request อ่านครั้งเดียว ขอบเขตเป็นราย request จึงไม่มีทางตอบค่าเก่าข้าม request และไม่มีจุดใดในระบบที่เขียน session แล้วอ่านซ้ำใน request เดียวกัน |
+
+ตรวจใน Chromium: `/login` `/register` `/forgot-password` ตอบ 200 ทั้งหมด ลิงก์ครบสี่ตัวและปลายทางตอบ 200
+ไม่มี horizontal overflow · สมัคร → เข้า workspace → sign out → `/user/dashboard` เด้งกลับ `/login`
+และ header กลับเป็นสถานะ signed-out ทันที (ยืนยันว่า `cache()` ไม่ค้างข้าม request)
+
+หมายเหตุ: การเปลี่ยน refresh ใน `order-console` ยังไม่ได้รันจริงในเบราว์เซอร์ เพราะ ordering ปิดอยู่ในเครื่องทดสอบ
+(ไม่มี supplier ที่ตั้งค่าไว้) — ผ่าน typecheck/lint และตรวจตรรกะด้วยสายตาเท่านั้น

@@ -1,5 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { SESSION_COOKIE } from './cookie-names'
 import { db } from './db'
@@ -184,8 +185,7 @@ export async function clearSessionCookie() {
   jar.delete(SESSION_COOKIE)
 }
 
-/** Resolves the caller, or null when signed out, paused, unverified or expired. */
-export async function currentSession(): Promise<{ session: Session; user: User } | null> {
+async function readSession(): Promise<{ session: Session; user: User } | null> {
   const jar = await cookies()
   const id = jar.get(SESSION_COOKIE)?.value
   if (!id || !/^[0-9a-f]{48,64}$/.test(id)) return null
@@ -203,6 +203,18 @@ export async function currentSession(): Promise<{ session: Session; user: User }
   if (!user || user.status !== 'active' || user.banned_at || user.email_verified_at === null) return null
   return { session: { id: row.id, userId: row.user_id, csrfToken: row.csrf_token }, user }
 }
+
+/**
+ * Resolves the caller, or null when signed out, paused, unverified or expired.
+ *
+ * Wrapped in React's per-request `cache` because a single page asks more
+ * than once: the layout resolves it for the header and the footer, and the
+ * page resolves it again for whatever it needs the CSRF token for — a
+ * layout cannot hand a prop to a page. The scope is one request, so a
+ * sign-in or sign-out is never answered from a previous one, and nothing
+ * here writes a session and then reads it back inside the same request.
+ */
+export const currentSession = cache(readSession)
 
 export async function requireSession() {
   const found = await currentSession()

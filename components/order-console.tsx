@@ -161,6 +161,7 @@ export function OrderConsole({
     setOrder(null)
 
     attemptKeyRef.current ??= newAttemptKey()
+    let placed = false
 
     try {
       let payload = await post(
@@ -177,21 +178,33 @@ export function OrderConsole({
         controller.signal,
       )
       attemptKeyRef.current = null
+      placed = true
       setOrder(payload)
+
+      /* The hold is on the balance the moment the order exists, so the
+         sidebar is already wrong. */
       router.refresh()
 
       const deadline = Date.now() + POLL_COURTESY_MS
+      let polled = false
       while (payload.status === 'processing' && Date.now() < deadline) {
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
         if (controller.signal.aborted) return
         payload = await post('/api/orders/status', { orderId: payload.orderId }, controller.signal)
+        polled = true
         setOrder(payload)
       }
-      router.refresh()
+
+      /* Only if a poll actually ran. An order that came back settled first
+         time used to fire this the same tick as the refresh above — two
+         round trips racing each other for one state. */
+      if (polled) router.refresh()
     } catch (thrown) {
       if (!controller.signal.aborted) {
         setError(thrown instanceof Error ? thrown.message : 'Something went wrong.')
-        router.refresh()
+        /* A failure before the order existed moved no money; refreshing
+           for it just costs a round trip on the unhappiest path. */
+        if (placed) router.refresh()
       }
     } finally {
       setBusy(false)
