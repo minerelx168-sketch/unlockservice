@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${origin}/services/unlock`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/services/imei-check`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/check`, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${origin}/contact`, changeFrequency: 'yearly', priority: 0.6 },
     ...(unlockOrderingEnabled()
       ? []
       : [{ url: `${origin}/unlock-waitlist`, changeFrequency: 'weekly' as const, priority: 0.6 }]),

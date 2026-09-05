@@ -22,7 +22,7 @@ const COLUMNS = [
   {
     heading: 'Contact',
     links: [
-      { href: '/#faq', label: 'Support' },
+      { href: '/contact', label: 'Contact us' },
       { href: '/login', label: 'Sign in' },
     ],
   },

@@ -53,9 +53,17 @@ function requireEmailDelivery() {
   }
 }
 
-async function sendEmail(to: string, subject: string, html: string, text: string) {
+async function sendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+  options: { replyTo?: string } = {},
+) {
   requireEmailDelivery()
-  const replyTo = process.env.IUNLOCKMOBILE_EMAIL_REPLY_TO?.trim()
+  /* A per-message reply-to for mail that is a conversation — a contact
+     form is answered by replying to the customer, not to us. */
+  const replyTo = options.replyTo?.trim() || process.env.IUNLOCKMOBILE_EMAIL_REPLY_TO?.trim()
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -88,8 +96,14 @@ async function sendEmail(to: string, subject: string, html: string, text: string
  * this system — the alternative was a second fetch to Resend somewhere
  * else, with its own idea of what happens when the key is missing.
  */
-export async function sendTransactionalEmail(to: string, subject: string, html: string, text: string) {
-  await sendEmail(to, subject, html, text)
+export async function sendTransactionalEmail(
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+  options: { replyTo?: string } = {},
+) {
+  await sendEmail(to, subject, html, text, options)
 }
 
 function issueOtp(userId: number, purpose: OtpPurpose): string {

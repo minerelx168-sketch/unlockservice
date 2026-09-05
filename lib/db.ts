@@ -326,6 +326,22 @@ CREATE TABLE IF NOT EXISTS api_access (
 				CREATE UNIQUE INDEX IF NOT EXISTS unlock_waitlist_unique
 				  ON unlock_waitlist(email, imei_fingerprint);
 
+				CREATE TABLE IF NOT EXISTS contact_messages (
+				  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+				  user_id      INTEGER REFERENCES users(id) ON DELETE SET NULL,
+				  name         TEXT,
+				  email        TEXT    NOT NULL,
+				  topic        TEXT    NOT NULL,
+				  message      TEXT    NOT NULL,
+				  order_ref    TEXT,
+				  -- Set once the message has actually left for the support
+				  -- inbox. Null means it is sitting here and nowhere else.
+				  delivered_at TEXT,
+				  created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
+				);
+				CREATE INDEX IF NOT EXISTS contact_messages_undelivered
+				  ON contact_messages(created_at DESC) WHERE delivered_at IS NULL;
+
 				CREATE TABLE IF NOT EXISTS schema_migrations (
 
 	  version    TEXT PRIMARY KEY,

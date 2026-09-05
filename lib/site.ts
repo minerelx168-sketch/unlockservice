@@ -18,3 +18,16 @@ export function publicOrigin(): string {
     return DEFAULT_ORIGIN
   }
 }
+
+const DEFAULT_SUPPORT_EMAIL = 'support@iunlockmobile.com'
+
+/**
+ * Where a customer's message goes, and the address the site shows them.
+ *
+ * One value for both, so the page can never print an address that the
+ * form does not actually deliver to.
+ */
+export function supportEmail(): string {
+  const configured = process.env.IUNLOCKMOBILE_SUPPORT_EMAIL?.trim()
+  return configured && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(configured) ? configured : DEFAULT_SUPPORT_EMAIL
+}

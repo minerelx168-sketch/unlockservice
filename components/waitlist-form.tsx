@@ -28,6 +28,9 @@ export function WaitlistForm({
   defaultCarrierId?: number
 }) {
   const [state, action, pending] = useActionState(joinUnlockWaitlistAction, EMPTY)
+  /* Controlled, because React empties an uncontrolled field when the
+     action returns — including the error path that asks for a retry. */
+  const [email, setEmail] = useState(defaultEmail)
   const [imei, setImei] = useState(groupImei(normalizeImei(defaultImei)))
   const [imeiError, setImeiError] = useState<string | null>(null)
 
@@ -92,8 +95,9 @@ export function WaitlistForm({
             name="email"
             type="email"
             autoComplete="email"
-            defaultValue={defaultEmail}
             placeholder="you@example.com"
+            value={email}
+            onChange={(event) => setEmail(event.currentTarget.value)}
             required
           />
         </div>

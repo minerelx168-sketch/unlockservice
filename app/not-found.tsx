@@ -34,7 +34,8 @@ export default async function NotFound() {
           <h1 className="t-section">That page is not here.</h1>
           <p className="t-lead">
             The link may be out of date, or the address may have a typo in it. Nothing has gone
-            wrong with your account or with any order you have placed.
+            wrong with your account or with any order you have placed. If you followed a link from
+            us to get here, <Link href="/contact">tell us where it was</Link>.
           </p>
           <div className="cta-actions">
             <Link className="button button--primary" href="/services/imei-check">

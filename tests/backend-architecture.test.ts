@@ -1429,3 +1429,82 @@ test('the unlock waitlist keeps a place in the queue without keeping the IMEI', 
   }
   assert.equal(attempts.at(-1), 'rate_limited')
 })
+
+test('a contact message is kept even when it cannot be sent', async () => {
+  const contact = await import('../lib/contact')
+  const site = await import('../lib/site')
+  const connection = database.db()
+
+  /* No RESEND_API_KEY in this environment, so delivery is off — which is
+     the case that matters: the message must survive it. */
+  assert.equal((await contact.submitContactMessage({
+    email: ' Asker@Example.invalid ',
+    name: '  Asker   Name  ',
+    topic: 'Payment or credit',
+    orderRef: 'ORD-1234',
+    message: 'My top-up has not appeared on my balance yet.',
+  })).delivered, false)
+
+  const row = connection
+    .prepare('SELECT name, email, topic, message, order_ref, delivered_at, user_id FROM contact_messages')
+    .get() as {
+      name: string
+      email: string
+      topic: string
+      message: string
+      order_ref: string
+      delivered_at: string | null
+      user_id: number | null
+    }
+  assert.equal(row.email, 'asker@example.invalid', 'one case, and no surrounding space')
+  assert.equal(row.name, 'Asker Name', 'runs of whitespace collapse')
+  assert.equal(row.topic, 'Payment or credit')
+  assert.equal(row.order_ref, 'ORD-1234')
+  assert.equal(row.delivered_at, null, 'nothing claims to have been delivered')
+  assert.equal(row.user_id, null)
+
+  /* A topic that is not one of ours falls back rather than being stored
+     as whatever the form posted. */
+  await contact.submitContactMessage({
+    email: 'topic@example.invalid',
+    topic: '<script>alert(1)</script>',
+    message: 'Does an unlock work on a phone bought second hand?',
+  })
+  const topic = connection
+    .prepare('SELECT topic FROM contact_messages WHERE email = ?')
+    .get('topic@example.invalid') as { topic: string }
+  assert.ok(contact.CONTACT_TOPICS.includes(topic.topic as (typeof contact.CONTACT_TOPICS)[number]))
+
+  await assert.rejects(
+    contact.submitContactMessage({ email: 'not-an-address', message: 'Hello there, is anyone home?' }),
+    (error: unknown) => error instanceof contact.ContactError && error.code === 'email_invalid',
+  )
+  await assert.rejects(
+    contact.submitContactMessage({ email: 'short@example.invalid', message: 'help' }),
+    (error: unknown) => error instanceof contact.ContactError && error.code === 'message_missing',
+  )
+  await assert.rejects(
+    contact.submitContactMessage({ email: 'long@example.invalid', message: 'x'.repeat(4_001) }),
+    (error: unknown) => error instanceof contact.ContactError && error.code === 'message_too_long',
+  )
+
+  /* And it cannot be used to relay mail: five an hour per address. */
+  const outcomes: string[] = []
+  for (let index = 0; index < 6; index += 1) {
+    outcomes.push(
+      await contact
+        .submitContactMessage({ email: 'flood@example.invalid', message: `Message number ${index} for you.` })
+        .then(() => 'ok')
+        .catch((error: unknown) => (error instanceof contact.ContactError ? error.code : 'other')),
+    )
+  }
+  assert.equal(outcomes.at(-1), 'rate_limited')
+
+  /* The address on the page is the address the form delivers to. */
+  assert.equal(site.supportEmail(), 'support@iunlockmobile.com')
+  process.env.IUNLOCKMOBILE_SUPPORT_EMAIL = 'not an address'
+  assert.equal(site.supportEmail(), 'support@iunlockmobile.com', 'a broken override is ignored')
+  process.env.IUNLOCKMOBILE_SUPPORT_EMAIL = 'help@example.invalid'
+  assert.equal(site.supportEmail(), 'help@example.invalid')
+  delete process.env.IUNLOCKMOBILE_SUPPORT_EMAIL
+})

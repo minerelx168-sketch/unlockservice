@@ -21,6 +21,7 @@ import {
   verifyEmail,
 } from './account-security'
 import { CARRIERS } from './catalog'
+import { ContactError, submitContactMessage } from './contact'
 import { isValidImei, normalizeImei } from './imei'
 import { parseUsd } from './money'
 import { landingRoute, unlockOrderingEnabled } from './provider'
@@ -92,6 +93,35 @@ export async function joinUnlockWaitlistAction(_: FormState, data: FormData): Pr
   }
 
   return { message: 'You are on the list. We will email you the day unlock ordering opens.' }
+}
+
+/**
+ * The contact form.
+ *
+ * The honeypot is a field no person sees and every naive bot fills in.
+ * A hit is answered with the same success state as a real message, so
+ * the sender learns nothing about why nothing happened.
+ */
+export async function sendContactMessageAction(_: FormState, data: FormData): Promise<FormState> {
+  const delivered = { message: 'Message received. We reply to every one, usually within a day.' }
+  if (String(data.get('website') ?? '').trim()) return delivered
+
+  const session = await currentSession()
+  try {
+    await submitContactMessage({
+      name: String(data.get('name') ?? ''),
+      email: String(data.get('email') ?? '') || (session?.user.email ?? ''),
+      topic: String(data.get('topic') ?? ''),
+      message: String(data.get('message') ?? ''),
+      orderRef: String(data.get('orderRef') ?? ''),
+      userId: session?.user.id,
+    })
+  } catch (error) {
+    if (error instanceof ContactError) return { error: error.message }
+    throw error
+  }
+
+  return delivered
 }
 
 export async function registerAction(_: FormState, data: FormData): Promise<FormState> {
