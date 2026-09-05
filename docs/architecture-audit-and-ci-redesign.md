@@ -545,3 +545,10 @@ rate limit 5 ครั้ง/ชั่วโมงต่ออีเมล อ�
 
 หมายเหตุ: การเปลี่ยน refresh ใน `order-console` ยังไม่ได้รันจริงในเบราว์เซอร์ เพราะ ordering ปิดอยู่ในเครื่องทดสอบ
 (ไม่มี supplier ที่ตั้งค่าไว้) — ผ่าน typecheck/lint และตรวจตรรกะด้วยสายตาเท่านั้น
+
+### สวิตช์ deploy
+
+`deploy` job ใน `.github/workflows/deploy.yml` ต้องการ repository variable `DEPLOY_ENABLED=1`
+เพิ่มเติมจาก `DEPLOY_HOST` — ตอนนี้ยังไม่ได้ตั้ง จึง **merge เข้า branch ได้โดยไม่ขึ้น production**
+ตั้งค่าที่ Settings → Secrets and variables → Actions → Variables เมื่อพร้อม deploy
+(หรือสั่ง workflow_dispatch จากแท็บ Actions ซึ่งผ่านสวิตช์ตัวเดียวกัน)

@@ -40,7 +40,15 @@ jobs:
     # A pull request verifies but never deploys, and without the host and
     # key configured there is nothing to deploy to — so the job skips
     # instead of failing the run.
-    if: ${{ github.event_name != 'pull_request' && vars.DEPLOY_HOST != '' }}
+    #
+    # DEPLOY_ENABLED is a hand-set switch, currently off. Merging into this
+    # branch is how code lands, and until now that also meant it went to the
+    # live site the same minute — with no chance to look at it first. Set the
+    # repository variable DEPLOY_ENABLED to 1 (Settings → Secrets and
+    # variables → Actions → Variables) to turn deploys back on, or run this
+    # workflow by hand from the Actions tab, which is gated on the same
+    # switch. Nothing else about the deploy changes.
+    if: ${{ github.event_name != 'pull_request' && vars.DEPLOY_HOST != '' && vars.DEPLOY_ENABLED == '1' }}
     environment: production
     steps:
       - name: Open an SSH session to the host
