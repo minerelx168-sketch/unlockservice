@@ -58,7 +58,6 @@ export type GatewayId = string
 
 export class PaymentError extends Error {}
 
-export const MIN_TOPUP_CENTS = 500
 export const MAX_TOPUP_CENTS = 1_000_000
 
 const INVOICE_COLUMNS = `
@@ -76,9 +75,10 @@ function invoiceRow(reference: string, userId?: number): InvoiceRow | undefined 
 export function createInvoice(userId: number, gatewayId: string, creditCents: number): Invoice {
   const gateway = GATEWAYS.find((entry) => entry.id === gatewayId)
   if (!gateway) throw new PaymentError('No payment method is configured. Contact support before sending funds.')
-  if (!Number.isSafeInteger(creditCents) || creditCents < MIN_TOPUP_CENTS || creditCents > MAX_TOPUP_CENTS) {
+  // No minimum top-up: accept any positive amount representable in USD cents.
+  if (!Number.isSafeInteger(creditCents) || creditCents <= 0 || creditCents > MAX_TOPUP_CENTS) {
     throw new PaymentError(
-      `Top-up must be between $${(MIN_TOPUP_CENTS / 100).toFixed(2)} and $${(MAX_TOPUP_CENTS / 100).toFixed(2)}.`,
+      `Enter an amount greater than $0.00, up to $${(MAX_TOPUP_CENTS / 100).toFixed(2)}, with no more than 2 decimal places.`,
     )
   }
 

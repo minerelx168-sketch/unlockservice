@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { PaidReportConsole } from '@/components/paid-report-console'
 import { requireSession } from '@/lib/auth'
 import { listPaidReportProducts } from '@/lib/paid-reports'
-import { GATEWAYS, MIN_TOPUP_CENTS } from '@/lib/payments'
+import { GATEWAYS } from '@/lib/payments'
 
 export const metadata: Metadata = { title: 'Buy an IMEI report' }
 export const dynamic = 'force-dynamic'
@@ -50,7 +50,6 @@ export default async function NewPaidReportPage({
         csrfToken={session.csrfToken}
         availableCents={available}
         initialProductCode={initialProductCode}
-        minTopupCents={MIN_TOPUP_CENTS}
         paymentMethods={GATEWAYS.map((gateway) => `${gateway.asset} on ${gateway.network}`)}
       />
 

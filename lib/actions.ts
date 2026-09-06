@@ -220,7 +220,7 @@ export async function createInvoiceAction(_: FormState, data: FormData): Promise
   }
 
   const cents = parseUsd(String(data.get('amount') ?? ''))
-  if (cents === null) return { error: 'Enter an amount like 25 or 25.50.' }
+  if (cents === null) return { error: 'Enter a USD amount with no more than 2 decimal places, such as 0.05 or 1.25.' }
 
   let reference: string
   try {

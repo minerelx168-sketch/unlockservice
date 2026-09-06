@@ -15,7 +15,7 @@
 | ป้าย Available อ้างอิง JSON ขณะที่ checkout มีเงื่อนไข database/provider เพิ่ม | หน้าร้านใช้ความพร้อมและราคาปัจจุบันจากเงื่อนไขของ checkout; ไม่ส่ง supplier cost หรือ service ID ไปยัง component ลูกค้า | [public-provider-catalog.ts](../lib/public-provider-catalog.ts) |
 | เลือกรายงานแล้วเข้าสู่ระบบกลับไปหน้าทั่วไป | คง `product` และปลายทางที่อนุญาตผ่าน login, register, verification, password reset และ Google | [continuation.ts](../lib/continuation.ts), [actions.ts](../lib/actions.ts), [auth-forms.tsx](../components/auth-forms.tsx) |
 | รายงานที่เลือกถูกดันลงใต้รายการสินค้าทั้งหมด | แสดงชื่อ รายละเอียด ราคา และเวลาประมาณของรายงานก่อน; เปิดรายการอื่นผ่าน `Change report` | [paid-report-console.tsx](../components/paid-report-console.tsx) |
-| ผู้ใช้เพิ่งทราบเงื่อนไขการเติมเงินในขั้นถัดไป | แจ้งยอดขาดขั้นต่ำ วิธีจ่าย และการรอตรวจสอบ; หน้าเติมเงินคงบริการที่เลือกและเติมยอดเริ่มต้นให้ | [add-funds/page.tsx](../app/(app)/user/add-funds/page.tsx), [payment-forms.tsx](../components/payment-forms.tsx) |
+| ผู้ใช้เพิ่งทราบเงื่อนไขการเติมเงินในขั้นถัดไป | แจ้งยอดเครดิตที่ขาด วิธีจ่าย และการรอตรวจสอบ; ไม่มีขั้นต่ำเติมเงิน; หน้าเติมเงินคงบริการที่เลือกและเติมยอดเริ่มต้นให้ | [add-funds/page.tsx](../app/(app)/user/add-funds/page.tsx), [payment-forms.tsx](../components/payment-forms.tsx) |
 | Invoice ไม่มีทางกลับไปซื้อรายงานเดิมหลังยืนยัน | เก็บปลายทาง เพิ่มปุ่มกลับไปรายงาน ปุ่มคัดลอก address และ refresh สถานะ | [invoice/page.tsx](../app/(app)/user/invoice/[reference]/page.tsx), [invoice-actions.tsx](../components/invoice-actions.tsx) |
 | Homepage สัญญาส่งผลทาง email และใช้ refund copy ที่กำกวม | เอาสัญญา email ที่ยังไม่รองรับออกจากหน้าหลัก และระบุว่าคืน reserved credit เข้าบัญชี | [หน้าหลัก](../app/(marketing)/page.tsx), [credits.ts](../lib/credits.ts) |
 
@@ -23,7 +23,7 @@
 
 1. เข้า catalog → ดูราคา ขอบเขตบริการ เวลาประมาณ และสถานะก่อนเลือก
 2. เลือกรายงาน → เข้าสู่ระบบหากจำเป็น → กลับมารายงานเดิม
-3. หากเครดิตไม่พอ → เห็น minimum top-up และ payment method → สร้าง invoice
+3. หากเครดิตไม่พอ → เห็นยอดเครดิตที่ขาดและ payment method โดยไม่มีขั้นต่ำเติมเงิน → สร้าง invoice
 4. ส่งเงินตาม invoice → ส่ง transaction reference → รอ trusted confirmation → กลับมารายงานเดิม
 5. เมื่อเครดิตพอจึงกรอก IMEI → Review → Confirm → รับสถานะและเปิด report history
 
@@ -149,7 +149,7 @@ Nonce-based CSP ปัจจุบันอ่าน header ใน root layout �
 | ลำดับ | ผลลัพธ์ที่ตรวจจากโค้ดได้ |
 |---|---|
 | P1 | รักษา product/ปลายทางผ่าน auth และ funding รวม password recovery และ invoice หลัง session หมดอายุ |
-| P1 | แสดง readiness จาก runtime ก่อนเปิด CTA ซื้อ และเปิดเผย minimum/payment เงื่อนไขก่อนเติมเงิน |
+| P1 | แสดง readiness จาก runtime ก่อนเปิด CTA ซื้อ และยกเลิกขั้นต่ำเติมเงินและเปิดเผยเงื่อนไขการชำระเงินก่อนเติม |
 | P1 | ป้องกันแก้คำสั่งซื้อระหว่างส่งหรือยังไม่ทราบผล และใช้ request key เดิมเมื่อลองซ้ำ |
 | P2 | ปรับ responsive navigation, invoice grid, typography, focus และข้อความอธิบายสถานะ |
 | P2 | เพิ่ม poll lease, service-map cache และ regression tests ที่เกี่ยวข้อง |
@@ -169,7 +169,7 @@ Nonce-based CSP ปัจจุบันอ่าน header ใน root layout �
 
 | ลำดับ | งานถัดไป | ประมาณการ | เงื่อนไขสำคัญ |
 |---|---|---|---|
-| P1 | ลด friction ของ wallet: $5 minimum, USDT BEP-20 และ manual review; ออกแบบ payment confirmation ที่ตรวจสอบได้ | 3–7 วันขึ้นไป | ต้องเลือก provider/วิธีจ่ายและทราบ settlement contract; ตรวจ credit idempotency |
+| P1 | ลด friction ของ wallet: USDT BEP-20 และ manual review; ออกแบบ payment confirmation ที่ตรวจสอบได้ | 3–7 วันขึ้นไป | ต้องเลือก provider/วิธีจ่ายและทราบ settlement contract; ตรวจ credit idempotency |
 | P1 | Durable worker พร้อม schedule, bounded concurrency, backoff และ monitoring ของรายการค้าง | 2–4 วัน | วัด provider rate limits และ backlog ก่อนตั้ง concurrency |
 | P1 | Checkout intent/resume สำหรับ legacy unlock และกรณีซื้อข้ามอุปกรณ์ | 2–3 วัน | กำหนด expiry, privacy และยืนยัน order หลังกลับมาเสมอ |
 | P2 | Transactional outbox สำหรับแจ้งผลและแจ้งปัญหา | 2–3 วัน | ตรวจการส่งจริง/ซ้ำ/ล้มเหลวก่อนแสดง email promise |
@@ -191,9 +191,9 @@ Guardrails: duplicate order/charge, manual review, refund, validation error แ�
 | รายการ | สถานะสำหรับบันทึกผลรอบสุดท้าย |
 |---|---|
 | Scoped lint และ diff check ของ homepage/IMEI CTA | ผ่านในการตรวจเฉพาะสองไฟล์; ยังต้องอ้างผลรวมด้านล่าง |
-| `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` | ผ่าน `npm run lint`, `npm run typecheck`, `npm run build`; regression 34/34 ผ่านด้วย `node --import tsx --test tests/*.test.ts` (รัน test เดียวกับ npm test โดยเลี่ยง IPC socket ที่ sandbox ไม่อนุญาต) |
+| `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` | ผ่าน `npm run lint`, `npm run typecheck`, `npm run build`; regression 35/35 ผ่านด้วย `node --import tsx --test tests/*.test.ts` (รัน test เดียวกับ npm test โดยเลี่ยง IPC socket ที่ sandbox ไม่อนุญาต) |
 | Browser QA: 320/390/768/1024/1440px; light/dark และเมนู | Home และ invoice ไม่ล้นแนวนอนที่ 320/390/768/1024/1440px; report ที่ 390px ใช้ input 16px, menu เปิด/ปิดด้วย Escape และคืน focus; catalog dark ที่ 768px ไม่ sticky และไม่มี CTA ซื้อเมื่อ provider ปิด |
-| Flow QA: product → auth → funding → invoice → resume → review; invalid input และ uncertain response | Production build บน localhost ใช้บัญชี/เครดิต/provider จำลอง: login คง APPLE_BASIC → invoice $5+$0.10 fee → ส่ง reference → ยืนยันผ่าน backend จำลอง → กลับรายงานเดิม → validation/focus → confirm → report completed; ยอดเครดิตทุกตำแหน่ง $5 → $4.95 |
+| Flow QA: product → auth → funding → invoice → resume → review; invalid input และ uncertain response | QA รอบก่อนยกเลิกขั้นต่ำ — Production build บน localhost ใช้บัญชี/เครดิต/provider จำลอง: login คง APPLE_BASIC → invoice $5+$0.10 fee → ส่ง reference → ยืนยันผ่าน backend จำลอง → กลับรายงานเดิม → validation/focus → confirm → report completed; ยอดเครดิตทุกตำแหน่ง $5 → $4.95 |
 | Production performance/conversion | ไม่ได้รับข้อมูล ไม่มีผลเปรียบเทียบที่ยืนยันได้ |
 
 Regression tests ที่เพิ่มครอบคลุม continuation allowlist, invoice continuation, service-map invalidation, poll lease ownership/expiry, overlapping provider calls, ledger settlement และ runtime catalog projection
@@ -213,3 +213,14 @@ Browser ทดสอบผ่าน Codex in-app browser; ไม่ใช่ก�
 
 หน้าแรก First Load JS ประมาณ 109 kB; หน้า paid report ประมาณ 111 kB ตาม Next.js build report ของรอบนี้
 เป็นขนาด bundle ที่ build รายงาน ไม่ใช่เวลาโหลดจริงหรือผล before/after
+
+
+### ปรับนโยบายเติมเงิน: ไม่มีขั้นต่ำ
+
+ยกเลิกขั้นต่ำ $5 ตามคำขอ: invoice ใหม่รับยอด USD ที่มากกว่า 0 และมีทศนิยมไม่เกิน 2 ตำแหน่งตามระบบ integer cents เดิม
+หน้าเติมเงินเสนอเฉพาะยอดเครดิตที่ขาดของรายงาน เช่น $0.05; หน้าเติมเงินทั่วไปเริ่มช่องยอดว่างให้ผู้ใช้ระบุเอง
+ทั้ง UI และ server ใช้เงื่อนไขเดียวกัน คงวงเงินสูงสุดเดิม $10,000 และการปัดค่าธรรมเนียมเป็นเซนต์
+Invoice เดิมยังคงยอดที่ล็อกไว้ และเครดิตเข้าหลัง trusted confirmation ตามเดิม
+
+Validation หลังยกเลิกขั้นต่ำ: lint, typecheck และ production build ผ่าน; 35 tests ผ่าน รวม invoice $0.01/$0.05/$0.25/$4.99, ค่าธรรมเนียมที่ปัดเป็นเซนต์, การปฏิเสธยอดไม่ถูกต้อง และการยืนยันซ้ำไม่เพิ่มเครดิตซ้ำ
+Browser QA ใน local fixture ยืนยันยอดขาด $0.05 ถูกกรอกล่วงหน้า, invoice $0.05 + fee $0.00 สร้างสำเร็จ และยอด $0 ถูกปฏิเสธโดย server; ไม่มีการโอนเงินจริง

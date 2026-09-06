@@ -51,14 +51,12 @@ export function PaidReportConsole({
   csrfToken,
   availableCents,
   initialProductCode,
-  minTopupCents,
   paymentMethods,
 }: {
   products: Product[]
   csrfToken: string
   availableCents: number
   initialProductCode?: string
-  minTopupCents: number
   paymentMethods: string[]
 }) {
   const router = useRouter()
@@ -375,7 +373,7 @@ export function PaidReportConsole({
               {product && product.providerReady && !affordable ? (
                 <p className="t-small" role="status">
                   Your balance is {formatUsd(balanceCents)} and this report costs{' '}
-                  {formatUsd(product.priceCents)}. Minimum top-up: {formatUsd(minTopupCents)}.
+                  {formatUsd(product.priceCents)}. Add just {formatUsd(product.priceCents - balanceCents)} more — no minimum top-up.
                   {paymentMethods.length > 0 ? ` Payment: ${paymentMethods.join(', ')}; transfers are verified before credit is available.` : ' Top-ups are currently unavailable; contact support for help.'}
                   {' '}Add credit first, then enter your IMEI when you return to this report.
                 </p>

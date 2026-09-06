@@ -24,22 +24,20 @@ function Problem({ message }: { message?: string }) {
 
 export function AddFundsForm({
   gateways,
-  minCents,
   maxCents,
   initialCents,
   returnTo,
 }: {
   gateways: Array<{ id: string; label: string; asset: string; network: string; feeBasisPoints: number }>
-  minCents: number
   maxCents: number
-  initialCents: number
+  initialCents?: number
   returnTo?: string | null
 }) {
   const [state, action, pending] = useActionState(createInvoiceAction, EMPTY)
-  const [amount, setAmount] = useState((initialCents / 100).toFixed(2))
+  const [amount, setAmount] = useState(initialCents ? (initialCents / 100).toFixed(2) : '')
   const [gatewayId, setGatewayId] = useState(gateways[0]?.id ?? '')
   const cents = parseUsd(amount)
-  const valid = cents !== null && cents >= minCents && cents <= maxCents
+  const valid = cents !== null && cents > 0 && cents <= maxCents
   const gateway = gateways.find((entry) => entry.id === gatewayId)
   const fee = valid && gateway ? Math.round(cents * gateway.feeBasisPoints / 10_000) : 0
 
@@ -66,8 +64,8 @@ export function AddFundsForm({
 
       <div className="field">
         <label htmlFor="amount">Credit to add (USD)</label>
-        <input id="amount" name="amount" className="mono" inputMode="decimal" value={amount} onChange={(event) => setAmount(event.currentTarget.value)} aria-describedby="amount-help" required />
-        <p className="field-note" id="amount-help">Add between {formatUsd(minCents)} and {formatUsd(maxCents)}. Unused credit stays on your account.</p>
+        <input id="amount" name="amount" className="mono" inputMode="decimal" placeholder="Enter amount" value={amount} onChange={(event) => setAmount(event.currentTarget.value)} aria-describedby="amount-help" required />
+        <p className="field-note" id="amount-help">No minimum top-up. Enter any amount greater than $0.00, up to {formatUsd(maxCents)}, with no more than 2 decimal places. Unused credit stays on your account.</p>
       </div>
 
       {valid ? (
@@ -76,7 +74,7 @@ export function AddFundsForm({
           <div><span className="label">Network fee</span><span className="value">{formatUsd(fee)}</span></div>
           <div><span className="label">Total due</span><span className="value">{formatUsd(cents + fee)}</span></div>
         </div>
-      ) : <p className="t-small" role="status">Enter an amount within the range above to preview your total.</p>}
+      ) : <p className="t-small" role="status">Enter a valid amount to preview your total.</p>}
       <p className="t-small">Creating an invoice does not send a payment. Check the network and locked total on the next page. Your transfer is reviewed before credit is added.</p>
 
       <button className="button button--primary" type="submit" disabled={pending}>

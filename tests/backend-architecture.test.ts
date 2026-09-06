@@ -1083,6 +1083,45 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
   }
 })
 
+test('top-ups accept positive cent amounts without a minimum and settle exactly once', async () => {
+  const user = auth.register('small-topups', 'small-topups@example.test', 'correct-horse-battery-staple')
+  const { parseUsd } = await import('../lib/money')
+  const gateway = payments.GATEWAYS.find((entry) => entry.id === 'crypto_networks')!
+  const previousFee = gateway.feeBasisPoints
+  gateway.feeBasisPoints = 200
+  let totalCredit = 0
+
+  try {
+    for (const [amount, cents, fee] of [['0.01', 1, 0], ['0.05', 5, 0], ['0.25', 25, 1], ['4.99', 499, 10], ['5.00', 500, 10]] as const) {
+      assert.equal(parseUsd(amount), cents)
+      const invoice = payments.createInvoice(user.id, gateway.id, cents)
+      assert.equal(invoice.credit_amount_cents, cents)
+      assert.equal(invoice.fee_cents, fee)
+      assert.equal(invoice.total_due_cents, cents + fee)
+      assert.equal(payments.createInvoice(user.id, gateway.id, cents).reference, invoice.reference)
+
+      payments.submitPaymentReference(invoice.reference, user.id, `SMALL_TOPUP_${cents}`, '')
+      assert.equal(credits.getBalance(user.id).creditCents, totalCredit)
+      payments.approveInvoice(invoice.reference, user.id)
+      payments.approveInvoice(invoice.reference, user.id)
+      totalCredit += cents
+      assert.equal(credits.getBalance(user.id).creditCents, totalCredit)
+      const effects = database.db().prepare(
+        "SELECT COUNT(*) AS count FROM credit_ledger WHERE user_id = ? AND ref_type = 'invoice' AND ref_id = ? AND type = 'topup'",
+      ).get(user.id, invoice.reference) as { count: number }
+      assert.equal(effects.count, 1)
+    }
+
+    for (const invalid of [0, -1, 0.5, NaN, Infinity, payments.MAX_TOPUP_CENTS + 1, Number.MAX_SAFE_INTEGER + 1]) {
+      assert.throws(() => payments.createInvoice(user.id, gateway.id, invalid), payments.PaymentError)
+    }
+    assert.equal(parseUsd('0.001'), null)
+    assert.equal(payments.createInvoice(user.id, gateway.id, payments.MAX_TOPUP_CENTS).credit_amount_cents, payments.MAX_TOPUP_CENTS)
+  } finally {
+    gateway.feeBasisPoints = previousFee
+  }
+})
+
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'crypto_networks', 2500)
