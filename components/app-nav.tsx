@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Icon, type IconName } from './icons'
 
 const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: string; icon: IconName }> }> = [
@@ -24,8 +25,24 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
   },
 ]
 
-export function AppNav({ isAdmin = false }: { isAdmin?: boolean }) {
+export function AppNav({ isAdmin = false, children }: { isAdmin?: boolean; children?: ReactNode }) {
   const pathname = usePathname()
+  const [openPath, setOpenPath] = useState<string | null>(null)
+  const open = openPath === pathname
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    panelRef.current?.querySelector<HTMLAnchorElement>('a[aria-current="page"], a')?.focus()
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setOpenPath(null)
+      toggleRef.current?.focus()
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [open])
   const sections = isAdmin
     ? [
         ...SECTIONS,
@@ -37,22 +54,39 @@ export function AppNav({ isAdmin = false }: { isAdmin?: boolean }) {
     : SECTIONS
 
   return (
-    <nav className="app-nav" aria-label="Workspace">
-      {sections.map((section) => (
-        <div key={section.heading}>
-          <h5>{section.heading}</h5>
-          {section.items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={pathname.startsWith(item.href) ? 'page' : undefined}
-            >
-              <Icon name={item.icon} />
-              {item.label}
-            </Link>
+    <div className="app-navigation" data-open={open ? 'true' : 'false'}>
+      <button
+        ref={toggleRef}
+        type="button"
+        className="button button--quiet app-nav-toggle"
+        aria-expanded={open}
+        aria-controls="workspace-navigation-panel"
+        onClick={() => setOpenPath(open ? null : pathname)}
+      >
+        <Icon name={open ? 'cross' : 'menu'} />
+        Menu
+      </button>
+      <div className="app-navigation-panel" id="workspace-navigation-panel" ref={panelRef}>
+        <nav className="app-nav" aria-label="Workspace">
+          {sections.map((section) => (
+            <div key={section.heading}>
+              <h5>{section.heading}</h5>
+              {section.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={pathname === item.href || pathname.startsWith(`${item.href}/`) ? 'page' : undefined}
+                  onClick={() => setOpenPath(null)}
+                >
+                  <Icon name={item.icon} />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           ))}
-        </div>
-      ))}
-    </nav>
+        </nav>
+        {children}
+      </div>
+    </div>
   )
 }

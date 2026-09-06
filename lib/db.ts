@@ -294,6 +294,14 @@ CREATE TABLE IF NOT EXISTS api_access (
       CREATE INDEX IF NOT EXISTS paid_report_orders_status
         ON paid_report_orders(status, provider_last_polled_at);
 
+      CREATE TABLE IF NOT EXISTS provider_poll_leases (
+        resource_type TEXT NOT NULL,
+        resource_id INTEGER NOT NULL,
+        token TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        PRIMARY KEY (resource_type, resource_id)
+      );
+
 					CREATE TABLE IF NOT EXISTS provider_events (
 				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
 				  resource_type   TEXT    NOT NULL,

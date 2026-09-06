@@ -229,3 +229,39 @@ test('expanded paid-report profiles remain service-specific, masked and fail-clo
   assert.equal(unknown.checks.length, 0)
   assert.match(unknown.summary, /did not return any supported public report fields/i)
 })
+
+test('service maps parse once per configuration and invalidate on edits, malformed values or removal', () => {
+  const savedImei = process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP
+  const savedUnlock = process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP
+  const originalParse = JSON.parse
+  const initialMap = JSON.stringify({ 'check:cache_test': { id: 'cache-one', mode: 'sync' } })
+  let parses = 0
+  try {
+    JSON.parse = (...args: Parameters<typeof JSON.parse>) => {
+      if (args[0] === initialMap) parses += 1
+      return originalParse(...args)
+    }
+    process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = initialMap
+    for (let index = 0; index < 100; index += 1) {
+      assert.deepEqual(imeiProviderService('cache_test'), { id: 'cache-one', mode: 'sync' })
+    }
+    assert.equal(parses, 1)
+    const cached = imeiProviderService('cache_test')!
+    assert.equal(Object.isFrozen(cached), true, 'a caller cannot change the shared mapping')
+    process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({ 'check:cache_test': { id: 'cache-two', mode: 'sync' } })
+    assert.equal(imeiProviderService('cache_test')?.id, 'cache-two')
+    process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP = JSON.stringify({ 'carrier:103': { id: 'separate-cache', mode: 'dhru' } })
+    assert.equal(unlockProviderService('carrier:103')?.id, 'separate-cache')
+    assert.equal(imeiProviderService('cache_test')?.id, 'cache-two')
+    process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = '{invalid-json'
+    assert.equal(imeiProviderService('cache_test'), undefined)
+    delete process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP
+    assert.equal(imeiProviderService('cache_test'), undefined)
+  } finally {
+    JSON.parse = originalParse
+    if (savedImei === undefined) delete process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP
+    else process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = savedImei
+    if (savedUnlock === undefined) delete process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP
+    else process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP = savedUnlock
+  }
+})

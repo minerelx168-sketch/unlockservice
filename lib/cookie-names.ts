@@ -8,4 +8,5 @@
 
 export const SESSION_COOKIE = 'iunlockmobile_session'
 export const GOOGLE_OAUTH_COOKIE = 'iunlockmobile_google_oauth'
+export const GOOGLE_RETURN_COOKIE = 'iunlockmobile_google_return'
 export const QUOTE_COOKIE = 'iunlockmobile_quote'

@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { groupImei, IMEI_LENGTH, luhnValid, maskIdentifier, normalizeImei } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
@@ -36,6 +37,8 @@ type PaidReportPayload = {
   }
 }
 
+class ReportRequestError extends Error {}
+
 function statusLabel(status: PaidReportView['status']) {
   if (status === 'completed') return 'Report ready'
   if (status === 'refunded') return 'Credit returned'
@@ -48,12 +51,17 @@ export function PaidReportConsole({
   csrfToken,
   availableCents,
   initialProductCode,
+  minTopupCents,
+  paymentMethods,
 }: {
   products: Product[]
   csrfToken: string
   availableCents: number
   initialProductCode?: string
+  minTopupCents: number
+  paymentMethods: string[]
 }) {
+  const router = useRouter()
   const initialCode = products.some((product) => product.code === initialProductCode)
     ? initialProductCode ?? ''
     : products[0]?.code ?? ''
@@ -61,6 +69,13 @@ export function PaidReportConsole({
   const [imei, setImei] = useState('')
   const [search, setSearch] = useState('')
   const [busy, setBusy] = useState(false)
+  const [uncertain, setUncertain] = useState(false)
+  const [balanceCents, setBalanceCents] = useState(availableCents)
+  const [imeiTouched, setImeiTouched] = useState(false)
+  const imeiRef = useRef<HTMLInputElement>(null)
+  const reviewRef = useRef<HTMLHeadingElement>(null)
+  const resultRef = useRef<HTMLElement>(null)
+  const inFlight = useRef(false)
   const [reviewing, setReviewing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [payload, setPayload] = useState<PaidReportPayload | null>(null)
@@ -74,8 +89,17 @@ export function PaidReportConsole({
       `${entry.name} ${entry.summary} ${entry.group}`.toLowerCase().includes(query),
     )
   }, [products, search])
-  const balanceCents = payload?.credit.balanceCents ?? availableCents
   const affordable = !product || product.priceCents <= balanceCents
+  const digits = normalizeImei(imei)
+  const imeiInvalid = imeiTouched && (digits.length !== IMEI_LENGTH || !luhnValid(digits))
+  const locked = busy || uncertain || payload !== null
+
+  useEffect(() => {
+    if (reviewing) reviewRef.current?.focus()
+  }, [reviewing])
+  useEffect(() => {
+    if (payload) resultRef.current?.focus()
+  }, [payload])
 
   function resetRequestIdentity() {
     idempotencyRef.current = null
@@ -91,37 +115,53 @@ export function PaidReportConsole({
   }
 
   async function post(path: string, body: Record<string, unknown>) {
-    const response = await fetch(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ ...body, csrfToken }),
-    })
-    let data: PaidReportPayload | { success: false; error?: string } | null = null
+    const controller = new AbortController()
+    const deadline = setTimeout(() => controller.abort(), 35_000)
     try {
-      data = (await response.json()) as PaidReportPayload | { success: false; error?: string }
-    } catch {
-      throw new Error('The server returned an unreadable response.')
+      const response = await fetch(path, {
+        signal: controller.signal,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ ...body, csrfToken }),
+      })
+      let data: PaidReportPayload | { success: false; error?: string } | null = null
+      try {
+        data = (await response.json()) as PaidReportPayload | { success: false; error?: string }
+      } catch {
+        throw new Error('We could not confirm the response. Check report history, or retry this same request.')
+      }
+      if (!response.ok || !data || data.success !== true) {
+        const message = data && 'error' in data ? data.error : undefined
+        // A gateway/server failure can happen after the order was accepted.
+        if (response.status >= 500) throw new Error('The order response is uncertain.')
+        throw new ReportRequestError(message ?? 'The paid report could not be submitted.')
+      }
+      return data
+    } finally {
+      clearTimeout(deadline)
     }
-    if (!response.ok || !data || data.success !== true) {
-      const message = data && 'error' in data ? data.error : undefined
-      throw new Error(message ?? 'The paid report could not be submitted.')
-    }
-    return data
   }
 
   function reviewOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (locked) return
+    setImeiTouched(true)
     const digits = normalizeImei(imei)
     if (!product) return setError('Choose a paid report first.')
     if (!product.providerReady) return setError('This report is not available yet.')
-    if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+    if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) {
+      setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+      imeiRef.current?.focus()
+      return
+    }
     if (!affordable) return setError('Not enough credit for this report.')
     setError(null)
     setReviewing(true)
   }
 
   async function confirmOrder() {
+    if (inFlight.current || payload) return
     const digits = normalizeImei(imei)
     if (!product || !product.providerReady) return setError('This report is not available yet.')
     if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
@@ -129,15 +169,22 @@ export function PaidReportConsole({
 
     const idempotencyKey = idempotencyRef.current ?? crypto.randomUUID()
     idempotencyRef.current = idempotencyKey
+    inFlight.current = true
     setBusy(true)
     setError(null)
     try {
       const result = await post('/api/imei/reports', { productCode: product.code, imei: digits, idempotencyKey })
       setPayload(result)
+      setBalanceCents(result.credit.balanceCents)
+      setUncertain(false)
       setReviewing(false)
+      router.refresh()
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : 'The paid report could not be submitted.')
+      const unknown = !(thrown instanceof ReportRequestError)
+      setUncertain((previous) => previous || unknown)
+      setError(unknown ? 'We could not confirm whether your order was received. Check report history before starting another order, or retry this same request safely.' : thrown.message)
     } finally {
+      inFlight.current = false
       setBusy(false)
     }
   }
@@ -147,7 +194,10 @@ export function PaidReportConsole({
     setBusy(true)
     setError(null)
     try {
-      setPayload(await post(`/api/imei/reports/${payload.order.id}`, {}))
+      const result = await post(`/api/imei/reports/${payload.order.id}`, {})
+      setPayload(result)
+      setBalanceCents(result.credit.balanceCents)
+      router.refresh()
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : 'The report status could not be refreshed.')
     } finally {
@@ -159,22 +209,37 @@ export function PaidReportConsole({
     return (
       <p className="alert" role="status">
         <Icon name="info" strokeWidth={1.9} />
-        <span>Paid Provider reports are not active yet. The Free IMEI Check remains available.</span>
+        <span>No paid reports are available right now. Use the Free IMEI Check to validate your number, or contact support for help.</span>
       </p>
     )
   }
 
   return (
     <div style={{ display: 'grid', gap: 20 }}>
-      <form className="panel" onSubmit={reviewOrder} noValidate>
+      <form className="panel" onSubmit={reviewOrder} noValidate aria-busy={busy}>
         <header>
           <h2>New paid report</h2>
           <span>{formatUsd(balanceCents)} available</span>
         </header>
 
         <div className="panel-body" style={{ display: 'grid', gap: 20 }}>
+          {uncertain ? <Link className="link-arrow" href="/user/reports">Check report history</Link> : null}
           {error ? <p className="alert alert--error" role="alert"><Icon name="cross" /> <span>{error}</span></p> : null}
 
+          {product ? (
+            <section className="checkout-selection" aria-label="Selected report">
+              <span className="kicker">Selected report</span>
+              <h3 className="t-card">{product.name}</h3>
+              <p className="t-small">{product.summary}</p>
+              <div className="quote">
+                <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
+                <div><span className="label">Estimated delivery</span><span className="value">{deliveryLabel(product.etaMinutes)}</span></div>
+              </div>
+            </section>
+          ) : null}
+
+          <details className="checkout-picker" open={initialProductCode ? undefined : true}>
+            <summary>Change report · {products.length} options</summary>
           <div className="field">
             <label htmlFor="paid-report-search">Search paid IMEI reports</label>
             <input
@@ -184,6 +249,7 @@ export function PaidReportConsole({
               onChange={(event) => setSearch(event.currentTarget.value)}
               placeholder="Apple, Samsung, blacklist, carrier…"
               autoComplete="off"
+              disabled={locked}
             />
             <p className="field-note">
               <Icon name="search" strokeWidth={1.9} />
@@ -196,6 +262,7 @@ export function PaidReportConsole({
               <button
                 key={entry.code}
                 type="button"
+                disabled={locked}
                 className="picker-option"
                 aria-pressed={entry.code === productCode}
                 onClick={() => {
@@ -209,7 +276,7 @@ export function PaidReportConsole({
                   <br />
                   <strong>{entry.name}</strong>
                   <br />
-                  <span className="t-small" style={{ fontSize: 12.5 }}>{entry.summary}</span>
+                  <span className="t-small">{entry.summary}</span>
                 </span>
                 <span className="price">{formatUsd(entry.priceCents)}</span>
               </button>
@@ -219,10 +286,17 @@ export function PaidReportConsole({
             ) : null}
           </div>
 
-          <div className="field">
+          </details>
+
+          {affordable ? <div className="field">
             <label htmlFor="paid-report-imei">IMEI number</label>
             <input
               id="paid-report-imei"
+              ref={imeiRef}
+              disabled={locked}
+              aria-invalid={imeiInvalid}
+              aria-describedby="paid-report-imei-help"
+              onBlur={() => setImeiTouched(true)}
               type="text"
               inputMode="numeric"
               autoComplete="off"
@@ -236,25 +310,18 @@ export function PaidReportConsole({
                 resetRequestIdentity()
               }}
             />
-            <p className="field-note">
+            <p className="field-note" id="paid-report-imei-help" aria-live="polite">
               <Icon name="shield" strokeWidth={1.9} />
-              <span>We never store your full IMEI and never show it in full — only the first two digits and the last four.</span>
+              <span>{imeiInvalid ? 'Enter 15 digits with a valid checksum. Find the IMEI in Settings or dial *#06#.' : 'Find your IMEI in Settings or dial *#06#. Reports and history show a masked number.'}</span>
             </p>
-          </div>
+          </div> : null}
 
-          {product ? (
-            <div className="quote">
-              <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
-              <div><span className="label">Available credit</span><span className="value">{formatUsd(balanceCents)}</span></div>
-            </div>
-          ) : null}
-
-          {reviewing && product ? (
+          {payload ? null : reviewing && product ? (
             <section className="order-review" aria-labelledby="paid-report-review-title">
               <div className="card-topline">
                 <div>
                   <span className="kicker">Confirm order</span>
-                  <h3 className="t-card" id="paid-report-review-title">{product.name}</h3>
+                  <h3 className="t-card" id="paid-report-review-title" tabIndex={-1} ref={reviewRef}>{product.name}</h3>
                 </div>
                 <span className="badge">Review</span>
               </div>
@@ -268,9 +335,9 @@ export function PaidReportConsole({
               <div className="order-review-actions">
                 <button className="button button--primary" type="button" disabled={busy} onClick={confirmOrder}>
                   <Icon name="file" strokeWidth={1.9} />
-                  {busy ? 'Submitting…' : `Confirm and order ${formatUsd(product.priceCents)}`}
+                  {busy ? 'Submitting…' : uncertain ? 'Retry the same request' : `Confirm and order ${formatUsd(product.priceCents)}`}
                 </button>
-                <button className="button button--quiet" type="button" disabled={busy} onClick={() => setReviewing(false)}>
+                <button className="button button--quiet" type="button" disabled={busy || uncertain} onClick={() => setReviewing(false)}>
                   Back to edit
                 </button>
               </div>
@@ -282,9 +349,9 @@ export function PaidReportConsole({
                   a small "add funds" link beside it asks the customer to work
                   out for themselves why they cannot buy. */}
               {product && product.providerReady && !affordable ? (
-                <Link className="button button--primary" href="/user/add-funds">
+                <Link className="button button--primary" href={`/user/add-funds?product=${encodeURIComponent(product.code)}`}>
                   <Icon name="arrowRight" strokeWidth={1.9} />
-                  Add funds and order this report
+                  Add credit to continue
                 </Link>
               ) : (
                 <button
@@ -308,19 +375,21 @@ export function PaidReportConsole({
               {product && product.providerReady && !affordable ? (
                 <p className="t-small" role="status">
                   Your balance is {formatUsd(balanceCents)} and this report costs{' '}
-                  {formatUsd(product.priceCents)}.
+                  {formatUsd(product.priceCents)}. Minimum top-up: {formatUsd(minTopupCents)}.
+                  {paymentMethods.length > 0 ? ` Payment: ${paymentMethods.join(', ')}; transfers are verified before credit is available.` : ' Top-ups are currently unavailable; contact support for help.'}
+                  {' '}Add credit first, then enter your IMEI when you return to this report.
                 </p>
               ) : null}
             </>
           )}
-          <p className="t-small" style={{ fontSize: 12.5 }}>
-            Credit is held before submission and charged only after a usable report is delivered. A clear terminal failure releases the hold. A timeout or uncertain Provider response goes to manual review and is never retried automatically.
+          <p className="t-small">
+            Credit is reserved when you confirm. A delivered report uses that credit; an undeliverable report returns it to your account balance. If the result is uncertain, the credit stays reserved while we check. You can follow the status in report history.
           </p>
         </div>
       </form>
 
       {payload ? (
-        <section className="card" role="status">
+        <section className="card" role="status" ref={resultRef} tabIndex={-1}>
           <div className="card-topline">
             <span className="kicker"><Icon name="file" /> {payload.order.productName}</span>
             <span className={payload.order.status === 'completed' ? 'badge badge--success' : 'badge'}>{statusLabel(payload.order.status)}</span>
@@ -330,13 +399,19 @@ export function PaidReportConsole({
             {payload.order.message ?? (payload.order.status === 'completed'
               ? 'The report is ready and the held credit has been charged.'
               : payload.order.status === 'refunded'
-                ? 'The Provider could not deliver the report and the full hold was released.'
+                ? 'The report could not be delivered. The reserved credit was returned to your account balance.'
                 : payload.order.status === 'manual_review'
-                  ? 'The Provider response was uncertain. Credit remains held while the request is reviewed.'
+                  ? 'The result needs review. Your credit remains reserved while we check.'
                   : 'The request is still processing.')}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-            <Link className="button button--quiet" href={`/user/reports/${payload.order.id}`}>View report</Link>
+            <Link className="button button--primary" href={`/user/reports/${payload.order.id}`}>View report</Link>
+            <button className="button button--quiet" type="button" disabled={busy} onClick={() => {
+              resetRequestIdentity()
+              setImei('')
+              setImeiTouched(false)
+              setError(null)
+            }}>Start another report</button>
             {payload.order.status === 'processing' ? (
               <button className="button button--quiet" type="button" disabled={busy} onClick={refreshStatus}>
                 {busy ? 'Refreshing…' : 'Refresh status'}

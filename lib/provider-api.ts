@@ -133,12 +133,30 @@ function parseServiceMap(raw: string | undefined): Record<string, ProviderServic
 }
 
 export function unlockProviderService(key: string) {
-  return parseServiceMap(process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP)[key]
+  return unlockServiceMap(process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP)[key]
 }
 
 export function imeiProviderService(checkType: string) {
-  return parseServiceMap(process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP)[`check:${checkType}`]
+  return imeiServiceMap(process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP)[`check:${checkType}`]
 }
+
+/** Parse each configuration once, and invalidate immediately when it changes. */
+function cachedServiceMap() {
+  let previous: string | undefined
+  let services: Record<string, ProviderService> = {}
+  return (raw: string | undefined) => {
+    if (raw !== previous) {
+      services = parseServiceMap(raw)
+      for (const service of Object.values(services)) Object.freeze(service)
+      Object.freeze(services)
+      previous = raw
+    }
+    return services
+  }
+}
+
+const unlockServiceMap = cachedServiceMap()
+const imeiServiceMap = cachedServiceMap()
 
 export function redactProviderText(value: string) {
   return value

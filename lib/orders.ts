@@ -11,6 +11,7 @@ import { IMEI_LENGTH, luhnValid, normalizeImei } from './imei'
 import { activeSupplier, maintenanceState, type SupplierResult, type UnlockRequest } from './provider'
 import { providerConfiguration, unlockProviderService } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { claimProviderPoll } from './provider-poll-lease'
 import { consumeAttempt } from './rate-limit'
 
 /**
@@ -429,74 +430,83 @@ export async function submitOrder(
 
 /** Checks in with the supplier on an order that is still out. */
 export async function pollOrder(userId: number, orderId: number): Promise<OrderPayload> {
-  const order = getOrder(orderId, userId)
-  if (!order) throw new OrderError('No such order.', 'order_unknown')
+  const snapshot = getOrder(orderId, userId)
+  if (!snapshot) throw new OrderError('No such order.', 'order_unknown')
+  const restingSnapshot = restingPayload(snapshot, readBalance(userId).availableCents)
+  if (snapshot.status !== 'processing' || !snapshot.provider_order_id) return restingSnapshot
+  const snapshotReadyAt = snapshot.provider_ready_at ? new Date(snapshot.provider_ready_at).getTime() : 0
+  if (Date.now() < snapshotReadyAt || providerPollDebounced(snapshot)) return restingSnapshot
 
-  const balance = readBalance(userId)
-  const resting = restingPayload(order, balance.availableCents)
+  const releasePoll = claimProviderPoll('order', snapshot.id)
+  if (!releasePoll) return restingSnapshot
 
-  if (order.status !== 'processing') return resting
-
-  const readyAt = order.provider_ready_at ? new Date(order.provider_ready_at).getTime() : 0
-  if (Date.now() < readyAt || providerPollDebounced(order)) return resting
-
-  const brand = order.brand_id ? getBrand(order.brand_id) : undefined
-  if (!brand) return resting
-
-  let supplier
   try {
-    supplier = activeSupplier()
-  } catch {
-    /* Reading an order must keep working while the operator sorts the
-       supplier out; the order simply stays where it is. */
-    return resting
-  }
+    // Another process may have polled or settled between the read and claim.
+    const order = getOrder(orderId, userId)
+    if (!order) throw new OrderError('No such order.', 'order_unknown')
+    const balance = readBalance(userId)
+    const resting = restingPayload(order, balance.availableCents)
+    if (order.status !== 'processing' || !order.provider_order_id) return resting
+    const readyAt = order.provider_ready_at ? new Date(order.provider_ready_at).getTime() : 0
+    if (Date.now() < readyAt || providerPollDebounced(order)) return resting
 
-  let result
-  try {
-    result = await supplier.poll(order.provider_order_id ?? '', requestFor(order, brand))
-  } catch {
-    if (order.provider_name) {
+    const brand = order.brand_id ? getBrand(order.brand_id) : undefined
+    if (!brand) return resting
+    let supplier
+    try {
+      supplier = activeSupplier()
+    } catch {
+      // Reading an order keeps working while its supplier is unconfigured.
+      return resting
+    }
+    let result
+    try {
+      result = await supplier.poll(order.provider_order_id, requestFor(order, brand))
+    } catch {
+      if (order.provider_name) {
+        db()
+          .prepare(
+            `UPDATE orders
+                SET provider_attempts = provider_attempts + 1,
+                    provider_last_polled_at = datetime('now'),
+                    provider_error_code = 'poll_exception', updated_at = datetime('now')
+              WHERE id = ? AND status = 'processing'`,
+          )
+          .run(order.id)
+        recordProviderEvent({
+          resourceType: 'order',
+          resourceId: order.id,
+          provider: order.provider_name,
+          providerMode: order.provider_mode ?? 'unknown',
+          eventType: 'poll_error',
+          idempotencyKey: `poll-error:${order.provider_attempts + 1}`,
+          errorCode: 'poll_exception',
+        })
+      }
+      return resting
+    }
+
+    persistProviderOutcome(order, result, true)
+
+    if (result.status === 'delivered') {
+      return settleDelivered(order.id, userId, result.orderId, result.unlockCode, result.result)
+    }
+    if (result.status === 'unavailable') {
+      return settleUnavailable(order.id, userId, result.message, balance.availableCents)
+    }
+    if (result.provider) {
+      const readyAt = new Date(Date.now() + result.readyInMs).toISOString()
       db()
         .prepare(
-          `UPDATE orders
-              SET provider_attempts = provider_attempts + 1,
-                  provider_last_polled_at = datetime('now'),
-                  provider_error_code = 'poll_exception', updated_at = datetime('now')
+          `UPDATE orders SET provider_ready_at = ?, updated_at = datetime('now')
             WHERE id = ? AND status = 'processing'`,
         )
-        .run(order.id)
-      recordProviderEvent({
-        resourceType: 'order',
-        resourceId: order.id,
-        provider: order.provider_name,
-        providerMode: order.provider_mode ?? 'unknown',
-        eventType: 'poll_error',
-        idempotencyKey: `poll-error:${order.provider_attempts + 1}`,
-        errorCode: 'poll_exception',
-      })
+        .run(readyAt, order.id)
     }
-    return resting
+    return restingPayload(getOrder(order.id, userId)!, balance.availableCents)
+  } finally {
+    releasePoll()
   }
-
-  persistProviderOutcome(order, result, true)
-
-  if (result.status === 'delivered') {
-    return settleDelivered(order.id, userId, result.orderId, result.unlockCode, result.result)
-  }
-  if (result.status === 'unavailable') {
-    return settleUnavailable(order.id, userId, result.message, balance.availableCents)
-  }
-  if (result.provider) {
-    const readyAt = new Date(Date.now() + result.readyInMs).toISOString()
-    db()
-      .prepare(
-        `UPDATE orders SET provider_ready_at = ?, updated_at = datetime('now')
-          WHERE id = ? AND status = 'processing'`,
-      )
-      .run(readyAt, order.id)
-  }
-  return restingPayload(getOrder(order.id, userId)!, balance.availableCents)
 }
 
 /**

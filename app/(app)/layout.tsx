@@ -1,19 +1,17 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { AppNav } from '@/components/app-nav'
 import { Brand } from '@/components/brand'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { logoutAction } from '@/lib/actions'
-import { currentSession } from '@/lib/auth'
+import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
 
 /** Everything under /user is behind the session. */
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const found = await currentSession()
-  if (!found) redirect('/login')
+  const found = await requireSession()
   const { user } = found
 
   const available = user.credit_cents - user.held_cents
@@ -36,24 +34,22 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           )}
         </div>
 
-        <AppNav isAdmin={user.account_type === 'admin'} />
-
-        <div style={{ marginTop: 'auto', display: 'grid', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <ThemeToggle />
-            <span className="t-small" style={{ fontSize: 13 }}>
-              {user.username}
-            </span>
+        <AppNav isAdmin={user.account_type === 'admin'}>
+          <div className="app-account-actions">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ThemeToggle />
+              <span className="t-small">{user.username}</span>
+            </div>
+            <Link className="button button--quiet" href="/">
+              Back to site
+            </Link>
+            <form action={logoutAction}>
+              <button className="button button--quiet button--wide" type="submit">
+                Sign out
+              </button>
+            </form>
           </div>
-          <Link className="button button--quiet" href="/">
-            Back to site
-          </Link>
-          <form action={logoutAction}>
-            <button className="button button--quiet button--wide" type="submit">
-              Sign out
-            </button>
-          </form>
-        </div>
+        </AppNav>
       </aside>
 
       <main className="app-main">{children}</main>

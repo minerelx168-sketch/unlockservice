@@ -6,12 +6,15 @@ import { Icon } from '@/components/icons'
 import { currentSession } from '@/lib/auth'
 import { landingRoute } from '@/lib/provider'
 import { describeQuote, readQuote } from '@/lib/quote'
+import { safeContinuation } from '@/lib/continuation'
+import { googleOAuthConfigured } from '@/lib/google-oauth'
 
 export const metadata: Metadata = { title: 'Create an account' }
 export const dynamic = 'force-dynamic'
 
-export default async function RegisterPage() {
-  if (await currentSession()) redirect(landingRoute())
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const returnTo = safeContinuation((await searchParams).next)
+  if (await currentSession()) redirect(returnTo ?? landingRoute())
 
   /* What they asked for on the homepage. It was previously sent here in the
      query string and then ignored, so the phone and the network had to be
@@ -21,8 +24,8 @@ export default async function RegisterPage() {
   return (
     <div className="auth-card">
       <Brand />
-      <h1>Start your unlock.</h1>
-      <p>Create an account to view service prices, place an unlock request and track the result.</p>
+      <h1>Create your account.</h1>
+      <p>{returnTo ? 'Your selected service is saved. Create an account to continue and keep your reports private.' : 'Keep your reports private, manage credit and track your orders in one place.'}</p>
       {quote ? (
         <p className="alert alert--success" role="status">
           <Icon name="check" strokeWidth={1.9} />
@@ -31,7 +34,7 @@ export default async function RegisterPage() {
           </span>
         </p>
       ) : null}
-      <RegisterForm />
+      <RegisterForm returnTo={returnTo} googleEnabled={googleOAuthConfigured()} />
     </div>
   )
 }

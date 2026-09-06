@@ -57,10 +57,12 @@
   border: 1px solid transparent;
   border-radius: var(--radius-control);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 0.9375rem;
   font-weight: 680;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
+  line-height: 1.4;
+  letter-spacing: 0;
+  white-space: normal;
+  text-align: center;
   transition:
     background-color 0.18s ease,
     border-color 0.18s ease,
@@ -151,8 +153,9 @@
 .icon-action {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   border: 1px solid var(--line);
   border-radius: 13px;
   background: var(--surface);
@@ -379,7 +382,7 @@
 
 .trust-bar span {
   display: block;
-  font-size: 12.5px;
+  font-size: 0.875rem;
   color: var(--muted);
   margin-top: 2px;
 }
@@ -389,14 +392,14 @@
 .field {
   display: grid;
   gap: 7px;
+  min-width: 0;
 }
 
 .field > label {
-  font-size: 11px;
-  font-weight: 720;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  line-height: 1.5;
+  color: var(--ink);
 }
 
 /* 16px, not 15. Safari on iOS zooms the whole viewport when a control it is
@@ -405,49 +408,61 @@
    entire fix. */
 .field input {
   min-height: 50px;
+  min-width: 0;
+  width: 100%;
   padding: 13px 14px;
   border: 1px solid var(--color-border-control);
   border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--ink-strong);
-  font-family: var(--font-mono);
-  font-size: 16px;
-  letter-spacing: 0.06em;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  letter-spacing: normal;
   transition: border-color 0.18s ease;
 }
 
 .field input::placeholder {
-  color: var(--faint);
+  color: var(--muted);
+  opacity: 1;
 }
 
 .field input:hover {
-  border-color: var(--line-strong);
+  border-color: var(--primary);
+}
+
+.field input.mono,
+.field input[inputmode='numeric'] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .field select {
   min-height: 50px;
+  min-width: 0;
   width: 100%;
   padding: 12px 40px 12px 14px;
   border: 1px solid var(--color-border-control);
   border-radius: var(--radius-control);
   background: var(--surface);
   color: var(--ink-strong);
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 620;
   cursor: pointer;
   transition: border-color 0.18s ease;
 }
 
 .field select:hover {
-  border-color: var(--line-strong);
+  border-color: var(--primary);
 }
 
 .field-note {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 7px;
   min-height: 20px;
-  font-size: 12.5px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
   color: var(--muted);
 }
 
@@ -455,6 +470,11 @@
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
+  margin-top: 4px;
+}
+
+.field [aria-invalid='true'] {
+  border-color: var(--danger);
 }
 
 .field-note[data-state='valid'] {
@@ -478,7 +498,7 @@
 
 .unlock-submit {
   min-height: 58px;
-  font-size: 14px;
+  font-size: 1rem;
   letter-spacing: 0;
 }
 
@@ -493,7 +513,7 @@
 .unlock-quote-note {
   margin: -4px 0 0;
   text-align: center;
-  font-size: 11.5px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 
@@ -564,7 +584,7 @@
 .site-header .shell {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
   min-height: 74px;
 }
 
@@ -573,6 +593,8 @@
   align-items: center;
   gap: 10px;
   color: var(--ink-strong);
+  flex-shrink: 0;
+  min-height: 44px;
 }
 
 .brand .mark {
@@ -607,16 +629,20 @@
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 16px;
   margin-left: 2px;
 }
 
 .site-nav a {
   position: relative;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.875rem;
   font-weight: 620;
   color: var(--muted);
   padding-block: 4px;
+  white-space: nowrap;
 }
 
 .site-nav a:hover {
@@ -645,14 +671,16 @@
   align-items: center;
   gap: 8px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .nav-toggle,
-.nav-cta {
+.site-nav .nav-cta,
+.site-nav .nav-account {
   display: none;
 }
 
-@media (max-width: 940px) {
+@media (max-width: 1180px) {
   .nav-toggle {
     display: grid;
   }
@@ -673,6 +701,8 @@
     background: var(--page);
     border-bottom: 1px solid var(--line);
     box-shadow: var(--shadow-soft);
+    max-height: calc(100dvh - 75px);
+    overflow-y: auto;
   }
 
   .site-nav[data-open='true'] {
@@ -683,6 +713,7 @@
     padding-block: 12px;
     border-top: 1px solid var(--line);
     font-size: 15px;
+    white-space: normal;
   }
 
   .site-nav a[aria-current='page']::after {
@@ -695,10 +726,14 @@
 
   /* The header CTA moves into the panel rather than competing for the
      last 40px of a phone header. */
-  .nav-cta {
-    display: block;
-    margin-top: 14px;
+  .site-nav .nav-cta,
+  .site-nav .nav-account {
+    display: flex;
     color: var(--primary);
+  }
+
+  .site-nav .nav-cta {
+    margin-top: 14px;
   }
 }
 
@@ -1214,6 +1249,31 @@
 }
 
 @media (max-width: 620px) {
+  .grid-3 {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .trust-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trust-bar > div {
+    padding: 16px;
+  }
+
+  .trust-bar > div:nth-child(2n + 1) {
+    border-left: 0;
+  }
+
+  .trust-bar > div:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
   .site-header .shell {
     gap: 12px;
   }
@@ -1252,8 +1312,14 @@
    toggle. The mark keeps the link home; a name nobody can reach the menu
    past is the worse trade. */
 @media (max-width: 380px) {
-  .brand .name {
-    display: none;
+  .site-header .brand .name {
+    /* Keep the home link named for assistive technology. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .site-header .shell {
@@ -1298,5 +1364,17 @@
   .grid-3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
+  }
+
+  .trust-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trust-bar > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  .trust-bar > div:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
   }
 }

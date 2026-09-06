@@ -16,6 +16,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  scroll-padding-top: 96px;
 }
 
 body {
@@ -23,7 +24,7 @@ body {
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 16.5px;
+  font-size: 1.03125rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -182,7 +183,7 @@ h4 {
 }
 
 .t-body {
-  font-size: 16.5px;
+  font-size: 1.03125rem;
   line-height: 1.7;
   color: var(--ink);
   margin: 0;
@@ -191,7 +192,7 @@ h4 {
 /* 15px is the floor for anything a customer has to read. Below that the
    line is a label, not a sentence. */
 .t-small {
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.7;
   color: var(--muted);
   margin: 0;
@@ -265,6 +266,7 @@ h4 {
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
 }

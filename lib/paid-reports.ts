@@ -20,6 +20,7 @@ import {
   type ProviderService,
 } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { claimProviderPoll } from './provider-poll-lease'
 import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
 
@@ -577,46 +578,66 @@ function pollDebounced(row: PaidReportOrderRow) {
 export async function pollPaidReport(userId: number, orderId: number): Promise<PaidReportPayload> {
   const original = rowForUser(userId, orderId)
   if (!original) throw new PaidReportError('Paid report not found.', 'report_not_found')
-  const row = reconcileSettlement(original)
-  const before = getBalance(userId)
-  if (row.status !== 'processing') return payload(row, before, before)
-  if (row.provider_mode !== 'dhru' || !row.provider_order_id || pollDebounced(row)) {
-    return payload(row, before, before)
+  const snapshot = reconcileSettlement(original)
+  const snapshotBalance = getBalance(userId)
+  if (snapshot.status !== 'processing'
+    || snapshot.provider_mode !== 'dhru'
+    || !snapshot.provider_order_id
+    || pollDebounced(snapshot)) {
+    return payload(snapshot, snapshotBalance, snapshotBalance)
   }
 
-  let outcome: ProviderOutcome
+  const releasePoll = claimProviderPoll('paid_imei_report', snapshot.id)
+  if (!releasePoll) return payload(snapshot, snapshotBalance, snapshotBalance)
+
   try {
-    outcome = await pollProviderRequest(row.provider_order_id)
-  } catch {
-    outcome = {
-      status: 'unavailable',
-      providerId: row.provider_order_id,
-      code: 'poll_exception',
-      message: 'The provider could not be reached.',
-      retryable: true,
-      timing: { totalMs: 0 },
+    const current = rowForUser(userId, orderId)
+    if (!current) throw new PaidReportError('Paid report not found.', 'report_not_found')
+    const row = reconcileSettlement(current)
+    const before = getBalance(userId)
+    if (row.status !== 'processing'
+      || row.provider_mode !== 'dhru'
+      || !row.provider_order_id
+      || pollDebounced(row)) {
+      return payload(row, before, before)
     }
-  }
 
-  if (outcome.status === 'unavailable' && outcome.retryable) {
-    db()
-      .prepare(
-        `UPDATE paid_report_orders
-            SET provider_last_polled_at = datetime('now'), provider_attempts = provider_attempts + 1,
-                provider_error_code = ?, updated_at = datetime('now')
-          WHERE id = ? AND status = 'processing'`,
-      )
-      .run(outcome.code, row.id)
-    auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:transient`)
-    const current = rowForUser(userId, row.id)!
-    return payload(current, before, getBalance(userId))
-  }
+    let outcome: ProviderOutcome
+    try {
+      outcome = await pollProviderRequest(row.provider_order_id)
+    } catch {
+      outcome = {
+        status: 'unavailable',
+        providerId: row.provider_order_id,
+        code: 'poll_exception',
+        message: 'The provider could not be reached.',
+        retryable: true,
+        timing: { totalMs: 0 },
+      }
+    }
 
-  if (outcome.status === 'processing') {
-    const processing = markProcessing(row, outcome.providerId, true)
-    auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:processing`)
-    return payload(processing, before, getBalance(userId))
-  }
+    if (outcome.status === 'unavailable' && outcome.retryable) {
+      db()
+        .prepare(
+          `UPDATE paid_report_orders
+              SET provider_last_polled_at = datetime('now'), provider_attempts = provider_attempts + 1,
+                  provider_error_code = ?, updated_at = datetime('now')
+            WHERE id = ? AND status = 'processing'`,
+        )
+        .run(outcome.code, row.id)
+      auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:transient`)
+      const current = rowForUser(userId, row.id)!
+      return payload(current, before, getBalance(userId))
+    }
 
-  return handleOutcome(row, outcome, before, `poll:${row.provider_attempts + 1}:outcome`)
+    if (outcome.status === 'processing') {
+      const processing = markProcessing(row, outcome.providerId, true)
+      auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:processing`)
+      return payload(processing, before, getBalance(userId))
+    }
+
+    return handleOutcome(row, outcome, before, `poll:${row.provider_attempts + 1}:outcome`)
+  } finally {
+    releasePoll()
+  }
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useActionState, useMemo, useRef, useState, type FormEvent } from 'react'
 import { startUnlockQuoteAction, type FormState } from '@/lib/actions'
 import { groupImei, IMEI_LENGTH, luhnValid, normalizeImei } from '@/lib/imei'
@@ -35,8 +36,7 @@ export function ImeiForm({
   ordering = true,
 }: {
   carriers: QuoteCarrier[]
-  /** False while unlock ordering is closed — the button then leads to the
-      reports catalogue, so it must not promise an unlock. */
+  /** Closed ordering shows browsing and waitlist links without collecting phone details. */
   ordering?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -102,6 +102,25 @@ export function ImeiForm({
 
   const shown = state.error ? { state: 'invalid' as const, icon: 'cross' as IconName, text: state.error } : note
 
+  if (!ordering) {
+    return (
+      <div className="unlock-quote">
+        <p className="t-small">
+          Unlock ordering is not open yet. Browse phone report prices and check availability, or join
+          the unlock waitlist.
+        </p>
+        <Link className="button button--primary button--wide unlock-submit" href="/services/imei-check">
+          Browse phone reports
+          <Icon name="arrowRight" strokeWidth={2.2} />
+        </Link>
+        <Link className="button button--secondary button--wide" href="/unlock-waitlist">
+          Join the unlock waitlist
+        </Link>
+        <p className="unlock-quote-note">No account or IMEI is needed to browse prices.</p>
+      </div>
+    )
+  }
+
   return (
     <form className="unlock-quote" action={action} onSubmit={handleSubmit} noValidate>
       {/* The digits, ungrouped — the visible field carries the spacing. */}
@@ -156,14 +175,12 @@ export function ImeiForm({
       </div>
 
       <button className="button button--primary button--wide unlock-submit" type="submit" disabled={pending}>
-        {pending ? 'Checking…' : ordering ? 'Unlock Phone' : 'Check this phone'}
+        {pending ? 'Checking…' : 'See price and delivery time'}
         <Icon name="arrowRight" strokeWidth={2.2} />
       </button>
 
       <p className="unlock-quote-note">
-        {ordering
-          ? 'Price and estimated delivery time are shown before you place the order.'
-          : 'Unlock orders are not open yet. This takes you to the reports you can order today, with the IMEI already filled in.'}
+        Price and estimated delivery time are shown before you place the order.
       </p>
     </form>
   )

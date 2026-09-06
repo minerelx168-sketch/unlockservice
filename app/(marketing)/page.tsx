@@ -23,22 +23,22 @@ const SERVICES: Array<{
     icon: 'device',
     tint: '',
     title: 'Unlock services',
-    body: 'Carrier, activation-lock, MDM and device unlocks, each at a fixed price. Anything you can order today is marked as such; the rest is still being checked.',
-    action: { href: '/services', label: 'Browse unlock services' },
+    body: 'Browse carrier, activation-lock, MDM and device unlock services. Check the price and availability for your device before proceeding.',
+    action: { href: '/services/unlock', label: 'Browse unlock services' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
     title: 'IMEI check reports',
     body: 'Apple, Samsung, carrier, blacklist and device-status reports on a phone you are about to buy or sell. The free check validates the number itself.',
-    action: { href: '/services', label: 'Browse IMEI reports' },
+    action: { href: '/services/imei-check', label: 'Browse IMEI reports' },
   },
   {
     icon: 'search',
     tint: ' icon-tile--moss',
     title: 'Track every order',
     body: 'See when a request is processing, delivered or refused. Delivered codes and instructions stay attached to the original order.',
-    action: { href: '/login', label: 'Track an order' },
+    action: { href: '/user/orders', label: 'Track an order' },
   },
 ]
 
@@ -53,7 +53,7 @@ const STEPS: Array<{ icon: IconName; tint: string; title: string; body: string }
     icon: 'bolt',
     tint: ' icon-tile--accent',
     title: 'We verify and process',
-    body: 'Review the price and delivery estimate, then confirm. Your funds are held while the provider checks eligibility.',
+    body: 'Review the price and delivery estimate, then confirm. Your account credit is reserved while the provider checks eligibility.',
   },
   {
     icon: 'check',
@@ -72,12 +72,12 @@ const BAND_ROWS: Array<{ icon: IconName; title: string; caption: string }> = [
   {
     icon: 'clock',
     title: 'Tracked while it runs',
-    caption: 'A live status per order, and the result by email',
+    caption: 'Follow the status and view the result in your account',
   },
   {
     icon: 'window',
     title: 'Held, then charged',
-    caption: 'Refused devices give the whole amount back',
+    caption: 'If refused, reserved credit returns to your account balance',
   },
 ]
 
@@ -113,7 +113,7 @@ const FAQ = [
   {
     question: 'What if my device cannot be unlocked?',
     answer:
-      'You get every cent back. Your credit is held while the order is with the carrier and only becomes a charge once the unlock is delivered — so a device that is under contract, reported lost or blocked for unpaid bills costs you nothing.',
+      'Your account credit is reserved while the order is with the carrier and charged only when the unlock is delivered. If the carrier refuses the order, the full reserved amount returns to your account balance. This releases account credit; it is not a refund to your original payment method.',
   },
   {
     question: 'Where do I find my IMEI?',
@@ -128,7 +128,7 @@ const FAQ = [
   {
     question: 'Can you unlock a phone that is still on contract?',
     answer:
-      'Usually not, and we will not pretend otherwise. Carriers refuse devices with an unpaid balance, an active contract, or a lost-or-stolen report. The order comes back refused and your credit is returned in full.',
+      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, the full reserved credit returns to your account balance.',
   },
 ]
 
@@ -155,21 +155,22 @@ export default function HomePage() {
               <p className="alert" role="status">
                 <Icon name="info" strokeWidth={1.9} />
                 <span>
-                  <b>{status.heading}.</b> {status.detail}{' '}
-                  <Link href="/unlock-waitlist">Get told when it opens</Link>.
+                  <b>Unlock ordering is paused.</b> You can browse service prices and follow existing orders.{' '}
+                  <Link href="/unlock-waitlist">Join the unlock waitlist</Link>.
                 </span>
               </p>
             ) : null}
 
             <h1 className="t-hero">
-              Unlock your phone by IMEI.
+              {ordering ? 'Unlock your phone by IMEI.' : 'Find the right service for your phone.'}
               <br />
-              <span className="accent">Price and delivery time before you pay.</span>
+              <span className="accent">{ordering ? 'Price and delivery time before you pay.' : 'Browse prices and check availability.'}</span>
             </h1>
 
             <p className="t-lead">
-              Enter the IMEI and the network the phone is locked to. You see what it costs and how
-              long it takes before anything is charged.
+              {ordering
+                ? 'Enter the IMEI and the network the phone is locked to. You see what it costs and how long it takes before anything is charged.'
+                : 'Explore device reports and unlock services. Compare service details before creating an account or entering your phone information.'}
             </p>
 
             {/* One filled button per screen. These were three competing calls
@@ -180,7 +181,7 @@ export default function HomePage() {
             <p className="hero-asides">
               <Link href="/services/imei-check">Just want a device report?</Link>
               <span aria-hidden="true">·</span>
-              <Link href="/login">Track an order</Link>
+              <Link href="/user/orders">Track an order</Link>
             </p>
           </div>
 
@@ -188,9 +189,9 @@ export default function HomePage() {
             <div className="hero-panel-head">
               <span className="kicker">
                 <Icon name="device" strokeWidth={2} />
-                Unlock your phone
+                {ordering ? 'Unlock your phone' : 'Explore your options'}
               </span>
-              <span className="t-micro">Safe · legal · refunded if refused</span>
+              <span className="t-micro">{ordering ? 'Reserved credit returned if refused' : 'Prices and availability before you choose'}</span>
             </div>
 
             {/* The same list the order form is built from, so the network a
@@ -223,7 +224,7 @@ export default function HomePage() {
                 </div>
                 <div className="mini-stat">
                   <span className="label">If unavailable</span>
-                  <span className="value">Funds returned</span>
+                  <span className="value">Credit returned to balance</span>
                 </div>
               </div>
             </div>
@@ -439,9 +440,9 @@ export default function HomePage() {
               ))}
             </ul>
 
-            <Link className="button button--primary" href="/register" style={{ justifySelf: 'start' }}>
+            <Link className="button button--primary" href={ordering ? '#check' : '/services/imei-check'} style={{ justifySelf: 'start' }}>
               <Icon name="bolt" strokeWidth={1.9} />
-              Unlock your first device
+              {ordering ? 'See your unlock price' : 'Browse phone reports'}
             </Link>
           </div>
         </div>
@@ -492,14 +493,14 @@ export default function HomePage() {
               <p className="t-small">
                 {ordering
                   ? 'Start with the country, original carrier and IMEI. You will see service details before confirming the order.'
-                  : 'Unlock ordering is not open yet. Leave an address and you will hear the day it is — phone checks and reports can be ordered today.'}
+                  : 'Unlock ordering is not open yet. Browse phone report prices and availability, or join the waitlist for unlock updates.'}
               </p>
             </div>
             <div className="cta-actions">
               <Link className="button button--primary" href={ordering ? '#check' : '/unlock-waitlist'}>
                 {ordering ? 'Unlock Phone Now' : 'Notify me when unlocking opens'}
               </Link>
-              <Link className="button button--quiet" href="/login">
+              <Link className="button button--quiet" href="/user/orders">
                 Track an Order
               </Link>
             </div>

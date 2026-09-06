@@ -2,14 +2,18 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { Icon } from '@/components/icons'
-import { CUSTOMER_IMEI_CHECK_PRODUCTS } from '@/lib/customer-provider-products'
+import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 
 export const metadata: Metadata = {
   title: 'Phone Check services and prices',
   description: 'Browse Phone Check services with prices, availability and delivery estimates.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function ImeiCheckServicesPage() {
+  const products = listPublicProviderProducts('imei_check')
+  const available = products.some((product) => product.status === 'available')
   return (
     <>
       <section className="section section--tint">
@@ -26,8 +30,8 @@ export default function ImeiCheckServicesPage() {
               Check device, carrier, warranty, blacklist and lock-status information. Every product on this page is a Phone Check service.
             </p>
             <div className="hero-actions service-page-actions">
-              <Link className="button button--primary" href="/user/reports/new">
-                <Icon name="file" /> Order a Phone Check
+              <Link className="button button--primary" href={available ? '/user/reports/new' : '#phone-check-catalog'}>
+                <Icon name="file" /> {available ? 'Order a Phone Check' : 'Browse report prices'}
               </Link>
               <Link className="button button--secondary" href="/services/unlock">Go to Unlock Service</Link>
               <Link className="button button--quiet" href="/check">Run basic IMEI validation</Link>
@@ -36,9 +40,10 @@ export default function ImeiCheckServicesPage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" id="phone-check-catalog">
         <div className="shell">
-          <ProductCatalog products={CUSTOMER_IMEI_CHECK_PRODUCTS} domain="imei_check" />
+          {!available ? <p className="alert" role="status"><Icon name="info" /><span>Paid reports are temporarily unavailable. You can <Link href="/check">validate an IMEI for free</Link> or <Link href="/contact">contact support</Link>.</span></p> : null}
+          <ProductCatalog products={products} domain="imei_check" />
           <p className="t-micro service-catalog-version">
             A report describes the phone at the moment it is run, and does not prove who owns it.
           </p>

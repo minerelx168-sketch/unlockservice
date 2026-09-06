@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { formatUsd } from '@/lib/money'
-import type { ProviderProduct, ProviderProductDomain } from '@/lib/provider-products'
+import type { ProviderProductDomain } from '@/lib/provider-products'
+import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
 import { Icon } from './icons'
 
 type ProductCatalogProps = {
-  products: ProviderProduct[]
+  products: PublicProviderProduct[]
   domain: ProviderProductDomain
 }
 
@@ -44,7 +45,7 @@ function customerText(value: string) {
     .trim()
 }
 
-function ProductCard({ product }: { product: ProviderProduct }) {
+function ProductCard({ product }: { product: PublicProviderProduct }) {
   const available = product.status === 'available'
   const productName = customerText(product.name)
   const productGroup = customerText(product.group)
@@ -70,6 +71,7 @@ function ProductCard({ product }: { product: ProviderProduct }) {
         <span className="label">Price</span>
         <strong className="product-price">{formatUsd(product.priceCents)}</strong>
       </div>
+      <p className="t-small">Estimated delivery: {customerText(product.etaLabel)}</p>
 
       {available ? (
         <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
@@ -154,7 +156,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
             <h2>Find a {copy.label.toLowerCase()} service</h2>
             <p className="t-small">Choose a subcategory, search by name or jump directly to a service and its price.</p>
           </div>
-          <span>{visible.length} of {products.length} shown</span>
+          <span role="status" aria-live="polite">{visible.length} of {products.length} shown</span>
         </header>
         <div className="panel-body catalog-filter-grid">
           <div className="field catalog-search-field">
@@ -223,7 +225,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
       </section>
 
       {visible.length === 0 ? (
-        <p className="alert" role="status"><Icon name="info" /> <span>No services match those filters.</span></p>
+        <p className="alert" role="status"><Icon name="info" /> <span>No services match those filters. Clear filters above to see all services.</span></p>
       ) : (
         <div className="product-subcategory-list">
           {visibleGroups.map(({ group, products: groupProducts }) => {

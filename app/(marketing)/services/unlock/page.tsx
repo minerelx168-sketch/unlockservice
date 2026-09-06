@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { Icon } from '@/components/icons'
-import { CUSTOMER_UNLOCK_PRODUCTS } from '@/lib/customer-provider-products'
+import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 import { unlockOrderingEnabled } from '@/lib/provider'
 
 export const metadata: Metadata = {
@@ -48,7 +48,7 @@ export default function UnlockServicesPage() {
 
       <section className="section" id="unlock-catalog">
         <div className="shell">
-          <ProductCatalog products={CUSTOMER_UNLOCK_PRODUCTS} domain="unlock" />
+          <ProductCatalog products={listPublicProviderProducts('unlock')} domain="unlock" />
           <p className="t-micro service-catalog-version">
             Prices are current as shown. A service you cannot order yet is one we have not finished
             checking with the network behind it.{' '}
