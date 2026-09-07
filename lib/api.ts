@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { currentSession } from './auth'
+import { readCommandJson } from './request-json'
 
 /**
  * Shared guard for the JSON endpoints: resolve the session, then check the
@@ -42,7 +43,7 @@ export async function guard(request: Request) {
 
   let body: Record<string, unknown>
   try {
-    body = (await request.json()) as Record<string, unknown>
+    body = await readCommandJson(request)
   } catch {
     return { error: NextResponse.json({ success: false, error: 'Malformed request.' }, { status: 400 }) }
   }

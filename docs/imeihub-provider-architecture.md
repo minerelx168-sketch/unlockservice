@@ -67,7 +67,7 @@ Free-check records continue storing only HMAC fingerprint plus masked IMEI. Raw 
 | IMEI check | `processing -> completed/unavailable` | None |
 | Any terminal resource | duplicate poll | Return stored state; never downgrade |
 
-Client polling is debounced. The worker selects bounded batches and calls the same business functions as user-triggered polling. No generic unsigned callback route is exposed. A callback may be added later only when the selected provider supplies a documented signing protocol and replay identifier.
+Client polling is debounced. The worker selects bounded batches and calls the same business functions as user-triggered polling. An opt-in signed callback route now exists at `/api/provider/webhook`; it requires explicit provider/adapter support for the documented HMAC and event-ID protocol. There is no unsigned fallback, and the current synchronous provider is not assumed to support callbacks. See [credit orders and signed callbacks](backend-order-webhooks.md) for atomic settlement, timeout recovery and the notification worker.
 
 ## Additive data model
 

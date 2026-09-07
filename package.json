@@ -12,7 +12,8 @@
     "deploy:local": "bash deploy/local.sh",
     "seed:demo": "node scripts/seed-demo.mjs",
     "admin:promote": "node scripts/promote-admin.mjs",
-    "provider:poll": "tsx scripts/poll-provider-jobs.ts"
+    "provider:poll": "tsx scripts/poll-provider-jobs.ts",
+    "notifications:deliver": "tsx scripts/deliver-order-notifications.ts"
   },
   "dependencies": {
     "@types/better-sqlite3": "^9.6.0",

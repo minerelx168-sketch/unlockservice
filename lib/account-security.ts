@@ -58,7 +58,7 @@ async function sendEmail(
   subject: string,
   html: string,
   text: string,
-  options: { replyTo?: string } = {},
+  options: { replyTo?: string; idempotencyKey?: string } = {},
 ) {
   requireEmailDelivery()
   /* A per-message reply-to for mail that is a conversation — a contact
@@ -69,6 +69,7 @@ async function sendEmail(
     headers: {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       'Content-Type': 'application/json',
+      ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
     },
     body: JSON.stringify({
       from: process.env.IUNLOCKMOBILE_EMAIL_FROM,
@@ -79,6 +80,8 @@ async function sendEmail(
       text,
     }),
     cache: 'no-store',
+    // Bound delivery attempts so an email cannot hold a worker indefinitely.
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {
@@ -101,7 +104,7 @@ export async function sendTransactionalEmail(
   subject: string,
   html: string,
   text: string,
-  options: { replyTo?: string } = {},
+  options: { replyTo?: string; idempotencyKey?: string } = {},
 ) {
   await sendEmail(to, subject, html, text, options)
 }

@@ -294,27 +294,46 @@ async function requestText(
     })
     const declaredLength = Number(response.headers.get('content-length') ?? 0)
     if (declaredLength > MAX_RESPONSE_BYTES) {
-      return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: false, startedAt }
+      await response.body?.cancel()
+      return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: true, startedAt }
     }
-    const buffer = await response.arrayBuffer()
-    if (buffer.byteLength > MAX_RESPONSE_BYTES) {
-      return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: false, startedAt }
+    // Enforce the cap while streaming; Content-Length can be absent or false.
+    const chunks: Uint8Array[] = []
+    let length = 0
+    const reader = response.body?.getReader()
+    if (reader) {
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          length += value.byteLength
+          if (length > MAX_RESPONSE_BYTES) {
+            await reader.cancel()
+            return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: true, startedAt }
+          }
+          chunks.push(value)
+        }
+      } finally {
+        reader.releaseLock()
+      }
     }
-    const text = new TextDecoder().decode(buffer)
+    const text = Buffer.concat(chunks, length).toString('utf8')
     if (!response.ok) {
       return {
         ok: false as const,
         code: `http_${response.status}`,
         message: response.status >= 500 ? 'The provider is temporarily unavailable.' : 'The provider rejected the request.',
-        retryable: response.status === 408 || response.status === 429 || response.status >= 500,
+        // HTTP failure alone does not prove that a placement was rejected.
+        // Preserve its reservation until a definitive business status arrives.
+        retryable: true,
         startedAt,
       }
     }
     return { ok: true as const, text, startedAt }
-  } catch (error) {
+  } catch {
     return {
       ok: false as const,
-      code: error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'network_error',
+      code: controller.signal.aborted ? 'timeout' : 'network_error',
       message: 'The provider could not be reached.',
       retryable: true,
       startedAt,
@@ -368,7 +387,7 @@ async function submitSync(config: ProviderConfiguration, request: ProviderReques
     if (Object.keys(details).length) {
       return { status: 'completed', providerId: null, data: details, timing: { totalMs: Date.now() - response.startedAt } }
     }
-    return providerFailure(response.startedAt, 'invalid_response', 'The provider returned an unreadable response.', false)
+    return providerFailure(response.startedAt, 'invalid_response', 'The provider returned an unreadable response.', true)
   }
 
   const rawStatus = decoded.status ?? decoded.result ?? decoded.success
@@ -410,7 +429,15 @@ async function placeDhru(config: ProviderConfiguration, request: ProviderRequest
     }
   }
   const message = pluck(decoded, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description', 'error']) || 'The provider rejected the order.'
-  return providerFailure(response.startedAt, 'provider_rejected', message, false)
+  // An empty/malformed placement reply may have lost an accepted job ID.
+  // Only the provider's explicit error envelope is a definitive refusal.
+  const errorRecord = firstObjectRecord(decoded?.ERROR)
+  const explicitError = typeof decoded?.ERROR === 'string'
+    ? Boolean(decoded.ERROR.trim())
+    : Boolean(pluck(errorRecord, ['MESSAGE', 'message', 'FULL_DESCRIPTION', 'description'])
+      || failureStatus(statusWord(errorRecord.STATUS ?? errorRecord.status)))
+  const rejected = explicitError || failureStatus(statusWord(decoded?.status ?? decoded?.STATUS))
+  return providerFailure(response.startedAt, rejected ? 'provider_rejected' : 'invalid_response', message, !rejected)
 }
 
 export async function submitProviderRequest(request: ProviderRequest): Promise<ProviderOutcome> {
@@ -424,9 +451,9 @@ export async function pollProviderRequest(providerId: string): Promise<ProviderO
   const config = providerConfiguration()
   const startedAt = Date.now()
   if (!config.enabled || !config.username || !config.dhruKey) {
-    return providerFailure(startedAt, 'provider_disabled', 'The asynchronous provider is not configured.', false, providerId)
+    return providerFailure(startedAt, 'provider_disabled', 'The asynchronous provider is not configured.', true, providerId)
   }
-  if (!providerId.trim()) return providerFailure(startedAt, 'provider_id_missing', 'The provider reference is missing.', false)
+  if (!providerId.trim()) return providerFailure(startedAt, 'provider_id_missing', 'The provider reference is missing.', true)
 
   const response = await requestText(dhruUrl(config, 'getimeiorder', { id: providerId }), config)
   if (!response.ok) {

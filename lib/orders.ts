@@ -12,6 +12,7 @@ import { activeSupplier, maintenanceState, type SupplierResult, type UnlockReque
 import { providerConfiguration, unlockProviderService } from './provider-api'
 import { recordProviderEvent } from './provider-events'
 import { claimProviderPoll } from './provider-poll-lease'
+import { enqueueOrderNotification } from './order-notifications'
 import { consumeAttempt } from './rate-limit'
 
 /**
@@ -212,7 +213,9 @@ function persistProviderOutcome(order: OrderView, result: SupplierResult, polled
       ? 'completed'
       : result.status === 'accepted'
         ? 'processing'
-        : 'unavailable'
+        : result.status === 'uncertain'
+          ? 'manual_review'
+          : 'unavailable'
   recordProviderEvent({
     resourceType: 'order',
     resourceId: order.id,
@@ -264,6 +267,14 @@ function orderForKey(userId: number, idempotencyKey: string): OrderView | undefi
   return row ? decorate(row) : undefined
 }
 
+function assertSameRequest(order: OrderView, input: SubmitInput, imei: string, email: string) {
+  if (order.kind !== input.kind || order.brand_id !== input.brandId || order.imei !== imei
+      || order.delivery_email !== email
+      || (input.kind === 'carrier_unlock' ? order.carrier_id !== input.carrierId : order.service_id !== input.serviceId)) {
+    throw new OrderError('That request key was already used for a different order.', 'idempotency_conflict')
+  }
+}
+
 /** The payload for an order that is simply read back, moving no money. */
 function restingPayload(order: OrderView, availableCents: number): OrderPayload {
   return payload(order, {
@@ -280,6 +291,17 @@ export async function submitOrder(
   input: SubmitInput,
   source: 'website' | 'api' = 'website',
 ): Promise<OrderPayload> {
+  const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
+  const imei = validateImei(input.imei)
+  const email = validateEmail(input.email)
+  if (idempotencyKey) {
+    const existing = orderForKey(userId, idempotencyKey)
+    if (existing) {
+      assertSameRequest(existing, input, imei, email)
+      return restingPayload(existing, readBalance(userId).availableCents)
+    }
+  }
+  // A replay remains readable even when new placement has been paused.
   if (maintenanceState().active) throw new OrderError(maintenanceState().message, 'maintenance')
 
   /* Resolved before a row exists. activeSupplier() refuses to hand back the
@@ -295,12 +317,6 @@ export async function submitOrder(
     )
   }
 
-  const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
-  if (idempotencyKey) {
-    const existing = orderForKey(userId, idempotencyKey)
-    if (existing) return restingPayload(existing, readBalance(userId).availableCents)
-  }
-
   /* Each accepted order costs a real supplier request, so the endpoint gets
      a ceiling of its own. It is set well above what a person ordering for
      themselves would reach; a reseller working through a batch will feel it
@@ -312,9 +328,6 @@ export async function submitOrder(
 
   const brand = getBrand(input.brandId)
   if (!brand) throw new OrderError('Pick the device brand.', 'brand_unknown')
-
-  const imei = validateImei(input.imei)
-  const email = validateEmail(input.email)
 
   let priceCents: number
   let etaHours: number
@@ -344,8 +357,17 @@ export async function submitOrder(
      failed hold left an orphan behind whenever the process died in between;
      a rollback cannot. */
   let orderId: number
+  let replayed = false
   try {
     orderId = db().transaction(() => {
+      // BEGIN IMMEDIATE locks SQLite's writer before checking the key/balance.
+      // A concurrent process therefore cannot reserve the same request twice.
+      const existing = idempotencyKey ? orderForKey(userId, idempotencyKey) : undefined
+      if (existing) {
+        assertSameRequest(existing, input, imei, email)
+        replayed = true
+        return existing.id
+      }
       const insert = db()
         .prepare(
           `INSERT INTO orders
@@ -370,7 +392,7 @@ export async function submitOrder(
       const id = Number(insert.lastInsertRowid)
       hold(userId, priceCents, 'order', String(id))
       return id
-    })()
+    }).immediate()
   } catch (error) {
     if (error instanceof InsufficientCredit) {
       throw new OrderError('Not enough credit for this order. Add funds and try again.', 'insufficient_credit')
@@ -379,6 +401,7 @@ export async function submitOrder(
   }
 
   let order = getOrder(orderId, userId)!
+  if (replayed) return restingPayload(order, readBalance(userId).availableCents)
   const config = providerConfiguration()
   const mapping = unlockProviderService(requestFor(order, brand).mappingKey)
   if (config.enabled && mapping) {
@@ -395,10 +418,22 @@ export async function submitOrder(
   try {
     result = await supplier.submit(requestFor(order, brand))
   } catch {
-    result = { status: 'unavailable' as const, orderId: null, message: 'The supplier could not be reached.' }
+    result = { status: 'uncertain' as const, orderId: null, message: 'The supplier response is uncertain.' }
   }
 
   persistProviderOutcome(order, result, false)
+
+  if (result.status === 'uncertain') {
+    // Timeout is NOT a rejection: the provider may already have accepted it.
+    // Never automatically resubmit or refund an order with an unknown outcome.
+    db().prepare(`UPDATE orders SET provider_order_id = COALESCE(?, provider_order_id),
+      provider_error_code = ?, error_message = ?, updated_at = datetime('now')
+      WHERE id = ? AND status = 'processing'`).run(
+      result.orderId, result.provider?.errorCode ?? 'submit_uncertain',
+      'The provider response is uncertain. Credit remains reserved while this order is reviewed. Do not place it again.', orderId,
+    )
+    return restingPayload(getOrder(orderId, userId)!, readBalance(userId).availableCents)
+  }
 
   if (result.status === 'unavailable') {
     return settleUnavailable(orderId, userId, result.message, before.availableCents)
@@ -412,7 +447,7 @@ export async function submitOrder(
   db()
     .prepare(
       `UPDATE orders SET provider_order_id = ?, provider_ready_at = ?, updated_at = datetime('now')
-        WHERE id = ?`,
+        WHERE id = ? AND status = 'processing'`,
     )
     .run(result.orderId, readyAt, orderId)
 
@@ -452,6 +487,8 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
 
     const brand = order.brand_id ? getBrand(order.brand_id) : undefined
     if (!brand) return resting
+    const config = providerConfiguration()
+    if (order.provider_name && (!config.enabled || config.name !== order.provider_name)) return resting
     let supplier
     try {
       supplier = activeSupplier()
@@ -483,7 +520,7 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
           errorCode: 'poll_exception',
         })
       }
-      return resting
+      return restingPayload(getOrder(orderId, userId)!, readBalance(userId).availableCents)
     }
 
     persistProviderOutcome(order, result, true)
@@ -494,7 +531,7 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
     if (result.status === 'unavailable') {
       return settleUnavailable(order.id, userId, result.message, balance.availableCents)
     }
-    if (result.provider) {
+    if (result.status === 'accepted' && result.provider) {
       const readyAt = new Date(Date.now() + result.readyInMs).toISOString()
       db()
         .prepare(
@@ -503,7 +540,7 @@ export async function pollOrder(userId: number, orderId: number): Promise<OrderP
         )
         .run(readyAt, order.id)
     }
-    return restingPayload(getOrder(order.id, userId)!, balance.availableCents)
+    return restingPayload(getOrder(order.id, userId)!, readBalance(userId).availableCents)
   } finally {
     releasePoll()
   }
@@ -545,8 +582,30 @@ function settle(
     } else {
       refund(userId, row.price_cents, 'order', String(orderId))
     }
+    enqueueOrderNotification('order', orderId, userId, next === 'delivered' ? 'success' : 'rejected')
     return { claimed: true, priceCents: row.price_cents }
-  })()
+  }).immediate()
+}
+
+/** Authenticated webhook and poll/submit use the same terminal transition. */
+export function settleOrderWebhook(
+  orderId: number,
+  providerOrderId: string,
+  outcome: { status: 'success' | 'rejected'; result?: Record<string, unknown>; message?: string; unlockCode?: string },
+): { status: string } {
+  return db().transaction(() => {
+    const row = db().prepare('SELECT user_id, provider_order_id FROM orders WHERE id = ?').get(orderId) as
+      { user_id: number; provider_order_id: string | null } | undefined
+    if (!row || row.provider_order_id !== providerOrderId) throw new OrderError('Order reference is not ready.', 'order_unknown')
+    const order = getOrder(orderId, row.user_id)!
+    if (order.status !== 'processing') return { status: order.status }
+    if (outcome.status === 'success') {
+      const code = outcome.unlockCode?.trim() || null
+      return { status: settleDelivered(orderId, row.user_id, providerOrderId, code, outcome.result ?? {}).status }
+    }
+    return { status: settleUnavailable(orderId, row.user_id,
+      'The provider rejected this order. Reserved credit was returned.', readBalance(row.user_id).availableCents).status }
+  }).immediate()
 }
 
 function settleDelivered(
@@ -556,29 +615,32 @@ function settleDelivered(
   unlockCode: string | null,
   result: Record<string, unknown>,
 ): OrderPayload {
-  const before = getBalance(userId)
-  const { claimed, priceCents } = settle(orderId, userId, 'delivered', () => {
-    db()
-      .prepare(
-        `UPDATE orders
-            SET unlock_code = ?, result_json = ?, provider_order_id = ?,
-                provider_ready_at = NULL, updated_at = datetime('now')
-          WHERE id = ? AND status = 'processing'`,
-      )
-      .run(unlockCode, JSON.stringify(result), providerOrderId, orderId)
-  })
-
-  const after = readBalance(userId)
-  const order = getOrder(orderId, userId)!
-  if (!claimed) return restingPayload(order, after.availableCents)
-
-  return payload(order, {
-    beforeCents: before.availableCents,
-    heldCents: 0,
-    chargedCents: priceCents,
-    refundedCents: 0,
-    balanceCents: after.availableCents,
-  })
+  return db().transaction(() => {
+    const current = getOrder(orderId, userId)
+    if (!current) throw new OrderError('No such order.', 'order_unknown')
+    const before = getBalance(userId)
+    if (current.status !== 'processing') return restingPayload(current, before.availableCents)
+    // Every channel (submit, poll, webhook) must supply a usable code for a
+    // code-based service. A success label alone is not a delivered product.
+    if (current.delivery === 'code' && !unlockCode?.trim()) {
+      db().prepare(`UPDATE orders SET provider_order_id = COALESCE(?, provider_order_id),
+        provider_error_code = 'result_incomplete', error_message = 'The provider result needs review before delivery.',
+        updated_at = datetime('now') WHERE id = ? AND status = 'processing'`).run(providerOrderId, orderId)
+      return restingPayload(getOrder(orderId, userId)!, before.availableCents)
+    }
+    const { claimed, priceCents } = settle(orderId, userId, 'delivered', () => {
+      db().prepare(`UPDATE orders SET unlock_code = ?, result_json = ?, provider_order_id = ?,
+        provider_ready_at = NULL, provider_error_code = NULL, error_message = NULL, updated_at = datetime('now')
+        WHERE id = ? AND status = 'processing'`).run(unlockCode, JSON.stringify(result), providerOrderId, orderId)
+    })
+    const after = readBalance(userId)
+    const order = getOrder(orderId, userId)!
+    if (!claimed) return restingPayload(order, after.availableCents)
+    return payload(order, {
+      beforeCents: before.availableCents, heldCents: 0, chargedCents: priceCents,
+      refundedCents: 0, balanceCents: after.availableCents,
+    })
+  }).immediate()
 }
 
 function settleUnavailable(
