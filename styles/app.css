@@ -1998,3 +1998,30 @@ table.account-table td {
     order: -1;
   }
 }
+
+/* The confirmation step for an administrator credit adjustment. It is a
+   panel in the page, not window.confirm(): a browser told to block dialogs
+   suppresses the native one without a sound, and the button then does
+   nothing that anybody can see or report. */
+.admin-confirm {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-card);
+  background: var(--page-soft);
+}
+
+.admin-confirm p {
+  margin: 0;
+}
+
+.admin-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-confirm-actions .button {
+  flex: 1 1 160px;
+}
