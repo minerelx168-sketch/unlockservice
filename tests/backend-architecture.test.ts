@@ -1550,3 +1550,96 @@ test('a contact message is kept even when it cannot be sent', async () => {
   assert.equal(site.supportEmail(), 'help@example.invalid')
   delete process.env.IUNLOCKMOBILE_SUPPORT_EMAIL
 })
+
+test('every guide is indexable, internally consistent, and links somewhere real', async () => {
+  const articles = await import('../lib/articles')
+  const all = articles.listArticles()
+  assert.ok(all.length >= 3, 'the section is not worth publishing with fewer')
+
+  /* Routes a guide is allowed to link to. A link that 404s is worse than
+     no link at all, and it is the kind of rot nobody notices for months. */
+  const routes = new Set([
+    '/',
+    '/articles',
+    '/check',
+    '/contact',
+    '/services',
+    '/services/imei-check',
+    '/services/unlock',
+    '/user/reports/new',
+    ...all.map((article) => `/articles/${article.slug}`),
+  ])
+
+  const slugs = new Set<string>()
+  const titles = new Set<string>()
+  const descriptions = new Set<string>()
+
+  for (const article of all) {
+    assert.match(article.slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/, `${article.slug} is not a clean slug`)
+    assert.ok(!slugs.has(article.slug), `duplicate slug ${article.slug}`)
+    slugs.add(article.slug)
+
+    /* Two pages with the same title compete with each other, which is the
+       one thing an SEO section must not do to itself. */
+    assert.ok(!titles.has(article.title), `duplicate title ${article.title}`)
+    titles.add(article.title)
+    assert.ok(!descriptions.has(article.description), 'duplicate meta description')
+    descriptions.add(article.description)
+
+    /* The layout appends " — iUnlockMobile", so the budget is what a
+       search result shows minus the suffix it will always carry. */
+    const rendered = `${article.title} — iUnlockMobile`
+    assert.ok(rendered.length <= 60, `${article.slug} renders a ${rendered.length}-char title`)
+    assert.ok(
+      article.description.length >= 110 && article.description.length <= 175,
+      `${article.slug} description is ${article.description.length} chars`,
+    )
+
+    for (const date of [article.published, article.updated]) {
+      assert.match(date, /^\d{4}-\d{2}-\d{2}$/, `${article.slug} has a malformed date`)
+      assert.ok(!Number.isNaN(Date.parse(`${date}T00:00:00Z`)), `${article.slug} date does not parse`)
+    }
+    assert.ok(article.updated >= article.published, `${article.slug} was updated before it existed`)
+
+    const headings = article.blocks.filter((block) => block.kind === 'h2')
+    assert.ok(headings.length >= 3, `${article.slug} has ${headings.length} sections`)
+    const ids = headings.map((block) => (block.kind === 'h2' ? block.id : ''))
+    assert.equal(new Set(ids).size, ids.length, `${article.slug} repeats a heading id`)
+    for (const id of ids) assert.match(id, /^[a-z0-9-]+$/, `${id} is not usable as an anchor`)
+
+    for (const block of article.blocks) {
+      if (block.kind === 'cta') {
+        assert.ok(routes.has(block.href), `${article.slug} links to ${block.href}, which is not a route`)
+      }
+      if (block.kind === 'table') {
+        for (const row of block.rows) {
+          assert.equal(row.length, block.head.length, `${article.slug} has a ragged table row`)
+        }
+      }
+    }
+
+    /* The body has to carry the words the guide is published for. */
+    const words = article.blocks
+      .flatMap((block) => {
+        if (block.kind === 'p' || block.kind === 'note') return [block.text]
+        if (block.kind === 'list') return block.items
+        if (block.kind === 'table') return [...block.head, ...block.rows.flat()]
+        return []
+      })
+      .join(' ')
+      .split(/\s+/).length
+    assert.ok(words >= 350, `${article.slug} is ${words} words — too thin to rank or to help`)
+  }
+
+  /* And the sitemap has to name every one of them, or none of this is
+     discoverable. */
+  const sitemap = (await import('../app/sitemap')).default()
+  const urls = new Set(sitemap.map((entry) => entry.url))
+  for (const article of all) {
+    assert.ok(
+      [...urls].some((url) => url.endsWith(`/articles/${article.slug}`)),
+      `${article.slug} is missing from the sitemap`,
+    )
+  }
+  assert.ok([...urls].some((url) => url.endsWith('/articles')), 'the index is missing from the sitemap')
+})

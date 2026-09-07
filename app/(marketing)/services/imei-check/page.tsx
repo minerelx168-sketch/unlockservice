@@ -47,6 +47,12 @@ export default function ImeiCheckServicesPage() {
           <p className="t-micro service-catalog-version">
             A report describes the phone at the moment it is run, and does not prove who owns it.
           </p>
+
+          <p className="service-guides">
+            New to this? <Link href="/articles/what-an-imei-check-tells-you">What an IMEI check
+            actually tells you</Link> · <Link href="/articles/checks-before-buying-a-used-phone">Checks
+            to run before buying a used phone</Link>
+          </p>
         </div>
       </section>
     </>

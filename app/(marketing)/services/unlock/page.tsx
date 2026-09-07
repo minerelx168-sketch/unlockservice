@@ -54,6 +54,13 @@ export default function UnlockServicesPage() {
             checking with the network behind it.{' '}
             {ordering ? null : <Link href="/unlock-waitlist">Get told when ordering opens</Link>}
           </p>
+
+          <p className="service-guides">
+            Not sure an unlock is what you need?{' '}
+            <Link href="/articles/network-unlock-explained">Network unlocking, explained
+            honestly</Link> · <Link href="/articles/what-an-imei-check-tells-you">What an IMEI check
+            actually tells you</Link>
+          </p>
         </div>
       </section>
     </>
