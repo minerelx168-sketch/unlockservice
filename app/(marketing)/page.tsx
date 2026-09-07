@@ -155,8 +155,7 @@ export default function HomePage() {
               <p className="alert" role="status">
                 <Icon name="info" strokeWidth={1.9} />
                 <span>
-                  <b>Unlock ordering is paused.</b> You can browse service prices and follow existing orders.{' '}
-                  <Link href="/unlock-waitlist">Join the unlock waitlist</Link>.
+                  <b>Unlock ordering is paused.</b> You can browse service prices and follow existing orders.
                 </span>
               </p>
             ) : null}
@@ -221,10 +220,6 @@ export default function HomePage() {
                 <div className="mini-stat">
                   <span className="label">Order access</span>
                   <span className="value">Live status</span>
-                </div>
-                <div className="mini-stat">
-                  <span className="label">If unavailable</span>
-                  <span className="value">Credit returned to balance</span>
                 </div>
               </div>
             </div>
@@ -493,12 +488,12 @@ export default function HomePage() {
               <p className="t-small">
                 {ordering
                   ? 'Start with the country, original carrier and IMEI. You will see service details before confirming the order.'
-                  : 'Unlock ordering is not open yet. Browse phone report prices and availability, or join the waitlist for unlock updates.'}
+                  : 'Unlock ordering is not open yet. Browse phone report prices and availability — those can be ordered today.'}
               </p>
             </div>
             <div className="cta-actions">
-              <Link className="button button--primary" href={ordering ? '#check' : '/unlock-waitlist'}>
-                {ordering ? 'Unlock Phone Now' : 'Notify me when unlocking opens'}
+              <Link className="button button--primary" href={ordering ? '#check' : '/services/imei-check'}>
+                {ordering ? 'Unlock Phone Now' : 'Browse phone reports'}
               </Link>
               <Link className="button button--quiet" href="/user/orders">
                 Track an Order

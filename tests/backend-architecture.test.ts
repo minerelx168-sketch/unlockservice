@@ -1643,3 +1643,31 @@ test('every guide is indexable, internally consistent, and links somewhere real'
   }
   assert.ok([...urls].some((url) => url.endsWith('/articles')), 'the index is missing from the sitemap')
 })
+
+test('a second process can wait for the writer instead of failing', async () => {
+  const connection = database.db()
+
+  /* The poll timer opens this same file while the app is running. WAL lets
+     it read during a write, but two writers still take turns — and with no
+     busy timeout the one that loses gets SQLITE_BUSY straight away instead
+     of waiting. Five seconds is far longer than any transaction here. */
+  const [{ timeout }] = connection.pragma('busy_timeout') as Array<{ timeout: number }>
+  assert.ok(timeout >= 5_000, `busy_timeout is ${timeout}ms`)
+
+  const [{ journal_mode: journal }] = connection.pragma('journal_mode') as Array<{ journal_mode: string }>
+  assert.equal(journal, 'wal', 'the second process must be able to read during a write')
+
+  /* And the batch poller does nothing at all while no supplier is
+     configured, which is what makes the timer safe to leave running before
+     the provider is turned on. */
+  const summary = await providerJobs.pollProviderJobs(5)
+  assert.deepEqual(summary, {
+    enabled: false,
+    ordersSeen: 0,
+    checksSeen: 0,
+    completed: 0,
+    unavailable: 0,
+    processing: 0,
+    errors: 0,
+  })
+})

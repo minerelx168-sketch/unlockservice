@@ -106,15 +106,11 @@ export function ImeiForm({
     return (
       <div className="unlock-quote">
         <p className="t-small">
-          Unlock ordering is not open yet. Browse phone report prices and check availability, or join
-          the unlock waitlist.
+          Unlock ordering is not open yet. Browse phone report prices and check availability.
         </p>
         <Link className="button button--primary button--wide unlock-submit" href="/services/imei-check">
           Browse phone reports
           <Icon name="arrowRight" strokeWidth={2.2} />
-        </Link>
-        <Link className="button button--secondary button--wide" href="/unlock-waitlist">
-          Join the unlock waitlist
         </Link>
         <p className="unlock-quote-note">No account or IMEI is needed to browse prices.</p>
       </div>
