@@ -18,7 +18,7 @@ const NAV = [
 
 /**
  * Actions read toggle → quiet account → Signal Blue catalog CTA, so the
- * strongest action sits furthest right. Below 1180px the nav becomes a panel and the buttons
+ * strongest action sits furthest right. Below 1320px the nav becomes a panel and the buttons
  * step aside — see the media queries in components.css.
  */
 export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: boolean }) {

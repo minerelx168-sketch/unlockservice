@@ -12,7 +12,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 740;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -34,7 +34,7 @@
   border: 1px solid var(--moss-border);
   background: var(--moss-soft);
   color: var(--moss);
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 720;
   letter-spacing: 0.045em;
   text-transform: uppercase;
@@ -53,6 +53,8 @@
   justify-content: center;
   gap: 8px;
   min-height: 46px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 10px 17px;
   border: 1px solid transparent;
   border-radius: var(--radius-control);
@@ -179,10 +181,11 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  min-height: 44px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--primary);
 }
 
@@ -583,9 +586,12 @@
 
 .site-header .shell {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 20px;
   min-height: 74px;
+  /* Six navigation links and account actions need a wider row than prose. */
+  max-width: calc(var(--shell) + 2 * var(--gutter));
 }
 
 .brand {
@@ -628,17 +634,21 @@
 
 .site-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
   margin-left: 2px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .site-nav a {
   position: relative;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   min-height: 44px;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 620;
   color: var(--muted);
   padding-block: 4px;
@@ -680,7 +690,7 @@
   display: none;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1320px) {
   .nav-toggle {
     display: grid;
   }
@@ -694,6 +704,7 @@
     left: 0;
     right: 0;
     flex-direction: column;
+    flex-wrap: nowrap;
     align-items: stretch;
     gap: 0;
     margin: 0;
@@ -701,6 +712,7 @@
     background: var(--page);
     border-bottom: 1px solid var(--line);
     box-shadow: var(--shadow-soft);
+    max-height: calc(100vh - 75px);
     max-height: calc(100dvh - 75px);
     overflow-y: auto;
   }
@@ -712,7 +724,7 @@
   .site-nav a {
     padding-block: 12px;
     border-top: 1px solid var(--line);
-    font-size: 15px;
+    font-size: 1rem;
     white-space: normal;
   }
 
@@ -734,6 +746,13 @@
 
   .site-nav .nav-cta {
     margin-top: 14px;
+  }
+}
+
+@media (max-height: 500px) {
+  /* A short landscape viewport needs its height for the page content. */
+  .site-header {
+    position: relative;
   }
 }
 
@@ -760,8 +779,8 @@
 .hero .shell {
   position: relative;
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 80px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(28px, 4vw, 64px);
   align-items: center;
   min-height: 620px;
 }
@@ -788,7 +807,8 @@
   position: relative;
   display: grid;
   gap: 18px;
-  padding: 30px;
+  min-width: 0;
+  padding: clamp(18px, 3vw, 30px);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -1192,12 +1212,12 @@
 
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
   gap: 48px;
 }
 
 .site-footer h4 {
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1206,14 +1226,18 @@
 
 .footer-links {
   display: grid;
-  gap: 11px;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .footer-links a {
-  font-size: 13.5px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
   color: var(--footer-muted);
 }
 
@@ -1222,7 +1246,7 @@
 }
 
 .site-footer .blurb {
-  font-size: 14px;
+  font-size: 0.9375rem;
   line-height: 1.7;
   color: var(--footer-muted);
   max-width: 34em;
@@ -1238,7 +1262,7 @@
   margin-top: 48px;
   padding-top: 22px;
   border-top: 1px solid var(--footer-line);
-  font-size: 12.5px;
+  font-size: 0.875rem;
 }
 
 @media (max-width: 940px) {

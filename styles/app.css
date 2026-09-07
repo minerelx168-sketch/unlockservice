@@ -135,7 +135,28 @@
 
 .app-main {
   min-width: 0;
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
   padding: 34px 40px 72px;
+}
+
+.app-main .card,
+.app-main .panel,
+.app-head > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.app-main .link-arrow {
+  min-height: 44px;
+  font-size: 0.875rem;
+}
+
+.app-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .app-head {
@@ -234,7 +255,7 @@
 
 .stat .label {
   display: block;
-  font-size: 11px;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -245,25 +266,29 @@
   display: block;
   margin-top: 8px;
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: clamp(1.5rem, 2.4vw, 1.875rem);
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1.05;
   color: var(--ink-strong);
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 .stat .caption {
   display: block;
   margin-top: 4px;
-  font-size: 12.5px;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--muted);
 }
 
 /* ---- table ---------------------------------------------------------- */
 
 .table-wrap {
+  min-width: 0;
   overflow-x: auto;
+  container-type: inline-size;
 }
 
 table.grid {
@@ -292,7 +317,7 @@ table.grid td {
 
 table.grid td.mono {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: 0.875rem;
   color: var(--ink-strong);
   white-space: nowrap;
 }
@@ -301,6 +326,88 @@ table.grid td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+table.account-table th,
+table.account-table td {
+  padding-inline: 16px;
+}
+
+table.account-table th.num {
+  text-align: right;
+}
+
+table.account-table td {
+  overflow-wrap: anywhere;
+}
+
+/* Use the table's available width, including a tablet beside the sidebar,
+   so actions stay visible without a sideways swipe. Explicit table roles
+   in the markup preserve semantics when the visual rows become cards. */
+@container (max-width: 760px) {
+  table.account-table,
+  table.account-table tbody {
+    display: block;
+  }
+
+  table.account-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  table.account-table tr {
+    display: grid;
+    gap: 10px;
+    padding: 18px;
+  }
+
+  table.account-table tr + tr {
+    border-top: 1px solid var(--line);
+  }
+
+  table.account-table td,
+  table.account-table td.mono,
+  table.account-table td.num {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: baseline;
+    gap: 14px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    white-space: normal;
+  }
+
+  table.account-table td::before {
+    content: attr(data-label);
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  table.account-table td > * {
+    min-width: 0;
+  }
+
+  table.account-table .badge {
+    justify-self: start;
+    white-space: normal;
+  }
+
+  table.account-table td.account-table-action {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  table.account-table td.account-table-action::before {
+    content: none;
+  }
 }
 
 .empty {
@@ -321,7 +428,7 @@ table.grid td.num {
   padding: 3px 9px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
-  font-size: 11.5px;
+  font-size: 0.8125rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -330,6 +437,7 @@ table.grid td.num {
   content: '';
   width: 6px;
   height: 6px;
+  flex: 0 0 6px;
   border-radius: 50%;
   background: currentColor;
 }
@@ -360,7 +468,7 @@ table.grid td.num {
   justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
-  padding: 16px 20px 0;
+  padding: 16px 20px;
   border-top: 1px solid var(--line);
   margin-top: 18px;
 }
@@ -572,6 +680,7 @@ table.grid td.num {
   align-content: center;
   gap: 22px;
   min-height: 100vh;
+  min-height: 100svh;
   padding: 40px 22px;
   background: var(--page-soft);
 }
@@ -600,6 +709,8 @@ table.grid td.num {
 .auth-card {
   width: 100%;
   max-width: 420px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: 32px;
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
@@ -609,7 +720,7 @@ table.grid td.num {
 
 .auth-card h1 {
   margin-top: 18px;
-  font-size: 27px;
+  font-size: 1.6875rem;
   line-height: 1.15;
   letter-spacing: -0.04em;
   font-weight: 680;
@@ -716,6 +827,11 @@ table.grid td.num {
   min-height: 44px;
   font-size: 0.9375rem;
   color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.picker-option > :first-child {
+  min-width: 0;
 }
 
 .picker-option:hover {
@@ -731,6 +847,7 @@ table.grid td.num {
 }
 
 .picker-option .price {
+  flex-shrink: 0;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: var(--ink-strong);
@@ -773,6 +890,50 @@ table.grid td.num {
   font-size: 0.9375rem;
   color: var(--ink-strong);
   overflow-wrap: anywhere;
+}
+
+.report-details {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-float);
+  background: var(--surface);
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.report-details > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 8px 16px;
+  padding: 14px 16px;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.report-details > div + div {
+  border-top: 1px solid var(--line);
+}
+
+.report-details dt {
+  color: var(--muted);
+}
+
+.report-details dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.report-details dd.status {
+  color: var(--success);
+}
+
+@container (max-width: 420px) {
+  .report-details > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
 }
 
 @media (max-width: 940px) {
@@ -858,6 +1019,38 @@ table.grid td.num {
   }
 }
 
+@media (max-width: 620px) {
+  .app-main .card {
+    padding: 20px;
+  }
+
+  .app-head > .button,
+  .app-head-actions,
+  .app-head-actions .button {
+    width: 100%;
+  }
+
+  .app-sidebar > .credit-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-sidebar .credit-card .value {
+    grid-area: auto;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-sidebar .brand > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 /* ---- order form ------------------------------------------------------ */
 
 /* Selects have to be styled by hand: the UA control ignores the token
@@ -918,7 +1111,8 @@ table.grid td.num {
 
 .product-catalog {
   display: grid;
-  gap: 36px;
+  gap: clamp(24px, 3vw, 36px);
+  min-width: 0;
 }
 
 /* The catalogue runs to several screens, so the controls that narrow it
@@ -939,6 +1133,13 @@ table.grid td.num {
   }
 }
 
+/* A landscape phone or zoomed laptop needs its height for results. */
+@media (max-height: 700px) {
+  .catalog-filter-panel {
+    position: static;
+  }
+}
+
 .catalog-filter-panel > header {
   gap: 24px;
   align-items: flex-start;
@@ -955,7 +1156,17 @@ table.grid td.num {
   align-items: end;
 }
 
+.catalog-filter-toolbar {
+  display: none;
+}
+
+/* Keep the desktop controls in the existing grid without viewport JS. */
+.catalog-advanced-filters {
+  display: contents;
+}
+
 .catalog-filter-grid .field {
+  min-width: 0;
   gap: 9px;
 }
 
@@ -965,6 +1176,8 @@ table.grid td.num {
 
 .catalog-filter-grid input,
 .catalog-filter-grid select {
+  width: 100%;
+  min-width: 0;
   min-height: 52px;
   padding-block: 12px;
   /* 16px for the same reason as every other control — see .field input. */
@@ -1072,20 +1285,34 @@ table.grid td.num {
 }
 
 .product-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
-  align-content: start;
+  min-width: 0;
   min-height: 100%;
-  padding: 20px;
+  padding: clamp(16px, 2vw, 22px);
 }
 
 .product-card-topline {
-  gap: 14px;
+  gap: 10px;
   align-items: flex-start;
+  margin-bottom: 0;
 }
 
 .product-card-topline .kicker {
+  min-width: 0;
+  font-size: 0.8125rem;
   line-height: 1.45;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.product-card-topline .kicker svg {
+  flex-shrink: 0;
+}
+
+.product-card-topline .badge {
+  white-space: normal;
 }
 
 .product-card-copy {
@@ -1110,6 +1337,8 @@ table.grid td.num {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+  flex-wrap: wrap;
+  margin-top: auto;
   padding: 11px 14px;
   border: 1px solid var(--primary-border);
   border-radius: var(--radius-control);
@@ -1118,23 +1347,24 @@ table.grid td.num {
 
 .product-card-price-row .label {
   color: var(--muted);
-  font-size: 10.5px;
+  font-size: 0.8125rem;
   font-weight: 750;
   line-height: 1.35;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .product-price {
   color: var(--primary-dark);
-  font-size: 22px;
+  font-size: 1.375rem;
+  font-variant-numeric: tabular-nums;
   line-height: 1.15;
 }
 
 .product-card-action {
   justify-content: center;
-  min-height: 46px;
-  margin-top: auto;
+  min-height: 48px;
+  margin-top: 0;
   padding: 11px 16px;
   text-align: center;
   white-space: normal;
@@ -1158,7 +1388,59 @@ table.grid td.num {
 }
 
 @media (max-width: 760px) {
-  .product-catalog,
+  .catalog-filter-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .catalog-filter-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .catalog-filter-toolbar .button {
+    min-width: 0;
+    min-height: 48px;
+    justify-content: center;
+    padding-inline: 12px;
+  }
+
+  .catalog-filter-toggle::after {
+    content: '';
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+  }
+
+  .catalog-filter-toggle[aria-expanded='true']::after {
+    transform: translateY(2px) rotate(225deg);
+  }
+
+  .catalog-filter-selection {
+    grid-column: 1 / -1;
+    overflow-wrap: anywhere;
+  }
+
+  .catalog-advanced-filters {
+    display: none;
+  }
+
+  .catalog-advanced-filters[data-expanded='true'] {
+    display: grid;
+    min-width: 0;
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .catalog-filter-actions {
+    display: none;
+  }
+
   .product-domain-list {
     gap: 40px;
   }
@@ -1312,7 +1594,7 @@ table.grid td.num {
 /* The quote is the moment money becomes real, so it gets its own well. */
 .quote {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
   gap: 1px;
   border: 1px solid var(--primary-border);
   border-radius: var(--radius-float);
@@ -1327,7 +1609,7 @@ table.grid td.num {
 
 .quote .label {
   display: block;
-  font-size: 10.5px;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1338,10 +1620,15 @@ table.grid td.num {
   display: block;
   margin-top: 4px;
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 1.1875rem;
   font-weight: 700;
   letter-spacing: -0.025em;
   color: var(--ink-strong);
+  overflow-wrap: anywhere;
+}
+
+.checkout-selection .quote {
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
 }
 
 /* The code is the deliverable — it should be the loudest thing on screen. */
@@ -1355,7 +1642,7 @@ table.grid td.num {
 
 .code-slab .label {
   display: block;
-  font-size: 10.5px;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -1366,9 +1653,11 @@ table.grid td.num {
   display: block;
   margin-top: 6px;
   font-family: var(--font-mono);
-  font-size: 34px;
+  font-size: clamp(1.375rem, 3vw, 2.125rem);
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
   color: var(--ink-strong);
 }
 
@@ -1392,11 +1681,12 @@ table.grid td.num {
 }
 
 .service-hub-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  align-content: start;
+  min-width: 0;
   min-height: 100%;
-  padding: 30px;
+  padding: clamp(22px, 2.5vw, 30px);
 }
 
 .service-hub-card--checks {
@@ -1432,7 +1722,8 @@ table.grid td.num {
 
 .service-hub-copy h2 {
   margin: 0;
-  font-size: clamp(28px, 3vw, 38px);
+  overflow-wrap: anywhere;
+  font-size: clamp(1.75rem, 3vw, 2.375rem);
   line-height: 1.12;
   letter-spacing: -0.03em;
 }
@@ -1440,7 +1731,7 @@ table.grid td.num {
 .service-hub-copy p {
   margin: 0;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 1rem;
   line-height: 1.7;
 }
 
@@ -1455,8 +1746,10 @@ table.grid td.num {
 
 .service-hub-stats > div {
   display: grid;
+  min-width: 0;
   gap: 5px;
   padding: 17px 18px;
+  overflow-wrap: anywhere;
 }
 
 .service-hub-stats > div + div {
@@ -1471,7 +1764,7 @@ table.grid td.num {
 
 .service-hub-stats span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 
@@ -1491,6 +1784,11 @@ table.grid td.num {
 .service-hub-version,
 .service-catalog-version {
   margin-top: 24px;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.6;
+  text-transform: none;
 }
 
 .service-breadcrumb {
@@ -1499,12 +1797,15 @@ table.grid td.num {
   gap: 8px;
   align-items: center;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.9375rem;
   font-weight: 700;
   line-height: 1.4;
 }
 
 .service-breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--primary-dark);
   text-decoration: none;
 }
@@ -1547,12 +1848,14 @@ table.grid td.num {
 
 .product-subcategory-header > div:first-child {
   display: grid;
+  min-width: 0;
   gap: 8px;
 }
 
 .product-subcategory-header h2 {
   margin: 0;
-  font-size: clamp(23px, 2.4vw, 31px);
+  overflow-wrap: anywhere;
+  font-size: clamp(1.4375rem, 2.4vw, 1.9375rem);
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
@@ -1563,6 +1866,7 @@ table.grid td.num {
   gap: 3px 8px;
   align-items: baseline;
   min-width: 150px;
+  flex-shrink: 0;
   text-align: right;
 }
 
@@ -1574,14 +1878,14 @@ table.grid td.num {
 
 .product-subcategory-count span {
   color: var(--ink-strong);
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
 .product-subcategory-count small {
   grid-column: 1 / -1;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 
@@ -1666,7 +1970,7 @@ table.grid td.num {
 }
 
 .contact-fact .label {
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 620;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1674,7 +1978,9 @@ table.grid td.num {
 }
 
 .contact-fact .value {
-  font-size: 15.5px;
+  min-width: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
   color: var(--ink-strong);
 }
 

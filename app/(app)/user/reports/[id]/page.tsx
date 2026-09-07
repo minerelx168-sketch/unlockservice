@@ -83,14 +83,14 @@ export default async function PaidReportDetailPage({ params }: { params: Promise
             <h2 className="t-card">{order.report.title}</h2>
             <p className="t-small">{order.report.summary}</p>
             {checks.length > 0 ? (
-              <div className="data-table" style={{ marginTop: 20 }}>
+              <dl className="report-details" style={{ marginTop: 20 }}>
                 {checks.map((item) => (
-                  <div className="row" key={item.key}>
-                    <span>{item.label}</span>
-                    <b className={item.status === 'passed' ? 'status' : undefined}>{item.value}</b>
+                  <div key={item.key}>
+                    <dt>{item.label}</dt>
+                    <dd className={item.status === 'passed' ? 'status' : undefined}>{item.value}</dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             ) : null}
           </section>
 
@@ -99,11 +99,11 @@ export default async function PaidReportDetailPage({ params }: { params: Promise
               {sections.map((section) => (
                 <section className="card" key={section.title}>
                   <div className="card-topline"><span className="kicker"><Icon name="device" /> {section.title}</span></div>
-                  <div className="data-table">
+                  <dl className="report-details">
                     {section.items.map((item) => (
-                      <div className="row" key={item.key}><span>{item.label}</span><b>{item.value}</b></div>
+                      <div key={item.key}><dt>{item.label}</dt><dd>{item.value}</dd></div>
                     ))}
-                  </div>
+                  </dl>
                 </section>
               ))}
             </div>

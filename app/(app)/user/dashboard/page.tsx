@@ -72,26 +72,26 @@ export default async function DashboardPage() {
           </Link>
         </header>
         <div className="table-wrap">
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>Order</th>
-                <th>Device</th>
-                <th>Service</th>
-                <th>Status</th>
-                <th className="num">Price</th>
+          <table role="table" className="grid account-table">
+            <thead role="rowgroup">
+              <tr role="row">
+                <th role="columnheader" scope="col">Order</th>
+                <th role="columnheader" scope="col">Device</th>
+                <th role="columnheader" scope="col">Service</th>
+                <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col" className="num">Price</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody role="rowgroup">
               {recent.map((order) => (
-                <tr key={order.id}>
-                  <td className="mono">#{order.id}</td>
-                  <td className="mono">{maskIdentifier(order.imei)}</td>
-                  <td>{order.title}</td>
-                  <td>
+                <tr role="row" key={order.id}>
+                  <td role="cell" className="mono" data-label="Order">#{order.id}</td>
+                  <td role="cell" className="mono" data-label="Device">{maskIdentifier(order.imei)}</td>
+                  <td role="cell" data-label="Service">{order.title}</td>
+                  <td role="cell" data-label="Status">
                     <OrderStatusBadge status={order.status} />
                   </td>
-                  <td className="num">{formatUsd(order.price_cents)}</td>
+                  <td role="cell" className="num" data-label="Price">{formatUsd(order.price_cents)}</td>
                 </tr>
               ))}
             </tbody>

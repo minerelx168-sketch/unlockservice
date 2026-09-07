@@ -59,7 +59,7 @@ export default async function OrdersPage({
             first two and last four digits.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="app-head-actions" aria-label="Order history view">
           <a className={`button ${tab === 'orders' ? 'button--primary' : 'button--quiet'}`} href="?tab=orders&page=1">
             Orders
           </a>
@@ -72,30 +72,30 @@ export default async function OrdersPage({
       <div className="panel">
         {tab === 'orders' ? (
           <div className="table-wrap">
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Device</th>
-                  <th>Service</th>
-                  <th>Status</th>
-                  <th className="num">Price</th>
-                  <th>Placed</th>
-                  <th />
+            <table role="table" className="grid account-table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th role="columnheader" scope="col">Order</th>
+                  <th role="columnheader" scope="col">Device</th>
+                  <th role="columnheader" scope="col">Service</th>
+                  <th role="columnheader" scope="col">Status</th>
+                  <th role="columnheader" scope="col" className="num">Price</th>
+                  <th role="columnheader" scope="col">Placed</th>
+                  <th role="columnheader" scope="col"><span className="visually-hidden">Action</span></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {orders.map((order) => (
-                  <tr key={order.id}>
-                    <td className="mono">#{order.id}</td>
-                    <td className="mono">{maskIdentifier(order.imei)}</td>
-                    <td>{order.title}</td>
-                    <td>
+                  <tr role="row" key={order.id}>
+                    <td role="cell" className="mono" data-label="Order">#{order.id}</td>
+                    <td role="cell" className="mono" data-label="Device">{maskIdentifier(order.imei)}</td>
+                    <td role="cell" data-label="Service">{order.title}</td>
+                    <td role="cell" data-label="Status">
                       <OrderStatusBadge status={order.status} />
                     </td>
-                    <td className="num">{formatUsd(order.price_cents)}</td>
-                    <td>{order.created_at}</td>
-                    <td>
+                    <td role="cell" className="num" data-label="Price">{formatUsd(order.price_cents)}</td>
+                    <td role="cell" data-label="Placed">{order.created_at}</td>
+                    <td role="cell" className="account-table-action" data-label="Action">
                       <Link className="link-arrow" href={`/user/orders/${order.id}`}>
                         Open
                       </Link>
@@ -116,30 +116,30 @@ export default async function OrdersPage({
           </div>
         ) : (
           <div className="table-wrap">
-            <table className="grid">
-              <thead>
-                <tr>
-                  <th>Movement</th>
-                  <th>Reference</th>
-                  <th className="num">Amount</th>
-                  <th className="num">Available after</th>
-                  <th>When</th>
+            <table role="table" className="grid account-table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th role="columnheader" scope="col">Movement</th>
+                  <th role="columnheader" scope="col">Reference</th>
+                  <th role="columnheader" scope="col" className="num">Amount</th>
+                  <th role="columnheader" scope="col" className="num">Available after</th>
+                  <th role="columnheader" scope="col">When</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {ledger.map((row) => (
-                  <tr key={row.id}>
-                    <td>{LEDGER_LABEL[row.type] ?? row.type}</td>
-                    <td className="mono">
+                  <tr role="row" key={row.id}>
+                    <td role="cell" data-label="Movement">{LEDGER_LABEL[row.type] ?? row.type}</td>
+                    <td role="cell" className="mono" data-label="Reference">
                       {row.ref_type === 'invoice' && row.ref_id
                         ? `#${row.ref_id.slice(0, 10).toUpperCase()}`
                         : row.ref_id
                           ? `order #${row.ref_id}`
                           : '—'}
                     </td>
-                    <td className="num">{formatUsd(row.amount_cents)}</td>
-                    <td className="num">{formatUsd(row.balance_after_cents)}</td>
-                    <td>{row.created_at}</td>
+                    <td role="cell" className="num" data-label="Amount">{formatUsd(row.amount_cents)}</td>
+                    <td role="cell" className="num" data-label="Available after">{formatUsd(row.balance_after_cents)}</td>
+                    <td role="cell" data-label="When">{row.created_at}</td>
                   </tr>
                 ))}
               </tbody>

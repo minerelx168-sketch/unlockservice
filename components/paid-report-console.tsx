@@ -236,7 +236,7 @@ export function PaidReportConsole({
             </section>
           ) : null}
 
-          <details className="checkout-picker" open={initialProductCode ? undefined : true}>
+          <details className="checkout-picker">
             <summary>Change report · {products.length} options</summary>
           <div className="field">
             <label htmlFor="paid-report-search">Search paid IMEI reports</label>

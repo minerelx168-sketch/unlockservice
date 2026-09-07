@@ -97,6 +97,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   const [query, setQuery] = useState('')
   const [selectedGroup, setSelectedGroup] = useState('all')
   const [selectedProductCode, setSelectedProductCode] = useState('all')
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
   const copy = DOMAIN_COPY[domain]
 
   const groups = useMemo(() => {
@@ -134,6 +135,9 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   const availableCount = products.filter((product) => product.status === 'available').length
   const comingSoonCount = products.length - availableCount
   const filtersActive = query.trim() !== '' || selectedGroup !== 'all' || selectedProductCode !== 'all'
+  const advancedFilterCount = Number(selectedGroup !== 'all') + Number(selectedProductCode !== 'all')
+  const selectedProduct = products.find((product) => product.productCode === selectedProductCode)
+  const filterSummary = selectedProduct ? customerText(selectedProduct.name) : selectedGroup !== 'all' ? selectedGroup : null
 
   function clearFilters() {
     setQuery('')
@@ -154,7 +158,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
         <header>
           <div>
             <h2>Find a {copy.label.toLowerCase()} service</h2>
-            <p className="t-small">Choose a subcategory, search by name or jump directly to a service and its price.</p>
+            <p className="t-small">Search by name, device or network.</p>
           </div>
           <span role="status" aria-live="polite">{visible.length} of {products.length} shown</span>
         </header>
@@ -171,49 +175,70 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
             />
           </div>
 
-          <div className="field">
-            <label htmlFor={`${domain}-product-group`}>{copy.groupLabel}</label>
-            <select
-              id={`${domain}-product-group`}
-              value={selectedGroup}
-              onChange={(event) => {
-                const group = event.currentTarget.value
-                setSelectedGroup(group)
-                const selected = products.find((product) => product.productCode === selectedProductCode)
-                if (selected && group !== 'all' && customerText(selected.group) !== group) setSelectedProductCode('all')
-              }}
+          <div className="catalog-filter-toolbar">
+            <button
+              className="button button--secondary catalog-filter-toggle"
+              type="button"
+              aria-expanded={filtersExpanded}
+              aria-controls={`${domain}-advanced-filters`}
+              onClick={() => setFiltersExpanded((expanded) => !expanded)}
             >
-              <option value="all">All {copy.label.toLowerCase()} categories</option>
-              {groups.map((group) => <option key={group} value={group}>{group}</option>)}
-            </select>
+              Filters{advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ''}
+            </button>
+            <button className="button button--secondary" type="button" onClick={clearFilters} disabled={!filtersActive} aria-label="Clear all filters">
+              Reset
+            </button>
+            {filterSummary ? <p className="t-small catalog-filter-selection" role="status">Applied: {filterSummary}</p> : null}
           </div>
 
-          <div className="field catalog-service-dropdown">
-            <label htmlFor={`${domain}-product-service`}>Choose a service</label>
-            <select
-              id={`${domain}-product-service`}
-              value={selectedProductCode}
-              onChange={(event) => {
-                const code = event.currentTarget.value
-                setSelectedProductCode(code)
-                const selected = products.find((product) => product.productCode === code)
-                if (selected) setSelectedGroup(customerText(selected.group))
-              }}
-            >
-              <option value="all">{copy.allServicesLabel}</option>
-              {groups.map((group) => {
-                const options = products.filter((product) => customerText(product.group) === group)
-                return (
-                  <optgroup key={group} label={group}>
-                    {options.map((product) => (
-                      <option key={product.productCode} value={product.productCode}>
-                        {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
-                      </option>
-                    ))}
-                  </optgroup>
-                )
-              })}
-            </select>
+          <div className="catalog-advanced-filters" id={`${domain}-advanced-filters`} data-expanded={filtersExpanded}>
+            <div className="field">
+              <label htmlFor={`${domain}-product-group`}>{copy.groupLabel}</label>
+              <select
+                id={`${domain}-product-group`}
+                value={selectedGroup}
+                onChange={(event) => {
+                  const group = event.currentTarget.value
+                  setSelectedGroup(group)
+                  const selected = products.find((product) => product.productCode === selectedProductCode)
+                  if (selected && group !== 'all' && customerText(selected.group) !== group) setSelectedProductCode('all')
+                }}
+              >
+                <option value="all">All {copy.label.toLowerCase()} categories</option>
+                {groups.map((group) => <option key={group} value={group}>{group}</option>)}
+              </select>
+            </div>
+
+            <div className="field catalog-service-dropdown">
+              <label htmlFor={`${domain}-product-service`}>Choose a service</label>
+              <select
+                id={`${domain}-product-service`}
+                value={selectedProductCode}
+                onChange={(event) => {
+                  const code = event.currentTarget.value
+                  setSelectedProductCode(code)
+                  const selected = products.find((product) => product.productCode === code)
+                  if (selected) {
+                    setSelectedGroup(customerText(selected.group))
+                    setQuery('')
+                  }
+                }}
+              >
+                <option value="all">{copy.allServicesLabel}</option>
+                {groups.map((group) => {
+                  const options = products.filter((product) => customerText(product.group) === group)
+                  return (
+                    <optgroup key={group} label={group}>
+                      {options.map((product) => (
+                        <option key={product.productCode} value={product.productCode}>
+                          {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )
+                })}
+              </select>
+            </div>
           </div>
 
           <div className="catalog-filter-actions">
