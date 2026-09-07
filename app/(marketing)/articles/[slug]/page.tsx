@@ -7,7 +7,7 @@ import { Icon } from '@/components/icons'
 import { getArticle, listArticles, relatedArticles } from '@/lib/articles'
 import { publicOrigin } from '@/lib/site'
 
-/* Every guide is known at build time, so every guide is a static file. */
+/* Enumerate the available guides for Next.js route generation. */
 export function generateStaticParams() {
   return listArticles().map((article) => ({ slug: article.slug }))
 }

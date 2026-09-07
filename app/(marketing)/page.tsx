@@ -143,14 +143,9 @@ export default function HomePage() {
       <StructuredData faq={FAQ} />
 
       {/* 02 · Hero */}
-      <section className="hero" id="check">
+      <section className="hero home-hero" id="check">
         <div className="shell">
           <div className="hero-copy">
-            <span className="eyebrow">
-              <Icon name="shield" strokeWidth={2} />
-              IMEI checks and remote unlock services
-            </span>
-
             {status ? (
               <p className="alert" role="status">
                 <Icon name="info" strokeWidth={1.9} />
@@ -228,7 +223,7 @@ export default function HomePage() {
       </section>
 
       {/* 03 · Trust bar */}
-      <section className="section section--flush-top">
+      <section className="section section--flush-top home-trust">
         <div className="shell">
           <div className="trust-bar">
             {TRUST.map((item) => (
@@ -242,7 +237,7 @@ export default function HomePage() {
       </section>
 
       {/* 04 · Benefit grid */}
-      <section className="section section--tint" id="services">
+      <section className="section section--tint home-section" id="services">
         <div className="shell">
           <div className="section-head">
             <span className="kicker">
@@ -256,9 +251,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ height: 44 }} />
-
-          <div className="grid-3">
+          <div className="grid-3 home-card-grid">
             {SERVICES.map((service) => (
               <article className="card card--benefit" key={service.title}>
                 <span className={`icon-tile${service.tint}`} aria-hidden="true">
@@ -277,7 +270,7 @@ export default function HomePage() {
       </section>
 
       {/* 05 · Steps */}
-      <section className="section" id="how">
+      <section className="section home-section" id="how">
         <div className="shell">
           <div className="section-head section-head--center">
             <span className="kicker">
@@ -290,9 +283,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ height: 44 }} />
-
-          <div className="grid-3">
+          <div className="grid-3 home-card-grid">
             {STEPS.map((step, index) => (
               <article className="card card--step" key={step.title}>
                 <span className="step-numeral" aria-hidden="true">
@@ -314,7 +305,7 @@ export default function HomePage() {
       </section>
 
       {/* 06 · Gradient band — the one saturated block on the page */}
-      <section className="section band">
+      <section className="section band home-section">
         <div className="shell band-grid">
           <div className="stack" style={{ gap: 20 }}>
             <span className="kicker">
@@ -344,7 +335,7 @@ export default function HomePage() {
       </section>
 
       {/* 07 · Product split */}
-      <section className="section">
+      <section className="section home-section">
         <div className="shell split">
           <div className="scene">
             <div className="window">
@@ -444,7 +435,7 @@ export default function HomePage() {
       </section>
 
       {/* 08 · FAQ */}
-      <section className="section section--tint" id="faq">
+      <section className="section section--tint home-section" id="faq">
         <div className="shell faq">
           <div className="section-head">
             <span className="kicker">
@@ -474,7 +465,7 @@ export default function HomePage() {
       </section>
 
       {/* 09 · CTA band */}
-      <section className="section">
+      <section className="section home-section">
         <div className="shell">
           <div className="cta">
             <div className="stack" style={{ gap: 10 }}>

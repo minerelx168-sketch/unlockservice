@@ -2004,7 +2004,7 @@ table.account-table td {
    because a line the width of this layout is a line nobody finishes. */
 .article-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 20px;
   margin-top: 28px;
 }
@@ -2016,6 +2016,7 @@ table.account-table td {
 }
 
 .article-card h2 a {
+  display: block;
   color: var(--ink-strong);
   text-decoration: none;
 }

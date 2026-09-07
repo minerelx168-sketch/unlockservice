@@ -15,6 +15,13 @@ export function ArticleStructuredData({ article }: { article: Article }) {
 
   const graph: Record<string, unknown>[] = [
     {
+      '@type': 'Organization',
+      '@id': `${origin}/#organization`,
+      name: 'iUnlockMobile',
+      url: origin,
+      logo: `${origin}/logo-mark.svg`,
+    },
+    {
       '@type': 'Article',
       '@id': `${url}#article`,
       headline: article.title,
