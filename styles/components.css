@@ -588,8 +588,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
-  min-height: 74px;
+  /* Brand, links and actions are three groups, not one run of items — the
+     row read as a single crowded strip when they shared the link spacing.
+     Measured against the shell's own max-width: the whole row is 1165px of
+     1180px at this spacing, so it stays one line. Past this it wraps, which
+     is worse than the crowding it fixes. */
+  gap: 24px;
+  min-height: 78px;
   /* Six navigation links and account actions need a wider row than prose. */
   max-width: calc(var(--shell) + 2 * var(--gutter));
 }
@@ -636,7 +641,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   margin-left: 2px;
   min-width: 0;
   max-width: 100%;
@@ -650,7 +655,9 @@
   min-height: 44px;
   font-size: 0.9375rem;
   font-weight: 620;
-  color: var(--muted);
+  /* Ink, not muted: navigation is not secondary text, and at 15px the
+     muted grey was the first thing to disappear on a bright screen. */
+  color: var(--ink);
   padding-block: 4px;
   white-space: nowrap;
 }
@@ -679,9 +686,37 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   margin-left: auto;
   flex-shrink: 0;
+}
+
+/* "My account" is a control, not a caption: a hairline box on a white
+   header reads as neither. It takes the control edge that every input
+   already uses, and ink text. */
+.header-actions .button--quiet {
+  border-color: var(--color-border-control);
+  color: var(--ink-strong);
+  font-weight: 660;
+}
+
+.header-actions .button--quiet:hover {
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+/* The one call to action in the header. Bigger type, a wider tap target
+   and a deeper shadow than a body button, because it is competing with a
+   whole row of links for the same glance. */
+.header-actions .button--primary {
+  font-size: 0.9688rem;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--primary) 32%, transparent);
+}
+
+.header-actions .button--primary:hover {
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--primary) 40%, transparent);
 }
 
 .nav-toggle,
@@ -828,9 +863,11 @@
   gap: 12px;
 }
 
+/* Auto-fit rather than a fixed pair: with one stat left, a hard two-column
+   grid leaves it stranded at half width beside an empty cell. */
 .hero-mini {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
 }
 
