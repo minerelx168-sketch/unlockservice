@@ -6,17 +6,22 @@ import { ApproveInvoiceForm, PaymentReferenceForm } from '@/components/payment-f
 import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 import { GATEWAYS, getInvoice, selfApprovalEnabled, shortReference } from '@/lib/payments'
+import { safeContinuation } from '@/lib/continuation'
+import { PaymentAddress, RefreshPaymentStatus } from '@/components/invoice-actions'
 
 export const metadata: Metadata = { title: 'Invoice' }
 export const dynamic = 'force-dynamic'
 
 export default async function InvoicePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ reference: string }>
+  searchParams: Promise<{ next?: string }>
 }) {
   const { user } = await requireSession()
   const { reference } = await params
+  const returnTo = safeContinuation((await searchParams).next)
   const invoice = getInvoice(reference, user.id)
   if (!invoice) notFound()
 
@@ -39,7 +44,7 @@ export default async function InvoicePage({
         </Link>
       </div>
 
-      <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
+      <div className="invoice-grid">
         <section className="panel">
           <header>
             <h2>Amount</h2>
@@ -82,10 +87,7 @@ export default async function InvoicePage({
           <div className="panel-body" style={{ display: 'grid', gap: 14 }}>
             {gateway ? (
               <>
-                <div className="field">
-                  <label htmlFor="address">Wallet address</label>
-                  <input id="address" className="mono" readOnly value={gateway.address} />
-                </div>
+                <PaymentAddress address={gateway.address} />
                 <p className="alert">
                   <Icon name="info" strokeWidth={1.9} />
                   <span>
@@ -115,32 +117,33 @@ export default async function InvoicePage({
         </header>
         <div className="panel-body" style={{ display: 'grid', gap: 16 }}>
           {settled ? (
-            <p className="t-small">
+            <><p className="t-small">
               Reference <span className="t-mono">{invoice.payment_reference}</span> was accepted and{' '}
               {formatUsd(invoice.credit_amount_cents)} was added to your balance.
-            </p>
+            </p><Link className="button button--primary" href={returnTo ?? '/user/reports/new'}>Continue to your report</Link></>
           ) : (
             <>
               {invoice.payment_reference ? (
                 <p className="t-small">
-                  Waiting on a human to verify{' '}
-                  <span className="t-mono">{invoice.payment_reference}</span>.
+                  Your transfer reference <span className="t-mono">{invoice.payment_reference}</span> is submitted for verification. Credit will appear here after it is confirmed. No need to send another transfer.
                 </p>
               ) : null}
-              {gateway ? <PaymentReferenceForm reference={invoice.reference} /> : null}
+              <RefreshPaymentStatus />
+              {gateway ? <PaymentReferenceForm reference={invoice.reference} returnTo={returnTo} /> : null}
               {selfApprovalEnabled() ? (
                 <>
                   <hr className="hairline" />
                   <p className="t-small">
-                    No administrator in this build — use this to walk the invoice through to settled.
+                    Development simulation: this adds test credit without a real transfer.
                   </p>
-                  <ApproveInvoiceForm reference={invoice.reference} />
+                  <ApproveInvoiceForm reference={invoice.reference} returnTo={returnTo} />
                 </>
               ) : null}
             </>
           )}
         </div>
       </section>
+      <p className="t-small" style={{ marginTop: 20 }}>Need help with this payment? <Link href="/contact">Contact support</Link> and include invoice {shortReference(invoice.reference)}.</p>
     </>
   )
 }

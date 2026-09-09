@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { ImeiForm } from '@/components/imei-form'
-import { CARRIERS } from '@/lib/catalog'
+import { DeviceBrowseForm } from '@/components/device-browse-form'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
+import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 import { StructuredData } from './structured-data'
 import { Icon, type IconName } from '@/components/icons'
 
@@ -23,22 +23,22 @@ const SERVICES: Array<{
     icon: 'device',
     tint: '',
     title: 'Unlock services',
-    body: 'Carrier, activation-lock, MDM and device unlocks, each at a fixed price. Anything you can order today is marked as such; the rest is still being checked.',
-    action: { href: '/services', label: 'Browse unlock services' },
+    body: 'Browse carrier, activation-lock, MDM and device unlock services. Check the price and availability for your device before proceeding.',
+    action: { href: '/services/unlock', label: 'Browse unlock services' },
   },
   {
     icon: 'lock',
     tint: ' icon-tile--accent',
     title: 'IMEI check reports',
     body: 'Apple, Samsung, carrier, blacklist and device-status reports on a phone you are about to buy or sell. The free check validates the number itself.',
-    action: { href: '/services', label: 'Browse IMEI reports' },
+    action: { href: '/services/imei-check', label: 'Browse IMEI reports' },
   },
   {
     icon: 'search',
     tint: ' icon-tile--moss',
     title: 'Track every order',
     body: 'See when a request is processing, delivered or refused. Delivered codes and instructions stay attached to the original order.',
-    action: { href: '/login', label: 'Track an order' },
+    action: { href: '/user/orders', label: 'Track an order' },
   },
 ]
 
@@ -53,7 +53,7 @@ const STEPS: Array<{ icon: IconName; tint: string; title: string; body: string }
     icon: 'bolt',
     tint: ' icon-tile--accent',
     title: 'We verify and process',
-    body: 'Review the price and delivery estimate, then confirm. Your funds are held while the provider checks eligibility.',
+    body: 'Review the price and delivery estimate, then confirm. Your account credit is reserved while the provider checks eligibility.',
   },
   {
     icon: 'check',
@@ -72,12 +72,12 @@ const BAND_ROWS: Array<{ icon: IconName; title: string; caption: string }> = [
   {
     icon: 'clock',
     title: 'Tracked while it runs',
-    caption: 'A live status per order, and the result by email',
+    caption: 'Follow the status and view the result in your account',
   },
   {
     icon: 'window',
     title: 'Held, then charged',
-    caption: 'Refused devices give the whole amount back',
+    caption: 'If refused, reserved credit returns to your account balance',
   },
 ]
 
@@ -113,7 +113,7 @@ const FAQ = [
   {
     question: 'What if my device cannot be unlocked?',
     answer:
-      'You get every cent back. Your credit is held while the order is with the carrier and only becomes a charge once the unlock is delivered — so a device that is under contract, reported lost or blocked for unpaid bills costs you nothing.',
+      'Your account credit is reserved while the order is with the carrier and charged only when the unlock is delivered. If the carrier refuses the order, the full reserved amount returns to your account balance. This releases account credit; it is not a refund to your original payment method.',
   },
   {
     question: 'Where do I find my IMEI?',
@@ -128,48 +128,41 @@ const FAQ = [
   {
     question: 'Can you unlock a phone that is still on contract?',
     answer:
-      'Usually not, and we will not pretend otherwise. Carriers refuse devices with an unpaid balance, an active contract, or a lost-or-stolen report. The order comes back refused and your credit is returned in full.',
+      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, the full reserved credit returns to your account balance.',
   },
 ]
 
 export default function HomePage() {
-  /* Said at the top rather than at the order form. A visitor who cannot
-     order should learn that before they enter their IMEI, not after. */
-  const status = serviceStatus()
-  const ordering = unlockOrderingEnabled()
+  const ordering = unlockOrderingEnabled() || listPublicProviderProducts('unlock').some((product) => product.status === 'available')
+  const status = !ordering && serviceStatus()
 
   return (
     <>
       <StructuredData faq={FAQ} />
 
       {/* 02 · Hero */}
-      <section className="hero" id="check">
+      <section className="hero home-hero" id="check">
         <div className="shell">
           <div className="hero-copy">
-            <span className="eyebrow">
-              <Icon name="shield" strokeWidth={2} />
-              IMEI checks and remote unlock services
-            </span>
-
             {status ? (
               <p className="alert" role="status">
                 <Icon name="info" strokeWidth={1.9} />
                 <span>
-                  <b>{status.heading}.</b> {status.detail}{' '}
-                  <Link href="/unlock-waitlist">Get told when it opens</Link>.
+                  <b>Unlock ordering is paused.</b> You can browse service prices and follow existing orders.
                 </span>
               </p>
             ) : null}
 
             <h1 className="t-hero">
-              Unlock your phone by IMEI.
+              {ordering ? 'Unlock your phone by IMEI.' : 'Find the right service for your phone.'}
               <br />
-              <span className="accent">Price and delivery time before you pay.</span>
+              <span className="accent">{ordering ? 'Price and delivery time before you pay.' : 'Browse prices and check availability.'}</span>
             </h1>
 
             <p className="t-lead">
-              Enter the IMEI and the network the phone is locked to. You see what it costs and how
-              long it takes before anything is charged.
+              {ordering
+                ? 'Enter your IMEI, then choose a service. Compare prices and delivery estimates before you confirm an order.'
+                : 'Explore device reports and unlock services. Enter your IMEI to get started, or browse prices first. You can compare services before creating an account.'}
             </p>
 
             {/* One filled button per screen. These were three competing calls
@@ -180,7 +173,7 @@ export default function HomePage() {
             <p className="hero-asides">
               <Link href="/services/imei-check">Just want a device report?</Link>
               <span aria-hidden="true">·</span>
-              <Link href="/login">Track an order</Link>
+              <Link href="/user/orders">Track an order</Link>
             </p>
           </div>
 
@@ -188,51 +181,18 @@ export default function HomePage() {
             <div className="hero-panel-head">
               <span className="kicker">
                 <Icon name="device" strokeWidth={2} />
-                Unlock your phone
+                Start with your device
               </span>
-              <span className="t-micro">Safe · legal · refunded if refused</span>
+              <span className="t-micro">{ordering ? 'Reserved credit returned if refused' : 'Prices and availability before you choose'}</span>
             </div>
 
-            {/* The same list the order form is built from, so the network a
-                visitor picks here is one they can actually order against. */}
-            <ImeiForm
-              ordering={ordering}
-              carriers={CARRIERS.map((carrier) => ({
-                id: carrier.id,
-                name: carrier.name,
-                country: carrier.country,
-              }))}
-            />
-
-            <hr className="hairline" />
-
-            <div className="hero-floats">
-              <div className="float-card">
-                <span className="icon-tile icon-tile--sm" aria-hidden="true">
-                  <Icon name="check" />
-                </span>
-                <span>
-                  <span className="label">Official unlock</span>
-                  <span className="value">Remote and permanent</span>
-                </span>
-              </div>
-              <div className="hero-mini">
-                <div className="mini-stat">
-                  <span className="label">Order access</span>
-                  <span className="value">Live status</span>
-                </div>
-                <div className="mini-stat">
-                  <span className="label">If unavailable</span>
-                  <span className="value">Funds returned</span>
-                </div>
-              </div>
-            </div>
+            <DeviceBrowseForm />
           </div>
         </div>
       </section>
 
       {/* 03 · Trust bar */}
-      <section className="section section--flush-top">
+      <section className="section section--flush-top home-trust">
         <div className="shell">
           <div className="trust-bar">
             {TRUST.map((item) => (
@@ -246,7 +206,7 @@ export default function HomePage() {
       </section>
 
       {/* 04 · Benefit grid */}
-      <section className="section section--tint" id="services">
+      <section className="section section--tint home-section" id="services">
         <div className="shell">
           <div className="section-head">
             <span className="kicker">
@@ -260,9 +220,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ height: 44 }} />
-
-          <div className="grid-3">
+          <div className="grid-3 home-card-grid">
             {SERVICES.map((service) => (
               <article className="card card--benefit" key={service.title}>
                 <span className={`icon-tile${service.tint}`} aria-hidden="true">
@@ -281,7 +239,7 @@ export default function HomePage() {
       </section>
 
       {/* 05 · Steps */}
-      <section className="section" id="how">
+      <section className="section home-section" id="how">
         <div className="shell">
           <div className="section-head section-head--center">
             <span className="kicker">
@@ -294,9 +252,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ height: 44 }} />
-
-          <div className="grid-3">
+          <div className="grid-3 home-card-grid">
             {STEPS.map((step, index) => (
               <article className="card card--step" key={step.title}>
                 <span className="step-numeral" aria-hidden="true">
@@ -318,7 +274,7 @@ export default function HomePage() {
       </section>
 
       {/* 06 · Gradient band — the one saturated block on the page */}
-      <section className="section band">
+      <section className="section band home-section">
         <div className="shell band-grid">
           <div className="stack" style={{ gap: 20 }}>
             <span className="kicker">
@@ -348,7 +304,7 @@ export default function HomePage() {
       </section>
 
       {/* 07 · Product split */}
-      <section className="section">
+      <section className="section home-section">
         <div className="shell split">
           <div className="scene">
             <div className="window">
@@ -439,16 +395,16 @@ export default function HomePage() {
               ))}
             </ul>
 
-            <Link className="button button--primary" href="/register" style={{ justifySelf: 'start' }}>
+            <Link className="button button--primary" href={ordering ? '#check' : '/services/imei-check'} style={{ justifySelf: 'start' }}>
               <Icon name="bolt" strokeWidth={1.9} />
-              Unlock your first device
+              {ordering ? 'See your unlock price' : 'Browse phone reports'}
             </Link>
           </div>
         </div>
       </section>
 
       {/* 08 · FAQ */}
-      <section className="section section--tint" id="faq">
+      <section className="section section--tint home-section" id="faq">
         <div className="shell faq">
           <div className="section-head">
             <span className="kicker">
@@ -478,7 +434,7 @@ export default function HomePage() {
       </section>
 
       {/* 09 · CTA band */}
-      <section className="section">
+      <section className="section home-section">
         <div className="shell">
           <div className="cta">
             <div className="stack" style={{ gap: 10 }}>
@@ -492,14 +448,14 @@ export default function HomePage() {
               <p className="t-small">
                 {ordering
                   ? 'Start with the country, original carrier and IMEI. You will see service details before confirming the order.'
-                  : 'Unlock ordering is not open yet. Leave an address and you will hear the day it is — phone checks and reports can be ordered today.'}
+                  : 'Unlock ordering is not open yet. Browse phone report prices and availability — those can be ordered today.'}
               </p>
             </div>
             <div className="cta-actions">
-              <Link className="button button--primary" href={ordering ? '#check' : '/unlock-waitlist'}>
-                {ordering ? 'Unlock Phone Now' : 'Notify me when unlocking opens'}
+              <Link className="button button--primary" href={ordering ? '#check' : '/services/imei-check'}>
+                {ordering ? 'Unlock Phone Now' : 'Browse phone reports'}
               </Link>
-              <Link className="button button--quiet" href="/login">
+              <Link className="button button--quiet" href="/user/orders">
                 Track an Order
               </Link>
             </div>

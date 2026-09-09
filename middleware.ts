@@ -61,6 +61,8 @@ export function middleware(request: NextRequest) {
   const headers = new Headers(request.headers)
   headers.set('x-nonce', nonce)
   headers.set('content-security-policy', csp)
+  // Overwrite any supplied value; the session guard only trusts this request's URL.
+  headers.set('x-continuation-path', `${request.nextUrl.pathname}${request.nextUrl.search}`)
 
   const response = NextResponse.next({ request: { headers } })
   response.headers.set('content-security-policy', csp)
@@ -82,6 +84,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Protected route prefetches also need the validated continuation header.
+    '/user/:path*',
     /* Everything a browser renders. Static assets carry no script and are
        served straight off disk, so they are left alone. */
     {

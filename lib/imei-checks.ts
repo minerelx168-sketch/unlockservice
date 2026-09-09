@@ -4,6 +4,7 @@ import { fingerprintImei } from './imei-privacy'
 import { activeImeiCheckProvider, type ImeiCheckResult } from './imei-check-provider'
 import { imeiProviderService, providerConfiguration } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { claimProviderPoll } from './provider-poll-lease'
 import { consumeAttempt } from './rate-limit'
 
 export type ImeiCheckStatus = 'queued' | 'processing' | 'completed' | 'unavailable'
@@ -226,18 +227,29 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
 }
 
 export async function pollImeiCheck(userId: number, id: number): Promise<ImeiCheckView> {
-  const row = rowForUser(userId, id)
-  if (!row) throw new ImeiCheckError('Check not found.', 'check_not_found')
-  if (row.status !== 'processing') return toView(row)
+  const snapshot = rowForUser(userId, id)
+  if (!snapshot) throw new ImeiCheckError('Check not found.', 'check_not_found')
+  if (snapshot.status !== 'processing' || !snapshot.provider_check_id) return toView(snapshot)
+  const snapshotLastPoll = snapshot.provider_last_polled_at ? Date.parse(`${snapshot.provider_last_polled_at}Z`) : 0
+  if (snapshotLastPoll && Date.now() - snapshotLastPoll < POLL_DEBOUNCE_MS) return toView(snapshot)
 
-  const lastPoll = row.provider_last_polled_at ? Date.parse(`${row.provider_last_polled_at}Z`) : 0
-  if (lastPoll && Date.now() - lastPoll < POLL_DEBOUNCE_MS) return toView(row)
+  const releasePoll = claimProviderPoll('imei_check', snapshot.id)
+  if (!releasePoll) return toView(snapshot)
 
-  const provider = activeImeiCheckProvider()
-  if (!provider.poll || !row.provider_check_id || !providerConfiguration().enabled) return toView(row)
+  try {
+    const row = rowForUser(userId, id)
+    if (!row) throw new ImeiCheckError('Check not found.', 'check_not_found')
+    if (row.status !== 'processing' || !row.provider_check_id) return toView(row)
+    const lastPoll = row.provider_last_polled_at ? Date.parse(`${row.provider_last_polled_at}Z`) : 0
+    if (lastPoll && Date.now() - lastPoll < POLL_DEBOUNCE_MS) return toView(row)
+    const provider = activeImeiCheckProvider()
+    if (!provider.poll || !providerConfiguration().enabled) return toView(row)
 
-  const outcome = await provider.poll(row.provider_check_id, row.check_type)
-  updateResult(id, outcome, true)
-  auditOutcome(id, row.provider_mode ?? 'dhru', outcome, `poll:${row.provider_attempts + 1}:${outcome.status}`)
-  return getImeiCheck(userId, id)!
+    const outcome = await provider.poll(row.provider_check_id, row.check_type)
+    updateResult(id, outcome, true)
+    auditOutcome(id, row.provider_mode ?? 'dhru', outcome, `poll:${row.provider_attempts + 1}:${outcome.status}`)
+    return getImeiCheck(userId, id)!
+  } finally {
+    releasePoll()
+  }
 }

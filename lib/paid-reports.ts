@@ -20,8 +20,10 @@ import {
   type ProviderService,
 } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { claimProviderPoll } from './provider-poll-lease'
 import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
+import { enqueueOrderNotification } from './order-notifications'
 
 export type PaidReportStatus = 'processing' | 'completed' | 'refunded' | 'manual_review'
 
@@ -31,6 +33,7 @@ export type PaidReportProduct = {
   name: string
   summary: string
   group: string
+  domain: 'imei_check' | 'unlock'
   inputType: 'imei'
   priceCents: number
   providerCostMicros: number
@@ -183,14 +186,20 @@ function parseReport(value: string | null): ProviderReport | null {
   }
 }
 
+function providerServiceConfigured(config: ReturnType<typeof providerConfiguration>, service: ProviderService | undefined) {
+  if (!config.enabled || !service) return false
+  if (service.mode === 'sync') return Boolean(config.endpoint && config.apiKey)
+  return Boolean(config.dhruEndpoint && config.username && config.dhruKey)
+}
+
 function productFromRow(row: PaidReportProductRow): PaidReportProduct {
   const config = providerConfiguration()
   const mapping = imeiProviderService(mappingKey(row.code))
   const catalogProduct = providerProductByCode(row.code)
   const approvedMapping = Boolean(
     catalogProduct?.status === 'available'
-      && mapping?.mode === 'sync'
-      && mapping.id === catalogProduct.serviceId,
+      && providerServiceConfigured(config, mapping)
+      && mapping?.id === catalogProduct.serviceId,
   )
   return {
     code: row.code,
@@ -198,12 +207,13 @@ function productFromRow(row: PaidReportProductRow): PaidReportProduct {
     name: row.name,
     summary: row.summary,
     group: catalogProduct?.group ?? 'Device checks',
+    domain: catalogProduct?.domain ?? 'imei_check',
     inputType: row.input_type,
     priceCents: row.price_cents,
     providerCostMicros: row.provider_cost_micros,
     etaMinutes: row.eta_minutes,
     isActive: row.is_active === 1,
-    providerReady: row.is_active === 1 && config.enabled && approvedMapping,
+    providerReady: row.is_active === 1 && approvedMapping,
     sortOrder: row.sort_order,
   }
 }
@@ -312,8 +322,11 @@ function auditOutcome(row: PaidReportOrderRow, outcome: ProviderOutcome, eventKe
 
 function settleCompleted(row: PaidReportOrderRow, report: ProviderReport, providerOrderId: string | null) {
   return db().transaction(() => {
-    const current = db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow
-    if (current.status === 'refunded') throw new Error('cannot deliver a refunded paid report')
+    const current = reconcileSettlement(db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow)
+    // Polls, submission responses and webhooks can arrive in any order. Once
+    // money has settled, neither a duplicate nor a conflicting result may
+    // rewrite the report or release credit reserved for a different order.
+    if (current.status === 'completed' || current.status === 'refunded') return current
     charge(current.user_id, current.price_cents, CREDIT_REF_TYPE, String(current.id))
     db()
       .prepare(
@@ -321,28 +334,71 @@ function settleCompleted(row: PaidReportOrderRow, report: ProviderReport, provid
             SET status = 'completed', report_json = ?, provider_order_id = COALESCE(?, provider_order_id),
                 provider_error_code = NULL, error_message = NULL,
                 completed_at = COALESCE(completed_at, datetime('now')), updated_at = datetime('now')
-          WHERE id = ? AND status IN ('processing', 'manual_review', 'completed')`,
+          WHERE id = ? AND status IN ('processing', 'manual_review')`,
       )
       .run(JSON.stringify(report), providerOrderId, current.id)
+    enqueueOrderNotification(CREDIT_REF_TYPE, current.id, current.user_id, 'success')
     return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(current.id) as PaidReportOrderRow
-  })()
+  }).immediate()
 }
 
 function settleRefunded(row: PaidReportOrderRow, errorCode: string, message: string) {
   return db().transaction(() => {
-    const current = db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow
-    if (current.status === 'completed') throw new Error('cannot refund a completed paid report')
+    const current = reconcileSettlement(db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow)
+    if (current.status === 'completed' || current.status === 'refunded') return current
     refund(current.user_id, current.price_cents, CREDIT_REF_TYPE, String(current.id))
     db()
       .prepare(
         `UPDATE paid_report_orders
             SET status = 'refunded', provider_error_code = ?, error_message = ?,
                 completed_at = COALESCE(completed_at, datetime('now')), updated_at = datetime('now')
-          WHERE id = ? AND status IN ('processing', 'manual_review', 'refunded')`,
+          WHERE id = ? AND status IN ('processing', 'manual_review')`,
       )
       .run(errorCode, message, current.id)
+    enqueueOrderNotification(CREDIT_REF_TYPE, current.id, current.user_id, 'rejected')
     return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(current.id) as PaidReportOrderRow
-  })()
+  }).immediate()
+}
+
+/**
+ * Called only after the webhook adapter verifies the raw-body signature and
+ * correlates the provider reference. Settlement, ledger effects and the
+ * notification outbox share the caller's transaction when one is active.
+ * SQLite's immediate transaction obtains its writer lock before any reads;
+ * no network request is made while that lock is held.
+ */
+export function settlePaidReportWebhook(
+  orderId: number,
+  providerOrderId: string,
+  outcome: { status: 'success' | 'rejected'; result?: Record<string, unknown>; message?: string },
+): { status: string } {
+  return db().transaction(() => {
+    const saved = db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(orderId) as PaidReportOrderRow | undefined
+    if (!saved) throw new PaidReportError('Paid report not found.', 'report_not_found')
+    if (!providerOrderId || saved.provider_order_id !== providerOrderId) {
+      throw new Error('The provider reference does not match this paid report.')
+    }
+    const row = reconcileSettlement(saved)
+    if (row.status === 'completed' || row.status === 'refunded') return { status: row.status }
+
+    if (outcome.status === 'rejected') {
+      // Provider messages may contain private identifiers or operational
+      // details. Public order copy uses our fixed, safe rejection message.
+      return { status: settleRefunded(row, 'provider_rejected', 'The provider could not deliver this report. The full credit hold was released.').status }
+    }
+
+    const report = buildProviderReport(row.product_code, row.provider_name ?? 'provider', outcome.result ?? {})
+    if (!providerReportHasContent(report)) {
+      return {
+        status: markManualReview(
+          row,
+          'unsupported_response',
+          'The provider completed the lookup, but the result needs manual review before delivery. Your credit remains on hold.',
+        ).status,
+      }
+    }
+    return { status: settleCompleted(row, report, providerOrderId).status }
+  }).immediate()
 }
 
 function markManualReview(row: PaidReportOrderRow, errorCode: string, message: string) {
@@ -430,10 +486,9 @@ function providerReadyFor(product: PaidReportProductRow): { config: ReturnType<t
   const service = imeiProviderService(mappingKey(product.code))
   const catalogProduct = providerProductByCode(product.code)
   if (
-    !config.enabled
+    !providerServiceConfigured(config, service)
     || !service
     || catalogProduct?.status !== 'available'
-    || service.mode !== 'sync'
     || service.id !== catalogProduct.serviceId
   ) {
     throw new PaidReportError('This paid report is not available yet.', 'provider_not_ready')
@@ -472,11 +527,6 @@ export async function createPaidReport(
   source: 'website' | 'api' = 'website',
 ): Promise<PaidReportPayload> {
   const productCode = cleanProductCode(input.productCode)
-  const product = getProductRow(productCode)
-  if (!product) throw new PaidReportError('Choose a valid paid report.', 'product_unknown')
-  if (product.is_active !== 1) throw new PaidReportError('This paid report is not active.', 'product_inactive')
-  const { config, service } = providerReadyFor(product)
-
   const imei = normalizeImei(input.imei)
   if (!imei) throw new PaidReportError('Enter the device IMEI.', 'imei_missing')
   if (!isValidImei(imei)) throw new PaidReportError('Enter a valid 15-digit IMEI.', 'imei_invalid')
@@ -485,12 +535,19 @@ export async function createPaidReport(
 
   const existing = rowForIdempotency(userId, idempotencyKey)
   if (existing) {
-    if (existing.product_code !== product.code || existing.imei_fingerprint !== fingerprint) {
+    if (existing.product_code !== productCode || existing.imei_fingerprint !== fingerprint) {
       throw new PaidReportError('That request key was already used for a different report.', 'idempotency_conflict')
     }
     const balance = getBalance(userId)
     return payload(existing, balance, balance)
   }
+
+  // A saved request remains readable when a service is paused or provider
+  // configuration changes. Operational availability applies only to new work.
+  const product = getProductRow(productCode)
+  if (!product) throw new PaidReportError('Choose a valid paid report.', 'product_unknown')
+  if (product.is_active !== 1) throw new PaidReportError('This paid report is not active.', 'product_inactive')
+  const { config, service } = providerReadyFor(product)
 
   if (!consumeAttempt('paid-imei-report-user', String(userId), REPORT_RATE_LIMIT, REPORT_WINDOW_SECONDS)) {
     throw new PaidReportError('Too many paid report requests. Please try again later.', 'rate_limited')
@@ -526,7 +583,7 @@ export async function createPaidReport(
       const orderId = Number(inserted.lastInsertRowid)
       hold(userId, product.price_cents, CREDIT_REF_TYPE, String(orderId))
       return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(orderId) as PaidReportOrderRow
-    })()
+    }).immediate()
   } catch (error) {
     const replay = rowForIdempotency(userId, idempotencyKey)
     if (replay) {
@@ -574,49 +631,79 @@ function pollDebounced(row: PaidReportOrderRow) {
   return Number.isFinite(timestamp) && Date.now() - timestamp < POLL_DEBOUNCE_MS
 }
 
+function pollProviderMatches(row: PaidReportOrderRow) {
+  const config = providerConfiguration()
+  // A local configuration change is not an upstream rejection. In particular,
+  // never send an old provider's order reference to a newly selected provider.
+  return config.enabled && Boolean(config.dhruEndpoint && config.username && config.dhruKey)
+    && Boolean(row.provider_name) && row.provider_name === config.name
+}
+
 export async function pollPaidReport(userId: number, orderId: number): Promise<PaidReportPayload> {
   const original = rowForUser(userId, orderId)
   if (!original) throw new PaidReportError('Paid report not found.', 'report_not_found')
-  const row = reconcileSettlement(original)
-  const before = getBalance(userId)
-  if (row.status !== 'processing') return payload(row, before, before)
-  if (row.provider_mode !== 'dhru' || !row.provider_order_id || pollDebounced(row)) {
-    return payload(row, before, before)
+  const snapshot = reconcileSettlement(original)
+  const snapshotBalance = getBalance(userId)
+  if (snapshot.status !== 'processing'
+    || snapshot.provider_mode !== 'dhru'
+    || !snapshot.provider_order_id
+    || !pollProviderMatches(snapshot)
+    || pollDebounced(snapshot)) {
+    return payload(snapshot, snapshotBalance, snapshotBalance)
   }
 
-  let outcome: ProviderOutcome
+  const releasePoll = claimProviderPoll('paid_imei_report', snapshot.id)
+  if (!releasePoll) return payload(snapshot, snapshotBalance, snapshotBalance)
+
   try {
-    outcome = await pollProviderRequest(row.provider_order_id)
-  } catch {
-    outcome = {
-      status: 'unavailable',
-      providerId: row.provider_order_id,
-      code: 'poll_exception',
-      message: 'The provider could not be reached.',
-      retryable: true,
-      timing: { totalMs: 0 },
+    const current = rowForUser(userId, orderId)
+    if (!current) throw new PaidReportError('Paid report not found.', 'report_not_found')
+    const row = reconcileSettlement(current)
+    const before = getBalance(userId)
+    if (row.status !== 'processing'
+      || row.provider_mode !== 'dhru'
+      || !row.provider_order_id
+      || !pollProviderMatches(row)
+      || pollDebounced(row)) {
+      return payload(row, before, before)
     }
-  }
 
-  if (outcome.status === 'unavailable' && outcome.retryable) {
-    db()
-      .prepare(
-        `UPDATE paid_report_orders
-            SET provider_last_polled_at = datetime('now'), provider_attempts = provider_attempts + 1,
-                provider_error_code = ?, updated_at = datetime('now')
-          WHERE id = ? AND status = 'processing'`,
-      )
-      .run(outcome.code, row.id)
-    auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:transient`)
-    const current = rowForUser(userId, row.id)!
-    return payload(current, before, getBalance(userId))
-  }
+    let outcome: ProviderOutcome
+    try {
+      outcome = await pollProviderRequest(row.provider_order_id)
+    } catch {
+      outcome = {
+        status: 'unavailable',
+        providerId: row.provider_order_id,
+        code: 'poll_exception',
+        message: 'The provider could not be reached.',
+        retryable: true,
+        timing: { totalMs: 0 },
+      }
+    }
 
-  if (outcome.status === 'processing') {
-    const processing = markProcessing(row, outcome.providerId, true)
-    auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:processing`)
-    return payload(processing, before, getBalance(userId))
-  }
+    if (outcome.status === 'unavailable' && outcome.retryable) {
+      db()
+        .prepare(
+          `UPDATE paid_report_orders
+              SET provider_last_polled_at = datetime('now'), provider_attempts = provider_attempts + 1,
+                  provider_error_code = ?, updated_at = datetime('now')
+            WHERE id = ? AND status = 'processing'`,
+        )
+        .run(outcome.code, row.id)
+      auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:transient`)
+      const current = rowForUser(userId, row.id)!
+      return payload(current, before, getBalance(userId))
+    }
 
-  return handleOutcome(row, outcome, before, `poll:${row.provider_attempts + 1}:outcome`)
+    if (outcome.status === 'processing') {
+      const processing = markProcessing(row, outcome.providerId, true)
+      auditOutcome(row, outcome, `poll:${row.provider_attempts + 1}:processing`)
+      return payload(processing, before, getBalance(userId))
+    }
+
+    return handleOutcome(row, outcome, before, `poll:${row.provider_attempts + 1}:outcome`)
+  } finally {
+    releasePoll()
+  }
 }

@@ -38,7 +38,7 @@ export function consumeAttempt(
       .prepare('UPDATE auth_rate_limits SET attempts = attempts + 1 WHERE bucket = ? AND subject_hash = ?')
       .run(bucket, hash)
     return true
-  })()
+  }).immediate()
 }
 
 export function clearAttempts(bucket: string, subject: string) {

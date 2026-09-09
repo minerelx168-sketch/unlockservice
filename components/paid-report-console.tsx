@@ -1,19 +1,25 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useRef, useState, type FormEvent } from 'react'
-import { groupImei, IMEI_LENGTH, luhnValid, maskIdentifier, normalizeImei } from '@/lib/imei'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { IMEI_LENGTH, maskIdentifier } from '@/lib/imei'
+import { deviceImei } from '@/lib/device-intent-value'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
+import { ServicePicker } from './service-picker'
+import { saveDeviceIntentAction, clearAcceptedDeviceIntentAction } from '@/lib/device-intent-actions'
 
 type Product = {
   code: string
   name: string
   summary: string
   group: string
+  domain: 'imei_check' | 'unlock'
   priceCents: number
   etaMinutes: number
   providerReady: boolean
+  hasExample: boolean
 }
 
 type PaidReportView = {
@@ -36,8 +42,10 @@ type PaidReportPayload = {
   }
 }
 
+class ReportRequestError extends Error {}
+
 function statusLabel(status: PaidReportView['status']) {
-  if (status === 'completed') return 'Report ready'
+  if (status === 'completed') return 'Result ready'
   if (status === 'refunded') return 'Credit returned'
   if (status === 'manual_review') return 'Manual review'
   return 'Processing'
@@ -48,34 +56,57 @@ export function PaidReportConsole({
   csrfToken,
   availableCents,
   initialProductCode,
+  initialImei,
+  initialDomain,
+  paymentMethods,
 }: {
   products: Product[]
   csrfToken: string
   availableCents: number
   initialProductCode?: string
+  initialImei?: string
+  initialDomain?: 'imei_check' | 'unlock'
+  paymentMethods: string[]
 }) {
+  const router = useRouter()
   const initialCode = products.some((product) => product.code === initialProductCode)
     ? initialProductCode ?? ''
-    : products[0]?.code ?? ''
+    : ''
   const [productCode, setProductCode] = useState(initialCode)
-  const [imei, setImei] = useState('')
-  const [search, setSearch] = useState('')
+  const [imei, setImei] = useState(initialImei ?? '')
+  const [domain, setDomain] = useState<'imei_check' | 'unlock'>(
+    products.find((entry) => entry.code === initialCode)?.domain ?? initialDomain ?? 'imei_check',
+  )
+  const [savingDraft, setSavingDraft] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [uncertain, setUncertain] = useState(false)
+  const [balanceCents, setBalanceCents] = useState(availableCents)
+  const [imeiTouched, setImeiTouched] = useState(false)
+  const imeiRef = useRef<HTMLInputElement>(null)
+  const reviewRef = useRef<HTMLHeadingElement>(null)
+  const resultRef = useRef<HTMLElement>(null)
+  const inFlight = useRef(false)
   const [reviewing, setReviewing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [payload, setPayload] = useState<PaidReportPayload | null>(null)
   const idempotencyRef = useRef<string | null>(null)
 
   const product = products.find((entry) => entry.code === productCode) ?? null
-  const visibleProducts = useMemo(() => {
-    const query = search.trim().toLowerCase()
-    if (!query) return products
-    return products.filter((entry) =>
-      `${entry.name} ${entry.summary} ${entry.group}`.toLowerCase().includes(query),
-    )
-  }, [products, search])
-  const balanceCents = payload?.credit.balanceCents ?? availableCents
+  const visibleProducts = useMemo(() => products.filter((entry) => entry.domain === domain), [products, domain])
   const affordable = !product || product.priceCents <= balanceCents
+  // Validate the original input: never truncate a longer identifier or discard letters.
+  const digits = deviceImei(imei)
+  const digitCount = imei.replace(/\D/g, '').length
+  const imeiValid = digits !== null
+  const imeiInvalid = imeiTouched && !imeiValid
+  const locked = busy || savingDraft || uncertain || payload !== null
+
+  useEffect(() => {
+    if (reviewing) reviewRef.current?.focus()
+  }, [reviewing])
+  useEffect(() => {
+    if (payload) resultRef.current?.focus()
+  }, [payload])
 
   function resetRequestIdentity() {
     idempotencyRef.current = null
@@ -91,53 +122,79 @@ export function PaidReportConsole({
   }
 
   async function post(path: string, body: Record<string, unknown>) {
-    const response = await fetch(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ ...body, csrfToken }),
-    })
-    let data: PaidReportPayload | { success: false; error?: string } | null = null
+    const controller = new AbortController()
+    const deadline = setTimeout(() => controller.abort(), 35_000)
     try {
-      data = (await response.json()) as PaidReportPayload | { success: false; error?: string }
-    } catch {
-      throw new Error('The server returned an unreadable response.')
+      const response = await fetch(path, {
+        signal: controller.signal,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ ...body, csrfToken }),
+      })
+      let data: PaidReportPayload | { success: false; error?: string } | null = null
+      try {
+        data = (await response.json()) as PaidReportPayload | { success: false; error?: string }
+      } catch {
+        throw new Error('We could not confirm the response. Check report history, or retry this same request.')
+      }
+      if (!response.ok || !data || data.success !== true) {
+        const message = data && 'error' in data ? data.error : undefined
+        // A gateway/server failure can happen after the order was accepted.
+        if (response.status >= 500) throw new Error('The order response is uncertain.')
+        throw new ReportRequestError(message ?? 'The paid report could not be submitted.')
+      }
+      return data
+    } finally {
+      clearTimeout(deadline)
     }
-    if (!response.ok || !data || data.success !== true) {
-      const message = data && 'error' in data ? data.error : undefined
-      throw new Error(message ?? 'The paid report could not be submitted.')
-    }
-    return data
   }
 
   function reviewOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const digits = normalizeImei(imei)
-    if (!product) return setError('Choose a paid report first.')
-    if (!product.providerReady) return setError('This report is not available yet.')
-    if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+    if (locked) return
+    setImeiTouched(true)
+    const digits = deviceImei(imei)
+    if (!product) return setError('Choose a service first.')
+    if (!product.providerReady) return setError('This service is not available yet.')
+    if (!digits) {
+      setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+      imeiRef.current?.focus()
+      return
+    }
     if (!affordable) return setError('Not enough credit for this report.')
     setError(null)
     setReviewing(true)
   }
 
   async function confirmOrder() {
-    const digits = normalizeImei(imei)
-    if (!product || !product.providerReady) return setError('This report is not available yet.')
-    if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+    if (inFlight.current || payload) return
+    const digits = deviceImei(imei)
+    if (!product || !product.providerReady) return setError('This service is not available yet.')
+    if (!digits) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
     if (!affordable) return setError('Not enough credit for this report.')
 
     const idempotencyKey = idempotencyRef.current ?? crypto.randomUUID()
     idempotencyRef.current = idempotencyKey
+    inFlight.current = true
     setBusy(true)
     setError(null)
     try {
       const result = await post('/api/imei/reports', { productCode: product.code, imei: digits, idempotencyKey })
       setPayload(result)
+      setBalanceCents(result.credit.balanceCents)
+      // Cleanup has its own short request so another tab's newer draft survives.
+      // Offline cleanup falls back to the draft's TTL, never an uncertain order.
+      void clearAcceptedDeviceIntentAction({ imei: digits, productCode: product.code }).catch(() => undefined)
+      setUncertain(false)
       setReviewing(false)
+      router.refresh()
     } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : 'The paid report could not be submitted.')
+      const unknown = !(thrown instanceof ReportRequestError)
+      setUncertain((previous) => previous || unknown)
+      setError(unknown ? 'We could not confirm whether your order was received. Check report history before starting another order, or retry this same request safely.' : thrown.message)
     } finally {
+      inFlight.current = false
       setBusy(false)
     }
   }
@@ -147,7 +204,10 @@ export function PaidReportConsole({
     setBusy(true)
     setError(null)
     try {
-      setPayload(await post(`/api/imei/reports/${payload.order.id}`, {}))
+      const result = await post(`/api/imei/reports/${payload.order.id}`, {})
+      setPayload(result)
+      setBalanceCents(result.credit.balanceCents)
+      router.refresh()
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : 'The report status could not be refreshed.')
     } finally {
@@ -155,110 +215,165 @@ export function PaidReportConsole({
     }
   }
 
-  if (products.length === 0) {
-    return (
-      <p className="alert" role="status">
-        <Icon name="info" strokeWidth={1.9} />
-        <span>Paid Provider reports are not active yet. The Free IMEI Check remains available.</span>
-      </p>
-    )
+  async function continueToFunding() {
+    if (locked || !product?.providerReady || affordable) return
+    if (imei.trim() && !deviceImei(imei)) {
+      setImeiTouched(true)
+      setError('Enter a valid 15-digit IMEI, or clear it before adding credit.')
+      imeiRef.current?.focus()
+      return
+    }
+    setSavingDraft(true)
+    setError(null)
+    try {
+      // Keep the device draft in the same secure handoff used by the homepage.
+      // The top-up URL contains only the service code, never the customer's IMEI.
+      const result = await saveDeviceIntentAction({ imei, productCode: product.code, domain: product.domain })
+      if (result.error) {
+        setError(result.error)
+        return
+      }
+      router.push(`/user/add-funds?product=${encodeURIComponent(product.code)}`)
+    } catch {
+      setError('We could not save your selection. Please try again; no credit has been charged.')
+    } finally {
+      setSavingDraft(false)
+    }
   }
 
   return (
-    <div style={{ display: 'grid', gap: 20 }}>
-      <form className="panel" onSubmit={reviewOrder} noValidate>
-        <header>
-          <h2>New paid report</h2>
-          <span>{formatUsd(balanceCents)} available</span>
+    <div className="service-workbench">
+      <form className="service-workbench-panel" onSubmit={reviewOrder} noValidate aria-busy={busy || savingDraft}>
+        <nav className="service-workbench-tabs" aria-label="Service orders">
+          <span className="service-workbench-tab is-current" aria-current="page"><Icon name="search" /> Order</span>
+          <Link className="service-workbench-tab" href="/user/reports"><Icon name="clock" /> Order history</Link>
+        </nav>
+        <header className="service-workbench-heading">
+          <span className="service-workbench-icon"><Icon name={domain === 'unlock' ? 'lock' : 'device'} /></span>
+          <div>
+            <h2>{domain === 'unlock' ? 'Unlock a device' : 'Check a device'}</h2>
+            <p>Enter an IMEI, choose a service, then review your order.</p>
+          </div>
+          <div className="service-workbench-credit">
+            <span>Available credit</span>
+            <strong>{formatUsd(balanceCents)}</strong>
+          </div>
         </header>
 
-        <div className="panel-body" style={{ display: 'grid', gap: 20 }}>
+        <div className="service-workbench-body">
+          {uncertain ? <Link className="link-arrow" href="/user/reports">Check report history</Link> : null}
           {error ? <p className="alert alert--error" role="alert"><Icon name="cross" /> <span>{error}</span></p> : null}
 
-          <div className="field">
-            <label htmlFor="paid-report-search">Search paid IMEI reports</label>
-            <input
-              id="paid-report-search"
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.currentTarget.value)}
-              placeholder="Apple, Samsung, blacklist, carrier…"
-              autoComplete="off"
-            />
-            <p className="field-note">
-              <Icon name="search" strokeWidth={1.9} />
-              <span>{visibleProducts.length} of {products.length} reports shown</span>
-            </p>
-          </div>
-
-          <div className="picker-list">
-            {visibleProducts.map((entry) => (
-              <button
-                key={entry.code}
-                type="button"
-                className="picker-option"
-                aria-pressed={entry.code === productCode}
-                onClick={() => {
-                  setProductCode(entry.code)
+          <div className="field service-workbench-imei">
+            <div className="service-workbench-label">
+              <label htmlFor="paid-report-imei">IMEI number</label>
+              <span className="service-workbench-validation" data-state={imeiInvalid ? 'invalid' : imeiValid ? 'valid' : undefined} aria-live="polite">
+                {imeiInvalid ? 'Check number' : imeiValid ? 'Valid format' : '15 digits'}
+              </span>
+            </div>
+            <div className="service-workbench-input" data-invalid={imeiInvalid || undefined}>
+              <Icon name="device" />
+              <input
+                id="paid-report-imei"
+                ref={imeiRef}
+                disabled={locked}
+                aria-invalid={imeiInvalid}
+                aria-describedby="paid-report-imei-help"
+                onBlur={() => setImeiTouched(true)}
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder="Enter your 15-digit IMEI"
+                value={imei}
+                onChange={(event) => {
+                  // Keep invalid characters visible so the customer can correct them.
+                  setImei(event.currentTarget.value)
                   setError(null)
                   resetRequestIdentity()
                 }}
-              >
-                <span>
-                  <span className="t-micro">{entry.group}</span>
-                  <br />
-                  <strong>{entry.name}</strong>
-                  <br />
-                  <span className="t-small" style={{ fontSize: 12.5 }}>{entry.summary}</span>
-                </span>
-                <span className="price">{formatUsd(entry.priceCents)}</span>
-              </button>
-            ))}
-            {visibleProducts.length === 0 ? (
-              <p className="alert" role="status"><Icon name="info" /> <span>No paid IMEI reports match that search.</span></p>
-            ) : null}
+              />
+              {imei ? <button type="button" className="service-workbench-clear" aria-label="Clear IMEI" disabled={locked} onClick={() => {
+                setImei('')
+                setImeiTouched(false)
+                setError(null)
+                resetRequestIdentity()
+                imeiRef.current?.focus()
+              }}><Icon name="cross" /></button> : null}
+            </div>
+            <div className="service-workbench-help">
+              <p className="field-note" id="paid-report-imei-help" data-state={imeiInvalid ? 'invalid' : undefined}>
+                <Icon name="info" strokeWidth={1.9} />
+                <span>{imeiInvalid ? 'Enter exactly 15 digits with a valid checksum. Only spaces or hyphens may separate digits.' : 'Find it in Settings or dial *#06#. IMEI only; serial numbers are not accepted.'}</span>
+              </p>
+              <span>{digitCount} / {IMEI_LENGTH}</span>
+            </div>
           </div>
 
-          <div className="field">
-            <label htmlFor="paid-report-imei">IMEI number</label>
-            <input
-              id="paid-report-imei"
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              spellCheck={false}
-              placeholder="35 490912 345678 9"
-              value={imei}
-              onChange={(event) => {
-                const digits = normalizeImei(event.currentTarget.value)
-                setImei(groupImei(digits))
-                setError(digits.length === IMEI_LENGTH && !luhnValid(digits) ? 'That IMEI checksum does not match.' : null)
+          <div className="service-workbench-service">
+            <div className="service-workbench-domain" role="group" aria-label="Service type">
+              <button type="button" aria-pressed={domain === 'imei_check'} disabled={locked} onClick={() => {
+                if (domain === 'imei_check') return
+                setDomain('imei_check')
+                setProductCode('')
+                setError(null)
+                resetRequestIdentity()
+              }}><Icon name="search" /> Phone Check</button>
+              <button type="button" aria-pressed={domain === 'unlock'} disabled={locked} onClick={() => {
+                if (domain === 'unlock') return
+                setDomain('unlock')
+                setProductCode('')
+                setError(null)
+                resetRequestIdentity()
+              }}><Icon name="lock" /> Unlock</button>
+            </div>
+            <ServicePicker
+              id="paid-report-service"
+              label={domain === 'unlock' ? 'Unlock service' : 'Lookup service'}
+              options={visibleProducts.map((entry) => ({
+                code: entry.code,
+                name: entry.name,
+                summary: entry.summary,
+                group: entry.group,
+                priceCents: entry.priceCents,
+                etaLabel: deliveryLabel(entry.etaMinutes),
+                available: entry.providerReady,
+                hasExample: entry.hasExample,
+              }))}
+              value={productCode}
+              disabled={locked}
+              onChange={(code) => {
+                if (locked) return
+                setProductCode(code)
+                setError(null)
                 resetRequestIdentity()
               }}
             />
-            <p className="field-note">
-              <Icon name="shield" strokeWidth={1.9} />
-              <span>We never store your full IMEI and never show it in full — only the first two digits and the last four.</span>
-            </p>
           </div>
 
           {product ? (
-            <div className="quote">
-              <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
-              <div><span className="label">Available credit</span><span className="value">{formatUsd(balanceCents)}</span></div>
-            </div>
+            <section className="service-workbench-selection" aria-label="Selected service">
+              <div className="service-workbench-selection-copy">
+                <h3>{product.name}</h3>
+                <p>{product.summary}</p>
+              </div>
+              <dl className="service-workbench-quote">
+                <div><dt>Price</dt><dd>{formatUsd(product.priceCents)}</dd></div>
+                <div><dt>Estimated delivery</dt><dd>{deliveryLabel(product.etaMinutes)}</dd></div>
+              </dl>
+            </section>
           ) : null}
 
-          {reviewing && product ? (
+          {payload ? null : reviewing && product ? (
             <section className="order-review" aria-labelledby="paid-report-review-title">
               <div className="card-topline">
                 <div>
                   <span className="kicker">Confirm order</span>
-                  <h3 className="t-card" id="paid-report-review-title">{product.name}</h3>
+                  <h3 className="t-card" id="paid-report-review-title" tabIndex={-1} ref={reviewRef}>{product.name}</h3>
                 </div>
                 <span className="badge">Review</span>
               </div>
-              <p className="t-small">IMEI {maskIdentifier(normalizeImei(imei))}</p>
+              <p className="t-small">IMEI {maskIdentifier(digits ?? '')}</p>
               <div className="quote">
                 <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
                 <div><span className="label">Estimated delivery</span><span className="value">{deliveryLabel(product.etaMinutes)}</span></div>
@@ -268,59 +383,53 @@ export function PaidReportConsole({
               <div className="order-review-actions">
                 <button className="button button--primary" type="button" disabled={busy} onClick={confirmOrder}>
                   <Icon name="file" strokeWidth={1.9} />
-                  {busy ? 'Submitting…' : `Confirm and order ${formatUsd(product.priceCents)}`}
+                  {busy ? 'Submitting…' : uncertain ? 'Retry the same request' : `Confirm and order ${formatUsd(product.priceCents)}`}
                 </button>
-                <button className="button button--quiet" type="button" disabled={busy} onClick={() => setReviewing(false)}>
+                <button className="button button--quiet" type="button" disabled={busy || uncertain} onClick={() => setReviewing(false)}>
                   Back to edit
                 </button>
               </div>
             </section>
           ) : (
             <>
-              {/* When credit is the only thing in the way, the button says so
-                  and does the thing that clears it. A greyed-out control with
-                  a small "add funds" link beside it asks the customer to work
-                  out for themselves why they cannot buy. */}
-              {product && product.providerReady && !affordable ? (
-                <Link className="button button--primary" href="/user/add-funds">
-                  <Icon name="arrowRight" strokeWidth={1.9} />
-                  Add funds and order this report
-                </Link>
-              ) : (
-                <button
-                  className="button button--primary"
-                  type="submit"
-                  disabled={busy || !product?.providerReady}
-                >
-                  <Icon name="file" strokeWidth={1.9} />
-                  {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a report'}
-                </button>
-              )}
-
-              {/* Every reason a control above is unavailable, stated next to
-                  it rather than left to be inferred from the grey. */}
-              {product && !product.providerReady ? (
-                <p className="t-small" role="status">
-                  This report is not open for ordering yet — the supplier behind it has not been
-                  verified. Nothing here can be charged in the meantime.
-                </p>
-              ) : null}
-              {product && product.providerReady && !affordable ? (
-                <p className="t-small" role="status">
-                  Your balance is {formatUsd(balanceCents)} and this report costs{' '}
-                  {formatUsd(product.priceCents)}.
-                </p>
-              ) : null}
+              <div className="service-workbench-actions">
+                {product && product.providerReady && !affordable ? (
+                  <button className="button button--primary" type="button" disabled={locked} onClick={continueToFunding}>
+                    <Icon name="plus" strokeWidth={1.9} />
+                    {savingDraft ? 'Saving selection…' : `Add ${formatUsd(product.priceCents - balanceCents)} to continue`}
+                  </button>
+                ) : (
+                  <button
+                    className="button button--primary"
+                    type="submit"
+                    disabled={locked || !product?.providerReady}
+                  >
+                    <Icon name="file" strokeWidth={1.9} />
+                    {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a service to continue'}
+                  </button>
+                )}
+                {!product ? <p className="t-small">{visibleProducts.length > 0 ? 'Choose a service above to see its price and delivery estimate.' : 'No services in this category are available right now. Choose another category or contact support.'}</p> : null}
+                {product && !product.providerReady ? (
+                  <p className="t-small" role="status">This service is not open for ordering yet. Choose an available service or contact support for help.</p>
+                ) : null}
+                {product && product.providerReady && !affordable ? (
+                  <p className="t-small" role="status">
+                    You need {formatUsd(product.priceCents - balanceCents)} more credit. No minimum top-up.
+                    {paymentMethods.length > 0 ? ` Payment: ${paymentMethods.join(', ')}; transfers are verified before credit is available.` : ' Top-ups are currently unavailable; contact support for help.'}
+                    {' '}Your IMEI and selected service are kept privately for 15 minutes. You will review and confirm the order after returning.
+                  </p>
+                ) : null}
+              </div>
             </>
           )}
-          <p className="t-small" style={{ fontSize: 12.5 }}>
-            Credit is held before submission and charged only after a usable report is delivered. A clear terminal failure releases the hold. A timeout or uncertain Provider response goes to manual review and is never retried automatically.
+          <p className="service-workbench-privacy">
+            <Icon name="shield" /> <span>Credit is reserved when you confirm. A delivered result uses that credit; an undeliverable service returns it to your account balance. If the result is uncertain, the credit stays reserved while we check. You can follow the status in service history.</span>
           </p>
         </div>
       </form>
 
       {payload ? (
-        <section className="card" role="status">
+        <section className="card service-workbench-result" role="status" ref={resultRef} tabIndex={-1}>
           <div className="card-topline">
             <span className="kicker"><Icon name="file" /> {payload.order.productName}</span>
             <span className={payload.order.status === 'completed' ? 'badge badge--success' : 'badge'}>{statusLabel(payload.order.status)}</span>
@@ -328,15 +437,21 @@ export function PaidReportConsole({
           <h3 className="t-card">IMEI {payload.order.maskedImei}</h3>
           <p className="t-small">
             {payload.order.message ?? (payload.order.status === 'completed'
-              ? 'The report is ready and the held credit has been charged.'
+              ? 'The result is ready and the held credit has been charged.'
               : payload.order.status === 'refunded'
-                ? 'The Provider could not deliver the report and the full hold was released.'
+                ? 'The service could not be delivered. The reserved credit was returned to your account balance.'
                 : payload.order.status === 'manual_review'
-                  ? 'The Provider response was uncertain. Credit remains held while the request is reviewed.'
+                  ? 'The result needs review. Your credit remains reserved while we check.'
                   : 'The request is still processing.')}
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-            <Link className="button button--quiet" href={`/user/reports/${payload.order.id}`}>View report</Link>
+          <div className="service-workbench-result-actions">
+            <Link className="button button--primary" href={`/user/reports/${payload.order.id}`}>View result</Link>
+            <button className="button button--quiet" type="button" disabled={busy} onClick={() => {
+              resetRequestIdentity()
+              setImei('')
+              setImeiTouched(false)
+              setError(null)
+            }}>Start another service</button>
             {payload.order.status === 'processing' ? (
               <button className="button button--quiet" type="button" disabled={busy} onClick={refreshStatus}>
                 {busy ? 'Refreshing…' : 'Refresh status'}

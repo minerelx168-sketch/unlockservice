@@ -8,8 +8,8 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 /**
  * SQLite so the whole thing runs with `npm run dev` and nothing to
  * provision. Plain SQL against a schema that keeps the reference's
- * shape — users, orders, invoices, a credit ledger — so moving to
- * Postgres later is a driver swap rather than a redesign.
+ * shape — users, orders, invoices, a credit ledger. A PostgreSQL migration
+ * can preserve the accounting contract but needs new SQL/transaction adapters.
  */
 
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
@@ -294,6 +294,43 @@ CREATE TABLE IF NOT EXISTS api_access (
       CREATE INDEX IF NOT EXISTS paid_report_orders_status
         ON paid_report_orders(status, provider_last_polled_at);
 
+      CREATE TABLE IF NOT EXISTS provider_poll_leases (
+        resource_type TEXT NOT NULL,
+        resource_id INTEGER NOT NULL,
+        token TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        PRIMARY KEY (resource_type, resource_id)
+      );
+
+      -- A receipt and its money/status effects commit together. No raw webhook
+      -- payload is retained; the digest detects event-ID reuse with new data.
+      CREATE TABLE IF NOT EXISTS provider_webhook_receipts (
+        provider TEXT NOT NULL,
+        event_id TEXT NOT NULL,
+        payload_sha256 TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY (provider, event_id)
+      );
+
+      -- Durable notification intent: a crash after settlement cannot lose it.
+      CREATE TABLE IF NOT EXISTS order_notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        resource_type TEXT NOT NULL CHECK (resource_type IN ('order', 'paid_imei_report')),
+        resource_id INTEGER NOT NULL,
+        event TEXT NOT NULL CHECK (event IN ('success', 'rejected')),
+        attempts INTEGER NOT NULL DEFAULT 0,
+        available_at INTEGER NOT NULL DEFAULT 0,
+        lease_token TEXT,
+        lease_until INTEGER NOT NULL DEFAULT 0,
+        sent_at TEXT,
+        last_error TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE (resource_type, resource_id, event)
+      );
+      CREATE INDEX IF NOT EXISTS order_notifications_pending
+        ON order_notifications(available_at, lease_until) WHERE sent_at IS NULL;
+
 					CREATE TABLE IF NOT EXISTS provider_events (
 				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
 				  resource_type   TEXT    NOT NULL,
@@ -358,6 +395,7 @@ export function db(): Database.Database {
   const connection = new Database(DB_PATH)
   connection.pragma('journal_mode = WAL')
   connection.pragma('foreign_keys = ON')
+  connection.pragma('busy_timeout = 5000')
 	  connection.exec(SCHEMA)
 		  migrate(connection)
 			  seedCatalog(connection)
@@ -594,6 +632,10 @@ function migrate(connection: Database.Database) {
       CREATE UNIQUE INDEX IF NOT EXISTS paid_report_orders_idempotency
         ON paid_report_orders(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS orders_provider_reference
+        ON orders(provider_name, provider_order_id) WHERE provider_order_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS paid_reports_provider_reference
+        ON paid_report_orders(provider_name, provider_order_id) WHERE provider_order_id IS NOT NULL;
     `)
   })()
 }
@@ -672,7 +714,14 @@ function seedPaidReportCatalog(connection: Database.Database) {
 }
 
 function applyProviderProductCatalogRollout(connection: Database.Database) {
-  const version = '2026-09-provider-product-catalog-v2'
+  // Preserve the historical marker on fresh databases. Existing production
+  // already has v2; changing or reusing that ID would make migration state lie.
+  const previousVersion = '2026-09-provider-product-catalog-v2'
+  if (!migrationApplied(connection, previousVersion)) {
+    connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run(previousVersion)
+  }
+
+  const version = '2026-09-provider-product-catalog-v3-strict-rollout'
   if (migrationApplied(connection, version)) return
 
   connection.transaction(() => {

@@ -174,6 +174,16 @@ const LABELS: Record<string, string> = {
   shipToCountry: 'Ship-to country',
 }
 
+const GENERIC_PRODUCT_FIELDS = [
+  'model', 'modelDescription', 'manufacturer', 'productDescription',
+  'imei', 'imei2', 'meid', 'serial',
+  'status', 'statusDescription', 'unlockStatus', 'carrier', 'network', 'simLock',
+  'blacklist', 'lost', 'demo', 'refurbished', 'replacement', 'replaced',
+  'fmi', 'icloud', 'country', 'purchaseDate', 'coverage', 'warranty',
+  'color', 'capacity', 'partNumber', 'esim', 'esimSupported',
+  'openRepairCase', 'loaner', 'purchaseCountry',
+]
+
 const SECTION_FIELDS = [
   ['Device', ['brand', 'model', 'fullModel', 'modelDescription', 'modelNumber', 'modelCode', 'modelRegion', 'partNumber', 'partType', 'configCode', 'productLine', 'productVersion', 'series', 'subSeries', 'machineType', 'imei', 'imei2', 'meid', 'serial']],
   ['Network and activation', ['carrier', 'simLock', 'activationStatus', 'activationPolicy', 'status', 'statusDescription', 'esnStatus', 'esimSupported', 'fsn', 'miActivationLock', 'keyLock', 'soldBy']],
@@ -383,7 +393,10 @@ export function providerReportHasContent(report: ProviderReport) {
 
 export function buildProviderReport(checkType: string, source: string, data: Record<string, unknown>): ProviderReport {
   const productCode = normalizedCheckType(checkType)
-  const allowed = new Set(PRODUCT_FIELDS[productCode] ?? [])
+  // Strict-rollout products without a dedicated schema may expose only fields
+  // already covered by the global alias allowlist. Unknown Provider keys never
+  // reach the customer, and identifier aliases remain masked below.
+  const allowed = new Set(PRODUCT_FIELDS[productCode] ?? GENERIC_PRODUCT_FIELDS)
   const indexed = indexFields(data)
   const sections: ProviderReport['sections'] = []
 
@@ -423,6 +436,8 @@ export function buildProviderReport(checkType: string, source: string, data: Rec
         : 'The provider completed the request but did not return any supported public report fields.',
     sections,
     checks,
-    nextStep: 'Provider data is a point-in-time lookup. Run a fresh report if the device status may have changed.',
+    nextStep: productCode.startsWith('UNLOCK_')
+      ? 'Follow this service in order history. Do not submit the same device again while a result is processing.'
+      : 'Provider data is a point-in-time lookup. Run a fresh report if the device status may have changed.',
   }
 }

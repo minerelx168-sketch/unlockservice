@@ -62,14 +62,14 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
             </p>
           ) : null}
           {items.length > 0 ? (
-            <div className="data-table" style={{ marginTop: 20 }}>
+            <dl className="report-details" style={{ marginTop: 20 }}>
               {items.map((item, index) => (
-                <div className="row" key={item.key ?? item.label ?? index}>
-                  <span>{item.label ?? 'Check'}</span>
-                  <b className={item.status === 'passed' ? 'status' : undefined}>{checkValue(item)}</b>
+                <div key={item.key ?? item.label ?? index}>
+                  <dt>{item.label ?? 'Check'}</dt>
+                  <dd className={item.status === 'passed' ? 'status' : undefined}>{checkValue(item)}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           ) : null}
         </section>
 
@@ -92,14 +92,14 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
                 <div className="card-topline">
                   <span className="kicker"><Icon name="device" /> {section.title ?? 'Report details'}</span>
                 </div>
-                <div className="data-table">
+                <dl className="report-details">
                   {sectionItems.map((item, itemIndex) => (
-                    <div className="row" key={item.key ?? item.label ?? itemIndex}>
-                      <span>{item.label ?? 'Detail'}</span>
-                      <b>{item.value ?? 'Not returned'}</b>
+                    <div key={item.key ?? item.label ?? itemIndex}>
+                      <dt>{item.label ?? 'Detail'}</dt>
+                      <dd>{item.value ?? 'Not returned'}</dd>
                     </div>
                   ))}
-                </div>
+                </dl>
               </section>
             )
           })}

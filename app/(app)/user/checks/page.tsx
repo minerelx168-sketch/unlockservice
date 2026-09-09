@@ -43,23 +43,29 @@ export default async function ChecksPage() {
             <span className="kicker"><Icon name="search" /> Recent checks</span>
             <span className="t-micro">{checks.length} shown</span>
           </div>
-          <div className="data-table">
-            <div className="row row--head">
-              <span>Device</span>
-              <span>Type</span>
-              <span>Status</span>
-              <span />
-            </div>
-            {checks.map((check) => (
-              <div className="row" key={check.id}>
-                <b className="mono">{check.maskedImei}</b>
-                <span>{check.checkType === 'basic' ? 'Free IMEI check' : check.checkType}</span>
-                <span className={check.status === 'completed' ? 'status' : undefined}>{statusLabel(check.status)}</span>
-                <Link className="link-arrow" href={`/user/checks/${check.id}`}>
-                  View <Icon name="arrowRight" />
-                </Link>
-              </div>
-            ))}
+          <div className="table-wrap">
+            <table role="table" className="grid account-table" aria-label="Recent phone checks">
+              <thead role="rowgroup"><tr role="row">
+                <th role="columnheader" scope="col">Device</th>
+                <th role="columnheader" scope="col">Type</th>
+                <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col"><span className="visually-hidden">Action</span></th>
+              </tr></thead>
+              <tbody role="rowgroup">
+                {checks.map((check) => (
+                  <tr role="row" key={check.id}>
+                    <td role="cell" className="mono" data-label="Device">{check.maskedImei}</td>
+                    <td role="cell" data-label="Type">{check.checkType === 'basic' ? 'Free IMEI check' : check.checkType}</td>
+                    <td role="cell" data-label="Status">{statusLabel(check.status)}</td>
+                    <td role="cell" className="account-table-action" data-label="Action">
+                      <Link className="link-arrow" href={`/user/checks/${check.id}`} aria-label={`View check ${check.id}`}>
+                        View <Icon name="arrowRight" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

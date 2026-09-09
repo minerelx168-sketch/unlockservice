@@ -46,23 +46,31 @@ export default async function PaidReportsPage() {
             <span className="kicker"><Icon name="file" /> Recent paid reports</span>
             <span className="t-micro">{reports.length} shown</span>
           </div>
-          <div className="data-table">
-            <div className="row row--head">
-              <span>Report</span>
-              <span>IMEI</span>
-              <span>Price</span>
-              <span>Status</span>
-              <span />
-            </div>
-            {reports.map((report) => (
-              <div className="row" key={report.id}>
-                <b>{report.productName}</b>
-                <span className="mono">{report.maskedImei}</span>
-                <span>{formatUsd(report.priceCents)}</span>
-                <span className={report.status === 'completed' ? 'status' : undefined}>{statusLabel(report.status)}</span>
-                <Link className="link-arrow" href={`/user/reports/${report.id}`}>View <Icon name="arrowRight" /></Link>
-              </div>
-            ))}
+          <div className="table-wrap">
+            <table role="table" className="grid account-table" aria-label="Recent paid reports">
+              <thead role="rowgroup"><tr role="row">
+                <th role="columnheader" scope="col">Report</th>
+                <th role="columnheader" scope="col">IMEI</th>
+                <th role="columnheader" scope="col" className="num">Price</th>
+                <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col"><span className="visually-hidden">Action</span></th>
+              </tr></thead>
+              <tbody role="rowgroup">
+                {reports.map((report) => (
+                  <tr role="row" key={report.id}>
+                    <td role="cell" data-label="Report">{report.productName}</td>
+                    <td role="cell" className="mono" data-label="IMEI">{report.maskedImei}</td>
+                    <td role="cell" className="num" data-label="Price">{formatUsd(report.priceCents)}</td>
+                    <td role="cell" data-label="Status">{statusLabel(report.status)}</td>
+                    <td role="cell" className="account-table-action" data-label="Action">
+                      <Link className="link-arrow" href={`/user/reports/${report.id}`} aria-label={`View report ${report.id}`}>
+                        View <Icon name="arrowRight" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
+import { formatUsd, parseUsd } from '@/lib/money'
 import {
   approveInvoiceAction,
   createInvoiceAction,
@@ -23,30 +24,35 @@ function Problem({ message }: { message?: string }) {
 
 export function AddFundsForm({
   gateways,
+  maxCents,
+  initialCents,
+  returnTo,
 }: {
-  gateways: Array<{ id: string; label: string; asset: string; network: string }>
+  gateways: Array<{ id: string; label: string; asset: string; network: string; feeBasisPoints: number }>
+  maxCents: number
+  initialCents?: number
+  returnTo?: string | null
 }) {
   const [state, action, pending] = useActionState(createInvoiceAction, EMPTY)
+  const [amount, setAmount] = useState(initialCents ? (initialCents / 100).toFixed(2) : '')
+  const [gatewayId, setGatewayId] = useState(gateways[0]?.id ?? '')
+  const cents = parseUsd(amount)
+  const valid = cents !== null && cents > 0 && cents <= maxCents
+  const gateway = gateways.find((entry) => entry.id === gatewayId)
+  const fee = valid && gateway ? Math.round(cents * gateway.feeBasisPoints / 10_000) : 0
 
   return (
     <form action={action} className="form-grid">
       <Problem message={state.error} />
+      <input type="hidden" name="next" value={returnTo ?? ''} />
 
       <div className="field">
         <label htmlFor="gateway">Payment method</label>
         <select
           id="gateway"
           name="gateway"
-          defaultValue={gateways[0]?.id}
-          style={{
-            minHeight: 50,
-            padding: '13px 14px',
-            border: '1px solid var(--line)',
-            borderRadius: 'var(--radius-control)',
-            background: 'var(--surface)',
-            color: 'var(--ink-strong)',
-            fontSize: 15,
-          }}
+          value={gatewayId}
+          onChange={(event) => setGatewayId(event.currentTarget.value)}
         >
           {gateways.map((gateway) => (
             <option key={gateway.id} value={gateway.id}>
@@ -58,8 +64,18 @@ export function AddFundsForm({
 
       <div className="field">
         <label htmlFor="amount">Credit to add (USD)</label>
-        <input id="amount" name="amount" className="mono" inputMode="decimal" placeholder="25.00" required />
+        <input id="amount" name="amount" className="mono" inputMode="decimal" placeholder="Enter amount" value={amount} onChange={(event) => setAmount(event.currentTarget.value)} aria-describedby="amount-help" required />
+        <p className="field-note" id="amount-help">No minimum top-up. Enter any amount greater than $0.00, up to {formatUsd(maxCents)}, with no more than 2 decimal places. Unused credit stays on your account.</p>
       </div>
+
+      {valid ? (
+        <div className="quote" aria-live="polite">
+          <div><span className="label">Credit added</span><span className="value">{formatUsd(cents)}</span></div>
+          <div><span className="label">Network fee</span><span className="value">{formatUsd(fee)}</span></div>
+          <div><span className="label">Total due</span><span className="value">{formatUsd(cents + fee)}</span></div>
+        </div>
+      ) : <p className="t-small" role="status">Enter a valid amount to preview your total.</p>}
+      <p className="t-small">Creating an invoice does not send a payment. Check the network and locked total on the next page. Your transfer is reviewed before credit is added.</p>
 
       <button className="button button--primary" type="submit" disabled={pending}>
         {pending ? 'Creating invoice…' : 'Create invoice'}
@@ -68,13 +84,14 @@ export function AddFundsForm({
   )
 }
 
-export function PaymentReferenceForm({ reference }: { reference: string }) {
+export function PaymentReferenceForm({ reference, returnTo }: { reference: string; returnTo?: string | null }) {
   const [state, action, pending] = useActionState(submitReferenceAction, EMPTY)
 
   return (
     <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
       <Problem message={state.error} />
       <input type="hidden" name="reference" value={reference} />
+      <input type="hidden" name="next" value={returnTo ?? ''} />
       <div className="field">
         <label htmlFor="paymentReference">Transaction reference</label>
         <input id="paymentReference" name="paymentReference" className="mono" required />
@@ -91,13 +108,14 @@ export function PaymentReferenceForm({ reference }: { reference: string }) {
 }
 
 /** Stands in for the admin confirming the transfer. */
-export function ApproveInvoiceForm({ reference }: { reference: string }) {
+export function ApproveInvoiceForm({ reference, returnTo }: { reference: string; returnTo?: string | null }) {
   const [state, action, pending] = useActionState(approveInvoiceAction, EMPTY)
 
   return (
     <form action={action} style={{ display: 'grid', gap: 10 }}>
       <Problem message={state.error} />
       <input type="hidden" name="reference" value={reference} />
+      <input type="hidden" name="next" value={returnTo ?? ''} />
       <button className="button button--quiet" type="submit" disabled={pending}>
         {pending ? 'Confirming…' : 'Simulate administrator confirmation'}
       </button>

@@ -41,7 +41,10 @@ export type ProviderConfiguration = {
   enabled: boolean
   name: string
   mode: ProviderState
+  /** Synchronous/PHP API endpoint. Kept as endpoint for compatibility. */
   endpoint: string
+  /** DHRU Fusion endpoint, configured independently from the PHP API. */
+  dhruEndpoint: string
   username: string
   apiKey: string
   dhruKey: string
@@ -87,17 +90,28 @@ function validHttpsEndpoint(value: string | undefined) {
 
 export function providerConfiguration(): ProviderConfiguration {
   const mode = cleanMode(process.env.IUNLOCKMOBILE_PROVIDER_MODE)
+  const name = cleanProviderName(process.env.IUNLOCKMOBILE_PROVIDER_NAME)
   const endpoint = validHttpsEndpoint(process.env.IUNLOCKMOBILE_PROVIDER_URL)
+  const configuredDhruEndpoint = validHttpsEndpoint(process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL)
+  // unlock-service exposes PHP and DHRU on different hosts and must opt in to
+  // the DHRU URL explicitly. Other generic adapters keep the legacy fallback.
+  const dhruEndpoint = configuredDhruEndpoint || (name === 'unlock-service' || name === 'unlockservice' ? '' : endpoint)
   const apiKey = process.env.IUNLOCKMOBILE_PROVIDER_API_KEY?.trim() ?? ''
-  const dhruKey = process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY?.trim() || apiKey
-  const username = process.env.IUNLOCKMOBILE_PROVIDER_USERNAME?.trim() ?? ''
-  const credentialsReady = Boolean(apiKey || (username && dhruKey))
+  const dhruKey = process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY?.trim() ?? ''
+  const username = (
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME
+    ?? process.env.IUNLOCKMOBILE_PROVIDER_USERNAME
+    ?? ''
+  ).trim()
+  const syncReady = Boolean(endpoint && apiKey)
+  const asyncReady = Boolean(dhruEndpoint && username && dhruKey)
 
   return {
-    enabled: mode === 'enabled' && Boolean(endpoint) && credentialsReady,
-    name: cleanProviderName(process.env.IUNLOCKMOBILE_PROVIDER_NAME),
+    enabled: mode === 'enabled' && (syncReady || asyncReady),
+    name,
     mode,
     endpoint,
+    dhruEndpoint,
     username,
     apiKey,
     dhruKey,
@@ -133,12 +147,31 @@ function parseServiceMap(raw: string | undefined): Record<string, ProviderServic
 }
 
 export function unlockProviderService(key: string) {
-  return parseServiceMap(process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP)[key]
+  return unlockServiceMap(process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP)[key]
 }
 
 export function imeiProviderService(checkType: string) {
-  return parseServiceMap(process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP)[`check:${checkType}`]
+  const services = imeiServiceMap(process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP)
+  return services[`product:${checkType}`] ?? services[`check:${checkType}`] ?? services[checkType]
 }
+
+/** Parse each configuration once, and invalidate immediately when it changes. */
+function cachedServiceMap() {
+  let previous: string | undefined
+  let services: Record<string, ProviderService> = {}
+  return (raw: string | undefined) => {
+    if (raw !== previous) {
+      services = parseServiceMap(raw)
+      for (const service of Object.values(services)) Object.freeze(service)
+      Object.freeze(services)
+      previous = raw
+    }
+    return services
+  }
+}
+
+const unlockServiceMap = cachedServiceMap()
+const imeiServiceMap = cachedServiceMap()
 
 export function redactProviderText(value: string) {
   return value
@@ -172,6 +205,15 @@ function scalarEntries(value: unknown): Record<string, unknown> {
     }
   }
   return out
+}
+
+function safeProviderResultText(value: string) {
+  return redactProviderText(value)
+    .replace(/\b(\d{11})(\d{4})\b/g, '***********$2')
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 2_000)
 }
 
 function extractTextDetails(value: string): Record<string, unknown> {
@@ -276,27 +318,46 @@ async function requestText(
     })
     const declaredLength = Number(response.headers.get('content-length') ?? 0)
     if (declaredLength > MAX_RESPONSE_BYTES) {
-      return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: false, startedAt }
+      await response.body?.cancel()
+      return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: true, startedAt }
     }
-    const buffer = await response.arrayBuffer()
-    if (buffer.byteLength > MAX_RESPONSE_BYTES) {
-      return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: false, startedAt }
+    // Enforce the cap while streaming; Content-Length can be absent or false.
+    const chunks: Uint8Array[] = []
+    let length = 0
+    const reader = response.body?.getReader()
+    if (reader) {
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          length += value.byteLength
+          if (length > MAX_RESPONSE_BYTES) {
+            await reader.cancel()
+            return { ok: false as const, code: 'response_too_large', message: 'Provider response is too large.', retryable: true, startedAt }
+          }
+          chunks.push(value)
+        }
+      } finally {
+        reader.releaseLock()
+      }
     }
-    const text = new TextDecoder().decode(buffer)
+    const text = Buffer.concat(chunks, length).toString('utf8')
     if (!response.ok) {
       return {
         ok: false as const,
         code: `http_${response.status}`,
         message: response.status >= 500 ? 'The provider is temporarily unavailable.' : 'The provider rejected the request.',
-        retryable: response.status === 408 || response.status === 429 || response.status >= 500,
+        // HTTP failure alone does not prove that a placement was rejected.
+        // Preserve its reservation until a definitive business status arrives.
+        retryable: true,
         startedAt,
       }
     }
     return { ok: true as const, text, startedAt }
-  } catch (error) {
+  } catch {
     return {
       ok: false as const,
-      code: error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'network_error',
+      code: controller.signal.aborted ? 'timeout' : 'network_error',
       message: 'The provider could not be reached.',
       retryable: true,
       startedAt,
@@ -329,13 +390,32 @@ function syncRequest(config: ProviderConfiguration, request: ProviderRequest) {
   return { url, method: 'GET' as const }
 }
 
-function dhruUrl(config: ProviderConfiguration, action: 'placeimeiorder' | 'getimeiorder', values: Record<string, string>) {
-  const url = new URL(config.endpoint)
-  url.searchParams.set('username', config.username)
-  url.searchParams.set('apiaccesskey', config.dhruKey)
-  url.searchParams.set('action', action)
-  for (const [key, value] of Object.entries(values)) url.searchParams.set(key, value)
-  return url
+function xmlText(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+function dhruRequest(
+  config: ProviderConfiguration,
+  action: 'placeimeiorder' | 'getimeiorder',
+  parameters: Record<string, string>,
+) {
+  const url = new URL(config.dhruEndpoint)
+  const xml = `<PARAMETERS>${Object.entries(parameters)
+    .map(([key, value]) => `<${key}>${xmlText(value)}</${key}>`)
+    .join('')}</PARAMETERS>`
+  const body = new URLSearchParams({
+    username: config.username,
+    apiaccesskey: config.dhruKey,
+    action,
+    requestformat: 'JSON',
+    parameters: xml,
+  })
+  return { url, method: 'POST' as const, body }
 }
 
 async function submitSync(config: ProviderConfiguration, request: ProviderRequest): Promise<ProviderOutcome> {
@@ -350,7 +430,7 @@ async function submitSync(config: ProviderConfiguration, request: ProviderReques
     if (Object.keys(details).length) {
       return { status: 'completed', providerId: null, data: details, timing: { totalMs: Date.now() - response.startedAt } }
     }
-    return providerFailure(response.startedAt, 'invalid_response', 'The provider returned an unreadable response.', false)
+    return providerFailure(response.startedAt, 'invalid_response', 'The provider returned an unreadable response.', true)
   }
 
   const rawStatus = decoded.status ?? decoded.result ?? decoded.success
@@ -375,10 +455,11 @@ async function placeDhru(config: ProviderConfiguration, request: ProviderRequest
   if (!config.username || !config.dhruKey) {
     return providerFailure(Date.now(), 'provider_disabled', 'The DHRU provider credentials are not configured.', false)
   }
-  const response = await requestText(
-    dhruUrl(config, 'placeimeiorder', { service: request.service.id, imei: request.imei }),
-    config,
-  )
+  if (!config.dhruEndpoint) {
+    return providerFailure(Date.now(), 'provider_disabled', 'The DHRU provider endpoint is not configured.', false)
+  }
+  const requestDetails = dhruRequest(config, 'placeimeiorder', { IMEI: request.imei, ID: request.service.id })
+  const response = await requestText(requestDetails.url, config, requestDetails)
   if (!response.ok) return providerFailure(response.startedAt, response.code, response.message, response.retryable)
 
   const decoded = parseJson(response.text)
@@ -392,7 +473,15 @@ async function placeDhru(config: ProviderConfiguration, request: ProviderRequest
     }
   }
   const message = pluck(decoded, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description', 'error']) || 'The provider rejected the order.'
-  return providerFailure(response.startedAt, 'provider_rejected', message, false)
+  // An empty/malformed placement reply may have lost an accepted job ID.
+  // Only the provider's explicit error envelope is a definitive refusal.
+  const errorRecord = firstObjectRecord(decoded?.ERROR)
+  const explicitError = typeof decoded?.ERROR === 'string'
+    ? Boolean(decoded.ERROR.trim())
+    : Boolean(pluck(errorRecord, ['MESSAGE', 'message', 'FULL_DESCRIPTION', 'description'])
+      || failureStatus(statusWord(errorRecord.STATUS ?? errorRecord.status)))
+  const rejected = explicitError || failureStatus(statusWord(decoded?.status ?? decoded?.STATUS))
+  return providerFailure(response.startedAt, rejected ? 'provider_rejected' : 'invalid_response', message, !rejected)
 }
 
 export async function submitProviderRequest(request: ProviderRequest): Promise<ProviderOutcome> {
@@ -406,11 +495,15 @@ export async function pollProviderRequest(providerId: string): Promise<ProviderO
   const config = providerConfiguration()
   const startedAt = Date.now()
   if (!config.enabled || !config.username || !config.dhruKey) {
-    return providerFailure(startedAt, 'provider_disabled', 'The asynchronous provider is not configured.', false, providerId)
+    return providerFailure(startedAt, 'provider_disabled', 'The asynchronous provider is not configured.', true, providerId)
   }
-  if (!providerId.trim()) return providerFailure(startedAt, 'provider_id_missing', 'The provider reference is missing.', false)
+  if (!providerId.trim()) return providerFailure(startedAt, 'provider_id_missing', 'The provider reference is missing.', true)
 
-  const response = await requestText(dhruUrl(config, 'getimeiorder', { id: providerId }), config)
+  if (!config.dhruEndpoint) {
+    return providerFailure(startedAt, 'provider_disabled', 'The DHRU provider endpoint is not configured.', true, providerId)
+  }
+  const requestDetails = dhruRequest(config, 'getimeiorder', { ID: providerId })
+  const response = await requestText(requestDetails.url, config, requestDetails)
   if (!response.ok) {
     if (response.retryable) {
       return {
@@ -424,20 +517,36 @@ export async function pollProviderRequest(providerId: string): Promise<ProviderO
   }
 
   const decoded = parseJson(response.text)
+  const errorRecord = firstObjectRecord(decoded?.ERROR)
   const normalized = statusWord(pluck(decoded, ['STATUS', 'status']))
-  const reply = pluck(decoded, ['REPLY', 'reply', 'response', 'output'])
-  if (successStatus(normalized)) {
+  const numericStatus = /^\d+$/.test(normalized) ? Number(normalized) : null
+  const reply = pluck(decoded, ['CODE', 'code', 'REPLY', 'reply', 'response', 'output'])
+  const completed = successStatus(normalized) || numericStatus === 4
+  if (completed) {
+    const details = extractTextDetails(reply)
     return {
       status: 'completed',
       providerId,
       data: {
-        ...extractTextDetails(reply),
+        status: 'Completed',
+        ...(Object.keys(details).length > 0
+          ? details
+          : reply
+            ? { statusDescription: safeProviderResultText(reply) }
+            : {}),
+        // SUCCESS metadata contains numeric transport status/reference fields;
+        // never let those overwrite the business result parsed from CODE/REPLY.
         ...scalarEntries(decoded?.data),
       },
       timing: { totalMs: Date.now() - response.startedAt },
     }
   }
-  if (failureStatus(normalized)) {
+  const explicitError = Boolean(
+    typeof decoded?.ERROR === 'string'
+      ? decoded.ERROR.trim()
+      : pluck(errorRecord, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description']),
+  )
+  if (explicitError || failureStatus(normalized)) {
     const message = pluck(decoded, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description']) || reply || 'The provider rejected the order.'
     return providerFailure(response.startedAt, 'provider_rejected', message, false, providerId)
   }

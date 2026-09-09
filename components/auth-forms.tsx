@@ -12,6 +12,7 @@ import {
   type FormState,
 } from '@/lib/actions'
 import { Icon } from './icons'
+import { withContinuation } from '@/lib/continuation'
 
 const EMPTY: FormState = {}
 
@@ -25,7 +26,7 @@ function Notice({ state }: { state: FormState }) {
   )
 }
 
-function GoogleAuthOption() {
+function GoogleAuthOption({ returnTo }: { returnTo?: string | null }) {
   return (
     <>
       {/* A plain anchor, not a Link. /auth/google is not a page: it mints an
@@ -34,7 +35,7 @@ function GoogleAuthOption() {
           transaction for every visitor who merely looked at this form, and a
           prefetch landing mid-flow would replace the cookie the real attempt
           was relying on. */}
-      <a className="button button--quiet button--wide" href="/auth/google">
+      <a className="button button--quiet button--wide" href={withContinuation('/auth/google', returnTo)}>
         Continue with Google
       </a>
       <div className="auth-divider" aria-hidden="true">
@@ -53,15 +54,20 @@ const OAUTH_MESSAGES: Record<string, string> = {
 export function LoginForm({
   resetComplete = false,
   oauthError,
+  returnTo,
+  googleEnabled = false,
 }: {
   resetComplete?: boolean
   oauthError?: string
+  returnTo?: string | null
+  googleEnabled?: boolean
 }) {
   const [state, action, pending] = useActionState(loginAction, EMPTY)
 
   return (
     <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
-      <GoogleAuthOption />
+      <input type="hidden" name="next" value={returnTo ?? ''} />
+      {googleEnabled ? <GoogleAuthOption returnTo={returnTo} /> : null}
       {oauthError && OAUTH_MESSAGES[oauthError] ? (
         <p className="alert alert--error" role="alert">
           <Icon name="info" strokeWidth={1.9} />
@@ -87,21 +93,22 @@ export function LoginForm({
         {pending ? 'Signing in…' : 'Sign in'}
       </button>
       <p className="auth-foot">
-        <Link href="/forgot-password">Forgot password?</Link>
+        <Link href={withContinuation('/forgot-password', returnTo)}>Forgot password?</Link>
       </p>
       <p className="auth-foot">
-        No account yet? <Link href="/register">Create one</Link>
+        No account yet? <Link href={withContinuation('/register', returnTo)}>Create one</Link>
       </p>
     </form>
   )
 }
 
-export function RegisterForm() {
+export function RegisterForm({ returnTo, googleEnabled = false }: { returnTo?: string | null; googleEnabled?: boolean }) {
   const [state, action, pending] = useActionState(registerAction, EMPTY)
 
   return (
     <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
-      <GoogleAuthOption />
+      <input type="hidden" name="next" value={returnTo ?? ''} />
+      {googleEnabled ? <GoogleAuthOption returnTo={returnTo} /> : null}
       <Notice state={state} />
       <div className="field">
         <label htmlFor="username">Username</label>
@@ -139,19 +146,20 @@ export function RegisterForm() {
         {pending ? 'Creating account…' : 'Create account'}
       </button>
       <p className="auth-foot">
-        Already registered? <Link href="/login">Sign in</Link>
+        Already registered? <Link href={withContinuation('/login', returnTo)}>Sign in</Link>
       </p>
     </form>
   )
 }
 
-export function VerifyEmailForm({ email }: { email: string }) {
+export function VerifyEmailForm({ email, returnTo }: { email: string; returnTo?: string | null }) {
   const [verifyState, verifyAction, verifying] = useActionState(verifyEmailAction, EMPTY)
   const [resendState, resendAction, resending] = useActionState(resendVerificationAction, EMPTY)
 
   return (
     <div className="form-grid" style={{ maxWidth: 'none' }}>
       <form action={verifyAction} className="form-grid" style={{ maxWidth: 'none' }}>
+        <input type="hidden" name="next" value={returnTo ?? ''} />
         <Notice state={verifyState} />
         <div className="field">
           <label htmlFor="email">Email</label>
@@ -185,13 +193,13 @@ export function VerifyEmailForm({ email }: { email: string }) {
       </form>
 
       <p className="auth-foot">
-        Already verified? <Link href="/login">Sign in</Link>
+        Already verified? <Link href={withContinuation('/login', returnTo)}>Sign in</Link>
       </p>
     </div>
   )
 }
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ returnTo }: { returnTo?: string | null }) {
   const [state, action, pending] = useActionState(requestPasswordResetAction, EMPTY)
 
   return (
@@ -205,20 +213,21 @@ export function ForgotPasswordForm() {
         {pending ? 'Sending…' : 'Send reset code'}
       </button>
       <p className="auth-foot">
-        Have a code? <Link href="/reset-password">Set a new password</Link>
+        Have a code? <Link href={withContinuation('/reset-password', returnTo)}>Set a new password</Link>
       </p>
       <p className="auth-foot">
-        <Link href="/login">Back to sign in</Link>
+        <Link href={withContinuation('/login', returnTo)}>Back to sign in</Link>
       </p>
     </form>
   )
 }
 
-export function ResetPasswordForm({ email }: { email: string }) {
+export function ResetPasswordForm({ email, returnTo }: { email: string; returnTo?: string | null }) {
   const [state, action, pending] = useActionState(resetPasswordAction, EMPTY)
 
   return (
     <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
+      <input type="hidden" name="next" value={returnTo ?? ''} />
       <Notice state={state} />
       <div className="field">
         <label htmlFor="email">Account email</label>
@@ -254,7 +263,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
         {pending ? 'Updating…' : 'Update password'}
       </button>
       <p className="auth-foot">
-        Need a code? <Link href="/forgot-password">Request one</Link>
+        Need a code? <Link href={withContinuation('/forgot-password', returnTo)}>Request one</Link>
       </p>
     </form>
   )

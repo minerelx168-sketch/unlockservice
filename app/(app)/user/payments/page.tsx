@@ -75,32 +75,32 @@ export default async function PaymentsPage() {
           <h2>Invoices</h2>
         </header>
         <div className="table-wrap">
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>Invoice</th>
-                <th>Method</th>
-                <th className="num">Credit</th>
-                <th className="num">Total due</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th />
+          <table role="table" className="grid account-table">
+            <thead role="rowgroup">
+              <tr role="row">
+                <th role="columnheader" scope="col">Invoice</th>
+                <th role="columnheader" scope="col">Method</th>
+                <th role="columnheader" scope="col" className="num">Credit</th>
+                <th role="columnheader" scope="col" className="num">Total due</th>
+                <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col">Created</th>
+                <th role="columnheader" scope="col"><span className="visually-hidden">Action</span></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody role="rowgroup">
               {invoices.map((invoice) => (
-                <tr key={invoice.reference}>
-                  <td className="mono">{shortReference(invoice.reference)}</td>
-                  <td>{invoice.gateway.replace(/_/g, ' ')}</td>
-                  <td className="num">{formatUsd(invoice.credit_amount_cents)}</td>
-                  <td className="num">{formatUsd(invoice.total_due_cents)}</td>
-                  <td>
+                <tr role="row" key={invoice.reference}>
+                  <td role="cell" className="mono" data-label="Invoice">{shortReference(invoice.reference)}</td>
+                  <td role="cell" data-label="Method">{invoice.gateway.replace(/_/g, ' ')}</td>
+                  <td role="cell" className="num" data-label="Credit">{formatUsd(invoice.credit_amount_cents)}</td>
+                  <td role="cell" className="num" data-label="Total due">{formatUsd(invoice.total_due_cents)}</td>
+                  <td role="cell" data-label="Status">
                     <span className={STATUS_BADGE[invoice.status] ?? 'badge badge--muted'}>
                       {STATUS_LABEL[invoice.status] ?? invoice.status}
                     </span>
                   </td>
-                  <td>{invoice.created_at}</td>
-                  <td>
+                  <td role="cell" data-label="Created">{invoice.created_at}</td>
+                  <td role="cell" className="account-table-action" data-label="Action">
                     <Link className="link-arrow" href={`/user/invoice/${invoice.reference}`}>
                       Open
                     </Link>

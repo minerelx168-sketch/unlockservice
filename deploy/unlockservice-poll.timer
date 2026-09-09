@@ -1,0 +1,17 @@
+[Unit]
+Description=Poll the supplier every two minutes
+# An order is settled by whoever asks first — the customer's own page, or
+# this. Without it, a customer who closes the tab leaves an order in
+# processing and their credit held with nothing to release it.
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=2min
+# Never two polls at once: the run is skipped rather than queued.
+AccuracySec=15s
+RandomizedDelaySec=20s
+Persistent=false
+Unit=unlockservice-poll.service
+
+[Install]
+WantedBy=timers.target
