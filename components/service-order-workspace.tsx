@@ -5,6 +5,7 @@ import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor, type DeviceDomain } from '@/lib/device-intent-value'
 import { listPaidReportProducts } from '@/lib/paid-reports'
 import { GATEWAYS } from '@/lib/payments'
+import { hasServiceOutputExample } from '@/lib/service-output-examples'
 
 /** Workspace entry points and payment returns share one explicit review flow. */
 export async function ServiceOrderWorkspace({ domain, requestedProduct }: { domain?: DeviceDomain; requestedProduct?: string }) {
@@ -25,6 +26,7 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct }: { doma
           code: product.code, name: product.name, summary: product.summary,
           group: product.group, domain: product.domain, priceCents: product.priceCents,
           etaMinutes: product.etaMinutes, providerReady: product.providerReady,
+          hasExample: hasServiceOutputExample(product.code),
         }))}
         csrfToken={session.csrfToken}
         availableCents={user.credit_cents - user.held_cents}

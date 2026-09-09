@@ -47,6 +47,7 @@ export function ServiceBrowser({
     priceCents: product.priceCents,
     etaLabel: product.etaLabel,
     available: product.status === 'available',
+    hasExample: product.hasExample,
   }))
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

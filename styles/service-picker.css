@@ -116,3 +116,7 @@
   .service-browser__summary { grid-template-columns: 1fr; padding: 16px; }
   .service-browser__actions > .button { width: 100%; min-width: 0; }
 }
+
+.service-picker__example { padding: 0 18px 12px; }
+.service-picker__selected-example { margin-top: 8px; }
+.product-card-example { align-self: flex-start; margin-block: 0 12px; }

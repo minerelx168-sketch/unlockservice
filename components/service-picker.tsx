@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
+import { ServiceOutputExample } from './service-output-example'
 
 export type ServiceOption = {
   code: string
@@ -12,6 +13,7 @@ export type ServiceOption = {
   priceCents: number
   etaLabel: string
   available: boolean
+  hasExample?: boolean
 }
 
 export function serviceDisplayText(value: string) {
@@ -97,6 +99,9 @@ export function ServicePicker({
           <span className="service-picker__chevron" />
         </span>
       </button>
+      {selected?.hasExample && !open ? (
+        <div className="service-picker__selected-example"><ServiceOutputExample productCode={selected.code} productName={serviceDisplayText(selected.name)} /></div>
+      ) : null}
       <div className="service-picker__panel" id={`${pickerId}-panel`} hidden={!open}>
         <div className="service-picker__search">
           <label htmlFor={`${pickerId}-search`}>Search services</label>
@@ -142,9 +147,10 @@ export function ServicePicker({
                 </span>
                 <span className="service-picker__option-price">
                   <strong>{formatUsd(option.priceCents)}</strong>
-                  {option.code === value ? <span><Icon name="checkSmall" /> Selected</span> : <span>View details</span>}
+                  {option.code === value ? <span><Icon name="checkSmall" /> Selected</span> : <span>Select service</span>}
                 </span>
               </button>
+              {option.hasExample ? <div className="service-picker__example"><ServiceOutputExample productCode={option.code} productName={serviceDisplayText(option.name)} /></div> : null}
             </li>
           ))}
         </ul>

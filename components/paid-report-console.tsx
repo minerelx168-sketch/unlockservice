@@ -19,6 +19,7 @@ type Product = {
   priceCents: number
   etaMinutes: number
   providerReady: boolean
+  hasExample: boolean
 }
 
 type PaidReportView = {
@@ -337,6 +338,7 @@ export function PaidReportConsole({
                 priceCents: entry.priceCents,
                 etaLabel: deliveryLabel(entry.etaMinutes),
                 available: entry.providerReady,
+                hasExample: entry.hasExample,
               }))}
               value={productCode}
               disabled={locked}

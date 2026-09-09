@@ -6,6 +6,7 @@ import { formatUsd } from '@/lib/money'
 import type { ProviderProductDomain } from '@/lib/provider-products'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
 import { Icon } from './icons'
+import { ServiceOutputExample } from './service-output-example'
 
 type ProductCatalogProps = {
   products: PublicProviderProduct[]
@@ -72,6 +73,8 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
         <strong className="product-price">{formatUsd(product.priceCents)}</strong>
       </div>
       <p className="t-small">Estimated delivery: {customerText(product.etaLabel)}</p>
+
+      {product.hasExample ? <ServiceOutputExample productCode={product.productCode} productName={productName} className="product-card-example" /> : null}
 
       {available ? (
         <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
