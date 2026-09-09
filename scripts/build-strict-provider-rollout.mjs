@@ -10,6 +10,14 @@ const live = JSON.parse(fs.readFileSync(livePath, 'utf8'))
 const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'))
 const liveByCode = new Map(live.products.map((product) => [product.productCode, product]))
 
+function approvedSummary(product) {
+  const summary = String(product.summary ?? '')
+  if (!/online ordering will open/i.test(summary)) return summary
+  return product.domain === 'unlock'
+    ? 'Provider-listed remote unlock or removal service. Review carrier, device and eligibility requirements before ordering.'
+    : 'Provider-listed device check. Review the supported report scope before ordering.'
+}
+
 function gateReasons(product) {
   const reasons = []
   if (product.preferredProtocol === 'none' || product.liveCost == null) reasons.push('missing_provider_service')
@@ -46,6 +54,7 @@ const products = catalog.products.map((product) => {
       ? product.providerCostMicros
       : Math.round(Number(current.liveCost) * 1_000_000),
     etaLabel: current.liveTime || product.etaLabel,
+    summary: approved ? approvedSummary(product) : product.summary,
   }
   if (approved) {
     paidServiceMap[`product:${product.productCode.toLowerCase()}`] = {
@@ -63,6 +72,8 @@ const products = catalog.products.map((product) => {
 })
 
 const approved = Object.keys(paidServiceMap).length
+const staleApprovedCopy = products.filter((product) => product.status === 'available' && /online ordering will open/i.test(product.summary ?? '')).length
+if (staleApprovedCopy !== 0) throw new Error(`Approved products retain stale copy: ${staleApprovedCopy}`)
 if (approved !== 99 || approvedImei !== 45 || approvedUnlock !== 54 || approvedPhp !== 35 || approvedDhru !== 64) {
   throw new Error(`Strict rollout mismatch: ${approved}/${approvedImei}/${approvedUnlock}/${approvedPhp}/${approvedDhru}`)
 }
