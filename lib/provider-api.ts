@@ -41,7 +41,10 @@ export type ProviderConfiguration = {
   enabled: boolean
   name: string
   mode: ProviderState
+  /** Synchronous/PHP API endpoint. Kept as endpoint for compatibility. */
   endpoint: string
+  /** DHRU Fusion endpoint, configured independently from the PHP API. */
+  dhruEndpoint: string
   username: string
   apiKey: string
   dhruKey: string
@@ -87,17 +90,28 @@ function validHttpsEndpoint(value: string | undefined) {
 
 export function providerConfiguration(): ProviderConfiguration {
   const mode = cleanMode(process.env.IUNLOCKMOBILE_PROVIDER_MODE)
+  const name = cleanProviderName(process.env.IUNLOCKMOBILE_PROVIDER_NAME)
   const endpoint = validHttpsEndpoint(process.env.IUNLOCKMOBILE_PROVIDER_URL)
+  const configuredDhruEndpoint = validHttpsEndpoint(process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL)
+  // unlock-service exposes PHP and DHRU on different hosts and must opt in to
+  // the DHRU URL explicitly. Other generic adapters keep the legacy fallback.
+  const dhruEndpoint = configuredDhruEndpoint || (name === 'unlock-service' || name === 'unlockservice' ? '' : endpoint)
   const apiKey = process.env.IUNLOCKMOBILE_PROVIDER_API_KEY?.trim() ?? ''
-  const dhruKey = process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY?.trim() || apiKey
-  const username = process.env.IUNLOCKMOBILE_PROVIDER_USERNAME?.trim() ?? ''
-  const credentialsReady = Boolean(apiKey || (username && dhruKey))
+  const dhruKey = process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY?.trim() ?? ''
+  const username = (
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME
+    ?? process.env.IUNLOCKMOBILE_PROVIDER_USERNAME
+    ?? ''
+  ).trim()
+  const syncReady = Boolean(endpoint && apiKey)
+  const asyncReady = Boolean(dhruEndpoint && username && dhruKey)
 
   return {
-    enabled: mode === 'enabled' && Boolean(endpoint) && credentialsReady,
-    name: cleanProviderName(process.env.IUNLOCKMOBILE_PROVIDER_NAME),
+    enabled: mode === 'enabled' && (syncReady || asyncReady),
+    name,
     mode,
     endpoint,
+    dhruEndpoint,
     username,
     apiKey,
     dhruKey,
@@ -137,7 +151,8 @@ export function unlockProviderService(key: string) {
 }
 
 export function imeiProviderService(checkType: string) {
-  return imeiServiceMap(process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP)[`check:${checkType}`]
+  const services = imeiServiceMap(process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP)
+  return services[`product:${checkType}`] ?? services[`check:${checkType}`] ?? services[checkType]
 }
 
 /** Parse each configuration once, and invalidate immediately when it changes. */
@@ -190,6 +205,15 @@ function scalarEntries(value: unknown): Record<string, unknown> {
     }
   }
   return out
+}
+
+function safeProviderResultText(value: string) {
+  return redactProviderText(value)
+    .replace(/\b(\d{11})(\d{4})\b/g, '***********$2')
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 2_000)
 }
 
 function extractTextDetails(value: string): Record<string, unknown> {
@@ -366,13 +390,32 @@ function syncRequest(config: ProviderConfiguration, request: ProviderRequest) {
   return { url, method: 'GET' as const }
 }
 
-function dhruUrl(config: ProviderConfiguration, action: 'placeimeiorder' | 'getimeiorder', values: Record<string, string>) {
-  const url = new URL(config.endpoint)
-  url.searchParams.set('username', config.username)
-  url.searchParams.set('apiaccesskey', config.dhruKey)
-  url.searchParams.set('action', action)
-  for (const [key, value] of Object.entries(values)) url.searchParams.set(key, value)
-  return url
+function xmlText(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+function dhruRequest(
+  config: ProviderConfiguration,
+  action: 'placeimeiorder' | 'getimeiorder',
+  parameters: Record<string, string>,
+) {
+  const url = new URL(config.dhruEndpoint)
+  const xml = `<PARAMETERS>${Object.entries(parameters)
+    .map(([key, value]) => `<${key}>${xmlText(value)}</${key}>`)
+    .join('')}</PARAMETERS>`
+  const body = new URLSearchParams({
+    username: config.username,
+    apiaccesskey: config.dhruKey,
+    action,
+    requestformat: 'JSON',
+    parameters: xml,
+  })
+  return { url, method: 'POST' as const, body }
 }
 
 async function submitSync(config: ProviderConfiguration, request: ProviderRequest): Promise<ProviderOutcome> {
@@ -412,10 +455,11 @@ async function placeDhru(config: ProviderConfiguration, request: ProviderRequest
   if (!config.username || !config.dhruKey) {
     return providerFailure(Date.now(), 'provider_disabled', 'The DHRU provider credentials are not configured.', false)
   }
-  const response = await requestText(
-    dhruUrl(config, 'placeimeiorder', { service: request.service.id, imei: request.imei }),
-    config,
-  )
+  if (!config.dhruEndpoint) {
+    return providerFailure(Date.now(), 'provider_disabled', 'The DHRU provider endpoint is not configured.', false)
+  }
+  const requestDetails = dhruRequest(config, 'placeimeiorder', { IMEI: request.imei, ID: request.service.id })
+  const response = await requestText(requestDetails.url, config, requestDetails)
   if (!response.ok) return providerFailure(response.startedAt, response.code, response.message, response.retryable)
 
   const decoded = parseJson(response.text)
@@ -455,7 +499,11 @@ export async function pollProviderRequest(providerId: string): Promise<ProviderO
   }
   if (!providerId.trim()) return providerFailure(startedAt, 'provider_id_missing', 'The provider reference is missing.', true)
 
-  const response = await requestText(dhruUrl(config, 'getimeiorder', { id: providerId }), config)
+  if (!config.dhruEndpoint) {
+    return providerFailure(startedAt, 'provider_disabled', 'The DHRU provider endpoint is not configured.', true, providerId)
+  }
+  const requestDetails = dhruRequest(config, 'getimeiorder', { ID: providerId })
+  const response = await requestText(requestDetails.url, config, requestDetails)
   if (!response.ok) {
     if (response.retryable) {
       return {
@@ -469,20 +517,36 @@ export async function pollProviderRequest(providerId: string): Promise<ProviderO
   }
 
   const decoded = parseJson(response.text)
+  const errorRecord = firstObjectRecord(decoded?.ERROR)
   const normalized = statusWord(pluck(decoded, ['STATUS', 'status']))
-  const reply = pluck(decoded, ['REPLY', 'reply', 'response', 'output'])
-  if (successStatus(normalized)) {
+  const numericStatus = /^\d+$/.test(normalized) ? Number(normalized) : null
+  const reply = pluck(decoded, ['CODE', 'code', 'REPLY', 'reply', 'response', 'output'])
+  const completed = successStatus(normalized) || numericStatus === 4
+  if (completed) {
+    const details = extractTextDetails(reply)
     return {
       status: 'completed',
       providerId,
       data: {
-        ...extractTextDetails(reply),
+        status: 'Completed',
+        ...(Object.keys(details).length > 0
+          ? details
+          : reply
+            ? { statusDescription: safeProviderResultText(reply) }
+            : {}),
+        // SUCCESS metadata contains numeric transport status/reference fields;
+        // never let those overwrite the business result parsed from CODE/REPLY.
         ...scalarEntries(decoded?.data),
       },
       timing: { totalMs: Date.now() - response.startedAt },
     }
   }
-  if (failureStatus(normalized)) {
+  const explicitError = Boolean(
+    typeof decoded?.ERROR === 'string'
+      ? decoded.ERROR.trim()
+      : pluck(errorRecord, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description']),
+  )
+  if (explicitError || failureStatus(normalized)) {
     const message = pluck(decoded, ['FULL_DESCRIPTION', 'MESSAGE', 'message', 'description']) || reply || 'The provider rejected the order.'
     return providerFailure(response.startedAt, 'provider_rejected', message, false, providerId)
   }

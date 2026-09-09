@@ -33,6 +33,7 @@ export type PaidReportProduct = {
   name: string
   summary: string
   group: string
+  domain: 'imei_check' | 'unlock'
   inputType: 'imei'
   priceCents: number
   providerCostMicros: number
@@ -185,14 +186,20 @@ function parseReport(value: string | null): ProviderReport | null {
   }
 }
 
+function providerServiceConfigured(config: ReturnType<typeof providerConfiguration>, service: ProviderService | undefined) {
+  if (!config.enabled || !service) return false
+  if (service.mode === 'sync') return Boolean(config.endpoint && config.apiKey)
+  return Boolean(config.dhruEndpoint && config.username && config.dhruKey)
+}
+
 function productFromRow(row: PaidReportProductRow): PaidReportProduct {
   const config = providerConfiguration()
   const mapping = imeiProviderService(mappingKey(row.code))
   const catalogProduct = providerProductByCode(row.code)
   const approvedMapping = Boolean(
     catalogProduct?.status === 'available'
-      && mapping?.mode === 'sync'
-      && mapping.id === catalogProduct.serviceId,
+      && providerServiceConfigured(config, mapping)
+      && mapping?.id === catalogProduct.serviceId,
   )
   return {
     code: row.code,
@@ -200,12 +207,13 @@ function productFromRow(row: PaidReportProductRow): PaidReportProduct {
     name: row.name,
     summary: row.summary,
     group: catalogProduct?.group ?? 'Device checks',
+    domain: catalogProduct?.domain ?? 'imei_check',
     inputType: row.input_type,
     priceCents: row.price_cents,
     providerCostMicros: row.provider_cost_micros,
     etaMinutes: row.eta_minutes,
     isActive: row.is_active === 1,
-    providerReady: row.is_active === 1 && config.enabled && approvedMapping,
+    providerReady: row.is_active === 1 && approvedMapping,
     sortOrder: row.sort_order,
   }
 }
@@ -478,10 +486,9 @@ function providerReadyFor(product: PaidReportProductRow): { config: ReturnType<t
   const service = imeiProviderService(mappingKey(product.code))
   const catalogProduct = providerProductByCode(product.code)
   if (
-    !config.enabled
+    !providerServiceConfigured(config, service)
     || !service
     || catalogProduct?.status !== 'available'
-    || service.mode !== 'sync'
     || service.id !== catalogProduct.serviceId
   ) {
     throw new PaidReportError('This paid report is not available yet.', 'provider_not_ready')
@@ -628,7 +635,7 @@ function pollProviderMatches(row: PaidReportOrderRow) {
   const config = providerConfiguration()
   // A local configuration change is not an upstream rejection. In particular,
   // never send an old provider's order reference to a newly selected provider.
-  return config.enabled && Boolean(config.username && config.dhruKey)
+  return config.enabled && Boolean(config.dhruEndpoint && config.username && config.dhruKey)
     && Boolean(row.provider_name) && row.provider_name === config.name
 }
 

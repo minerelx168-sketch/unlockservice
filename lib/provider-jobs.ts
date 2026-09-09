@@ -1,15 +1,18 @@
 import { db } from './db'
 import { pollImeiCheck } from './imei-checks'
 import { pollOrder } from './orders'
+import { pollPaidReport } from './paid-reports'
 import { providerConfiguration } from './provider-api'
 
 export type ProviderPollSummary = {
   enabled: boolean
   ordersSeen: number
+  reportsSeen: number
   checksSeen: number
   completed: number
   unavailable: number
   processing: number
+  manualReview: number
   errors: number
 }
 
@@ -18,10 +21,12 @@ export async function pollProviderJobs(limit = 20): Promise<ProviderPollSummary>
   const summary: ProviderPollSummary = {
     enabled: providerConfiguration().enabled,
     ordersSeen: 0,
+    reportsSeen: 0,
     checksSeen: 0,
     completed: 0,
     unavailable: 0,
     processing: 0,
+    manualReview: 0,
     errors: 0,
   }
   if (!summary.enabled) return summary
@@ -51,7 +56,46 @@ export async function pollProviderJobs(limit = 20): Promise<ProviderPollSummary>
     }
   }
 
-  const remaining = Math.max(0, safeLimit - orders.length)
+  const reportsRemaining = Math.max(0, safeLimit - orders.length)
+  if (!reportsRemaining) return summary
+
+  const reports = db()
+    .prepare(
+      `SELECT id, user_id
+         FROM paid_report_orders
+        WHERE status = 'processing'
+          AND provider_mode = 'dhru'
+          AND provider_order_id IS NOT NULL
+          AND (
+            provider_last_polled_at IS NULL
+            OR provider_last_polled_at <= datetime(
+              'now',
+              CASE
+                WHEN provider_attempts < 5 THEN '-2 minutes'
+                WHEN provider_attempts < 20 THEN '-10 minutes'
+                ELSE '-1 hour'
+              END
+            )
+          )
+        ORDER BY COALESCE(provider_last_polled_at, created_at) ASC
+        LIMIT ?`,
+    )
+    .all(reportsRemaining) as Array<{ id: number; user_id: number }>
+
+  for (const report of reports) {
+    summary.reportsSeen += 1
+    try {
+      const result = await pollPaidReport(report.user_id, report.id)
+      if (result.order.status === 'completed') summary.completed += 1
+      else if (result.order.status === 'refunded') summary.unavailable += 1
+      else if (result.order.status === 'manual_review') summary.manualReview += 1
+      else summary.processing += 1
+    } catch {
+      summary.errors += 1
+    }
+  }
+
+  const remaining = Math.max(0, reportsRemaining - reports.length)
   if (!remaining) return summary
 
   const checks = db()

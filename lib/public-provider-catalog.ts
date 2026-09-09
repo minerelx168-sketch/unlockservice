@@ -12,7 +12,7 @@ export type PublicProviderProduct = Pick<ProviderProduct,
 export function listPublicProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
   const products = domain === 'imei_check' ? CUSTOMER_IMEI_CHECK_PRODUCTS : CUSTOMER_UNLOCK_PRODUCTS
   const orderable = new Map(
-    (domain === 'imei_check' ? listPaidReportProducts() : []).map((product) => [product.code, product]),
+    listPaidReportProducts().map((product) => [product.code, product]),
   )
   return products.map((product) => {
     const live = orderable.get(product.productCode)

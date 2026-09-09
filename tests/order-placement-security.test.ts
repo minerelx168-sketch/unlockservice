@@ -12,7 +12,9 @@ process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'enabled'
 process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'dhru'
 process.env.IUNLOCKMOBILE_PROVIDER_URL = 'https://provider.example.test/api'
 process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = 'test-only-key'
-process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = 'test-user'
+process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL = 'https://provider.example.test/api/index.php'
+process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = 'test-only-dhru-key'
+process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME = 'test-user'
 process.env.IUNLOCKMOBILE_PROVIDER_TIMEOUT_MS = '2000'
 process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP = JSON.stringify({ 'carrier:103': { id: '901', mode: 'dhru' } })
 process.env.IUNLOCKMOBILE_MAINTENANCE = '0'
@@ -136,20 +138,20 @@ test('polling configuration drift and code-less success cannot release or charge
   const due = () => database.db().prepare(`UPDATE orders SET provider_ready_at = datetime('now', '-1 minute'),
     provider_last_polled_at = datetime('now', '-1 minute') WHERE id = ?`).run(order.orderId)
   const savedMap = process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP
-  const savedUser = process.env.IUNLOCKMOBILE_PROVIDER_USERNAME
+  const savedUser = process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME
   try {
     globalThis.fetch = async () => { throw new Error('Configuration failures must not reach transport') }
     delete process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP
     due()
     assert.equal((await orders.pollOrder(user, order.orderId)).status, 'processing')
     process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP = savedMap
-    delete process.env.IUNLOCKMOBILE_PROVIDER_USERNAME
+    delete process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME
     due()
     assert.equal((await orders.pollOrder(user, order.orderId)).status, 'processing')
     assert.equal(credits.getBalance(user).heldCents, price)
   } finally {
     process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP = savedMap
-    process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = savedUser
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME = savedUser
   }
   globalThis.fetch = async () => new Response('{"SUCCESS":[{"STATUS":"SUCCESS","REPLY":"Model: Galaxy S24"}]}')
   due()

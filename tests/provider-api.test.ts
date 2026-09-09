@@ -14,8 +14,9 @@ const ENV_KEYS = [
   'IUNLOCKMOBILE_PROVIDER_NAME',
   'IUNLOCKMOBILE_PROVIDER_URL',
   'IUNLOCKMOBILE_PROVIDER_API_KEY',
+  'IUNLOCKMOBILE_PROVIDER_DHRU_URL',
   'IUNLOCKMOBILE_PROVIDER_DHRU_KEY',
-  'IUNLOCKMOBILE_PROVIDER_USERNAME',
+  'IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME',
   'IUNLOCKMOBILE_UNLOCK_SERVICE_MAP',
   'IUNLOCKMOBILE_IMEI_SERVICE_MAP',
 ] as const
@@ -118,18 +119,28 @@ test('provider core keeps disabled mode safe and normalizes sync plus DHRU respo
       assert.equal(rejectedSync.message, 'Service temporarily disabled')
     }
 
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL = 'https://provider.example/api/index.php'
     process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = 'dhru-test-key'
-    process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = 'provider-user'
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME = 'provider-user'
     let placed = false
-    globalThis.fetch = async (input) => {
+    globalThis.fetch = async (input, init) => {
       const url = new URL(String(input))
-      assert.equal(url.searchParams.get('apiaccesskey'), 'dhru-test-key')
-      if (url.searchParams.get('action') === 'placeimeiorder') {
+      const body = new URLSearchParams(String(init?.body))
+      assert.equal(url.href, 'https://provider.example/api/index.php')
+      assert.equal(init?.method, 'POST')
+      assert.equal(body.get('apiaccesskey'), 'dhru-test-key')
+      assert.equal(body.get('requestformat'), 'JSON')
+      const parameters = body.get('parameters') ?? ''
+      if (body.get('action') === 'placeimeiorder') {
+        assert.match(parameters, /<ID>901<\/ID>/)
+        assert.match(parameters, /<IMEI>490154203237518<\/IMEI>/)
         placed = true
         return new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'provider-123' }] }), { status: 200 })
       }
+      assert.equal(body.get('action'), 'getimeiorder')
+      assert.match(parameters, /<ID>provider-123<\/ID>/)
       return new Response(
-        JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Brand: Apple\nModel: iPhone 15' }] }),
+        JSON.stringify({ SUCCESS: [{ STATUS: 4, CODE: 'Brand: Apple\nModel: iPhone 15' }] }),
         { status: 200 },
       )
     }
@@ -225,9 +236,11 @@ test('expanded paid-report profiles remain service-specific, masked and fail-clo
     IMEI: '490154203237518',
     'Sold By': 'Private reseller',
   })
-  assert.equal(unknown.sections.length, 0)
-  assert.equal(unknown.checks.length, 0)
-  assert.match(unknown.summary, /did not return any supported public report fields/i)
+  const unknownJson = JSON.stringify(unknown)
+  assert.equal(unknown.sections.length > 0, true)
+  assert.match(unknownJson, /iPhone 15/)
+  assert.equal(unknownJson.includes('490154203237518'), false)
+  assert.equal(unknownJson.includes('Private reseller'), false)
 })
 
 test('service maps parse once per configuration and invalidate on edits, malformed values or removal', () => {

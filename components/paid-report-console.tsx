@@ -12,6 +12,7 @@ type Product = {
   name: string
   summary: string
   group: string
+  domain: 'imei_check' | 'unlock'
   priceCents: number
   etaMinutes: number
   providerReady: boolean
@@ -40,7 +41,7 @@ type PaidReportPayload = {
 class ReportRequestError extends Error {}
 
 function statusLabel(status: PaidReportView['status']) {
-  if (status === 'completed') return 'Report ready'
+  if (status === 'completed') return 'Result ready'
   if (status === 'refunded') return 'Credit returned'
   if (status === 'manual_review') return 'Manual review'
   return 'Processing'
@@ -146,8 +147,8 @@ export function PaidReportConsole({
     if (locked) return
     setImeiTouched(true)
     const digits = normalizeImei(imei)
-    if (!product) return setError('Choose a paid report first.')
-    if (!product.providerReady) return setError('This report is not available yet.')
+    if (!product) return setError('Choose a service first.')
+    if (!product.providerReady) return setError('This service is not available yet.')
     if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) {
       setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
       imeiRef.current?.focus()
@@ -161,7 +162,7 @@ export function PaidReportConsole({
   async function confirmOrder() {
     if (inFlight.current || payload) return
     const digits = normalizeImei(imei)
-    if (!product || !product.providerReady) return setError('This report is not available yet.')
+    if (!product || !product.providerReady) return setError('This service is not available yet.')
     if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
     if (!affordable) return setError('Not enough credit for this report.')
 
@@ -207,7 +208,7 @@ export function PaidReportConsole({
     return (
       <p className="alert" role="status">
         <Icon name="info" strokeWidth={1.9} />
-        <span>No paid reports are available right now. Use the Free IMEI Check to validate your number, or contact support for help.</span>
+        <span>No paid services are available right now. Use the Free IMEI Check to validate your number, or contact support for help.</span>
       </p>
     )
   }
@@ -216,7 +217,7 @@ export function PaidReportConsole({
     <div style={{ display: 'grid', gap: 20 }}>
       <form className="panel" onSubmit={reviewOrder} noValidate aria-busy={busy}>
         <header>
-          <h2>New paid report</h2>
+          <h2>New service order</h2>
           <span>{formatUsd(balanceCents)} available</span>
         </header>
 
@@ -225,8 +226,8 @@ export function PaidReportConsole({
           {error ? <p className="alert alert--error" role="alert"><Icon name="cross" /> <span>{error}</span></p> : null}
 
           {product ? (
-            <section className="checkout-selection" aria-label="Selected report">
-              <span className="kicker">Selected report</span>
+            <section className="checkout-selection" aria-label="Selected service">
+              <span className="kicker">Selected {product.domain === 'unlock' ? 'unlock service' : 'phone check'}</span>
               <h3 className="t-card">{product.name}</h3>
               <p className="t-small">{product.summary}</p>
               <div className="quote">
@@ -237,9 +238,9 @@ export function PaidReportConsole({
           ) : null}
 
           <details className="checkout-picker">
-            <summary>Change report · {products.length} options</summary>
+            <summary>Change service · {products.length} options</summary>
           <div className="field">
-            <label htmlFor="paid-report-search">Search paid IMEI reports</label>
+            <label htmlFor="paid-report-search">Search services</label>
             <input
               id="paid-report-search"
               type="search"
@@ -251,7 +252,7 @@ export function PaidReportConsole({
             />
             <p className="field-note">
               <Icon name="search" strokeWidth={1.9} />
-              <span>{visibleProducts.length} of {products.length} reports shown</span>
+              <span>{visibleProducts.length} of {products.length} services shown</span>
             </p>
           </div>
 
@@ -280,7 +281,7 @@ export function PaidReportConsole({
               </button>
             ))}
             {visibleProducts.length === 0 ? (
-              <p className="alert" role="status"><Icon name="info" /> <span>No paid IMEI reports match that search.</span></p>
+              <p className="alert" role="status"><Icon name="info" /> <span>No paid services match that search.</span></p>
             ) : null}
           </div>
 
@@ -358,7 +359,7 @@ export function PaidReportConsole({
                   disabled={busy || !product?.providerReady}
                 >
                   <Icon name="file" strokeWidth={1.9} />
-                  {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a report'}
+                  {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a service'}
                 </button>
               )}
 
@@ -366,7 +367,7 @@ export function PaidReportConsole({
                   it rather than left to be inferred from the grey. */}
               {product && !product.providerReady ? (
                 <p className="t-small" role="status">
-                  This report is not open for ordering yet — the supplier behind it has not been
+                  This service is not open for ordering yet — the supplier behind it has not been
                   verified. Nothing here can be charged in the meantime.
                 </p>
               ) : null}
@@ -381,7 +382,7 @@ export function PaidReportConsole({
             </>
           )}
           <p className="t-small">
-            Credit is reserved when you confirm. A delivered report uses that credit; an undeliverable report returns it to your account balance. If the result is uncertain, the credit stays reserved while we check. You can follow the status in report history.
+            Credit is reserved when you confirm. A delivered result uses that credit; an undeliverable service returns it to your account balance. If the result is uncertain, the credit stays reserved while we check. You can follow the status in service history.
           </p>
         </div>
       </form>
@@ -395,21 +396,21 @@ export function PaidReportConsole({
           <h3 className="t-card">IMEI {payload.order.maskedImei}</h3>
           <p className="t-small">
             {payload.order.message ?? (payload.order.status === 'completed'
-              ? 'The report is ready and the held credit has been charged.'
+              ? 'The result is ready and the held credit has been charged.'
               : payload.order.status === 'refunded'
-                ? 'The report could not be delivered. The reserved credit was returned to your account balance.'
+                ? 'The service could not be delivered. The reserved credit was returned to your account balance.'
                 : payload.order.status === 'manual_review'
                   ? 'The result needs review. Your credit remains reserved while we check.'
                   : 'The request is still processing.')}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-            <Link className="button button--primary" href={`/user/reports/${payload.order.id}`}>View report</Link>
+            <Link className="button button--primary" href={`/user/reports/${payload.order.id}`}>View result</Link>
             <button className="button button--quiet" type="button" disabled={busy} onClick={() => {
               resetRequestIdentity()
               setImei('')
               setImeiTouched(false)
               setError(null)
-            }}>Start another report</button>
+            }}>Start another service</button>
             {payload.order.status === 'processing' ? (
               <button className="button button--quiet" type="button" disabled={busy} onClick={refreshStatus}>
                 {busy ? 'Refreshing…' : 'Refresh status'}

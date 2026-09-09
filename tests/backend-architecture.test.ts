@@ -193,6 +193,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-09-ledger-effect-uniqueness-v1',
       '2026-09-paid-imei-reports-v1',
       '2026-09-provider-product-catalog-v2',
+      '2026-09-provider-product-catalog-v3-strict-rollout',
     ],
   )
 
@@ -215,10 +216,10 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
 
 test('provider product catalog publishes only reviewed products and keeps activation fail-closed', () => {
   assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 130)
-  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 109)
-  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 25)
-  assert.equal(providerProducts.COMING_SOON_PROVIDER_PRODUCTS.length, 84)
-  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 13)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 108)
+  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 99)
+  assert.equal(providerProducts.COMING_SOON_PROVIDER_PRODUCTS.length, 9)
+  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 14)
   assert.equal(providerProducts.RESTRICTED_PROVIDER_PRODUCTS.length, 8)
   assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map((product) => product.productCode)).size, 130)
   assert.partialDeepStrictEqual(
@@ -232,12 +233,11 @@ test('provider product catalog publishes only reviewed products and keeps activa
   )
   assert.equal(
     providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter((product) => product.domain === 'unlock').length,
-    55,
+    54,
   )
   assert.equal(
     providerProducts.AVAILABLE_PROVIDER_PRODUCTS.every((product) =>
-      product.domain === 'imei_check'
-      && product.inputType === 'imei'
+      product.inputType === 'imei'
       && product.priceCents * 10_000 > product.providerCostMicros,
     ),
     true,
@@ -246,7 +246,11 @@ test('provider product catalog publishes only reviewed products and keeps activa
   const paidRows = database.db()
     .prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products')
     .get() as { total: number; active: number }
-  assert.deepEqual(paidRows, { total: 25, active: 25 })
+  assert.deepEqual(paidRows, { total: 99, active: 99 })
+
+  assert.equal(providerProducts.etaMinutesFromLabel('1-10 sec'), 1)
+  assert.equal(providerProducts.etaMinutesFromLabel('10 minutes-1 hour'), 60)
+  assert.equal(providerProducts.etaMinutesFromLabel('Instant to 5 days'), 7_200)
 })
 
 test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate routes', () => {
@@ -651,7 +655,9 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     url: process.env.IUNLOCKMOBILE_PROVIDER_URL,
     apiKey: process.env.IUNLOCKMOBILE_PROVIDER_API_KEY,
     dhruKey: process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY,
+    dhruUrl: process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL,
     username: process.env.IUNLOCKMOBILE_PROVIDER_USERNAME,
+    dhruUsername: process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME,
     unlockMap: process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP,
     imeiMap: process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP,
     maintenance: process.env.IUNLOCKMOBILE_MAINTENANCE,
@@ -710,8 +716,9 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     assert.deepEqual(credits.getBalance(alice.id), aliceCredit)
 
     process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'dhru'
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL = 'https://provider.example/api/index.php'
     process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = 'dhru-secret-key'
-    process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = 'provider-user'
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME = 'provider-user'
     process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
       'check:basic': { id: '900', mode: 'dhru' },
     })
@@ -722,27 +729,32 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
 
     let checkPlaced = false
     let orderPlaced = false
-    globalThis.fetch = async (input) => {
+    globalThis.fetch = async (input, init) => {
       const url = new URL(String(input))
-      assert.equal(url.searchParams.get('apiaccesskey'), 'dhru-secret-key')
-      const action = url.searchParams.get('action')
-      if (action === 'placeimeiorder' && url.searchParams.get('service') === '900') {
+      const body = new URLSearchParams(String(init?.body))
+      assert.equal(url.href, 'https://provider.example/api/index.php')
+      assert.equal(init?.method, 'POST')
+      assert.equal(body.get('apiaccesskey'), 'dhru-secret-key')
+      assert.equal(body.get('requestformat'), 'JSON')
+      const action = body.get('action')
+      const parameters = body.get('parameters') ?? ''
+      if (action === 'placeimeiorder' && parameters.includes('<ID>900</ID>')) {
         checkPlaced = true
         return new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'dhru-check-1' }] }), { status: 200 })
       }
-      if (action === 'placeimeiorder' && url.searchParams.get('service') === '901') {
+      if (action === 'placeimeiorder' && parameters.includes('<ID>901</ID>')) {
         orderPlaced = true
         return new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'dhru-order-1' }] }), { status: 200 })
       }
-      if (action === 'getimeiorder' && url.searchParams.get('id') === 'dhru-check-1') {
+      if (action === 'getimeiorder' && parameters.includes('<ID>dhru-check-1</ID>')) {
         return new Response(
-          JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Brand: Apple\\nModel: iPhone 14' }] }),
+          JSON.stringify({ SUCCESS: [{ STATUS: 4, CODE: 'Brand: Apple\\nModel: iPhone 14' }] }),
           { status: 200 },
         )
       }
-      if (action === 'getimeiorder' && url.searchParams.get('id') === 'dhru-order-1') {
+      if (action === 'getimeiorder' && parameters.includes('<ID>dhru-order-1</ID>')) {
         return new Response(
-          JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Status: Unlocked\\nPermanent: Yes' }] }),
+          JSON.stringify({ SUCCESS: [{ STATUS: 4, CODE: 'Status: Unlocked\\nPermanent: Yes' }] }),
           { status: 200 },
         )
       }
@@ -803,10 +815,12 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     assert.deepEqual(await providerJobs.pollProviderJobs(), {
       enabled: false,
       ordersSeen: 0,
+      reportsSeen: 0,
       checksSeen: 0,
       completed: 0,
       unavailable: 0,
       processing: 0,
+      manualReview: 0,
       errors: 0,
     })
   } finally {
@@ -820,7 +834,9 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     restore('IUNLOCKMOBILE_PROVIDER_URL', saved.url)
     restore('IUNLOCKMOBILE_PROVIDER_API_KEY', saved.apiKey)
     restore('IUNLOCKMOBILE_PROVIDER_DHRU_KEY', saved.dhruKey)
+    restore('IUNLOCKMOBILE_PROVIDER_DHRU_URL', saved.dhruUrl)
     restore('IUNLOCKMOBILE_PROVIDER_USERNAME', saved.username)
+    restore('IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME', saved.dhruUsername)
     restore('IUNLOCKMOBILE_UNLOCK_SERVICE_MAP', saved.unlockMap)
     restore('IUNLOCKMOBILE_IMEI_SERVICE_MAP', saved.imeiMap)
     restore('IUNLOCKMOBILE_MAINTENANCE', saved.maintenance)
@@ -849,7 +865,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     const freeChecksBefore = imeiChecks.listImeiChecks(alice.id).length
 
     const activeCatalog = paidReports.listPaidReportProducts()
-    assert.equal(activeCatalog.length, 25)
+    assert.equal(activeCatalog.length, 99)
     assert.equal(activeCatalog.every((product) => product.isActive), true)
     assert.equal(activeCatalog.every((product) => !product.providerReady), true)
     const seeded = paidReports.getPaidReportProduct('APPLE_BASIC')
@@ -1664,10 +1680,12 @@ test('a second process can wait for the writer instead of failing', async () => 
   assert.deepEqual(summary, {
     enabled: false,
     ordersSeen: 0,
+    reportsSeen: 0,
     checksSeen: 0,
     completed: 0,
     unavailable: 0,
     processing: 0,
+    manualReview: 0,
     errors: 0,
   })
 })

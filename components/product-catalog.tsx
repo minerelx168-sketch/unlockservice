@@ -34,7 +34,7 @@ const DOMAIN_COPY: Record<ProviderProductDomain, {
     groupLabel: 'Unlock category',
     searchPlaceholder: 'Country, network, Apple or Android',
     availableLabel: 'Services available online',
-    notice: 'Unlock prices are shown in USD. These services remain view-only until online ordering is verified for each network and device service.',
+    notice: 'Unlock prices are shown in USD. Available services can be ordered online; services that require additional device or account details remain view-only until their input flow is verified.',
   },
 }
 
@@ -75,7 +75,7 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
 
       {available ? (
         <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
-          Choose report <Icon name="arrowRight" />
+          {product.domain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
         </Link>
       ) : product.domain === 'unlock' ? (
         /* A dead grey label was the whole of the offer on every unlock

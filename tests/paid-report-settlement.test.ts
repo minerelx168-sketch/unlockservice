@@ -10,7 +10,9 @@ process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'enabled'
 process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'dhru'
 process.env.IUNLOCKMOBILE_PROVIDER_URL = 'https://provider.example.test/api'
 process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = 'test-only-key'
-process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = 'test-user'
+process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL = 'https://provider.example.test/api/index.php'
+process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = 'test-only-dhru-key'
+process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME = 'test-user'
 
 let database: typeof import('../lib/db')
 let credits: typeof import('../lib/credits')
@@ -186,7 +188,7 @@ test('an in-flight paid report poll cannot overwrite a webhook refund', async ()
   const gate = new Promise<void>((resolve) => { release = resolve })
   globalThis.fetch = async () => {
     await gate
-    return new Response(JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Model: iPhone 15' }] }))
+    return new Response(JSON.stringify({ SUCCESS: [{ STATUS: 4, CODE: 'Model: iPhone 15' }] }))
   }
   const pending = reports.pollPaidReport(userId, id)
   try {
@@ -230,7 +232,8 @@ test('paid polling retains credit when provider configuration is disabled, incom
   globalThis.fetch = async () => { calls += 1; throw new Error('Unsafe polling must not contact any provider.') }
   const names = [
     'IUNLOCKMOBILE_PROVIDER_MODE', 'IUNLOCKMOBILE_PROVIDER_NAME',
-    'IUNLOCKMOBILE_PROVIDER_API_KEY', 'IUNLOCKMOBILE_PROVIDER_DHRU_KEY', 'IUNLOCKMOBILE_PROVIDER_USERNAME',
+    'IUNLOCKMOBILE_PROVIDER_API_KEY', 'IUNLOCKMOBILE_PROVIDER_DHRU_URL',
+    'IUNLOCKMOBILE_PROVIDER_DHRU_KEY', 'IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME',
   ] as const
   const saved = new Map(names.map((name) => [name, process.env[name]]))
   const restore = () => {
@@ -242,8 +245,8 @@ test('paid polling retains credit when provider configuration is disabled, incom
   }
   const configurations = [
     () => { process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled' },
-    () => { process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = '' },
-    () => { process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = ''; process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = '' },
+    () => { process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME = '' },
+    () => { process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL = ''; process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = '' },
     () => { process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'different-provider' },
   ]
   try {

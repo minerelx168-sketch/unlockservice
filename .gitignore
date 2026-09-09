@@ -4,6 +4,7 @@ out/
 data/
 next-env.d.ts
 *.tsbuildinfo
+catalog/provider-rollout-strict.json
 
 .env
 .env.local

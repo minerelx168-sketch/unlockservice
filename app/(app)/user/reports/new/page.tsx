@@ -5,7 +5,7 @@ import { requireSession } from '@/lib/auth'
 import { listPaidReportProducts } from '@/lib/paid-reports'
 import { GATEWAYS } from '@/lib/payments'
 
-export const metadata: Metadata = { title: 'Buy an IMEI report' }
+export const metadata: Metadata = { title: 'Order a device service' }
 export const dynamic = 'force-dynamic'
 
 export default async function NewPaidReportPage({
@@ -26,14 +26,14 @@ export default async function NewPaidReportPage({
     <>
       <div className="app-head">
         <div>
-          <span className="kicker">Paid reports</span>
-          <h1>Buy an IMEI report</h1>
+          <span className="kicker">Provider services</span>
+          <h1>Order a device service</h1>
           <p>
-            Check your phone’s details with a paid report. Review the price before confirming.
+            Choose a phone check or remote unlock service. Review the price and estimated delivery before confirming.
           </p>
         </div>
         <div style={{ display: 'grid', justifyItems: 'end', gap: 10 }}>
-          <Link className="link-arrow" href="/user/reports">Report history</Link>
+          <Link className="link-arrow" href="/user/reports">Service history</Link>
         </div>
       </div>
 
@@ -43,6 +43,7 @@ export default async function NewPaidReportPage({
           name: product.name,
           summary: product.summary,
           group: product.group,
+          domain: product.domain,
           priceCents: product.priceCents,
           etaMinutes: product.etaMinutes,
           providerReady: product.providerReady,

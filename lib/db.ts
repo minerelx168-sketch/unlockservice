@@ -714,7 +714,14 @@ function seedPaidReportCatalog(connection: Database.Database) {
 }
 
 function applyProviderProductCatalogRollout(connection: Database.Database) {
-  const version = '2026-09-provider-product-catalog-v2'
+  // Preserve the historical marker on fresh databases. Existing production
+  // already has v2; changing or reusing that ID would make migration state lie.
+  const previousVersion = '2026-09-provider-product-catalog-v2'
+  if (!migrationApplied(connection, previousVersion)) {
+    connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run(previousVersion)
+  }
+
+  const version = '2026-09-provider-product-catalog-v3-strict-rollout'
   if (migrationApplied(connection, version)) return
 
   connection.transaction(() => {
