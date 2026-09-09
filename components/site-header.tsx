@@ -25,7 +25,7 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
   const [open, setOpen] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
-  const accountHref = isAuthenticated ? '/user/unlock' : '/login'
+  const accountHref = isAuthenticated ? '/user/check' : '/login'
   const accountLabel = isAuthenticated ? 'My account' : 'Sign in'
 
   useEffect(() => {

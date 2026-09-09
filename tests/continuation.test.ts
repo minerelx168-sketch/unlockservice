@@ -25,3 +25,12 @@ test('an expired invoice session retains only an allowlisted report continuation
   assert.equal(safeContinuation(invoice + '?next=' + encodeURIComponent('//example.com')), invoice)
   assert.equal(safeContinuation(invoice + '?next=' + encodeURIComponent('/user/invoice/0123456789abcdef0123456789abcdef')), invoice)
 })
+
+test('check and unlock workspaces survive sign-in without exposing device query values', () => {
+  for (const path of ['/user/check', '/user/services/unlock']) {
+    assert.equal(safeContinuation(path), path)
+    assert.equal(safeContinuation(`${path}?imei=490154203237518&product=APPLE_BASIC&next=//example.com`), path)
+    assert.equal(withContinuation('/login', path), `/login?next=${encodeURIComponent(path)}`)
+    assert.equal(safeContinuation(`${path}/unexpected`), null)
+  }
+})

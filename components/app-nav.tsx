@@ -10,9 +10,10 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
     heading: 'Work',
     items: [
       { href: '/user/dashboard', label: 'Dashboard', icon: 'window' },
-      { href: '/user/unlock', label: 'Unlock a device', icon: 'bolt' },
+      { href: '/user/check', label: 'Check IMEI', icon: 'search' },
+      { href: '/user/services/unlock', label: 'Unlock services', icon: 'lock' },
       { href: '/user/orders', label: 'Orders', icon: 'clock' },
-      { href: '/user/reports', label: 'Paid reports', icon: 'file' },
+      { href: '/user/reports', label: 'Service history', icon: 'file' },
       { href: '/user/checks', label: 'Free checks', icon: 'search' },
     ],
   },

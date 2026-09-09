@@ -27,6 +27,7 @@ import { isValidImei, normalizeImei } from './imei'
 import { parseUsd } from './money'
 import { landingRoute, unlockOrderingEnabled } from './provider'
 import { writeQuote } from './quote'
+import { clearDeviceIntent } from './device-intent'
 import { joinUnlockWaitlist, WaitlistError } from './waitlist'
 import {
   approveInvoice,
@@ -205,6 +206,7 @@ export async function resetPasswordAction(_: FormState, data: FormData): Promise
 }
 
 export async function logoutAction() {
+  await clearDeviceIntent()
   const found = await currentSession()
   if (found) destroySession(found.session.id)
   await clearSessionCookie()

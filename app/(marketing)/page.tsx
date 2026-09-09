@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { ImeiForm } from '@/components/imei-form'
-import { CARRIERS } from '@/lib/catalog'
+import { DeviceBrowseForm } from '@/components/device-browse-form'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
+import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 import { StructuredData } from './structured-data'
 import { Icon, type IconName } from '@/components/icons'
 
@@ -133,10 +133,8 @@ const FAQ = [
 ]
 
 export default function HomePage() {
-  /* Said at the top rather than at the order form. A visitor who cannot
-     order should learn that before they enter their IMEI, not after. */
-  const status = serviceStatus()
-  const ordering = unlockOrderingEnabled()
+  const ordering = unlockOrderingEnabled() || listPublicProviderProducts('unlock').some((product) => product.status === 'available')
+  const status = !ordering && serviceStatus()
 
   return (
     <>
@@ -163,8 +161,8 @@ export default function HomePage() {
 
             <p className="t-lead">
               {ordering
-                ? 'Enter the IMEI and the network the phone is locked to. You see what it costs and how long it takes before anything is charged.'
-                : 'Explore device reports and unlock services. Compare service details before creating an account or entering your phone information.'}
+                ? 'Enter your IMEI, then choose a service. Compare prices and delivery estimates before you confirm an order.'
+                : 'Explore device reports and unlock services. Enter your IMEI to get started, or browse prices first. You can compare services before creating an account.'}
             </p>
 
             {/* One filled button per screen. These were three competing calls
@@ -183,41 +181,12 @@ export default function HomePage() {
             <div className="hero-panel-head">
               <span className="kicker">
                 <Icon name="device" strokeWidth={2} />
-                {ordering ? 'Unlock your phone' : 'Explore your options'}
+                Start with your device
               </span>
               <span className="t-micro">{ordering ? 'Reserved credit returned if refused' : 'Prices and availability before you choose'}</span>
             </div>
 
-            {/* The same list the order form is built from, so the network a
-                visitor picks here is one they can actually order against. */}
-            <ImeiForm
-              ordering={ordering}
-              carriers={CARRIERS.map((carrier) => ({
-                id: carrier.id,
-                name: carrier.name,
-                country: carrier.country,
-              }))}
-            />
-
-            <hr className="hairline" />
-
-            <div className="hero-floats">
-              <div className="float-card">
-                <span className="icon-tile icon-tile--sm" aria-hidden="true">
-                  <Icon name="check" />
-                </span>
-                <span>
-                  <span className="label">Official unlock</span>
-                  <span className="value">Remote and permanent</span>
-                </span>
-              </div>
-              <div className="hero-mini">
-                <div className="mini-stat">
-                  <span className="label">Order access</span>
-                  <span className="value">Live status</span>
-                </div>
-              </div>
-            </div>
+            <DeviceBrowseForm />
           </div>
         </div>
       </section>
