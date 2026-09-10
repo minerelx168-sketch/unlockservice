@@ -20,8 +20,17 @@ export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
                 {block.text}
               </h2>
             )
+          case 'h3':
+            return <h3 key={block.id} id={block.id}>{block.text}</h3>
           case 'p':
-            return <p key={index}>{block.text}</p>
+            return (
+              <p key={index}>
+                {block.text}
+                {block.links?.map((link) => (
+                  <span key={link.href}> <Link href={link.href}>{link.label}</Link>.</span>
+                ))}
+              </p>
+            )
           case 'list':
             return block.ordered ? (
               <ol key={index}>
