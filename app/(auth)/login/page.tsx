@@ -7,7 +7,7 @@ import { landingRoute } from '@/lib/provider'
 import { safeContinuation } from '@/lib/continuation'
 import { googleOAuthConfigured } from '@/lib/google-oauth'
 
-export const metadata: Metadata = { title: 'Sign in' }
+export const metadata: Metadata = { robots: { index: false, follow: true }, title: 'Sign in' }
 export const dynamic = 'force-dynamic'
 
 export default async function LoginPage({
@@ -28,3 +28,4 @@ export default async function LoginPage({
     </div>
   )
 }
+

@@ -6,7 +6,7 @@ import { currentSession } from '@/lib/auth'
 import { landingRoute } from '@/lib/provider'
 import { safeContinuation } from '@/lib/continuation'
 
-export const metadata: Metadata = { title: 'Reset password' }
+export const metadata: Metadata = { robots: { index: false, follow: true }, title: 'Reset password' }
 export const dynamic = 'force-dynamic'
 
 export default async function ResetPasswordPage({
@@ -27,3 +27,4 @@ export default async function ResetPasswordPage({
     </div>
   )
 }
+

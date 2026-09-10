@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { AppNav } from '@/components/app-nav'
@@ -6,6 +7,8 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { logoutAction } from '@/lib/actions'
 import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
+
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 export const dynamic = 'force-dynamic'
 
@@ -56,3 +59,4 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     </div>
   )
 }
+

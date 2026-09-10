@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { Icon } from '@/components/icons'
@@ -8,12 +8,11 @@ import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor } from '@/lib/device-intent-value'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 
-export const metadata: Metadata = {
-  title: 'Phone Check services and prices',
-  description: 'Browse Phone Check services with prices, availability and delivery estimates.',
-}
+
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = pageMetadata("/services/imei-check", "IMEI Check Reports: Carrier, Blacklist & Warranty", "Compare paid IMEI reports for carrier, blacklist, warranty and lock-status information. Check what each report includes, its price and availability.")
 
 export default async function ImeiCheckServicesPage() {
   const [found, intent] = await Promise.all([currentSession(), readDeviceIntent()])
@@ -27,7 +26,7 @@ export default async function ImeiCheckServicesPage() {
             <span aria-hidden="true">/</span>
             <span aria-current="page">Phone Check</span>
           </nav>
-          <h1 className="service-entry-title">Phone Check services</h1>
+          <h1 className="service-entry-title">IMEI check reports</h1>
           <ServiceBrowser
             products={products}
             domain="imei_check"
@@ -61,3 +60,4 @@ export default async function ImeiCheckServicesPage() {
       </section>
   )
 }
+

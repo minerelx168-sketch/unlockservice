@@ -9,7 +9,7 @@ import { describeQuote, readQuote } from '@/lib/quote'
 import { safeContinuation } from '@/lib/continuation'
 import { googleOAuthConfigured } from '@/lib/google-oauth'
 
-export const metadata: Metadata = { title: 'Create an account' }
+export const metadata: Metadata = { robots: { index: false, follow: true }, title: 'Create an account' }
 export const dynamic = 'force-dynamic'
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
@@ -38,3 +38,4 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
     </div>
   )
 }
+

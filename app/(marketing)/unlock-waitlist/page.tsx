@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Icon } from '@/components/icons'
@@ -6,13 +6,11 @@ import { WaitlistForm } from '@/components/waitlist-form'
 import { CARRIERS } from '@/lib/catalog'
 import { unlockOrderingEnabled } from '@/lib/provider'
 
-export const metadata: Metadata = {
-  title: 'Get told when phone unlocking opens',
-  description:
-    'Leave an email address and we will tell you the day network unlocking opens for ordering. Phone checks and reports are available now.',
-}
+
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = pageMetadata("/unlock-waitlist", "Phone Unlock Availability Notifications", "Join the phone unlocking waitlist for an availability update. Browse currently available IMEI reports and check service requirements before ordering.")
 
 export default function UnlockWaitlistPage() {
   /* The moment ordering opens this page has nothing to offer, and the

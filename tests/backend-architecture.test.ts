@@ -287,9 +287,9 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.doesNotMatch(imeiPage, /CUSTOMER_UNLOCK_PRODUCTS/)
   assert.match(unlockPage, /listPublicProviderProducts\('unlock'\)/)
   assert.match(unlockPage, /domain="unlock"/)
-  assert.match(unlockPage, /<h1[^>]*>Unlock services<\/h1>/)
+  assert.match(unlockPage, /<h1[^>]*>Phone unlock services<\/h1>/)
   assert.doesNotMatch(unlockPage, /CUSTOMER_IMEI_CHECK_PRODUCTS/)
-  assert.match(imeiPage, /<h1[^>]*>Phone Check services<\/h1>/)
+  assert.match(imeiPage, /<h1[^>]*>IMEI check reports<\/h1>/)
   assert.match(basicCheckPage, /Basic IMEI validation/)
   assert.doesNotMatch(basicCheckPage, /Free IMEI check/i)
   assert.match(basicCheckForm, /Choose a paid Phone Check/)
@@ -1689,3 +1689,4 @@ test('a second process can wait for the writer instead of failing', async () => 
     errors: 0,
   })
 })
+
