@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { DeviceBrowseForm } from '@/components/device-browse-form'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
@@ -131,6 +132,8 @@ const FAQ = [
       'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, the full reserved credit returns to your account balance.',
   },
 ]
+
+export const metadata = pageMetadata("/", "IMEI Phone Unlocking & Device Check Reports", "Compare IMEI phone unlock services and device reports. Review availability, prices and delivery estimates before ordering with iUnlockMobile.")
 
 export default function HomePage() {
   const ordering = unlockOrderingEnabled() || listPublicProviderProducts('unlock').some((product) => product.status === 'available')
@@ -465,3 +468,4 @@ export default function HomePage() {
     </>
   )
 }
+

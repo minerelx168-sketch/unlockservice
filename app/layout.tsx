@@ -5,7 +5,7 @@ import { publicOrigin } from '@/lib/site'
 import '@/styles/globals.css'
 
 const DESCRIPTION =
-  'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, and refunded in full if the carrier refuses.'
+  'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, with reserved account credit returned if the carrier refuses.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicOrigin()),
@@ -24,7 +24,6 @@ export const metadata: Metadata = {
     url: '/',
   },
   twitter: { card: 'summary_large_image' },
-  alternates: { canonical: '/' },
 }
 
 export const viewport: Viewport = {

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { ServiceBrowser } from '@/components/service-browser'
@@ -7,12 +7,11 @@ import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor } from '@/lib/device-intent-value'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 
-export const metadata: Metadata = {
-  title: 'Phone unlock services and prices',
-  description: 'Browse phone unlock services and published prices by network, country and device type.',
-}
+
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = pageMetadata("/services/unlock", "Phone Unlock Services by Carrier & Device", "Browse phone unlock services by network, country and device. Compare published prices, requirements and delivery estimates before ordering.")
 
 export default async function UnlockServicesPage() {
   const [found, intent] = await Promise.all([currentSession(), readDeviceIntent()])
@@ -27,7 +26,7 @@ export default async function UnlockServicesPage() {
             <span aria-hidden="true">/</span>
             <span aria-current="page">Unlock Service</span>
           </nav>
-          <h1 className="service-entry-title">Unlock services</h1>
+          <h1 className="service-entry-title">Phone unlock services</h1>
           <ServiceBrowser
             products={products}
             domain="unlock"
@@ -61,3 +60,4 @@ export default async function UnlockServicesPage() {
       </section>
   )
 }
+

@@ -7,7 +7,7 @@ import { currentSession } from '@/lib/auth'
 import { landingRoute } from '@/lib/provider'
 import { safeContinuation, withContinuation } from '@/lib/continuation'
 
-export const metadata: Metadata = { title: 'Verify email' }
+export const metadata: Metadata = { robots: { index: false, follow: true }, title: 'Verify email' }
 export const dynamic = 'force-dynamic'
 
 export default async function VerifyEmailPage({
@@ -29,3 +29,4 @@ export default async function VerifyEmailPage({
     </div>
   )
 }
+

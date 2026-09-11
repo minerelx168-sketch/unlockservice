@@ -6,7 +6,7 @@ import { currentSession } from '@/lib/auth'
 import { landingRoute } from '@/lib/provider'
 import { safeContinuation } from '@/lib/continuation'
 
-export const metadata: Metadata = { title: 'Forgot password' }
+export const metadata: Metadata = { robots: { index: false, follow: true }, title: 'Forgot password' }
 export const dynamic = 'force-dynamic'
 
 export default async function ForgotPasswordPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
@@ -22,3 +22,4 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
     </div>
   )
 }
+

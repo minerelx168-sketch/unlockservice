@@ -27,9 +27,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...(unlockOrderingEnabled()
       ? []
       : [{ url: `${origin}/unlock-waitlist`, changeFrequency: 'weekly' as const, priority: 0.6 }]),
-    { url: `${origin}/register`, changeFrequency: 'yearly', priority: 0.5 },
-    { url: `${origin}/login`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${origin}/privacy`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${origin}/terms`, changeFrequency: 'yearly', priority: 0.2 },
   ]
 }
+

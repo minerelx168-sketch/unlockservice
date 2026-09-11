@@ -1,8 +1,10 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { Brand } from '@/components/brand'
 
-export const metadata: Metadata = { title: 'Terms of Service' }
+
+
+export const metadata = pageMetadata("/terms", "Terms of Service", "Read the iUnlockMobile terms covering accounts, phone checks, unlock orders, payments and service limitations before placing an order.")
 
 export default function TermsPage() {
   return (

@@ -28,7 +28,7 @@ export default function ArticlesPage() {
           <span className="kicker">
             <Icon name="file" strokeWidth={2} /> Guides
           </span>
-          <h1 className="t-section">What to check, and what it means.</h1>
+          <h1 className="t-section">IMEI check and phone unlocking guides</h1>
           <p className="t-lead">
             Short guides on the same subjects our support inbox gets asked about: what a number can
             tell you about a handset, what an unlock changes, and how to buy a used phone without
@@ -57,3 +57,4 @@ export default function ArticlesPage() {
     </section>
   )
 }
+
