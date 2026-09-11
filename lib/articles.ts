@@ -724,7 +724,7 @@ const ARTICLES: Article[] = [
     title: 'What an IMEI check actually tells you',
     heading: 'What an IMEI check actually tells you.',
     description:
-      'An IMEI check reads what networks and manufacturers already know about a handset: the model behind the number, whether it is blacklisted, and which carrier it belongs to.',
+      'Learn what an IMEI check can reveal about a handset, including model, blacklist status, SIM lock, warranty information and original carrier.',
     standfirst:
       'The number is fifteen digits long and it is the only name your phone has that a network recognises. Here is what can be read from it, and what cannot.',
     published: '2026-09-07',
@@ -944,7 +944,7 @@ const ARTICLES: Article[] = [
     title: 'Checks to run before buying a used phone',
     heading: 'Before you buy a used phone.',
     description:
-      'A short, practical order of checks for a second-hand handset: the number, the blacklist, the lock, the account and the receipt — and what each one saves you from.',
+      'Use this practical checklist before buying a used phone: verify its IMEI, model, blacklist, carrier lock, account status and seller receipt.',
     standfirst:
       'Most bad used-phone purchases were avoidable with two minutes and the fifteen digits the seller already has.',
     published: '2026-09-07',
