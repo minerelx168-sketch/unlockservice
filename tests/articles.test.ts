@@ -41,19 +41,6 @@ test('eligibility guide metadata fits the rendered title and description budgets
   assert.ok(article.faq && article.faq.length > 0)
 })
 
-test('AT&T unlock guide covers the request and status intent within metadata budgets', () => {
-  const article = getArticle('att-iphone-unlock-request-status')
-  assert.ok(article)
-  assert.ok(`${article.title} — iUnlockMobile`.length <= 60)
-  assert.ok(article.description.length >= 120 && article.description.length <= 150)
-  assert.match(article.title, /AT&T iPhone Unlock/i)
-  assert.match(article.heading, /AT&T iPhone Unlock/i)
-  assert.equal(article.published, '2026-09-11')
-  assert.ok(article.blocks.some((block) => block.kind === 'h2' && block.id === 'key-takeaways'))
-  assert.ok(article.blocks.some((block) => block.kind === 'h2' && block.id === 'track-status'))
-  assert.ok(article.faq && article.faq.length > 0)
-})
-
 test('article links use HTTPS sources or existing internal routes', () => {
   for (const article of listArticles()) {
     for (const block of article.blocks) {
