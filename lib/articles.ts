@@ -42,6 +42,337 @@ export type Article = {
 
 const ARTICLES: Article[] = [
   {
+    "slug": "t-mobile-iphone-unlock-status-esim",
+    "title": "T-Mobile iPhone Unlock: Status & eSIM",
+    "heading": "T-Mobile iPhone Unlock: What to Do If It Still Shows SIM Locked",
+    "description": "Check T-Mobile iPhone unlock status, understand prepaid and postpaid rules, and resolve a locked device before buying a travel eSIM.",
+    "standfirst": "An eligibility result and an unlocked iPhone are two different checkpoints. Find out which one needs attention before changing carriers or buying a travel plan.",
+    "published": "2026-09-12",
+    "updated": "2026-09-12",
+    "minutes": 7,
+    "topic": "T-Mobile iPhone unlock",
+    "blocks": [
+      {
+        "kind": "p",
+        "text": "If your T-Mobile iPhone unlock appears eligible but the phone still shows a carrier restriction, compare the account’s eligibility result with the status on the handset. Then ask T-Mobile to resolve the mismatch. A message about eligibility is not a reason to assume another carrier’s SIM or eSIM will activate."
+      },
+      {
+        "kind": "h2",
+        "id": "key-takeaways",
+        "text": "Key Takeaways"
+      },
+      {
+        "kind": "list",
+        "items": [
+          "Check both the iPhone’s Carrier Lock setting and the device information for the correct T-Mobile line.",
+          "Use the rule for your actual account type; prepaid and postpaid do not follow the same eligibility test.",
+          "If the account and handset disagree, collect both results and ask the carrier which step remains incomplete.",
+          "Before purchasing a travel eSIM, confirm carrier-unlocked status and the destination provider’s device compatibility.",
+          "Do not buy a second unlock solely because an already-unlocked phone cannot get service."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "two-status-checks",
+        "text": "Check T-Mobile unlock status in two places"
+      },
+      {
+        "kind": "h3",
+        "id": "iphone-setting",
+        "text": "On the iPhone: check the actual carrier restriction"
+      },
+      {
+        "kind": "p",
+        "text": "Open Settings > General > About and find Carrier Lock. Apple says “No SIM restrictions” means the iPhone is unlocked. If a restriction remains, Apple cannot remove it for you; the carrier must authorize the change.",
+        "links": [
+          {
+            "label": "Apple’s Carrier Lock instructions",
+            "href": "https://support.apple.com/en-us/109316"
+          }
+        ]
+      },
+      {
+        "kind": "h3",
+        "id": "account-check",
+        "text": "In your account: check the correct device and line"
+      },
+      {
+        "kind": "p",
+        "text": "On T-Mobile.com, open your account’s Accounts page, choose the line, then Check device unlock status. In T-Life or the T-Mobile app, go to Manage, select the line and open Device lock status; Manage all may appear first. These are account checks, not an unlock-code screen on the iPhone.",
+        "links": [
+          {
+            "label": "T-Mobile’s account and app status instructions",
+            "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Compare the model and device identifier with the phone in your hand. This matters after an upgrade, replacement or used-phone purchase: a screenshot for a different device cannot establish the status of yours. Record the date of the check and the exact message, keeping identifiers and account information private."
+      },
+      {
+        "kind": "h2",
+        "id": "current-eligibility",
+        "text": "T-Mobile iPhone unlock requirements by account type"
+      },
+      {
+        "kind": "p",
+        "text": "The following US T-Mobile policy summary was checked on September 12, 2026. It applies to phones from that carrier even when their owners are abroad. T-Mobile unlocks qualifying devices without a fee. The device must have been sold by T-Mobile, have no lost, stolen or blocked status, and have an account in good standing.",
+        "links": [
+          {
+            "label": "T-Mobile’s current SIM unlock policy",
+            "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Account type",
+          "Additional published conditions"
+        ],
+        "rows": [
+          [
+            "Postpaid",
+            "At least 40 days active on the requesting line; financed or leased device fully paid; canceled account balance zero."
+          ],
+          [
+            "Prepaid",
+            "365 days since activation; or, if earlier, more than $100 in refills for each active line during that period and more than 14 days since purchase. No more than two unlocks per line in the preceding 12 months."
+          ]
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "T-Mobile may require purchase evidence or other information. Deployed military customers in good standing can request an exception with overseas orders. Eligible remote-capable devices are automatically unlocked within two business days; for others, the carrier provides next steps. Check the policy for complete conditions.",
+        "links": [
+          {
+            "label": "Review eligibility and exceptions with T-Mobile",
+            "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "eligible-still-locked",
+        "text": "Eligible, but still SIM locked: a practical support checklist"
+      },
+      {
+        "kind": "p",
+        "text": "T-Mobile’s iPhone-specific instructions say to contact support when an eligible iPhone remains locked so the carrier can submit the unlock. Connect the phone to Wi-Fi or the T-Mobile network first. Do not follow a Samsung menu or install an Android Device Unlock app on the assumption that it is an iPhone requirement.",
+        "links": [
+          {
+            "label": "Follow T-Mobile’s Apple iPhone unlock steps",
+            "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "ordered": true,
+        "items": [
+          "Save the account eligibility result and the Carrier Lock wording, with the date and time of each check.",
+          "Confirm the device in the account matches the iPhone, especially after a replacement or line change.",
+          "Ask support whether the case is waiting for an eligibility review, a submitted unlock, or confirmation that the change reached the phone.",
+          "Request a case reference and a specific next action. Keep the answer with your purchase records.",
+          "After the carrier confirms completion, recheck the handset and follow the new provider’s activation instructions."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "A useful support message is: “My account shows this device as eligible, but the iPhone still shows a Carrier Lock restriction. Can you confirm that the IMEI matches, whether an unlock has been submitted, and what I should do next?” Share identifiers only through the carrier’s official support channel.",
+        "links": [
+          {
+            "label": "Contact T-Mobile for device assistance",
+            "href": "https://www.t-mobile.com/contact-us"
+          }
+        ]
+      },
+      {
+        "kind": "h3",
+        "id": "not-eligible",
+        "text": "If the device is not eligible"
+      },
+      {
+        "kind": "p",
+        "text": "Ask for the specific unmet condition instead of repeatedly opening the same request. Separate a service-history question from a billing dispute or an incorrect device record. A seller’s statement that a phone is “paid off” is not evidence that every carrier requirement has passed."
+      },
+      {
+        "kind": "p",
+        "text": "For a used iPhone, ask the seller to help resolve issues tied to the original account. Keep the listing, receipt and messages. If the seller cannot deliver the unlocked device advertised, consider the marketplace’s dispute process before spending more on an uncertain service.",
+        "links": [
+          {
+            "label": "Checks before buying a used phone",
+            "href": "/articles/checks-before-buying-a-used-phone"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "temporary-unlock-travel",
+        "text": "Does a temporary T-Mobile iPhone unlock solve a travel problem?"
+      },
+      {
+        "kind": "p",
+        "text": "The current T-Mobile help page gives iPhone-specific status and support steps; it does not document a temporary iPhone unlock procedure. Do not treat a temporary-unlock instruction for another manufacturer, or an old discussion, as confirmation that your iPhone qualifies. Ask T-Mobile what it can authorize for your device before committing to a travel plan.",
+        "links": [
+          {
+            "label": "Check the current instructions for Apple iPhone",
+            "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Apple distinguishes roaming with your existing carrier from using another provider’s travel eSIM. The latter requires an unlocked iPhone. If you are not ready to switch providers, check your existing plan’s destination coverage, roaming charges and available travel options instead.",
+        "links": [
+          {
+            "label": "Apple’s international eSIM guidance",
+            "href": "https://support.apple.com/en-us/118227"
+          }
+        ]
+      },
+      {
+        "kind": "h3",
+        "id": "esim-purchase-checklist",
+        "text": "Before buying a travel eSIM"
+      },
+      {
+        "kind": "list",
+        "items": [
+          "Confirm the destination provider supports the exact iPhone model and its SIM or eSIM configuration.",
+          "Check the countries included, plan duration and whether the package provides data only or also a local phone number.",
+          "Read when the plan’s validity starts and how activation works so a test does not start the package earlier than intended.",
+          "Decide whether to keep your home line enabled and check any charges that may apply to it."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "An unlocked iPhone still needs compatible cellular hardware and a supported plan. Apple advises checking eSIM support with the provider and cellular bands for the destination. Unlocking changes the carrier restriction; it does not add hardware capabilities.",
+        "links": [
+          {
+            "label": "Check Apple’s requirements for using eSIM abroad",
+            "href": "https://support.apple.com/en-us/118227"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "different-locks",
+        "text": "Make sure you are solving the right lock"
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Restriction",
+          "Appropriate next step"
+        ],
+        "rows": [
+          [
+            "Carrier Lock",
+            "Resolve carrier authorization and verify the phone’s network-lock status."
+          ],
+          [
+            "SIM PIN or PUK",
+            "Ask the SIM or eSIM provider for recovery help; do not guess codes."
+          ],
+          [
+            "Screen passcode",
+            "Use Apple’s passcode recovery route rather than ordering a carrier unlock."
+          ],
+          [
+            "Activation Lock / Locked to Owner",
+            "Resolve the Apple Account ownership check with the legitimate owner or Apple’s documented support process."
+          ],
+          [
+            "Blacklist or finance issue",
+            "Resolve the underlying carrier record or account obligation; an unlock is not a debt settlement or report-removal service."
+          ]
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Apple warns that incorrect PIN or PUK guesses can permanently lock a SIM or eSIM. Activation Lock is separate protection associated with Find My. Neither problem is fixed by getting permission to use another mobile network.",
+        "links": [
+          {
+            "label": "Apple: SIM PIN and PUK help",
+            "href": "https://support.apple.com/en-us/118228"
+          },
+          {
+            "label": "Apple: Activation Lock",
+            "href": "https://support.apple.com/en-us/108794"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "third-party-help",
+        "text": "When considering an iPhone unlock service"
+      },
+      {
+        "kind": "p",
+        "text": "Keep the carrier’s answer as your starting point. A third party may offer a device report or assistance with a supported carrier request; those are different deliverables. Ask which one is being sold, what device statuses are accepted, and what happens if the request cannot be completed. Payment does not create carrier authorization."
+      },
+      {
+        "kind": "p",
+        "text": "There is no reason to hand an intermediary your Apple Account password or an account verification code for an IMEI information check. Read the scope, processing estimate and refund terms before deciding. Avoid a promise that one purchase will simultaneously remove network restrictions, ownership protection and outstanding finance.",
+        "links": [
+          {
+            "label": "Understand what an IMEI report actually tells you",
+            "href": "/articles/what-an-imei-check-tells-you"
+          },
+          {
+            "label": "Compare carrier eligibility in the iPhone unlock guide",
+            "href": "/articles/iphone-carrier-unlock-eligibility"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Need help identifying the next step for your device? Contact iUnlockMobile with the carrier and the error wording, without passwords or verification codes. Ask about current availability before placing an order; this guide does not confirm that T-Mobile unlocking is currently offered.",
+        "href": "/contact",
+        "label": "Ask about your iPhone unlock options"
+      },
+      {
+        "kind": "h2",
+        "id": "after-confirmation",
+        "text": "After confirmation: verify before switching"
+      },
+      {
+        "kind": "p",
+        "text": "Once the carrier confirms completion, Apple directs users to set up the new carrier’s eSIM or insert its physical SIM. Its separate instructions for users without another SIM include a backup before erasing and restoring. Do not erase a phone as a speculative first step while eligibility is unresolved.",
+        "links": [
+          {
+            "label": "Apple’s steps after carrier confirmation",
+            "href": "https://support.apple.com/en-us/109316"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "If the phone is unlocked but the new line still cannot connect, ask the destination carrier to check activation and compatibility. Keep the unlock confirmation and the new provider’s error message together: they describe different parts of the handover. This helps support investigate the actual failure instead of starting another unlock order."
+      }
+    ],
+    "faq": [
+      {
+        "question": "Why does my account say eligible while my iPhone is still locked?",
+        "answer": "Eligibility describes whether a request can proceed; the phone’s setting reflects the restriction you need resolved. Compare the device details and ask support which stage remains incomplete, using the checklist above."
+      },
+      {
+        "question": "Can I use an Android Device Unlock app for my iPhone?",
+        "answer": "Use the Apple iPhone section of the carrier’s help page. Do not expect another manufacturer’s app or menu to be present on iOS."
+      },
+      {
+        "question": "Does paying off my iPhone prove it is ready to unlock?",
+        "answer": "No. Establish the full device and account history and compare it with the applicable requirements. Ask for the exact unmet condition if the result is still ineligible."
+      },
+      {
+        "question": "Should I buy another unlock if a travel eSIM has no signal?",
+        "answer": "First establish whether the carrier restriction has already been removed. If it has, ask the travel provider to investigate its plan and activation rather than assuming another unlock purchase is needed."
+      }
+    ]
+  },
+  {
     "slug": "att-iphone-unlock-request-status",
     "title": "AT&T iPhone Unlock: Request & Status Guide",
     "heading": "AT&T iPhone Unlock: How to Request, Track and Fix a Denial",
