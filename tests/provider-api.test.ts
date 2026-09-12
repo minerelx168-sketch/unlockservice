@@ -81,6 +81,7 @@ test('provider core keeps disabled mode safe and normalizes sync plus DHRU respo
       assert.equal(sync.data.Brand, 'Apple')
       assert.equal(sync.data.Model, 'iPhone 15')
       assert.equal(sync.data.IMEI, '490154203237518')
+      assert.equal(sync.providerCode, 'Model: iPhone 15\nBlacklist Status: Clean')
       const report = buildProviderReport('APPLE_BASIC', 'unlock-service', sync.data)
       const serialized = JSON.stringify(report)
       assert.equal(report.schemaVersion, 1)
@@ -103,6 +104,7 @@ test('provider core keeps disabled mode safe and normalizes sync plus DHRU respo
     if (legacySync.status === 'completed') {
       assert.equal(legacySync.data.Brand, 'Samsung')
       assert.equal(legacySync.data.Model, 'Galaxy S24')
+      assert.match(legacySync.providerCode, /^Brand: Samsung\nModel: Galaxy S24$/)
     }
 
     globalThis.fetch = async () => new Response(
@@ -158,6 +160,7 @@ test('provider core keeps disabled mode safe and normalizes sync plus DHRU respo
     if (polled.status === 'completed') {
       assert.equal(polled.data.Brand, 'Apple')
       assert.equal(polled.data.Model, 'iPhone 15')
+      assert.equal(polled.providerCode, 'Brand: Apple\nModel: iPhone 15')
     }
   } finally {
     globalThis.fetch = originalFetch

@@ -276,6 +276,8 @@ CREATE TABLE IF NOT EXISTS api_access (
         source                  TEXT NOT NULL DEFAULT 'website',
         idempotency_key         TEXT,
         report_json             TEXT,
+        provider_code_encrypted TEXT,
+        provider_code_sha256    TEXT,
         provider_order_id       TEXT,
         provider_name           TEXT,
         provider_mode           TEXT,
@@ -454,6 +456,8 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'imei_checks', 'provider_attempts INTEGER NOT NULL DEFAULT 0')
     addColumn(connection, 'imei_checks', 'provider_error_code TEXT')
     addColumn(connection, 'orders', 'idempotency_key TEXT')
+    addColumn(connection, 'paid_report_orders', 'provider_code_encrypted TEXT')
+    addColumn(connection, 'paid_report_orders', 'provider_code_sha256 TEXT')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
 
@@ -609,6 +613,10 @@ function migrate(connection: Database.Database) {
 
     if (!migrationApplied(connection, '2026-09-paid-imei-reports-v1')) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-imei-reports-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-provider-code-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-provider-code-v1')
     }
 
     if (!migrationApplied(connection, '2026-09-admin-credit-adjustments-v1')) {

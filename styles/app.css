@@ -929,6 +929,21 @@ table.account-table td {
   color: var(--success);
 }
 
+.provider-code-result {
+  margin: 18px 0 0;
+  padding: 16px;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-float);
+  background: var(--page-soft);
+  color: var(--ink-strong);
+  font: 500 0.875rem/1.65 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 @container (max-width: 420px) {
   .report-details > div {
     grid-template-columns: minmax(0, 1fr);

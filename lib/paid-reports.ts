@@ -12,6 +12,12 @@ import { isValidImei, maskIdentifier, normalizeImei } from './imei'
 import { fingerprintImei } from './imei-privacy'
 import { buildProviderReport, providerReportHasContent, type ProviderReport } from './imei-report'
 import {
+  decryptProviderCode,
+  encryptProviderCode,
+  providerCodeDigest,
+  providerCodeFromData,
+} from './provider-code'
+import {
   imeiProviderService,
   pollProviderRequest,
   providerConfiguration,
@@ -70,6 +76,8 @@ type PaidReportOrderRow = {
   source: string
   idempotency_key: string | null
   report_json: string | null
+  provider_code_encrypted: string | null
+  provider_code_sha256: string | null
   provider_order_id: string | null
   provider_name: string | null
   provider_mode: string | null
@@ -93,6 +101,7 @@ export type PaidReportView = {
   priceCents: number
   source: string
   report: ProviderReport | null
+  providerCode?: string
   message?: string
   createdAt: string
   updatedAt: string
@@ -152,6 +161,7 @@ const ORDER_SELECT = `
   SELECT id, user_id, product_code, product_name, input_type,
          imei_fingerprint, masked_imei, status, price_cents,
          provider_cost_micros, source, idempotency_key, report_json,
+         provider_code_encrypted, provider_code_sha256,
          provider_order_id, provider_name, provider_mode, provider_service_id,
          provider_last_polled_at, provider_attempts, provider_error_code,
          error_message, completed_at, created_at, updated_at
@@ -229,6 +239,7 @@ function toView(row: PaidReportOrderRow): PaidReportView {
     priceCents: row.price_cents,
     source: row.provider_name ?? 'provider',
     report: parseReport(row.report_json),
+    providerCode: decryptProviderCode(row.provider_code_encrypted) ?? undefined,
     message: row.error_message ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -320,7 +331,14 @@ function auditOutcome(row: PaidReportOrderRow, outcome: ProviderOutcome, eventKe
   })
 }
 
-function settleCompleted(row: PaidReportOrderRow, report: ProviderReport, providerOrderId: string | null) {
+function settleCompleted(
+  row: PaidReportOrderRow,
+  report: ProviderReport,
+  providerOrderId: string | null,
+  providerCode: string,
+) {
+  const encryptedCode = encryptProviderCode(providerCode)
+  const codeDigest = providerCode ? providerCodeDigest(providerCode) : null
   return db().transaction(() => {
     const current = reconcileSettlement(db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow)
     // Polls, submission responses and webhooks can arrive in any order. Once
@@ -331,12 +349,14 @@ function settleCompleted(row: PaidReportOrderRow, report: ProviderReport, provid
     db()
       .prepare(
         `UPDATE paid_report_orders
-            SET status = 'completed', report_json = ?, provider_order_id = COALESCE(?, provider_order_id),
+            SET status = 'completed', report_json = ?,
+                provider_code_encrypted = ?, provider_code_sha256 = ?,
+                provider_order_id = COALESCE(?, provider_order_id),
                 provider_error_code = NULL, error_message = NULL,
                 completed_at = COALESCE(completed_at, datetime('now')), updated_at = datetime('now')
           WHERE id = ? AND status IN ('processing', 'manual_review')`,
       )
-      .run(JSON.stringify(report), providerOrderId, current.id)
+      .run(JSON.stringify(report), encryptedCode, codeDigest, providerOrderId, current.id)
     enqueueOrderNotification(CREDIT_REF_TYPE, current.id, current.user_id, 'success')
     return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(current.id) as PaidReportOrderRow
   }).immediate()
@@ -397,7 +417,8 @@ export function settlePaidReportWebhook(
         ).status,
       }
     }
-    return { status: settleCompleted(row, report, providerOrderId).status }
+    const providerCode = providerCodeFromData(outcome.result ?? {})
+    return { status: settleCompleted(row, report, providerOrderId, providerCode).status }
   }).immediate()
 }
 
@@ -455,7 +476,7 @@ function handleOutcome(
       })
       return payload(reviewed, before)
     }
-    const completed = settleCompleted(row, report, outcome.providerId)
+    const completed = settleCompleted(row, report, outcome.providerId, outcome.providerCode)
     return payload(completed, before)
   }
 

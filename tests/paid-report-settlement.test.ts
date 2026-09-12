@@ -58,7 +58,7 @@ function pendingReport(userId: number, reference: string) {
 
 function stored(id: number) {
   return database.db().prepare(
-    'SELECT status, report_json, error_message, completed_at, updated_at FROM paid_report_orders WHERE id = ?',
+    'SELECT status, report_json, provider_code_encrypted, provider_code_sha256, error_message, completed_at, updated_at FROM paid_report_orders WHERE id = ?',
   ).get(id)
 }
 
@@ -94,6 +94,12 @@ test('paid report success is immutable across duplicate and conflicting callback
   assert.deepEqual(stored(id), completed)
   assert.equal(JSON.stringify(completed).includes('never store'), false)
   assert.equal(JSON.stringify(completed).includes('490154203237518'), false)
+  const ownerView = reports.getPaidReport(userId, id)
+  assert.match(ownerView?.providerCode ?? '', /IMEI: 490154203237518/)
+  assert.match(ownerView?.providerCode ?? '', /providerSecret: \*\*\*/)
+  assert.equal((ownerView?.providerCode ?? '').includes('never store'), false)
+  const outsiderId = customer('paid-success-outsider')
+  assert.equal(reports.getPaidReport(outsiderId, id), undefined)
   assert.deepEqual(credits.getBalance(userId), { creditCents: 995, heldCents: 5, availableCents: 990 })
   assert.equal(reports.getPaidReport(userId, otherId)?.status, 'processing')
   assert.deepEqual(effects(id), [

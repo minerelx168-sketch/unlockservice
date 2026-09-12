@@ -192,6 +192,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-09-admin-credit-adjustments-v1',
       '2026-09-ledger-effect-uniqueness-v1',
       '2026-09-paid-imei-reports-v1',
+      '2026-09-provider-code-v1',
       '2026-09-provider-product-catalog-v2',
       '2026-09-provider-product-catalog-v3-strict-rollout',
     ],
@@ -955,11 +956,15 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(providerCalls, 1)
     assert.equal(paidReports.getPaidReport(1, delivered.order.id), undefined)
 
-    const storedDelivered = JSON.stringify(paidReports.getPaidReport(alice.id, delivered.order.id))
-    assert.equal(storedDelivered.includes('490154203237518'), false)
-    assert.equal(storedDelivered.includes('PAID-RAW-SERIAL-1234'), false)
-    assert.equal(storedDelivered.includes('must never be stored'), false)
-    assert.match(storedDelivered, /iPhone 15 Pro/)
+    const deliveredView = paidReports.getPaidReport(alice.id, delivered.order.id)
+    const storedSummary = JSON.stringify(deliveredView?.report)
+    assert.equal(storedSummary.includes('490154203237518'), false)
+    assert.equal(storedSummary.includes('PAID-RAW-SERIAL-1234'), false)
+    assert.equal(storedSummary.includes('must never be stored'), false)
+    assert.match(storedSummary, /iPhone 15 Pro/)
+    assert.match(deliveredView?.providerCode ?? '', /IMEI: 490154203237518/)
+    assert.match(deliveredView?.providerCode ?? '', /Serial Number: PAID-RAW-SERIAL-1234/)
+    assert.match(deliveredView?.providerCode ?? '', /providerInternalNote: must never be stored/)
 
     const replay = await paidReports.createPaidReport(alice.id, {
       productCode: 'APPLE_BASIC',
@@ -1065,14 +1070,24 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(columns.some((column) => column.name === 'raw_response'), false)
     assert.equal(columns.some((column) => column.name === 'imei_fingerprint'), true)
     assert.equal(columns.some((column) => column.name === 'masked_imei'), true)
+    assert.equal(columns.some((column) => column.name === 'provider_code_encrypted'), true)
+    assert.equal(columns.some((column) => column.name === 'provider_code_sha256'), true)
 
     const paidRows = connection
-      .prepare('SELECT imei_fingerprint, masked_imei, report_json FROM paid_report_orders')
-      .all() as Array<{ imei_fingerprint: string; masked_imei: string; report_json: string | null }>
+      .prepare('SELECT imei_fingerprint, masked_imei, report_json, provider_code_encrypted, provider_code_sha256 FROM paid_report_orders')
+      .all() as Array<{
+        imei_fingerprint: string
+        masked_imei: string
+        report_json: string | null
+        provider_code_encrypted: string | null
+        provider_code_sha256: string | null
+      }>
     const persistedText = JSON.stringify(paidRows)
     assert.equal(persistedText.includes('490154203237518'), false)
     assert.equal(persistedText.includes('356938035643809'), false)
     assert.equal(persistedText.includes('paid-report-secret'), false)
+    assert.equal(paidRows.some((row) => Boolean(row.provider_code_encrypted)), true)
+    assert.equal(paidRows.some((row) => /^[a-f0-9]{64}$/.test(row.provider_code_sha256 ?? '')), true)
 
     const auditRows = connection
       .prepare("SELECT metadata_json FROM provider_events WHERE resource_type = 'paid_imei_report'")

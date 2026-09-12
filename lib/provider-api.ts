@@ -1,3 +1,5 @@
+import { normalizeProviderCode, providerCodeFromData } from './provider-code'
+
 type ProviderState = 'disabled' | 'enabled'
 export type ActiveProviderMode = 'sync' | 'dhru'
 
@@ -21,6 +23,7 @@ export type ProviderOutcome =
       status: 'completed'
       providerId: string | null
       data: Record<string, unknown>
+      providerCode: string
       timing: ProviderTiming
     }
   | {
@@ -428,7 +431,13 @@ async function submitSync(config: ProviderConfiguration, request: ProviderReques
   if (!decoded) {
     const details = extractTextDetails(response.text)
     if (Object.keys(details).length) {
-      return { status: 'completed', providerId: null, data: details, timing: { totalMs: Date.now() - response.startedAt } }
+      return {
+        status: 'completed',
+        providerId: null,
+        data: details,
+        providerCode: normalizeProviderCode(response.text) || providerCodeFromData(details),
+        timing: { totalMs: Date.now() - response.startedAt },
+      }
     }
     return providerFailure(response.startedAt, 'invalid_response', 'The provider returned an unreadable response.', true)
   }
@@ -437,10 +446,15 @@ async function submitSync(config: ProviderConfiguration, request: ProviderReques
   const normalized = statusWord(rawStatus)
   if (successStatus(normalized)) {
     const bodyField = decoded.response ?? decoded.result ?? decoded.data ?? decoded.object ?? {}
+    const data = normalizedData(decoded, bodyField)
+    const providerCode = typeof decoded.response === 'string'
+      ? normalizeProviderCode(decoded.response)
+      : ''
     return {
       status: 'completed',
       providerId: pluck(decoded, ['REFERENCEID', 'referenceid', 'reference_id', 'orderid', 'OrderID', 'id']) || null,
-      data: normalizedData(decoded, bodyField),
+      data,
+      providerCode: providerCode || providerCodeFromData(data),
       timing: { totalMs: Date.now() - response.startedAt },
     }
   }
@@ -524,20 +538,22 @@ export async function pollProviderRequest(providerId: string): Promise<ProviderO
   const completed = successStatus(normalized) || numericStatus === 4
   if (completed) {
     const details = extractTextDetails(reply)
+    const data = {
+      status: 'Completed',
+      ...(Object.keys(details).length > 0
+        ? details
+        : reply
+          ? { statusDescription: safeProviderResultText(reply) }
+          : {}),
+      // SUCCESS metadata contains numeric transport status/reference fields;
+      // never let those overwrite the business result parsed from CODE/REPLY.
+      ...scalarEntries(decoded?.data),
+    }
     return {
       status: 'completed',
       providerId,
-      data: {
-        status: 'Completed',
-        ...(Object.keys(details).length > 0
-          ? details
-          : reply
-            ? { statusDescription: safeProviderResultText(reply) }
-            : {}),
-        // SUCCESS metadata contains numeric transport status/reference fields;
-        // never let those overwrite the business result parsed from CODE/REPLY.
-        ...scalarEntries(decoded?.data),
-      },
+      data,
+      providerCode: normalizeProviderCode(reply) || providerCodeFromData(data),
       timing: { totalMs: Date.now() - response.startedAt },
     }
   }

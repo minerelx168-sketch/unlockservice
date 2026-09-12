@@ -67,11 +67,22 @@ export default async function PaidReportDetailPage({ params }: { params: Promise
             <span className="kicker"><Icon name="shield" /> Privacy</span>
           </div>
           <p className="t-small">
-            The stored report contains only allowlisted Provider fields. IMEI and serial values are masked; the raw Provider payload is not stored or displayed.
+            The full Provider result is encrypted at rest and is shown only inside this owner-scoped report. It may contain original device identifiers, so share it carefully.
           </p>
           <p className="field-note" role="note"><Icon name="info" /><span>Provider data is a point-in-time lookup, not proof of ownership or a guarantee of unlock eligibility.</span></p>
         </section>
       </div>
+
+      {order.providerCode ? (
+        <section className="card" style={{ marginTop: 20 }}>
+          <div className="card-topline">
+            <span className="kicker"><Icon name="file" /> Full Provider result</span>
+            <span className="t-micro">Code</span>
+          </div>
+          <p className="t-small">Complete business result returned in the Provider Code field.</p>
+          <pre className="provider-code-result">{order.providerCode}</pre>
+        </section>
+      ) : null}
 
       {order.report ? (
         <>
