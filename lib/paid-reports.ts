@@ -29,7 +29,6 @@ import { recordProviderEvent } from './provider-events'
 import { claimProviderPoll } from './provider-poll-lease'
 import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
-import { enqueueOrderNotification } from './order-notifications'
 
 export type PaidReportStatus = 'processing' | 'completed' | 'refunded' | 'manual_review'
 
@@ -357,7 +356,6 @@ function settleCompleted(
           WHERE id = ? AND status IN ('processing', 'manual_review')`,
       )
       .run(JSON.stringify(report), encryptedCode, codeDigest, providerOrderId, current.id)
-    enqueueOrderNotification(CREDIT_REF_TYPE, current.id, current.user_id, 'success')
     return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(current.id) as PaidReportOrderRow
   }).immediate()
 }
@@ -375,15 +373,14 @@ function settleRefunded(row: PaidReportOrderRow, errorCode: string, message: str
           WHERE id = ? AND status IN ('processing', 'manual_review')`,
       )
       .run(errorCode, message, current.id)
-    enqueueOrderNotification(CREDIT_REF_TYPE, current.id, current.user_id, 'rejected')
     return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(current.id) as PaidReportOrderRow
   }).immediate()
 }
 
 /**
  * Called only after the webhook adapter verifies the raw-body signature and
- * correlates the provider reference. Settlement, ledger effects and the
- * notification outbox share the caller's transaction when one is active.
+ * correlates the provider reference. Credit settlement and report persistence
+ * share the caller's transaction when one is active.
  * SQLite's immediate transaction obtains its writer lock before any reads;
  * no network request is made while that lock is held.
  */

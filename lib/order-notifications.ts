@@ -1,20 +1,24 @@
 import { randomUUID } from 'node:crypto'
 import { emailDeliveryConfigured, sendTransactionalEmail } from './account-security'
 import { db } from './db'
+import { normalizeProviderCode, providerCodeFromData } from './provider-code'
 import { publicOrigin } from './site'
 
-type ResourceType = 'order' | 'paid_imei_report'
+type StoredResourceType = 'order' | 'paid_imei_report'
 type SettlementEvent = 'success' | 'rejected'
 
 type NotificationRow = {
   id: number
   user_id: number
-  resource_type: ResourceType
+  resource_type: StoredResourceType
   resource_id: number
   event: SettlementEvent
   attempts: number
   lease_token: string
   email: string
+  imei: string | null
+  unlock_code: string | null
+  result_json: string | null
 }
 
 export type NotificationDeliverySummary = {
@@ -22,20 +26,19 @@ export type NotificationDeliverySummary = {
   sent: number
   failed: number
   leaseLost: number
+  suppressed: number
 }
 
-// Each email has a 10-second transport deadline. Claim only when it is about
-// to be sent, so later entries in a batch do not expire while awaiting their turn.
 const LEASE_MS = 30_000
 const MAX_BATCH = 100
 
 /**
- * Call synchronously inside the transaction that settles credit and the order.
+ * Call synchronously inside the transaction that settles credit and an unlock order.
  * A rollback then removes the event too; a duplicate callback cannot enqueue
- * another copy of the same event. No network work belongs in this transaction.
+ * another copy of the same event. IMEI checks and paid reports never call this.
  */
 export function enqueueOrderNotification(
-  resourceType: ResourceType,
+  resourceType: 'order',
   resourceId: number,
   userId: number,
   status: SettlementEvent,
@@ -51,6 +54,16 @@ export function enqueueOrderNotification(
   `).run(userId, resourceType, resourceId, status)
 }
 
+function suppressCheckNotifications(): number {
+  const result = db().prepare(`
+    UPDATE order_notifications
+       SET sent_at = datetime('now'), last_error = 'email_suppressed_for_check_service',
+           lease_token = NULL, lease_until = 0
+     WHERE sent_at IS NULL AND resource_type != 'order'
+  `).run()
+  return result.changes
+}
+
 function claimNotification(id: number): NotificationRow | null {
   const connection = db()
   return connection.transaction(() => {
@@ -59,13 +72,19 @@ function claimNotification(id: number): NotificationRow | null {
     const claimed = connection.prepare(`
       UPDATE order_notifications
       SET attempts = attempts + 1, lease_token = ?, lease_until = ?
-      WHERE id = ? AND sent_at IS NULL AND available_at <= ? AND lease_until <= ?
+      WHERE id = ? AND resource_type = 'order'
+        AND sent_at IS NULL AND available_at <= ? AND lease_until <= ?
     `).run(token, now + LEASE_MS, id, now, now)
     if (claimed.changes !== 1) return null
     return connection.prepare(`
       SELECT n.id, n.user_id, n.resource_type, n.resource_id, n.event,
-             n.attempts, n.lease_token, u.email
-      FROM order_notifications n JOIN users u ON u.id = n.user_id
+             n.attempts, n.lease_token,
+             COALESCE(NULLIF(o.delivery_email, ''), u.email) AS email,
+             o.imei, o.unlock_code, o.result_json
+      FROM order_notifications n
+      JOIN users u ON u.id = n.user_id
+      LEFT JOIN orders o
+        ON n.resource_type = 'order' AND o.id = n.resource_id AND o.user_id = n.user_id
       WHERE n.id = ?
     `).get(id) as NotificationRow
   }).immediate()
@@ -77,33 +96,56 @@ function escapeHtml(value: string): string {
   })[character]!)
 }
 
+function parsedResult(value: string | null): Record<string, unknown> {
+  if (!value) return {}
+  try {
+    const parsed = JSON.parse(value) as unknown
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    return parsed as Record<string, unknown>
+  } catch {
+    return {}
+  }
+}
+
+function unlockResultText(row: NotificationRow): string {
+  const stored = parsedResult(row.result_json)
+  const customerResult = Object.fromEntries(
+    Object.entries(stored).filter(([key]) => key.toLowerCase() !== 'source'),
+  )
+  const lines = [
+    row.imei ? `IMEI: ${row.imei}` : '',
+    row.unlock_code ? `Unlock code: ${row.unlock_code}` : '',
+    providerCodeFromData(customerResult),
+  ].filter(Boolean)
+  return normalizeProviderCode(lines.join('\n'))
+}
+
 function notificationMessage(row: NotificationRow) {
-  // Never trust request Host headers, callback URLs, or provider HTML in email.
-  // Reject non-web configured schemes; users can always sign in to the default site.
   let origin = publicOrigin()
   if (!/^https?:\/\//i.test(origin)) origin = 'https://iunlockmobile.com'
-  const path = row.resource_type === 'order'
-    ? `/user/orders/${row.resource_id}`
-    : `/user/reports/${row.resource_id}`
-  const accountUrl = new URL(path, origin).href
-  const kind = row.resource_type === 'order' ? 'Order' : 'IMEI report'
-  const subject = row.event === 'success'
-    ? `${kind} #${row.resource_id} is complete`
-    : `${kind} #${row.resource_id} was rejected — credit returned`
-  const message = row.event === 'success'
-    ? 'Your result is ready. Sign in to your account to view it.'
-    : 'The provider could not complete this request. The reserved credit has been returned to your available balance.'
-  // No IMEI, unlock code, provider response, or other sensitive result leaves
-  // the authenticated account page via a notification email.
+  const accountUrl = new URL(`/user/orders/${row.resource_id}`, origin).href
+
+  if (row.event === 'rejected') {
+    const message = 'The provider could not complete this unlock request. The reserved credit has been returned to your available balance.'
+    return {
+      subject: `Unlock order #${row.resource_id} was rejected — credit returned`,
+      html: `<p>${escapeHtml(message)}</p><p><a href="${escapeHtml(accountUrl)}">View order</a></p>`,
+      text: `${message}\n\nView order: ${accountUrl}`,
+    }
+  }
+
+  const result = unlockResultText(row)
+  if (!result) throw new Error('Unlock result is unavailable for email delivery.')
+  const intro = 'Your unlock result is ready.'
   return {
-    subject,
-    html: `<p>${escapeHtml(message)}</p><p><a href="${escapeHtml(accountUrl)}">View in your account</a></p>`,
-    text: `${message}\n\nView in your account: ${accountUrl}`,
+    subject: `Unlock order #${row.resource_id} is complete`,
+    html: `<p>${escapeHtml(intro)}</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere;padding:16px;border:1px solid #dbe3ec;border-radius:10px;background:#f7f9fc;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace">${escapeHtml(result)}</pre><p><a href="${escapeHtml(accountUrl)}">View order</a></p>`,
+    text: `${intro}\n\n${result}\n\nView order: ${accountUrl}`,
   }
 }
 
 /**
- * Run from a scheduled worker with the same database and email configuration.
+ * Run from the existing Provider polling worker with the same database and email configuration.
  * Delivery is at least once: a crash after Resend accepts an email but before
  * our acknowledgement requires retry. A stable Resend idempotency key suppresses
  * duplicate deliveries within its 24-hour window; it is not an exactly-once claim.
@@ -114,15 +156,15 @@ export async function deliverOrderNotifications(limit = 20): Promise<Notificatio
     throw new Error('Notification delivery must run outside a database transaction.')
   }
   const boundedLimit = Number.isFinite(limit) ? Math.max(1, Math.min(MAX_BATCH, Math.floor(limit))) : 20
+  const suppressed = suppressCheckNotifications()
   const now = Date.now()
-  // Snapshot a bounded set. A failed entry cannot be retried again in this batch,
-  // and a competing worker must still acquire its own lease for each candidate.
   const candidates = connection.prepare(`
     SELECT id FROM order_notifications
-    WHERE sent_at IS NULL AND available_at <= ? AND lease_until <= ?
+    WHERE resource_type = 'order'
+      AND sent_at IS NULL AND available_at <= ? AND lease_until <= ?
     ORDER BY available_at, id LIMIT ?
   `).all(now, now, boundedLimit) as Array<{ id: number }>
-  const summary: NotificationDeliverySummary = { claimed: 0, sent: 0, failed: 0, leaseLost: 0 }
+  const summary: NotificationDeliverySummary = { claimed: 0, sent: 0, failed: 0, leaseLost: 0, suppressed }
 
   for (const { id } of candidates) {
     const row = claimNotification(id)
@@ -135,17 +177,14 @@ export async function deliverOrderNotifications(limit = 20): Promise<Notificatio
       } else {
         const message = notificationMessage(row)
         await sendTransactionalEmail(row.email, message.subject, message.html, message.text, {
-          idempotencyKey: `settlement/${row.resource_type}/${row.resource_id}/${row.event}`,
+          idempotencyKey: `settlement/order/${row.resource_id}/${row.event}`,
         })
       }
     } catch {
-      // Do not persist provider errors that may echo email addresses or secrets.
       failure = 'email_delivery_failed'
     }
 
     if (failure) {
-      // Capped exponential backoff; pending events remain recoverable when mail
-      // configuration or the provider comes back, without a tight retry loop.
       const delayMs = Math.min(3_600_000, 30_000 * 2 ** Math.min(row.attempts - 1, 7))
       const changed = connection.prepare(`
         UPDATE order_notifications SET available_at = ?, last_error = ?, lease_token = NULL, lease_until = 0
@@ -154,7 +193,6 @@ export async function deliverOrderNotifications(limit = 20): Promise<Notificatio
       if (changed.changes === 1) summary.failed += 1
       else summary.leaseLost += 1
     } else {
-      // A stale worker cannot acknowledge or clear a replacement worker's lease.
       const changed = connection.prepare(`
         UPDATE order_notifications SET sent_at = datetime('now'), last_error = NULL, lease_token = NULL, lease_until = 0
         WHERE id = ? AND lease_token = ? AND sent_at IS NULL

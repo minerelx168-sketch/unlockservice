@@ -106,7 +106,7 @@ test('paid report success is immutable across duplicate and conflicting callback
     { type: 'hold', amount_cents: -5, affects_balance: 0 },
     { type: 'charge', amount_cents: -5, affects_balance: 1 },
   ])
-  assert.deepEqual(notifications(id), [{ event: 'success' }])
+  assert.deepEqual(notifications(id), [])
 })
 
 test('paid report rejection restores only its hold once and cannot later be charged', () => {
@@ -130,7 +130,7 @@ test('paid report rejection restores only its hold once and cannot later be char
     { type: 'hold', amount_cents: -5, affects_balance: 0 },
     { type: 'refund', amount_cents: 5, affects_balance: 0 },
   ])
-  assert.deepEqual(notifications(id), [{ event: 'rejected' }])
+  assert.deepEqual(notifications(id), [])
   assert.equal(credits.creditIntegrity().mismatches, 0)
   assert.equal(credits.creditIntegrity().invalidHolds, 0)
 })
@@ -161,29 +161,23 @@ test('paid report callbacks require the exact saved provider reference', () => {
   assert.equal(reports.getPaidReport(userId, id)?.status, 'processing')
 })
 
-test('paid report settlement rolls back order and credit if its notification cannot be queued', () => {
-  for (const status of ['success', 'rejected'] as const) {
-    const userId = customer(`paid-rollback-${status}`)
-    const reference = `paid-rollback-${status}-1`
-    const id = pendingReport(userId, reference)
-    const before = credits.getBalance(userId)
-    const beforeOrder = stored(id)
-    // Inject a database failure after the ledger and order writes. The outbox
-    // must commit with them, otherwise a settled order can lose its notification.
-    database.db().exec(`CREATE TEMP TRIGGER fail_paid_notification BEFORE INSERT ON order_notifications
-      WHEN NEW.resource_type = 'paid_imei_report' AND NEW.resource_id = ${id}
-      BEGIN SELECT RAISE(ABORT, 'simulated notification storage failure'); END`)
-    try {
-      assert.throws(() => reports.settlePaidReportWebhook(id, reference, {
+test('paid report settlement never writes the email notification outbox', () => {
+  database.db().exec(`CREATE TEMP TRIGGER fail_paid_notification BEFORE INSERT ON order_notifications
+    WHEN NEW.resource_type = 'paid_imei_report'
+    BEGIN SELECT RAISE(ABORT, 'paid reports must not enqueue email'); END`)
+  try {
+    for (const status of ['success', 'rejected'] as const) {
+      const userId = customer(`paid-no-email-${status}`)
+      const reference = `paid-no-email-${status}-1`
+      const id = pendingReport(userId, reference)
+      assert.doesNotThrow(() => reports.settlePaidReportWebhook(id, reference, {
         status, result: { Model: 'iPhone 15' },
-      }), /simulated notification storage failure/)
-    } finally {
-      database.db().exec('DROP TRIGGER fail_paid_notification')
+      }))
+      assert.equal(reports.getPaidReport(userId, id)?.status, status === 'success' ? 'completed' : 'refunded')
+      assert.deepEqual(notifications(id), [])
     }
-    assert.deepEqual(stored(id), beforeOrder)
-    assert.deepEqual(credits.getBalance(userId), before)
-    assert.deepEqual(effects(id), [{ type: 'hold', amount_cents: -5, affects_balance: 0 }])
-    assert.deepEqual(notifications(id), [])
+  } finally {
+    database.db().exec('DROP TRIGGER fail_paid_notification')
   }
 })
 

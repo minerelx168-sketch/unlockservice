@@ -929,6 +929,10 @@ table.account-table td {
   color: var(--success);
 }
 
+.report-result-only {
+  min-width: 0;
+}
+
 .provider-code-result {
   margin: 18px 0 0;
   padding: 16px;
@@ -942,6 +946,13 @@ table.account-table td {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.provider-code-result--standalone {
+  margin: 0;
+  padding: clamp(18px, 3vw, 28px);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 @container (max-width: 420px) {

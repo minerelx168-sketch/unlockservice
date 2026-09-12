@@ -4,7 +4,6 @@ import { OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
 import { unlockOrderingEnabled } from '@/lib/provider'
 import { countLedger, listLedger } from '@/lib/credits'
-import { maskIdentifier } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
 import { countOrders, listOrders } from '@/lib/orders'
 
@@ -55,8 +54,7 @@ export default async function OrdersPage({
         <div>
           <h1>Orders</h1>
           <p>
-            Every order and every movement of credit, kept readable. Identifiers are masked to the
-            first two and last four digits.
+            Every order and every movement of credit, with the complete IMEI visible only inside your signed-in account.
           </p>
         </div>
         <div className="app-head-actions" aria-label="Order history view">
@@ -88,7 +86,7 @@ export default async function OrdersPage({
                 {orders.map((order) => (
                   <tr role="row" key={order.id}>
                     <td role="cell" className="mono" data-label="Order">#{order.id}</td>
-                    <td role="cell" className="mono" data-label="Device">{maskIdentifier(order.imei)}</td>
+                    <td role="cell" className="mono" data-label="Device">{order.imei}</td>
                     <td role="cell" data-label="Service">{order.title}</td>
                     <td role="cell" data-label="Status">
                       <OrderStatusBadge status={order.status} />

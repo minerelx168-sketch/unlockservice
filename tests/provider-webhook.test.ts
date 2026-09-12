@@ -135,6 +135,8 @@ test('paid report callbacks use the same atomic charge/refund semantics', async 
   assert.equal(ledgerCount(success.userId, 'charge'), 1)
   assert.equal(ledgerCount(success.userId, 'refund'), 0)
   assert.equal(ledgerCount(rejected.userId, 'refund'), 1)
+  assert.equal(notificationCount(success.userId), 0)
+  assert.equal(notificationCount(rejected.userId), 0)
 })
 
 test('unknown or ambiguous provider references are retryable and do not consume receipts', async () => {
@@ -266,7 +268,7 @@ test('receipt failure rolls back settlement and ledger, leaving the exact callba
   assert.equal(credits.creditIntegrity().mismatches, 0)
 })
 
-test('a failed rejected-report receipt also rolls back the refund and notification atomically', async () => {
+test('a failed rejected-report receipt rolls back the refund and still never creates email', async () => {
   const fixture = seed('refund-rollback-reference', 'paid_imei_report')
   const body = event('refund-rollback-event', 'refund-rollback-reference', 'rejected', 'paid_imei_report')
   const beforeBalance = credits.getBalance(fixture.userId)
@@ -287,7 +289,7 @@ test('a failed rejected-report receipt also rolls back the refund and notificati
   assert.equal((await handle(signed(body))).status, 200)
   assert.equal((await handle(signed(body))).status, 200)
   assert.equal(ledgerCount(fixture.userId, 'refund'), 1)
-  assert.equal(notificationCount(fixture.userId), 1)
+  assert.equal(notificationCount(fixture.userId), 0)
   assert.equal(credits.getBalance(fixture.userId).availableCents, 1_000)
   assert.equal(credits.creditIntegrity().mismatches, 0)
 })
