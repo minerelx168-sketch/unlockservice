@@ -17,6 +17,11 @@ test('owner-scoped unlock order history renders the complete stored IMEI', () =>
   assert.doesNotMatch(page, /maskIdentifier/)
 })
 
+test('owner-scoped paid report history prefers decrypted IMEI and falls back only for legacy rows', () => {
+  const page = read('app/(app)/user/reports/page.tsx')
+  assert.match(page, /report\.imei \?\? report\.maskedImei/)
+})
+
 test('the existing Provider poll entrypoint delivers the Unlock-only notification outbox', () => {
   const pollScript = read('scripts/poll-provider-jobs.ts')
   const reports = read('lib/paid-reports.ts')

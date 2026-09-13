@@ -24,6 +24,7 @@ let checks: typeof import('../lib/imei-checks')
 let reports: typeof import('../lib/paid-reports')
 let providerJobs: typeof import('../lib/provider-jobs')
 let leases: typeof import('../lib/provider-poll-lease')
+let imeiPrivacy: typeof import('../lib/imei-privacy')
 let catalog: typeof import('../lib/public-provider-catalog')
 const originalFetch = globalThis.fetch
 
@@ -35,6 +36,7 @@ before(async () => {
   reports = await import('../lib/paid-reports')
   providerJobs = await import('../lib/provider-jobs')
   leases = await import('../lib/provider-poll-lease')
+  imeiPrivacy = await import('../lib/imei-privacy')
   catalog = await import('../lib/public-provider-catalog')
   globalThis.fetch = async () => { throw new Error('Every provider call must be mocked in this test.') }
 })
@@ -178,14 +180,40 @@ test('legacy asynchronous paid reports deduplicate polls and settle one hold', a
   assert.equal(credits.creditIntegrity().mismatches, 0)
 })
 
-test('the bounded batch worker settles a DHRU paid report without re-placement', async () => {
-  const userId = customer('paid-worker')
+test('legacy paid reports backfill full IMEI only when completed Code matches the request fingerprint', async () => {
+  const userId = customer('legacy-imei-backfill')
+  const imei = '490154203237518'
   const inserted = database.db().prepare(`
     INSERT INTO paid_report_orders
       (user_id, product_code, product_name, imei_fingerprint, masked_imei, status,
        price_cents, source, provider_order_id, provider_name, provider_mode)
+    VALUES (?, 'APPLE_BASIC', 'Apple Basic', ?, '49·········7518',
+      'processing', 5, 'website', 'legacy-imei-ref', 'dhru', 'dhru')
+  `).run(userId, imeiPrivacy.fingerprintImei(imei))
+  const id = Number(inserted.lastInsertRowid)
+  credits.hold(userId, 5, 'paid_imei_report', String(id))
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    SUCCESS: [{ STATUS: 4, CODE: `Model: Test Device\nIMEI: ${imei}\nStatus: Clean` }],
+  }))
+
+  const settled = await reports.pollPaidReport(userId, id)
+  assert.equal(settled.order.status, 'completed')
+  assert.equal(settled.order.imei, imei)
+  const stored = database.db().prepare('SELECT imei_encrypted FROM paid_report_orders WHERE id = ?').get(id) as { imei_encrypted: string }
+  assert.equal(Boolean(stored.imei_encrypted), true)
+  assert.equal(stored.imei_encrypted.includes(imei), false)
+})
+
+test('the bounded batch worker polls every timer cycle even after many attempts and settles without re-placement', async () => {
+  const userId = customer('paid-worker')
+  const inserted = database.db().prepare(`
+    INSERT INTO paid_report_orders
+      (user_id, product_code, product_name, imei_fingerprint, masked_imei, status,
+       price_cents, source, provider_order_id, provider_name, provider_mode,
+       provider_attempts, provider_last_polled_at)
     VALUES (?, 'APPLE_BASIC', 'Apple Basic', 'worker-fingerprint', '***********7518',
-      'processing', 5, 'website', 'paid-worker-1', 'dhru', 'dhru')
+      'processing', 5, 'website', 'paid-worker-1', 'dhru', 'dhru',
+      99, datetime('now', '-2 minutes'))
   `).run(userId)
   const id = Number(inserted.lastInsertRowid)
   credits.hold(userId, 5, 'paid_imei_report', String(id))
@@ -283,6 +311,7 @@ test('an approved DHRU unlock product holds, places once and settles through the
     })
     assert.equal(created.order.status, 'processing')
     assert.equal(created.order.productCode, 'UNLOCK_346')
+    assert.equal(created.order.imei, '490154203237518')
     assert.equal(created.order.priceCents, 15)
     assert.equal(placements, 1)
     assert.equal(credits.getBalance(userId).heldCents, before.heldCents + 15)
@@ -293,6 +322,7 @@ test('an approved DHRU unlock product holds, places once and settles through the
       idempotencyKey: 'strict-unlock-346-once',
     })
     assert.equal(replay.order.id, created.order.id)
+    assert.equal(replay.order.imei, '490154203237518')
     assert.equal(placements, 1)
 
     database.db().prepare("UPDATE paid_report_orders SET provider_last_polled_at = datetime('now', '-3 minutes') WHERE id = ?").run(created.order.id)

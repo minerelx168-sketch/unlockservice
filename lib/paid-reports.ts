@@ -10,6 +10,7 @@ import {
 } from './credits'
 import { isValidImei, maskIdentifier, normalizeImei } from './imei'
 import { fingerprintImei } from './imei-privacy'
+import { decryptPaidReportImei, encryptPaidReportImei } from './paid-report-imei'
 import { buildProviderReport, providerReportHasContent, type ProviderReport } from './imei-report'
 import {
   decryptProviderCode,
@@ -69,6 +70,7 @@ type PaidReportOrderRow = {
   input_type: 'imei'
   imei_fingerprint: string
   masked_imei: string
+  imei_encrypted: string | null
   status: PaidReportStatus
   price_cents: number
   provider_cost_micros: number
@@ -96,6 +98,7 @@ export type PaidReportView = {
   productName: string
   inputType: 'imei'
   maskedImei: string
+  imei?: string
   status: PaidReportStatus
   priceCents: number
   source: string
@@ -158,7 +161,7 @@ const PRODUCT_SELECT = `
 
 const ORDER_SELECT = `
   SELECT id, user_id, product_code, product_name, input_type,
-         imei_fingerprint, masked_imei, status, price_cents,
+         imei_fingerprint, masked_imei, imei_encrypted, status, price_cents,
          provider_cost_micros, source, idempotency_key, report_json,
          provider_code_encrypted, provider_code_sha256,
          provider_order_id, provider_name, provider_mode, provider_service_id,
@@ -234,6 +237,7 @@ function toView(row: PaidReportOrderRow): PaidReportView {
     productName: row.product_name,
     inputType: row.input_type,
     maskedImei: row.masked_imei,
+    imei: decryptPaidReportImei(row.imei_encrypted) ?? undefined,
     status: row.status,
     priceCents: row.price_cents,
     source: row.provider_name ?? 'provider',
@@ -244,6 +248,12 @@ function toView(row: PaidReportOrderRow): PaidReportView {
     updatedAt: row.updated_at,
     completedAt: row.completed_at ?? undefined,
   }
+}
+
+function imeiFromProviderCode(row: PaidReportOrderRow, providerCode: string) {
+  if (row.imei_encrypted || !providerCode) return null
+  const candidates = Array.from(new Set(providerCode.match(/\b\d{15}\b/g) ?? []))
+  return candidates.find((candidate) => isValidImei(candidate) && fingerprintImei(candidate) === row.imei_fingerprint) ?? null
 }
 
 function getProductRow(code: string): PaidReportProductRow | undefined {
@@ -340,6 +350,8 @@ function settleCompleted(
   const codeDigest = providerCode ? providerCodeDigest(providerCode) : null
   return db().transaction(() => {
     const current = reconcileSettlement(db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow)
+    const completedImei = imeiFromProviderCode(current, providerCode)
+    const encryptedImei = completedImei ? encryptPaidReportImei(completedImei) : null
     // Polls, submission responses and webhooks can arrive in any order. Once
     // money has settled, neither a duplicate nor a conflicting result may
     // rewrite the report or release credit reserved for a different order.
@@ -350,12 +362,13 @@ function settleCompleted(
         `UPDATE paid_report_orders
             SET status = 'completed', report_json = ?,
                 provider_code_encrypted = ?, provider_code_sha256 = ?,
+                imei_encrypted = COALESCE(imei_encrypted, ?),
                 provider_order_id = COALESCE(?, provider_order_id),
                 provider_error_code = NULL, error_message = NULL,
                 completed_at = COALESCE(completed_at, datetime('now')), updated_at = datetime('now')
           WHERE id = ? AND status IN ('processing', 'manual_review')`,
       )
-      .run(JSON.stringify(report), encryptedCode, codeDigest, providerOrderId, current.id)
+        .run(JSON.stringify(report), encryptedCode, codeDigest, encryptedImei, providerOrderId, current.id)
     return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(current.id) as PaidReportOrderRow
   }).immediate()
 }
@@ -578,10 +591,10 @@ export async function createPaidReport(
       const inserted = db()
         .prepare(
           `INSERT INTO paid_report_orders
-             (user_id, product_code, product_name, input_type, imei_fingerprint, masked_imei,
+             (user_id, product_code, product_name, input_type, imei_fingerprint, masked_imei, imei_encrypted,
               status, price_cents, provider_cost_micros, source, idempotency_key,
               provider_name, provider_mode, provider_service_id, provider_attempts)
-           VALUES (?, ?, ?, ?, ?, ?, 'manual_review', ?, ?, ?, ?, ?, ?, ?, 1)`,
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'manual_review', ?, ?, ?, ?, ?, ?, ?, 1)`,
         )
         .run(
           userId,
@@ -590,6 +603,7 @@ export async function createPaidReport(
           product.input_type,
           fingerprint,
           maskIdentifier(imei),
+          encryptPaidReportImei(imei),
           product.price_cents,
           product.provider_cost_micros,
           source,

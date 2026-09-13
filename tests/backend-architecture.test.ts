@@ -192,6 +192,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-09-admin-credit-adjustments-v1',
       '2026-09-ledger-effect-uniqueness-v1',
       '2026-09-paid-imei-reports-v1',
+      '2026-09-paid-report-imei-encryption-v1',
       '2026-09-provider-code-v1',
       '2026-09-provider-product-catalog-v2',
       '2026-09-provider-product-catalog-v3-strict-rollout',
@@ -1070,14 +1071,16 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(columns.some((column) => column.name === 'raw_response'), false)
     assert.equal(columns.some((column) => column.name === 'imei_fingerprint'), true)
     assert.equal(columns.some((column) => column.name === 'masked_imei'), true)
+    assert.equal(columns.some((column) => column.name === 'imei_encrypted'), true)
     assert.equal(columns.some((column) => column.name === 'provider_code_encrypted'), true)
     assert.equal(columns.some((column) => column.name === 'provider_code_sha256'), true)
 
     const paidRows = connection
-      .prepare('SELECT imei_fingerprint, masked_imei, report_json, provider_code_encrypted, provider_code_sha256 FROM paid_report_orders')
+      .prepare('SELECT imei_fingerprint, masked_imei, imei_encrypted, report_json, provider_code_encrypted, provider_code_sha256 FROM paid_report_orders')
       .all() as Array<{
         imei_fingerprint: string
         masked_imei: string
+        imei_encrypted: string | null
         report_json: string | null
         provider_code_encrypted: string | null
         provider_code_sha256: string | null
@@ -1086,6 +1089,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(persistedText.includes('490154203237518'), false)
     assert.equal(persistedText.includes('356938035643809'), false)
     assert.equal(persistedText.includes('paid-report-secret'), false)
+    assert.equal(paidRows.some((row) => Boolean(row.imei_encrypted)), true)
     assert.equal(paidRows.some((row) => Boolean(row.provider_code_encrypted)), true)
     assert.equal(paidRows.some((row) => /^[a-f0-9]{64}$/.test(row.provider_code_sha256 ?? '')), true)
 

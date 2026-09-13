@@ -270,6 +270,7 @@ CREATE TABLE IF NOT EXISTS api_access (
         input_type              TEXT NOT NULL DEFAULT 'imei',
         imei_fingerprint        TEXT NOT NULL,
         masked_imei             TEXT NOT NULL,
+        imei_encrypted          TEXT,
         status                  TEXT NOT NULL DEFAULT 'processing',
         price_cents             INTEGER NOT NULL CHECK (price_cents > 0),
         provider_cost_micros    INTEGER NOT NULL DEFAULT 0 CHECK (provider_cost_micros >= 0),
@@ -458,6 +459,7 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'orders', 'idempotency_key TEXT')
     addColumn(connection, 'paid_report_orders', 'provider_code_encrypted TEXT')
     addColumn(connection, 'paid_report_orders', 'provider_code_sha256 TEXT')
+    addColumn(connection, 'paid_report_orders', 'imei_encrypted TEXT')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
 
@@ -617,6 +619,10 @@ function migrate(connection: Database.Database) {
 
     if (!migrationApplied(connection, '2026-09-provider-code-v1')) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-provider-code-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-paid-report-imei-encryption-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-report-imei-encryption-v1')
     }
 
     if (!migrationApplied(connection, '2026-09-admin-credit-adjustments-v1')) {

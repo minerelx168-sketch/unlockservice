@@ -68,14 +68,7 @@ export async function pollProviderJobs(limit = 20): Promise<ProviderPollSummary>
           AND provider_order_id IS NOT NULL
           AND (
             provider_last_polled_at IS NULL
-            OR provider_last_polled_at <= datetime(
-              'now',
-              CASE
-                WHEN provider_attempts < 5 THEN '-2 minutes'
-                WHEN provider_attempts < 20 THEN '-10 minutes'
-                ELSE '-1 hour'
-              END
-            )
+            OR provider_last_polled_at <= datetime('now', '-90 seconds')
           )
         ORDER BY COALESCE(provider_last_polled_at, created_at) ASC
         LIMIT ?`,

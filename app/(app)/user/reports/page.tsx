@@ -59,7 +59,7 @@ export default async function PaidReportsPage() {
                 {reports.map((report) => (
                   <tr role="row" key={report.id}>
                     <td role="cell" data-label="Report">{report.productName}</td>
-                    <td role="cell" className="mono" data-label="IMEI">{report.maskedImei}</td>
+                    <td role="cell" className="mono" data-label="IMEI">{report.imei ?? report.maskedImei}</td>
                     <td role="cell" className="num" data-label="Price">{formatUsd(report.priceCents)}</td>
                     <td role="cell" data-label="Status">{statusLabel(report.status)}</td>
                     <td role="cell" className="account-table-action" data-label="Action">
