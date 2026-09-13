@@ -42,7 +42,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         <div>
           <Link className="link-arrow" href="/user/checks"><span style={{ display: 'inline-flex', transform: 'rotate(180deg)' }}><Icon name="arrowRight" /></span> Back to checks</Link>
           <h1 style={{ marginTop: 16 }}>IMEI check report</h1>
-          <p>{check.maskedImei} · {new Date(check.createdAt).toLocaleString()}</p>
+          <p>{check.imei ?? check.maskedImei} · {new Date(check.createdAt).toLocaleString()}</p>
         </div>
         <span className={check.status === 'completed' ? 'badge badge--success' : 'badge'}>{check.status}</span>
       </div>
@@ -58,7 +58,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
           {isProviderReport ? (
             <p className="field-note" role="note">
               <Icon name="shield" strokeWidth={1.9} />
-              <span>Identifiers are masked. Provider results are a point-in-time lookup, not proof of ownership or a guarantee of unlock eligibility.</span>
+              <span>The IMEI is shown only to the signed-in owner. Provider results are a point-in-time lookup, not proof of ownership or a guarantee of unlock eligibility.</span>
             </p>
           ) : null}
           {items.length > 0 ? (

@@ -4,7 +4,6 @@ import { OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
 import { unlockOrderingEnabled } from '@/lib/provider'
 import { creditSummary } from '@/lib/credits'
-import { maskIdentifier } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
 import { listOrders, orderStats } from '@/lib/orders'
 
@@ -86,7 +85,7 @@ export default async function DashboardPage() {
               {recent.map((order) => (
                 <tr role="row" key={order.id}>
                   <td role="cell" className="mono" data-label="Order">#{order.id}</td>
-                  <td role="cell" className="mono" data-label="Device">{maskIdentifier(order.imei)}</td>
+                  <td role="cell" className="mono" data-label="Device">{order.imei}</td>
                   <td role="cell" data-label="Service">{order.title}</td>
                   <td role="cell" data-label="Status">
                     <OrderStatusBadge status={order.status} />

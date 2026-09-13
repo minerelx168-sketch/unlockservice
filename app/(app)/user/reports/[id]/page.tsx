@@ -53,7 +53,7 @@ export default async function PaidReportDetailPage({ params }: { params: Promise
             Back to paid reports
           </Link>
           <h1 style={{ marginTop: 16 }}>{order.productName}</h1>
-          <p>{order.maskedImei} · {new Date(order.createdAt).toLocaleString()}</p>
+          <p>{order.imei ?? order.maskedImei} · {new Date(order.createdAt).toLocaleString()}</p>
         </div>
         <span className="badge">{statusLabel(order.status)}</span>
       </div>

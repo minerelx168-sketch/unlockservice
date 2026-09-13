@@ -1,6 +1,7 @@
 import { db } from './db'
 import { isValidImei, maskIdentifier, normalizeImei } from './imei'
 import { fingerprintImei } from './imei-privacy'
+import { decryptImeiCheckImei, encryptImeiCheckImei } from './imei-check-imei'
 import { activeImeiCheckProvider, type ImeiCheckResult } from './imei-check-provider'
 import { imeiProviderService, providerConfiguration } from './provider-api'
 import { recordProviderEvent } from './provider-events'
@@ -14,6 +15,7 @@ type ImeiCheckRow = {
   user_id: number
   check_type: string
   masked_imei: string
+  imei_encrypted: string | null
   status: ImeiCheckStatus
   provider: string
   provider_check_id: string | null
@@ -32,6 +34,7 @@ export type ImeiCheckView = {
   id: number
   checkType: string
   maskedImei: string
+  imei?: string
   status: ImeiCheckStatus
   provider: string
   result: Record<string, unknown> | null
@@ -78,6 +81,7 @@ function toView(row: ImeiCheckRow): ImeiCheckView {
     id: row.id,
     checkType: row.check_type,
     maskedImei: row.masked_imei,
+    imei: decryptImeiCheckImei(row.imei_encrypted) ?? undefined,
     status: row.status,
     provider: row.provider,
     result: parseResult(row.result_json),
@@ -88,7 +92,7 @@ function toView(row: ImeiCheckRow): ImeiCheckView {
 }
 
 const ROW_SELECT = `
-  SELECT id, user_id, check_type, masked_imei, status, provider,
+  SELECT id, user_id, check_type, masked_imei, imei_encrypted, status, provider,
          provider_check_id, provider_mode, provider_service_id,
          provider_last_polled_at, provider_attempts, provider_error_code,
          result_json, error_message, created_at, updated_at
@@ -191,14 +195,15 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
   const inserted = db()
     .prepare(
       `INSERT INTO imei_checks
-         (user_id, check_type, imei_fingerprint, masked_imei, status, provider,
+         (user_id, check_type, imei_fingerprint, masked_imei, imei_encrypted, status, provider,
           provider_mode, provider_service_id, idempotency_key)
-       VALUES (?, 'basic', ?, ?, 'queued', ?, ?, ?, ?)`,
+       VALUES (?, 'basic', ?, ?, ?, 'queued', ?, ?, ?, ?)`,
     )
     .run(
       userId,
       fingerprintImei(imei),
       maskIdentifier(imei),
+      encryptImeiCheckImei(imei),
       provider.name,
       providerMode,
       service?.id ?? null,

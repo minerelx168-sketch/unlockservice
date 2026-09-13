@@ -955,6 +955,11 @@ table.account-table td {
   box-shadow: var(--shadow-card);
 }
 
+.service-workbench-inline-code {
+  margin-block: 16px;
+  max-height: min(52vh, 520px);
+}
+
 @container (max-width: 420px) {
   .report-details > div {
     grid-template-columns: minmax(0, 1fr);

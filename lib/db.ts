@@ -226,9 +226,10 @@ CREATE TABLE IF NOT EXISTS api_access (
 		  id                      INTEGER PRIMARY KEY AUTOINCREMENT,
 		  user_id                 INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 		  check_type              TEXT    NOT NULL DEFAULT 'basic',
-		  imei_fingerprint        TEXT    NOT NULL,
-		  masked_imei             TEXT    NOT NULL,
-		  status                  TEXT    NOT NULL DEFAULT 'queued',
+			  imei_fingerprint        TEXT    NOT NULL,
+			  masked_imei             TEXT    NOT NULL,
+			  imei_encrypted          TEXT,
+			  status                  TEXT    NOT NULL DEFAULT 'queued',
 		  provider                TEXT    NOT NULL DEFAULT 'local-validation',
 		  provider_check_id       TEXT,
 		  provider_mode           TEXT,
@@ -456,6 +457,7 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'imei_checks', 'provider_last_polled_at TEXT')
     addColumn(connection, 'imei_checks', 'provider_attempts INTEGER NOT NULL DEFAULT 0')
     addColumn(connection, 'imei_checks', 'provider_error_code TEXT')
+    addColumn(connection, 'imei_checks', 'imei_encrypted TEXT')
     addColumn(connection, 'orders', 'idempotency_key TEXT')
     addColumn(connection, 'paid_report_orders', 'provider_code_encrypted TEXT')
     addColumn(connection, 'paid_report_orders', 'provider_code_sha256 TEXT')
@@ -623,6 +625,10 @@ function migrate(connection: Database.Database) {
 
     if (!migrationApplied(connection, '2026-09-paid-report-imei-encryption-v1')) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-report-imei-encryption-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-imei-check-imei-encryption-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-imei-check-imei-encryption-v1')
     }
 
     if (!migrationApplied(connection, '2026-09-admin-credit-adjustments-v1')) {

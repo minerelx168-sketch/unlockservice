@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { IMEI_LENGTH, maskIdentifier } from '@/lib/imei'
+import { IMEI_LENGTH } from '@/lib/imei'
 import { deviceImei } from '@/lib/device-intent-value'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
@@ -24,8 +24,11 @@ type Product = {
 
 type PaidReportView = {
   id: number
+  productCode: string
   productName: string
   maskedImei: string
+  imei?: string
+  providerCode?: string
   status: 'processing' | 'completed' | 'refunded' | 'manual_review'
   priceCents: number
   message?: string
@@ -107,6 +110,51 @@ export function PaidReportConsole({
   useEffect(() => {
     if (payload) resultRef.current?.focus()
   }, [payload])
+
+  useEffect(() => {
+    setBalanceCents(availableCents)
+  }, [availableCents])
+
+  useEffect(() => {
+    if (!payload || payload.order.status !== 'processing') return
+    let cancelled = false
+    const refreshFromDatabase = async () => {
+      try {
+        const response = await fetch(`/api/imei/reports/${payload.order.id}`, {
+          method: 'GET',
+          credentials: 'same-origin',
+          cache: 'no-store',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        const data = (await response.json()) as { success?: boolean; report?: PaidReportView }
+        if (!response.ok || !data.success || !data.report || cancelled) return
+        setPayload((current) => current ? { ...current, order: data.report! } : current)
+        if (data.report.status !== 'processing') router.refresh()
+      } catch {
+        // Background refresh is best effort. The two-minute server worker remains authoritative.
+      }
+    }
+    void refreshFromDatabase()
+    const timer = window.setInterval(refreshFromDatabase, 5_000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [payload?.order.id, payload?.order.status, router])
+
+  function saveProviderResult() {
+    const result = payload?.order.providerCode?.trim()
+    if (!payload || payload.order.status !== 'completed' || !result) return
+    const blob = new Blob([`${result}\n`], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${payload.order.productCode.toLowerCase()}-report-${payload.order.id}.txt`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  }
 
   function resetRequestIdentity() {
     idempotencyRef.current = null
@@ -195,22 +243,6 @@ export function PaidReportConsole({
       setError(unknown ? 'We could not confirm whether your order was received. Check report history before starting another order, or retry this same request safely.' : thrown.message)
     } finally {
       inFlight.current = false
-      setBusy(false)
-    }
-  }
-
-  async function refreshStatus() {
-    if (!payload || payload.order.status !== 'processing') return
-    setBusy(true)
-    setError(null)
-    try {
-      const result = await post(`/api/imei/reports/${payload.order.id}`, {})
-      setPayload(result)
-      setBalanceCents(result.credit.balanceCents)
-      router.refresh()
-    } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : 'The report status could not be refreshed.')
-    } finally {
       setBusy(false)
     }
   }
@@ -373,7 +405,7 @@ export function PaidReportConsole({
                 </div>
                 <span className="badge">Review</span>
               </div>
-              <p className="t-small">IMEI {maskIdentifier(digits ?? '')}</p>
+              <p className="t-small">IMEI {digits ?? ''}</p>
               <div className="quote">
                 <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
                 <div><span className="label">Estimated delivery</span><span className="value">{deliveryLabel(product.etaMinutes)}</span></div>
@@ -434,7 +466,10 @@ export function PaidReportConsole({
             <span className="kicker"><Icon name="file" /> {payload.order.productName}</span>
             <span className={payload.order.status === 'completed' ? 'badge badge--success' : 'badge'}>{statusLabel(payload.order.status)}</span>
           </div>
-          <h3 className="t-card">IMEI {payload.order.maskedImei}</h3>
+          <h3 className="t-card">IMEI {payload.order.imei ?? digits ?? payload.order.maskedImei}</h3>
+          {payload.order.status === 'completed' && payload.order.providerCode ? (
+            <pre className="provider-code-result service-workbench-inline-code">{payload.order.providerCode}</pre>
+          ) : null}
           <p className="t-small">
             {payload.order.message ?? (payload.order.status === 'completed'
               ? 'The result is ready and the held credit has been charged.'
@@ -445,18 +480,15 @@ export function PaidReportConsole({
                   : 'The request is still processing.')}
           </p>
           <div className="service-workbench-result-actions">
-            <Link className="button button--primary" href={`/user/reports/${payload.order.id}`}>View result</Link>
+            {payload.order.status === 'completed' && payload.order.providerCode ? (
+              <button className="button button--primary" type="button" onClick={saveProviderResult}>Save</button>
+            ) : null}
             <button className="button button--quiet" type="button" disabled={busy} onClick={() => {
               resetRequestIdentity()
               setImei('')
               setImeiTouched(false)
               setError(null)
             }}>Start another service</button>
-            {payload.order.status === 'processing' ? (
-              <button className="button button--quiet" type="button" disabled={busy} onClick={refreshStatus}>
-                {busy ? 'Refreshing…' : 'Refresh status'}
-              </button>
-            ) : null}
           </div>
         </section>
       ) : null}

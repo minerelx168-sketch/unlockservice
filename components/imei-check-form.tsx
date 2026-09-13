@@ -1,14 +1,14 @@
 'use client'
 
-import Link from 'next/link'
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { groupImei, IMEI_LENGTH, luhnValid, normalizeImei } from '@/lib/imei'
 import { Icon } from './icons'
 
 type CheckPayload = {
   id: number
   maskedImei: string
-  status: 'queued' | 'completed' | 'unavailable'
+  imei?: string
+  status: 'queued' | 'processing' | 'completed' | 'unavailable'
   provider: string
   result: Record<string, unknown> | null
   message?: string
@@ -18,6 +18,7 @@ type CheckPayload = {
 const STATUS: Record<CheckPayload['status'], { kicker: string; badge: string; label: string }> = {
   completed: { kicker: 'Check complete', badge: 'badge--success', label: 'Complete' },
   queued: { kicker: 'Check queued', badge: 'badge--pending', label: 'Queued' },
+  processing: { kicker: 'Check processing', badge: 'badge--pending', label: 'Processing' },
   unavailable: { kicker: 'Check unavailable', badge: 'badge--error', label: 'Unavailable' },
 }
 
@@ -27,6 +28,45 @@ export function ImeiCheckForm({ csrfToken }: { csrfToken: string }) {
   const [error, setError] = useState<string | null>(null)
   const [check, setCheck] = useState<CheckPayload | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!check || (check.status !== 'queued' && check.status !== 'processing')) return
+    let cancelled = false
+    const refreshFromDatabase = async () => {
+      try {
+        const response = await fetch(`/api/imei/checks/${check.id}`, {
+          method: 'GET',
+          credentials: 'same-origin',
+          cache: 'no-store',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        const data = (await response.json()) as { success?: boolean; check?: CheckPayload }
+        if (response.ok && data.success && data.check && !cancelled) setCheck(data.check)
+      } catch {
+        // The background worker remains authoritative; this only refreshes the owner UI.
+      }
+    }
+    void refreshFromDatabase()
+    const timer = window.setInterval(refreshFromDatabase, 5_000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [check?.id, check?.status])
+
+  function saveCheckResult() {
+    if (!check?.result) return
+    const text = JSON.stringify(check.result, null, 2)
+    const blob = new Blob([`${text}\n`], { type: 'application/json;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `imei-check-${check.id}.json`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  }
 
   function change(event: FormEvent<HTMLInputElement>) {
     const input = event.currentTarget
@@ -106,12 +146,14 @@ export function ImeiCheckForm({ csrfToken }: { csrfToken: string }) {
                 green saying "unavailable". */}
             <span className={`badge ${STATUS[check.status].badge}`}>{STATUS[check.status].label}</span>
           </div>
-          <h3 className="t-card">IMEI {check.maskedImei}</h3>
+          <h3 className="t-card">IMEI {(check.imei ?? normalizeImei(value)) || check.maskedImei}</h3>
           <p className="t-small">{String(check.result?.summary ?? check.message ?? 'The report is ready.')}</p>
-          <Link className="link-arrow" href={`/user/checks/${check.id}`}>
-            {check.status === 'completed' ? 'View full report' : 'Open this check'}{' '}
-            <Icon name="arrowRight" strokeWidth={2.2} />
-          </Link>
+          {check.status === 'completed' && check.result ? (
+            <pre className="provider-code-result service-workbench-inline-code">{JSON.stringify(check.result, null, 2)}</pre>
+          ) : null}
+          {check.status === 'completed' && check.result ? (
+            <button className="button button--primary" type="button" onClick={saveCheckResult}>Save</button>
+          ) : null}
         </div>
       ) : null}
     </>

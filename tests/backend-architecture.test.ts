@@ -190,6 +190,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
       '2026-09-admin-credit-adjustments-v1',
+      '2026-09-imei-check-imei-encryption-v1',
       '2026-09-ledger-effect-uniqueness-v1',
       '2026-09-paid-imei-reports-v1',
       '2026-09-paid-report-imei-encryption-v1',
@@ -637,7 +638,11 @@ test('free IMEI checks are repeatable, owner-scoped, and never touch credit', as
   assert.equal(first.status, 'completed')
   assert.equal(first.result?.demo, true)
   assert.equal(first.maskedImei, '49·········7518')
-  assert.equal('imei' in first, false)
+  assert.equal(first.imei, '490154203237518')
+  const encrypted = database.db().prepare('SELECT masked_imei, imei_encrypted FROM imei_checks WHERE id = ?').get(first.id) as { masked_imei: string; imei_encrypted: string }
+  assert.equal(encrypted.masked_imei, '49·········7518')
+  assert.ok(encrypted.imei_encrypted)
+  assert.doesNotMatch(encrypted.imei_encrypted, /490154203237518/)
   assert.notEqual(first.id, repeat.id)
   assert.equal(replay.id, replayAgain.id)
   assert.equal(imeiChecks.getImeiCheck(2, first.id), undefined)

@@ -54,7 +54,7 @@ export default async function ChecksPage() {
               <tbody role="rowgroup">
                 {checks.map((check) => (
                   <tr role="row" key={check.id}>
-                    <td role="cell" className="mono" data-label="Device">{check.maskedImei}</td>
+                    <td role="cell" className="mono" data-label="Device">{check.imei ?? check.maskedImei}</td>
                     <td role="cell" data-label="Type">{check.checkType === 'basic' ? 'Free IMEI check' : check.checkType}</td>
                     <td role="cell" data-label="Status">{statusLabel(check.status)}</td>
                     <td role="cell" className="account-table-action" data-label="Action">
