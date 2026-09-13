@@ -64,3 +64,30 @@ test('article links use HTTPS sources or existing internal routes', () => {
     }
   }
 })
+
+test('Cricket guide has dated policy distinctions and publication-ready metadata', () => {
+  const article = getArticle('cricket-iphone-unlock-purchase-date-rules')
+  assert.ok(article)
+  assert.ok(`${article.title} — iUnlockMobile`.length <= 60)
+  assert.ok(article.description.length >= 120 && article.description.length <= 150)
+  assert.match(article.heading, /cricket iphone unlock/i)
+  assert.match(article.description, /cricket iphone unlock/i)
+  assert.equal(article.published, '2026-09-13')
+  assert.equal(article.updated, article.published)
+  assert.ok(article.blocks.some((block) => block.kind === 'h2' && block.id === 'key-takeaways'))
+  assert.ok(article.blocks.some((block) => block.kind === 'h3'))
+  assert.ok(article.blocks.some((block) => block.kind === 'cta' && block.href === '/contact'))
+  const comparison = article.blocks.find((block) => block.kind === 'table')
+  assert.ok(comparison?.kind === 'table')
+  assert.deepEqual(comparison.rows, [
+    ['Before July 1, 2026', 'At least six months'],
+    ['On or after July 1, 2026', 'At least 365 days'],
+  ])
+  const sources = article.blocks.flatMap((block) => block.kind === 'p' ? block.links ?? [] : [])
+  for (const href of [
+    'https://www.cricketwireless.com/support/account-management/device-unlock',
+    'https://www.cricketwireless.com/legal-info/device-unlock-policy.html',
+    'https://support.apple.com/en-us/109316',
+  ]) assert.ok(sources.some((link) => link.href === href), href)
+  assert.ok(article.faq && article.faq.length >= 3)
+})

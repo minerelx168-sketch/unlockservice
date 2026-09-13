@@ -42,6 +42,183 @@ export type Article = {
 
 const ARTICLES: Article[] = [
   {
+    slug: 'cricket-iphone-unlock-purchase-date-rules',
+    title: 'Cricket iPhone Unlock: Which Rule Applies?',
+    heading: 'Cricket iPhone Unlock: Six Months or 365 Days of Service?',
+    description: 'Check Cricket iPhone unlock rules by purchase date, follow the official request steps, and know what to ask if your device is refused.',
+    standfirst: 'Your purchase date matters. Compare Cricket’s current support instructions with its general policy before assuming your iPhone qualifies.',
+    published: '2026-09-13',
+    updated: '2026-09-13',
+    minutes: 6,
+    topic: 'Cricket iPhone unlock',
+    blocks: [
+      {
+        kind: 'p',
+        text: 'A Cricket iPhone unlock starts with the right eligibility rule, not an unlock-code purchase. Cricket’s support page currently distinguishes devices by purchase date, while its general policy states a longer service requirement without that distinction. If those pages seem to give different answers for your phone, ask Cricket to confirm the applicable rule for your device before paying anyone.',
+        links: [
+          { label: 'Cricket’s device-specific support instructions', href: 'https://www.cricketwireless.com/support/account-management/device-unlock' },
+          { label: 'Cricket’s general unlock policy', href: 'https://www.cricketwireless.com/legal-info/device-unlock-policy.html' },
+        ],
+      },
+      { kind: 'h2', id: 'key-takeaways', text: 'Key Takeaways' },
+      {
+        kind: 'list',
+        items: [
+          'Use the purchase-date comparison below, then have Cricket verify the paid-service history of the actual device.',
+          'An old receipt proves a purchase date, not every month of qualifying service.',
+          'Keep the eligibility decision, request confirmation and handset status as separate checkpoints.',
+          'A missing device in the account portal is a reason to investigate the device record, not evidence that a paid bypass is needed.',
+          'Ask about current service availability before ordering from a third party; no provider can guarantee every device qualifies.',
+        ],
+      },
+      { kind: 'h2', id: 'purchase-date-rules', text: 'Cricket unlock policy: which purchase-date rule applies?' },
+      {
+        kind: 'p',
+        text: 'Checked September 13, 2026: Cricket’s Device Unlock support page lists the following split. These are paid-service requirements, not simply the age of the iPhone.',
+        links: [{ label: 'Read the current Cricket support requirements', href: 'https://www.cricketwireless.com/support/account-management/device-unlock' }],
+      },
+      {
+        kind: 'table',
+        head: ['Device purchase date', 'Paid service stated on the support page'],
+        rows: [
+          ['Before July 1, 2026', 'At least six months'],
+          ['On or after July 1, 2026', 'At least 365 days'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'The separate policy page, revised July 1, 2026, says 365 days on the device and does not spell out the earlier-purchase exception. It also requires a Cricket-designed, Cricket-locked device with no lost/stolen report or fraudulent-account association. Do not resolve a disagreement by choosing whichever page promises the shorter wait: request a device-specific explanation from Cricket.',
+        links: [{ label: 'Compare Cricket’s published policy wording', href: 'https://www.cricketwireless.com/legal-info/device-unlock-policy.html' }],
+      },
+      { kind: 'h3', id: 'used-or-replacement-phone', text: 'Used or replacement iPhone? Confirm the date Cricket recognizes' },
+      {
+        kind: 'p',
+        text: 'For a secondhand purchase, separate your receipt from the device’s original purchase record. For a replacement, keep the exchange paperwork too. The public pages do not explain every resale, replacement or interrupted-service scenario. Rather than assuming service transfers or the clock restarts, ask which date and service periods Cricket has associated with this IMEI.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Have the model, purchase or replacement receipt, and relevant Cricket line available.',
+          'Ask: “Which purchase-date category applies to this device, and how much qualifying service is recorded?”',
+          'If refused, request the specific unmet requirement and the next action or review date.',
+          'Keep the case reference and a dated copy of the reply so the next conversation starts with evidence.',
+        ],
+      },
+      { kind: 'h3', id: 'military-exception', text: 'Overseas military deployment is a separate request' },
+      {
+        kind: 'p',
+        text: 'Cricket’s policy permits one device for eligible active, deployed military personnel who cannot meet the service-duration rule, with acceptable deployment verification and the other requirements satisfied. Ask Cricket to assess that exception; a holiday or ordinary business trip is not the same category.',
+        links: [{ label: 'Cricket’s deployed military exception', href: 'https://www.cricketwireless.com/legal-info/device-unlock-policy.html' }],
+      },
+      { kind: 'h2', id: 'request-iphone-unlock', text: 'How to unlock a Cricket iPhone through the official process' },
+      {
+        kind: 'p',
+        text: 'Current customers can sign in to Cricket’s online device-unlock process, choose the relevant phone number and select Request Unlock. Eligible iPhones receive an on-screen confirmation and a text; a restart may be needed. Former customers should contact 1-800-CRICKET (274-2538). Cricket’s Android app and code instructions are a separate workflow.',
+        links: [
+          { label: 'Open Cricket’s official device-unlock portal', href: 'https://www.cricketwireless.com/deviceunlock' },
+          { label: 'Follow Cricket’s iPhone instructions', href: 'https://www.cricketwireless.com/support/account-management/device-unlock' },
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Enter account credentials only on the carrier’s own site. If the phone is missing from the portal, Cricket says it may already be unlocked or have missing IMEI information. Ask support to check the record instead of selecting a different line just to continue.',
+        links: [{ label: 'Cricket’s missing-device guidance', href: 'https://www.cricketwireless.com/deviceunlock' }],
+      },
+      { kind: 'h3', id: 'verify-completion', text: 'Verify completion on the iPhone' },
+      {
+        kind: 'p',
+        text: 'Open Settings > General > About and look at Carrier Lock. Apple identifies “No SIM restrictions” as the unlocked state. If a restriction remains after confirmation, ask Cricket to verify that the authorization was applied to the correct phone. Apple says only the carrier can unlock it; an eligibility result alone is not that authorization.',
+        links: [{ label: 'Apple’s carrier-unlock verification steps', href: 'https://support.apple.com/en-us/109316' }],
+      },
+      { kind: 'h2', id: 'different-locks', text: 'Make sure the problem is actually a carrier lock' },
+      {
+        kind: 'table',
+        head: ['What you see or learn', 'What to investigate'],
+        rows: [
+          ['Carrier restriction in About', 'The carrier-unlock request and the device it covers'],
+          ['SIM PIN or PUK prompt', 'Security on the SIM or eSIM; ask its provider for help'],
+          ['Passcode screen', 'Access to the iPhone itself, not permission to change networks'],
+          ['iPhone Locked to Owner', 'Activation Lock linked to an Apple Account'],
+          ['Lost/stolen flag or outstanding finance', 'The underlying report or agreement, not a settings change'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Do not guess SIM PINs or PUK codes: failed attempts can leave the SIM or eSIM unusable. Contact the provider that issued it. Activation Lock is different again and protects a device linked to its owner’s Apple Account; a carrier unlock does not remove that ownership check.',
+        links: [
+          { label: 'Apple’s SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+          { label: 'Apple’s explanation of Activation Lock', href: 'https://support.apple.com/en-us/108794' },
+        ],
+      },
+      { kind: 'h2', id: 'refused-request', text: 'What to do when a Cricket iPhone unlock is refused' },
+      {
+        kind: 'p',
+        text: 'Treat a refusal as a question to narrow down. “Not eligible” is less useful than knowing whether the obstacle is the purchase record, service history, account access or a device flag. Repeating the same submission without correcting the underlying issue gives you little new information.',
+      },
+      {
+        kind: 'table',
+        head: ['Situation', 'Useful next question or action'],
+        rows: [
+          ['Your receipt appears to put you in the earlier category', 'Ask Cricket to compare the receipt with its recorded purchase date.'],
+          ['You believe enough service has elapsed', 'Request the qualifying periods recorded for this device and an explanation of any gap.'],
+          ['You bought the phone from someone else', 'Ask the seller for the original record and any unlock confirmation; preserve the return deadline.'],
+          ['A lost/stolen or fraud issue appears', 'Have the legitimate owner resolve the report with the responsible party; do not buy a removal promise.'],
+          ['Approval appears, but Carrier Lock remains', 'Provide the case reference and privately confirm that the request and phone identifiers match.'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'An IMEI report can help you frame the next question, but it does not replace Cricket’s eligibility decision or settle a finance agreement. If a seller advertised an unlocked phone and cannot substantiate that claim, consider the seller’s return process before spending more on it.',
+        links: [{ label: 'What an IMEI check can and cannot tell you', href: '/articles/what-an-imei-check-tells-you' }],
+      },
+      { kind: 'h2', id: 'international-use', text: 'Before using another network or a travel eSIM' },
+      {
+        kind: 'p',
+        text: 'Once unlocked, check the destination provider’s compatibility requirements for your exact iPhone model and chosen plan. eSIM availability depends on the device and provider; installing an eSIM is a plan-activation step, not a substitute for carrier authorization. Follow the new provider’s setup instructions and test the services included in your plan before relying on it abroad.',
+        links: [{ label: 'Apple’s eSIM setup requirements', href: 'https://support.apple.com/en-us/118669' }],
+      },
+      { kind: 'h2', id: 'third-party-service', text: 'What can a third-party unlock service actually do?' },
+      {
+        kind: 'p',
+        text: 'An intermediary can help review service requirements and, where an applicable service is available, arrange submission of an unlock request. It cannot turn a refused device into a guaranteed approval. iUnlockMobile does not clear finance agreements or unlock devices reported lost or stolen. This guide does not confirm that Cricket ordering is currently available.',
+        links: [{ label: 'Review iUnlockMobile’s service limitations', href: '/contact' }],
+      },
+      {
+        kind: 'list',
+        items: [
+          'Before paying, ask whether the service explicitly supports your device and its current status.',
+          'Get the actual deliverable, total price and estimated processing time in writing.',
+          'Check what happens to the payment or account credit if the request is refused.',
+          'Never provide an Apple Account password, Cricket password or device passcode to an unlock seller.',
+        ],
+      },
+      {
+        kind: 'cta',
+        text: 'Unsure which service fits your Cricket iPhone? Tell us the model and the exact eligibility message, without passwords or full device identifiers in the initial message. Ask us to confirm current availability before placing an order.',
+        label: 'Ask about your device before paying',
+        href: '/contact',
+      },
+    ],
+    faq: [
+      {
+        question: 'Does buying an older used iPhone make it eligible immediately?',
+        answer: 'No. A resale receipt does not establish the device’s qualifying service record. Ask Cricket to identify the purchase-date category and service history it recognizes for that phone.',
+      },
+      {
+        question: 'Should I follow a six-month guide or the 365-day policy?',
+        answer: 'Check the dated comparison above and ask Cricket which rule applies to your device. Its support page includes a purchase-date distinction that is not spelled out in the general policy; neither a generic guide nor a screenshot can decide your case.',
+      },
+      {
+        question: 'Do I need an Android unlock app for my Cricket iPhone?',
+        answer: 'No. Follow Cricket’s iPhone-specific online or support route described above, rather than its Android app instructions.',
+      },
+      {
+        question: 'Can a paid service guarantee an unlock before I qualify?',
+        answer: 'Do not rely on that promise. Ask what eligible service is being supplied and what happens if it is refused. Paying an intermediary does not itself change the carrier’s requirements.',
+      },
+    ],
+  },
+  {
     "slug": "t-mobile-iphone-unlock-status-esim",
     "title": "T-Mobile iPhone Unlock: Status & eSIM",
     "heading": "T-Mobile iPhone Unlock: What to Do If It Still Shows SIM Locked",
