@@ -42,6 +42,188 @@ export type Article = {
 
 const ARTICLES: Article[] = [
   {
+    slug: 'straight-talk-iphone-unlock-request-checklist',
+    title: 'Straight Talk iPhone Unlock: Request Guide',
+    heading: 'Straight Talk iPhone Unlock: What to Check Before You Request It',
+    description: 'Prepare a Straight Talk iPhone unlock request with the right device details, check eligibility with the carrier, and verify completion.',
+    standfirst: 'A useful unlock request identifies the phone, the restriction and the account history. Here is what to collect before contacting Straight Talk or paying an intermediary.',
+    published: '2026-09-14',
+    updated: '2026-09-14',
+    minutes: 6,
+    topic: 'Straight Talk iPhone unlock',
+    blocks: [
+      {
+        kind: 'p',
+        text: 'Before requesting a Straight Talk iPhone unlock, check whether the iPhone is actually carrier-locked and establish where the device came from. Then ask the carrier to assess that specific phone. A service-plan receipt, a seller’s promise and an unlock confirmation answer different questions; confusing them can send you to the wrong provider or lead to an unnecessary purchase.',
+      },
+      { kind: 'h2', id: 'key-takeaways', text: 'Key Takeaways' },
+      {
+        kind: 'list',
+        items: [
+          'Check the handset’s Carrier Lock status before requesting a paid service.',
+          'Separate a Straight Talk device purchase from a SIM or plan bought for a phone you already owned.',
+          'Have the device identifier, purchase record and relevant service history ready for the carrier’s assessment.',
+          'Ask which policy applies and what remains unmet; do not treat a general waiting-period claim as your eligibility result.',
+          'Keep a case reference, then verify completion on the iPhone before buying a replacement plan.',
+        ],
+      },
+      { kind: 'h2', id: 'check-carrier-lock', text: 'First, check whether the iPhone needs a carrier unlock' },
+      {
+        kind: 'p',
+        text: 'Open Settings > General > About and find Carrier Lock. Apple says “No SIM restrictions” means the iPhone is unlocked. If that is already displayed, an inability to get service needs a different investigation. If a restriction remains, Apple cannot release it: the carrier must authorize the unlock.',
+        links: [{ label: 'Apple’s official carrier-unlock instructions', href: 'https://support.apple.com/en-us/109316' }],
+      },
+      {
+        kind: 'p',
+        text: 'Write down the exact message rather than describing every problem as “SIM locked.” A screenshot can help, but crop out the phone number, serial number and IMEI before posting it publicly. Keep the unredacted details for a private conversation with the verified provider when required.',
+      },
+      { kind: 'h3', id: 'other-locks', text: 'A PIN prompt or ownership lock needs a different route' },
+      {
+        kind: 'table',
+        head: ['Problem', 'Appropriate next step'],
+        rows: [
+          ['Carrier restriction in About', 'Ask the carrier responsible for the device restriction about unlocking.'],
+          ['SIM PIN or PUK request', 'Contact the provider that issued the SIM or eSIM; do not guess codes.'],
+          ['Forgotten device passcode', 'Use Apple’s passcode-recovery guidance, not a carrier-unlock order.'],
+          ['iPhone Locked to Owner', 'Resolve Activation Lock with the legitimate owner through Apple’s supported process.'],
+          ['Lost/stolen report or finance issue', 'Resolve the underlying record or agreement with the responsible party.'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'SIM PIN protection can apply to a physical SIM or an eSIM, and guessing can permanently block it. Activation Lock instead ties the device to an Apple Account. Neither is removed by changing the iPhone’s carrier-unlock status.',
+        links: [
+          { label: 'Apple’s SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+          { label: 'Apple’s Activation Lock explanation', href: 'https://support.apple.com/en-us/108794' },
+        ],
+      },
+      { kind: 'h2', id: 'device-or-plan', text: 'Was the iPhone bought for Straight Talk, or did you bring it yourself?' },
+      {
+        kind: 'p',
+        text: 'This is the first question to resolve with support. Buying a Straight Talk plan is not the same transaction as buying a Straight Talk handset. Straight Talk’s support site separately lists phone purchases and Bring Your Own Phone options. For a phone you previously bought elsewhere, gather the original purchase details before assuming your latest service provider controls its restriction.',
+        links: [{ label: 'Straight Talk’s support and device options', href: 'https://www.straighttalk.com/support' }],
+      },
+      {
+        kind: 'table',
+        head: ['Your situation', 'Record to find', 'Question to ask'],
+        rows: [
+          ['Bought a Straight Talk-branded iPhone', 'The handset receipt and activation record', 'Is this device covered by your unlock policy?'],
+          ['Bought only a SIM or service plan', 'The phone’s original seller and carrier details', 'Does your system manage this device’s carrier restriction?'],
+          ['Bought a used or replacement iPhone', 'Original receipt or replacement paperwork, if available', 'Which device and service history are associated with this identifier?'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'For example, if your paperwork records only a plan purchase, it does not establish where the iPhone was originally sold. Ask support to identify the correct route. If a different carrier must handle the request, keep the explanation and use that carrier’s official process rather than submitting several paid orders.',
+      },
+      { kind: 'h2', id: 'eligibility-records', text: 'Prepare a Straight Talk unlock eligibility checklist' },
+      {
+        kind: 'p',
+        text: 'Straight Talk asks existing customers to have their device identifier and/or Straight Talk phone number available when contacting support. Use a separate device for a technical-support call so you can inspect the iPhone while speaking to the representative.',
+        links: [{ label: 'Straight Talk’s official contact instructions', href: 'https://www.straighttalk.com/support/contact' }],
+      },
+      {
+        kind: 'list',
+        items: [
+          'Device: exact iPhone model and the identifier the carrier asks you to confirm.',
+          'Purchase: seller, handset purchase date and any replacement or exchange record.',
+          'Service: activation information and payment records available for that phone, not just your current line.',
+          'Status: exact Carrier Lock wording, any refusal message and previous case references.',
+          'Goal: another domestic network, resale or a compatible plan abroad; state what you need without assuming it changes eligibility.',
+        ],
+      },
+      { kind: 'h3', id: 'current-policy', text: 'Use the current Straight Talk unlock policy, not a universal countdown' },
+      {
+        kind: 'p',
+        text: 'Straight Talk links its Unlocking Policy from the support hub to tfwunlockpolicy.com. Open it from that official route and ask which conditions apply to your device. We could not verify the full policy text during the September 14, 2026 review, so this guide does not quote an eligibility waiting period, exception threshold or early-unlock fee. Get those details from the carrier before making a payment or travel commitment.',
+        links: [{ label: 'Find Unlocking Policy on Straight Talk’s support hub', href: 'https://www.straighttalk.com/support' }],
+      },
+      {
+        kind: 'p',
+        text: 'Ask the representative to distinguish the date of purchase, activation history and qualifying service in your record. A calendar calculation from a receipt alone is not a device-specific decision. If records are incomplete, ask what evidence would resolve the gap rather than guessing an eligibility date.',
+      },
+      { kind: 'h2', id: 'make-request', text: 'How to make a useful unlock request' },
+      {
+        kind: 'p',
+        text: 'Use Straight Talk’s official contact page for chat or call 1-877-430-2355. If you are outside the United States and cannot reach the number, use the online contact route. This is a support request, not a reason to give account passwords to a seller or an unsolicited caller.',
+        links: [{ label: 'Contact Straight Talk directly', href: 'https://www.straighttalk.com/support/contact' }],
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Confirm that the representative is assessing the iPhone you have, not a previous device on the line.',
+          'Ask whether Straight Talk handles its restriction and whether it currently qualifies.',
+          'If eligible, ask whether any action remains for you and how completion will be confirmed.',
+          'If refused, ask for the specific unmet condition and the evidence or change needed for review.',
+          'Record the case reference and the follow-up timeframe supplied for that case.',
+        ],
+      },
+      {
+        kind: 'note',
+        text: 'Suggested wording: “I want to use my iPhone with another carrier. Please confirm whether you manage its carrier lock, which eligibility rule applies to this device, and what action remains. If it is not eligible, please identify the unmet requirement and give me a case reference.”',
+      },
+      { kind: 'h3', id: 'after-response', text: 'Turn the response into a next action' },
+      {
+        kind: 'table',
+        head: ['Carrier response', 'What to do next'],
+        rows: [
+          ['Device not found or wrong provider', 'Recheck the identifier and original purchase record before contacting the named provider.'],
+          ['Service requirement not met', 'Ask which recorded period is missing and when the case can be reviewed.'],
+          ['Ownership, fraud or lost/stolen concern', 'Have the legitimate owner resolve the underlying issue; do not buy a bypass promise.'],
+          ['Request accepted or pending', 'Keep the case reference and follow the supplied status-check instructions.'],
+          ['Unlock confirmed', 'Check the phone itself before purchasing another plan.'],
+        ],
+      },
+      { kind: 'h2', id: 'confirm-and-switch', text: 'Confirm the unlock before switching SIM or eSIM' },
+      {
+        kind: 'p',
+        text: 'After carrier confirmation, revisit Carrier Lock in About. If the restriction remains, return to the existing case with that result and ask the carrier to check its authorization. Apple’s guidance then distinguishes activation with another carrier’s physical SIM from setting up an eSIM. Do not erase the phone as an initial eligibility test.',
+        links: [{ label: 'Apple’s steps after carrier approval', href: 'https://support.apple.com/en-us/109316' }],
+      },
+      {
+        kind: 'p',
+        text: 'For eSIM, confirm that your exact model and destination provider support it, then follow that provider’s activation instructions. Unlocking and plan activation are separate checks. If an unlocked device still cannot connect, ask the new provider about compatibility and provisioning instead of immediately paying for another unlock.',
+        links: [{ label: 'Apple’s eSIM setup requirements', href: 'https://support.apple.com/en-us/118669' }],
+      },
+      { kind: 'h2', id: 'before-paying', text: 'Before paying a third-party iPhone unlock service' },
+      {
+        kind: 'p',
+        text: 'An intermediary may help review requirements and arrange a request where an applicable service is available. That is different from guaranteeing an override of the carrier’s decision. Ask what is being sold: a status report, request submission or a completed unlock, and what happens if it is refused. An IMEI report is information, not proof that the network restriction has been removed.',
+        links: [{ label: 'Understand what an IMEI check tells you', href: '/articles/what-an-imei-check-tells-you' }],
+      },
+      {
+        kind: 'p',
+        text: 'iUnlockMobile does not clear finance agreements or unlock devices reported lost or stolen. This article is informational and does not establish that Straight Talk ordering is available. Contact us to confirm a suitable service and its current terms before paying; do not send passwords, a device passcode or payment-card details.',
+        links: [{ label: 'Read iUnlockMobile’s support limitations', href: '/contact' }],
+      },
+      {
+        kind: 'cta',
+        text: 'Have a Straight Talk eligibility response but are unsure what it means? Share the model and the message with sensitive identifiers removed, and ask us to confirm whether an appropriate service is currently available.',
+        href: '/contact',
+        label: 'Ask before placing an unlock order',
+      },
+    ],
+    faq: [
+      {
+        question: 'Does using a Straight Talk SIM prove Straight Talk can unlock my iPhone?',
+        answer: 'No. Identify where the handset came from and ask whether Straight Talk manages its carrier restriction. A plan purchase alone does not establish the phone’s original sales or lock history.',
+      },
+      {
+        question: 'What if I do not have the original activation date?',
+        answer: 'Tell support which records you do have and ask them to check the device history. Do not substitute the used-phone purchase date or estimate a qualifying date from the model’s age.',
+      },
+      {
+        question: 'Can I use an eSIM instead of requesting an unlock?',
+        answer: 'An eSIM is a way to activate a plan, not a carrier-lock bypass. Establish unlocked status and confirm device and provider compatibility before buying the plan.',
+      },
+      {
+        question: 'Does a carrier unlock remove debt or Activation Lock?',
+        answer: 'No. Finance obligations and Apple’s ownership protection are separate issues that must be resolved through the responsible provider or legitimate owner.',
+      },
+    ],
+  },
+  {
     slug: 'cricket-iphone-unlock-purchase-date-rules',
     title: 'Cricket iPhone Unlock: Which Rule Applies?',
     heading: 'Cricket iPhone Unlock: Six Months or 365 Days of Service?',
