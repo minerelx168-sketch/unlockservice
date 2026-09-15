@@ -42,6 +42,193 @@ export type Article = {
 
 const ARTICLES: Article[] = [
   {
+    slug: 'how-to-check-if-iphone-is-unlocked',
+    title: 'How to Check If Your iPhone Is Unlocked',
+    heading: 'How to Check If Your iPhone Is Unlocked: Four Reliable Methods',
+    description: 'Learn how to check if your iPhone is unlocked in Settings, what an IMEI report can confirm, and why a new SIM may still fail.',
+    standfirst: 'Start with the status stored on the iPhone, then use carrier records, another network or a sourced IMEI report only when you need more evidence.',
+    published: '2026-09-15',
+    updated: '2026-09-15',
+    minutes: 7,
+    topic: 'iPhone unlock status',
+    blocks: [
+      {
+        kind: 'p',
+        text: 'The quickest way to check if your iPhone is unlocked is Settings > General > About. Find Carrier Lock: Apple says “No SIM restrictions” means the iPhone is unlocked. That is the best first check when the phone is in your hand, but a carrier confirmation, a different network test or an IMEI report can answer questions that the Settings line alone cannot.',
+        links: [{ label: 'Apple’s current carrier-unlock instructions', href: 'https://support.apple.com/en-us/109316' }],
+      },
+      { kind: 'h2', id: 'key-takeaways', text: 'Key Takeaways' },
+      {
+        kind: 'list',
+        items: [
+          'On iOS 14 or later, “No SIM restrictions” beside Carrier Lock is Apple’s direct unlocked-status indicator.',
+          'A failed SIM or eSIM activation is not conclusive: compatibility, provisioning, coverage or a barred IMEI can also stop service.',
+          'An IMEI report is useful when you cannot inspect the iPhone, but its scope, source and report time matter.',
+          'Only the carrier can authorize an iPhone carrier unlock; Apple and a status-check provider cannot override that decision.',
+          'Carrier Lock is separate from a SIM PIN, device passcode, Activation Lock, blacklist record and finance agreement.',
+        ],
+      },
+      { kind: 'h2', id: 'four-methods', text: 'Four ways to check whether an iPhone is unlocked' },
+      {
+        kind: 'table',
+        head: ['Method', 'Best use', 'What the result proves'],
+        rows: [
+          ['Carrier Lock in Settings', 'The iPhone is available and set up', 'Shows the carrier-lock status reported on the device.'],
+          ['Original carrier confirmation', 'The status is unclear or an unlock is pending', 'Confirms the carrier’s record and whether it authorized the unlock.'],
+          ['Another carrier’s SIM or eSIM', 'You can safely test a compatible active plan', 'A successful activation confirms practical use on that network; a failure needs diagnosis.'],
+          ['IMEI unlock-status report', 'Remote, boxed or used-phone checks', 'Reports the fields supplied by the named data source at the report time.'],
+        ],
+      },
+      { kind: 'h2', id: 'check-settings', text: 'Method 1: Check Carrier Lock in iPhone Settings' },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Open Settings.',
+          'Tap General, then About.',
+          'Scroll to Carrier Lock. In some regions, the label may be translated or shown as Network Provider Lock.',
+          'Read the status beside it. “No SIM restrictions” means the iPhone is carrier unlocked.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Take a screenshot if you are documenting a purchase or following up on an unlock, but crop out the phone number, serial number, IMEI and other identifiers before sharing it publicly. If Carrier Lock is missing, the wording is unclear or the result conflicts with a recent carrier message, use the carrier-confirmation method next.',
+      },
+      {
+        kind: 'note',
+        text: 'Do not erase the iPhone just to perform the first check. Apple lists backup, erase and restore as a completion route after carrier confirmation when no other SIM is available, not as the opening eligibility test.',
+      },
+      { kind: 'h3', id: 'no-sim-restrictions', text: 'What “No SIM restrictions” does and does not mean' },
+      {
+        kind: 'p',
+        text: 'It means the iPhone is not restricted to one carrier. It does not guarantee that every network or plan will accept the model, that the IMEI is clear, or that a new line has been activated correctly. An unlocked phone can still show SOS, No Service or an eSIM activation error for reasons unrelated to a carrier lock.',
+      },
+      { kind: 'h2', id: 'ask-carrier', text: 'Method 2: Ask the original carrier to confirm its record' },
+      {
+        kind: 'p',
+        text: 'Apple states that only the current carrier can unlock an iPhone. Contact the carrier that sold or currently restricts the device, give it the identifier requested through an authenticated channel, and ask whether the unlock has been authorized and completed. Keep the case reference and the exact response.',
+        links: [{ label: 'See Apple’s explanation of carrier responsibility', href: 'https://support.apple.com/en-us/109316' }],
+      },
+      {
+        kind: 'list',
+        items: [
+          'Ask whether the representative is checking the same IMEI shown on the iPhone.',
+          'If the request is pending, ask for its status and the next review point supplied for that case.',
+          'If it was denied, ask which eligibility condition was not met and what record can resolve it.',
+          'If the carrier says the unlock is complete but Settings still shows a restriction, return to that case before paying another provider.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Carrier confirmation is especially important after a recent unlock request, a device replacement or a used-phone sale. The status on a receipt, marketplace listing or seller message is not a substitute for the handset status and carrier record.',
+        links: [{ label: 'Review iPhone carrier-unlock eligibility before paying', href: '/articles/iphone-carrier-unlock-eligibility' }],
+      },
+      { kind: 'h2', id: 'test-another-network', text: 'Method 3: Test a compatible SIM or eSIM from another carrier' },
+      {
+        kind: 'p',
+        text: 'After the original carrier confirms the unlock, Apple says you can insert a SIM from another carrier so the device activates, or follow the new carrier’s eSIM setup process. Use a plan that is active and known to support your exact iPhone model. A successful activation and connection provide useful real-world confirmation.',
+        links: [
+          { label: 'Follow Apple’s post-unlock activation steps', href: 'https://support.apple.com/en-us/109316' },
+          { label: 'Check Apple’s eSIM setup requirements', href: 'https://support.apple.com/en-us/118669' },
+        ],
+      },
+      { kind: 'h3', id: 'failed-test', text: 'Why a failed SIM or eSIM test is not proof of a lock' },
+      {
+        kind: 'table',
+        head: ['What you see', 'Check before ordering an unlock'],
+        rows: [
+          ['SIM not supported during activation', 'Recheck Carrier Lock and ask the original carrier whether its authorization completed.'],
+          ['Unable to add or activate eSIM', 'Confirm model, region and provider eSIM support, then ask the new carrier to verify provisioning.'],
+          ['SOS or No Service', 'Check line activation, coverage, outages, carrier settings, compatibility and any device bar.'],
+          ['SIM PIN, Locked SIM or PUK prompt', 'Contact the provider that issued that SIM or eSIM; do not guess the code.'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'A new carrier can confirm whether its plan supports the model and whether the line is provisioned. The original carrier remains responsible for its lock decision. Keeping those roles separate prevents a failed activation from turning into an unnecessary unlock purchase.',
+      },
+      { kind: 'h2', id: 'imei-report', text: 'Method 4: Check iPhone unlock status by IMEI' },
+      {
+        kind: 'p',
+        text: 'An IMEI report is most useful when the iPhone is not available to inspect, such as a remote used-phone purchase, or when you need a dated record from a specific source. It can also help identify the device and original carrier. The report should state which fields are included, where its data comes from and when the lookup was performed.',
+        links: [{ label: 'Learn what an IMEI check can and cannot tell you', href: '/articles/what-an-imei-check-tells-you' }],
+      },
+      {
+        kind: 'list',
+        items: [
+          'Match the returned model to the phone or listing before relying on any status field.',
+          'Read carrier lock, blacklist and Activation Lock fields separately; one clean result does not answer the others.',
+          'Treat the result as a time-stamped lookup, not a guarantee that no later account or lost/stolen report can affect service.',
+          'Do not post a full IMEI in public listings, forums or screenshots.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'An IMEI check does not unlock the iPhone. It reports information available from its data source. If the report and Settings disagree, confirm that both refer to the same IMEI, note the report time, and ask the responsible carrier to resolve the discrepancy.',
+      },
+      { kind: 'h2', id: 'different-locks', text: 'Make sure you are checking the right kind of lock' },
+      {
+        kind: 'table',
+        head: ['Restriction or record', 'What it affects', 'Correct route'],
+        rows: [
+          ['Carrier Lock', 'Use with another cellular carrier', 'The carrier that controls the restriction.'],
+          ['SIM PIN or PUK', 'Access to one physical SIM or eSIM', 'The provider that issued that line.'],
+          ['Device passcode', 'Access to iOS on the phone', 'Apple’s supported passcode-recovery process.'],
+          ['Activation Lock', 'Ownership-linked setup and reactivation', 'The legitimate owner’s Apple Account or Apple’s supported process.'],
+          ['Blacklist or finance issue', 'Network access or an account obligation', 'The reporting carrier, seller or responsible account holder.'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Apple warns not to guess a SIM PIN or PUK because repeated wrong entries can permanently block the SIM or eSIM. Activation Lock instead protects ownership through an Apple Account. Neither issue is removed by changing Carrier Lock.',
+        links: [
+          { label: 'Apple’s SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+          { label: 'Apple’s Activation Lock explanation', href: 'https://support.apple.com/en-us/108794' },
+        ],
+      },
+      { kind: 'h2', id: 'choose-next-step', text: 'Choose the next step from the evidence you have' },
+      {
+        kind: 'table',
+        head: ['Your result', 'Sensible next action'],
+        rows: [
+          ['Settings says No SIM restrictions and another network works', 'No carrier unlock is needed. Keep the evidence if you are selling the phone.'],
+          ['Settings says No SIM restrictions but service fails', 'Troubleshoot compatibility, activation, provisioning, coverage and device status with the new carrier.'],
+          ['Settings shows a restriction', 'Identify the responsible carrier and check its current eligibility process.'],
+          ['Carrier says unlocked but the iPhone still shows restricted', 'Reopen the carrier case with the on-device result.'],
+          ['You cannot inspect the phone', 'Request a current, sourced IMEI report and verify the same IMEI in person before paying the seller.'],
+        ],
+      },
+      {
+        kind: 'cta',
+        text: 'Need a documented status check for an iPhone you cannot inspect? Review the available report fields first, then choose only the check that answers your question.',
+        href: '/services/imei-check',
+        label: 'Compare iPhone IMEI checks',
+      },
+    ],
+    faq: [
+      {
+        question: 'How can I check if my iPhone is unlocked without another SIM?',
+        answer: 'Open Settings > General > About and read Carrier Lock. Apple says “No SIM restrictions” means the iPhone is unlocked. You can also ask the responsible carrier to confirm its record.',
+      },
+      {
+        question: 'Can I check whether an iPhone is unlocked by IMEI?',
+        answer: 'A sourced IMEI report can return an unlock-status field without the phone in hand. Check the report scope and date, match the device, and remember that the report supplies information rather than changing the lock.',
+      },
+      {
+        question: 'Does “No SIM restrictions” mean any eSIM will work?',
+        answer: 'No. It confirms carrier-unlocked status, but the iPhone model, region, new provider and plan must also support eSIM, and the line still needs successful provisioning and activation.',
+      },
+      {
+        question: 'Why does my unlocked iPhone say SIM not supported?',
+        answer: 'First recheck Carrier Lock and confirm the original carrier completed its authorization. If the iPhone still shows No SIM restrictions, ask the new carrier to check compatibility, activation and provisioning.',
+      },
+      {
+        question: 'Is a SIM PIN the same as an iPhone carrier lock?',
+        answer: 'No. A SIM PIN protects one SIM or eSIM and is handled by the provider that issued it. Carrier Lock restricts which cellular carriers the iPhone can use.',
+      },
+    ],
+  },
+  {
     slug: 'straight-talk-iphone-unlock-request-checklist',
     title: 'Straight Talk iPhone Unlock: Request Guide',
     heading: 'Straight Talk iPhone Unlock: What to Check Before You Request It',
