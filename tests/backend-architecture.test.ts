@@ -9,11 +9,14 @@ const workDir = mkdtempSync(join(tmpdir(), 'iunlockmobile-backend-'))
 const databasePath = join(workDir, 'legacy.db')
 
 process.env.IUNLOCKMOBILE_DB = databasePath
-process.env.IUNLOCKMOBILE_USDT_BEP20_ADDRESS = '0x1111111111111111111111111111111111111111'
-process.env.IUNLOCKMOBILE_USDT_BEP20_CONTRACT = '0x55d398326f99059ff775485246999027b3197955'
-process.env.IUNLOCKMOBILE_USDT_DECIMALS = '18'
-process.env.IUNLOCKMOBILE_TOPUP_MODE = 'bnb_rpc'
+process.env.IUNLOCKMOBILE_TOPUP_ENABLED = '1'
+process.env.IUNLOCKMOBILE_EVM_RECEIVING_ADDRESS = '0x1111111111111111111111111111111111111111'
+process.env.IUNLOCKMOBILE_TRON_RECEIVING_ADDRESS = 'TBXSw8fM4jpQkGc6zZjsVABFpVN7UvXPdV'
+process.env.IUNLOCKMOBILE_TOPUP_BEP20_BSC_USD_ENABLED = '1'
+process.env.IUNLOCKMOBILE_TOPUP_ERC20_USDT_ENABLED = '1'
+process.env.IUNLOCKMOBILE_TOPUP_TRC20_USDT_ENABLED = '1'
 process.env.IUNLOCKMOBILE_ETHERSCAN_API_KEY = 'test-etherscan-key'
+process.env.IUNLOCKMOBILE_TRONGRID_API_KEY = 'test-trongrid-key'
 delete process.env.IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION
 
 const legacy = new Database(databasePath)
@@ -198,6 +201,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-09-bscscan-invoice-verification-v2',
       '2026-09-imei-check-imei-encryption-v1',
       '2026-09-ledger-effect-uniqueness-v1',
+      '2026-09-multichain-topup-v1',
       '2026-09-paid-imei-reports-v1',
       '2026-09-paid-report-imei-encryption-v1',
       '2026-09-provider-code-v1',
@@ -1133,7 +1137,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
 test('top-ups accept positive cent amounts without a minimum and settle exactly once', async () => {
   const user = auth.register('small-topups', 'small-topups@example.test', 'correct-horse-battery-staple')
   const { parseUsd } = await import('../lib/money')
-  const gateway = payments.GATEWAYS.find((entry) => entry.id === 'crypto_networks')!
+  const gateway = payments.GATEWAYS.find((entry) => entry.id === 'bsc-usdt-peg')!
   const previousFee = gateway.feeBasisPoints
   gateway.feeBasisPoints = 200
   let totalCredit = 0
@@ -1171,7 +1175,7 @@ test('top-ups accept positive cent amounts without a minimum and settle exactly 
 
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
-  const invoice = payments.createInvoice(user.id, 'crypto_networks', 2500)
+  const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 2500)
   payments.submitPaymentReference(invoice.reference, user.id, `0x${'a'.repeat(64)}`, 'integration test')
 
   payments.approveInvoice(invoice.reference, user.id, 'provider-charge-1')

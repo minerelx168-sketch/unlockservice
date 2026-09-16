@@ -26,8 +26,8 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
           <span className="eyebrow">Secure account funding</span>
           <h1>Add credit in four clear steps.</h1>
           <p>
-            Create a locked payment request, send the exact USDT amount on BNB Smart Chain,
-            then paste the transaction hash. Verification and credit delivery are automatic.
+            Choose a supported token and network, create a locked payment request, then paste the transaction ID.
+            The server verifies the allowlisted contract, receiving wallet and on-chain amount before adding credit.
           </p>
         </div>
         <div className="funding-balance-card">
@@ -40,7 +40,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
       <ol className="funding-progress" aria-label="Add funds process">
         <li><span>1</span><strong>Choose amount</strong><small>Preview the exact total</small></li>
         <li><span>2</span><strong>Create request</strong><small>Numbers are locked</small></li>
-        <li><span>3</span><strong>Send and paste hash</strong><small>Use BEP-20 only</small></li>
+        <li><span>3</span><strong>Send and paste ID</strong><small>Match the selected network</small></li>
         <li><span>4</span><strong>Credit verified</strong><small>Added once on confirmation</small></li>
       </ol>
 
@@ -64,7 +64,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
           <header>
             <div>
               <h2>Create payment request</h2>
-              <p className="t-small">One method, one network, and a locked amount before you send.</p>
+              <p className="t-small">Select one token and network; your invoice locks the verified route before you send.</p>
             </div>
             <span>No minimum top-up</span>
           </header>
@@ -78,6 +78,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
                   network: gateway.network,
                   feeBasisPoints: gateway.feeBasisPoints,
                   automaticVerification: gateway.automaticVerification,
+                  riskClassification: gateway.riskClassification,
                 }))}
                 maxCents={MAX_TOPUP_CENTS}
                 initialCents={shortfall > 0 ? Math.min(MAX_TOPUP_CENTS, shortfall) : undefined}
@@ -100,8 +101,8 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
             <Icon name="shield" strokeWidth={1.9} />
             <h2>Before you send</h2>
           </div>
-          <p>Only send the listed USDT token on BNB Smart Chain (BEP-20). Other networks and tokens cannot be auto-verified.</p>
-          <p>Copy the exact amount and wallet from your invoice. Never reuse a transaction hash for another invoice.</p>
+          <p>Use only the token, contract and network shown on the invoice. A wallet address may look valid on another network but still be the wrong destination.</p>
+          <p>Copy the amount and wallet from your invoice. Never reuse a transaction ID for another invoice.</p>
           <p>iUnlockMobile will never ask for your wallet password, private key, seed phrase, or remote wallet access.</p>
           <Link className="link-arrow" href="/user/payments">View payment history</Link>
         </aside>

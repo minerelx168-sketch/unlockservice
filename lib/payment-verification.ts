@@ -4,17 +4,25 @@ import { credit, getBalance, type Balance } from './credits'
 import { db } from './db'
 import { consumeAttempt } from './rate-limit'
 import {
-  isTransactionHash,
-  paymentVerificationConfiguration,
+  normalizeEvmAddress,
+  normalizeTransactionId,
+  paymentProviderConfiguration,
+  paymentRouteConfiguration,
+  paymentRouteDefinition,
+  paymentRoutesConfiguration,
+  paymentTransactionUrl,
+  tronAddressToHex20,
+  type PaymentChainKind,
+  type PaymentProviderMode,
 } from './payment-config'
+import {
+  inspectPaymentTransaction,
+  PaymentProviderError,
+} from './payment-chain-provider'
 
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ADMIN_KEY_PATTERN = /^[A-Za-z0-9._:-]{8,100}$/
-const MAX_RESPONSE_BYTES = 1_000_000
-const CHAIN_PROVIDER_REQUEST_INTERVAL_MS = 250
 const INVOICE_TIME_SKEW_MS = 5 * 60_000
-let nextChainProviderRequestAt = 0
-let validatedRpcEndpoint = ''
 
 type VerificationStatus = 'submitted' | 'confirming' | 'verified' | 'manual_review' | 'rejected'
 
@@ -37,6 +45,12 @@ type InvoiceVerificationRow = {
   verified_credit_cents: number | null
   receipt_block_number: number | null
   receipt_block_timestamp: string | null
+  payment_route_id: string | null
+  network_id: string | null
+  chain_kind: PaymentChainKind | null
+  asset_code: string | null
+  provider_mode: PaymentProviderMode | null
+  confirmations_required: number | null
   invoice_created_at: string
   status: VerificationStatus
   confirmations: number
@@ -61,6 +75,7 @@ export type AdminInvoiceReview = InvoiceVerificationRow & {
   tax_cents: number
   currency: string
   invoice_created_at: string
+  explorer_url: string | null
 }
 
 export type PaymentVerificationCode =
@@ -155,29 +170,35 @@ function addEvent(
 export function submitInvoiceTransaction(
   reference: string,
   userId: number,
-  transactionHash: string,
+  transactionId: string,
   note: string,
 ): InvoiceVerificationView {
-  const config = paymentVerificationConfiguration()
-  if (!config.enabled) {
-    throw new PaymentVerificationError('Automatic payment verification is not configured. Do not send funds.', 'unavailable')
-  }
-
-  const txHash = transactionHash.trim().toLowerCase()
-  if (!isTransactionHash(txHash)) {
-    throw new PaymentVerificationError('Enter the 66-character transaction hash beginning with 0x.', 'invalid_transaction')
-  }
-
   try {
     return db().transaction(() => {
       const invoice = db()
-        .prepare('SELECT reference, user_id, gateway, status, credit_amount_cents FROM invoices WHERE reference = ? AND user_id = ?')
+        .prepare(
+          `SELECT reference, user_id, gateway, status, credit_amount_cents,
+                  payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
+                  payment_asset_code, payment_token_contract, payment_token_decimals,
+                  payment_destination_address, payment_confirmations_required, payment_provider_mode
+             FROM invoices WHERE reference = ? AND user_id = ?`,
+        )
         .get(reference, userId) as {
           reference: string
           user_id: number
           gateway: string
           status: string
           credit_amount_cents: number
+          payment_route_id: string | null
+          payment_network_id: string | null
+          payment_chain_kind: PaymentChainKind | null
+          payment_chain_id: number | null
+          payment_asset_code: string | null
+          payment_token_contract: string | null
+          payment_token_decimals: number | null
+          payment_destination_address: string | null
+          payment_confirmations_required: number | null
+          payment_provider_mode: PaymentProviderMode | null
         } | undefined
       if (!invoice) throw new PaymentVerificationError('No such invoice.', 'not_found')
       if (invoice.status === 'success') {
@@ -186,15 +207,47 @@ export function submitInvoiceTransaction(
       if (!['pending', 'review'].includes(invoice.status)) {
         throw new PaymentVerificationError(`This invoice cannot accept a transaction while ${invoice.status}.`, 'invalid_state')
       }
-      if (invoice.gateway !== 'crypto_networks') {
-        throw new PaymentVerificationError('This invoice is not configured for on-chain verification.', 'unavailable')
+
+      const routeId = invoice.payment_route_id ?? ''
+      const definition = paymentRouteDefinition(routeId)
+      const route = paymentRouteConfiguration(routeId)
+      if (
+        !definition
+        || !route?.enabled
+        || invoice.gateway !== routeId
+        || invoice.payment_network_id !== definition.networkId
+        || invoice.payment_chain_kind !== definition.chainKind
+        || invoice.payment_chain_id !== definition.chainId
+        || invoice.payment_asset_code !== definition.asset
+        || invoice.payment_provider_mode !== definition.providerMode
+        || invoice.payment_token_decimals !== definition.tokenDecimals
+        || !invoice.payment_token_contract
+        || !invoice.payment_destination_address
+        || !Number.isSafeInteger(invoice.payment_confirmations_required)
+      ) {
+        throw new PaymentVerificationError('This invoice does not have an active verified payment route.', 'unavailable')
+      }
+
+      const configuredContract = canonicalAddress(definition.chainKind, invoice.payment_token_contract)
+      const allowlistedContract = canonicalAddress(definition.chainKind, definition.tokenContract)
+      const destination = canonicalAddress(definition.chainKind, invoice.payment_destination_address)
+      if (!configuredContract || configuredContract !== allowlistedContract || !destination) {
+        throw new PaymentVerificationError('This invoice payment route is invalid. Do not send funds.', 'unavailable')
+      }
+
+      const txHash = normalizeTransactionId(definition.chainKind, transactionId)
+      if (!txHash) {
+        const guidance = definition.chainKind === 'tron'
+          ? 'Enter the 64-character TRON transaction ID.'
+          : 'Enter the 66-character transaction hash beginning with 0x.'
+        throw new PaymentVerificationError(guidance, 'invalid_transaction')
       }
 
       const used = db()
         .prepare('SELECT invoice_reference FROM invoice_verifications WHERE tx_hash = ? COLLATE NOCASE LIMIT 1')
         .get(txHash) as { invoice_reference: string } | undefined
       if (used && used.invoice_reference !== reference) {
-        throw new PaymentVerificationError('This transaction hash is already attached to another invoice.', 'duplicate_transaction')
+        throw new PaymentVerificationError('This transaction is already attached to another invoice.', 'duplicate_transaction')
       }
 
       const existing = verificationRow(reference, userId)
@@ -212,17 +265,25 @@ export function submitInvoiceTransaction(
         .prepare(
           `INSERT INTO invoice_verifications
              (invoice_reference, chain_id, token_contract, token_decimals,
-              destination_address, tx_hash, requested_credit_cents, status, next_attempt_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'submitted', datetime('now'))`,
+              destination_address, tx_hash, requested_credit_cents,
+              payment_route_id, network_id, chain_kind, asset_code, provider_mode,
+              confirmations_required, status, next_attempt_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'submitted', datetime('now'))`,
         )
         .run(
           reference,
-          config.chainId,
-          config.tokenContract,
-          config.tokenDecimals,
-          config.destinationAddress,
+          invoice.payment_chain_id,
+          invoice.payment_token_contract,
+          invoice.payment_token_decimals,
+          invoice.payment_destination_address,
           txHash,
           invoice.credit_amount_cents,
+          routeId,
+          invoice.payment_network_id,
+          invoice.payment_chain_kind,
+          invoice.payment_asset_code,
+          invoice.payment_provider_mode,
+          invoice.payment_confirmations_required,
         )
       db()
         .prepare(
@@ -231,44 +292,32 @@ export function submitInvoiceTransaction(
             WHERE reference = ? AND user_id = ?`,
         )
         .run(txHash, cleanNote(note), reference, userId)
-      addEvent(reference, 'submitted', `submitted:${reference}:${txHash}`)
+      addEvent(reference, 'submitted', `submitted:${reference}:${routeId}:${txHash}`, {
+        metadata: {
+          routeId,
+          networkId: invoice.payment_network_id,
+          assetCode: invoice.payment_asset_code,
+        },
+      })
       return getInvoiceVerification(reference, userId)!
     })()
   } catch (error) {
     if (error instanceof PaymentVerificationError) throw error
     if (error instanceof Error && /UNIQUE constraint failed: invoice_verifications\.tx_hash/i.test(error.message)) {
-      throw new PaymentVerificationError('This transaction hash is already attached to another invoice.', 'duplicate_transaction')
+      throw new PaymentVerificationError('This transaction is already attached to another invoice.', 'duplicate_transaction')
     }
     throw error
   }
 }
 
-type ReceiptLog = {
-  address?: unknown
-  topics?: unknown
-  data?: unknown
-  logIndex?: unknown
-  blockNumber?: unknown
-  transactionHash?: unknown
-  removed?: unknown
-}
-
-type Receipt = {
-  status?: unknown
-  blockNumber?: unknown
-  transactionHash?: unknown
-  logs?: unknown
-}
-
-function parseHexInteger(value: unknown): number | null {
-  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]+$/.test(value)) return null
-  const parsed = Number.parseInt(value.slice(2), 16)
-  return Number.isSafeInteger(parsed) ? parsed : null
-}
-
 function topicAddress(value: unknown): string | null {
   if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(value)) return null
   return `0x${value.slice(-40).toLowerCase()}`
+}
+
+function canonicalAddress(chainKind: PaymentChainKind, value: string): string | null {
+  if (chainKind === 'tron') return tronAddressToHex20(value)
+  return normalizeEvmAddress(value)
 }
 
 function rawAmountToCreditCents(rawAmount: bigint, decimals: number): number | null {
@@ -279,143 +328,6 @@ function rawAmountToCreditCents(rawAmount: bigint, decimals: number): number | n
   const cents = scaled / unit
   if (cents <= 0n || cents > BigInt(Number.MAX_SAFE_INTEGER)) return null
   return Number(cents)
-}
-
-async function paceChainProviderRequest() {
-  const now = Date.now()
-  const waitMs = Math.max(0, nextChainProviderRequestAt - now)
-  nextChainProviderRequestAt = Math.max(now, nextChainProviderRequestAt) + CHAIN_PROVIDER_REQUEST_INTERVAL_MS
-  if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs))
-}
-
-async function chainProviderCall(
-  method: string,
-  params: unknown[],
-  etherscanParameters: Record<string, string>,
-): Promise<unknown> {
-  const config = paymentVerificationConfiguration()
-  if (!config.enabled) throw new UpstreamVerificationError('provider_disabled')
-
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 10_000)
-  try {
-    await paceChainProviderRequest()
-    const response = config.mode === 'bnb_rpc'
-      ? await fetch(config.apiUrl, {
-          method: 'POST',
-          headers: { accept: 'application/json', 'content-type': 'application/json' },
-          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
-          cache: 'no-store',
-          signal: controller.signal,
-        })
-      : await (() => {
-          const url = new URL(config.apiUrl)
-          for (const [key, value] of Object.entries({
-            apikey: config.apiKey,
-            chainid: String(config.chainId),
-            ...etherscanParameters,
-          })) {
-            url.searchParams.set(key, value)
-          }
-          return fetch(url, {
-            method: 'GET',
-            headers: { accept: 'application/json' },
-            cache: 'no-store',
-            signal: controller.signal,
-          })
-        })()
-
-    if (!response.ok) {
-      throw new UpstreamVerificationError(response.status === 429 ? 'provider_rate_limited' : `provider_http_${response.status}`)
-    }
-    const declaredLength = Number(response.headers.get('content-length') ?? '0')
-    if (declaredLength > MAX_RESPONSE_BYTES) throw new UpstreamVerificationError('provider_response_too_large')
-    const text = await response.text()
-    if (text.length > MAX_RESPONSE_BYTES) throw new UpstreamVerificationError('provider_response_too_large')
-    try {
-      return JSON.parse(text) as unknown
-    } catch {
-      throw new UpstreamVerificationError('provider_invalid_json')
-    }
-  } catch (error) {
-    if (error instanceof UpstreamVerificationError) throw error
-    throw new UpstreamVerificationError(error instanceof Error && error.name === 'AbortError' ? 'provider_timeout' : 'provider_unavailable')
-  } finally {
-    clearTimeout(timeout)
-  }
-}
-
-function upstreamErrorCode(value: unknown): string {
-  const message = typeof value === 'string'
-    ? value.toLowerCase()
-    : value && typeof value === 'object' && typeof (value as Record<string, unknown>).message === 'string'
-      ? String((value as Record<string, unknown>).message).toLowerCase()
-      : ''
-  if (message.includes('free api access') || message.includes('paid tier') || message.includes('upgrade your api plan')) {
-    return 'provider_plan_required'
-  }
-  if (message.includes('rate limit') || message.includes('max rate limit')) return 'provider_rate_limited'
-  if (message.includes('invalid api key') || message.includes('missing/invalid api key')) return 'provider_invalid_api_key'
-  return 'provider_rpc_error'
-}
-
-function rpcResult(payload: unknown): unknown {
-  if (!payload || typeof payload !== 'object') throw new UpstreamVerificationError('provider_invalid_response')
-  const record = payload as Record<string, unknown>
-  if (record.error) throw new UpstreamVerificationError(upstreamErrorCode(record.error))
-  if (record.status === '0') throw new UpstreamVerificationError(upstreamErrorCode(record.result ?? record.message))
-  if (!('result' in record)) throw new UpstreamVerificationError('provider_invalid_response')
-  return record.result
-}
-
-async function ensureProviderChain(): Promise<void> {
-  const config = paymentVerificationConfiguration()
-  if (config.mode !== 'bnb_rpc' || validatedRpcEndpoint === config.apiUrl) return
-  const payload = await chainProviderCall('eth_chainId', [], {})
-  if (parseHexInteger(rpcResult(payload)) !== config.chainId) {
-    throw new UpstreamVerificationError('provider_wrong_chain')
-  }
-  validatedRpcEndpoint = config.apiUrl
-}
-
-async function fetchReceipt(txHash: string): Promise<Receipt | null> {
-  await ensureProviderChain()
-  const payload = await chainProviderCall(
-    'eth_getTransactionReceipt',
-    [txHash],
-    { module: 'proxy', action: 'eth_getTransactionReceipt', txhash: txHash },
-  )
-  const result = rpcResult(payload)
-  if (result === null) return null
-  if (!result || typeof result !== 'object') throw new UpstreamVerificationError('provider_invalid_receipt')
-  return result as Receipt
-}
-
-async function fetchLatestBlock(): Promise<number> {
-  const payload = await chainProviderCall('eth_blockNumber', [], { module: 'proxy', action: 'eth_blockNumber' })
-  const result = parseHexInteger(rpcResult(payload))
-  if (result === null) throw new UpstreamVerificationError('provider_invalid_block')
-  return result
-}
-
-async function fetchBlockTimestamp(blockNumber: number): Promise<string> {
-  const tag = `0x${blockNumber.toString(16)}`
-  const payload = await chainProviderCall(
-    'eth_getBlockByNumber',
-    [tag, false],
-    { module: 'proxy', action: 'eth_getBlockByNumber', tag, boolean: 'false' },
-  )
-  const result = rpcResult(payload)
-  if (!result || typeof result !== 'object') throw new UpstreamVerificationError('provider_invalid_block')
-  const block = result as Record<string, unknown>
-  const returnedNumber = parseHexInteger(block.number)
-  const timestampSeconds = parseHexInteger(block.timestamp)
-  if (returnedNumber !== blockNumber || timestampSeconds === null) {
-    throw new UpstreamVerificationError('provider_invalid_block')
-  }
-  const timestamp = new Date(timestampSeconds * 1_000)
-  if (!Number.isFinite(timestamp.getTime())) throw new UpstreamVerificationError('provider_invalid_block')
-  return timestamp.toISOString()
 }
 
 function retryTimestamp(attempt: number): string {
@@ -508,6 +420,9 @@ function settleVerifiedInvoice(
       )
     addEvent(fresh.invoice_reference, 'verified_auto', `verified_auto:${fresh.invoice_reference}:${fresh.tx_hash}:${logIndex}`, {
       metadata: {
+        routeId: fresh.payment_route_id,
+        networkId: fresh.network_id,
+        assetCode: fresh.asset_code,
         chainId: fresh.chain_id,
         confirmations,
         amountMatched: fresh.requested_credit_cents === verifiedCreditCents,
@@ -527,36 +442,57 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
   if (row.status === 'manual_review' || row.status === 'rejected') return 'manual_review'
 
   try {
-    const receipt = await fetchReceipt(row.tx_hash)
+    const definition = paymentRouteDefinition(row.payment_route_id ?? '')
+    const expectedContract = definition ? canonicalAddress(definition.chainKind, definition.tokenContract) : null
+    const snapshottedContract = row.chain_kind ? canonicalAddress(row.chain_kind, row.token_contract) : null
+    const destination = row.chain_kind ? canonicalAddress(row.chain_kind, row.destination_address) : null
+    if (
+      !definition
+      || row.network_id !== definition.networkId
+      || row.chain_kind !== definition.chainKind
+      || row.chain_id !== definition.chainId
+      || row.asset_code !== definition.asset
+      || row.provider_mode !== definition.providerMode
+      || row.token_decimals !== definition.tokenDecimals
+      || !Number.isSafeInteger(row.confirmations_required)
+      || !expectedContract
+      || snapshottedContract !== expectedContract
+      || !destination
+    ) {
+      markManualReview(row, 'payment_route_snapshot_mismatch')
+      return 'manual_review'
+    }
+
+    const provider = paymentProviderConfiguration(definition.providerMode, definition.chainId)
+    if (!provider.enabled) throw new PaymentProviderError('provider_disabled')
+    const receipt = await inspectPaymentTransaction(
+      {
+        providerMode: definition.providerMode,
+        chainKind: definition.chainKind,
+        chainId: definition.chainId,
+      },
+      row.tx_hash,
+    )
     if (!receipt) {
       markRetry(row, 'receipt_pending')
       return 'pending'
     }
-    if (String(receipt.transactionHash ?? '').toLowerCase() !== row.tx_hash) {
+    if (receipt.transactionId !== row.tx_hash) {
       markManualReview(row, 'transaction_hash_mismatch')
       return 'manual_review'
     }
-    if (receipt.status !== '0x1') {
+    if (!receipt.succeeded) {
       markManualReview(row, 'receipt_failed')
       return 'manual_review'
     }
 
-    const blockNumber = parseHexInteger(receipt.blockNumber)
-    if (blockNumber === null || !Array.isArray(receipt.logs)) {
-      throw new UpstreamVerificationError('provider_invalid_receipt')
-    }
-
     const candidates: Array<{ logIndex: number; rawAmount: bigint }> = []
-    for (const value of receipt.logs as ReceiptLog[]) {
-      if (!value || typeof value !== 'object' || value.removed === true) continue
-      if (String(value.address ?? '').toLowerCase() !== row.token_contract) continue
-      if (!Array.isArray(value.topics) || String(value.topics[0] ?? '').toLowerCase() !== TRANSFER_TOPIC) continue
-      if (topicAddress(value.topics[2]) !== row.destination_address) continue
-      if (String(value.transactionHash ?? '').toLowerCase() !== row.tx_hash) continue
-      if (parseHexInteger(value.blockNumber) !== blockNumber) continue
-      const logIndex = parseHexInteger(value.logIndex)
-      if (logIndex === null || typeof value.data !== 'string' || !/^0x[0-9a-fA-F]+$/.test(value.data)) continue
-      candidates.push({ logIndex, rawAmount: BigInt(value.data) })
+    for (const log of receipt.logs) {
+      if (log.contractAddress !== snapshottedContract) continue
+      if (log.topics[0] !== TRANSFER_TOPIC) continue
+      if (topicAddress(log.topics[2]) !== destination) continue
+      if (!/^0x[0-9a-fA-F]+$/.test(log.data)) continue
+      candidates.push({ logIndex: log.logIndex, rawAmount: BigInt(log.data) })
     }
 
     if (candidates.length !== 1) {
@@ -577,11 +513,10 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
       return 'manual_review'
     }
 
-    const blockTimestamp = await fetchBlockTimestamp(blockNumber)
     const invoiceCreatedAt = Date.parse(row.invoice_created_at)
-    const transferTime = Date.parse(blockTimestamp)
+    const transferTime = Date.parse(receipt.blockTimestamp)
     if (!Number.isFinite(invoiceCreatedAt) || !Number.isFinite(transferTime)) {
-      throw new UpstreamVerificationError('provider_invalid_block')
+      throw new PaymentProviderError('provider_invalid_block')
     }
     if (transferTime < invoiceCreatedAt - INVOICE_TIME_SKEW_MS || transferTime > Date.now() + INVOICE_TIME_SKEW_MS) {
       db()
@@ -590,18 +525,15 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
               SET receipt_block_number = ?, receipt_block_timestamp = ?, updated_at = ?
             WHERE invoice_reference = ?`,
         )
-        .run(blockNumber, blockTimestamp, new Date().toISOString(), row.invoice_reference)
+        .run(receipt.blockNumber, receipt.blockTimestamp, new Date().toISOString(), row.invoice_reference)
       markManualReview(row, 'transaction_outside_invoice_window', { transferPredatesInvoice: transferTime < invoiceCreatedAt })
       return 'manual_review'
     }
 
-    const latestBlock = await fetchLatestBlock()
-    if (latestBlock < blockNumber) throw new UpstreamVerificationError('provider_block_inconsistent')
-    const confirmations = latestBlock - blockNumber + 1
-    const config = paymentVerificationConfiguration()
-    if (!config.enabled || config.chainId !== row.chain_id) throw new UpstreamVerificationError('provider_disabled')
-
-    if (confirmations < config.confirmationsRequired) {
+    if (receipt.latestFinalBlock < receipt.blockNumber) throw new PaymentProviderError('provider_block_inconsistent')
+    const confirmations = receipt.latestFinalBlock - receipt.blockNumber + 1
+    const requiredConfirmations = row.confirmations_required ?? 15
+    if (confirmations < requiredConfirmations) {
       const timestamp = new Date().toISOString()
       db()
         .prepare(
@@ -617,8 +549,8 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
           candidate.logIndex,
           candidate.rawAmount.toString(),
           verifiedCreditCents,
-          blockNumber,
-          blockTimestamp,
+          receipt.blockNumber,
+          receipt.blockTimestamp,
           confirmations,
           timestamp,
           retryTimestamp(row.attempt_count + 1),
@@ -627,8 +559,11 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
         )
       addEvent(row.invoice_reference, 'confirmation_wait', `confirmation_wait:${row.invoice_reference}:${confirmations}`, {
         metadata: {
+          routeId: row.payment_route_id,
+          networkId: row.network_id,
+          assetCode: row.asset_code,
           confirmations,
-          required: config.confirmationsRequired,
+          required: requiredConfirmations,
           amountMatched: row.requested_credit_cents === verifiedCreditCents,
           requestedCreditCents: row.requested_credit_cents,
           verifiedCreditCents,
@@ -642,13 +577,13 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
       candidate.logIndex,
       candidate.rawAmount.toString(),
       verifiedCreditCents,
-      blockNumber,
-      blockTimestamp,
+      receipt.blockNumber,
+      receipt.blockTimestamp,
       confirmations,
     )
     return 'verified'
   } catch (error) {
-    if (error instanceof UpstreamVerificationError) {
+    if (error instanceof PaymentProviderError) {
       markRetry(row, error.code)
       return 'pending'
     }
@@ -667,10 +602,10 @@ export type PaymentPollSummary = {
 }
 
 export async function pollInvoiceVerifications(limit = 20): Promise<PaymentPollSummary> {
-  const config = paymentVerificationConfiguration()
+  const providerReady = paymentRoutesConfiguration().some((route) => route.providerReady)
   const safeLimit = Math.max(1, Math.min(Math.trunc(limit), 100))
   const summary: PaymentPollSummary = {
-    enabled: config.enabled,
+    enabled: providerReady,
     seen: 0,
     verified: 0,
     confirming: 0,
@@ -678,7 +613,7 @@ export async function pollInvoiceVerifications(limit = 20): Promise<PaymentPollS
     pending: 0,
     errors: 0,
   }
-  if (!config.enabled) return summary
+  if (!providerReady) return summary
 
   const rows = db()
     .prepare(
@@ -835,7 +770,7 @@ export function decideInvoiceVerification(
 
 export function listAdminInvoiceReviews(limit = 50): AdminInvoiceReview[] {
   const safeLimit = Math.max(1, Math.min(Math.trunc(limit), 100))
-  return db()
+  const rows = db()
     .prepare(
       `SELECT v.*, i.user_id, i.status AS invoice_status,
               i.gateway, i.credit_amount_cents, i.fee_cents, i.tax_cents,
@@ -848,5 +783,9 @@ export function listAdminInvoiceReviews(limit = 50): AdminInvoiceReview[] {
         ORDER BY CASE v.status WHEN 'manual_review' THEN 0 ELSE 1 END, v.updated_at ASC
         LIMIT ?`,
     )
-    .all(safeLimit) as AdminInvoiceReview[]
+    .all(safeLimit) as Array<Omit<AdminInvoiceReview, 'explorer_url'>>
+  return rows.map((row) => ({
+    ...row,
+    explorer_url: paymentTransactionUrl(row.payment_route_id, row.tx_hash),
+  }))
 }

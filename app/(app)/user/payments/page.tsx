@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { requireSession } from '@/lib/auth'
 import { creditSummary } from '@/lib/credits'
 import { formatUsd } from '@/lib/money'
-import { invoiceSummary, listInvoices, shortReference } from '@/lib/payments'
+import { invoiceGateway, invoiceSummary, listInvoices, shortReference, type Invoice } from '@/lib/payments'
 
 export const metadata: Metadata = { title: 'Payments' }
 export const dynamic = 'force-dynamic'
@@ -22,6 +22,11 @@ const STATUS_LABEL: Record<string, string> = {
   pending: 'Awaiting transfer',
   failed: 'Closed',
   refunded: 'Refunded',
+}
+
+function paymentMethod(invoice: Invoice): string {
+  const gateway = invoiceGateway(invoice)
+  return gateway ? `${gateway.asset} · ${gateway.network}` : 'Legacy payment request'
 }
 
 const FILTERS = [
@@ -115,7 +120,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
               {invoices.map((invoice) => (
                 <tr role="row" key={invoice.reference}>
                   <td role="cell" className="mono" data-label="Request">{shortReference(invoice.reference)}</td>
-                  <td role="cell" data-label="Method">USDT · BNB Smart Chain</td>
+                  <td role="cell" data-label="Method">{paymentMethod(invoice)}</td>
                   <td role="cell" className="num" data-label="Credit amount">{formatUsd(invoice.credit_amount_cents)}</td>
                   <td role="cell" className="num" data-label="Transfer / request">{formatUsd(invoice.total_due_cents)}</td>
                   <td role="cell" data-label="Status">

@@ -36,6 +36,7 @@ export function AddFundsForm({
     network: string
     feeBasisPoints: number
     automaticVerification: boolean
+    riskClassification: 'issuer_native' | 'third_party_pegged'
   }>
   maxCents: number
   initialCents?: number
@@ -104,10 +105,13 @@ export function AddFundsForm({
               onClick={() => setGatewayId(entry.id)}
               aria-pressed={entry.id === gatewayId}
             >
-              <span className="payment-method-icon">₮</span>
+              <span className="payment-method-icon">{entry.asset === 'USDC' ? '$' : '₮'}</span>
               <span>
                 <strong>{entry.label}</strong>
                 <small>{entry.asset} · {entry.network}</small>
+                {entry.riskClassification === 'third_party_pegged' ? (
+                  <small>Binance-issued pegged representation</small>
+                ) : null}
               </span>
               <span className="badge badge--success">Auto verification</span>
             </button>
@@ -146,8 +150,21 @@ export function AddFundsForm({
   )
 }
 
-export function PaymentReferenceForm({ reference, returnTo }: { reference: string; returnTo?: string | null }) {
+export function PaymentReferenceForm({
+  reference,
+  returnTo,
+  chainKind,
+  network,
+  asset,
+}: {
+  reference: string
+  returnTo?: string | null
+  chainKind: 'evm' | 'tron'
+  network: string
+  asset: string
+}) {
   const [state, action, pending] = useActionState(submitReferenceAction, EMPTY)
+  const isTron = chainKind === 'tron'
 
   return (
     <form action={action} className="form-grid payment-hash-form">
@@ -155,22 +172,22 @@ export function PaymentReferenceForm({ reference, returnTo }: { reference: strin
       <input type="hidden" name="reference" value={reference} />
       <input type="hidden" name="next" value={returnTo ?? ''} />
       <div className="field">
-        <label htmlFor="paymentReference">BSC transaction hash</label>
+        <label htmlFor="paymentReference">{isTron ? 'TRON transaction ID' : 'Transaction hash'}</label>
         <input
           id="paymentReference"
           name="paymentReference"
           className="mono"
           autoComplete="off"
           spellCheck={false}
-          placeholder="0x…"
-          pattern="0x[a-fA-F0-9]{64}"
-          minLength={66}
-          maxLength={66}
+          placeholder={isTron ? '64 hexadecimal characters' : '0x…'}
+          pattern={isTron ? '[a-fA-F0-9]{64}' : '0x[a-fA-F0-9]{64}'}
+          minLength={isTron ? 64 : 66}
+          maxLength={isTron ? 64 : 66}
           aria-describedby="transaction-help"
           required
         />
         <p className="field-note" id="transaction-help">
-          Paste the 66-character transaction hash after sending supported USDT. The verified on-chain amount determines the credit; a wallet address is not a transaction hash.
+          Paste the transaction identifier after sending {asset} on {network}. The verified on-chain amount determines the credit; a wallet address is not a transaction ID.
         </p>
       </div>
       <div className="field">

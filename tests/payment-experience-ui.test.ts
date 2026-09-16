@@ -4,29 +4,34 @@ import test from 'node:test'
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
 
-test('Add funds presents quick amounts, locked summary and one auto-verified method', () => {
+test('Add funds presents quick amounts, locked summary and explicit multi-chain method selection', () => {
   const page = read('app/(app)/user/add-funds/page.tsx')
   const form = read('components/payment-forms.tsx')
   assert.match(page, /Add credit in four clear steps/)
   assert.match(page, /Automatic verification ready/)
+  assert.match(page, /Use only the token, contract and network shown on the invoice/)
   assert.match(form, /QUICK_AMOUNTS = \[10, 25, 50, 100\]/)
   assert.match(form, /Suggested amount to send/)
   assert.match(form, /verified on-chain amount determines the credit/i)
+  assert.match(form, /Binance-issued pegged representation/)
   assert.match(form, /Create payment request/)
   assert.match(form, /private key or seed phrase/)
 })
 
-test('invoice page keeps BscScan calls off the browser and refreshes database state only', () => {
+test('invoice page uses per-route explorer metadata and refreshes database state only', () => {
   const page = read('app/(app)/user/invoice/[reference]/page.tsx')
   const actions = read('components/invoice-actions.tsx')
   const form = read('components/payment-forms.tsx')
   assert.match(page, /paymentAddressQrDataUrl/)
   assert.match(page, /AutoRefreshPaymentStatus/)
-  assert.match(page, /https:\/\/bscscan\.com\/tx\//)
+  assert.match(page, /paymentTransactionUrl/)
+  assert.doesNotMatch(page, /https:\/\/bscscan\.com\/tx\//)
   assert.match(actions, /router\.refresh\(\)/)
   assert.match(actions, /5_000/)
   assert.doesNotMatch(actions, /fetch\(/)
-  assert.match(form, /pattern="0x\[a-fA-F0-9\]\{64\}"/)
+  assert.match(form, /chainKind: 'evm' \| 'tron'/)
+  assert.match(form, /\[a-fA-F0-9\]\{64\}/)
+  assert.match(form, /0x\[a-fA-F0-9\]\{64\}/)
 })
 
 test('bounded payment reconciliation runs inside the existing provider poll entrypoint', () => {
@@ -36,7 +41,7 @@ test('bounded payment reconciliation runs inside the existing provider poll entr
   assert.doesNotMatch(script, /setInterval|setTimeout/)
 })
 
-test('admin fallback uses API guard, admin RBAC, reason and idempotency', () => {
+test('admin fallback uses API guard, admin RBAC, reason, idempotency and route-specific explorer links', () => {
   const route = read('app/api/admin/invoice-verifications/route.ts')
   const component = read('components/admin-invoice-review.tsx')
   const domain = read('lib/payment-verification.ts')
@@ -45,22 +50,30 @@ test('admin fallback uses API guard, admin RBAC, reason and idempotency', () => 
   assert.match(component, /csrfToken/)
   assert.match(component, /idempotencyKey/)
   assert.match(component, /Decision reason/)
+  assert.match(component, /explorer_url/)
+  assert.doesNotMatch(component, /https:\/\/bscscan\.com\/tx\//)
   assert.match(domain, /consumeAttempt\('admin-invoice-verification'/)
   assert.match(domain, /credit\(row\.user_id, approvedCreditCents, 'topup', 'invoice'/)
 })
 
-test('payment verification is fail closed and matches receipt logs by contract, recipient and exact amount', () => {
+test('payment verification is fail closed and delegates chain reads to server-side adapters', () => {
   const config = read('lib/payment-config.ts')
+  const provider = read('lib/payment-chain-provider.ts')
   const domain = read('lib/payment-verification.ts')
-  assert.match(config, /mode === 'bnb_rpc'/)
-  assert.match(domain, /config\.mode === 'bnb_rpc'/)
-  assert.match(domain, /eth_chainId/)
-  assert.match(config, /Boolean\(destinationAddress\)/)
-  assert.match(config, /Boolean\(tokenContract\)/)
-  assert.match(domain, /eth_getTransactionReceipt/)
-  assert.match(domain, /eth_blockNumber/)
-  assert.match(domain, /value\.address/)
-  assert.match(domain, /topicAddress\(value\.topics\[2\]\)/)
+  assert.match(config, /IUNLOCKMOBILE_TOPUP_ENABLED/)
+  assert.match(config, /PAYMENT_ROUTE_DEFINITIONS/)
+  assert.match(config, /IUNLOCKMOBILE_TOPUP_TRC20_USDT_ENABLED/)
+  assert.match(config, /IUNLOCKMOBILE_TOPUP_BEP20_BSC_USD_ENABLED/)
+  assert.match(config, /IUNLOCKMOBILE_TOPUP_ERC20_USDT_ENABLED/)
+  assert.match(provider, /eth_chainId/)
+  assert.match(provider, /eth_getTransactionReceipt/)
+  assert.match(provider, /eth_blockNumber/)
+  assert.match(provider, /wallet\/gettransactioninfobyid/)
+  assert.match(provider, /walletsolidity\/getnowblock/)
+  assert.match(provider, /TRON-PRO-API-KEY/)
+  assert.match(domain, /payment_route_snapshot_mismatch/)
+  assert.match(domain, /log\.contractAddress !== snapshottedContract/)
+  assert.match(domain, /topicAddress\(log\.topics\[2\]\) !== destination/)
   assert.match(domain, /rawAmountToCreditCents\(candidate\.rawAmount/)
   assert.match(domain, /requestedCreditCents/)
   assert.match(domain, /verifiedCreditCents/)

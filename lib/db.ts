@@ -122,6 +122,16 @@ CREATE TABLE IF NOT EXISTS invoices (
   idempotency_key    TEXT,
   paid_at            TEXT,
   credited_at        TEXT,
+  payment_route_id   TEXT,
+  payment_network_id TEXT,
+  payment_chain_kind TEXT,
+  payment_chain_id   INTEGER,
+  payment_asset_code TEXT,
+  payment_token_contract TEXT,
+  payment_token_decimals INTEGER,
+  payment_destination_address TEXT,
+  payment_confirmations_required INTEGER,
+  payment_provider_mode TEXT,
   created_at         TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at         TEXT    NOT NULL DEFAULT (datetime('now'))
 );
@@ -140,6 +150,12 @@ CREATE TABLE IF NOT EXISTS invoice_verifications (
   verified_credit_cents INTEGER,
   receipt_block_number INTEGER,
   receipt_block_timestamp TEXT,
+  payment_route_id      TEXT,
+  network_id            TEXT,
+  chain_kind            TEXT,
+  asset_code            TEXT,
+  provider_mode         TEXT,
+  confirmations_required INTEGER,
   status               TEXT    NOT NULL DEFAULT 'submitted',
   confirmations        INTEGER NOT NULL DEFAULT 0,
   attempt_count        INTEGER NOT NULL DEFAULT 0,
@@ -494,6 +510,16 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'invoices', 'idempotency_key TEXT')
     addColumn(connection, 'invoices', 'paid_at TEXT')
     addColumn(connection, 'invoices', 'credited_at TEXT')
+    addColumn(connection, 'invoices', 'payment_route_id TEXT')
+    addColumn(connection, 'invoices', 'payment_network_id TEXT')
+    addColumn(connection, 'invoices', 'payment_chain_kind TEXT')
+    addColumn(connection, 'invoices', 'payment_chain_id INTEGER')
+    addColumn(connection, 'invoices', 'payment_asset_code TEXT')
+    addColumn(connection, 'invoices', 'payment_token_contract TEXT')
+    addColumn(connection, 'invoices', 'payment_token_decimals INTEGER')
+    addColumn(connection, 'invoices', 'payment_destination_address TEXT')
+    addColumn(connection, 'invoices', 'payment_confirmations_required INTEGER')
+    addColumn(connection, 'invoices', 'payment_provider_mode TEXT')
     addColumn(connection, 'orders', 'provider_name TEXT')
     addColumn(connection, 'orders', 'provider_mode TEXT')
     addColumn(connection, 'orders', 'provider_service_id TEXT')
@@ -513,6 +539,12 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'invoice_verifications', 'receipt_block_timestamp TEXT')
     addColumn(connection, 'invoice_verifications', 'requested_credit_cents INTEGER')
     addColumn(connection, 'invoice_verifications', 'verified_credit_cents INTEGER')
+    addColumn(connection, 'invoice_verifications', 'payment_route_id TEXT')
+    addColumn(connection, 'invoice_verifications', 'network_id TEXT')
+    addColumn(connection, 'invoice_verifications', 'chain_kind TEXT')
+    addColumn(connection, 'invoice_verifications', 'asset_code TEXT')
+    addColumn(connection, 'invoice_verifications', 'provider_mode TEXT')
+    addColumn(connection, 'invoice_verifications', 'confirmations_required INTEGER')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
 
@@ -704,6 +736,35 @@ function migrate(connection: Database.Database) {
           WHERE requested_credit_cents IS NULL`,
       ).run()
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-usdt-verified-amount-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-multichain-topup-v1')) {
+      connection.prepare(
+        `UPDATE invoice_verifications
+            SET payment_route_id = COALESCE(payment_route_id, 'bsc-usdt-peg'),
+                network_id = COALESCE(network_id, 'bsc-mainnet'),
+                chain_kind = COALESCE(chain_kind, 'evm'),
+                asset_code = COALESCE(asset_code, 'BSC-USD'),
+                provider_mode = COALESCE(provider_mode, 'bnb_rpc'),
+                confirmations_required = COALESCE(confirmations_required, 15)
+          WHERE chain_id = 56
+            AND lower(token_contract) = '0x55d398326f99059ff775485246999027b3197955'`,
+      ).run()
+      connection.prepare(
+        `UPDATE invoices
+            SET payment_route_id = COALESCE(payment_route_id, (SELECT payment_route_id FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_network_id = COALESCE(payment_network_id, (SELECT network_id FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_chain_kind = COALESCE(payment_chain_kind, (SELECT chain_kind FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_chain_id = COALESCE(payment_chain_id, (SELECT chain_id FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_asset_code = COALESCE(payment_asset_code, (SELECT asset_code FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_token_contract = COALESCE(payment_token_contract, (SELECT token_contract FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_token_decimals = COALESCE(payment_token_decimals, (SELECT token_decimals FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_destination_address = COALESCE(payment_destination_address, (SELECT destination_address FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_confirmations_required = COALESCE(payment_confirmations_required, (SELECT confirmations_required FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_provider_mode = COALESCE(payment_provider_mode, (SELECT provider_mode FROM invoice_verifications WHERE invoice_reference = invoices.reference))
+          WHERE EXISTS (SELECT 1 FROM invoice_verifications WHERE invoice_reference = invoices.reference)`,
+      ).run()
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-multichain-topup-v1')
     }
 
     connection.exec(`

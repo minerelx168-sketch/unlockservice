@@ -8,9 +8,10 @@ import { AutoRefreshPaymentStatus, CopyValue, PaymentAddress } from '@/component
 import { requireSession } from '@/lib/auth'
 import { safeContinuation } from '@/lib/continuation'
 import { formatUsd } from '@/lib/money'
-import { GATEWAYS, getInvoice, selfApprovalEnabled, shortReference } from '@/lib/payments'
+import { getInvoice, invoiceGateway, selfApprovalEnabled, shortReference } from '@/lib/payments'
 import { getInvoiceVerification } from '@/lib/payment-verification'
 import { paymentAddressQrDataUrl } from '@/lib/payment-qr'
+import { paymentTransactionUrl } from '@/lib/payment-config'
 
 export const metadata: Metadata = { title: 'Payment request' }
 export const dynamic = 'force-dynamic'
@@ -48,14 +49,14 @@ export default async function InvoicePage({
   const invoice = getInvoice(reference, user.id)
   if (!invoice) notFound()
 
-  const gateway = GATEWAYS.find((entry) => entry.id === invoice.gateway)
+  const gateway = invoiceGateway(invoice)
   const verification = getInvoiceVerification(invoice.reference, user.id)
   const settled = invoice.status === 'success'
   const closed = invoice.status === 'failed' || invoice.status === 'refunded'
   const status = statusCopy(invoice.status, verification?.status)
   const refreshActive = invoice.status === 'review' && ['submitted', 'confirming'].includes(verification?.status ?? '')
   const qrDataUrl = gateway ? await paymentAddressQrDataUrl(gateway.address).catch(() => null) : null
-  const explorerUrl = verification ? `https://bscscan.com/tx/${verification.tx_hash}` : null
+  const explorerUrl = verification ? paymentTransactionUrl(verification.payment_route_id, verification.tx_hash) : null
   const requestedCreditCents = verification?.requested_credit_cents ?? invoice.credit_amount_cents
   const verifiedCreditCents = verification?.verified_credit_cents ?? null
   const requestedTokenUnits = (requestedCreditCents / 100).toFixed(2)
@@ -86,7 +87,7 @@ export default async function InvoicePage({
           <section className="panel transfer-card">
             <header>
               <div>
-                <h2>Send USDT on BNB Smart Chain</h2>
+                <h2>{gateway ? `Send ${gateway.asset} on ${gateway.network}` : 'Payment instructions unavailable'}</h2>
                 <p className="t-small">Use only the asset and network shown below.</p>
               </div>
               <span>{gateway ? `${gateway.asset} · ${gateway.network}` : invoice.gateway}</span>
@@ -96,8 +97,12 @@ export default async function InvoicePage({
                 <div className="transfer-layout">
                   <div className="transfer-details">
                     <div className="network-banner">
-                      <span className="payment-method-icon">₮</span>
-                      <div><strong>{gateway.asset}</strong><small>{gateway.network}</small></div>
+                      <span className="payment-method-icon">{gateway.asset === 'USDC' ? '$' : '₮'}</span>
+                      <div>
+                        <strong>{gateway.asset}</strong>
+                        <small>{gateway.network}</small>
+                        {gateway.riskClassification === 'third_party_pegged' ? <small>Binance-issued pegged representation</small> : null}
+                      </div>
                       <span className="badge badge--success">Auto verification</span>
                     </div>
                     <CopyValue
@@ -111,8 +116,9 @@ export default async function InvoicePage({
                     <p className="alert alert--warning">
                       <Icon name="info" strokeWidth={1.9} />
                       <span>
-                        Send only the supported token on BNB Smart Chain. Credit is based on the verified on-chain amount;
-                        amounts that cannot be represented exactly in cents require manual review. Blockchain transfers cannot be reversed.
+                        Send only {gateway.asset} on {gateway.network} to this address. The token contract and network must match this request.
+                        Credit is based on the verified on-chain amount; amounts that cannot be represented exactly in cents require manual review.
+                        Blockchain transfers cannot be reversed.
                       </span>
                     </p>
                   </div>
@@ -120,7 +126,7 @@ export default async function InvoicePage({
                     <div className="payment-qr">
                       <Image src={qrDataUrl} width={220} height={220} alt="QR code containing the payment wallet address" unoptimized />
                       <strong>Scan wallet address</strong>
-                      <small>Confirm BNB Smart Chain, the supported token contract and the receiving address before sending.</small>
+                      <small>Confirm {gateway.network}, the listed token and the receiving address before sending.</small>
                     </div>
                   ) : null}
                 </div>
@@ -148,7 +154,7 @@ export default async function InvoicePage({
             <section className="panel verification-card">
               <header>
                 <div>
-                  <h2>{verification ? 'Automatic verification' : 'Paste your transaction hash'}</h2>
+                  <h2>{verification ? 'Automatic verification' : 'Paste your transaction ID'}</h2>
                   <p className="t-small">Submitting a hash never adds credit by itself.</p>
                 </div>
                 {verification ? <span>{verification.confirmations} confirmations</span> : null}
@@ -162,12 +168,18 @@ export default async function InvoicePage({
                       {verifiedCreditCents !== null ? (
                         <p className="t-small">Verified on-chain amount: <strong>{formatUsd(verifiedCreditCents)}</strong></p>
                       ) : null}
-                      {explorerUrl ? <Link className="link-arrow" href={explorerUrl} target="_blank" rel="noreferrer">View transaction on BscScan</Link> : null}
+                      {explorerUrl ? <Link className="link-arrow" href={explorerUrl} target="_blank" rel="noreferrer">View transaction on explorer</Link> : null}
                     </div>
                     <AutoRefreshPaymentStatus active={refreshActive} />
                   </div>
                 ) : gateway ? (
-                  <PaymentReferenceForm reference={invoice.reference} returnTo={returnTo} />
+                  <PaymentReferenceForm
+                    reference={invoice.reference}
+                    returnTo={returnTo}
+                    chainKind={gateway.chainKind}
+                    network={gateway.network}
+                    asset={gateway.asset}
+                  />
                 ) : null}
 
                 {selfApprovalEnabled() ? (

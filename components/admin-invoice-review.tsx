@@ -15,6 +15,10 @@ export type InvoiceReviewItem = {
   total_due_cents: number
   currency: string
   tx_hash: string
+  payment_route_id: string | null
+  network_id: string | null
+  asset_code: string | null
+  explorer_url: string | null
   status: string
   confirmations: number
   error_code: string | null
@@ -94,14 +98,17 @@ function ReviewCard({ item, csrfToken }: { item: InvoiceReviewItem; csrfToken: s
       <dl className="admin-invoice-metrics">
         <div><dt>Requested credit</dt><dd>{formatUsd(requestedCreditCents)}</dd></div>
         <div><dt>Verified on-chain</dt><dd>{item.verified_credit_cents === null ? 'Not cent-exact' : formatUsd(item.verified_credit_cents)}</dd></div>
+        <div><dt>Payment route</dt><dd>{item.asset_code ?? 'Legacy'} · {item.network_id ?? 'Unknown network'}</dd></div>
         <div><dt>Confirmations</dt><dd>{item.confirmations}</dd></div>
         <div><dt>Verifier</dt><dd>{item.error_code ? item.error_code.replaceAll('_', ' ') : 'No mismatch'}</dd></div>
       </dl>
 
       <p className="admin-tx-hash mono" title={item.tx_hash}>{item.tx_hash}</p>
-      <a className="link-arrow" href={`https://bscscan.com/tx/${item.tx_hash}`} target="_blank" rel="noreferrer">
-        Inspect transaction on BscScan
-      </a>
+      {item.explorer_url ? (
+        <a className="link-arrow" href={item.explorer_url} target="_blank" rel="noreferrer">
+          Inspect transaction on explorer
+        </a>
+      ) : null}
 
       <div className="field">
         <label htmlFor={`invoice-reason-${item.invoice_reference}`}>Decision reason</label>
