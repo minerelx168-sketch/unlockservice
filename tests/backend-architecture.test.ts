@@ -10,6 +10,10 @@ const databasePath = join(workDir, 'legacy.db')
 
 process.env.IUNLOCKMOBILE_DB = databasePath
 process.env.IUNLOCKMOBILE_USDT_BEP20_ADDRESS = '0x1111111111111111111111111111111111111111'
+process.env.IUNLOCKMOBILE_USDT_BEP20_CONTRACT = '0x55d398326f99059ff775485246999027b3197955'
+process.env.IUNLOCKMOBILE_USDT_DECIMALS = '18'
+process.env.IUNLOCKMOBILE_TOPUP_MODE = 'bnb_rpc'
+process.env.IUNLOCKMOBILE_ETHERSCAN_API_KEY = 'test-etherscan-key'
 delete process.env.IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION
 
 const legacy = new Database(databasePath)
@@ -190,6 +194,8 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
       '2026-09-admin-credit-adjustments-v1',
+      '2026-09-bscscan-invoice-verification-v1',
+      '2026-09-bscscan-invoice-verification-v2',
       '2026-09-imei-check-imei-encryption-v1',
       '2026-09-ledger-effect-uniqueness-v1',
       '2026-09-paid-imei-reports-v1',
@@ -197,6 +203,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-09-provider-code-v1',
       '2026-09-provider-product-catalog-v2',
       '2026-09-provider-product-catalog-v3-strict-rollout',
+      '2026-09-usdt-verified-amount-v1',
     ],
   )
 
@@ -1140,7 +1147,7 @@ test('top-ups accept positive cent amounts without a minimum and settle exactly 
       assert.equal(invoice.total_due_cents, cents + fee)
       assert.equal(payments.createInvoice(user.id, gateway.id, cents).reference, invoice.reference)
 
-      payments.submitPaymentReference(invoice.reference, user.id, `SMALL_TOPUP_${cents}`, '')
+      payments.submitPaymentReference(invoice.reference, user.id, `0x${cents.toString(16).padStart(64, '0')}`, '')
       assert.equal(credits.getBalance(user.id).creditCents, totalCredit)
       payments.approveInvoice(invoice.reference, user.id)
       payments.approveInvoice(invoice.reference, user.id)
@@ -1165,7 +1172,7 @@ test('top-ups accept positive cent amounts without a minimum and settle exactly 
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'crypto_networks', 2500)
-  payments.submitPaymentReference(invoice.reference, user.id, 'TX_REFERENCE_123456', 'integration test')
+  payments.submitPaymentReference(invoice.reference, user.id, `0x${'a'.repeat(64)}`, 'integration test')
 
   payments.approveInvoice(invoice.reference, user.id, 'provider-charge-1')
   const afterFirst = credits.getBalance(user.id)

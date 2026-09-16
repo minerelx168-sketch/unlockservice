@@ -1,6 +1,8 @@
 import { randomBytes } from 'node:crypto'
 import { credit } from './credits'
 import { db } from './db'
+import { paymentVerificationConfiguration } from './payment-config'
+import { submitInvoiceTransaction } from './payment-verification'
 
 /**
  * An invoice locks its numbers at creation. A customer may submit a payment
@@ -39,17 +41,26 @@ export type Gateway = {
   network: string
   feeBasisPoints: number
   address: string
+  tokenContract: string
+  tokenDecimals: number
+  automaticVerification: boolean
 }
 
-export const GATEWAYS: Gateway[] = process.env.IUNLOCKMOBILE_USDT_BEP20_ADDRESS
+const paymentConfig = paymentVerificationConfiguration()
+
+/** A gateway is sellable only when every auto-verification dependency is configured. */
+export const GATEWAYS: Gateway[] = paymentConfig.enabled
   ? [
       {
         id: 'crypto_networks',
-        label: 'Crypto networks',
+        label: 'USDT on BNB Smart Chain',
         asset: 'USDT',
-        network: 'BEP-20',
-        feeBasisPoints: Number(process.env.IUNLOCKMOBILE_USDT_FEE_BPS ?? '0'),
-        address: process.env.IUNLOCKMOBILE_USDT_BEP20_ADDRESS,
+        network: 'BNB Smart Chain (BEP-20)',
+        feeBasisPoints: paymentConfig.feeBasisPoints,
+        address: paymentConfig.destinationAddress,
+        tokenContract: paymentConfig.tokenContract,
+        tokenDecimals: paymentConfig.tokenDecimals,
+        automaticVerification: true,
       },
     ]
   : []
@@ -129,34 +140,20 @@ export function listInvoices(userId: number, limit = 50): Invoice[] {
     .all(userId, limit) as Invoice[]
 }
 
-/** The customer submits evidence; this never changes their balance. */
+/** The customer submits an on-chain transaction hash; this never changes their balance. */
 export function submitPaymentReference(
   reference: string,
   userId: number,
   paymentReference: string,
   note: string,
 ): Invoice {
-  const invoice = invoiceRow(reference, userId)
-  if (!invoice) throw new PaymentError('No such invoice.')
-  if (!GATEWAYS.some((gateway) => gateway.id === invoice.gateway)) {
-    throw new PaymentError('This payment method is not configured. Do not send funds.')
+  try {
+    submitInvoiceTransaction(reference, userId, paymentReference, note)
+    return getInvoice(reference, userId)!
+  } catch (error) {
+    if (error instanceof Error) throw new PaymentError(error.message)
+    throw error
   }
-  if (invoice.status === 'success') throw new PaymentError('This invoice is already settled.')
-  if (!['pending', 'review'].includes(invoice.status)) throw new PaymentError(`This invoice is ${invoice.status}.`)
-
-  const cleanReference = paymentReference.trim()
-  if (!/^[A-Za-z0-9:_-]{6,255}$/.test(cleanReference)) {
-    throw new PaymentError('Enter a valid transaction reference.')
-  }
-
-  db()
-    .prepare(
-      `UPDATE invoices
-          SET payment_reference = ?, note = ?, status = 'review', updated_at = datetime('now')
-        WHERE reference = ? AND user_id = ? AND status IN ('pending', 'review')`,
-    )
-    .run(cleanReference, note.trim().slice(0, 500) || null, reference, userId)
-  return getInvoice(reference, userId)!
 }
 
 /**

@@ -11,6 +11,7 @@ import {
 import { Icon } from './icons'
 
 const EMPTY: FormState = {}
+const QUICK_AMOUNTS = [10, 25, 50, 100]
 
 function Problem({ message }: { message?: string }) {
   if (!message) return null
@@ -28,13 +29,20 @@ export function AddFundsForm({
   initialCents,
   returnTo,
 }: {
-  gateways: Array<{ id: string; label: string; asset: string; network: string; feeBasisPoints: number }>
+  gateways: Array<{
+    id: string
+    label: string
+    asset: string
+    network: string
+    feeBasisPoints: number
+    automaticVerification: boolean
+  }>
   maxCents: number
   initialCents?: number
   returnTo?: string | null
 }) {
   const [state, action, pending] = useActionState(createInvoiceAction, EMPTY)
-  const [amount, setAmount] = useState(initialCents ? (initialCents / 100).toFixed(2) : '')
+  const [amount, setAmount] = useState(initialCents ? (initialCents / 100).toFixed(2) : '10.00')
   const [gatewayId, setGatewayId] = useState(gateways[0]?.id ?? '')
   const cents = parseUsd(amount)
   const valid = cents !== null && cents > 0 && cents <= maxCents
@@ -42,43 +50,97 @@ export function AddFundsForm({
   const fee = valid && gateway ? Math.round(cents * gateway.feeBasisPoints / 10_000) : 0
 
   return (
-    <form action={action} className="form-grid">
+    <form action={action} className="funding-form">
       <Problem message={state.error} />
       <input type="hidden" name="next" value={returnTo ?? ''} />
+      <input type="hidden" name="gateway" value={gatewayId} />
 
-      <div className="field">
-        <label htmlFor="gateway">Payment method</label>
-        <select
-          id="gateway"
-          name="gateway"
-          value={gatewayId}
-          onChange={(event) => setGatewayId(event.currentTarget.value)}
-        >
-          {gateways.map((gateway) => (
-            <option key={gateway.id} value={gateway.id}>
-              {gateway.label} — {gateway.asset} on {gateway.network}
-            </option>
+      <fieldset className="funding-step">
+        <legend><span>1</span> Choose credit amount</legend>
+        <div className="quick-amounts" aria-label="Quick credit amounts">
+          {QUICK_AMOUNTS.map((quick) => (
+            <button
+              className={amount === quick.toFixed(2) ? 'quick-amount quick-amount--active' : 'quick-amount'}
+              key={quick}
+              type="button"
+              onClick={() => setAmount(quick.toFixed(2))}
+              aria-pressed={amount === quick.toFixed(2)}
+            >
+              ${quick}
+            </button>
           ))}
-        </select>
-      </div>
-
-      <div className="field">
-        <label htmlFor="amount">Credit to add (USD)</label>
-        <input id="amount" name="amount" className="mono" inputMode="decimal" placeholder="Enter amount" value={amount} onChange={(event) => setAmount(event.currentTarget.value)} aria-describedby="amount-help" required />
-        <p className="field-note" id="amount-help">No minimum top-up. Enter any amount greater than $0.00, up to {formatUsd(maxCents)}, with no more than 2 decimal places. Unused credit stays on your account.</p>
-      </div>
-
-      {valid ? (
-        <div className="quote" aria-live="polite">
-          <div><span className="label">Credit added</span><span className="value">{formatUsd(cents)}</span></div>
-          <div><span className="label">Network fee</span><span className="value">{formatUsd(fee)}</span></div>
-          <div><span className="label">Total due</span><span className="value">{formatUsd(cents + fee)}</span></div>
         </div>
-      ) : <p className="t-small" role="status">Enter a valid amount to preview your total.</p>}
-      <p className="t-small">Creating an invoice does not send a payment. Check the network and locked total on the next page. Your transfer is reviewed before credit is added.</p>
+        <div className="field funding-amount-field">
+          <label htmlFor="amount">Custom amount (USD)</label>
+          <div className="money-input">
+            <span aria-hidden="true">$</span>
+            <input
+              id="amount"
+              name="amount"
+              className="mono"
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder="10.00"
+              value={amount}
+              onChange={(event) => setAmount(event.currentTarget.value)}
+              aria-describedby="amount-help"
+              required
+            />
+          </div>
+          <p className="field-note" id="amount-help">
+            Enter any amount above $0.00, up to {formatUsd(maxCents)}, using no more than two decimal places.
+          </p>
+        </div>
+      </fieldset>
 
-      <button className="button button--primary" type="submit" disabled={pending}>
-        {pending ? 'Creating invoice…' : 'Create invoice'}
+      <fieldset className="funding-step">
+        <legend><span>2</span> Confirm payment method</legend>
+        <div className="payment-method-grid">
+          {gateways.map((entry) => (
+            <button
+              className={entry.id === gatewayId ? 'payment-method-card payment-method-card--active' : 'payment-method-card'}
+              key={entry.id}
+              type="button"
+              onClick={() => setGatewayId(entry.id)}
+              aria-pressed={entry.id === gatewayId}
+            >
+              <span className="payment-method-icon">₮</span>
+              <span>
+                <strong>{entry.label}</strong>
+                <small>{entry.asset} · {entry.network}</small>
+              </span>
+              <span className="badge badge--success">Auto verification</span>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <section className="funding-summary" aria-live="polite" aria-label="Payment request summary">
+        <div>
+          <span>Requested credit</span>
+          <strong>{valid ? formatUsd(cents) : '—'}</strong>
+        </div>
+        <div>
+          <span>Service fee</span>
+          <strong>{valid ? formatUsd(fee) : '—'}</strong>
+        </div>
+        <div className="funding-summary-total">
+          <span>Suggested amount to send</span>
+          <strong>{valid ? formatUsd(cents + fee) : '—'}</strong>
+        </div>
+      </section>
+
+      <div className="funding-safety">
+        <Icon name="shield" strokeWidth={1.9} />
+        <p>
+          Creating a payment request does not move money or add credit. On the next page, verify the token,
+          network and receiving wallet before sending. Credit follows the cent-exact amount verified on chain.
+          We will never ask for your private key or seed phrase.
+        </p>
+      </div>
+
+      <button className="button button--primary funding-submit" type="submit" disabled={pending || !valid || !gatewayId}>
+        {pending ? 'Creating payment request…' : 'Create payment request'}
       </button>
     </form>
   )
@@ -88,26 +150,41 @@ export function PaymentReferenceForm({ reference, returnTo }: { reference: strin
   const [state, action, pending] = useActionState(submitReferenceAction, EMPTY)
 
   return (
-    <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
+    <form action={action} className="form-grid payment-hash-form">
       <Problem message={state.error} />
       <input type="hidden" name="reference" value={reference} />
       <input type="hidden" name="next" value={returnTo ?? ''} />
       <div className="field">
-        <label htmlFor="paymentReference">Transaction reference</label>
-        <input id="paymentReference" name="paymentReference" className="mono" required />
+        <label htmlFor="paymentReference">BSC transaction hash</label>
+        <input
+          id="paymentReference"
+          name="paymentReference"
+          className="mono"
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="0x…"
+          pattern="0x[a-fA-F0-9]{64}"
+          minLength={66}
+          maxLength={66}
+          aria-describedby="transaction-help"
+          required
+        />
+        <p className="field-note" id="transaction-help">
+          Paste the 66-character transaction hash after sending supported USDT. The verified on-chain amount determines the credit; a wallet address is not a transaction hash.
+        </p>
       </div>
       <div className="field">
-        <label htmlFor="note">Note (optional)</label>
-        <input id="note" name="note" />
+        <label htmlFor="note">Note to support <span className="t-small">(optional)</span></label>
+        <input id="note" name="note" maxLength={500} placeholder="Only add context if support may need it" />
       </div>
       <button className="button button--primary" type="submit" disabled={pending}>
-        {pending ? 'Submitting…' : 'I have paid — submit for review'}
+        {pending ? 'Submitting for verification…' : 'Verify my payment'}
       </button>
     </form>
   )
 }
 
-/** Stands in for the admin confirming the transfer. */
+/** Development-only simulation; production always keeps self approval disabled. */
 export function ApproveInvoiceForm({ reference, returnTo }: { reference: string; returnTo?: string | null }) {
   const [state, action, pending] = useActionState(approveInvoiceAction, EMPTY)
 

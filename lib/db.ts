@@ -127,6 +127,54 @@ CREATE TABLE IF NOT EXISTS invoices (
 );
 CREATE INDEX IF NOT EXISTS invoices_user ON invoices(user_id, created_at DESC);
 
+CREATE TABLE IF NOT EXISTS invoice_verifications (
+  invoice_reference    TEXT    PRIMARY KEY REFERENCES invoices(reference) ON DELETE RESTRICT,
+  chain_id             INTEGER NOT NULL,
+  token_contract       TEXT    NOT NULL,
+  token_decimals       INTEGER NOT NULL,
+  destination_address TEXT    NOT NULL,
+  tx_hash              TEXT    NOT NULL COLLATE NOCASE UNIQUE,
+  matched_log_index    INTEGER,
+  matched_amount_raw   TEXT,
+  requested_credit_cents INTEGER,
+  verified_credit_cents INTEGER,
+  receipt_block_number INTEGER,
+  receipt_block_timestamp TEXT,
+  status               TEXT    NOT NULL DEFAULT 'submitted',
+  confirmations        INTEGER NOT NULL DEFAULT 0,
+  attempt_count        INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at      TEXT,
+  last_checked_at      TEXT,
+  error_code           TEXT,
+  created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at           TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS invoice_verifications_poll
+  ON invoice_verifications(status, next_attempt_at, updated_at);
+CREATE UNIQUE INDEX IF NOT EXISTS invoice_verifications_transfer
+  ON invoice_verifications(chain_id, tx_hash, matched_log_index)
+  WHERE matched_log_index IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS invoice_verification_events (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  public_id         TEXT    NOT NULL UNIQUE,
+  invoice_reference TEXT    NOT NULL REFERENCES invoices(reference) ON DELETE RESTRICT,
+  admin_user_id     INTEGER REFERENCES users(id) ON DELETE RESTRICT,
+  action            TEXT    NOT NULL,
+  idempotency_key   TEXT    NOT NULL UNIQUE,
+  reason            TEXT,
+  metadata_json     TEXT,
+  created_at        TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS invoice_verification_events_invoice
+  ON invoice_verification_events(invoice_reference, id DESC);
+CREATE TRIGGER IF NOT EXISTS invoice_verification_events_no_update
+  BEFORE UPDATE ON invoice_verification_events
+  BEGIN SELECT RAISE(ABORT, 'invoice verification events are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS invoice_verification_events_no_delete
+  BEFORE DELETE ON invoice_verification_events
+  BEGIN SELECT RAISE(ABORT, 'invoice verification events are append-only'); END;
+
 CREATE TABLE IF NOT EXISTS credit_ledger (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id            INTEGER NOT NULL REFERENCES users(id),
@@ -462,6 +510,9 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'paid_report_orders', 'provider_code_encrypted TEXT')
     addColumn(connection, 'paid_report_orders', 'provider_code_sha256 TEXT')
     addColumn(connection, 'paid_report_orders', 'imei_encrypted TEXT')
+    addColumn(connection, 'invoice_verifications', 'receipt_block_timestamp TEXT')
+    addColumn(connection, 'invoice_verifications', 'requested_credit_cents INTEGER')
+    addColumn(connection, 'invoice_verifications', 'verified_credit_cents INTEGER')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
 
@@ -635,11 +686,36 @@ function migrate(connection: Database.Database) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-admin-credit-adjustments-v1')
     }
 
+    if (!migrationApplied(connection, '2026-09-bscscan-invoice-verification-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-bscscan-invoice-verification-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-bscscan-invoice-verification-v2')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-bscscan-invoice-verification-v2')
+    }
+
+    if (!migrationApplied(connection, '2026-09-usdt-verified-amount-v1')) {
+      connection.prepare(
+        `UPDATE invoice_verifications
+            SET requested_credit_cents = COALESCE(
+              requested_credit_cents,
+              (SELECT credit_amount_cents FROM invoices WHERE reference = invoice_reference)
+            )
+          WHERE requested_credit_cents IS NULL`,
+      ).run()
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-usdt-verified-amount-v1')
+    }
+
     connection.exec(`
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_idempotency
         ON invoices(idempotency_key) WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_provider_charge
         ON invoices(provider, provider_charge_id) WHERE provider_charge_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS invoice_verifications_tx_hash
+        ON invoice_verifications(tx_hash COLLATE NOCASE);
+      CREATE UNIQUE INDEX IF NOT EXISTS invoice_verifications_transfer
+        ON invoice_verifications(chain_id, tx_hash, matched_log_index)
+        WHERE matched_log_index IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS imei_checks_idempotency
         ON imei_checks(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;

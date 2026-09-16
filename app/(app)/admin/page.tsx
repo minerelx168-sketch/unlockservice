@@ -4,6 +4,8 @@ import { listAdminCreditAdjustments } from '@/lib/admin-credit-adjustments'
 import { requireAdmin } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 import { AdminCreditAdjustment } from '@/components/admin-credit-adjustment'
+import { AdminInvoiceReviewQueue } from '@/components/admin-invoice-review'
+import { listAdminInvoiceReviews } from '@/lib/payment-verification'
 
 export const metadata: Metadata = { title: 'Control panel' }
 export const dynamic = 'force-dynamic'
@@ -13,6 +15,7 @@ export default async function AdminPage() {
   const overview = adminOverview()
   const users = listAdminUsers(100)
   const adjustments = listAdminCreditAdjustments(25)
+  const invoiceReviews = listAdminInvoiceReviews(50)
 
   return (
     <>
@@ -58,6 +61,21 @@ export default async function AdminPage() {
         </header>
         <div className="panel-body">
           <AdminCreditAdjustment csrfToken={session.csrfToken} users={users} />
+        </div>
+      </section>
+
+      <div style={{ height: 22 }} />
+
+      <section className="panel admin-invoice-review-panel">
+        <header>
+          <div>
+            <h2>Payment verification queue</h2>
+            <p className="t-small">Automatic verification is the default. Approve only with independent on-chain evidence; every decision is permanent and audited.</p>
+          </div>
+          <span>{invoiceReviews.length} awaiting decision</span>
+        </header>
+        <div className="panel-body">
+          <AdminInvoiceReviewQueue csrfToken={session.csrfToken} items={invoiceReviews} />
         </div>
       </section>
 
