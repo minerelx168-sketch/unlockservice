@@ -2567,24 +2567,12 @@ table.account-table td {
   color: var(--primary-dark);
 }
 
-.funding-safety,
 .funding-assurance > div:first-child,
 .payment-success {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
-
-.funding-safety {
-  color: var(--muted);
-}
-
-.funding-safety p {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.55;
-}
-
 .funding-submit {
   width: 100%;
   min-height: 50px;

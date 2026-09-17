@@ -9,13 +9,16 @@ test('Add funds presents quick amounts, locked summary and explicit multi-chain 
   const form = read('components/payment-forms.tsx')
   assert.match(page, /Add credit in four clear steps/)
   assert.match(page, /Automatic verification ready/)
-  assert.match(page, /Use only the token, contract and network shown on the invoice/)
+  assert.match(page, /Use only the token, network, amount and wallet shown on your invoice/)
+  assert.doesNotMatch(page, /Never reuse a transaction ID/)
+  assert.doesNotMatch(page, /wallet password, private key, seed phrase/)
   assert.match(form, /QUICK_AMOUNTS = \[10, 25, 50, 100\]/)
   assert.match(form, /Suggested amount to send/)
   assert.match(form, /verified on-chain amount determines the credit/i)
   assert.match(form, /Binance-issued pegged representation/)
   assert.match(form, /Create payment request/)
-  assert.match(form, /private key or seed phrase/)
+  assert.doesNotMatch(form, /Creating a payment request does not move money/)
+  assert.doesNotMatch(form, /private key or seed phrase/)
 })
 
 test('invoice page uses per-route explorer metadata and refreshes database state only', () => {

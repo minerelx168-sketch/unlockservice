@@ -134,15 +134,6 @@ export function AddFundsForm({
         </div>
       </section>
 
-      <div className="funding-safety">
-        <Icon name="shield" strokeWidth={1.9} />
-        <p>
-          Creating a payment request does not move money or add credit. On the next page, verify the token,
-          network and receiving wallet before sending. Credit follows the cent-exact amount verified on chain.
-          We will never ask for your private key or seed phrase.
-        </p>
-      </div>
-
       <button className="button button--primary funding-submit" type="submit" disabled={pending || !valid || !gatewayId}>
         {pending ? 'Creating payment request…' : 'Create payment request'}
       </button>

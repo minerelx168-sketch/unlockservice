@@ -101,9 +101,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
             <Icon name="shield" strokeWidth={1.9} />
             <h2>Before you send</h2>
           </div>
-          <p>Use only the token, contract and network shown on the invoice. A wallet address may look valid on another network but still be the wrong destination.</p>
-          <p>Copy the amount and wallet from your invoice. Never reuse a transaction ID for another invoice.</p>
-          <p>iUnlockMobile will never ask for your wallet password, private key, seed phrase, or remote wallet access.</p>
+          <p>Use only the token, network, amount and wallet shown on your invoice.</p>
           <Link className="link-arrow" href="/user/payments">View payment history</Link>
         </aside>
       </div>
