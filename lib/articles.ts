@@ -323,7 +323,7 @@ const ARTICLES: Article[] = [
     description: 'Need a Boost Mobile iPhone unlock? Compare postpaid, prepaid and military eligibility, automatic timing and steps if it stays locked.',
     standfirst: 'Boost uses different eligibility rules for postpaid and prepaid devices. Confirm the plan type, payoff and activation record before escalating a delay.',
     published: '2026-09-19',
-    updated: '2026-09-19',
+    updated: '2026-09-21',
     minutes: 8,
     topic: 'Boost Mobile iPhone unlock',
     blocks: [
@@ -335,7 +335,7 @@ const ARTICLES: Article[] = [
       { kind: 'list', items: [
         'A Boost postpaid iPhone bought outright is eligible immediately; a financed device becomes eligible after the financing plan is completed.',
         'A Boost prepaid device generally reaches eligibility one year after initial activation and must also satisfy the stated balance, usage and account-status conditions.',
-        'Boost says eligible postpaid and prepaid devices are automatically unlocked remotely within two business days, without an additional fee.',
+        'Boost says eligible postpaid devices are automatically unlocked remotely within two business days without an additional fee. For eligible prepaid devices, Boost says it will automatically unlock them remotely within two business days after eligibility, subject to the stated payment, usage and account-status conditions.',
         'Deployed U.S. military customers have a documented international SIM-unlock route with separate evidence requirements.',
         'After Boost confirms completion, verify Carrier Lock in iPhone Settings instead of looking for an iPhone unlock code.',
       ] },
