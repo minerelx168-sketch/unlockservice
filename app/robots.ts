@@ -2,10 +2,10 @@ import type { MetadataRoute } from 'next'
 import { publicOrigin } from '@/lib/site'
 
 /**
- * The workspace and the JSON endpoints are behind a session, so a crawler
- * only ever gets a redirect from them — but saying so keeps them out of the
- * crawl budget and out of the index, and stops an order or invoice URL from
- * being fetched on a whim.
+ * Reduce crawling of account and API routes. These directives are not access
+ * control and do not guarantee exclusion from search results. The unlock
+ * catalog deliberately remains crawlable so its noindex header can be read;
+ * its server-side IMEI step applies equally to every visitor.
  */
 export default function robots(): MetadataRoute.Robots {
   return {

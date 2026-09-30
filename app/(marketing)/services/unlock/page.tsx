@@ -1,63 +1,39 @@
-import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
-import { ProductCatalog } from '@/components/product-catalog'
-import { ServiceBrowser } from '@/components/service-browser'
-import { currentSession } from '@/lib/auth'
+import { UnlockDeviceEntry } from '@/components/unlock-device-entry'
 import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor } from '@/lib/device-intent-value'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
-
-
+import { pageMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata = pageMetadata("/services/unlock", "Phone Unlock Services by Carrier & Device", "Browse phone unlock services by network, country and device. Compare published prices, requirements and delivery estimates before ordering.")
+export const metadata = pageMetadata(
+  '/services/unlock',
+  'Phone Unlock Services by Carrier & Device',
+  'Enter your IMEI to browse phone unlock services, then review service requirements, prices and delivery estimates before ordering.',
+)
 
+/** The entry page never loads or serializes the unlock catalog, even with a saved IMEI. */
 export default async function UnlockServicesPage() {
-  const [found, intent] = await Promise.all([currentSession(), readDeviceIntent()])
-  const products = listPublicProviderProducts('unlock')
-  const available = products.some((product) => product.status === 'available')
-
+  const intent = await readDeviceIntent()
   return (
-      <section className="section section--tint service-entry-section">
-        <div className="shell">
-          <nav className="service-breadcrumb" aria-label="Breadcrumb">
-            <Link href="/services">Services</Link>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">Unlock Service</span>
-          </nav>
-          <h1 className="service-entry-title">Phone unlock services</h1>
-          <ServiceBrowser
-            products={products}
-            domain="unlock"
-            initialImei={intentImeiFor(intent, 'unlock')}
-            initialProductCode={intent?.domain === 'unlock' ? intent.productCode : undefined}
-            isAuthenticated={found !== null}
-            availableCents={found ? found.user.credit_cents - found.user.held_cents : undefined}
-          />
-
-          <div className="service-entry-links">
-            <Link href="/services/imei-check">Check your device before unlocking</Link>
-            {!available ? <Link href="/unlock-waitlist">Notify me when ordering opens</Link> : null}
-          </div>
-
-          <details className="service-catalog-details" id="unlock-catalog">
-            <summary>Browse the full Unlock catalog · {products.length} services</summary>
-            <ProductCatalog products={products} domain="unlock" />
-            <p className="t-small service-catalog-version">
-              Compare the price, device requirements and delivery estimate for each service.
-              Services marked unavailable cannot be ordered online yet.
-            </p>
-          </details>
-
-          <p className="service-guides">
-            Not sure an unlock is what you need?{' '}
-            <Link href="/articles/network-unlock-explained">Network unlocking, explained
-            honestly</Link> · <Link href="/articles/what-an-imei-check-tells-you">What an IMEI check
-            actually tells you</Link>
-          </p>
+    <section className="section section--tint service-entry-section">
+      <div className="shell">
+        <nav className="service-breadcrumb" aria-label="Breadcrumb">
+          <Link href="/services">Services</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Unlock Service</span>
+        </nav>
+        <h1 className="service-entry-title">Phone unlock services</h1>
+        <UnlockDeviceEntry initialImei={intentImeiFor(intent, 'unlock')} />
+        <div className="service-entry-links">
+          <Link href="/services/imei-check">Check your device before unlocking</Link>
+          <Link href="/contact">Need help finding your IMEI?</Link>
         </div>
-      </section>
+        <p className="service-guides">
+          Not sure an unlock is what you need?{' '}
+          <Link href="/articles/network-unlock-explained">Network unlocking, explained honestly</Link>
+        </p>
+      </div>
+    </section>
   )
 }
-

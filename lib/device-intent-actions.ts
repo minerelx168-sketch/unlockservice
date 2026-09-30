@@ -22,7 +22,16 @@ export async function browseDevicesAction(_: IntentState, form: FormData): Promi
   } else {
     await clearDeviceIntent()
   }
-  redirect(domain === 'unlock' ? '/services/unlock' : '/services/imei-check')
+  redirect(domain === 'unlock' ? (raw.trim() ? '/services/unlock/catalog' : '/services/unlock') : '/services/imei-check')
+}
+
+/** The unlock catalog is revealed only after the same IMEI validation for every visitor.
+ * This is a browsing step, not a device lookup or an order. */
+export async function showUnlockServicesAction(_: IntentState, form: FormData): Promise<IntentState> {
+  const imei = deviceImei(form.get('imei'))
+  if (!imei) return { error: 'Enter a valid 15-digit IMEI before viewing unlock services.' }
+  await writeDeviceIntent(imei, 'unlock')
+  redirect('/services/unlock/catalog')
 }
 
 export async function continueDeviceServiceAction(_: IntentState, form: FormData): Promise<IntentState> {

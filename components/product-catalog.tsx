@@ -109,7 +109,8 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
       .sort((left, right) => {
         if (left.toLowerCase() === 'featured') return -1
         if (right.toLowerCase() === 'featured') return 1
-        return left.localeCompare(right)
+        // Use the same collation during SSR and hydration, regardless of host locale.
+        return left.localeCompare(right, 'en')
       })
   }, [products])
 

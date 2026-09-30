@@ -278,6 +278,7 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   const servicesHub = readFileSync(join(process.cwd(), 'app/(marketing)/services/page.tsx'), 'utf8')
   const imeiPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/imei-check/page.tsx'), 'utf8')
   const unlockPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/unlock/page.tsx'), 'utf8')
+  const unlockCatalogPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/unlock/catalog/page.tsx'), 'utf8')
   const basicCheckPage = readFileSync(join(process.cwd(), 'app/(marketing)/check/page.tsx'), 'utf8')
   const basicCheckForm = readFileSync(join(process.cwd(), 'components/imei-check-form.tsx'), 'utf8')
 
@@ -299,8 +300,10 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.match(imeiPage, /listPublicProviderProducts\('imei_check'\)/)
   assert.match(imeiPage, /domain="imei_check"/)
   assert.doesNotMatch(imeiPage, /CUSTOMER_UNLOCK_PRODUCTS/)
-  assert.match(unlockPage, /listPublicProviderProducts\('unlock'\)/)
-  assert.match(unlockPage, /domain="unlock"/)
+  assert.doesNotMatch(unlockPage, /listPublicProviderProducts|ProductCatalog|ServiceBrowser/)
+  assert.match(unlockPage, /<UnlockDeviceEntry/)
+  assert.match(unlockCatalogPage, /listPublicProviderProducts\('unlock'\)/)
+  assert.match(unlockCatalogPage, /domain="unlock"/)
   assert.match(unlockPage, /<h1[^>]*>Phone unlock services<\/h1>/)
   assert.doesNotMatch(unlockPage, /CUSTOMER_IMEI_CHECK_PRODUCTS/)
   assert.match(imeiPage, /<h1[^>]*>IMEI check reports<\/h1>/)
@@ -1724,4 +1727,3 @@ test('a second process can wait for the writer instead of failing', async () => 
     errors: 0,
   })
 })
-

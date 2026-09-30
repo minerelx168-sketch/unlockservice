@@ -18,6 +18,7 @@ export function ServiceBrowser({
   domain,
   initialImei = '',
   initialProductCode = '',
+  imeiReadOnly = false,
   isAuthenticated = false,
   availableCents,
 }: {
@@ -25,6 +26,7 @@ export function ServiceBrowser({
   domain: 'imei_check' | 'unlock'
   initialImei?: string
   initialProductCode?: string
+  imeiReadOnly?: boolean
   isAuthenticated?: boolean
   availableCents?: number
 }) {
@@ -98,13 +100,14 @@ export function ServiceBrowser({
               onBlur={() => { if (imei) setTouched(true) }}
               placeholder="Enter your 15-digit IMEI"
               disabled={pending}
+              readOnly={imeiReadOnly}
               aria-invalid={showInvalid}
               aria-describedby={`${inputId}-hint`}
             />
-            {imei ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setTouched(false); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}
+            {imei && !imeiReadOnly ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setTouched(false); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}
           </div>
           <p id={`${inputId}-hint`} className={showInvalid ? 'service-browser__error' : 'service-browser__hint'} role={showInvalid ? 'alert' : undefined}>
-            {showInvalid ? 'Enter a valid 15-digit IMEI. Check the number in your phone settings.' : 'Find it in Settings or dial *#06#. You can browse services before entering it.'}
+            {showInvalid ? 'Enter a valid 15-digit IMEI. Check the number in your phone settings.' : imeiReadOnly ? <>Check each service’s device and network requirements before choosing. <Link href="/services/unlock" className="service-browser__change-imei">Change IMEI</Link></> : 'Find it in Settings or dial *#06#. You can browse services before entering it.'}
           </p>
         </div>
 

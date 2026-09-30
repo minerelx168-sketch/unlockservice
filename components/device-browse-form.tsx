@@ -14,9 +14,9 @@ export function DeviceBrowseForm() {
   const digits = imei.replace(/[\s-]/g, '')
 
   function validate(event: FormEvent<HTMLFormElement>) {
-    if (imei.trim() && !deviceImei(imei)) {
+    if ((domain === 'unlock' || imei.trim()) && !deviceImei(imei)) {
       event.preventDefault()
-      setError('Enter a valid 15-digit IMEI, or clear it to browse without one.')
+      setError(domain === 'unlock' ? 'Enter a valid 15-digit IMEI to view unlock services.' : 'Enter a valid 15-digit IMEI, or clear it to browse without one.')
       input.current?.focus()
     }
   }
@@ -27,13 +27,13 @@ export function DeviceBrowseForm() {
         <legend>What would you like to do?</legend>
         {(['imei_check', 'unlock'] as const).map((value) => (
           <label key={value}>
-            <input type="radio" name="domain" value={value} checked={domain === value} onChange={() => setDomain(value)} />
+            <input type="radio" name="domain" value={value} checked={domain === value} onChange={() => { setDomain(value); setError(null) }} />
             <span><Icon name={value === 'unlock' ? 'lock' : 'search'} />{value === 'unlock' ? 'Unlock' : 'Phone Check'}</span>
           </label>
         ))}
       </fieldset>
       <div className="field">
-        <label htmlFor="browse-imei">IMEI number <span className="device-browse-optional">Optional</span></label>
+        <label htmlFor="browse-imei">IMEI number {domain === 'imei_check' ? <span className="device-browse-optional">Optional</span> : null}</label>
         <div className="device-browse-input">
           <Icon name="device" />
           <input id="browse-imei" ref={input} name="imei" type="text" inputMode="numeric" autoComplete="off" spellCheck={false}
@@ -49,7 +49,7 @@ export function DeviceBrowseForm() {
         {pending ? 'Opening services…' : 'Browse services'}<Icon name="arrowRight" />
       </button>
       <p className="device-browse-note"><Icon name="shield" />Compare prices first. Nothing is ordered or charged.</p>
-      <p className="device-browse-note">Your IMEI is carried privately for 15 minutes. You can also browse without entering it.</p>
+      <p className="device-browse-note">{domain === 'unlock' ? 'Enter your IMEI to view unlock services and compare prices.' : 'Your IMEI is carried privately for 15 minutes. You can also browse without entering it.'}</p>
     </form>
   )
 }

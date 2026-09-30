@@ -1,0 +1,35 @@
+/* Match the service workspace while keeping the first step compact on every screen. */
+.unlock-device-entry .service-browser__header { padding-block: 24px; }
+.unlock-device-entry .service-browser__header > div { max-width: 620px; min-width: 0; }
+.unlock-device-entry__body { max-width: 792px; margin-inline: auto; padding: 24px 36px 30px; }
+.unlock-device-entry__steps { display: flex; justify-content: space-between; gap: 14px; margin: 0 0 26px; padding: 0 0 20px; list-style: none; border-bottom: 1px solid var(--line); }
+.unlock-device-entry__steps li { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--muted); font-size: .875rem; font-weight: 500; line-height: 1.45; }
+.unlock-device-entry__steps li > span { display: grid; place-items: center; flex: 0 0 28px; height: 28px; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--page-soft); font-size: .8125rem; font-weight: 700; }
+.unlock-device-entry__steps li[aria-current='step'] { color: var(--primary-dark); font-weight: 700; }
+.unlock-device-entry__steps li[aria-current='step'] > span { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.unlock-device-entry .service-browser__form { gap: 22px; max-width: none; padding: 0; }
+.unlock-device-entry .service-browser__actions > .button { min-width: 280px; }
+.unlock-device-entry .service-browser__imei input:focus { outline: none; box-shadow: none; }
+.unlock-device-entry .service-browser__imei button:disabled { cursor: wait; opacity: .6; }
+.unlock-device-entry__spinner { width: 18px; height: 18px; flex-shrink: 0; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: unlock-entry-spin .8s linear infinite; }
+@keyframes unlock-entry-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 740px) {
+  .unlock-device-entry .service-browser__header { padding-block: 22px; }
+  .unlock-device-entry__body { padding: 22px; }
+}
+
+@media (max-width: 480px) {
+  .unlock-device-entry .service-browser__header { align-items: flex-start; padding-block: 20px; }
+  .unlock-device-entry .service-browser__header p { font-size: .9375rem; line-height: 1.6; }
+  .unlock-device-entry__body { padding: 20px 16px 24px; }
+  .unlock-device-entry__steps { gap: 8px; margin-bottom: 22px; padding-bottom: 18px; }
+  .unlock-device-entry__steps li { flex: 1; flex-direction: column; gap: 6px; text-align: center; font-size: .75rem; }
+  .unlock-device-entry__steps li > span { flex-basis: auto; width: 28px; }
+  .unlock-device-entry .service-browser__actions > .button { width: 100%; min-width: 0; padding-inline: 12px; }
+  .unlock-device-entry .service-browser__hint { font-size: .875rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unlock-device-entry__spinner { animation: none; }
+}
