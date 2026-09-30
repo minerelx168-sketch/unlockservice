@@ -27,7 +27,7 @@ const DOMAIN_COPY: Record<ProviderProductDomain, {
     groupLabel: 'Check category',
     searchPlaceholder: 'Apple, Samsung, carrier or blacklist',
     availableLabel: 'Reports available online',
-    notice: 'Phone Check prices are shown in USD. Available reports can be ordered online; coming-soon checks remain view-only until their input and report formats are verified.',
+    notice: 'Phone Check prices are shown in USD. Review the service requirements and price before confirming your order.',
   },
   unlock: {
     label: 'Unlock',
@@ -35,7 +35,7 @@ const DOMAIN_COPY: Record<ProviderProductDomain, {
     groupLabel: 'Unlock category',
     searchPlaceholder: 'Country, network, Apple or Android',
     availableLabel: 'Services available online',
-    notice: 'Unlock prices are shown in USD. Available services can be ordered online; services that require additional device or account details remain view-only until their input flow is verified.',
+    notice: 'Unlock prices are shown in USD. Review the service requirements and price before confirming your order.',
   },
 }
 
@@ -59,7 +59,7 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
           {productGroup}
         </span>
         <span className={available ? 'badge badge--success' : 'badge badge--muted'}>
-          {available ? 'Available' : 'Coming soon'}
+          {available ? 'Available' : 'Temporarily unavailable'}
         </span>
       </div>
 
@@ -80,17 +80,10 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
         <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
           {product.domain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
         </Link>
-      ) : product.domain === 'unlock' ? (
-        /* A dead grey label was the whole of the offer on every unlock
-           card. The service is coming; the card can say so and take an
-           address instead of ending the visit. */
-        <Link className="button button--secondary product-card-action" href="/unlock-waitlist">
-          Notify me when this opens <Icon name="arrowRight" />
-        </Link>
       ) : (
-        <span className="button button--quiet product-card-action" aria-disabled="true">
-          Unavailable online
-        </span>
+        <Link className="button button--secondary product-card-action" href="/contact">
+          Contact support <Icon name="arrowRight" />
+        </Link>
       )}
     </article>
   )
@@ -137,7 +130,6 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   }, [groups, visible])
 
   const availableCount = products.filter((product) => product.status === 'available').length
-  const comingSoonCount = products.length - availableCount
   const filtersActive = query.trim() !== '' || selectedGroup !== 'all' || selectedProductCode !== 'all'
   const advancedFilterCount = Number(selectedGroup !== 'all') + Number(selectedProductCode !== 'all')
   const selectedProduct = products.find((product) => product.productCode === selectedProductCode)
@@ -154,7 +146,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
       <div className="trust-bar" aria-label={`${copy.label} catalog summary`}>
         <div><b>{products.length} services</b><span>Published in this category</span></div>
         <div><b>{availableCount} available</b><span>{copy.availableLabel}</span></div>
-        <div><b>{comingSoonCount} coming soon</b><span>View-only until verified</span></div>
+        <div><b>Order history</b><span>Results saved to your account</span></div>
         <div><b>USD prices</b><span>Shown before ordering</span></div>
       </div>
 
@@ -235,7 +227,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
                     <optgroup key={group} label={group}>
                       {options.map((product) => (
                         <option key={product.productCode} value={product.productCode}>
-                          {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
+                          {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Temporarily unavailable'}
                         </option>
                       ))}
                     </optgroup>

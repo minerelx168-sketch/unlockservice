@@ -9,27 +9,29 @@ export type PublicProviderProduct = Pick<ProviderProduct,
   'inputType' | 'status' | 'priceCents' | 'etaLabel' | 'sortOrder'
 > & { hasExample: boolean }
 
-/** Resolve availability and retail prices from the same gates as checkout. */
+/** Publish the owner's active products. Transport configuration is checked at
+ * checkout, not converted into a misleading prelaunch label on the storefront. */
 export function listPublicProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
   const products = domain === 'imei_check' ? CUSTOMER_IMEI_CHECK_PRODUCTS : CUSTOMER_UNLOCK_PRODUCTS
   const orderable = new Map(
     listPaidReportProducts().map((product) => [product.code, product]),
   )
-  return products.map((product) => {
+  return products.flatMap((product) => {
     const live = orderable.get(product.productCode)
-    return {
+    if (product.status !== 'available' || !live?.isActive) return []
+    return [{
       productCode: product.productCode,
-      slug: product.slug,
-      name: product.name,
-      summary: product.summary,
+      slug: live.slug,
+      name: live.name,
+      summary: live.summary,
       group: product.group,
       domain: product.domain,
       inputType: product.inputType,
-      status: product.status === 'available' && live?.providerReady ? 'available' : 'coming_soon',
-      priceCents: live?.priceCents ?? product.priceCents,
+      status: 'available' as const,
+      priceCents: live.priceCents,
       etaLabel: product.etaLabel,
-      sortOrder: product.sortOrder,
+      sortOrder: live.sortOrder,
       hasExample: hasServiceOutputExample(product.productCode),
-    }
-  })
+    }]
+  }).sort((left, right) => left.sortOrder - right.sortOrder || left.productCode.localeCompare(right.productCode, 'en'))
 }

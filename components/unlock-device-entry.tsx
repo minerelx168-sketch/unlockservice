@@ -141,7 +141,7 @@ export function UnlockDeviceEntry({ initialImei = '', previewProducts = [] }: {
                   </div>
                   <h4>{productName}</h4>
                   <span className={`unlock-service-preview__availability${available ? ' is-available' : ''}`}>
-                    {available ? 'Available online' : 'Coming soon'}
+                    {available ? 'Available online' : 'Temporarily unavailable'}
                   </span>
                   <div className="unlock-service-preview__card-bottom">
                     <strong className="unlock-service-preview__price">{formatUsd(product.priceCents)}</strong>

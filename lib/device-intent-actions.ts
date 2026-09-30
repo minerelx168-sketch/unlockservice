@@ -34,8 +34,8 @@ export async function showUnlockServicesAction(_: IntentState, form: FormData): 
   const requestedCode = form.get('productCode')
   const product = requestedCode === null ? undefined : listPublicProviderProducts('unlock').find((entry) => entry.productCode === requestedCode)
   if (requestedCode !== null && !product) return { error: 'This service is no longer listed. Select Show more to browse current services.' }
-  // A preview can select an unavailable listing for details, but cannot order it.
-  // continueDeviceServiceAction rechecks current orderability before checkout.
+  // Only active owner products can be selected from a preview. Continue also
+  // checks the current provider configuration before opening checkout.
   await writeDeviceIntent(imei, 'unlock', product?.productCode)
   redirect('/services/unlock/catalog')
 }
@@ -45,8 +45,9 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   const imei = deviceImei(form.get('imei'))
   if (!imei) return { error: 'Enter a valid 15-digit IMEI before continuing.' }
   const productCode = form.get('productCode')
-  const product = listPaidReportProducts().find((entry) => entry.code === productCode && entry.domain === domain && entry.providerReady)
+  const product = listPaidReportProducts().find((entry) => entry.code === productCode && entry.domain === domain)
   if (!product) return { error: 'Choose an available service. Availability may have changed; refresh to see current options.' }
+  if (!product.providerReady) return { error: 'Ordering is temporarily unavailable. Please contact support or try again later.' }
   await writeDeviceIntent(imei, product.domain, product.code)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
   redirect(await currentSession() ? target : withContinuation('/login', target))

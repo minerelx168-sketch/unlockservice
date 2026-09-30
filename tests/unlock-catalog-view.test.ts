@@ -29,12 +29,17 @@ test('search intersects category and accepts words in any order without mutating
   assert.deepEqual(products.map((product) => product.productCode), before)
 })
 
-test('entry previews retain runtime price and availability and never backfill removed entries', () => {
-  const runtime = products.map((product) => ({ ...product, priceCents: 999, status: 'coming_soon' as const }))
+test('entry previews use active owner products and prices without seeded sample services', () => {
+  const runtime: PublicProviderProduct[] = products.map((product) => ({ ...product, priceCents: 999, status: 'available' as const }))
   const preview = unlockPreviewProducts(runtime)
   assert.equal(preview.length, 4)
-  assert.ok(preview.every((product) => product.priceCents === 999 && product.status === 'coming_soon'))
+  assert.ok(preview.every((product) => product.priceCents === 999 && product.status === 'available'))
+  assert.equal(new Set(preview.map(unlockCategory)).size, 4)
+  assert.ok(preview.every((product) => runtime.includes(product)))
   assert.ok(preview.every((product) => !/icloud|mdm|bypass/i.test(`${product.name} ${product.group} ${product.summary}`)))
-  assert.equal(unlockPreviewProducts(runtime.filter((product) => product.productCode !== preview[0].productCode)).length, 3)
+  const paused = runtime.map((product) => ({ ...product, status: 'coming_soon' as const }))
+  assert.deepEqual(unlockPreviewProducts(paused), [])
+  const removed = runtime.filter((product) => product.productCode !== preview[0].productCode)
+  assert.ok(unlockPreviewProducts(removed).every((product) => removed.includes(product)))
   assert.deepEqual(unlockPreviewProducts([]), [])
 })

@@ -384,9 +384,10 @@ test('pollers re-read eligibility after claiming when another process updated th
   assert.deepEqual(credits.getBalance(userId), balanceBefore)
 })
 
-test('public availability follows operational gates, current prices and omits supplier-only fields', () => {
+test('owner publication stays active while checkout enforces operational gates and current prices', async () => {
   const find = () => catalog.listPublicProviderProducts('imei_check').find((product) => product.productCode === 'APPLE_BASIC')!
-  assert.equal(find().status, 'coming_soon', 'no approved mapping must not advertise an orderable report')
+  assert.equal(find().status, 'available', 'local transport settings must not label an active owner product as prelaunch')
+  assert.equal(reports.getPaidReportProduct('APPLE_BASIC')?.providerReady, false)
   process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
     'check:apple_basic': { id: '214', mode: 'sync' },
     'product:unlock_346': { id: '346', mode: 'dhru' },
@@ -400,10 +401,18 @@ test('public availability follows operational gates, current prices and omits su
   assert.equal('providerCostMicros' in available, false)
   assert.equal('serviceId' in available, false)
   process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled'
-  assert.equal(find().status, 'coming_soon')
-  assert.equal(findUnlock().status, 'coming_soon')
+  assert.equal(find().status, 'available')
+  assert.equal(findUnlock().status, 'available')
+  const userId = customer('catalog-checkout-gate')
+  const balanceBefore = credits.getBalance(userId)
+  const ordersBefore = reports.listPaidReports(userId).length
+  await assert.rejects(reports.createPaidReport(userId, {
+    productCode: 'APPLE_BASIC', imei: '490154203237518', idempotencyKey: 'catalog-disabled-provider',
+  }), (error: unknown) => error instanceof reports.PaidReportError && error.code === 'provider_not_ready')
+  assert.deepEqual(credits.getBalance(userId), balanceBefore)
+  assert.equal(reports.listPaidReports(userId).length, ordersBefore)
   process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'enabled'
   database.db().prepare("UPDATE paid_report_products SET is_active = 0 WHERE code = 'APPLE_BASIC'").run()
-  assert.equal(find().status, 'coming_soon')
+  assert.equal(find(), undefined)
   assert.equal(findUnlock().status, 'available')
 })

@@ -42,7 +42,7 @@ export default async function UnlockServicesPage() {
 
           <div className="service-entry-links">
             <Link href="/services/imei-check">Check your device before unlocking</Link>
-            {!available ? <Link href="/unlock-waitlist">Notify me when ordering opens</Link> : null}
+            {!available ? <Link href="/contact">Contact us for service availability</Link> : null}
           </div>
 
           <p className="service-guides">

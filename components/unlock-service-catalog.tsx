@@ -45,7 +45,7 @@ function UnlockServiceRow({ product, imei, initiallyExpanded, isAuthenticated }:
           <span className="unlock-catalog__service-meta">
             <span><Icon name="clock" /> {eta}</span>
             <span className={available ? 'unlock-catalog__available' : 'unlock-catalog__unavailable'}>
-              {available ? 'Available' : 'Coming soon'}
+              {available ? 'Available' : 'Temporarily unavailable'}
             </span>
           </span>
         </span>
@@ -82,8 +82,8 @@ function UnlockServiceRow({ product, imei, initiallyExpanded, isAuthenticated }:
           </form>
         ) : (
           <div className="unlock-catalog__review-actions unlock-catalog__waitlist">
-            <Link href="/unlock-waitlist" className="button button--secondary">Notify me when available<Icon name="arrowRight" /></Link>
-            <p>This service is currently unavailable online. You can still review its details.</p>
+            <Link href="/contact" className="button button--secondary">Contact support<Icon name="arrowRight" /></Link>
+            <p>This service is temporarily unavailable. Contact us for help choosing another service.</p>
           </div>
         )}
       </div>

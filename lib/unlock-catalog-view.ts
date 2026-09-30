@@ -40,13 +40,15 @@ export function filterUnlockProducts(products: PublicProviderProduct[], category
   })
 }
 
-// A small, explicit selection of carrier services is public on the entry page.
-// Never fall back to the whole catalog when an item is removed or unavailable.
-export const UNLOCK_PREVIEW_CODES = ['UNLOCK_346', 'UNLOCK_282', 'UNLOCK_39', 'UNLOCK_294'] as const
-
+// Preview the owner's currently orderable carrier services in catalog priority,
+// with one per country. Do not seed example products or expose the full catalog.
 export function unlockPreviewProducts(products: PublicProviderProduct[]): PublicProviderProduct[] {
-  return UNLOCK_PREVIEW_CODES.flatMap((code) => {
-    const product = products.find((entry) => entry.productCode === code && entry.domain === 'unlock')
-    return product ? [{ ...product, summary: 'Review carrier, device and eligibility requirements before ordering.' }] : []
+  const countries = new Set(Object.values(COUNTRY_GROUPS))
+  const selected = new Set<string>()
+  return products.filter((product) => {
+    const category = unlockCategory(product)
+    if (product.domain !== 'unlock' || product.status !== 'available' || !countries.has(category) || selected.has(category) || selected.size >= 4) return false
+    selected.add(category)
+    return true
   })
 }
