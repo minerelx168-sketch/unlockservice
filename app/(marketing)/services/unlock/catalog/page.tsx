@@ -1,14 +1,10 @@
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ProductCatalog } from '@/components/product-catalog'
-import { ServiceBrowser } from '@/components/service-browser'
+import { UnlockServiceCatalog } from '@/components/unlock-service-catalog'
 import { currentSession } from '@/lib/auth'
 import { readDeviceIntent } from '@/lib/device-intent'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
-
-
-
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
@@ -36,12 +32,10 @@ export default async function UnlockServicesPage() {
             <span aria-current="page">Choose a service</span>
           </nav>
           <h1 className="service-entry-title">Choose your unlock service</h1>
-          <ServiceBrowser
+          <UnlockServiceCatalog
             products={products}
-            domain="unlock"
-            initialImei={intent.imei}
+            imei={intent.imei}
             initialProductCode={intent.productCode}
-            imeiReadOnly
             isAuthenticated={found !== null}
             availableCents={found ? found.user.credit_cents - found.user.held_cents : undefined}
           />
@@ -50,15 +44,6 @@ export default async function UnlockServicesPage() {
             <Link href="/services/imei-check">Check your device before unlocking</Link>
             {!available ? <Link href="/unlock-waitlist">Notify me when ordering opens</Link> : null}
           </div>
-
-          <details className="service-catalog-details" id="unlock-catalog">
-            <summary>Browse the full Unlock catalog · {products.length} services</summary>
-            <ProductCatalog products={products} domain="unlock" />
-            <p className="t-small service-catalog-version">
-              Compare the price, device requirements and delivery estimate for each service.
-              Services marked unavailable cannot be ordered online yet.
-            </p>
-          </details>
 
           <p className="service-guides">
             Not sure an unlock is what you need?{' '}

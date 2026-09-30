@@ -3,6 +3,8 @@ import { UnlockDeviceEntry } from '@/components/unlock-device-entry'
 import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor } from '@/lib/device-intent-value'
 import { pageMetadata } from '@/lib/seo'
+import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { unlockPreviewProducts } from '@/lib/unlock-catalog-view'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,9 +14,10 @@ export const metadata = pageMetadata(
   'Enter your IMEI to browse phone unlock services, then review service requirements, prices and delivery estimates before ordering.',
 )
 
-/** The entry page never loads or serializes the unlock catalog, even with a saved IMEI. */
+/** Only the curated carrier previews are serialized here; the full list requires the IMEI step. */
 export default async function UnlockServicesPage() {
   const intent = await readDeviceIntent()
+  const previews = unlockPreviewProducts(listPublicProviderProducts('unlock'))
   return (
     <section className="section section--tint service-entry-section">
       <div className="shell">
@@ -24,7 +27,7 @@ export default async function UnlockServicesPage() {
           <span aria-current="page">Unlock Service</span>
         </nav>
         <h1 className="service-entry-title">Phone unlock services</h1>
-        <UnlockDeviceEntry initialImei={intentImeiFor(intent, 'unlock')} />
+        <UnlockDeviceEntry initialImei={intentImeiFor(intent, 'unlock')} previewProducts={previews} />
         <div className="service-entry-links">
           <Link href="/services/imei-check">Check your device before unlocking</Link>
           <Link href="/contact">Need help finding your IMEI?</Link>

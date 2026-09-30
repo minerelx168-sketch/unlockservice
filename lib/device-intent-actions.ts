@@ -6,6 +6,7 @@ import { withContinuation } from './continuation'
 import { clearDeviceIntent, readDeviceIntent, writeDeviceIntent } from './device-intent'
 import { deviceDomain, deviceImei } from './device-intent-value'
 import { listPaidReportProducts } from './paid-reports'
+import { listPublicProviderProducts } from './public-provider-catalog'
 
 type IntentState = { error?: string }
 
@@ -30,7 +31,12 @@ export async function browseDevicesAction(_: IntentState, form: FormData): Promi
 export async function showUnlockServicesAction(_: IntentState, form: FormData): Promise<IntentState> {
   const imei = deviceImei(form.get('imei'))
   if (!imei) return { error: 'Enter a valid 15-digit IMEI before viewing unlock services.' }
-  await writeDeviceIntent(imei, 'unlock')
+  const requestedCode = form.get('productCode')
+  const product = requestedCode === null ? undefined : listPublicProviderProducts('unlock').find((entry) => entry.productCode === requestedCode)
+  if (requestedCode !== null && !product) return { error: 'This service is no longer listed. Select Show more to browse current services.' }
+  // A preview can select an unavailable listing for details, but cannot order it.
+  // continueDeviceServiceAction rechecks current orderability before checkout.
+  await writeDeviceIntent(imei, 'unlock', product?.productCode)
   redirect('/services/unlock/catalog')
 }
 
