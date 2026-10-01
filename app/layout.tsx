@@ -46,6 +46,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
      makes it mean anything is written. Next.js stamps its own streamed
      scripts with it; this one has to be given the nonce by hand. */
   const nonce = (await headers()).get('x-nonce') ?? undefined
+  const googleAdsTag = 'AW-18465855968'
+  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${googleAdsTag}');`
 
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
@@ -54,6 +56,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_GUARD }} />
+        <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} />
       </head>
       <body>{children}</body>
     </html>

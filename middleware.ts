@@ -26,6 +26,9 @@ function policy(nonce: string, secure: boolean): string {
     "'self'",
     `'nonce-${nonce}'`,
     "'strict-dynamic'",
+    'https://www.googletagmanager.com',
+    'https://www.googleadservices.com',
+    'https://www.google.com',
     // The development bundler compiles with eval; production never does.
     process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : '',
   ].filter(Boolean)
@@ -36,9 +39,10 @@ function policy(nonce: string, secure: boolean): string {
     // Server-rendered style attributes are inline by definition, and every
     // colour in them resolves to a token rather than arriving from a request.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data:",
+    "img-src 'self' data: https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com",
     "font-src 'self'",
-    "connect-src 'self'",
+    "connect-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://ad.doubleclick.net",
+    "frame-src 'self' https://www.googletagmanager.com",
     "form-action 'self'",
     "frame-ancestors 'none'",
     "base-uri 'none'",
