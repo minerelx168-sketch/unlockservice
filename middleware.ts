@@ -39,9 +39,9 @@ function policy(nonce: string, secure: boolean): string {
     // Server-rendered style attributes are inline by definition, and every
     // colour in them resolves to a token rather than arriving from a request.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com",
+    "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com",
     "font-src 'self'",
-    "connect-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://ad.doubleclick.net",
+    "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://ad.doubleclick.net",
     "frame-src 'self' https://www.googletagmanager.com",
     "form-action 'self'",
     "frame-ancestors 'none'",
