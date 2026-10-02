@@ -47,7 +47,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
      scripts with it; this one has to be given the nonce by hand. */
   const nonce = (await headers()).get('x-nonce') ?? undefined
   const googleAdsTag = 'AW-18465855968'
-  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${googleAdsTag}');`
+  const googleAnalyticsTag = 'G-9WCELVR3V3'
+  // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
+  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${googleAdsTag}'); gtag('config', '${googleAnalyticsTag}');`
 
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
