@@ -49,7 +49,10 @@ export function AppNav({ isAdmin = false, children }: { isAdmin?: boolean; child
         ...SECTIONS,
         {
           heading: 'Administration',
-          items: [{ href: '/admin', label: 'Control panel', icon: 'window' as IconName }],
+          items: [
+            { href: '/admin', label: 'Control panel', icon: 'window' as IconName },
+            { href: '/admin/payments', label: 'Payment history', icon: 'file' as IconName },
+          ],
         },
       ]
     : SECTIONS
@@ -76,7 +79,7 @@ export function AppNav({ isAdmin = false, children }: { isAdmin?: boolean; child
                 <Link
                   key={item.href}
                   href={item.href}
-                  aria-current={pathname === item.href || pathname.startsWith(`${item.href}/`) ? 'page' : undefined}
+                  aria-current={pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`)) ? 'page' : undefined}
                   onClick={() => setOpenPath(null)}
                 >
                   <Icon name={item.icon} />

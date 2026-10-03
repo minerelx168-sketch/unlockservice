@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { adminOverview, listAdminUsers } from '@/lib/admin'
 import { listAdminCreditAdjustments } from '@/lib/admin-credit-adjustments'
 import { requireAdmin } from '@/lib/auth'
@@ -24,6 +25,7 @@ export default async function AdminPage() {
           <h1>Control panel</h1>
           <p>Signed in as {administrator.username}. Administrator access and every financial mutation are enforced on the server.</p>
         </div>
+        <Link className="button button--secondary" href="/admin/payments">View payment history</Link>
       </div>
 
       <div className="stat-grid">

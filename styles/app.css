@@ -2827,6 +2827,31 @@ table.account-table td {
   gap: 12px;
 }
 
+.admin-payment-search {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-payment-search label {
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.admin-payment-search input[type='search'] {
+  flex: 1 1 250px;
+  min-width: 0;
+  max-width: 370px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-strong);
+  font: inherit;
+}
+
 .admin-invoice-queue {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
