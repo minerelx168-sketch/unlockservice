@@ -303,6 +303,34 @@ test('a BEP-20 transfer carrying the code is credited with nothing pasted', asyn
   await scan()
   assert.equal(credits.getBalance(user.id).creditCents, 2500, 'scanning again never credits twice')
 })
+test('BSC first scan stays in the free-tier log-query budget without skipping later blocks', async () => {
+  const user = newUser()
+  const invoice = request(user.id, 'bsc-usdt-peg', 2700)
+  mine(5_000) // force a true 4,800-block initial lookback, not the test's small initial head
+  sendBsc(bscRaw(invoice.payment_amount_e4!))
+  mine()
+  database.db().prepare("UPDATE payment_watch_cursors SET last_block = NULL WHERE route_id = 'bsc-usdt-peg'").run()
+  let logCalls = 0
+  const original = globalThis.fetch
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    if (typeof init?.body === 'string' && init.body.includes('eth_getLogs')) logCalls += 1
+    return original(input, init)
+  }) as typeof fetch
+  try {
+    const first = await watcher.scanPaymentRoute('bsc-usdt-peg', { force: true })
+    assert.equal(first.status, 'ok')
+    assert.equal(logCalls, 1, 'a 2,000-block log query uses the whole per-route scan budget')
+    assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'pending')
+    for (let i = 0; i < 4 && payments.getInvoice(invoice.reference, user.id)!.status !== 'success'; i += 1) {
+      const next = await watcher.scanPaymentRoute('bsc-usdt-peg', { force: true })
+      assert.equal(next.status, 'ok')
+    }
+  } finally {
+    globalThis.fetch = original
+  }
+  assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
+  assert.equal(credits.getBalance(user.id).creditCents, 2700)
+})
 
 test('a TRC-20 transfer carrying the code is credited with nothing pasted', async () => {
   const user = newUser()

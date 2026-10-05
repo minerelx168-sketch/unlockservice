@@ -49,10 +49,16 @@ import {
  */
 
 const LEASE_MS = 90_000
-const MIN_SCAN_INTERVAL_MS = 10_000
+// Two enabled BSC routes share a 60 RU/min keyless RPC budget. Each log query
+// costs more than a simple chain-head read; never scan a route every refresh.
+const MIN_SCAN_INTERVAL_MS = 30_000
 const MAX_EVM_CHUNKS = 10
 const EVM_CHUNK_BLOCKS = 2_000
 const EVM_MIN_CHUNK_BLOCKS = 1
+// Blockmachine keyless has 60 RU/min/IP. Its published log-query costs are
+// 5 RU (<=100 blocks), 10 RU (<=1,000), 25 RU (<=10,000). Two BSC routes
+// may be enabled, so leave capacity for head/receipt reads and overlap scans.
+const MAX_EVM_LOG_RU_PER_SCAN = 25
 /** Stop starting new reads well inside the lease, so a long scan never outlives it. */
 const SCAN_BUDGET_MS = 45_000
 /** Re-read behind the cursor every scan, for a node that answered a little behind. */
@@ -271,8 +277,12 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
   let next = cursor.last_block === null ? last + 1 : Math.max(0, last + 1 - EVM_OVERLAP_BLOCKS)
   let found = 0
   let span = EVM_CHUNK_BLOCKS
+  let usedLogRu = 0
   for (let chunk = 0; chunk < MAX_EVM_CHUNKS * 4 && next <= safeHead && Date.now() - startedAt < SCAN_BUDGET_MS; chunk += 1) {
     const to = Math.min(safeHead, next + span - 1)
+    const width = to - next + 1
+    const logRu = width <= 100 ? 5 : width <= 1_000 ? 10 : 25
+    if (usedLogRu + logRu > MAX_EVM_LOG_RU_PER_SCAN) break
     let transfers: IncomingTransfer[]
     try {
       transfers = await listEvmIncomingTransfers(
@@ -293,6 +303,7 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
       }
       throw error
     }
+    usedLogRu += logRu
     for (const transfer of transfers) {
       if (recordTransfer(route, transfer) !== null) found += 1
     }
@@ -386,7 +397,7 @@ export async function scanPaymentWallets(): Promise<WatcherSummary> {
  * While a customer has their payment request open: look for their transfer
  * now rather than at the next timer tick, and re-check an attached one that
  * is waiting on confirmations. Throttled per route and per invoice, so a
- * page refreshing every few seconds costs a chain read every ten or so.
+ * page refreshing every few seconds costs a chain scan at most every thirty seconds.
  */
 export async function nudgeInvoicePayment(reference: string): Promise<void> {
   if (process.env.IUNLOCKMOBILE_PAYMENT_WATCHER !== '1') return
