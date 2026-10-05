@@ -78,7 +78,7 @@ function upstreamErrorCode(value: unknown): string {
   return 'provider_rpc_error'
 }
 
-async function requestJson(url: string, init: RequestInit): Promise<unknown> {
+async function requestJson(url: string, init: RequestInit, maxBytes = MAX_RESPONSE_BYTES): Promise<unknown> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 10_000)
   try {
@@ -88,9 +88,9 @@ async function requestJson(url: string, init: RequestInit): Promise<unknown> {
       throw new PaymentProviderError(response.status === 429 ? 'provider_rate_limited' : `provider_http_${response.status}`)
     }
     const declaredLength = Number(response.headers.get('content-length') ?? '0')
-    if (declaredLength > MAX_RESPONSE_BYTES) throw new PaymentProviderError('provider_response_too_large')
+    if (declaredLength > maxBytes) throw new PaymentProviderError('provider_response_too_large')
     const text = await response.text()
-    if (text.length > MAX_RESPONSE_BYTES) throw new PaymentProviderError('provider_response_too_large')
+    if (text.length > maxBytes) throw new PaymentProviderError('provider_response_too_large')
     try {
       return JSON.parse(text) as unknown
     } catch {
@@ -118,16 +118,21 @@ async function evmCall(
   method: string,
   params: unknown[],
   etherscanParameters: Record<string, string>,
+  maxBytes = MAX_RESPONSE_BYTES,
 ): Promise<unknown> {
   const provider = paymentProviderConfiguration(snapshot.providerMode, snapshot.chainId)
   if (!provider.enabled || provider.chainKind !== 'evm') throw new PaymentProviderError('provider_disabled')
 
   if (provider.mode === 'bnb_rpc') {
-    const payload = await requestJson(provider.apiUrl, {
-      method: 'POST',
-      headers: { accept: 'application/json', 'content-type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
-    })
+    const payload = await requestJson(
+      provider.apiUrl,
+      {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+      },
+      maxBytes,
+    )
     return payload
   }
 
@@ -321,4 +326,188 @@ export async function inspectPaymentTransaction(
   if (!normalized) throw new PaymentProviderError('invalid_transaction')
   if (snapshot.chainKind === 'tron') return inspectTronTransaction(snapshot, normalized)
   return inspectEvmTransaction(snapshot, normalized)
+}
+
+/* ---- wallet scanning (the payment watcher) -----------------------------
+ *
+ * The functions above read one transaction a customer pointed at. These
+ * list every token transfer INTO the receiving wallet, so the watcher can
+ * find a payment nobody pasted. Read-only, through the same pacing, size
+ * limits and error codes as the rest of this adapter.
+ */
+
+const TRANSFER_EVENT_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+const LOG_RESPONSE_BYTES = 12_000_000
+
+export type IncomingTransfer = {
+  transactionId: string
+  /** Distinguishes several transfers in one transaction. */
+  logIndex: number
+  blockNumber: number | null
+  blockTimestamp: string
+  from: string | null
+  rawAmount: bigint
+}
+
+function addressTopic(address: string): string {
+  return `0x${address.toLowerCase().replace(/^0x/, '').padStart(64, '0')}`
+}
+
+/** Latest block on a JSON-RPC (bnb_rpc) route, after checking the endpoint is the right chain. */
+export async function evmLatestBlock(snapshot: PaymentProviderSnapshot): Promise<number> {
+  if (snapshot.providerMode !== 'bnb_rpc') throw new PaymentProviderError('provider_scan_unsupported')
+  await ensureEvmChain(snapshot)
+  const latest = parseHexInteger(rpcResult(await evmCall(snapshot, 'eth_blockNumber', [], {})))
+  if (latest === null) throw new PaymentProviderError('provider_invalid_block')
+  return latest
+}
+
+/** Token transfers into `destination` over an inclusive block range (bnb_rpc routes). */
+export async function listEvmIncomingTransfers(
+  snapshot: PaymentProviderSnapshot,
+  tokenContract: string,
+  destination: string,
+  fromBlock: number,
+  toBlock: number,
+  /** Smaller transfers are dropped before any block is fetched for them (spam). */
+  minRawAmount = 1n,
+): Promise<IncomingTransfer[]> {
+  if (snapshot.providerMode !== 'bnb_rpc') throw new PaymentProviderError('provider_scan_unsupported')
+  const result = rpcResult(
+    await evmCall(
+      snapshot,
+      'eth_getLogs',
+      [
+        {
+          fromBlock: `0x${fromBlock.toString(16)}`,
+          toBlock: `0x${toBlock.toString(16)}`,
+          address: tokenContract.toLowerCase(),
+          topics: [TRANSFER_EVENT_TOPIC, null, addressTopic(destination)],
+        },
+      ],
+      {},
+      /* Log lists can be large when a wallet is spammed. One block cannot
+         hold more transfer logs than its gas limit allows, which is well
+         under this, so narrowing the range always ends in a readable answer. */
+      LOG_RESPONSE_BYTES,
+    ),
+  )
+  /* A node that answers null, or anything but a list, has not said "no
+     transfers"; treating it so would move the cursor past blocks nobody read. */
+  if (!Array.isArray(result)) throw new PaymentProviderError('provider_invalid_logs')
+
+  const wantedContract = tokenContract.toLowerCase()
+  const wantedTopic = addressTopic(destination)
+  const transfers: Array<Omit<IncomingTransfer, 'blockTimestamp'> & { blockNumber: number }> = []
+  for (const value of result) {
+    if (!value || typeof value !== 'object') continue
+    const log = value as Record<string, unknown>
+    if (log.removed === true) continue
+    const topics = Array.isArray(log.topics) ? log.topics.map((topic) => String(topic).toLowerCase()) : []
+    const transactionId = normalizeTransactionId('evm', String(log.transactionHash ?? ''))
+    const blockNumber = parseHexInteger(log.blockNumber)
+    const logIndex = parseHexInteger(log.logIndex)
+    const data = typeof log.data === 'string' && /^0x[0-9a-fA-F]+$/.test(log.data) ? log.data : null
+    if (
+      String(log.address ?? '').toLowerCase() !== wantedContract
+      || topics[0] !== TRANSFER_EVENT_TOPIC
+      || topics[2] !== wantedTopic
+      || !transactionId
+      || blockNumber === null
+      || logIndex === null
+      || !data
+      || BigInt(data) < minRawAmount
+    ) {
+      continue
+    }
+    transfers.push({
+      transactionId,
+      logIndex,
+      blockNumber,
+      from: topics[1] ? `0x${topics[1].slice(-40)}` : null,
+      rawAmount: BigInt(data),
+    })
+  }
+
+  const times = new Map<number, string>()
+  for (const blockNumber of new Set(transfers.map((transfer) => transfer.blockNumber))) {
+    const tag = `0x${blockNumber.toString(16)}`
+    const block = rpcResult(await evmCall(snapshot, 'eth_getBlockByNumber', [tag, false], {}))
+    const seconds = block && typeof block === 'object' ? parseHexInteger((block as Record<string, unknown>).timestamp) : null
+    if (seconds === null) throw new PaymentProviderError('provider_invalid_block')
+    times.set(blockNumber, new Date(seconds * 1_000).toISOString())
+  }
+  return transfers.map((transfer) => ({ ...transfer, blockTimestamp: times.get(transfer.blockNumber)! }))
+}
+
+/**
+ * Confirmed TRC-20 transfers into `destination` since `minTimestampMs`,
+ * oldest first, through TronGrid's account history. Returns the newest
+ * block time seen so the caller can move its cursor.
+ */
+export async function listTronIncomingTransfers(
+  snapshot: PaymentProviderSnapshot,
+  tokenContract: string,
+  destination: string,
+  minTimestampMs: number,
+  maxPages = 5,
+  startFingerprint: string | null = null,
+): Promise<{ transfers: IncomingTransfer[]; newestTimestampMs: number | null; complete: boolean; nextFingerprint: string | null }> {
+  const transfers: IncomingTransfer[] = []
+  const perTransaction = new Map<string, number>()
+  let newestTimestampMs: number | null = null
+  let fingerprint: string | null = startFingerprint
+
+  for (let page = 0; page < maxPages; page += 1) {
+    const query = new URLSearchParams({
+      only_to: 'true',
+      only_confirmed: 'true',
+      contract_address: tokenContract,
+      min_timestamp: String(Math.max(0, Math.floor(minTimestampMs))),
+      order_by: 'block_timestamp,asc',
+      limit: '200',
+    })
+    if (fingerprint) query.set('fingerprint', fingerprint)
+    const payload = await tronRequest(
+      snapshot,
+      `/v1/accounts/${encodeURIComponent(destination)}/transactions/trc20?${query.toString()}`,
+      { method: 'GET' },
+    )
+    if (!payload || typeof payload !== 'object' || !Array.isArray((payload as Record<string, unknown>).data)) {
+      throw new PaymentProviderError('provider_invalid_logs')
+    }
+    const record = payload as { data: unknown[]; meta?: { fingerprint?: unknown } }
+    for (const value of record.data) {
+      if (!value || typeof value !== 'object') continue
+      const entry = value as Record<string, unknown>
+      const token = entry.token_info as Record<string, unknown> | undefined
+      const transactionId = normalizeTransactionId('tron', String(entry.transaction_id ?? ''))
+      const timestampMs = safeInteger(entry.block_timestamp)
+      const amount = typeof entry.value === 'string' && /^\d+$/.test(entry.value) ? BigInt(entry.value) : null
+      if (
+        !transactionId
+        || timestampMs === null
+        || amount === null
+        || entry.to !== destination
+        || token?.address !== tokenContract
+      ) {
+        continue
+      }
+      const index = perTransaction.get(transactionId) ?? 0
+      perTransaction.set(transactionId, index + 1)
+      transfers.push({
+        transactionId,
+        logIndex: index,
+        blockNumber: null,
+        blockTimestamp: new Date(timestampMs).toISOString(),
+        from: typeof entry.from === 'string' ? entry.from : null,
+        rawAmount: amount,
+      })
+      newestTimestampMs = Math.max(newestTimestampMs ?? 0, timestampMs)
+    }
+    fingerprint = typeof record.meta?.fingerprint === 'string' && record.meta.fingerprint.length > 0
+      ? record.meta.fingerprint : null
+    if (!fingerprint) return { transfers, newestTimestampMs, complete: true, nextFingerprint: null }
+  }
+  return { transfers, newestTimestampMs, complete: false, nextFingerprint: fingerprint }
 }

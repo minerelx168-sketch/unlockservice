@@ -82,3 +82,16 @@ test('payment verification is fail closed and delegates chain reads to server-si
   assert.match(domain, /verifiedCreditCents/)
   assert.match(domain, /duplicate_transaction/)
 })
+
+test('payments are detected without a pasted hash, and pasting stays as the fallback', () => {
+  const script = read('scripts/poll-provider-jobs.ts')
+  const page = read('app/(app)/user/invoice/[reference]/page.tsx')
+  const actions = read('components/invoice-actions.tsx')
+  assert.match(script, /const watcher = await scanPaymentWallets\(\)/)
+  assert.ok(script.indexOf('scanPaymentWallets()') < script.indexOf('pollInvoiceVerifications(boundedLimit)'))
+  assert.match(page, /nudgeInvoicePayment\(invoice\.reference\)/)
+  assert.match(page, /<CodedAmount/)
+  assert.match(page, /className="paste-fallback"/)
+  assert.match(page, /PaymentReferenceForm/)
+  assert.doesNotMatch(actions, /fetch\(/)
+})

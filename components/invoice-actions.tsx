@@ -82,3 +82,35 @@ export function AutoRefreshPaymentStatus({ active }: { active: boolean }) {
 export function RefreshPaymentStatus() {
   return <AutoRefreshPaymentStatus active />
 }
+
+/**
+ * The exact amount to send, with its last two digits — the request's code —
+ * marked, because those are the digits people are tempted to round away.
+ */
+export function CodedAmount({ amount, asset }: { amount: string; asset: string }) {
+  const [message, setMessage] = useState('')
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(amount)
+      setMessage('Amount copied. Paste it as is — including the last two digits.')
+    } catch {
+      setMessage(`Copy failed. Type ${amount} exactly.`)
+    }
+  }
+
+  return (
+    <div className="coded-amount">
+      <span className="coded-amount-label" id="coded-amount-label">Send exactly</span>
+      <div className="coded-amount-row">
+        <strong aria-labelledby="coded-amount-label" className="coded-amount-value mono">
+          {amount.slice(0, -2)}
+          <mark>{amount.slice(-2)}</mark>
+          <span>{asset}</span>
+        </strong>
+        <button className="button button--secondary" type="button" onClick={copy}>Copy amount</button>
+      </div>
+      {message ? <p className="field-note" role="status">{message}</p> : null}
+    </div>
+  )
+}

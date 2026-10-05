@@ -191,6 +191,44 @@ CREATE TRIGGER IF NOT EXISTS invoice_verification_events_no_delete
   BEFORE DELETE ON invoice_verification_events
   BEGIN SELECT RAISE(ABORT, 'invoice verification events are append-only'); END;
 
+-- Every token transfer into a receiving wallet, read off the chain by the
+-- payment watcher. A row exists whether or not it found an invoice: the
+-- unmatched ones are the payments a person has to look at.
+CREATE TABLE IF NOT EXISTS chain_transfers (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  route_id          TEXT    NOT NULL,
+  tx_hash           TEXT    NOT NULL COLLATE NOCASE,
+  log_index         INTEGER NOT NULL,
+  block_number      INTEGER,
+  block_time        TEXT    NOT NULL,
+  from_address      TEXT,
+  amount_raw        TEXT    NOT NULL,
+  -- The same amount floored to 1/10,000 of a token: the precision invoice codes use.
+  amount_e4         INTEGER NOT NULL,
+  -- unmatched → matched (attached to an invoice by its code) | dismissed (a person decided)
+  status            TEXT    NOT NULL DEFAULT 'unmatched',
+  invoice_reference TEXT    REFERENCES invoices(reference),
+  note              TEXT,
+  seen_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (route_id, tx_hash, log_index)
+);
+CREATE INDEX IF NOT EXISTS chain_transfers_status ON chain_transfers(status, block_time DESC);
+
+-- How far the watcher has read on each route, and a short lease so the
+-- poll timer and a customer's open invoice never scan the same range at once.
+CREATE TABLE IF NOT EXISTS payment_watch_cursors (
+  route_id      TEXT PRIMARY KEY,
+  last_block    INTEGER,
+  last_time_ms  INTEGER,
+  resume_from_ms INTEGER,
+  resume_fingerprint TEXT,
+  lease_until   TEXT,
+  lease_token   TEXT,
+  last_scan_at  TEXT,
+  last_ok_at    TEXT,
+  last_error    TEXT
+);
+
 CREATE TABLE IF NOT EXISTS credit_ledger (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id            INTEGER NOT NULL REFERENCES users(id),
@@ -520,6 +558,12 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'invoices', 'payment_destination_address TEXT')
     addColumn(connection, 'invoices', 'payment_confirmations_required INTEGER')
     addColumn(connection, 'invoices', 'payment_provider_mode TEXT')
+    // The exact token amount to send, in 1/10,000 of a token. Its last two
+    // digits are the invoice's code, which is how the watcher ties a transfer
+    // to an invoice without the customer pasting anything. Null on invoices
+    // created before codes existed; those keep the paste-only flow.
+    addColumn(connection, 'invoices', 'payment_amount_e4 INTEGER')
+    addColumn(connection, 'payment_watch_cursors', 'resume_fingerprint TEXT')
     addColumn(connection, 'orders', 'provider_name TEXT')
     addColumn(connection, 'orders', 'provider_mode TEXT')
     addColumn(connection, 'orders', 'provider_service_id TEXT')

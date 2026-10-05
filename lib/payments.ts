@@ -9,6 +9,8 @@ import {
   type PaymentRouteConfig,
 } from './payment-config'
 import { submitInvoiceTransaction } from './payment-verification'
+import { allocatePaymentAmount, codedInvoiceExpired, expireStaleCodedInvoices } from './payment-codes'
+import { consumeAttempt } from './rate-limit'
 
 /**
  * An invoice locks its numbers and chain/token route at creation. A customer may
@@ -38,6 +40,8 @@ export type Invoice = {
   payment_destination_address: string | null
   payment_confirmations_required: number | null
   payment_provider_mode: PaymentProviderMode | null
+  /** Exact amount to send, in 1/10,000 of a token; the last two digits are the code. */
+  payment_amount_e4: number | null
   created_at: string
   updated_at: string
 }
@@ -127,6 +131,9 @@ export type GatewayId = string
 export class PaymentError extends Error {}
 
 export const MAX_TOPUP_CENTS = 1_000_000
+/** Every open coded invoice holds a code; these keep one account from holding them all. */
+const MAX_OPEN_INVOICES = 5
+const NEW_INVOICES_PER_HOUR = 10
 
 const INVOICE_COLUMNS = `
   reference, user_id, gateway, credit_amount_cents, fee_cents, tax_cents,
@@ -134,7 +141,7 @@ const INVOICE_COLUMNS = `
   payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
   payment_asset_code, payment_token_contract, payment_token_decimals,
   payment_destination_address, payment_confirmations_required, payment_provider_mode,
-  created_at, updated_at
+  payment_amount_e4, created_at, updated_at
 `
 
 function invoiceRow(reference: string, userId?: number): InvoiceRow | undefined {
@@ -153,49 +160,81 @@ export function createInvoice(userId: number, gatewayId: string, creditCents: nu
     )
   }
 
-  const open = db()
-    .prepare(
-      `SELECT ${INVOICE_COLUMNS} FROM invoices
-        WHERE user_id = ? AND gateway = ? AND credit_amount_cents = ?
-          AND status = 'pending' AND payment_reference IS NULL
-        ORDER BY created_at DESC, rowid DESC LIMIT 1`,
-    )
-    .get(userId, gateway.id, creditCents) as Invoice | undefined
-  if (open) return open
+  expireStaleCodedInvoices()
+  return db().transaction(() => {
+    /* Reopening the same unpaid top-up shows the same request and code, as
+       long as it can still be paid. */
+    const open = db()
+      .prepare(
+        `SELECT ${INVOICE_COLUMNS} FROM invoices
+          WHERE user_id = ? AND gateway = ? AND credit_amount_cents = ?
+            AND status = 'pending' AND payment_reference IS NULL
+            AND payment_amount_e4 IS NOT NULL
+          ORDER BY created_at DESC, rowid DESC LIMIT 1`,
+      )
+      .get(userId, gateway.id, creditCents) as Invoice | undefined
+    if (open && !codedInvoiceExpired(open)) return open
 
-  const fee = Math.round((creditCents * gateway.feeBasisPoints) / 10_000)
-  const reference = randomBytes(16).toString('hex')
-  db()
-    .prepare(
-      `INSERT INTO invoices
-         (reference, user_id, gateway, credit_amount_cents, fee_cents, tax_cents,
-          total_due_cents, provider, idempotency_key,
-          payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
-          payment_asset_code, payment_token_contract, payment_token_decimals,
-          payment_destination_address, payment_confirmations_required, payment_provider_mode)
-       VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .run(
-      reference,
-      userId,
-      gateway.id,
-      creditCents,
-      fee,
-      creditCents + fee,
-      gateway.providerMode,
-      `${userId}-${gateway.id}-${creditCents}-${randomBytes(16).toString('hex')}`,
-      gateway.id,
-      gateway.networkId,
-      gateway.chainKind,
-      gateway.chainId,
-      gateway.asset,
-      gateway.tokenContract,
-      gateway.tokenDecimals,
-      gateway.address,
-      gateway.confirmationsRequired,
-      gateway.providerMode,
-    )
-  return getInvoice(reference, userId)!
+    const unpaid = db()
+      .prepare(
+        `SELECT COUNT(*) AS count FROM invoices
+          WHERE user_id = ? AND status IN ('pending', 'review') AND payment_amount_e4 IS NOT NULL`,
+      )
+      .get(userId) as { count: number }
+    if (unpaid.count >= MAX_OPEN_INVOICES) {
+      throw new PaymentError(
+        `You have ${unpaid.count} payment requests waiting for payment or review. Use one of them from Payments, or wait for them to close.`,
+      )
+    }
+    if (!consumeAttempt('invoice-create', String(userId), NEW_INVOICES_PER_HOUR, 3_600)) {
+      throw new PaymentError('Too many new payment requests in the last hour. Use one you already created, or try again later.')
+    }
+
+    const fee = Math.round((creditCents * gateway.feeBasisPoints) / 10_000)
+    /* Every new request carries a code. Without one it could only be paid
+       by a pasted hash, and an uncoded paste cannot be told apart from
+       someone else's transfer, so none is created. */
+    const paymentAmountE4 = allocatePaymentAmount(gateway.id, creditCents + fee)
+    if (paymentAmountE4 === null) {
+      throw new PaymentError(
+        'Too many open payment requests near this amount right now. Try a slightly different amount, or try again in a little while.',
+      )
+    }
+    const reference = randomBytes(16).toString('hex')
+    db()
+      .prepare(
+        `INSERT INTO invoices
+           (reference, user_id, gateway, credit_amount_cents, fee_cents, tax_cents,
+            total_due_cents, provider, idempotency_key,
+            payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
+            payment_asset_code, payment_token_contract, payment_token_decimals,
+            payment_destination_address, payment_confirmations_required, payment_provider_mode,
+            payment_amount_e4)
+         VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        reference,
+        userId,
+        gateway.id,
+        creditCents,
+        fee,
+        creditCents + fee,
+        gateway.providerMode,
+        `${userId}-${gateway.id}-${creditCents}-${randomBytes(16).toString('hex')}`,
+        gateway.id,
+        gateway.networkId,
+        gateway.chainKind,
+        gateway.chainId,
+        gateway.asset,
+        gateway.tokenContract,
+        gateway.tokenDecimals,
+        gateway.address,
+        gateway.confirmationsRequired,
+        gateway.providerMode,
+        paymentAmountE4,
+      )
+    return getInvoice(reference, userId)!
+  })()
 }
 
 export function getInvoice(reference: string, userId: number): Invoice | undefined {
