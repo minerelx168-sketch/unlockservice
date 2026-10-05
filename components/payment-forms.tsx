@@ -95,7 +95,7 @@ export function AddFundsForm({
       </fieldset>
 
       <fieldset className="funding-step">
-        <legend><span>2</span> Confirm payment method</legend>
+        <legend><span>2</span> Choose token and network</legend>
         <div className="payment-method-grid">
           {gateways.map((entry) => (
             <button
@@ -113,7 +113,9 @@ export function AddFundsForm({
                   <small>Binance-issued pegged representation</small>
                 ) : null}
               </span>
-              <span className="badge badge--success">Auto verification</span>
+              <span className={entry.automaticVerification ? 'badge badge--success' : 'badge badge--pending'}>
+                {entry.automaticVerification ? 'Auto detection' : 'Manual review'}
+              </span>
             </button>
           ))}
         </div>
@@ -129,13 +131,14 @@ export function AddFundsForm({
           <strong>{valid ? formatUsd(fee) : '—'}</strong>
         </div>
         <div className="funding-summary-total">
-          <span>Suggested amount to send</span>
+          <span>Estimated request total</span>
           <strong>{valid ? formatUsd(cents + fee) : '—'}</strong>
         </div>
+        <p className="funding-summary-note">Do not send this estimate. Your exact token amount, wallet and QR code appear on the next page after you create the request.</p>
       </section>
 
       <button className="button button--primary funding-submit" type="submit" disabled={pending || !valid || !gatewayId}>
-        {pending ? 'Creating payment request…' : 'Create payment request'}
+        {pending ? 'Creating payment request…' : 'Continue to payment details'}
       </button>
     </form>
   )

@@ -2361,6 +2361,42 @@ table.account-table td {
   font-size: 0.75rem;
 }
 
+.funding-journey {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.funding-journey li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.funding-journey li > span {
+  flex: 0 0 auto;
+  color: var(--primary-dark);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.funding-journey strong,
+.funding-journey small {
+  display: block;
+  line-height: 1.4;
+}
+
+.funding-journey strong { color: var(--ink-strong); }
+.funding-journey small { margin-top: 4px; color: var(--muted); }
+
 .invoice-progress li.is-complete {
   border-color: color-mix(in srgb, #16834b 30%, var(--line));
   background: color-mix(in srgb, #16834b 6%, var(--surface));
@@ -2565,6 +2601,13 @@ table.account-table td {
   font-family: var(--font-display);
   font-size: 1.45rem;
   color: var(--primary-dark);
+}
+
+.funding-summary-note {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .funding-assurance > div:first-child,
@@ -2943,6 +2986,10 @@ table.account-table td {
   .payment-request-head {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .funding-journey {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .funding-progress,
