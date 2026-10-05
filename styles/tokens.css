@@ -77,6 +77,11 @@
   --color-warning: #ad5d0c;
   --color-danger: #b03a2b;
 
+  /* A QR code is read by a camera, not a person: black on white in both
+     themes, because scanners are tuned for dark modules on light ground. */
+  --color-qr-ink: #000000;
+  --color-qr-paper: #ffffff;
+
   /* ---- palette: depth ---------------------------------------------- */
   --shadow-sm: 0 1px 2px rgb(12 34 58 / 6%), 0 2px 8px rgb(12 34 58 / 4%);
   --shadow-md: 0 14px 40px rgb(12 34 58 / 8%);
@@ -128,6 +133,8 @@
   --success: var(--color-success);
   --warning: var(--color-warning);
   --danger: var(--color-danger);
+  --qr-ink: var(--color-qr-ink);
+  --qr-paper: var(--color-qr-paper);
 
   --shadow-soft: var(--shadow-md);
   --shadow: var(--shadow-lg);

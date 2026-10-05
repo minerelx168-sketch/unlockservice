@@ -1,12 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
-import {
-  approveInvoiceAction,
-  createInvoiceAction,
-  submitReferenceAction,
-  type FormState,
-} from '@/lib/actions'
+import { useActionState, useState } from 'react'
+import { approveInvoiceAction, createInvoiceAction, type FormState } from '@/lib/actions'
 import { Icon } from './icons'
 
 const EMPTY: FormState = {}
@@ -21,70 +16,75 @@ function Problem({ message }: { message?: string }) {
   )
 }
 
+const QUICK_AMOUNTS = ['10', '25', '50', '100']
+
 export function AddFundsForm({
   gateways,
+  defaultAmount,
 }: {
-  gateways: Array<{ id: string; label: string; asset: string; network: string }>
+  gateways: Array<{ id: string; label: string; asset: string; network: string; networkLabel: string }>
+  defaultAmount?: string
 }) {
   const [state, action, pending] = useActionState(createInvoiceAction, EMPTY)
+  const [amount, setAmount] = useState(defaultAmount ?? '')
+  const only = gateways.length === 1 ? gateways[0] : null
 
   return (
     <form action={action} className="form-grid">
       <Problem message={state.error} />
 
-      <div className="field">
-        <label htmlFor="gateway">Payment method</label>
-        <select
-          id="gateway"
-          name="gateway"
-          defaultValue={gateways[0]?.id}
-          style={{
-            minHeight: 50,
-            padding: '13px 14px',
-            border: '1px solid var(--line)',
-            borderRadius: 'var(--radius-control)',
-            background: 'var(--surface)',
-            color: 'var(--ink-strong)',
-            fontSize: 15,
-          }}
-        >
-          {gateways.map((gateway) => (
-            <option key={gateway.id} value={gateway.id}>
-              {gateway.label} — {gateway.asset} on {gateway.network}
-            </option>
-          ))}
-        </select>
-      </div>
+      {only ? (
+        <>
+          <input type="hidden" name="gateway" value={only.id} />
+          <div className="pay-method">
+            <span className="pay-method-asset">{only.asset}</span>
+            <span>
+              Pay with <strong>{only.asset}</strong> on {only.networkLabel}. Credited automatically once it arrives.
+            </span>
+          </div>
+        </>
+      ) : (
+        <div className="field">
+          <label htmlFor="gateway">Payment method</label>
+          <select id="gateway" name="gateway" defaultValue={gateways[0]?.id}>
+            {gateways.map((gateway) => (
+              <option key={gateway.id} value={gateway.id}>
+                {gateway.label} — {gateway.asset} on {gateway.networkLabel}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="field">
         <label htmlFor="amount">Credit to add (USD)</label>
-        <input id="amount" name="amount" className="mono" inputMode="decimal" placeholder="25.00" required />
+        <div className="amount-chips" role="group" aria-label="Quick amounts">
+          {QUICK_AMOUNTS.map((quick) => (
+            <button
+              key={quick}
+              type="button"
+              className={`amount-chip${amount === quick ? ' is-active' : ''}`}
+              aria-pressed={amount === quick}
+              onClick={() => setAmount(quick)}
+            >
+              ${quick}
+            </button>
+          ))}
+        </div>
+        <input
+          id="amount"
+          name="amount"
+          className="mono"
+          inputMode="decimal"
+          placeholder="25.00"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          required
+        />
       </div>
 
       <button className="button button--primary" type="submit" disabled={pending}>
-        {pending ? 'Creating invoice…' : 'Create invoice'}
-      </button>
-    </form>
-  )
-}
-
-export function PaymentReferenceForm({ reference }: { reference: string }) {
-  const [state, action, pending] = useActionState(submitReferenceAction, EMPTY)
-
-  return (
-    <form action={action} className="form-grid" style={{ maxWidth: 'none' }}>
-      <Problem message={state.error} />
-      <input type="hidden" name="reference" value={reference} />
-      <div className="field">
-        <label htmlFor="paymentReference">Transaction reference</label>
-        <input id="paymentReference" name="paymentReference" className="mono" required />
-      </div>
-      <div className="field">
-        <label htmlFor="note">Note (optional)</label>
-        <input id="note" name="note" />
-      </div>
-      <button className="button button--primary" type="submit" disabled={pending}>
-        {pending ? 'Submitting…' : 'I have paid — submit for review'}
+        {pending ? 'Preparing payment…' : 'Continue to payment'}
       </button>
     </form>
   )

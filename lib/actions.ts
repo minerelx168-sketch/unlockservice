@@ -32,7 +32,6 @@ import {
   createInvoice,
   PaymentError,
   selfApprovalEnabled,
-  submitPaymentReference,
 } from './payments'
 
 export type FormState = { error?: string; message?: string }
@@ -221,26 +220,6 @@ export async function createInvoiceAction(_: FormState, data: FormData): Promise
   let reference: string
   try {
     reference = createInvoice(found.user.id, String(data.get('gateway') ?? ''), cents).reference
-  } catch (error) {
-    if (error instanceof PaymentError) return { error: error.message }
-    throw error
-  }
-  revalidatePath('/', 'layout')
-  redirect(`/user/invoice/${reference}`)
-}
-
-export async function submitReferenceAction(_: FormState, data: FormData): Promise<FormState> {
-  const found = await currentSession()
-  if (!found) redirect('/login')
-
-  const reference = String(data.get('reference') ?? '')
-  try {
-    submitPaymentReference(
-      reference,
-      found.user.id,
-      String(data.get('paymentReference') ?? ''),
-      String(data.get('note') ?? ''),
-    )
   } catch (error) {
     if (error instanceof PaymentError) return { error: error.message }
     throw error

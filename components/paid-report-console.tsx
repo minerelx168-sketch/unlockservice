@@ -282,7 +282,10 @@ export function PaidReportConsole({
                   a small "add funds" link beside it asks the customer to work
                   out for themselves why they cannot buy. */}
               {product && product.providerReady && !affordable ? (
-                <Link className="button button--primary" href="/user/add-funds">
+                <Link
+                  className="button button--primary"
+                  href={`/user/add-funds?amount=${((product.priceCents - balanceCents) / 100).toFixed(2)}`}
+                >
                   <Icon name="arrowRight" strokeWidth={1.9} />
                   Add funds and order this report
                 </Link>

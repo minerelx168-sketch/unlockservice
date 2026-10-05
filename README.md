@@ -27,7 +27,9 @@ lib/db.ts                   SQLite schema, seeded with brands, carriers and devi
 lib/credits.ts              The escrow ledger: hold → charge / refund
 lib/orders.ts               The order pipeline both endpoints call
 lib/catalog.ts              Brands, carriers and their prices and turnarounds
-lib/payments.ts             Invoices: numbers locked at creation, credited on confirmation
+lib/payments.ts             Invoices: numbers locked at creation, each with a coded USDT amount
+lib/usdt.ts                 Reads USDT transfers off BNB Smart Chain and settles invoices by code
+lib/bsc.ts                  Minimal read-only BNB Smart Chain JSON-RPC client
 lib/provider.ts             Supplier adapter + the mock that stands in for a real one
 lib/auth.ts                 Passwords, accounts, sessions, CSRF tokens, RBAC guards
 lib/admin.ts                Read models for the administrator control panel
@@ -84,9 +86,11 @@ A real unlock takes hours, so the page polls as a courtesy for the first thirty 
 everything else waits in Orders. The mock resolves in six seconds so the whole flow can be walked
 without waiting a day.
 
-Top-ups need a confirmation that would normally come from an administrator. In development the
-invoice page offers to stand in for one; in production that button only appears when
-`IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` is set. `IUNLOCKMOBILE_MAINTENANCE=1` pauses new orders.
+Top-ups confirm themselves: each invoice asks for a coded USDT amount, and the payment watcher
+credits the invoice when a transfer carrying that code lands on BNB Smart Chain — no transaction id
+to paste. Transfers it cannot place wait in `/admin`. See "USDT detection" in `deploy/README.md`.
+For a rehearsal without a chain, the invoice page can stand in for a confirmation when
+`IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` is set outside production. `IUNLOCKMOBILE_MAINTENANCE=1` pauses new orders.
 
 Administrator access is an explicit `account_type = 'admin'` role checked on the server. The
 `/admin` control panel never renders for a normal account. Create an account through `/register` so
@@ -144,7 +148,7 @@ Change it in those four places and the site follows.
 
 ## Not built yet
 
-Still open: admin write operations (invoice approval, catalog and supplier management), emailing the result
+Still open: admin write operations beyond payments and credit (catalog and supplier management), emailing the result
 to the customer, the API portal and its DHRU-compatible surface, reseller accounts and credit
 transfer, the 7-day activity chart on the dashboard, server-side pagination in Orders, email change, and rate limiting on the order endpoint. There is also no background worker yet
 — an order only advances when someone opens it or the console polls it.

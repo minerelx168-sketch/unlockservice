@@ -1517,3 +1517,448 @@ table.grid td.num {
     order: -1;
   }
 }
+
+/* ---- USDT payment ------------------------------------------------------
+ * One exact amount, one network, one address — read top to bottom in the
+ * order the customer types them into their exchange. The status column
+ * beside it is what tells them they can stop.
+ */
+
+.pay-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.pay-steps {
+  display: grid;
+  gap: 22px;
+}
+
+.pay-step {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.pay-step-n {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-border);
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 720;
+}
+
+.pay-step-body {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pay-step-label {
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 30px;
+}
+
+.pay-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.pay-amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+  line-height: 1.1;
+}
+
+/* The code is the part people are tempted to round away, so it is the
+   part that looks deliberate. */
+.pay-code {
+  padding: 0 2px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  box-shadow: inset 0 -3px 0 var(--accent);
+  color: var(--ink-strong);
+}
+
+.pay-unit {
+  margin-left: 8px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.pay-hint {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.pay-hint strong {
+  color: var(--ink-strong);
+  font-weight: 650;
+}
+
+.pay-network {
+  justify-self: start;
+  padding: 7px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--primary-border);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 14px;
+  font-weight: 680;
+}
+
+.pay-address {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.pay-qr {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-float);
+  background: var(--qr-paper);
+}
+
+.pay-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pay-qr .qr-paper {
+  fill: var(--qr-paper);
+}
+
+.pay-qr .qr-ink {
+  fill: var(--qr-ink);
+}
+
+.pay-address-text {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.pay-address-text code {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-strong);
+  color: var(--ink-strong);
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.copy-button {
+  min-height: 38px;
+  padding: 7px 13px;
+}
+
+.pay-side {
+  display: grid;
+  gap: 18px;
+}
+
+.pay-live {
+  display: grid;
+  gap: 16px;
+}
+
+.pay-state {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.pay-state strong {
+  display: block;
+  font-size: 15.5px;
+  color: var(--ink-strong);
+}
+
+.pay-state p {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.pay-state .link-arrow {
+  display: inline-flex;
+  margin-top: 8px;
+  font-size: 13.5px;
+}
+
+.pay-state .pay-meta {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.pay-state-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--success);
+}
+
+.pay-state-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pay-state-icon--review {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.pay-state--done strong {
+  color: var(--success);
+}
+
+/* A beacon rather than a spinner: nothing is loading, the page is
+   listening, and it says so without implying the customer must wait. */
+.pay-pulse {
+  position: relative;
+  width: 34px;
+  height: 34px;
+}
+
+.pay-pulse::before,
+.pay-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 11px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.pay-pulse::after {
+  animation: pay-pulse 1.8s ease-out infinite;
+}
+
+@keyframes pay-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pay-pulse::after {
+    animation: none;
+  }
+}
+
+.pay-fallback {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-strong);
+}
+
+.pay-fallback > summary {
+  padding: 12px 14px;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.pay-fallback[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.pay-claim {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.pay-claim-help {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.pay-claim .field input {
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+.pay-claim .button {
+  justify-self: start;
+}
+
+.pay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pay-summary {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.pay-summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.pay-summary dt {
+  color: var(--muted);
+}
+
+.pay-summary dd {
+  margin: 0;
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.pay-method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-strong);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.pay-method-asset {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-border);
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+}
+
+.amount-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.amount-chip {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-strong);
+  font-size: 14px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.amount-chip:hover {
+  border-color: var(--primary);
+}
+
+.amount-chip.is-active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+@media (max-width: 1100px) {
+  .pay-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .pay-address {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pay-qr {
+    width: 168px;
+  }
+
+  .pay-step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .pay-step-n {
+    display: none;
+  }
+}
+
+/* ---- admin: payments ------------------------------------------------ */
+
+.watcher-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.payment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payment-actions .button {
+  min-height: 36px;
+  padding: 6px 12px;
+}
+
+.tx-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--primary);
+}

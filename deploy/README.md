@@ -23,10 +23,13 @@ same as working:
    empty no payment method is offered at all. Before setting it, send a
    small transfer and confirm it arrives: a wrong address sends customer
    funds somewhere unrecoverable.
-3. **Nothing can confirm a top-up.** Confirmation is an administrator
-   action and `/admin` is still read-only, so a paid invoice sits in
-   review until someone confirms it by hand. The stand-in button is off in
-   production and stays off — it mints credit.
+3. **Top-ups confirm themselves — if the watcher can read the chain.**
+   Each invoice asks for a coded USDT amount (25.0037 for $25), and the
+   server reads BNB Smart Chain and credits the invoice whose code the
+   transfer carries. That needs `IUNLOCKMOBILE_BSC_RPC_URL` pointed at an
+   endpoint that serves `eth_getLogs` (see "USDT detection" below). Transfers
+   without a code wait in `/admin` for a person. The stand-in self-approval
+   button is still off in production and stays off — it mints credit.
 4. **Prices and turnarounds are invented.** Everything in
    `lib/catalog.ts` is a plausible schedule, not a quoted one. Nothing in
    the code can tell that this one is wrong.
@@ -291,6 +294,55 @@ decide whether the service is safe:
 | `IUNLOCKMOBILE_PROVIDER_MODE` | `disabled` until a real supplier is configured. While disabled, production refuses orders rather than serving invented codes. |
 | `IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET` | Keys the fingerprint that stands in for a stored IMEI. At least 32 characters. Without it, production refuses to run checks. Changing it orphans every existing fingerprint. |
 | `IUNLOCKMOBILE_USDT_BEP20_ADDRESS` | The receiving wallet. Unset means no payment method is offered, which is the right state until a test transfer has arrived. |
+| `IUNLOCKMOBILE_BSC_RPC_URL` | BNB Smart Chain JSON-RPC the payment watcher reads. Must serve `eth_getLogs`. Read-only; no key for the wallet is ever on the server. |
+| `IUNLOCKMOBILE_USDT_SHORTFALL_TOLERANCE_CENTS` / `_BPS` | How short a coded transfer may arrive and still credit the full invoice (exchange withdrawal fees): the smaller of 100 cents and 3% of the invoice by default. Set either to 0 to credit only what arrives. |
 | `IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION=1` | Makes an account prove its address. Turn it on once mail works: it also closes the path where a Google sign-in adopts an account that only asserted the address. |
 | `IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` | Lets an account confirm its own invoice. Ignored in production, and it should never be set anywhere that holds real balances — it mints credit without a payment. |
 | `IUNLOCKMOBILE_ALLOW_MOCK_SUPPLIER=1` | Serves invented unlock codes in production. For a staging box that deliberately wants the demo, and nothing else. |
+
+
+## USDT detection
+
+Customers no longer paste a transaction id. `createInvoice` gives every
+invoice a two-digit code below the cents — $25.00 becomes **25.0037 USDT** —
+and the watcher (`lib/usdt.ts`) reads every USDT transfer into the wallet off
+BNB Smart Chain and credits the open invoice whose code it carries.
+
+- **Where it runs.** Inside the web server, started by `instrumentation.ts`,
+  every 20 seconds; also on demand while a customer has their invoice open,
+  and from `npm run usdt:scan`. A lease in `chain_cursors` keeps them from
+  overlapping. `IUNLOCKMOBILE_USDT_WATCH=0` turns the timer off.
+- **The RPC.** Any endpoint answers a receipt lookup, but the scan uses
+  `eth_getLogs`, which the free `bsc-dataseed` endpoints restrict. Use a
+  provider that serves it (NodeReal, Ankr, QuickNode, Chainstack, Alchemy …)
+  and put its URL in `IUNLOCKMOBILE_BSC_RPC_URL`. The watcher refuses an
+  endpoint that is not chain 56, and `/admin` shows the last good scan and
+  the last error.
+- **What credits automatically.** A transfer whose code matches exactly one
+  unpaid invoice, within ±3 USDT of its amount, in a block strictly later
+  than the invoice's creation and no more than 7 days after it, buried
+  under `IUNLOCKMOBILE_USDT_CONFIRMATIONS` blocks (default 15). A small
+  shortfall (the smaller of $1 and 3%) credits in full; anything else
+  credits what arrived. The transfer's hash and log index become the
+  invoice's charge id, so one transfer can never pay two invoices and a
+  re-scan never credits twice. Transfers under 1 USDT are ignored (address
+  poisoning spam).
+- **Limits.** An account can hold 5 open top-ups and create 10 an hour.
+  Unpaid invoices close after 8 days; their code stays reserved 7 more.
+  Keep the server clock on NTP: a transfer only pays an invoice created
+  before its block, by the server's clock.
+- **What waits for a person.** A transfer with no code (the customer rounded
+  the amount), or one the customer pointed at by pasting its hash. The paste
+  is checked on chain immediately, but never credits by itself: every
+  transfer into the wallet is public, so anyone could paste someone else's.
+  `/admin` lists these with the sender, the time, the open invoices each
+  could belong to, and any rival invoice pointing at the same transfer.
+  Confirming always goes through the chain record, never the pasted text.
+  Money sent before its sender made an invoice: credit it with "Adjust user
+  credit", then dismiss the transfer naming the adjustment.
+- **The receiving wallet must be self-custody** (Trust Wallet, MetaMask, a
+  hardware wallet), not an exchange deposit address. Exchanges often settle
+  transfers between their own users internally, off-chain — those never
+  appear on BNB Smart Chain, and nothing here can see them.
+- **First start.** The cursor begins about an hour back. To pick up older
+  payments, set `IUNLOCKMOBILE_USDT_SCAN_START_BLOCK` before the first start.

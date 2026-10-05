@@ -342,6 +342,45 @@ CREATE TABLE IF NOT EXISTS api_access (
 				CREATE INDEX IF NOT EXISTS contact_messages_undelivered
 				  ON contact_messages(created_at DESC) WHERE delivered_at IS NULL;
 
+-- Every USDT transfer that reached the receiving wallet, read off the chain.
+-- A row exists whether or not it could be tied to an invoice: the unmatched
+-- ones are exactly the payments a person has to look at.
+CREATE TABLE IF NOT EXISTS chain_transfers (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  network           TEXT    NOT NULL,
+  tx_hash           TEXT    NOT NULL,
+  log_index         INTEGER NOT NULL,
+  block_number      INTEGER NOT NULL,
+  block_time        TEXT    NOT NULL,
+  from_address      TEXT    NOT NULL,
+  to_address        TEXT    NOT NULL,
+  -- Raw token units as a decimal string (18 decimals on BSC), and the same
+  -- amount floored to 1/10,000 USDT, which is the precision invoices use.
+  amount_units      TEXT    NOT NULL,
+  amount_e4         INTEGER NOT NULL,
+  -- unmatched → matched (credited) | claimed (customer named an invoice,
+  -- waiting on a person) | dismissed (a person decided it is not ours to credit)
+  status            TEXT    NOT NULL DEFAULT 'unmatched',
+  invoice_reference TEXT    REFERENCES invoices(reference),
+  claimed_reference TEXT    REFERENCES invoices(reference),
+  note              TEXT,
+  seen_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (network, tx_hash, log_index)
+);
+CREATE INDEX IF NOT EXISTS chain_transfers_status ON chain_transfers(status, seen_at DESC);
+
+-- How far the watcher has read, plus a short lease so two processes (the
+-- web server and a timer, say) never scan the same range at once.
+CREATE TABLE IF NOT EXISTS chain_cursors (
+  network       TEXT PRIMARY KEY,
+  last_block    INTEGER,
+  lease_until   TEXT,
+  lease_token   TEXT,
+  last_scan_at  TEXT,
+  last_ok_at    TEXT,
+  last_error    TEXT
+);
+
 				CREATE TABLE IF NOT EXISTS schema_migrations (
 
 	  version    TEXT PRIMARY KEY,
@@ -404,6 +443,15 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'invoices', 'idempotency_key TEXT')
     addColumn(connection, 'invoices', 'paid_at TEXT')
     addColumn(connection, 'invoices', 'credited_at TEXT')
+    // The exact USDT amount to send, in 1/10,000 USDT. The last two digits
+    // are the invoice's code, which is how a transfer finds its invoice
+    // without the customer pasting a transaction id. Null on invoices made
+    // before codes existed.
+    addColumn(connection, 'invoices', 'pay_amount_e4 INTEGER')
+    addColumn(connection, 'invoices', 'received_e4 INTEGER')
+    addColumn(connection, 'invoices', 'credited_cents INTEGER')
+    addColumn(connection, 'invoices', 'confirmed_by_user_id INTEGER')
+    addColumn(connection, 'chain_cursors', 'lease_token TEXT')
     addColumn(connection, 'orders', 'provider_name TEXT')
     addColumn(connection, 'orders', 'provider_mode TEXT')
     addColumn(connection, 'orders', 'provider_service_id TEXT')
@@ -582,6 +630,8 @@ function migrate(connection: Database.Database) {
         ON invoices(idempotency_key) WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_provider_charge
         ON invoices(provider, provider_charge_id) WHERE provider_charge_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS invoices_open_codes
+        ON invoices(status, created_at) WHERE pay_amount_e4 IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS imei_checks_idempotency
         ON imei_checks(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;

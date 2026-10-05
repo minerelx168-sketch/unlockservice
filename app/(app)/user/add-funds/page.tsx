@@ -2,14 +2,27 @@ import type { Metadata } from 'next'
 import { AddFundsForm } from '@/components/payment-forms'
 import { Icon } from '@/components/icons'
 import { requireSession } from '@/lib/auth'
-import { MIN_TOPUP_CENTS, GATEWAYS } from '@/lib/payments'
-import { formatUsd } from '@/lib/money'
+import { formatUsd, parseUsd } from '@/lib/money'
+import { GATEWAYS, MAX_TOPUP_CENTS, MIN_TOPUP_CENTS } from '@/lib/payments'
 
 export const metadata: Metadata = { title: 'Add funds' }
 export const dynamic = 'force-dynamic'
 
-export default async function AddFundsPage() {
+export default async function AddFundsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ amount?: string }>
+}) {
   await requireSession()
+
+  /* An order page that was short of credit links here with the shortfall,
+     so the customer tops up exactly what they need instead of guessing. */
+  const { amount } = await searchParams
+  const asked = parseUsd(String(amount ?? ''))
+  const defaultAmount =
+    asked === null
+      ? undefined
+      : (Math.min(Math.max(asked, MIN_TOPUP_CENTS), MAX_TOPUP_CENTS) / 100).toFixed(2).replace(/\.00$/, '')
 
   return (
     <>
@@ -17,26 +30,27 @@ export default async function AddFundsPage() {
         <div>
           <h1>Add funds</h1>
           <p>
-            Credit pays for unlock orders. Fees, tax and the final amount are locked into the
-            invoice the moment it is created, so the number you see is the number you pay — and the
-            credit lands once the transfer is confirmed.
+            Credit pays for orders. Pick an amount and you get one exact USDT figure to send — the credit is added by
+            itself as soon as the transfer arrives.
           </p>
         </div>
       </div>
 
       <div className="panel" style={{ maxWidth: 560 }}>
         <header>
-          <h2>New invoice</h2>
+          <h2>Top up</h2>
           <span>Minimum {formatUsd(MIN_TOPUP_CENTS)}</span>
         </header>
         <div className="panel-body">
           {GATEWAYS.length > 0 ? (
             <AddFundsForm
+              defaultAmount={defaultAmount}
               gateways={GATEWAYS.map((gateway) => ({
                 id: gateway.id,
                 label: gateway.label,
                 asset: gateway.asset,
                 network: gateway.network,
+                networkLabel: gateway.networkLabel,
               }))}
             />
           ) : (

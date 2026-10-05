@@ -382,7 +382,10 @@ export function OrderConsole({
                 small red text beside it leaves the customer to work out the
                 connection. */}
             {!affordable && chosen ? (
-              <Link className="button button--primary" href="/user/add-funds">
+              <Link
+                className="button button--primary"
+                href={`/user/add-funds?amount=${((priceCents - availableCents) / 100).toFixed(2)}`}
+              >
                 <Icon name="arrowRight" strokeWidth={1.9} />
                 Add funds and order
               </Link>
