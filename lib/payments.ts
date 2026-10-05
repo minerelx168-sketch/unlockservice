@@ -162,23 +162,22 @@ export function createInvoice(userId: number, gatewayId: string, creditCents: nu
 
   expireStaleCodedInvoices()
   return db().transaction(() => {
-    /* Reopening the same unpaid top-up shows the same request and code, as
-       long as it can still be paid. */
+    /* Reopening the same unpaid top-up shows the same request, coded or
+       manual-only, instead of filling the queue with duplicate requests. */
     const open = db()
       .prepare(
         `SELECT ${INVOICE_COLUMNS} FROM invoices
           WHERE user_id = ? AND gateway = ? AND credit_amount_cents = ?
             AND status = 'pending' AND payment_reference IS NULL
-            AND payment_amount_e4 IS NOT NULL
           ORDER BY created_at DESC, rowid DESC LIMIT 1`,
       )
       .get(userId, gateway.id, creditCents) as Invoice | undefined
-    if (open && !codedInvoiceExpired(open)) return open
+    if (open && (open.payment_amount_e4 === null || !codedInvoiceExpired(open))) return open
 
     const unpaid = db()
       .prepare(
         `SELECT COUNT(*) AS count FROM invoices
-          WHERE user_id = ? AND status IN ('pending', 'review') AND payment_amount_e4 IS NOT NULL`,
+          WHERE user_id = ? AND status IN ('pending', 'review')`,
       )
       .get(userId) as { count: number }
     if (unpaid.count >= MAX_OPEN_INVOICES) {
@@ -191,15 +190,10 @@ export function createInvoice(userId: number, gatewayId: string, creditCents: nu
     }
 
     const fee = Math.round((creditCents * gateway.feeBasisPoints) / 10_000)
-    /* Every new request carries a code. Without one it could only be paid
-       by a pasted hash, and an uncoded paste cannot be told apart from
-       someone else's transfer, so none is created. */
+    /* Once all 99 codes have ever been used near this amount, issue an
+       uncoded request. The customer must paste a transaction ID; it cannot
+       auto-credit and ownership remains subject to human review. */
     const paymentAmountE4 = allocatePaymentAmount(gateway.id, creditCents + fee)
-    if (paymentAmountE4 === null) {
-      throw new PaymentError(
-        'Too many open payment requests near this amount right now. Try a slightly different amount, or try again in a little while.',
-      )
-    }
     const reference = randomBytes(16).toString('hex')
     db()
       .prepare(
@@ -275,6 +269,9 @@ export function selfApprovalEnabled(): boolean {
 
 /** Trusted confirmation. Duplicate confirmation is a no-op. */
 export function approveInvoice(reference: string, userId: number, providerChargeId?: string): Invoice {
+  // This legacy helper has no on-chain proof parameter. Reject production
+  // callers even if a future server action accidentally omits its own guard.
+  if (process.env.NODE_ENV === 'production') throw new PaymentError('Confirmation requires verified payment evidence.')
   return db().transaction(() => {
     const invoice = invoiceRow(reference, userId)
     if (!invoice) throw new PaymentError('No such invoice.')

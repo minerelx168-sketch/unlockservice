@@ -6,7 +6,7 @@ import {
   type PaymentRouteConfig,
 } from './payment-config'
 import {
-  evmLatestBlock,
+  evmFinalizedBlock,
   listEvmIncomingTransfers,
   listTronIncomingTransfers,
   PaymentProviderError,
@@ -212,7 +212,7 @@ export function matchRecordedTransfers(routeId?: string): string[] {
   const rows = db()
     .prepare(
       `SELECT * FROM chain_transfers
-        WHERE status = 'unmatched' ${routeId ? 'AND route_id = ?' : ''}
+        WHERE status = 'unmatched' AND note IS NULL ${routeId ? 'AND route_id = ?' : ''}
           AND julianday(block_time) >= julianday('now') - ?
         ORDER BY id`,
     )
@@ -222,6 +222,17 @@ export function matchRecordedTransfers(routeId?: string): string[] {
   for (const transfer of rows) {
     // One bad row must not stop every payment behind it.
     try {
+      // Invoice verification currently reserves an entire tx hash. Do not
+      // auto-credit just its first log and strand a second customer's log.
+      // Leave all logs in the admin queue for reconciliation outside this
+      // single-hash settlement path until event-level claims are implemented.
+      const eventCount = db().prepare(
+        'SELECT COUNT(*) AS n FROM chain_transfers WHERE tx_hash = ? COLLATE NOCASE',
+      ).get(transfer.tx_hash) as { n: number }
+      if (eventCount.n > 1) {
+        noteTransfer(transfer.id, 'Multiple incoming token transfers in one transaction — manual reconciliation required.')
+        continue
+      }
       const alreadyAttached = db()
         .prepare(
           'SELECT invoice_reference, matched_log_index FROM invoice_verifications WHERE tx_hash = ? COLLATE NOCASE LIMIT 1',
@@ -238,7 +249,13 @@ export function matchRecordedTransfers(routeId?: string): string[] {
         continue
       }
       const candidates = codeCandidates(transfer)
-      if (candidates.length === 0) continue
+      if (candidates.length === 0) {
+        // An invoice created in the future cannot own a past transfer.
+        // Annotate once for human review instead of rechecking thousands of
+        // old unmatched rows on every subsequent TronGrid page.
+        noteTransfer(transfer.id, 'No eligible open payment request — manual reconciliation required.')
+        continue
+      }
       if (candidates.length > 1) {
         noteTransfer(transfer.id, `Code matches ${candidates.length} open payment requests — needs a person.`)
         continue
@@ -272,7 +289,7 @@ function dustFloorRaw(decimals: number): bigint {
 async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promise<number> {
   const snapshot = snapshotOf(route)
   const startedAt = Date.now()
-  const safeHead = (await evmLatestBlock(snapshot)) - route.confirmationsRequired
+  const safeHead = await evmFinalizedBlock(snapshot)
   let last = cursor.last_block ?? Math.max(0, safeHead - FIRST_SCAN_LOOKBACK_BLOCKS)
   let next = cursor.last_block === null ? last + 1 : Math.max(0, last + 1 - EVM_OVERLAP_BLOCKS)
   let found = 0
@@ -329,7 +346,7 @@ async function readTronRoute(route: PaymentRouteConfig, cursor: CursorRow): Prom
       ? cursor.resume_from_ms
       : cursor.last_time_ms - TRON_OVERLAP_MS
   const page = await listTronIncomingTransfers(
-    snapshotOf(route), route.tokenContract, route.destinationAddress, since, 5, cursor.resume_fingerprint,
+    snapshotOf(route), route.tokenContract, route.destinationAddress, since, 1, cursor.resume_fingerprint,
   )
   let found = 0
   for (const transfer of page.transfers) if (recordTransfer(route, transfer) !== null) found += 1

@@ -102,7 +102,7 @@ export default async function InvoicePage({
 
       <ol className="invoice-progress" aria-label="Payment progress">
         <li className="is-complete"><span>1</span><strong>Request created</strong></li>
-        <li className={verification || settled ? 'is-complete' : 'is-current'}><span>2</span><strong>{watched || coded ? 'Transfer found' : 'Transfer submitted'}</strong></li>
+        <li className={verification || settled ? 'is-complete' : 'is-current'}><span>2</span><strong>{watched ? 'Transfer found' : 'Transfer submitted'}</strong></li>
         <li className={settled ? 'is-complete' : verification ? 'is-current' : ''}><span>3</span><strong>On-chain checks</strong></li>
         <li className={settled ? 'is-complete' : ''}><span>4</span><strong>Credit added</strong></li>
       </ol>
@@ -128,24 +128,29 @@ export default async function InvoicePage({
                         <small>{gateway.network}</small>
                         {gateway.riskClassification === 'third_party_pegged' ? <small>Binance-issued pegged representation</small> : null}
                       </div>
-                      <span className="badge badge--success">Auto verification</span>
+                      <span className={watched ? 'badge badge--success' : 'badge badge--warning'}>
+                        {watched ? 'Auto verification' : 'Manual verification'}
+                      </span>
                     </div>
                     {codedAmount && code ? (
                       <>
                         <CodedAmount amount={codedAmount} asset={gateway.asset} />
                         <p className="coded-amount-note">
-                          The last two digits, <strong>{code}</strong>, are this request&rsquo;s code — they are how we recognise
-                          your payment without a transaction ID. Send the amount exactly as shown.
+                          The last two digits, <strong>{code}</strong>, are this request&rsquo;s code. Send the amount exactly as shown.
+                          {!watched ? ' Automatic detection is temporarily unavailable; after sending, paste your transaction ID below for manual verification.' : ' We can recognise the payment without a transaction ID.'}
                         </p>
                       </>
                     ) : (
-                      <CopyValue
-                        id="payment-total"
-                        label={`Requested amount (${gateway.asset})`}
-                        value={requestedTokenUnits}
-                        buttonLabel="Copy requested amount"
-                        copiedMessage="Requested amount copied."
-                      />
+                      <>
+                        <CopyValue
+                          id="payment-total"
+                          label={`Requested amount (${gateway.asset})`}
+                          value={requestedTokenUnits}
+                          buttonLabel="Copy requested amount"
+                          copiedMessage="Requested amount copied."
+                        />
+                        <p className="alert alert--warning">No unique payment code is available for this amount. After sending, paste your transaction ID below. An administrator must verify ownership and the on-chain transfer before credit is added; it will not be credited automatically.</p>
+                      </>
                     )}
                     <PaymentAddress address={gateway.address} />
                     <p className="alert alert--warning">
@@ -279,7 +284,7 @@ export default async function InvoicePage({
             <div><dt>Tax</dt><dd>{formatUsd(invoice.tax_cents)}</dd></div>
             <div className="invoice-summary-total"><dt>Total due</dt><dd>{formatUsd(invoice.total_due_cents)}</dd></div>
           </dl>
-          <p>The request preserves the original amount for audit. After verification, the account receives the cent-exact amount proven by the on-chain transfer exactly once.</p>
+          <p>The request preserves the original amount for audit. A small exchange withdrawal shortfall within the shown allowance receives the full requested credit; beyond it, credit follows the verified on-chain amount. Every transfer settles at most once.</p>
           <Link className="link-arrow" href="/user/payments">All payments</Link>
         </aside>
       </div>

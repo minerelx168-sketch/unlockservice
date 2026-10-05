@@ -214,6 +214,27 @@ CREATE TABLE IF NOT EXISTS chain_transfers (
 );
 CREATE INDEX IF NOT EXISTS chain_transfers_status ON chain_transfers(status, block_time DESC);
 
+-- A permanent admin audit for decisions on transfers not automatically matched.
+-- No raw receipt, wallet credential or customer identifier is copied here.
+CREATE TABLE IF NOT EXISTS chain_transfer_admin_events (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  transfer_id     INTEGER NOT NULL REFERENCES chain_transfers(id) ON DELETE RESTRICT,
+  admin_user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  action          TEXT NOT NULL CHECK (action IN ('confirm', 'dismiss', 'reject')),
+  invoice_reference TEXT REFERENCES invoices(reference) ON DELETE RESTRICT,
+  reason          TEXT NOT NULL,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS chain_transfer_admin_events_transfer
+  ON chain_transfer_admin_events(transfer_id, id DESC);
+CREATE TRIGGER IF NOT EXISTS chain_transfer_admin_events_no_update
+  BEFORE UPDATE ON chain_transfer_admin_events
+  BEGIN SELECT RAISE(ABORT, 'transfer admin events are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS chain_transfer_admin_events_no_delete
+  BEFORE DELETE ON chain_transfer_admin_events
+  BEGIN SELECT RAISE(ABORT, 'transfer admin events are append-only'); END;
+
 -- How far the watcher has read on each route, and a short lease so the
 -- poll timer and a customer's open invoice never scan the same range at once.
 CREATE TABLE IF NOT EXISTS payment_watch_cursors (

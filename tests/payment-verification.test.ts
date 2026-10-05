@@ -62,6 +62,7 @@ function transferReceipt(
     result: {
       status: '0x1',
       blockNumber: `0x${block.toString(16)}`,
+      blockHash: `0x${block.toString(16).padStart(64, '0')}`,
       transactionHash: txHash,
       logs: [
         {
@@ -138,12 +139,13 @@ function mockChainProvider(
       ? { jsonrpc: '2.0', id: 1, result: `0x${chainId.toString(16)}` }
       : action === 'eth_getTransactionReceipt'
         ? receipt
-        : action === 'eth_getBlockByNumber'
+      : action === 'eth_getBlockByNumber'
           ? {
               jsonrpc: '2.0',
               id: 1,
               result: {
-                number: tag,
+                number: tag === 'finalized' ? `0x${latestBlock.toString(16)}` : tag,
+                hash: `0x${(tag === 'finalized' ? latestBlock : Number.parseInt(tag ?? '0x0', 16)).toString(16).padStart(64, '0')}`,
                 timestamp: `0x${blockTimestampSeconds.toString(16)}`,
               },
             }
@@ -266,7 +268,7 @@ test('a matching finalized TRC-20 Transfer credits the verified amount exactly o
   assert.equal(view?.verified_credit_cents, 725)
 })
 
-test('a finalized ERC-20 USDT Transfer verifies through Etherscan V2 and credits six-decimal value', async () => {
+test('Etherscan V2 head depth cannot settle ERC-20 USDT without canonical finalized RPC proof', async () => {
   const user = auth.register('ethereum-settle', 'ethereum-settle@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'usdt-erc20', 825)
   backdate(invoice.reference)
@@ -277,14 +279,14 @@ test('a finalized ERC-20 USDT Transfer verifies through Etherscan V2 and credits
     transferReceipt(txHash, 850, { tokenContract: ethereumUsdtContract, decimals: 6, rawAmount: codedRaw(invoice, 6, 2_500) }),
   ) as typeof fetch
   try {
-    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'pending')
   } finally {
     globalThis.fetch = originalFetch
   }
-  assert.equal(credits.getBalance(user.id).creditCents, 850)
+  assert.equal(credits.getBalance(user.id).creditCents, 0)
   const view = verification.getInvoiceVerification(invoice.reference, user.id)
   assert.equal(view?.network_id, 'ethereum-mainnet')
-  assert.equal(view?.verified_credit_cents, 850)
+  assert.equal(view?.error_code, 'provider_finality_unavailable')
 })
 
 test('a receipt from another allowlisted token cannot settle the selected route', async () => {
@@ -473,7 +475,7 @@ test('a transaction mined before the invoice window never auto-credits', async (
   assert.equal(credits.getBalance(user.id).creditCents, 0)
 })
 
-test('Etherscan provider-plan rejection stays retryable for an Ethereum invoice and never changes credit', async () => {
+test('Etherscan provider is blocked before API-plan errors can affect credit', async () => {
   const user = auth.register('plan-required', 'plan-required@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'usdt-erc20', 1300)
   payments.submitPaymentReference(invoice.reference, user.id, transactionHash('b'), '')
@@ -488,7 +490,7 @@ test('Etherscan provider-plan rejection stays retryable for an Ethereum invoice 
   } finally {
     globalThis.fetch = originalFetch
   }
-  assert.equal(verification.getInvoiceVerification(invoice.reference, user.id)?.error_code, 'provider_plan_required')
+  assert.equal(verification.getInvoiceVerification(invoice.reference, user.id)?.error_code, 'provider_finality_unavailable')
   assert.equal(credits.getBalance(user.id).creditCents, 0)
 })
 
@@ -499,17 +501,21 @@ test('manual approval requires admin RBAC, is replay safe, and writes append-onl
   database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(admin.id)
 
   const invoice = payments.createInvoice(customer.id, 'bsc-usdt-peg', 1200)
+  backdate(invoice.reference)
   const txHash = transactionHash('6')
+  const fixedBlockTimestampSeconds = Math.floor(Date.now() / 1_000)
   payments.submitPaymentReference(invoice.reference, customer.id, txHash, '')
   const originalFetch = globalThis.fetch
   globalThis.fetch = mockChainProvider(
-    transferReceipt(txHash, invoice.total_due_cents, { recipient: '0x3333333333333333333333333333333333333333' }),
+    transferReceipt(txHash, invoice.total_due_cents), // correct recipient, rounded amount without a code
+    114, fixedBlockTimestampSeconds,
   ) as typeof fetch
   try {
     assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'manual_review')
   } finally {
     globalThis.fetch = originalFetch
   }
+  assert.equal(verification.getInvoiceVerification(invoice.reference, customer.id)?.error_code, 'amount_without_invoice_code')
 
   const input = {
     invoiceReference: invoice.reference,
@@ -517,9 +523,15 @@ test('manual approval requires admin RBAC, is replay safe, and writes append-onl
     reason: 'Verified independently against the confirmed on-chain transfer.',
     idempotencyKey: 'manual-payment-approval-1',
   }
-  assert.throws(() => verification.decideInvoiceVerification(ordinary.id, input), /Administrator access is required/)
-  const first = verification.decideInvoiceVerification(admin.id, input)
-  const replay = verification.decideInvoiceVerification(admin.id, input)
+  globalThis.fetch = mockChainProvider(transferReceipt(txHash, invoice.total_due_cents), 114, fixedBlockTimestampSeconds) as typeof fetch
+  let first, replay
+  try {
+    await assert.rejects(verification.decideInvoiceVerification(ordinary.id, input), /Administrator access is required/)
+    first = await verification.decideInvoiceVerification(admin.id, input)
+    replay = await verification.decideInvoiceVerification(admin.id, input)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
   assert.equal(first.replayed, false)
   assert.equal(replay.replayed, true)
   assert.equal(credits.getBalance(customer.id).creditCents, 1200)
@@ -531,6 +543,59 @@ test('manual approval requires admin RBAC, is replay safe, and writes append-onl
   assert.equal(effects.count, 1)
   assert.throws(() => db.prepare("UPDATE invoice_verification_events SET reason = 'changed'").run(), /append-only/)
   assert.throws(() => db.prepare('DELETE FROM invoice_verification_events').run(), /append-only/)
+})
+
+test('manual approval rejects a finalized receipt whose original block timestamp is in the future', async () => {
+  const customer = auth.register('future-customer', 'future-customer@example.test', 'correct-horse-battery-staple')
+  const admin = auth.register('future-admin', 'future-admin@example.test', 'correct-horse-battery-staple')
+  database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(admin.id)
+  const invoice = payments.createInvoice(customer.id, 'bsc-usdt-peg', 1050)
+  backdate(invoice.reference)
+  const txHash = `0x${'a'.repeat(63)}0`
+  const futureBlockTimestamp = Math.floor(Date.now() / 1_000) + 600
+  payments.submitPaymentReference(invoice.reference, customer.id, txHash, '')
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = mockChainProvider(transferReceipt(txHash, invoice.total_due_cents), 114, futureBlockTimestamp) as typeof fetch
+  try {
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'manual_review')
+    await assert.rejects(verification.decideInvoiceVerification(admin.id, {
+      invoiceReference: invoice.reference,
+      decision: 'approve',
+      reason: 'Do not credit a timestamp from the future.',
+      idempotencyKey: 'future-admin-approval-1',
+    }), /Receipt, recipient, amount or confirmations changed/)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+  assert.equal(credits.getBalance(customer.id).creditCents, 0)
+})
+
+test('Etherscan V2 receipt cannot settle without canonical finalized RPC proof', async () => {
+  const provider = await import('../lib/payment-chain-provider')
+  await assert.rejects(provider.inspectPaymentTransaction(
+    { chainId: 1, chainKind: 'evm', providerMode: 'etherscan_v2' }, transactionHash('f'),
+  ), /provider_finality_unavailable/)
+})
+
+test('manual approval cannot credit an unobserved transfer to the wrong wallet', async () => {
+  const customer = auth.register('unsafe-review', 'unsafe-review@example.test', 'correct-horse-battery-staple')
+  const admin = auth.register('unsafe-review-admin', 'unsafe-review-admin@example.test', 'correct-horse-battery-staple')
+  database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(admin.id)
+  const invoice = payments.createInvoice(customer.id, 'bsc-usdt-peg', 900)
+  backdate(invoice.reference)
+  const txHash = transactionHash('0')
+  payments.submitPaymentReference(invoice.reference, customer.id, txHash, '')
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = mockChainProvider(transferReceipt(txHash, 900, { recipient: '0x3333333333333333333333333333333333333333' })) as typeof fetch
+  try {
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'manual_review')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+  await assert.rejects(verification.decideInvoiceVerification(admin.id, {
+    invoiceReference: invoice.reference, decision: 'approve', reason: 'No matching receipt to our wallet.', idempotencyKey: 'unsafe-review-no-evidence',
+  }), /Wait for an observed on-chain transfer/)
+  assert.equal(credits.getBalance(customer.id).creditCents, 0)
 })
 
 
@@ -592,8 +657,8 @@ test('manual rejection closes the invoice without a ledger effect and replays sa
     reason: 'Transfer recipient does not match the configured receiving wallet.',
     idempotencyKey: 'manual-payment-rejection-1',
   }
-  assert.equal(verification.decideInvoiceVerification(admin.id, input).replayed, false)
-  assert.equal(verification.decideInvoiceVerification(admin.id, input).replayed, true)
+  assert.equal((await verification.decideInvoiceVerification(admin.id, input)).replayed, false)
+  assert.equal((await verification.decideInvoiceVerification(admin.id, input)).replayed, true)
   assert.equal(payments.getInvoice(invoice.reference, customer.id)?.status, 'failed')
   assert.equal(credits.getBalance(customer.id).creditCents, 0)
   const effects = database.db().prepare(
@@ -643,7 +708,7 @@ test('a coded invoice never accepts a transfer from the same moment it was creat
   assert.equal(credits.getBalance(user.id).creditCents, 0)
 })
 
-test('an exchange fee taken out of a coded amount credits only the verified amount by default', async () => {
+test('exchange withdrawal fees within the smaller of $1 or 3% credit the full invoice', async () => {
   const user = auth.register('fee-absorbed', 'fee-absorbed@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 4000)
   backdate(invoice.reference)
@@ -658,11 +723,16 @@ test('an exchange fee taken out of a coded amount credits only the verified amou
   } finally {
     globalThis.fetch = originalFetch
   }
-  assert.equal(credits.getBalance(user.id).creditCents, 3971)
+  assert.equal(credits.getBalance(user.id).creditCents, 4000)
 
   const codes = await import('../lib/payment-codes')
   const small = { credit_amount_cents: 500, total_due_cents: 500, payment_amount_e4: 50_037 }
-  assert.equal(codes.creditForCodedTransfer(small, 48_637), 486, 'the verified 4.8637 tokens credit $4.86')
+  assert.equal(codes.creditForCodedTransfer(small, 48_637), 500, '14 cents short is inside the 3% cap')
+  assert.equal(codes.creditForCodedTransfer(small, 48_437), 484, '16 cents short is outside the 15-cent cap')
   assert.equal(codes.creditForCodedTransfer(small, 40_037), 400, 'a dollar short of $5 is not a fee')
-  assert.equal(codes.shortfallToleranceCents(500), 0, 'the operator must opt in before any shortfall is absorbed')
+  assert.equal(codes.shortfallToleranceCents(500), 15)
+  assert.equal(codes.shortfallToleranceCents(4000), 100, 'the dollar cap applies before 3%')
+  const large = { credit_amount_cents: 10_000, total_due_cents: 10_000, payment_amount_e4: 1_000_037 }
+  assert.equal(codes.creditForCodedTransfer(large, 990_037), 10_000, 'exactly $1 short is inside the cap')
+  assert.equal(codes.creditForCodedTransfer(large, 989_937), 9899, '$1.01 short credits only the verified amount')
 })

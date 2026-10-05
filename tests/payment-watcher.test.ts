@@ -52,6 +52,7 @@ const bsc = {
   times: new Map<number, number>(),
   receipts: new Map<string, unknown>(),
   getLogsAnswersNull: false,
+  finalizedUnsupported: false,
   /** Ranges wider than this answer with more than the 1 MB the adapter accepts. */
   tooLargeAbove: 0,
 }
@@ -69,6 +70,7 @@ type TronEntry = {
 const tron = { head: 5_000, entries: [] as TronEntry[] }
 let counter = 0
 const hex = (value: number | bigint) => `0x${value.toString(16)}`
+const blockHash = (block: number) => `0x${block.toString(16).padStart(64, '0')}`
 const topic = (address: string) => `0x${address.slice(2).toLowerCase().padStart(64, '0')}`
 
 /** One transaction carrying several BEP-20 transfers into the wallet (an exchange batch). */
@@ -86,7 +88,7 @@ function sendBscBatch(rawAmounts: bigint[]): string {
     removed: false,
   }))
   bsc.logs.push(...logs)
-  bsc.receipts.set(txHash, { status: '0x1', blockNumber: hex(block), transactionHash: txHash, logs })
+  bsc.receipts.set(txHash, { status: '0x1', blockNumber: hex(block), blockHash: blockHash(block), transactionHash: txHash, logs })
   bsc.times.set(block, Math.floor(Date.now() / 1_000) + 2)
   bsc.head = block
   return txHash
@@ -107,7 +109,7 @@ function sendBsc(rawAmount: bigint, options: { to?: string; secondsFromNow?: num
     removed: false,
   }
   bsc.logs.push(log)
-  bsc.receipts.set(txHash, { status: '0x1', blockNumber: hex(block), transactionHash: txHash, logs: [log] })
+  bsc.receipts.set(txHash, { status: '0x1', blockNumber: hex(block), blockHash: blockHash(block), transactionHash: txHash, logs: [log] })
   bsc.times.set(block, Math.floor(Date.now() / 1_000) + (options.secondsFromNow ?? 2))
   bsc.head = block
   return txHash
@@ -159,22 +161,21 @@ globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) =>
       const entry = tron.entries.find((candidate) => candidate.transaction_id === value)
       if (!entry) return json({})
       const config = await import('../lib/payment-config')
+      const entries = tron.entries.filter((candidate) => candidate.transaction_id === value)
       return json({
         id: entry.transaction_id,
         blockNumber: entry.blockNumber,
         blockTimeStamp: entry.block_timestamp,
         receipt: { result: 'SUCCESS' },
-        log: [
-          {
+        log: entries.map((item) => ({
             address: tronUsdtHex,
             topics: [
               transferTopic.slice(2),
               '0'.repeat(64),
-              config.tronAddressToHex20(entry.to)!.slice(2).padStart(64, '0'),
+              config.tronAddressToHex20(item.to)!.slice(2).padStart(64, '0'),
             ],
-            data: BigInt(entry.value).toString(16).padStart(64, '0'),
-          },
-        ],
+            data: BigInt(item.value).toString(16).padStart(64, '0'),
+          })),
       })
     }
     if (url.pathname === '/walletsolidity/getnowblock') {
@@ -209,8 +210,11 @@ globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) =>
       }
     } else if (method === 'eth_getBlockByNumber') {
       const tag = String(params[0])
-      const block = Number.parseInt(tag, 16)
-      result = { number: tag, timestamp: hex(bsc.times.get(block) ?? Math.floor(Date.now() / 1_000)) }
+      if (tag === 'finalized' && bsc.finalizedUnsupported) {
+        return json({ jsonrpc: '2.0', id, error: { code: -32602, message: 'finalized block unsupported' } })
+      }
+      const block = tag === 'finalized' ? bsc.head - 3 : tag === 'safe' ? bsc.head - 2 : Number.parseInt(tag, 16)
+      result = { number: hex(block), hash: blockHash(block), timestamp: hex(bsc.times.get(block) ?? Math.floor(Date.now() / 1_000)) }
     } else if (method === 'eth_getTransactionReceipt') result = bsc.receipts.get(String(params[0])) ?? null
     else return json({ jsonrpc: '2.0', id, error: { message: `unsupported ${method}` } })
     return json({ jsonrpc: '2.0', id, result })
@@ -420,7 +424,7 @@ test('an administrator rejecting a pasted transfer releases it for the request i
   payments.submitPaymentReference(thiefInvoice.reference, thief.id, txHash, '')
   assert.equal(await verification.verifyInvoiceTransaction(thiefInvoice.reference), 'manual_review')
 
-  verification.decideInvoiceVerification(admin.id, {
+  await verification.decideInvoiceVerification(admin.id, {
     invoiceReference: thiefInvoice.reference,
     decision: 'reject',
     reason: 'Not this customer’s transfer',
@@ -429,7 +433,7 @@ test('an administrator rejecting a pasted transfer releases it for the request i
   // The owner can now paste it; a person then confirms the rounded amount.
   payments.submitPaymentReference(ownerInvoice.reference, owner.id, txHash, '')
   assert.equal(await verification.verifyInvoiceTransaction(ownerInvoice.reference), 'manual_review')
-  verification.decideInvoiceVerification(admin.id, {
+  await verification.decideInvoiceVerification(admin.id, {
     invoiceReference: ownerInvoice.reference,
     decision: 'approve',
     reason: 'Rounded payment from the owner',
@@ -518,8 +522,10 @@ test('a busy TRON wallet is read to the end across scans, never re-reading the s
   for (let index = 0; index < 1_100; index += 1) sendTron(tronRaw(20_000 + index * 100), { extraMs: index * 3 })
   sendTron(tronRaw(invoice.payment_amount_e4!), { secondsFromNow: 6 })
   mine(20)
-  await scan()
-  await scan()
+  for (let index = 0; index < 60; index += 1) {
+    const result = await watcher.scanPaymentRoute('usdt-trc20', { force: true })
+    assert.equal(result.status, 'ok')
+  }
   assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
 })
 test('TRON resumes its fingerprint when more than a thousand transfers share a timestamp', async () => {
@@ -537,13 +543,21 @@ test('TRON resumes its fingerprint when more than a thousand transfers share a t
   sendTron(tronRaw(invoice.payment_amount_e4!))
   tron.entries.at(-1)!.block_timestamp = sharedTimestamp
   mine(20)
-  await scan()
+  assert.equal((await watcher.scanPaymentRoute('usdt-trc20', { force: true })).status, 'ok')
   assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'pending')
   const paused = database.db().prepare(
     "SELECT resume_fingerprint FROM payment_watch_cursors WHERE route_id = 'usdt-trc20'",
   ).get() as { resume_fingerprint: string | null }
   assert.ok(paused.resume_fingerprint, 'pagination state persists between runs')
-  await scan()
+  let completedPagination = false
+  for (let index = 0; index < 60; index += 1) {
+    const result = await watcher.scanPaymentRoute('usdt-trc20', { force: true })
+    assert.equal(result.status, 'ok')
+    const row = database.db().prepare("SELECT resume_fingerprint FROM payment_watch_cursors WHERE route_id='usdt-trc20'")
+      .get() as { resume_fingerprint: string | null }
+    if (row.resume_fingerprint === null) { completedPagination = true; break }
+  }
+  assert.ok(completedPagination, 'fingerprint eventually reaches the final page without skipping tied timestamps')
   assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
   assert.equal(credits.getBalance(user.id).creditCents, 3100)
   const completed = database.db().prepare(
@@ -571,18 +585,21 @@ test('an open page does not turn a hash that never appears into a stream of prov
   assert.equal(lookups, 0, 'the poll back-off still applies')
 })
 
-test('no request is ever created without a code', () => {
+test('codes used by long-closed requests are never reused; exhaustion requires a human', () => {
   for (let index = 0; index < 99; index += 1) {
     database.db().prepare(
       `INSERT INTO invoices (reference, user_id, gateway, credit_amount_cents, total_due_cents, status,
                              payment_route_id, payment_amount_e4, created_at)
-       VALUES (?, 1, 'usdt-trc20', 7700, 7700, 'pending', 'usdt-trc20', ?, datetime('now'))`,
+       VALUES (?, 1, 'usdt-trc20', 7700, 7700, 'success', 'usdt-trc20', ?, datetime('now', '-100 days'))`,
     ).run(`filler-${index}`, 770_000 + index + 1)
   }
-  assert.throws(() => payments.createInvoice(newUser().id, 'usdt-trc20', 7700), /Too many open payment requests near this amount/)
+  const user = newUser()
+  const invoice = payments.createInvoice(user.id, 'usdt-trc20', 7700)
+  assert.equal(invoice.payment_amount_e4, null)
+  assert.equal(payments.createInvoice(user.id, 'usdt-trc20', 7700).reference, invoice.reference)
 })
 
-test('a batched transaction pasted on the wrong request is handed to a request whose code it carries', async () => {
+test('a batched transaction with two wallet transfers never credits either customer through the single-hash path', async () => {
   const a = newUser()
   const b = newUser()
   const invoiceA = request(a.id, 'bsc-usdt-peg', 5000)
@@ -593,13 +610,23 @@ test('a batched transaction pasted on the wrong request is handed to a request w
   payments.submitPaymentReference(thiefInvoice.reference, thief.id, tx, '')
   mine()
   await scan()
-  assert.equal(await verification.verifyInvoiceTransaction(thiefInvoice.reference), 'pending')
+  assert.equal(await verification.verifyInvoiceTransaction(thiefInvoice.reference), 'manual_review')
   assert.equal(credits.getBalance(thief.id).creditCents, 0)
-  assert.equal(credits.getBalance(a.id).creditCents, 5000, 'the first log went to its owner')
-  const leftover = database.db().prepare(
-    "SELECT status FROM chain_transfers WHERE route_id = 'bsc-usdt-peg' AND tx_hash = ? AND log_index = 1",
-  ).get(tx) as { status: string } | undefined
-  assert.equal(leftover?.status, 'unmatched', 'the other log in the batch stays available for human review')
+  assert.equal(credits.getBalance(a.id).creditCents, 0)
+  assert.equal(credits.getBalance(b.id).creditCents, 0)
+  const rows = database.db().prepare(
+    "SELECT id, status FROM chain_transfers WHERE route_id = 'bsc-usdt-peg' AND tx_hash = ? ORDER BY log_index",
+  ).all(tx) as Array<{ id: number; status: string }>
+  assert.equal(rows.length, 2)
+  assert.deepEqual(rows.map((row) => row.status), ['unmatched', 'unmatched'])
+  const admin = newUser()
+  database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(admin.id)
+  const decisions = await import('../lib/admin-payment-transfers')
+  await assert.rejects(decisions.decideUnmatchedTransfer(admin.id, {
+    transferId: rows[0].id, invoiceReference: invoiceA.reference, decision: 'confirm',
+    reason: 'Single-hash verification cannot claim two events.', idempotencyKey: 'multi-event-unsafe-confirm',
+  }), /multiple wallet transfers/)
+  assert.equal(credits.getBalance(a.id).creditCents, 0)
 })
 
 test('a pasted transfer older than the request is flagged as outside its window', async () => {
@@ -624,15 +651,16 @@ test('rejecting a transfer the watcher attached puts it back where a person can 
   mine()
   await scan()
   assert.equal(verification.getInvoiceVerification(invoice.reference, user.id)!.status, 'manual_review')
-  verification.decideInvoiceVerification(admin.id, {
+  await verification.decideInvoiceVerification(admin.id, {
     invoiceReference: invoice.reference,
     decision: 'reject',
     reason: 'Fee policy mismatch, refund it',
     idempotencyKey: 'reject-fee-0001',
   })
-  const row = watcher.unmatchedTransfers().rows.find((entry) => entry.tx_hash === txHash)
-  assert.ok(row, 'the transfer is listed again')
-  assert.match(row.note!, /Rejected on payment request/)
+  const row = database.db().prepare('SELECT status, note FROM chain_transfers WHERE tx_hash = ?').get(txHash) as
+    { status: string; note: string | null } | undefined
+  assert.equal(row?.status, 'unmatched', 'the transfer is listed again')
+  assert.match(row?.note ?? '', /Rejected on payment request/)
 })
 test('a dismissed on-chain transfer cannot be reattached by watcher or customer', () => {
   const user = newUser()
@@ -673,4 +701,196 @@ test('failed attach rolls back its claimed transfer row instead of leaving a mat
   assert.equal(row.status, 'unmatched')
   assert.equal(row.invoice_reference, null)
   assert.equal(credits.getBalance(user.id).creditCents, 0)
+})
+
+// An unmatched transfer is public-chain data, not proof that any particular
+// user owns it. Even a nearby amount must be independently verified first.
+test('admin Confirm validates a finalized uncoded transfer, then requires invoice review before exactly-once credit', async () => {
+  const decisions = await import('../lib/admin-payment-transfers')
+  const admin = newUser()
+  database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(admin.id)
+  const customer = newUser()
+  const invoice = request(customer.id, 'bsc-usdt-peg', 3600)
+  const tx = sendBsc(bscRaw(360_000)) // rounded amount: no request code
+  mine()
+  await scan()
+  const transfer = database.db().prepare('SELECT id, status FROM chain_transfers WHERE tx_hash = ?').get(tx) as { id: number; status: string }
+  assert.equal(transfer.status, 'unmatched')
+  const input = {
+    transferId: transfer.id, invoiceReference: invoice.reference, decision: 'confirm' as const,
+    reason: 'Customer supplied separate evidence for this finalized deposit.', idempotencyKey: 'manual-unmatched-confirm-1',
+  }
+  await assert.rejects(decisions.decideUnmatchedTransfer(customer.id, input), /Administrator access/)
+  const result = await decisions.decideUnmatchedTransfer(admin.id, input)
+  assert.equal(result.status, 'review')
+  assert.equal(credits.getBalance(customer.id).creditCents, 0, 'choosing a nearby request alone never credits')
+  assert.deepEqual(await decisions.decideUnmatchedTransfer(admin.id, input), { replayed: true, status: 'review' })
+  assert.equal(verification.getInvoiceVerification(invoice.reference, customer.id)?.error_code, 'amount_without_invoice_code')
+  assert.equal((verification.getInvoiceVerification(invoice.reference, customer.id)?.confirmations ?? 0) >= 3, true)
+  const row = database.db().prepare('SELECT status, invoice_reference FROM chain_transfers WHERE id = ?').get(transfer.id) as { status: string; invoice_reference: string }
+  assert.deepEqual(row, { status: 'matched', invoice_reference: invoice.reference })
+  assert.equal((await verification.decideInvoiceVerification(admin.id, {
+    invoiceReference: invoice.reference, decision: 'approve', reason: 'Independent customer evidence and finalized receipt match.', idempotencyKey: 'manual-unmatched-approve-1',
+  })).replayed, false)
+  assert.equal(credits.getBalance(customer.id).creditCents, 3600)
+  const effect = database.db().prepare("SELECT COUNT(*) AS n FROM credit_ledger WHERE ref_type = 'invoice' AND ref_id = ? AND type = 'topup'")
+    .get(invoice.reference) as { n: number }
+  assert.equal(effect.n, 1)
+  assert.throws(() => database.db().prepare("UPDATE chain_transfer_admin_events SET reason = 'tampered'").run(), /append-only/)
+  assert.throws(() => database.db().prepare('DELETE FROM chain_transfer_admin_events').run(), /append-only/)
+})
+
+test('admin Reject and Dismiss are distinct audited decisions; both forbid later attach and double-credit', async () => {
+  const decisions = await import('../lib/admin-payment-transfers')
+  const admin = newUser()
+  database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(admin.id)
+  const customer = newUser()
+  const invoice = request(customer.id, 'bsc-usdt-peg', 5100)
+  for (const decision of ['reject', 'dismiss'] as const) {
+    const tx = sendBsc(bscRaw(510_000 + (decision === 'reject' ? 10_000 : 20_000)))
+    mine()
+    await scan()
+    const row = database.db().prepare('SELECT id FROM chain_transfers WHERE tx_hash = ?').get(tx) as { id: number }
+    const input = { transferId: row.id, decision, reason: 'Cannot associate this transfer to any verified owner.', idempotencyKey: `admin-${decision}-${row.id}` }
+    assert.equal((await decisions.decideUnmatchedTransfer(admin.id, input)).status, 'closed')
+    assert.equal((await decisions.decideUnmatchedTransfer(admin.id, input)).replayed, true)
+    assert.equal((database.db().prepare('SELECT status FROM chain_transfers WHERE id = ?').get(row.id) as { status: string }).status, 'dismissed')
+    await assert.rejects(decisions.decideUnmatchedTransfer(admin.id, { ...input, idempotencyKey: `admin-repeat-${row.id}` }), /already been handled/)
+    assert.throws(() => payments.submitPaymentReference(invoice.reference, customer.id, tx, ''), /dismissed/)
+  }
+  const audit = database.db().prepare("SELECT action FROM chain_transfer_admin_events WHERE admin_user_id = ? ORDER BY id").all(admin.id) as Array<{ action: string }>
+  assert.deepEqual(audit.map((row) => row.action), ['reject', 'dismiss'])
+  assert.equal(credits.getBalance(customer.id).creditCents, 0)
+})
+
+test('admin Confirm fails closed when the receipt amount or finality differs from the recorded transfer', async () => {
+  const decisions = await import('../lib/admin-payment-transfers')
+  const admin = newUser()
+  database.db().prepare("UPDATE users SET account_type = 'admin' WHERE id = ?").run(admin.id)
+  const customer = newUser()
+  const invoice = request(customer.id, 'bsc-usdt-peg', 5800)
+  const tx = sendBsc(bscRaw(580_000))
+  mine()
+  await scan()
+  const row = database.db().prepare('SELECT id FROM chain_transfers WHERE tx_hash = ?').get(tx) as { id: number }
+  const original = bsc.head
+  const receipt = bsc.receipts.get(tx) as { logs: EvmLog[] }
+  bsc.head = Number.parseInt(receipt.logs[0].blockNumber, 16) // only one confirmation
+  try {
+    await assert.rejects(decisions.decideUnmatchedTransfer(admin.id, {
+      transferId: row.id, invoiceReference: invoice.reference, decision: 'confirm',
+      reason: 'Not final; this action must not add customer credit.', idempotencyKey: 'admin-unfinalized-1',
+    }), /finality|network could not verify/i)
+  } finally {
+    bsc.head = original
+  }
+  const beforeAmount = receipt.logs[0].data
+  receipt.logs[0].data = hex(bscRaw(580_100))
+  try {
+    await assert.rejects(decisions.decideUnmatchedTransfer(admin.id, {
+      transferId: row.id, invoiceReference: invoice.reference, decision: 'confirm',
+      reason: 'Receipt content was altered; fail closed.', idempotencyKey: 'admin-receipt-mismatch-1',
+    }), /did not match/)
+  } finally {
+    receipt.logs[0].data = beforeAmount
+  }
+  assert.equal(credits.getBalance(customer.id).creditCents, 0)
+  assert.equal((database.db().prepare('SELECT status FROM chain_transfers WHERE id = ?').get(row.id) as { status: string }).status, 'unmatched')
+})
+
+test('a settled invoice keeps its code quarantined; a later transfer with that code cannot pay a different customer', async () => {
+  const decisions = await import('../lib/admin-payment-transfers')
+  const admin = newUser()
+  database.db().prepare("UPDATE users SET account_type='admin' WHERE id=?").run(admin.id)
+  const first = newUser()
+  const paid = request(first.id, 'bsc-usdt-peg', 2500)
+  sendBsc(bscRaw(paid.payment_amount_e4!))
+  mine()
+  await scan()
+  assert.equal(payments.getInvoice(paid.reference, first.id)?.status, 'success')
+  const second = newUser()
+  const pending = request(second.id, 'bsc-usdt-peg', 2500)
+  assert.notEqual(pending.payment_amount_e4! % 100, paid.payment_amount_e4! % 100)
+  const repeated = sendBsc(bscRaw(paid.payment_amount_e4!))
+  mine()
+  await scan()
+  const transfer = database.db().prepare('SELECT id FROM chain_transfers WHERE tx_hash = ?').get(repeated) as { id: number }
+  await assert.rejects(decisions.decideUnmatchedTransfer(admin.id, {
+    transferId: transfer.id, invoiceReference: pending.reference, decision: 'confirm',
+    reason: 'Attempt to associate a previously settled payment code.', idempotencyKey: 'quarantine-admin-1',
+  }), /different open request owns this transfer code/)
+  payments.submitPaymentReference(pending.reference, second.id, repeated, '')
+  assert.equal(await verification.verifyInvoiceTransaction(pending.reference), 'manual_review')
+  assert.equal(verification.getInvoiceVerification(pending.reference, second.id)?.error_code, 'transfer_carries_another_request_code')
+  assert.equal(credits.getBalance(second.id).creditCents, 0)
+})
+
+// Account-history entries have no event index. A transaction may straddle
+// TronGrid's page boundary; its receipt must give stable indices on both runs.
+test('TRON page boundary keeps both receipt log indices across resumed scans', async () => {
+  const user = newUser()
+  const invoice = request(user.id, 'usdt-trc20', 9300)
+  const timestamp = Date.now() + 9_000
+  database.db().prepare(
+    "UPDATE payment_watch_cursors SET last_time_ms=?, resume_from_ms=?, resume_fingerprint=NULL WHERE route_id='usdt-trc20'",
+  ).run(timestamp, timestamp)
+  for (let index = 0; index < 19; index += 1) {
+    sendTron(tronRaw(20_000 + index * 100))
+    tron.entries.at(-1)!.block_timestamp = timestamp
+  }
+  const first = sendTron(tronRaw(22_345))
+  tron.entries.at(-1)!.block_timestamp = timestamp
+  const firstBlock = tron.entries.at(-1)!.blockNumber
+  sendTron(tronRaw(invoice.payment_amount_e4!))
+  tron.entries.at(-1)!.block_timestamp = timestamp
+  tron.entries.at(-1)!.blockNumber = firstBlock
+  tron.entries.at(-1)!.transaction_id = first
+  mine(20)
+  assert.equal((await watcher.scanPaymentRoute('usdt-trc20', { force: true })).status, 'ok')
+  assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'pending', 'a multi-event transaction must not credit just one log')
+  for (let index = 0; index < 3; index += 1) {
+    const result = await watcher.scanPaymentRoute('usdt-trc20', { force: true })
+    assert.equal(result.status, 'ok')
+  }
+  const rows = database.db().prepare(
+    "SELECT log_index, status FROM chain_transfers WHERE route_id='usdt-trc20' AND tx_hash=? ORDER BY log_index",
+  ).all(first) as Array<{ log_index: number; status: string }>
+  assert.deepEqual(rows.map((row) => row.log_index), [0, 1])
+  assert.deepEqual(rows.map((row) => row.status), ['unmatched', 'unmatched'])
+  assert.equal(credits.getBalance(user.id).creditCents, 0)
+})
+
+// Depth behind eth_blockNumber is not a canonical/finalized proof. Neither an
+// unsupported finalized tag nor a receipt from a different block may credit.
+test('BSC finalized tag unavailable fails closed without customer credit', async () => {
+  const user = newUser()
+  const invoice = request(user.id, 'bsc-usdt-peg', 8400)
+  sendBsc(bscRaw(invoice.payment_amount_e4!))
+  mine(20)
+  bsc.finalizedUnsupported = true
+  try {
+    const result = await watcher.scanPaymentRoute('bsc-usdt-peg', { force: true })
+    assert.equal(result.status, 'error')
+  } finally {
+    bsc.finalizedUnsupported = false
+  }
+  assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'pending')
+  assert.equal(credits.getBalance(user.id).creditCents, 0)
+})
+
+test('BSC receipt block hash differing from canonical block never credits', async () => {
+  const user = newUser()
+  const invoice = request(user.id, 'bsc-usdt-peg', 8500)
+  const hash = sendBsc(bscRaw(invoice.payment_amount_e4!))
+  mine(20)
+  const receipt = bsc.receipts.get(hash) as { blockHash: string }
+  const valid = receipt.blockHash
+  receipt.blockHash = `0x${'f'.repeat(64)}`
+  try {
+    await scan()
+    assert.notEqual(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
+    assert.equal(credits.getBalance(user.id).creditCents, 0)
+  } finally {
+    receipt.blockHash = valid
+  }
 })

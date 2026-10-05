@@ -112,10 +112,10 @@ export default async function AdminPage() {
           <div>
             <h2>Transfers with no payment request</h2>
             <p className="t-small">
-              Transfers carrying a request&rsquo;s code are credited automatically. These arrived without one and nobody has
-              pasted them. Usually a customer who rounded the amount: once they paste the transaction ID it moves to the queue
-              above. Money sent with no request at all: credit it with &ldquo;Adjust user credit&rdquo;, then dismiss it here
-              with a note naming the adjustment.
+              These transfers have no unambiguous payment code. Confirm a nearby request only after checking customer ownership:
+              the server rereads the receipt, and uncoded transfers still require approval in the verification queue above.
+              Reject or Dismiss closes the transfer without a refund or credit. If no payment request exists, investigate
+              independently before using Adjust user credit, then Dismiss with the adjustment reference.
             </p>
           </div>
           <span>{strays.total} open</span>

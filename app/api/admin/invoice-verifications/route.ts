@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     if (!decision) {
       return NextResponse.json({ success: false, error: 'Choose approve or reject.' }, { status: 400 })
     }
-    const result = decideInvoiceVerification(found.user.id, {
+    const result = await decideInvoiceVerification(found.user.id, {
       invoiceReference: String(body.invoiceReference ?? ''),
       decision,
       reason: String(body.reason ?? ''),
