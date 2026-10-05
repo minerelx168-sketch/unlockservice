@@ -7,6 +7,10 @@ import { formatUsd } from '@/lib/money'
 import { AdminCreditAdjustment } from '@/components/admin-credit-adjustment'
 import { AdminInvoiceReviewQueue } from '@/components/admin-invoice-review'
 import { listAdminInvoiceReviews } from '@/lib/payment-verification'
+import { AdminUnmatchedTransfers } from '@/components/admin-unmatched-transfers'
+import { formatE4 } from '@/lib/payment-codes'
+import { paymentRouteDefinition, paymentTransactionUrl } from '@/lib/payment-config'
+import { unmatchedTransfers, watcherHealth } from '@/lib/payment-watcher'
 
 export const metadata: Metadata = { title: 'Control panel' }
 export const dynamic = 'force-dynamic'
@@ -17,6 +21,26 @@ export default async function AdminPage() {
   const users = listAdminUsers(100)
   const adjustments = listAdminCreditAdjustments(25)
   const invoiceReviews = listAdminInvoiceReviews(50)
+  const strays = unmatchedTransfers(50)
+  const watch = watcherHealth()
+  const strayItems = strays.rows.map((row) => {
+    const route = paymentRouteDefinition(row.route_id)
+    return {
+      id: row.id,
+      route_label: route ? `${route.asset} · ${route.network}` : row.route_id,
+      tx_hash: row.tx_hash,
+      explorer_url: paymentTransactionUrl(row.route_id, row.tx_hash),
+      from_address: row.from_address,
+      amount: `${formatE4(row.amount_e4)} ${route?.asset ?? ''}`.trim(),
+      block_time: row.block_time,
+      note: row.note,
+      candidates: row.candidates.map((candidate) => ({
+        reference: candidate.reference,
+        username: candidate.username,
+        amount: candidate.payment_amount_e4 !== null ? formatE4(candidate.payment_amount_e4) : null,
+      })),
+    }
+  })
 
   return (
     <>
@@ -78,6 +102,41 @@ export default async function AdminPage() {
         </header>
         <div className="panel-body">
           <AdminInvoiceReviewQueue csrfToken={session.csrfToken} items={invoiceReviews} />
+        </div>
+      </section>
+
+      <div style={{ height: 22 }} />
+
+      <section className="panel">
+        <header>
+          <div>
+            <h2>Transfers with no payment request</h2>
+            <p className="t-small">
+              Transfers carrying a request&rsquo;s code are credited automatically. These arrived without one and nobody has
+              pasted them. Usually a customer who rounded the amount: once they paste the transaction ID it moves to the queue
+              above. Money sent with no request at all: credit it with &ldquo;Adjust user credit&rdquo;, then dismiss it here
+              with a note naming the adjustment.
+            </p>
+          </div>
+          <span>{strays.total} open</span>
+        </header>
+        <div className="panel-body" style={{ display: 'grid', gap: 14 }}>
+          <div className="watcher-health">
+            {watch.length === 0 ? <span>No payment route is enabled.</span> : null}
+            {watch.map((route) => (
+              <span key={route.routeId}>
+                <strong>{route.label}</strong>:{' '}
+                {!route.watched
+                  ? 'paste only'
+                  : route.lastError
+                    ? `watcher failing (${route.lastError})`
+                    : route.lastOkAt
+                      ? `watched, last good scan ${route.lastOkAt.replace('T', ' ').slice(0, 16)} UTC`
+                      : 'watched, no scan yet'}
+              </span>
+            ))}
+          </div>
+          <AdminUnmatchedTransfers csrfToken={session.csrfToken} items={strayItems} total={strays.total} />
         </div>
       </section>
 

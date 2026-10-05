@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Icon } from '@/components/icons'
 import { ApproveInvoiceForm, PaymentReferenceForm } from '@/components/payment-forms'
-import { AutoRefreshPaymentStatus, CopyValue, PaymentAddress } from '@/components/invoice-actions'
+import { AutoRefreshPaymentStatus, CodedAmount, CopyValue, PaymentAddress } from '@/components/invoice-actions'
 import { requireSession } from '@/lib/auth'
 import { safeContinuation } from '@/lib/continuation'
 import { formatUsd } from '@/lib/money'
@@ -12,6 +12,8 @@ import { getInvoice, invoiceGateway, selfApprovalEnabled, shortReference } from 
 import { getInvoiceVerification } from '@/lib/payment-verification'
 import { paymentAddressQrDataUrl } from '@/lib/payment-qr'
 import { paymentTransactionUrl } from '@/lib/payment-config'
+import { codedInvoiceExpired, formatE4, paymentCode, shortfallToleranceCents } from '@/lib/payment-codes'
+import { nudgeInvoicePayment, watchableRoute } from '@/lib/payment-watcher'
 
 export const metadata: Metadata = { title: 'Payment request' }
 export const dynamic = 'force-dynamic'
@@ -19,6 +21,7 @@ export const dynamic = 'force-dynamic'
 function statusCopy(
   invoiceStatus: 'pending' | 'review' | 'success' | 'failed' | 'refunded',
   verificationStatus?: string,
+  watched = false,
 ) {
   if (invoiceStatus === 'success') return { label: 'Verified', tone: 'success', message: 'Payment verified and credit added.' }
   if (invoiceStatus === 'failed' || invoiceStatus === 'refunded' || verificationStatus === 'rejected') {
@@ -31,7 +34,14 @@ function statusCopy(
     return { label: 'Confirming', tone: 'warning', message: 'The transfer matched. We are waiting for the confirmation threshold.' }
   }
   if (verificationStatus === 'submitted') {
-    return { label: 'Checking', tone: 'warning', message: 'Your transaction hash is queued for automatic verification.' }
+    return { label: 'Checking', tone: 'warning', message: 'Your transfer was found and is being checked on the network.' }
+  }
+  if (watched) {
+    return {
+      label: 'Waiting for your transfer',
+      tone: 'neutral',
+      message: 'Send the exact amount below. We spot it on the network and add the credit by ourselves — no transaction ID to paste. You can close this page.',
+    }
   }
   return { label: 'Awaiting transfer', tone: 'neutral', message: 'Send supported USDT, then paste your transaction hash.' }
 }
@@ -49,12 +59,27 @@ export default async function InvoicePage({
   const invoice = getInvoice(reference, user.id)
   if (!invoice) notFound()
 
+  /* While the customer has this page open, look for their transfer now
+     rather than at the next timer tick. Deferred past this render and not
+     awaited: the page answers at once and the 5-second refresh shows the
+     result. */
+  setImmediate(() => void nudgeInvoicePayment(invoice.reference).catch(() => undefined))
+
   const gateway = invoiceGateway(invoice)
   const verification = getInvoiceVerification(invoice.reference, user.id)
   const settled = invoice.status === 'success'
-  const closed = invoice.status === 'failed' || invoice.status === 'refunded'
-  const status = statusCopy(invoice.status, verification?.status)
-  const refreshActive = invoice.status === 'review' && ['submitted', 'confirming'].includes(verification?.status ?? '')
+  const expired = codedInvoiceExpired(invoice)
+  const closed = invoice.status === 'failed' || invoice.status === 'refunded' || expired
+  const coded = invoice.payment_amount_e4 !== null
+  // Detected automatically: a coded request on a route the watcher reads.
+  const watched = Boolean(coded && gateway && watchableRoute(gateway) && !closed)
+  const status = statusCopy(expired ? 'failed' : invoice.status, verification?.status, watched && !verification)
+  const refreshActive =
+    (invoice.status === 'review' && ['submitted', 'confirming'].includes(verification?.status ?? ''))
+    || (watched && invoice.status === 'pending')
+  const codedAmount = coded ? formatE4(invoice.payment_amount_e4!) : null
+  const code = coded ? String(paymentCode(invoice.payment_amount_e4!)).padStart(2, '0') : null
+  const tolerance = shortfallToleranceCents(invoice.total_due_cents)
   const qrDataUrl = gateway ? await paymentAddressQrDataUrl(gateway.address).catch(() => null) : null
   const explorerUrl = verification ? paymentTransactionUrl(verification.payment_route_id, verification.tx_hash) : null
   const requestedCreditCents = verification?.requested_credit_cents ?? invoice.credit_amount_cents
@@ -77,7 +102,7 @@ export default async function InvoicePage({
 
       <ol className="invoice-progress" aria-label="Payment progress">
         <li className="is-complete"><span>1</span><strong>Request created</strong></li>
-        <li className={verification || settled ? 'is-complete' : 'is-current'}><span>2</span><strong>Transfer submitted</strong></li>
+        <li className={verification || settled ? 'is-complete' : 'is-current'}><span>2</span><strong>{watched || coded ? 'Transfer found' : 'Transfer submitted'}</strong></li>
         <li className={settled ? 'is-complete' : verification ? 'is-current' : ''}><span>3</span><strong>On-chain checks</strong></li>
         <li className={settled ? 'is-complete' : ''}><span>4</span><strong>Credit added</strong></li>
       </ol>
@@ -105,20 +130,34 @@ export default async function InvoicePage({
                       </div>
                       <span className="badge badge--success">Auto verification</span>
                     </div>
-                    <CopyValue
-                      id="payment-total"
-                      label={`Requested amount (${gateway.asset})`}
-                      value={requestedTokenUnits}
-                      buttonLabel="Copy requested amount"
-                      copiedMessage="Requested amount copied."
-                    />
+                    {codedAmount && code ? (
+                      <>
+                        <CodedAmount amount={codedAmount} asset={gateway.asset} />
+                        <p className="coded-amount-note">
+                          The last two digits, <strong>{code}</strong>, are this request&rsquo;s code — they are how we recognise
+                          your payment without a transaction ID. Send the amount exactly as shown.
+                        </p>
+                      </>
+                    ) : (
+                      <CopyValue
+                        id="payment-total"
+                        label={`Requested amount (${gateway.asset})`}
+                        value={requestedTokenUnits}
+                        buttonLabel="Copy requested amount"
+                        copiedMessage="Requested amount copied."
+                      />
+                    )}
                     <PaymentAddress address={gateway.address} />
                     <p className="alert alert--warning">
                       <Icon name="info" strokeWidth={1.9} />
                       <span>
                         Send only {gateway.asset} on {gateway.network} to this address. The token contract and network must match this request.
-                        Credit is based on the verified on-chain amount; amounts that cannot be represented exactly in cents require manual review.
-                        Blockchain transfers cannot be reversed.
+                        {coded
+                          ? tolerance > 0
+                            ? ` If your exchange takes its withdrawal fee out of the amount, up to ${formatUsd(tolerance)} short still counts in full.`
+                            : ''
+                          : ' Credit is based on the verified on-chain amount; amounts that cannot be represented exactly in cents require manual review.'}
+                        {' '}Blockchain transfers cannot be reversed.
                       </span>
                     </p>
                   </div>
@@ -154,8 +193,12 @@ export default async function InvoicePage({
             <section className="panel verification-card">
               <header>
                 <div>
-                  <h2>{verification ? 'Automatic verification' : 'Paste your transaction ID'}</h2>
-                  <p className="t-small">Submitting a hash never adds credit by itself.</p>
+                  <h2>{verification ? 'Automatic verification' : watched ? 'Waiting for your transfer' : 'Paste your transaction ID'}</h2>
+                  <p className="t-small">
+                    {watched && !verification
+                      ? 'Usually found within a minute or two of sending.'
+                      : 'Submitting a hash never adds credit by itself.'}
+                  </p>
                 </div>
                 {verification ? <span>{verification.confirmations} confirmations</span> : null}
               </header>
@@ -171,6 +214,27 @@ export default async function InvoicePage({
                       {explorerUrl ? <Link className="link-arrow" href={explorerUrl} target="_blank" rel="noreferrer">View transaction on explorer</Link> : null}
                     </div>
                     <AutoRefreshPaymentStatus active={refreshActive} />
+                  </div>
+                ) : gateway && watched ? (
+                  <div className="watch-state">
+                    <div className="watch-state-copy">
+                      <span className="watch-pulse" aria-hidden="true" />
+                      <p>
+                        Checking the network for <strong>{codedAmount} {gateway.asset}</strong>. This page updates by itself, and the
+                        credit is added even if you close it.
+                      </p>
+                    </div>
+                    <AutoRefreshPaymentStatus active={refreshActive} />
+                    <details className="paste-fallback">
+                      <summary>Sent it, but nothing after 10 minutes? Paste your transaction ID</summary>
+                      <PaymentReferenceForm
+                        reference={invoice.reference}
+                        returnTo={returnTo}
+                        chainKind={gateway.chainKind}
+                        network={gateway.network}
+                        asset={gateway.asset}
+                      />
+                    </details>
                   </div>
                 ) : gateway ? (
                   <PaymentReferenceForm
@@ -205,6 +269,9 @@ export default async function InvoicePage({
           <h2>Request summary</h2>
           <dl>
             <div><dt>Requested credit</dt><dd>{formatUsd(requestedCreditCents)}</dd></div>
+            {codedAmount && gateway ? (
+              <div><dt>Amount to send</dt><dd className="mono">{codedAmount} {gateway.asset}</dd></div>
+            ) : null}
             {verifiedCreditCents !== null ? (
               <div><dt>Verified on-chain</dt><dd>{formatUsd(verifiedCreditCents)}</dd></div>
             ) : null}

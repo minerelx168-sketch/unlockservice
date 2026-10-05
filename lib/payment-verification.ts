@@ -19,6 +19,7 @@ import {
   inspectPaymentTransaction,
   PaymentProviderError,
 } from './payment-chain-provider'
+import { carriesInvoiceCode, creditForCodedTransfer, INVOICE_TTL_DAYS, rawToE4 } from './payment-codes'
 
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ADMIN_KEY_PATTERN = /^[A-Za-z0-9._:-]{8,100}$/
@@ -52,6 +53,8 @@ type InvoiceVerificationRow = {
   provider_mode: PaymentProviderMode | null
   confirmations_required: number | null
   invoice_created_at: string
+  /** The invoice's coded amount; null on invoices from before codes existed. */
+  payment_amount_e4: number | null
   status: VerificationStatus
   confirmations: number
   attempt_count: number
@@ -64,7 +67,14 @@ type InvoiceVerificationRow = {
 
 export type InvoiceVerificationView = Omit<
   InvoiceVerificationRow,
-  'user_id' | 'invoice_status' | 'invoice_created_at' | 'credit_amount_cents' | 'total_due_cents' | 'fee_cents' | 'tax_cents'
+  | 'user_id'
+  | 'invoice_status'
+  | 'invoice_created_at'
+  | 'credit_amount_cents'
+  | 'total_due_cents'
+  | 'fee_cents'
+  | 'tax_cents'
+  | 'payment_amount_e4'
 >
 
 export type AdminInvoiceReview = InvoiceVerificationRow & {
@@ -107,7 +117,7 @@ class UpstreamVerificationError extends Error {
 
 const VERIFICATION_SELECT = `
   SELECT v.*, i.user_id, i.status AS invoice_status,
-         i.created_at AS invoice_created_at,
+         i.created_at AS invoice_created_at, i.payment_amount_e4,
          i.credit_amount_cents, i.total_due_cents, i.fee_cents, i.tax_cents
     FROM invoice_verifications v
     JOIN invoices i ON i.reference = v.invoice_reference`
@@ -130,6 +140,7 @@ export function getInvoiceVerification(reference: string, userId: number): Invoi
     total_due_cents: _due,
     fee_cents: _fee,
     tax_cents: _tax,
+    payment_amount_e4: _code,
     ...view
   } = row
   return view
@@ -172,6 +183,27 @@ export function submitInvoiceTransaction(
   userId: number,
   transactionId: string,
   note: string,
+): InvoiceVerificationView {
+  return attachTransaction(reference, userId, transactionId, note, 'customer')
+}
+
+/**
+ * The payment watcher found a transfer carrying this invoice's code and
+ * attaches it exactly as a pasted hash would be — so it then passes every
+ * check the paste path does, against a receipt read fresh from the chain.
+ */
+export function attachDetectedTransfer(reference: string, transactionId: string): InvoiceVerificationView {
+  const owner = db().prepare('SELECT user_id FROM invoices WHERE reference = ?').get(reference) as { user_id: number } | undefined
+  if (!owner) throw new PaymentVerificationError('No such invoice.', 'not_found')
+  return attachTransaction(reference, owner.user_id, transactionId, '', 'watcher')
+}
+
+function attachTransaction(
+  reference: string,
+  userId: number,
+  transactionId: string,
+  note: string,
+  source: 'customer' | 'watcher',
 ): InvoiceVerificationView {
   try {
     return db().transaction(() => {
@@ -292,11 +324,13 @@ export function submitInvoiceTransaction(
             WHERE reference = ? AND user_id = ?`,
         )
         .run(txHash, cleanNote(note), reference, userId)
-      addEvent(reference, 'submitted', `submitted:${reference}:${routeId}:${txHash}`, {
+      const action = source === 'watcher' ? 'detected' : 'submitted'
+      addEvent(reference, action, `${action}:${reference}:${routeId}:${txHash}`, {
         metadata: {
           routeId,
           networkId: invoice.payment_network_id,
           assetCode: invoice.payment_asset_code,
+          source,
         },
       })
       return getInvoiceVerification(reference, userId)!
@@ -357,6 +391,120 @@ function markManualReview(row: InvoiceVerificationRow, code: string, metadata: R
       )
       .run(code, new Date().toISOString(), new Date().toISOString(), row.invoice_reference)
     addEvent(row.invoice_reference, 'mismatch', `mismatch:${row.invoice_reference}:${code}`, { metadata })
+  })()
+}
+
+/** Keeps what the chain showed on a row headed for a person, so approving it credits that. */
+function recordObservedAmount(
+  row: InvoiceVerificationRow,
+  candidate: { logIndex: number; rawAmount: bigint },
+  observedCreditCents: number,
+  receipt: { blockNumber: number; blockTimestamp: string },
+) {
+  db()
+    .prepare(
+      `UPDATE invoice_verifications
+          SET matched_log_index = ?, matched_amount_raw = ?, verified_credit_cents = ?,
+              receipt_block_number = ?, receipt_block_timestamp = ?, updated_at = ?
+        WHERE invoice_reference = ? AND status IN ('submitted', 'confirming')`,
+    )
+    .run(
+      candidate.logIndex,
+      candidate.rawAmount.toString(),
+      observedCreditCents,
+      receipt.blockNumber,
+      receipt.blockTimestamp,
+      new Date().toISOString(),
+      row.invoice_reference,
+    )
+}
+
+/**
+ * The one open coded request on this route whose code this amount carries,
+ * created strictly before the transfer's block — other than the request the
+ * hash was pasted on.
+ */
+function codeOwner(
+  row: InvoiceVerificationRow,
+  receivedE4: number,
+  blockTimestamp: string,
+): { reference: string; user_id: number } | undefined {
+  const owners = (
+    db()
+      .prepare(
+        `SELECT reference, user_id, payment_amount_e4 FROM invoices
+          WHERE payment_route_id = ? AND reference != ?
+            AND status = 'pending' AND payment_reference IS NULL
+            AND payment_amount_e4 IS NOT NULL AND payment_amount_e4 % 100 = ?
+            AND julianday(created_at) < julianday(?)
+            AND julianday(created_at) >= julianday(?) - ?`,
+      )
+      .all(
+        row.payment_route_id,
+        row.invoice_reference,
+        receivedE4 % 100,
+        blockTimestamp,
+        blockTimestamp,
+        INVOICE_TTL_DAYS,
+      ) as Array<{ reference: string; user_id: number; payment_amount_e4: number }>
+  ).filter((invoice) => carriesInvoiceCode(invoice, receivedE4))
+  return owners.length === 1 ? owners[0] : undefined
+}
+
+/**
+ * Gives the pasted transaction to the request whose code it carries. If
+ * that cannot be done (its route switched off mid-flight, say), the paste
+ * waits for a person, marked so it can be rejected but never approved.
+ */
+async function handOver(
+  row: InvoiceVerificationRow,
+  owner: { reference: string; user_id: number },
+  entry: { logIndex: number; rawAmount: bigint },
+  receivedE4: number,
+  receipt: { blockNumber: number; blockTimestamp: string },
+): Promise<VerificationAttempt> {
+  try {
+    releaseToCodeOwner(row, owner, entry.logIndex)
+  } catch (error) {
+    if (!(error instanceof PaymentVerificationError)) throw error
+    recordObservedAmount(row, entry, Math.floor(receivedE4 / 100), receipt)
+    markManualReview(row, 'transfer_carries_another_request_code', { receivedE4 })
+    return 'manual_review'
+  }
+  await verifyInvoiceTransaction(owner.reference).catch(() => undefined)
+  return 'pending'
+}
+
+/** Moves a pasted transfer from the request it was pasted on to the request whose code it carries. */
+function releaseToCodeOwner(row: InvoiceVerificationRow, owner: { reference: string; user_id: number }, logIndex: number) {
+  db().transaction(() => {
+    const fresh = verificationRow(row.invoice_reference)
+    if (!fresh || fresh.tx_hash !== row.tx_hash || !['submitted', 'confirming'].includes(fresh.status)) return
+    addEvent(row.invoice_reference, 'released_to_code_owner', `released:${row.invoice_reference}:${row.tx_hash}`, {
+      metadata: { routeId: row.payment_route_id },
+    })
+    db().prepare('DELETE FROM invoice_verifications WHERE invoice_reference = ?').run(row.invoice_reference)
+    db()
+      .prepare(
+        `UPDATE invoices
+            SET status = 'pending', payment_reference = NULL, updated_at = datetime('now'),
+                note = 'The transaction pasted here carries another payment request’s code, so it was matched to that request.'
+          WHERE reference = ? AND status = 'review'`,
+      )
+      .run(row.invoice_reference)
+    attachTransaction(owner.reference, owner.user_id, row.tx_hash, '', 'watcher')
+    /* Only the transfer that carries the owner's code: another transfer
+       in the same batch is someone else's and stays visible. A lone
+       transfer is marked whatever index the chain adapter gave it. */
+    db()
+      .prepare(
+        `UPDATE chain_transfers SET status = 'matched', invoice_reference = ?, note = NULL
+          WHERE route_id = ? AND tx_hash = ? COLLATE NOCASE AND status = 'unmatched'
+            AND (log_index = ? OR (SELECT COUNT(*) FROM chain_transfers o
+                                    WHERE o.route_id = chain_transfers.route_id
+                                      AND o.tx_hash = chain_transfers.tx_hash COLLATE NOCASE) = 1)`,
+      )
+      .run(owner.reference, row.payment_route_id, row.tx_hash, logIndex)
   })()
 }
 
@@ -495,17 +643,84 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
       candidates.push({ logIndex: log.logIndex, rawAmount: BigInt(log.data) })
     }
 
-    if (candidates.length !== 1) {
+    const coded = row.payment_amount_e4 !== null
+    const invoiceCreatedAt = Date.parse(
+      row.invoice_created_at.includes('T') ? row.invoice_created_at : `${row.invoice_created_at.replace(' ', 'T')}Z`,
+    )
+    const transferTime = Date.parse(receipt.blockTimestamp)
+    if (!Number.isFinite(invoiceCreatedAt) || !Number.isFinite(transferTime)) {
+      throw new PaymentProviderError('provider_invalid_block')
+    }
+
+    /* Several transfers into the wallet in one transaction (an exchange
+       batching withdrawals): a coded invoice takes the one carrying its code. */
+    let candidate = candidates.length === 1 ? candidates[0] : undefined
+    if (!candidate && coded && candidates.length > 1) {
+      const own = candidates.filter((entry) => {
+        const e4 = rawToE4(entry.rawAmount, row.token_decimals)
+        return e4 !== null && carriesInvoiceCode({ payment_amount_e4: row.payment_amount_e4! }, e4)
+      })
+      if (own.length === 1) candidate = own[0]
+      else if (own.length === 0) {
+        // None of them is this request's; if one is another open request's, it goes there.
+        for (const entry of [...candidates].sort((a, b) => a.logIndex - b.logIndex)) {
+          const e4 = rawToE4(entry.rawAmount, row.token_decimals)
+          const owner = e4 === null ? undefined : codeOwner(row, e4, receipt.blockTimestamp)
+          if (owner) return await handOver(row, owner, entry, e4!, receipt)
+        }
+      }
+    }
+    if (!candidate) {
       markManualReview(row, candidates.length === 0 ? 'transfer_not_found' : 'ambiguous_transfer_logs', {
         matchingLogs: candidates.length,
       })
       return 'manual_review'
     }
 
-    const candidate = candidates[0]
-    const verifiedCreditCents = rawAmountToCreditCents(candidate.rawAmount, row.token_decimals)
-    if (verifiedCreditCents === null) {
-      markManualReview(row, 'verified_amount_not_cent_exact')
+    let verifiedCreditCents: number | null
+    if (coded) {
+      const receivedE4 = rawToE4(candidate.rawAmount, row.token_decimals)
+      if (receivedE4 === null || receivedE4 <= 0) {
+        markManualReview(row, 'verified_amount_unreadable')
+        return 'manual_review'
+      }
+      if (!carriesInvoiceCode({ payment_amount_e4: row.payment_amount_e4! }, receivedE4)) {
+        /* The transfer carries another open request's code: it is that
+           customer's payment, pasted here first. Hand it to them rather
+           than freezing it on this request. */
+        const owner = codeOwner(row, receivedE4, receipt.blockTimestamp)
+        if (owner) return await handOver(row, owner, candidate, receivedE4, receipt)
+        /* No open request owns it: a rounded amount, or a stranger's
+           transfer. A person decides, and approving credits what actually
+           arrived, nothing more. Every transfer into the wallet is public;
+           without this, whoever pastes a hash first would be paid. */
+        recordObservedAmount(row, candidate, Math.floor(receivedE4 / 100), receipt)
+        const predates = transferTime <= invoiceCreatedAt
+        markManualReview(row, predates ? 'transaction_outside_invoice_window' : 'amount_without_invoice_code', {
+          receivedE4,
+          transferPredatesInvoice: predates,
+        })
+        return 'manual_review'
+      }
+      verifiedCreditCents = creditForCodedTransfer(
+        {
+          credit_amount_cents: row.credit_amount_cents,
+          total_due_cents: row.total_due_cents,
+          payment_amount_e4: row.payment_amount_e4!,
+        },
+        receivedE4,
+      )
+    } else {
+      verifiedCreditCents = rawAmountToCreditCents(candidate.rawAmount, row.token_decimals)
+      if (verifiedCreditCents === null) {
+        markManualReview(row, 'verified_amount_not_cent_exact')
+        return 'manual_review'
+      }
+      /* A request from before codes existed has nothing that ties a
+         transfer to it — any transfer of a matching amount could be anyone's
+         — so a person confirms it, with what arrived recorded. */
+      recordObservedAmount(row, candidate, verifiedCreditCents, receipt)
+      markManualReview(row, 'legacy_request_needs_review', { verifiedCreditCents })
       return 'manual_review'
     }
     if (row.fee_cents !== 0 || row.tax_cents !== 0) {
@@ -513,12 +728,11 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
       return 'manual_review'
     }
 
-    const invoiceCreatedAt = Date.parse(row.invoice_created_at)
-    const transferTime = Date.parse(receipt.blockTimestamp)
-    if (!Number.isFinite(invoiceCreatedAt) || !Number.isFinite(transferTime)) {
-      throw new PaymentProviderError('provider_invalid_block')
-    }
-    if (transferTime < invoiceCreatedAt - INVOICE_TIME_SKEW_MS || transferTime > Date.now() + INVOICE_TIME_SKEW_MS) {
+    /* A coded invoice only accepts a transfer from a block strictly after it
+       was created: a grace period would be a window in which to open an
+       invoice that catches someone else's transfer. */
+    const earliest = coded ? invoiceCreatedAt + 1 : invoiceCreatedAt - INVOICE_TIME_SKEW_MS
+    if (transferTime < earliest || transferTime > Date.now() + INVOICE_TIME_SKEW_MS) {
       db()
         .prepare(
           `UPDATE invoice_verifications
@@ -526,6 +740,7 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
             WHERE invoice_reference = ?`,
         )
         .run(receipt.blockNumber, receipt.blockTimestamp, new Date().toISOString(), row.invoice_reference)
+      if (coded) recordObservedAmount(row, candidate, verifiedCreditCents, receipt)
       markManualReview(row, 'transaction_outside_invoice_window', { transferPredatesInvoice: transferTime < invoiceCreatedAt })
       return 'manual_review'
     }
@@ -713,6 +928,10 @@ export function decideInvoiceVerification(
 
     const timestamp = new Date().toISOString()
     if (input.decision === 'approve') {
+      // Never for a transfer that carries another open request's code.
+      if (row.error_code === 'transfer_carries_another_request_code') {
+        throw new PaymentVerificationError('This transfer belongs to another payment request. Reject it here.', 'invalid_state')
+      }
       const approvedCreditCents = row.verified_credit_cents ?? row.credit_amount_cents
       const balance = credit(row.user_id, approvedCreditCents, 'topup', 'invoice', row.invoice_reference)
       db()
@@ -756,14 +975,24 @@ export function decideInvoiceVerification(
     db()
       .prepare("UPDATE invoices SET status = 'failed', updated_at = ? WHERE reference = ? AND user_id = ? AND status = 'review'")
       .run(timestamp, row.invoice_reference, row.user_id)
+    /* The rejected transaction is released, so the request it really
+       belongs to can still be matched or pasted. The original hash stays in
+       the audit event and in the renamed row. */
     db()
       .prepare(
         `UPDATE invoice_verifications
-            SET status = 'rejected', error_code = 'rejected_by_admin', next_attempt_at = NULL, updated_at = ?
+            SET status = 'rejected', error_code = 'rejected_by_admin', next_attempt_at = NULL, updated_at = ?,
+                tx_hash = tx_hash || ':rejected:' || invoice_reference
           WHERE invoice_reference = ?`,
       )
       .run(timestamp, row.invoice_reference)
-    addEvent(row.invoice_reference, 'reject_manual', eventKey, { adminUserId, reason })
+    db()
+      .prepare(
+        `UPDATE chain_transfers SET status = 'unmatched', invoice_reference = NULL, note = ?
+          WHERE tx_hash = ? COLLATE NOCASE AND status = 'matched' AND invoice_reference = ?`,
+      )
+      .run(`Rejected on payment request ${row.invoice_reference.slice(0, 10).toUpperCase()}: ${reason}`.slice(0, 300), row.tx_hash, row.invoice_reference)
+    addEvent(row.invoice_reference, 'reject_manual', eventKey, { adminUserId, reason, metadata: { txHash: row.tx_hash } })
     return { balance: getBalance(row.user_id), replayed: false }
   })()
 }

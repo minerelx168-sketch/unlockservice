@@ -157,6 +157,26 @@ function mockChainProvider(
   }
 }
 
+/** The coded amount an invoice asks for, in raw token units. */
+function codedRaw(invoice: { payment_amount_e4: number | null }, decimals: number, extraE4 = 0): bigint {
+  assert.ok(invoice.payment_amount_e4, 'invoice should carry a payment code')
+  return BigInt(invoice.payment_amount_e4 + extraE4) * 10n ** BigInt(decimals - 4)
+}
+
+/**
+ * Moves an invoice's creation a minute into the past. A coded invoice only
+ * accepts transfers from a block strictly after it was created, and these
+ * receipts are stamped "now".
+ */
+function backdate(reference: string, seconds = 60) {
+  database.db().prepare(`UPDATE invoices SET created_at = datetime('now', ?) WHERE reference = ?`).run(`-${seconds} seconds`, reference)
+}
+
+/** An invoice from before payment codes existed. */
+function legacy(reference: string) {
+  database.db().prepare('UPDATE invoices SET payment_amount_e4 = NULL WHERE reference = ?').run(reference)
+}
+
 before(async () => {
   database = await import('../lib/db')
   auth = await import('../lib/auth')
@@ -223,12 +243,16 @@ test('payment routes are server allowlisted and invoices snapshot network/token 
 test('a matching finalized TRC-20 Transfer credits the verified amount exactly once', async () => {
   const user = auth.register('tron-settle', 'tron-settle@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'usdt-trc20', 700)
+  backdate(invoice.reference)
   const txId = tronTransactionId('a')
   payments.submitPaymentReference(invoice.reference, user.id, txId, '')
   const recipientHex = paymentConfig.tronAddressToHex20(tronWallet)
   assert.ok(recipientHex)
   const originalFetch = globalThis.fetch
-  globalThis.fetch = mockTronProvider(tronTransferReceipt(txId, 725, recipientHex)) as typeof fetch
+  // The invoice's code, 25 cents over: the extra arrived, so it is credited.
+  globalThis.fetch = mockTronProvider(
+    tronTransferReceipt(txId, 725, recipientHex, { rawAmount: codedRaw(invoice, 6, 2_500) }),
+  ) as typeof fetch
   try {
     assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
     assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
@@ -245,11 +269,12 @@ test('a matching finalized TRC-20 Transfer credits the verified amount exactly o
 test('a finalized ERC-20 USDT Transfer verifies through Etherscan V2 and credits six-decimal value', async () => {
   const user = auth.register('ethereum-settle', 'ethereum-settle@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'usdt-erc20', 825)
+  backdate(invoice.reference)
   const txHash = transactionHash('e')
   payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
   const originalFetch = globalThis.fetch
   globalThis.fetch = mockChainProvider(
-    transferReceipt(txHash, 850, { tokenContract: ethereumUsdtContract, decimals: 6 }),
+    transferReceipt(txHash, 850, { tokenContract: ethereumUsdtContract, decimals: 6, rawAmount: codedRaw(invoice, 6, 2_500) }),
   ) as typeof fetch
   try {
     assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
@@ -297,13 +322,14 @@ test('official BNB RPC must identify chain ID 56 before verification', async () 
 test('a matching finalized BEP-20 Transfer credits one invoice exactly once', async () => {
   const user = auth.register('auto-settle', 'auto-settle@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 2500)
+  backdate(invoice.reference)
   const txHash = transactionHash('1')
   const balanceBefore = credits.getBalance(user.id)
   payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
   assert.deepEqual(credits.getBalance(user.id), balanceBefore)
 
   const originalFetch = globalThis.fetch
-  globalThis.fetch = mockChainProvider(transferReceipt(txHash, invoice.total_due_cents)) as typeof fetch
+  globalThis.fetch = mockChainProvider(transferReceipt(txHash, invoice.total_due_cents, { rawAmount: codedRaw(invoice, 18) })) as typeof fetch
   try {
     assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
     assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
@@ -320,35 +346,32 @@ test('a matching finalized BEP-20 Transfer credits one invoice exactly once', as
   assert.equal(ledger.count, 1)
 })
 
-test('a cent-exact different amount credits the verified value and preserves the requested audit', async () => {
+test('a legacy invoice without a code is never credited automatically; a person confirms what arrived', async () => {
   const user = auth.register('amount-different', 'amount-different@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 1000)
+  legacy(invoice.reference)
   const txHash = transactionHash('2')
   payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
 
   const originalFetch = globalThis.fetch
   globalThis.fetch = mockChainProvider(transferReceipt(txHash, 999)) as typeof fetch
   try {
-    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'manual_review')
   } finally {
     globalThis.fetch = originalFetch
   }
 
   const view = verification.getInvoiceVerification(invoice.reference, user.id)
-  assert.equal(view?.status, 'verified')
+  assert.equal(view?.error_code, 'legacy_request_needs_review')
   assert.equal(view?.requested_credit_cents, 1000)
-  assert.equal(view?.verified_credit_cents, 999)
-  assert.equal(credits.getBalance(user.id).creditCents, 999)
-  const settled = payments.getInvoice(invoice.reference, user.id)
-  assert.deepEqual(
-    { status: settled?.status, credit: settled?.credit_amount_cents, total: settled?.total_due_cents },
-    { status: 'success', credit: 999, total: 999 },
-  )
+  assert.equal(view?.verified_credit_cents, 999, 'an approval credits what arrived')
+  assert.equal(credits.getBalance(user.id).creditCents, 0)
 })
 
-test('a verified amount with sub-cent precision requires manual review and never credits', async () => {
+test('on a legacy invoice a verified amount with sub-cent precision requires manual review and never credits', async () => {
   const user = auth.register('fractional-amount', 'fractional-amount@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 1000)
+  legacy(invoice.reference)
   const txHash = transactionHash('d')
   payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
   const originalFetch = globalThis.fetch
@@ -369,9 +392,10 @@ test('a verified amount with sub-cent precision requires manual review and never
 test('verification waits for confirmations and settles after the threshold', async () => {
   const user = auth.register('confirmations', 'confirmations@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 500)
+  backdate(invoice.reference)
   const txHash = transactionHash('3')
   payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
-  const receipt = transferReceipt(txHash, invoice.total_due_cents)
+  const receipt = transferReceipt(txHash, invoice.total_due_cents, { rawAmount: codedRaw(invoice, 18) })
   const originalFetch = globalThis.fetch
 
   globalThis.fetch = mockChainProvider(receipt, 110) as typeof fetch
@@ -430,10 +454,14 @@ test('a transaction mined before the invoice window never auto-credits', async (
   const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 1100)
   const txHash = transactionHash('a')
   payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
-  const invoiceCreatedAt = Date.parse(invoice.created_at)
+  const invoiceCreatedAt = Date.parse(`${invoice.created_at.replace(' ', 'T')}Z`)
   const oldBlockTimestamp = Math.floor((invoiceCreatedAt - 60 * 60_000) / 1_000)
   const originalFetch = globalThis.fetch
-  globalThis.fetch = mockChainProvider(transferReceipt(txHash, invoice.total_due_cents), 114, oldBlockTimestamp) as typeof fetch
+  globalThis.fetch = mockChainProvider(
+    transferReceipt(txHash, invoice.total_due_cents, { rawAmount: codedRaw(invoice, 18) }),
+    114,
+    oldBlockTimestamp,
+  ) as typeof fetch
   try {
     assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'manual_review')
   } finally {
@@ -572,4 +600,68 @@ test('manual rejection closes the invoice without a ledger effect and replays sa
     "SELECT COUNT(*) AS count FROM credit_ledger WHERE ref_type = 'invoice' AND ref_id = ? AND type = 'topup'",
   ).get(invoice.reference) as { count: number }
   assert.equal(effects.count, 0)
+})
+
+test('a pasted transfer without the invoice\'s code is held for a person, with what arrived recorded', async () => {
+  const user = auth.register('uncoded-paste', 'uncoded-paste@example.test', 'correct-horse-battery-staple')
+  const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 1500)
+  backdate(invoice.reference)
+  const txHash = `0x${'7a'.repeat(32)}`
+  payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
+  const originalFetch = globalThis.fetch
+  // Rounded to 15.00: real money, but anyone watching the wallet could have pasted it.
+  globalThis.fetch = mockChainProvider(transferReceipt(txHash, 1500)) as typeof fetch
+  try {
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'manual_review')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+  const view = verification.getInvoiceVerification(invoice.reference, user.id)
+  assert.equal(view?.error_code, 'amount_without_invoice_code')
+  assert.equal(view?.verified_credit_cents, 1500, 'an approval credits what arrived')
+  assert.equal(credits.getBalance(user.id).creditCents, 0)
+})
+
+test('a coded invoice never accepts a transfer from the same moment it was created or earlier', async () => {
+  const user = auth.register('same-second', 'same-second@example.test', 'correct-horse-battery-staple')
+  const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 1600)
+  const txHash = `0x${'8b'.repeat(32)}`
+  payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
+  const createdSeconds = Math.floor(Date.parse(`${invoice.created_at.replace(' ', 'T')}Z`) / 1_000)
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = mockChainProvider(
+    transferReceipt(txHash, 1600, { rawAmount: codedRaw(invoice, 18) }),
+    114,
+    createdSeconds,
+  ) as typeof fetch
+  try {
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'manual_review')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+  assert.equal(verification.getInvoiceVerification(invoice.reference, user.id)?.error_code, 'transaction_outside_invoice_window')
+  assert.equal(credits.getBalance(user.id).creditCents, 0)
+})
+
+test('an exchange fee taken out of a coded amount is absorbed up to the cap, never beyond it', async () => {
+  const user = auth.register('fee-absorbed', 'fee-absorbed@example.test', 'correct-horse-battery-staple')
+  const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 4000)
+  backdate(invoice.reference)
+  const txHash = `0x${'9c'.repeat(32)}`
+  payments.submitPaymentReference(invoice.reference, user.id, txHash, '')
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = mockChainProvider(
+    transferReceipt(txHash, 4000, { rawAmount: codedRaw(invoice, 18, -2_900) }),
+  ) as typeof fetch
+  try {
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference), 'verified')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+  assert.equal(credits.getBalance(user.id).creditCents, 4000)
+
+  const codes = await import('../lib/payment-codes')
+  const small = { credit_amount_cents: 500, total_due_cents: 500, payment_amount_e4: 50_037 }
+  assert.equal(codes.creditForCodedTransfer(small, 48_637), 500, '14 cents short of $5 is within 3%')
+  assert.equal(codes.creditForCodedTransfer(small, 40_037), 400, 'a dollar short of $5 is not a fee')
 })

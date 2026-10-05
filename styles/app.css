@@ -2994,3 +2994,156 @@ table.account-table td {
     width: 100%;
   }
 }
+
+/* ---- coded amount and automatic detection --------------------------------
+ * The amount is the one thing the customer types into their exchange, and
+ * its last two digits are the ones they are tempted to round away, so those
+ * are the digits that look deliberate.
+ */
+
+.coded-amount {
+  display: grid;
+  gap: 8px;
+}
+
+.coded-amount-label {
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.coded-amount-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.coded-amount-value {
+  font-size: clamp(26px, 4.4vw, 34px);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.coded-amount-value mark {
+  padding: 0 2px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  box-shadow: inset 0 -3px 0 var(--accent);
+  color: var(--ink-strong);
+}
+
+.coded-amount-value span {
+  margin-left: 8px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.coded-amount-note {
+  margin: -4px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.coded-amount-note strong {
+  color: var(--ink-strong);
+}
+
+.watch-state {
+  display: grid;
+  gap: 14px;
+}
+
+.watch-state-copy {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.watch-state-copy p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.watch-state-copy strong {
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A beacon rather than a spinner: nothing is loading; the page is
+   listening, and it says so without implying the customer must wait. */
+.watch-pulse {
+  position: relative;
+  width: 26px;
+  height: 26px;
+}
+
+.watch-pulse::before,
+.watch-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.watch-pulse::after {
+  animation: watch-pulse 1.8s ease-out infinite;
+}
+
+@keyframes watch-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .watch-pulse::after {
+    animation: none;
+  }
+}
+
+.paste-fallback {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-strong);
+}
+
+.paste-fallback > summary {
+  padding: 12px 14px;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.paste-fallback[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.paste-fallback > form {
+  padding: 14px;
+}
+
+/* ---- admin: transfers with no payment request ------------------------- */
+
+.watcher-health {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 13px;
+  color: var(--muted);
+}

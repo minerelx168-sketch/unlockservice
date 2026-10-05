@@ -294,3 +294,45 @@ decide whether the service is safe:
 | `IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION=1` | Makes an account prove its address. Turn it on once mail works: it also closes the path where a Google sign-in adopts an account that only asserted the address. |
 | `IUNLOCKMOBILE_ALLOW_SELF_APPROVE=1` | Lets an account confirm its own invoice. Ignored in production, and it should never be set anywhere that holds real balances — it mints credit without a payment. |
 | `IUNLOCKMOBILE_ALLOW_MOCK_SUPPLIER=1` | Serves invented unlock codes in production. For a staging box that deliberately wants the demo, and nothing else. |
+
+
+## Automatic payment detection
+
+Customers no longer have to paste a transaction ID. Every new payment request
+asks for a **coded amount** — $25.00 becomes `25.0037 USDT`; the last two
+digits are the request's code — and the payment watcher
+(`lib/payment-watcher.ts`) reads every transfer into the receiving wallets and
+attaches the one carrying an open request's code. Attaching is the same step as
+a pasted hash, so the transfer then passes every existing check (route,
+contract, recipient, amount, timing, confirmations) against a receipt read
+fresh from the chain, and settles through the same ledger effect.
+
+- **Where it runs.** In the existing `unlockservice-poll` timer (every two
+  minutes), before attached transfers are verified, and on demand while a
+  customer has their request open, so the credit usually lands within a minute
+  of sending. A lease per route keeps the two from overlapping.
+- **Which routes.** TRC-20 through TronGrid, and BEP-20 through
+  `IUNLOCKMOBILE_BNB_RPC_URL`, which must answer `eth_getLogs`. Public nodes
+  often restrict it; if `/admin` shows the watcher failing on BNB Smart Chain,
+  put a provider URL there (NodeReal, Ankr, QuickNode …). Ethereum routes keep
+  the paste flow.
+- **What credits automatically.** A transfer carrying exactly one open
+  request's code, within ±3 tokens of its amount, from a block strictly after
+  the request was created and within seven days of it. Overpayments are
+  credited; a small shortfall (the smaller of $1 and 3%) credits in full —
+  exchanges that take their fee out of the amount; anything else credits what
+  arrived.
+- **What goes to a person.** A pasted transaction whose amount does not carry
+  the request's code — a rounded amount, or someone else's transfer: every
+  transfer into the wallet is public, so without this whoever pastes first is
+  paid. It lands in the verification queue with what actually arrived
+  recorded; approving credits that. Transfers that matched nothing and were
+  never pasted are listed under "Transfers with no payment request".
+- **Limits.** Five open requests per account and ten new ones an hour; unpaid
+  coded requests close after eight days and their code stays reserved a week
+  longer. Transfers under one token are ignored (address-poisoning spam).
+- **The receiving wallets must be self-custody**, not exchange deposit
+  addresses: exchanges often settle transfers between their own users
+  off-chain, where nothing can see them. Keep the server clock on NTP.
+- Requests created before this change have no code and keep the paste flow,
+  with their original rules.
