@@ -21,6 +21,7 @@ import {
   MATCH_BAND_E4,
   paymentCode,
   rawToE4,
+  shortfallToleranceCents,
 } from './payment-codes'
 import {
   attachDetectedTransfer,
@@ -145,10 +146,15 @@ function releaseLease(routeId: string, token: string, error: string | null) {
 
 /* ---- recording and matching --------------------------------------------- */
 
-/** Stores a transfer once; dust is never stored. Returns the row id when new. */
+/** Stores a transfer once. Below-floor transfers require one eligible coded invoice. */
 function recordTransfer(route: PaymentRouteConfig, transfer: IncomingTransfer): number | null {
   const amountE4 = rawToE4(transfer.rawAmount, route.tokenDecimals)
-  if (amountE4 === null || amountE4 < DUST_FLOOR_E4) return null
+  if (amountE4 === null || amountE4 <= 0) return null
+  if (amountE4 < DUST_FLOOR_E4 && codeCandidates({
+    route_id: route.id,
+    amount_e4: amountE4,
+    block_time: transfer.blockTimestamp,
+  }).length !== 1) return null
   const result = db()
     .prepare(
       `INSERT INTO chain_transfers
@@ -174,12 +180,19 @@ function recordTransfer(route: PaymentRouteConfig, transfer: IncomingTransfer): 
  * code, inside the band, created strictly before its block and not so long
  * before that the invoice had stopped accepting payment.
  */
-function codeCandidates(transfer: ChainTransferRow): Array<{ reference: string; payment_amount_e4: number }> {
+type CodedCandidate = { reference: string; payment_amount_e4: number; total_due_cents: number }
+
+function withinLowValueShortfall(invoice: CodedCandidate, receivedE4: number): boolean {
+  return carriesInvoiceCode(invoice, receivedE4)
+    && receivedE4 >= invoice.payment_amount_e4 - shortfallToleranceCents(invoice.total_due_cents) * 100
+}
+
+function codeCandidates(transfer: Pick<ChainTransferRow, 'route_id' | 'amount_e4' | 'block_time'>): CodedCandidate[] {
   if (paymentCode(transfer.amount_e4) === 0) return []
   return (
     db()
       .prepare(
-        `SELECT reference, payment_amount_e4 FROM invoices
+        `SELECT reference, payment_amount_e4, total_due_cents FROM invoices
           WHERE payment_route_id = ? AND status = 'pending' AND payment_reference IS NULL
             AND payment_amount_e4 IS NOT NULL
             AND payment_amount_e4 % 100 = ?
@@ -196,8 +209,10 @@ function codeCandidates(transfer: ChainTransferRow): Array<{ reference: string; 
         transfer.block_time,
         transfer.block_time,
         INVOICE_TTL_DAYS,
-      ) as Array<{ reference: string; payment_amount_e4: number }>
-  ).filter((invoice) => carriesInvoiceCode(invoice, transfer.amount_e4))
+      ) as CodedCandidate[]
+  ).filter((invoice) => transfer.amount_e4 < DUST_FLOOR_E4
+    ? withinLowValueShortfall(invoice, transfer.amount_e4)
+    : carriesInvoiceCode(invoice, transfer.amount_e4))
 }
 
 function noteTransfer(id: number, note: string) {
@@ -290,6 +305,19 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
   const snapshot = snapshotOf(route)
   const startedAt = Date.now()
   const safeHead = await evmFinalizedBlock(snapshot)
+  // Only fetch a below-$1 block when the code and amount could belong to an
+  // open request. A final time-bound query in recordTransfer rejects old/spam
+  // transfers, and receipt verification still decides whether to credit.
+  const lowInvoices = db().prepare(
+    `SELECT reference, payment_amount_e4, total_due_cents FROM invoices
+      WHERE payment_route_id = ? AND status = 'pending' AND payment_reference IS NULL
+        AND payment_amount_e4 BETWEEN 1 AND ?`,
+  ).all(route.id, DUST_FLOOR_E4 + MATCH_BAND_E4) as CodedCandidate[]
+  const belowFloorCandidate = (rawAmount: bigint): boolean => {
+    const receivedE4 = rawToE4(rawAmount, route.tokenDecimals)
+    return receivedE4 !== null && receivedE4 > 0 && receivedE4 < DUST_FLOOR_E4
+      && lowInvoices.some((invoice) => withinLowValueShortfall(invoice, receivedE4))
+  }
   let last = cursor.last_block ?? Math.max(0, safeHead - FIRST_SCAN_LOOKBACK_BLOCKS)
   let next = cursor.last_block === null ? last + 1 : Math.max(0, last + 1 - EVM_OVERLAP_BLOCKS)
   let found = 0
@@ -309,6 +337,7 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
         next,
         to,
         dustFloorRaw(route.tokenDecimals),
+        belowFloorCandidate,
       )
     } catch (error) {
       /* Spam can make a range answer too large (or a node refuse it).

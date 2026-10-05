@@ -43,7 +43,7 @@ function statusCopy(
       message: 'Send the exact amount below. We spot it on the network and add the credit by ourselves — no transaction ID to paste. You can close this page.',
     }
   }
-  return { label: 'Awaiting transfer', tone: 'neutral', message: 'Send supported USDT, then paste your transaction hash.' }
+  return { label: 'Manual verification required', tone: 'warning', message: 'This request cannot be detected automatically. If you already paid, provide the transaction ID below; otherwise, consider a new request.' }
 }
 
 export default async function InvoicePage({
@@ -149,7 +149,14 @@ export default async function InvoicePage({
                           buttonLabel="Copy requested amount"
                           copiedMessage="Requested amount copied."
                         />
-                        <p className="alert alert--warning">No unique payment code is available for this amount. After sending, paste your transaction ID below. An administrator must verify ownership and the on-chain transfer before credit is added; it will not be credited automatically.</p>
+                        <div className="alert alert--warning">
+                          <span>
+                            This request has no unique payment code. It may have been created before automatic detection was enabled, or a code may be unavailable for this amount. It will not credit automatically.
+                            If you already paid, paste the transaction ID below for administrator review. If you have not paid,{' '}
+                            <Link href="/user/add-funds">choose a different amount or network to start a new request</Link>.
+                            Choosing the same amount and network reopens this pending request; do not pay both requests.
+                          </span>
+                        </div>
                       </>
                     )}
                     <PaymentAddress address={gateway.address} />
@@ -284,7 +291,9 @@ export default async function InvoicePage({
             <div><dt>Tax</dt><dd>{formatUsd(invoice.tax_cents)}</dd></div>
             <div className="invoice-summary-total"><dt>Total due</dt><dd>{formatUsd(invoice.total_due_cents)}</dd></div>
           </dl>
-          <p>The request preserves the original amount for audit. A small exchange withdrawal shortfall within the shown allowance receives the full requested credit; beyond it, credit follows the verified on-chain amount. Every transfer settles at most once.</p>
+          <p>{coded
+            ? 'The request preserves the original amount for audit. A small exchange withdrawal shortfall within the shown allowance receives the full requested credit; beyond it, credit follows the verified on-chain amount. Every transfer settles at most once.'
+            : 'This request needs a transaction ID and administrator review; credit is not added automatically. Every transfer settles at most once.'}</p>
           <Link className="link-arrow" href="/user/payments">All payments</Link>
         </aside>
       </div>

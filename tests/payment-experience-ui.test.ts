@@ -44,6 +44,18 @@ test('invoice page uses per-route explorer metadata and refreshes database state
   assert.match(form, /0x\[a-fA-F0-9\]\{64\}/)
 })
 
+test('uncoded legacy invoice explains manual-only status and safe way to request automatic detection', () => {
+  const page = read('app/(app)/user/invoice/[reference]/page.tsx')
+  assert.match(page, /Manual verification required/)
+  assert.match(page, /This request has no unique payment code/)
+  assert.match(page, /It may have been created before automatic detection was enabled/)
+  assert.match(page, /If you already paid, paste the transaction ID below/)
+  assert.match(page, /choose a different amount or network to start a new request/)
+  assert.match(page, /Choosing the same amount and network reopens this pending request/)
+  assert.match(page, /href="\/user\/add-funds"/)
+  assert.doesNotMatch(page, /Send supported USDT, then paste your transaction hash/)
+})
+
 test('bounded payment reconciliation runs inside the existing provider poll entrypoint', () => {
   const script = read('scripts/poll-provider-jobs.ts')
   assert.match(script, /pollInvoiceVerifications/)

@@ -391,6 +391,8 @@ export async function listEvmIncomingTransfers(
   toBlock: number,
   /** Smaller transfers are dropped before any block is fetched for them (spam). */
   minRawAmount = 1n,
+  /** Explicitly allow a below-floor coded invoice candidate; all other dust stays filtered. */
+  belowFloorCandidate?: (rawAmount: bigint) => boolean,
 ): Promise<IncomingTransfer[]> {
   if (snapshot.providerMode !== 'bnb_rpc') throw new PaymentProviderError('provider_scan_unsupported')
   const result = rpcResult(
@@ -428,6 +430,7 @@ export async function listEvmIncomingTransfers(
     const blockNumber = parseHexInteger(log.blockNumber)
     const logIndex = parseHexInteger(log.logIndex)
     const data = typeof log.data === 'string' && /^0x[0-9a-fA-F]+$/.test(log.data) ? log.data : null
+    const rawAmount = data ? BigInt(data) : null
     if (
       String(log.address ?? '').toLowerCase() !== wantedContract
       || topics[0] !== TRANSFER_EVENT_TOPIC
@@ -435,8 +438,9 @@ export async function listEvmIncomingTransfers(
       || !transactionId
       || blockNumber === null
       || logIndex === null
-      || !data
-      || BigInt(data) < minRawAmount
+      || rawAmount === null
+      || rawAmount <= 0n
+      || (rawAmount < minRawAmount && !belowFloorCandidate?.(rawAmount))
     ) {
       continue
     }
@@ -445,7 +449,7 @@ export async function listEvmIncomingTransfers(
       logIndex,
       blockNumber,
       from: topics[1] ? `0x${topics[1].slice(-40)}` : null,
-      rawAmount: BigInt(data),
+      rawAmount,
     })
   }
 

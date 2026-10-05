@@ -307,6 +307,22 @@ test('a BEP-20 transfer carrying the code is credited with nothing pasted', asyn
   await scan()
   assert.equal(credits.getBalance(user.id).creditCents, 2500, 'scanning again never credits twice')
 })
+test('a $1 BEP-20 transfer below the dust floor after a small withdrawal fee matches only its open coded request', async () => {
+  const user = newUser()
+  const invoice = request(user.id, 'bsc-usdt-peg', 100)
+  const paid = sendBsc(bscRaw(invoice.payment_amount_e4! - 100)) // 0.01 token fee, code unchanged
+  const unrelatedDust = sendBsc(bscRaw(invoice.payment_amount_e4! - 1_000)) // same code, beyond allowed shortfall
+  mine()
+  await scan()
+  assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
+  assert.equal(credits.getBalance(user.id).creditCents, 100)
+  assert.equal(verification.getInvoiceVerification(invoice.reference, user.id)!.status, 'verified')
+  const transferCount = database.db().prepare('SELECT COUNT(*) AS count FROM chain_transfers WHERE tx_hash = ?')
+  assert.equal((transferCount.get(paid) as { count: number }).count, 1)
+  assert.equal((transferCount.get(unrelatedDust) as { count: number }).count, 0)
+  await scan()
+  assert.equal(credits.getBalance(user.id).creditCents, 100, 'the credited transfer is never applied twice')
+})
 test('BSC first scan stays in the free-tier log-query budget without skipping later blocks', async () => {
   const user = newUser()
   const invoice = request(user.id, 'bsc-usdt-peg', 2700)
@@ -344,6 +360,15 @@ test('a TRC-20 transfer carrying the code is credited with nothing pasted', asyn
   await scan()
   assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
   assert.equal(credits.getBalance(user.id).creditCents, 1800)
+})
+test('a $1 TRC-20 transfer below the dust floor after a small withdrawal fee matches its coded request', async () => {
+  const user = newUser()
+  const invoice = request(user.id, 'usdt-trc20', 100)
+  sendTron(tronRaw(invoice.payment_amount_e4! - 100))
+  mine(20)
+  await scan()
+  assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
+  assert.equal(credits.getBalance(user.id).creditCents, 100)
 })
 
 test('a transfer is not attached until it is past the confirmation threshold, then credited', async () => {

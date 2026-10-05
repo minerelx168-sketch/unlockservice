@@ -29,7 +29,7 @@ export const MATCH_BAND_E4 = 30_000
 export const INVOICE_TTL_DAYS = 7
 /** It is closed a day later, so a payment sent in its last minutes still finds it open. */
 const EXPIRY_GRACE_DAYS = 1
-/** Transfers below one token are never matched or recorded (address-poisoning spam). */
+/** Default dust floor; below it only a coded open invoice inside the shortfall cap may match. */
 export const DUST_FLOOR_E4 = 10_000
 
 export function paymentCode(amountE4: number): number {
