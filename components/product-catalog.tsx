@@ -3,11 +3,13 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { formatUsd } from '@/lib/money'
-import type { ProviderProduct, ProviderProductDomain } from '@/lib/provider-products'
+import type { ProviderProductDomain } from '@/lib/provider-products'
+import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
 import { Icon } from './icons'
+import { ServiceOutputExample } from './service-output-example'
 
 type ProductCatalogProps = {
-  products: ProviderProduct[]
+  products: PublicProviderProduct[]
   domain: ProviderProductDomain
 }
 
@@ -25,7 +27,7 @@ const DOMAIN_COPY: Record<ProviderProductDomain, {
     groupLabel: 'Check category',
     searchPlaceholder: 'Apple, Samsung, carrier or blacklist',
     availableLabel: 'Reports available online',
-    notice: 'Phone Check prices are shown in USD. Available reports can be ordered online; coming-soon checks remain view-only until their input and report formats are verified.',
+    notice: 'Phone Check prices are shown in USD. Review the service requirements and price before confirming your order.',
   },
   unlock: {
     label: 'Unlock',
@@ -33,7 +35,7 @@ const DOMAIN_COPY: Record<ProviderProductDomain, {
     groupLabel: 'Unlock category',
     searchPlaceholder: 'Country, network, Apple or Android',
     availableLabel: 'Services available online',
-    notice: 'Unlock prices are shown in USD. These services remain view-only until online ordering is verified for each network and device service.',
+    notice: 'Unlock prices are shown in USD. Review the service requirements and price before confirming your order.',
   },
 }
 
@@ -44,7 +46,7 @@ function customerText(value: string) {
     .trim()
 }
 
-function ProductCard({ product }: { product: ProviderProduct }) {
+function ProductCard({ product }: { product: PublicProviderProduct }) {
   const available = product.status === 'available'
   const productName = customerText(product.name)
   const productGroup = customerText(product.group)
@@ -57,7 +59,7 @@ function ProductCard({ product }: { product: ProviderProduct }) {
           {productGroup}
         </span>
         <span className={available ? 'badge badge--success' : 'badge badge--muted'}>
-          {available ? 'Available' : 'Coming soon'}
+          {available ? 'Available' : 'Temporarily unavailable'}
         </span>
       </div>
 
@@ -70,22 +72,18 @@ function ProductCard({ product }: { product: ProviderProduct }) {
         <span className="label">Price</span>
         <strong className="product-price">{formatUsd(product.priceCents)}</strong>
       </div>
+      <p className="t-small">Estimated delivery: {customerText(product.etaLabel)}</p>
+
+      {product.hasExample ? <ServiceOutputExample productCode={product.productCode} productName={productName} className="product-card-example" /> : null}
 
       {available ? (
         <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
-          Choose report <Icon name="arrowRight" />
-        </Link>
-      ) : product.domain === 'unlock' ? (
-        /* A dead grey label was the whole of the offer on every unlock
-           card. The service is coming; the card can say so and take an
-           address instead of ending the visit. */
-        <Link className="button button--secondary product-card-action" href="/unlock-waitlist">
-          Notify me when this opens <Icon name="arrowRight" />
+          {product.domain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
         </Link>
       ) : (
-        <span className="button button--quiet product-card-action" aria-disabled="true">
-          Unavailable online
-        </span>
+        <Link className="button button--secondary product-card-action" href="/contact">
+          Contact support <Icon name="arrowRight" />
+        </Link>
       )}
     </article>
   )
@@ -95,6 +93,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   const [query, setQuery] = useState('')
   const [selectedGroup, setSelectedGroup] = useState('all')
   const [selectedProductCode, setSelectedProductCode] = useState('all')
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
   const copy = DOMAIN_COPY[domain]
 
   const groups = useMemo(() => {
@@ -103,7 +102,8 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
       .sort((left, right) => {
         if (left.toLowerCase() === 'featured') return -1
         if (right.toLowerCase() === 'featured') return 1
-        return left.localeCompare(right)
+        // Use the same collation during SSR and hydration, regardless of host locale.
+        return left.localeCompare(right, 'en')
       })
   }, [products])
 
@@ -130,8 +130,10 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   }, [groups, visible])
 
   const availableCount = products.filter((product) => product.status === 'available').length
-  const comingSoonCount = products.length - availableCount
   const filtersActive = query.trim() !== '' || selectedGroup !== 'all' || selectedProductCode !== 'all'
+  const advancedFilterCount = Number(selectedGroup !== 'all') + Number(selectedProductCode !== 'all')
+  const selectedProduct = products.find((product) => product.productCode === selectedProductCode)
+  const filterSummary = selectedProduct ? customerText(selectedProduct.name) : selectedGroup !== 'all' ? selectedGroup : null
 
   function clearFilters() {
     setQuery('')
@@ -144,7 +146,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
       <div className="trust-bar" aria-label={`${copy.label} catalog summary`}>
         <div><b>{products.length} services</b><span>Published in this category</span></div>
         <div><b>{availableCount} available</b><span>{copy.availableLabel}</span></div>
-        <div><b>{comingSoonCount} coming soon</b><span>View-only until verified</span></div>
+        <div><b>Order history</b><span>Results saved to your account</span></div>
         <div><b>USD prices</b><span>Shown before ordering</span></div>
       </div>
 
@@ -152,9 +154,9 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
         <header>
           <div>
             <h2>Find a {copy.label.toLowerCase()} service</h2>
-            <p className="t-small">Choose a subcategory, search by name or jump directly to a service and its price.</p>
+            <p className="t-small">Search by name, device or network.</p>
           </div>
-          <span>{visible.length} of {products.length} shown</span>
+          <span role="status" aria-live="polite">{visible.length} of {products.length} shown</span>
         </header>
         <div className="panel-body catalog-filter-grid">
           <div className="field catalog-search-field">
@@ -169,49 +171,70 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
             />
           </div>
 
-          <div className="field">
-            <label htmlFor={`${domain}-product-group`}>{copy.groupLabel}</label>
-            <select
-              id={`${domain}-product-group`}
-              value={selectedGroup}
-              onChange={(event) => {
-                const group = event.currentTarget.value
-                setSelectedGroup(group)
-                const selected = products.find((product) => product.productCode === selectedProductCode)
-                if (selected && group !== 'all' && customerText(selected.group) !== group) setSelectedProductCode('all')
-              }}
+          <div className="catalog-filter-toolbar">
+            <button
+              className="button button--secondary catalog-filter-toggle"
+              type="button"
+              aria-expanded={filtersExpanded}
+              aria-controls={`${domain}-advanced-filters`}
+              onClick={() => setFiltersExpanded((expanded) => !expanded)}
             >
-              <option value="all">All {copy.label.toLowerCase()} categories</option>
-              {groups.map((group) => <option key={group} value={group}>{group}</option>)}
-            </select>
+              Filters{advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ''}
+            </button>
+            <button className="button button--secondary" type="button" onClick={clearFilters} disabled={!filtersActive} aria-label="Clear all filters">
+              Reset
+            </button>
+            {filterSummary ? <p className="t-small catalog-filter-selection" role="status">Applied: {filterSummary}</p> : null}
           </div>
 
-          <div className="field catalog-service-dropdown">
-            <label htmlFor={`${domain}-product-service`}>Choose a service</label>
-            <select
-              id={`${domain}-product-service`}
-              value={selectedProductCode}
-              onChange={(event) => {
-                const code = event.currentTarget.value
-                setSelectedProductCode(code)
-                const selected = products.find((product) => product.productCode === code)
-                if (selected) setSelectedGroup(customerText(selected.group))
-              }}
-            >
-              <option value="all">{copy.allServicesLabel}</option>
-              {groups.map((group) => {
-                const options = products.filter((product) => customerText(product.group) === group)
-                return (
-                  <optgroup key={group} label={group}>
-                    {options.map((product) => (
-                      <option key={product.productCode} value={product.productCode}>
-                        {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
-                      </option>
-                    ))}
-                  </optgroup>
-                )
-              })}
-            </select>
+          <div className="catalog-advanced-filters" id={`${domain}-advanced-filters`} data-expanded={filtersExpanded}>
+            <div className="field">
+              <label htmlFor={`${domain}-product-group`}>{copy.groupLabel}</label>
+              <select
+                id={`${domain}-product-group`}
+                value={selectedGroup}
+                onChange={(event) => {
+                  const group = event.currentTarget.value
+                  setSelectedGroup(group)
+                  const selected = products.find((product) => product.productCode === selectedProductCode)
+                  if (selected && group !== 'all' && customerText(selected.group) !== group) setSelectedProductCode('all')
+                }}
+              >
+                <option value="all">All {copy.label.toLowerCase()} categories</option>
+                {groups.map((group) => <option key={group} value={group}>{group}</option>)}
+              </select>
+            </div>
+
+            <div className="field catalog-service-dropdown">
+              <label htmlFor={`${domain}-product-service`}>Choose a service</label>
+              <select
+                id={`${domain}-product-service`}
+                value={selectedProductCode}
+                onChange={(event) => {
+                  const code = event.currentTarget.value
+                  setSelectedProductCode(code)
+                  const selected = products.find((product) => product.productCode === code)
+                  if (selected) {
+                    setSelectedGroup(customerText(selected.group))
+                    setQuery('')
+                  }
+                }}
+              >
+                <option value="all">{copy.allServicesLabel}</option>
+                {groups.map((group) => {
+                  const options = products.filter((product) => customerText(product.group) === group)
+                  return (
+                    <optgroup key={group} label={group}>
+                      {options.map((product) => (
+                        <option key={product.productCode} value={product.productCode}>
+                          {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Temporarily unavailable'}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )
+                })}
+              </select>
+            </div>
           </div>
 
           <div className="catalog-filter-actions">
@@ -223,7 +246,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
       </section>
 
       {visible.length === 0 ? (
-        <p className="alert" role="status"><Icon name="info" /> <span>No services match those filters.</span></p>
+        <p className="alert" role="status"><Icon name="info" /> <span>No services match those filters. Clear filters above to see all services.</span></p>
       ) : (
         <div className="product-subcategory-list">
           {visibleGroups.map(({ group, products: groupProducts }) => {

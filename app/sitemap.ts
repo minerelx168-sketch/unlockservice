@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { listArticles } from '@/lib/articles'
 import { unlockOrderingEnabled } from '@/lib/provider'
 import { publicOrigin } from '@/lib/site'
 
@@ -15,13 +16,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${origin}/services/unlock`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/services/imei-check`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/check`, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${origin}/articles`, changeFrequency: 'weekly', priority: 0.7 },
+    ...listArticles().map((article) => ({
+      url: `${origin}/articles/${article.slug}`,
+      lastModified: new Date(`${article.updated}T00:00:00Z`),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
     { url: `${origin}/contact`, changeFrequency: 'yearly', priority: 0.6 },
     ...(unlockOrderingEnabled()
       ? []
       : [{ url: `${origin}/unlock-waitlist`, changeFrequency: 'weekly' as const, priority: 0.6 }]),
-    { url: `${origin}/register`, changeFrequency: 'yearly', priority: 0.5 },
-    { url: `${origin}/login`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${origin}/privacy`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${origin}/terms`, changeFrequency: 'yearly', priority: 0.2 },
   ]
 }
+

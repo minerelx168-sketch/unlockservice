@@ -1,8 +1,10 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { Brand } from '@/components/brand'
 
-export const metadata: Metadata = { title: 'Privacy Policy' }
+
+
+export const metadata = pageMetadata("/privacy", "Privacy Policy", "Read how iUnlockMobile handles account details, device identifiers and service information, and how to contact us about your privacy.")
 
 export default function PrivacyPage() {
   return (

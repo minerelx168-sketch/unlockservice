@@ -1,0 +1,116 @@
+/*
+ * Keep readable card widths as a layout constraint. A zero-overflow page can
+ * still be unusable when three cards squeeze their text into 50px columns.
+ * Imported last so older desktop-first breakpoint rules cannot undo this.
+ */
+.grid-3 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+.grid-3 > .card {
+  min-width: 0;
+}
+
+.grid-3 .t-card,
+.grid-3 .t-small {
+  overflow-wrap: anywhere;
+}
+
+/* Start with one readable column; add columns only when there is room.
+ * Grid gaps draw the dividers correctly for one, two, or four columns. */
+.trust-bar {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+  background: var(--line);
+}
+
+.trust-bar > div:nth-child(n) {
+  min-width: 0;
+  padding: 16px;
+  border: 0;
+  background: var(--surface);
+}
+
+.trust-bar b {
+  font-size: 1.125rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.trust-bar span {
+  margin-top: 4px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 24rem) {
+  .trust-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 68rem) {
+  .trust-bar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .trust-bar > div:nth-child(n) {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 40rem) {
+  .grid-3 > .card {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .grid-3 .t-card {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  .grid-3 .t-small {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .card--benefit {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 12px 14px;
+    align-content: start;
+    align-items: center;
+  }
+
+  .card--benefit .icon-tile {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+  }
+
+  .card--benefit .t-card,
+  .card--benefit .t-small,
+  .card--benefit .link-arrow {
+    margin: 0;
+  }
+
+  .card--benefit .t-small,
+  .card--benefit .link-arrow {
+    grid-column: 1 / -1;
+  }
+
+  .card--benefit .link-arrow {
+    min-height: 44px;
+    padding-block: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+}

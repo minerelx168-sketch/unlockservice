@@ -11,6 +11,12 @@ export async function POST(request: Request) {
   if ('error' in guarded) return guarded.error
   const { found, body } = guarded
 
+  // Require a stable request identity for HTTP callers; never accept price or
+  // user ID from the payload. Both come from our catalog/session respectively.
+  if (typeof body.idempotencyKey !== 'string' || !body.idempotencyKey.trim()) {
+    return NextResponse.json({ success: false, error: 'A request key is required.', code: 'idempotency_required' }, { status: 422 })
+  }
+
   const kind = body.kind === 'device_service' ? 'device_service' : 'carrier_unlock'
 
   try {
@@ -27,11 +33,15 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof OrderError) {
       const status =
-        error.code === 'rate_limited'
-          ? 429
-          : error.code === 'maintenance' || error.code === 'supplier_unconfigured'
-            ? 503
-            : 400
+        error.code === 'idempotency_conflict'
+          ? 409
+          : error.code === 'insufficient_credit'
+            ? 402
+            : error.code === 'rate_limited'
+              ? 429
+              : error.code === 'maintenance' || error.code === 'supplier_unconfigured'
+                ? 503
+                : 400
       return NextResponse.json({ success: false, error: error.message, code: error.code }, { status })
     }
     throw error

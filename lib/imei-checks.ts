@@ -1,9 +1,11 @@
 import { db } from './db'
 import { isValidImei, maskIdentifier, normalizeImei } from './imei'
 import { fingerprintImei } from './imei-privacy'
+import { decryptImeiCheckImei, encryptImeiCheckImei } from './imei-check-imei'
 import { activeImeiCheckProvider, type ImeiCheckResult } from './imei-check-provider'
 import { imeiProviderService, providerConfiguration } from './provider-api'
 import { recordProviderEvent } from './provider-events'
+import { claimProviderPoll } from './provider-poll-lease'
 import { consumeAttempt } from './rate-limit'
 
 export type ImeiCheckStatus = 'queued' | 'processing' | 'completed' | 'unavailable'
@@ -13,6 +15,7 @@ type ImeiCheckRow = {
   user_id: number
   check_type: string
   masked_imei: string
+  imei_encrypted: string | null
   status: ImeiCheckStatus
   provider: string
   provider_check_id: string | null
@@ -31,6 +34,7 @@ export type ImeiCheckView = {
   id: number
   checkType: string
   maskedImei: string
+  imei?: string
   status: ImeiCheckStatus
   provider: string
   result: Record<string, unknown> | null
@@ -77,6 +81,7 @@ function toView(row: ImeiCheckRow): ImeiCheckView {
     id: row.id,
     checkType: row.check_type,
     maskedImei: row.masked_imei,
+    imei: decryptImeiCheckImei(row.imei_encrypted) ?? undefined,
     status: row.status,
     provider: row.provider,
     result: parseResult(row.result_json),
@@ -87,7 +92,7 @@ function toView(row: ImeiCheckRow): ImeiCheckView {
 }
 
 const ROW_SELECT = `
-  SELECT id, user_id, check_type, masked_imei, status, provider,
+  SELECT id, user_id, check_type, masked_imei, imei_encrypted, status, provider,
          provider_check_id, provider_mode, provider_service_id,
          provider_last_polled_at, provider_attempts, provider_error_code,
          result_json, error_message, created_at, updated_at
@@ -190,14 +195,15 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
   const inserted = db()
     .prepare(
       `INSERT INTO imei_checks
-         (user_id, check_type, imei_fingerprint, masked_imei, status, provider,
+         (user_id, check_type, imei_fingerprint, masked_imei, imei_encrypted, status, provider,
           provider_mode, provider_service_id, idempotency_key)
-       VALUES (?, 'basic', ?, ?, 'queued', ?, ?, ?, ?)`,
+       VALUES (?, 'basic', ?, ?, ?, 'queued', ?, ?, ?, ?)`,
     )
     .run(
       userId,
       fingerprintImei(imei),
       maskIdentifier(imei),
+      encryptImeiCheckImei(imei),
       provider.name,
       providerMode,
       service?.id ?? null,
@@ -226,18 +232,29 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
 }
 
 export async function pollImeiCheck(userId: number, id: number): Promise<ImeiCheckView> {
-  const row = rowForUser(userId, id)
-  if (!row) throw new ImeiCheckError('Check not found.', 'check_not_found')
-  if (row.status !== 'processing') return toView(row)
+  const snapshot = rowForUser(userId, id)
+  if (!snapshot) throw new ImeiCheckError('Check not found.', 'check_not_found')
+  if (snapshot.status !== 'processing' || !snapshot.provider_check_id) return toView(snapshot)
+  const snapshotLastPoll = snapshot.provider_last_polled_at ? Date.parse(`${snapshot.provider_last_polled_at}Z`) : 0
+  if (snapshotLastPoll && Date.now() - snapshotLastPoll < POLL_DEBOUNCE_MS) return toView(snapshot)
 
-  const lastPoll = row.provider_last_polled_at ? Date.parse(`${row.provider_last_polled_at}Z`) : 0
-  if (lastPoll && Date.now() - lastPoll < POLL_DEBOUNCE_MS) return toView(row)
+  const releasePoll = claimProviderPoll('imei_check', snapshot.id)
+  if (!releasePoll) return toView(snapshot)
 
-  const provider = activeImeiCheckProvider()
-  if (!provider.poll || !row.provider_check_id || !providerConfiguration().enabled) return toView(row)
+  try {
+    const row = rowForUser(userId, id)
+    if (!row) throw new ImeiCheckError('Check not found.', 'check_not_found')
+    if (row.status !== 'processing' || !row.provider_check_id) return toView(row)
+    const lastPoll = row.provider_last_polled_at ? Date.parse(`${row.provider_last_polled_at}Z`) : 0
+    if (lastPoll && Date.now() - lastPoll < POLL_DEBOUNCE_MS) return toView(row)
+    const provider = activeImeiCheckProvider()
+    if (!provider.poll || !providerConfiguration().enabled) return toView(row)
 
-  const outcome = await provider.poll(row.provider_check_id, row.check_type)
-  updateResult(id, outcome, true)
-  auditOutcome(id, row.provider_mode ?? 'dhru', outcome, `poll:${row.provider_attempts + 1}:${outcome.status}`)
-  return getImeiCheck(userId, id)!
+    const outcome = await provider.poll(row.provider_check_id, row.check_type)
+    updateResult(id, outcome, true)
+    auditOutcome(id, row.provider_mode ?? 'dhru', outcome, `poll:${row.provider_attempts + 1}:${outcome.status}`)
+    return getImeiCheck(userId, id)!
+  } finally {
+    releasePoll()
+  }
 }

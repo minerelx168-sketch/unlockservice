@@ -47,19 +47,19 @@ export function providerProductByCode(code: string) {
 export function etaMinutesFromLabel(label: string) {
   const normalized = label.trim().toLowerCase()
   if (normalized === 'instant') return 1
-  const range = normalized.match(/(\d+)\s*-\s*(\d+)\s*(minute|hour|day)/)
-  if (range) {
-    const maximum = Number(range[2])
-    if (range[3] === 'hour') return maximum * 60
-    if (range[3] === 'day') return maximum * 24 * 60
-    return maximum
-  }
-  const single = normalized.match(/(\d+)\s*(minute|hour|day)/)
-  if (single) {
-    const amount = Number(single[1])
-    if (single[2] === 'hour') return amount * 60
-    if (single[2] === 'day') return amount * 24 * 60
+
+  const values = [...normalized.matchAll(
+    /(\d+(?:\.\d+)?)\s*(seconds?|secs?|minutes?|mins?|hours?|hrs?|days?|weeks?)/g,
+  )].map((match) => {
+    const amount = Number(match[1])
+    const unit = match[2]
+    if (unit.startsWith('sec')) return amount / 60
+    if (unit.startsWith('hour') || unit.startsWith('hr')) return amount * 60
+    if (unit.startsWith('day')) return amount * 24 * 60
+    if (unit.startsWith('week')) return amount * 7 * 24 * 60
     return amount
-  }
-  return 24 * 60
+  })
+
+  if (values.length > 0) return Math.max(1, Math.ceil(Math.max(...values)))
+  return normalized.includes('instant') ? 1 : 24 * 60
 }

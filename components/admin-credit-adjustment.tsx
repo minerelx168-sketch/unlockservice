@@ -47,6 +47,12 @@ export function AdminCreditAdjustment({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  /* The confirmation step lives in the page rather than in window.confirm().
+     A browser that has been told to block dialogs — the checkbox that
+     appears after a couple of them, an extension, a locked-down profile —
+     suppresses the native one silently, and the button then does nothing at
+     all: no request, no error, nothing to report. */
+  const [confirming, setConfirming] = useState(false)
   const idempotencyRef = useRef<string | null>(null)
 
   const selected = useMemo(
@@ -68,17 +74,21 @@ export function AdminCreditAdjustment({
     idempotencyRef.current = null
     setError(null)
     setSuccess(null)
+    /* Any edit invalidates what was on screen to confirm. */
+    setConfirming(false)
   }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!selected || amountCents === null || !canSubmit || busy) return
 
-    const direction = amountCents > 0 ? 'add' : 'remove'
-    const confirmed = window.confirm(
-      `Confirm ${direction} ${formatUsd(Math.abs(amountCents))} ${amountCents > 0 ? 'to' : 'from'} ${selected.username}? This financial action is recorded permanently.`,
-    )
-    if (!confirmed) return
+    /* First press asks, second press commits. */
+    if (!confirming) {
+      setConfirming(true)
+      setError(null)
+      setSuccess(null)
+      return
+    }
 
     const idempotencyKey = idempotencyRef.current ?? crypto.randomUUID()
     idempotencyRef.current = idempotencyKey
@@ -114,6 +124,7 @@ export function AdminCreditAdjustment({
       )
       setAmount('')
       setReason('')
+      setConfirming(false)
       idempotencyRef.current = null
       router.refresh()
     } catch {
@@ -216,9 +227,38 @@ export function AdminCreditAdjustment({
           </p>
         ) : null}
 
-        <button className="button button--primary button--wide" type="submit" disabled={!canSubmit || busy}>
-          {busy ? 'Recording adjustment…' : amountCents && amountCents < 0 ? 'Remove credit' : 'Add credit'}
-        </button>
+        {confirming && selected && amountCents !== null ? (
+          <div className="admin-confirm" role="alertdialog" aria-label="Confirm this adjustment">
+            <p>
+              <strong>
+                {amountCents > 0 ? 'Add' : 'Remove'} {formatUsd(Math.abs(amountCents))}{' '}
+                {amountCents > 0 ? 'to' : 'from'} {selected.username}?
+              </strong>
+            </p>
+            <p className="t-small">
+              {selected.email} · available {formatUsd(selected.credit_cents - selected.held_cents)} →{' '}
+              {projectedAvailable === null ? '—' : formatUsd(projectedAvailable)}. This is recorded
+              permanently and cannot be edited or deleted.
+            </p>
+            <div className="admin-confirm-actions">
+              <button className="button button--primary" type="submit" disabled={busy}>
+                {busy ? 'Recording adjustment…' : 'Yes, record it'}
+              </button>
+              <button
+                className="button button--quiet"
+                type="button"
+                onClick={() => setConfirming(false)}
+                disabled={busy}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="button button--primary button--wide" type="submit" disabled={!canSubmit || busy}>
+            {amountCents && amountCents < 0 ? 'Remove credit' : 'Add credit'}
+          </button>
+        )}
         <p className="t-small">Confirmation is required. Every adjustment is append-only and linked to the credit ledger.</p>
       </aside>
     </form>

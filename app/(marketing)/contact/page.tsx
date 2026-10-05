@@ -1,17 +1,15 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ContactForm } from '@/components/contact-form'
 import { Icon } from '@/components/icons'
 import { currentSession } from '@/lib/auth'
 import { supportEmail } from '@/lib/site'
 
-export const metadata: Metadata = {
-  title: 'Contact us',
-  description:
-    'Send a message to iUnlockMobile support about an order, a payment, or a question before you buy.',
-}
+
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = pageMetadata("/contact", "Contact iUnlockMobile Support", "Contact iUnlockMobile about phone unlocking, IMEI reports, payments or an existing order. Get help choosing a service before you pay.")
 
 export default async function ContactPage() {
   const found = await currentSession()

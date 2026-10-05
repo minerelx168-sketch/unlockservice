@@ -26,6 +26,9 @@ function policy(nonce: string, secure: boolean): string {
     "'self'",
     `'nonce-${nonce}'`,
     "'strict-dynamic'",
+    'https://www.googletagmanager.com',
+    'https://www.googleadservices.com',
+    'https://www.google.com',
     // The development bundler compiles with eval; production never does.
     process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : '',
   ].filter(Boolean)
@@ -36,9 +39,10 @@ function policy(nonce: string, secure: boolean): string {
     // Server-rendered style attributes are inline by definition, and every
     // colour in them resolves to a token rather than arriving from a request.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data:",
+    "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com",
     "font-src 'self'",
-    "connect-src 'self'",
+    "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://ad.doubleclick.net",
+    "frame-src 'self' https://www.googletagmanager.com",
     "form-action 'self'",
     "frame-ancestors 'none'",
     "base-uri 'none'",
@@ -61,6 +65,8 @@ export function middleware(request: NextRequest) {
   const headers = new Headers(request.headers)
   headers.set('x-nonce', nonce)
   headers.set('content-security-policy', csp)
+  // Overwrite any supplied value; the session guard only trusts this request's URL.
+  headers.set('x-continuation-path', `${request.nextUrl.pathname}${request.nextUrl.search}`)
 
   const response = NextResponse.next({ request: { headers } })
   response.headers.set('content-security-policy', csp)
@@ -82,6 +88,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Protected route prefetches also need the validated continuation header.
+    '/user/:path*',
     /* Everything a browser renders. Static assets carry no script and are
        served straight off disk, so they are left alone. */
     {

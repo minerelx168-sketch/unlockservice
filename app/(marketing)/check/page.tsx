@@ -1,26 +1,28 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ImeiCheckForm } from '@/components/imei-check-form'
 import { currentSession } from '@/lib/auth'
 import { serviceStatus } from '@/lib/provider'
 import { Icon } from '@/components/icons'
 
-export const metadata: Metadata = { title: 'Phone Check' }
+
 export const dynamic = 'force-dynamic'
+
+export const metadata = pageMetadata("/check", "IMEI Number Validation: Format & Checksum", "Validate an IMEI number format and checksum after signing in. For carrier, blacklist or warranty information, browse our separate paid IMEI reports.")
 
 export default async function CheckPage() {
   const found = await currentSession()
   const status = serviceStatus()
 
   return (
-    <main className="section">
+    <section className="section">
       <div className="shell split">
         <div className="stack" style={{ gap: 18 }}>
           <span className="kicker">
             <Icon name="search" strokeWidth={2} />
             Phone Check
           </span>
-          <h1 className="t-section">Phone Check for the information you need.</h1>
+          <h1 className="t-section">Validate your IMEI number format and checksum.</h1>
           <p className="t-lead">
             This free tool validates IMEI format and checksum only. For carrier, blacklist, warranty,
             lock-status and device reports, choose a paid Phone Check service.
@@ -69,6 +71,6 @@ export default async function CheckPage() {
           )}
         </div>
       </div>
-    </main>
+    </section>
   )
 }

@@ -26,6 +26,8 @@ app/api/orders/             Place an order; /status checks in on one the supplie
 lib/db.ts                   SQLite schema, seeded with brands, carriers and device services
 lib/credits.ts              The escrow ledger: hold → charge / refund
 lib/orders.ts               The order pipeline both endpoints call
+lib/provider-webhook.ts     Opt-in signed callback, atomic receipt and settlement
+lib/order-notifications.ts  Durable settlement notifications and retry worker
 lib/catalog.ts              Brands, carriers and their prices and turnarounds
 lib/payments.ts             Invoices: numbers locked at creation, credited on confirmation
 lib/provider.ts             Supplier adapter + the mock that stands in for a real one
@@ -41,6 +43,9 @@ docs/reference/             The two source documents from the Cowork sessions
 deploy/                     Caddy site, systemd units, deploy and domain scripts
 scripts/promote-admin.mjs    Idempotently promotes an existing account; never handles its password
 ```
+
+Credit-order concurrency, callback authentication, timeout recovery and the
+notification worker are documented in [backend-order-webhooks.md](docs/backend-order-webhooks.md).
 
 Deploying is documented in [`deploy/README.md`](deploy/README.md) — including how the domain is
 pointed at the server, and what is still a placeholder and must be replaced before the site takes

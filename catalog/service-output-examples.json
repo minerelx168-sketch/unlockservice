@@ -1,0 +1,446 @@
+{
+  "APPLE_BASIC": {
+    "title": "Apple Basic Info",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Clean\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "APPLE_CARRIER_LITE": {
+    "title": "Apple Carrier (Lite)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "APPLE_CARRIER_PRO": {
+    "title": "Apple Carrier (Pro)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nModel Number: A3257\nModel Region: United States, Puerto Rico\nActivation Status: Activated\nTelephone Technical Support: Active\nTelephone Technical Support Expiration Date: April 17, 2026\nRepairs and Service Coverage: Active\nRepairs and Service Coverage Expiration Date: January 17, 2027\nAppleCare Eligible: Yes\nAppleCare Eligible Description: There are 49 days left to add coverage.\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Blacklisted\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "APPLE_CARRIER_PRO_PLUS": {
+    "title": "Apple Carrier (Pro Plus)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nModel Number: A3257\nModel Region: United States, Puerto Rico\nActivation Status: Activated\nTelephone Technical Support: Active\nTelephone Technical Support Expiration Date: April 17, 2026\nRepairs and Service Coverage: Active\nRepairs and Service Coverage Expiration Date: January 17, 2027\nAppleCare Eligible: Yes\nAppleCare Eligible Description: There are 49 days left to add coverage.\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nOpen Repair Case: Yes\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Blacklisted\nPart Number: MFXH4LL/A\nPart Number Type: Retail\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "APPLE_MAX_INFO": {
+    "title": "Apple Max Info (Premium)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nModel Number: A3257\nModel Region: United States, Puerto Rico\nActivation Status: Activated\nTelephone Technical Support: Active\nTelephone Technical Support Expiration Date: April 17, 2026\nRepairs and Service Coverage: Active\nRepairs and Service Coverage Expiration Date: January 17, 2027\nAppleCare Eligible: Yes\nAppleCare Eligible Description: There are 49 days left to add coverage.\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nOpen Repair Case: Yes\nFind My iPhone: ON\niCloud Status: Clean\nMDM Status: OFF\nBlacklist Status: Blacklisted\nBlacklisted By: VERIZON WIRELESS\nBlacklisted Country: United States\nBlacklisted On: 23/12/2025 13:11:00\nBlacklist Reason: Fraudulently Obtained (0026)\nBlacklist Description: Equipment identified as fraudulently obtained from Operator with sufficient evidence that a police complaint could be filed.\nPart Number: MFXH4LL/A\nPart Number Type: Retail\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "APPLE_WARRANTY": {
+    "title": "Apple Warranty (Activation Info)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: IPHONE 11 PRO MAX 256GB MIDNIGHT GREEN [A2218]\nIMEI/SN: [redacted]\nActivation Status: Activated\nTelephone Technical Support: Expired\nCoverage Status: Apple Limited Warranty (2 days remaining)\nCoverage End Date: September 20, 2020\nAppleCare Eligible: No\nEstimated Purchase Date: September 21, 2019\nRegistered: Y\nLoaner: N"
+      }
+    ]
+  },
+  "CHECK_343": {
+    "title": "Apple Warranty (Activation Info) SN",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: MacBook Pro (16-inch, 2023)\nSerial: [redacted]\nActivation Status: Activated\nAppleCare Eligible: No\nValid Purchase Date: Yes\nRegistered Device: Yes\nReplaced Device: No\nTelephone Technical Support: Active (251 days remaining)\nTelephone Technical Support Expiration Date: May 15, 2026\nRepairs and Service Coverage: Active (251 days remaining)\nRepairs and Service Expiration Date: May 15, 2026\nWarranty Status: AppleCare+ (251 days remaining)\nYour device is covered for: Accidental Damage Protection, Hardware Service, 24/7 Priority Access\nAgreement Code: [redacted]\nEstimated Purchase Date: May 16, 2023"
+      }
+    ]
+  },
+  "CHECK_590": {
+    "title": "Apple IMEI ↔ SN ↔ IMEI2 CONVERT",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model:  IPHONE 8 PLUS 64GB SILVER\nIMEI: [redacted]\nMEID: [redacted]\nSerial Number: [redacted]"
+      }
+    ]
+  },
+  "APPLE_PART_NUMBER": {
+    "title": "Apple Part Number / MPN",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: iPhone XS\nIMEI Number: [redacted]\nPart Number: MT9K2RU/A\nPart Number Country: Russia\nPart Type: Retail"
+      }
+    ]
+  },
+  "CHECK_503": {
+    "title": "Apple iCloud MACBOOK/iMAC (ON / OFF)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: MACBOOK PRO\nSerial Number: [redacted]\nFind My Mac: ON"
+      }
+    ]
+  },
+  "CHECK_574": {
+    "title": "Apple iCloud MACBOOK/iMAC (Clean / Lost)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: MACBOOK PRO (14-INCH, 2021)\nModel Description: MBP 14.2 SL CTO\nSerial Number: [redacted]\nFind My Mac: ON\niCloud Status: LOST"
+      }
+    ]
+  },
+  "APPLE_ICLOUD_STATUS": {
+    "title": "Apple iCloud (ON / OFF)",
+    "variants": [
+      {
+        "label": "Find My on",
+        "output": "[redacted] Find My iPhone: ON"
+      },
+      {
+        "label": "Find My off",
+        "output": "[redacted] Find My iPhone: OFF"
+      }
+    ]
+  },
+  "APPLE_ICLOUD_CLEAN": {
+    "title": "Apple iCloud (Clean / Lost)",
+    "variants": [
+      {
+        "label": "Lost mode",
+        "output": "[redacted] FMI STATUS: LOST > Means iCloud Lock is ON and in LOST mode."
+      },
+      {
+        "label": "Clean mode",
+        "output": "[redacted] FMI STATUS: CLEAN > Means iCloud Lock is ON and in CLEAN mode."
+      },
+      {
+        "label": "Find My off",
+        "output": "[redacted] FMI STATUS: OFF > Means iCloud Lock is OFF."
+      }
+    ]
+  },
+  "CHECK_847": {
+    "title": "Apple iCloud (Clean / Lost) SN",
+    "variants": [
+      {
+        "label": "Lost mode",
+        "output": "[redacted] FMI STATUS: LOST > Means iCloud Lock is ON and in LOST mode."
+      },
+      {
+        "label": "Clean mode",
+        "output": "[redacted] FMI STATUS: CLEAN > Means iCloud Lock is ON and in CLEAN mode."
+      },
+      {
+        "label": "Find My off",
+        "output": "[redacted] FMI STATUS: OFF > Means iCloud Lock is OFF."
+      }
+    ]
+  },
+  "APPLE_MDM": {
+    "title": "Apple MDM (ON / OFF)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: IPHONE 11\nIMEI: [redacted]\nMDM Enrollment Status: ON"
+      }
+    ]
+  },
+  "CHECK_457": {
+    "title": "Apple MDM (ON / OFF) SN",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "MDM Enrollment Status: ON"
+      }
+    ]
+  },
+  "APPLE_GSX_TETHER": {
+    "title": "Apple GSX Next Tether Policy",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: iPhone 12 Pro Max (A2342)\nIMEI/SN: [redacted]\nFind My: ON\nNext Tether Policy: S2388 US Loaner and Service Picker policy - iPhone 7 and newer\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "APPLE_CASE_REPAIR_HISTORY": {
+    "title": "Apple Case History, Replacement",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX DESERT 256GB-JPN\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\n\nCases History:\n[redacted] 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:14:59.673Z Summary: Apple account disabled\nReplacement Details: Not Found"
+      }
+    ]
+  },
+  "APPLE_SOLD_BY_INFO": {
+    "title": "Apple Sold By Info",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model Config: IPHONE 12 MINI,ROW,64GB,GREEN\nProduct Sold By: [redacted]\nEstimated Purchase Date: 16 Jun 2021\nPurchase Country: France"
+      }
+    ]
+  },
+  "APPLE_SOLD_BY_COVERAGE": {
+    "title": "Apple Sold By, Coverage (Max Info)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Description: IPHONE 11 PRO MAX SG 64GB TMO-USA\nModel: IPHONE 11 PRO MAX,NA,64GB,SPACE GRAY\nIMEI Number: [redacted]\nIMEI2 Number: [redacted]\nMEID Number: [redacted]\nSerial Number: [redacted]\nProduct Version: 14.3\nSIM1 Carrier: RM (Roam Mobility)\nSIM2 Carrier: Boost Mobile\nMDM Lock: OFF\niCloud Lock: ON\niCloud Status: LOST\nGSX Case History: 0 records\nGSX Replacement History: 0 records\nCoverage Status: Out of warranty (no coverage)\nEstimated Purchase Date: 08 October 2020\nSold To Name: [redacted]\nPurchase Country: United States\nNext Tether Policy: US Sprint/T-Mobile Locked Policy\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "APPLE_FULL_GSX": {
+    "title": "Apple Sold By, Case History, Replacement, Activation Policy [ICCID & MAC] (Full GSX)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model Description: IPHONE 13 ROW 256GB MIDNIGHT\nProduct Description: IPHONE 13 MIDNIGHT 256GB-YPT\nConfig Code: 000DT6\nPart Number: MLQ63QL/A\nModel Number: A2633\nProduct Line: 300428\nProduct Version: 16.2\nLast Unbrick Os Build: 20C65\nWireless Mac Address: [redacted]\nCSN/CSN2/EID: [redacted]\nPurchase Date: 2023-01-14T00:00:00Z\nFirst Activation Date: 2023-01-14T17:19:49Z\nLast Restore Date: 2023-01-22T03:32:04Z\nUnlock Date: 2023-01-14T17:19:49Z\nWarranty Status Description: Out Of Warranty (No Coverage)\nLoaner: False\nUnlocked: True\nPersonalized: False\nPart Covered: False\nLabor Covered: False\nOnsite Coverage: False\nLimited Warranty: False\nInitial Activation Policy: 10 - Unlock.\nApplied Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nSold To Name: [redacted]\nPurchase Country: Spain\nMDM Lock: OFF\niCloud Lock: ON\niCloud Status: LOST\nSIM Lock: Unlocked\nCases: Not Found\nReplacement: Not Found"
+      }
+    ]
+  },
+  "CHECK_987": {
+    "title": "Apple Sold By, Case History, Replacement, GSX Activation Policy",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nConfig Code: 0050CJ\nProduct Line: 301048\nProduct Version: 26.3.1\nLast Unbrick Os Build: 23D8133\nCSN/CSN2/EID: [redacted]\nCarrier Name: Carrier\nFirst Activation Date: 2025-01-18T20:09:36Z\nPurchase Date: 2025-01-19T00:00:00Z\nRegistration Date: 2025-01-18T00:00:00Z\nLast Restore Date: 2026-03-14T13:20:51Z\nUnlock Date: 2025-04-18T20:16:59Z\nUnlocked: Yes\nApplied Activation Policy: 10 - Unlock.\nInitial Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nPersonalized: No\nPart Covered: No\nLabor Covered: No\nOnsite Coverage: No\nLimited Warranty: No\nWarranty Status: Out Of Warranty (No Coverage)\nSold To Name: [redacted]\nPurchase Country: Japan\nMDM Lock: OFF\niCloud Lock: OFF\n\nCases History:\n[redacted] 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:14:59.673Z Summary: Apple account disabled\nReplacement Details: Not Found"
+      }
+    ]
+  },
+  "APPLE_GSX_LIGHT": {
+    "title": "Apple Sold By, Case History, Replacement, GSX Activation Policy [ICCID & MAC]",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX DESERT 256GB-JPN\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nConfig Code: 0050CJ\nProduct Line: 301048\nProduct Version: 26.3.1\nLast Unbrick Os Build: 23D8133\nCSN/CSN2/EID: [redacted]\nWireless Mac Address: [redacted]\nCarrier Name: Carrier\nFirst Activation Date: 2025-01-18T20:09:36Z\nPurchase Date: 2025-01-19T00:00:00Z\nRegistration Date: 2025-01-18T00:00:00Z\nLast Restore Date: 2026-03-14T13:20:51Z\nUnlock Date: 2025-04-18T20:16:59Z\nUnlocked: Yes\nApplied Activation Policy: 10 - Unlock.\nInitial Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nPersonalized: No\nPart Covered: No\nLabor Covered: No\nOnsite Coverage: No\nLimited Warranty: No\nWarranty Status: Out Of Warranty (No Coverage)\nSold To Name: [redacted]\nPurchase Country: Japan\nMDM Lock: OFF\niCloud Lock: OFF\n\nCases History:\n[redacted] 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:14:59.673Z Summary: Apple account disabled\nReplacement Details: Not Found"
+      }
+    ]
+  },
+  "CHECK_690": {
+    "title": "Apple Case History",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Description: IPHONE XR WHITE 64GB-RUS\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 2020-11-15\nReplaced Device: No\n\nCase Details\nStatus: RESOL\nLast Modified: 2022-05-12T08:20:15.675Z\nId: [redacted]\nIssue Code: ICL0013\nIssue Desc: Login issue (iCloud Only)\nComponent Code: ICL001\nComponent Desc: iCloud Account\nTitle: log in to Apple ID issue\nSupport Topic: log in to Apple ID issue\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-13T10:14:37.072Z\nId: [redacted]\nIssue Code: ID05-02\nIssue Desc: How to - reset/change password\nComponent Code: ID05\nComponent Desc: Forgotten / Change Password\nTitle: forgoten id password\nSupport Topic: forgoten id password\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-12T08:01:55.081Z\nId: [redacted]\nIssue Code: NTI0302\nIssue Desc: Law Enforcement Referral\nComponent Code: NTI03\nComponent Desc: Law Enforcement Inquiry or Referral\nTitle: Referral\nSupport Topic: Referral\nStatus Description: Closed"
+      }
+    ]
+  },
+  "CHECK_621": {
+    "title": "Apple Case History, Repairs, Replacements, Diagnostics",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Description: IPHONE XR WHITE 64GB-RUS\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 2020-11-15\nReplaced Device: No\n\nCase Details\nStatus: RESOL\nLast Modified: 2022-05-12T08:20:15.675Z\nId: [redacted]\nIssue Code: ICL0013\nIssue Desc: Login issue (iCloud Only)\nComponent Code: ICL001\nComponent Desc: iCloud Account\nTitle: log in to Apple ID issue\nSupport Topic: log in to Apple ID issue\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-13T10:14:37.072Z\nId: [redacted]\nIssue Code: ID05-02\nIssue Desc: How to - reset/change password\nComponent Code: ID05\nComponent Desc: Forgotten / Change Password\nTitle: forgoten id password\nSupport Topic: forgoten id password\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-12T08:01:55.081Z\nId: [redacted]\nIssue Code: NTI0302\nIssue Desc: Law Enforcement Referral\nComponent Code: NTI03\nComponent Desc: Law Enforcement Inquiry or Referral\nTitle: Referral\nSupport Topic: Referral\nStatus Description: Closed\nNo Repair Found!"
+      }
+    ]
+  },
+  "CHECK_942": {
+    "title": "Apple Sold By, Case History, Replacement, Activation Policy [ICCID & MAC] (FULL GSX) S2",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model Description: IPHONE 12 BLACK 64GB ATT-USA\nModel: iPhone 12 64GB Black A2172 US\nEID Number: [redacted]\nManufacture Date: 18 Nov 2020\nUnit Age: 4 years, 11 months and 17 days\nAssembled In: Foxconn Chengdu, China\nActivation Status: Activated\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 28 Dec 2020\nPurchase Country: United States\nCoverage End Date: 12 Jun 2025\nTelephone Technical Support: Expired\nRepairs and Service Coverage: Expired\nAppleCare Eligible: No\nValid Purchase Date: Yes\nRegistered Device: Yes\nReplaced by Apple: No\nReplacement Device: No\nRefurbished: No\nDemo Unit: No\nLoaner Device: No\nFind My iPhone: OFF\nUS Block Status: Clean\nNext Activation Policy ID: 10\nLocked Carrier: Unlock\nCountry: United States\nSIM-Lock Status: Unlocked\nDevice Details\nProduct Sold By: [redacted]\nEstimated Purchase Date 28/12/20\nPurchased In United States\nCoverage Details Coverage Status\nOut Of Warranty (No Coverage)\nLoaner Device No\nActivation Policy Details\nDevice Details\nPart Description iPhone 12\nCSN/CSN2/EID: [redacted]\nWi-Fi Mac Address: [redacted]\nSoftware Version 18.5\nSoftware Build 22F76\nCarrier F-Contact\nICCID: [redacted]\nCarrier 2 MetTel\nDevice Enrollment Program No\nActivation Details\nInitial Activation Policy ID 23\nInitial Activation Policy US AT&T Activation Policy\nLast Applied Activation Policy ID 2303\nLast Applied Activation Policy Multi-Mode Unlock\nNext Tether Policy ID 2303\nNext Tether Policy Multi-Mode Unlock\nFirst Activation Date 27/12/20 02:27 AM\nLast Restore Date 18/06/25 02:03 PM\nUnlock Date 03/11/25 07:54 PM\nUnlocked Yes\n\nNo Repair Found\nNo Case History Found\nNo Replacement History Found\nNo Escalation Found\nNo Diagnostic History Found"
+      }
+    ]
+  },
+  "BLACKLIST_SIMPLE": {
+    "title": "WorldWide GSMA Blacklist Status (SIMPLE INFO)",
+    "variants": [
+      {
+        "label": "Blacklisted",
+        "output": "[redacted] BLACKLIST STATUS: BLACKLISTED"
+      },
+      {
+        "label": "Clean",
+        "output": "[redacted] BLACKLIST STATUS: CLEAN"
+      }
+    ]
+  },
+  "BLACKLIST_FULL": {
+    "title": "WorldWide GSMA Blacklist Status (FULL INFO)",
+    "variants": [
+      {
+        "label": "Blacklisted — Verizon",
+        "output": "Model Name: APPLE IPHONE 11 PRO (A2160)\nManufacturer: APPLE INC\nBlacklist Status: BLACKLISTED\nBlacklisted (FRAUD) By: VERIZON WIRELESS\nBlacklisted (FRAUD) Country: US\nBlacklisted (FRAUD) On: 24/01/2020 10:31:00\nNote: Reported stolen on 29/01/17"
+      },
+      {
+        "label": "Blacklisted — O2",
+        "output": "IMEI: [redacted]\nModel: APPLE IPHONE 4S (A1387)\nBlacklist Status: BLACKLISTED\nBlacklisted By: O2 (UK) LIMITED\nBlacklisted On: 2017-08-05 07:44:48\nBlacklisted Country: UNITED KINGDOM"
+      },
+      {
+        "label": "Clean",
+        "output": "IMEI: [redacted]\nModel Name: APPLE IPHONE 8 (A1905)\nModel Number: IPHONE 8 (A1905)\nManufacturer: APPLE INC\nBlacklist Status: CLEAN\nDetails: Never been blacklisted"
+      }
+    ]
+  },
+  "TMOBILE_USA": {
+    "title": "T-Mobile USA Status",
+    "variants": [
+      {
+        "label": "Blocked",
+        "output": "Model: iPhone XR\nManufacturer: Apple\nIMEI: [redacted]\nIMEI2: [redacted]\nStatus: Blocked"
+      },
+      {
+        "label": "Clean",
+        "output": "Model: Apple iPhone 11 (A2111)\nManufacturer: Apple Inc\nESN Status: CLEAN"
+      }
+    ]
+  },
+  "TMOBILE_USA_PRO": {
+    "title": "T-Mobile USA Status [PRO]",
+    "variants": [
+      {
+        "label": "Blocked",
+        "output": "Model: iPhone XR\nManufacturer: Apple\nIMEI: [redacted]\nIMEI2: [redacted]\neSIM CSN: [redacted]\neSIM Supported: Yes\nStatus: Blocked\nStatus Description: Reported unrecoverable by insurance Unrecoverable - Insurance"
+      },
+      {
+        "label": "Clean",
+        "output": "Model: Apple iPhone 11 (A2111)\nManufacturer: Apple Inc\nESN Status: CLEAN"
+      },
+      {
+        "label": "Clean — leased device",
+        "output": "Model: Apple iPhone 11 (A2111)\nManufacturer: Apple Inc\nESN Status: CLEAN (Leased device)"
+      }
+    ]
+  },
+  "VERIZON_USA_PRO": {
+    "title": "Verizon USA Status",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model: GALAXY S22 ULTRA 512 BLK\nIMEI: [redacted]\nStatus: Clean\nPart Number: SMS908UZKFV\nProduct ID: DEV17760008\nDevice SKU: SKU5030023"
+      }
+    ]
+  },
+  "CHECK_267": {
+    "title": "ZTE INFO",
+    "variants": [
+      {
+        "label": "Report excerpt",
+        "output": "IMEI: [redacted]\nProduct Name: P817A22\nProduct Description: Z971 Mobile Phone\nProduct Info: AT&T/No Charger&Cable/4FF SIM/3140mAh/SZLM/PAYGO\nProduct Line: North America\nModel: Z971"
+      }
+    ]
+  },
+  "XIAOMI_STATUS": {
+    "title": "XIAOMI (ON / OFF)",
+    "variants": [
+      {
+        "label": "Device report example",
+        "output": "Model: Redmi Note 13 Mint Green 6GB RAM 128GB ROM\nIMEI: [redacted]\nSerial Number: [redacted]\nUnlock Number (FSN): [redacted]\nWarranty Status: Out of Warranty\nWarranty Description: Non-local sale and Non-global warranty\nWarranty Start Date: 2024-02-15 05:53:27\nWarranty End Date: 2026-02-14 05:53:27\nPurchased In: Paraguay\nMI Activation Lock: ON"
+      },
+      {
+        "label": "Lock status example",
+        "output": "IMEI/KeyLock: [redacted]\nMI Activation Lock: ON"
+      }
+    ]
+  },
+  "CHECK_856": {
+    "title": "XIAOMI (Clean/ Lost)",
+    "variants": [
+      {
+        "label": "Clean activation status",
+        "output": "Model Name: Redmi6 Pro SIM Free 4GB RAM Obsidian Black 64GB\nModel Code: XIAOMI M1805D1SE\nIMEI Number: [redacted]\nIMEI2 Number: [redacted]\nMEID Number: [redacted]\nSerial Number: [redacted]\nUnlock Number: [redacted]\nSKU Number: MZB6271CN\nPurchase Country: China\nActivation Country: Uzbekistan\nWarranty Status: Non-Local device\nWarranty Description: Non-local sale\nWarranty Start Date: 2018-12-24 19:27:56\nWarranty End Date: 2020-12-23\nDelivery Date: 2018-09-27 14:20:32\nActivation Date: 2018-09-27 14:20:32\nProduction Date: 2018-08-16 08:40:19\nMI Activation Lock: ON\nMI Activation Status: Clean"
+      }
+    ]
+  },
+  "HUAWEI_INFO": {
+    "title": "HUAWEI INFO",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Model Description: HUAWEI P50 8GB+256GB Cocoa Gold Single Card AT&T Ver. USA CHG\nModel Code: Amber-L09C\nIMEI: [redacted]\nS/N: [redacted]\nItem Code: 51097AVP\nOffer Code: OFFE00580406\nWarranty Valid In: Mexico\nWarranty Status: In warranty\nActivation Date: April 25, 2022\nShipment Date: May 17, 2022\nOrder Date: May 13, 2022\n\nWarranty Details:\nWarranty Type: 15 Day Device Return\nValid in Country: MX\nService Code: BS01000002\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\n\nWarranty Type: 15 Day Device Replacement\nValid in Country: MX\nService Code: BS02000001\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\n\nWarranty Type: 1 Year Warranty\nValid in Country: MX\nService Code: BS03000001\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: HUAWEI Accidental Screen Damage Warranty 6M1T\nValid in Country: MX\nService Code: ES02000004\nStart Date: December 10, 2022\nEnd Date: June 11, 2023\nBind Date: August 11, 2022\n\nWarranty Type: Huawei Setup Assistance 12Months 1 Time\nValid in Country: MX\nService Code: ES5330001101\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022"
+      }
+    ]
+  },
+  "SAMSUNG_INFO": {
+    "title": "SAMSUNG INFO",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "IMEI Number: [redacted]\nMaster Number: [redacted]\nSerial Number: [redacted]\nUn Number: [redacted]\nModel Info: MOBILE SM-J510FN BLACK BGL\nModel Number: [redacted]\nModel Name: SM-J510FN\nWarranty Status: Out of Warranty\nPurchase Country: Austria\nWarranty Until: 03.09.2017\nProduction Date: 09.03.2017\nManufacturer: P518 Samsung Electronics Vietnam\nCarrier: Bulgaria Open\nSold By: Austria / 10 March 2017\nShip To: Bulgaria / 22 March 2017"
+      }
+    ]
+  },
+  "CHECK_500": {
+    "title": "SAMSUNG INFO (Server 2)",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "IMEI Number: [redacted]\nMaster Number: [redacted]\nSerial Number: [redacted]\nUn Number: [redacted]\nModel Info: MOBILE SM-J510FN BLACK BGL\nModel Number: [redacted]\nModel Name: SM-J510FN\nWarranty Status: Out of Warranty\nPurchase Country: Austria\nWarranty Until: 03.09.2017\nProduction Date: 09.03.2017\nManufacturer: P518 Samsung Electronics Vietnam\nCarrier: Bulgaria Open\nSold By: Austria / 10 March 2017\nShip To: Bulgaria / 22 March 2017"
+      }
+    ]
+  },
+  "SAMSUNG_KNOX": {
+    "title": "SAMSUNG (Knox Guard Status, Samsung Lock - ON/OFF)",
+    "variants": [
+      {
+        "label": "Lock status report excerpt",
+        "output": "Model Info: MOBILE SM-A326B BLACK THL\nIMEI: [redacted]\nSerial Number: [redacted]\nModel Number: SM-A326BZKHTHL\nModel Name: SM-A326B\nModel Desc: Galaxy A32 5G\nWarranty Status: Warranty Expired\nProduction Date: July 27, 2021\nWarranty Until: July 27, 2022\nManufacturer: Samsung Electronics Vietnam (SEV), Bac Ninh City\nCarrier: Open (Regional lock) - Thailand\n\nSamsung Lock: ON\nSamsung Status: Lost Mode\nLost Number: [redacted]\n\n[KG] Registed: ON\n[KG] Company: [redacted]\n[KG] Device ID: [redacted]\n[KG] Device state: Locked"
+      }
+    ]
+  },
+  "MOTOROLA_INFO": {
+    "title": "MOTOROLA INFO",
+    "variants": [
+      {
+        "label": "Warranty report excerpt",
+        "output": "Model: PHN MOTO XT2321-5 US PB 8+256 DL ATT\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial Number: [redacted]\nWarranty Status: In Warranty\nPurchased In: United States of America\n\nWarranty Entitlements:\nName: 1YR CCI, 8X5 NBD for MOTO smartphone\nWarranty Status: Active (184 days remaining)\nWarranty Start: June 15, 2023\nWarranty End: September 12, 2024\nDescription: This product has a one years limited warranty and is entitled to parts, labor and carry-in repair service, but it might exclude Battery, Charger and Earphone for Moto smartphone."
+      }
+    ]
+  },
+  "CHECK_616": {
+    "title": "Home Location Register (HLR) Lookup",
+    "variants": [
+      {
+        "label": "Report example",
+        "output": "Number: [redacted]\nOriginal Network Name: Orange (Everything Everywhere Limited)\nOriginal Country Name: United Kingdom\nOriginal Country Prefix: +44\nPorted: Yes\nPorted Network Name: 3 (Hutchison 3G UK Ltd)\nPorted Country Name: United Kingdom\nPorted Country Prefix: +44\nRoaming: No\nLocal Time: Europe/London: GMT+01:00\nStatus: CONNECTED"
+      }
+    ]
+  },
+  "CHECK_618": {
+    "title": "Ping-SMS",
+    "variants": [
+      {
+        "label": "Delivered status example",
+        "output": "Number: [redacted]\nNetwork Name: MTS\nCountry: Russia\nRegion: Saint Petersburg and Leningrad Oblast\nStatus: Online\nStatus Description: Ping-SMS Delivered"
+      }
+    ]
+  },
+  "CHECK_619": {
+    "title": "Ping-SMS (Server 2)",
+    "variants": [
+      {
+        "label": "Delivered status example",
+        "output": "Number: [redacted]\nNetwork Name: MTS\nCountry: Russia\nRegion: Saint Petersburg and Leningrad Oblast\nStatus: Online\nStatus Description: Ping-SMS Delivered"
+      }
+    ]
+  },
+  "UNLOCK_265": {
+    "title": "LG WorldWide - 2020",
+    "variants": [
+      {
+        "label": "Unlock code example",
+        "output": "NCK=[redacted]"
+      }
+    ]
+  },
+  "UNLOCK_137": {
+    "title": "LG WorldWide - UNTIL 2019 (Premium)",
+    "variants": [
+      {
+        "label": "Unlock codes example",
+        "output": "NCK=[redacted]\nNSCK=[redacted]\nSPCK=[redacted]\nCPCK=[redacted]\nSIMCK=[redacted]"
+      }
+    ]
+  }
+}

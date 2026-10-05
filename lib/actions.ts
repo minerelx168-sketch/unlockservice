@@ -21,11 +21,13 @@ import {
   verifyEmail,
 } from './account-security'
 import { CARRIERS } from './catalog'
+import { safeContinuation, withContinuation } from './continuation'
 import { ContactError, submitContactMessage } from './contact'
 import { isValidImei, normalizeImei } from './imei'
 import { parseUsd } from './money'
 import { landingRoute, unlockOrderingEnabled } from './provider'
 import { writeQuote } from './quote'
+import { clearDeviceIntent } from './device-intent'
 import { joinUnlockWaitlist, WaitlistError } from './waitlist'
 import {
   approveInvoice,
@@ -140,8 +142,8 @@ export async function registerAction(_: FormState, data: FormData): Promise<Form
     throw error
   }
   revalidatePath('/', 'layout')
-  if (verificationRequired) redirect(`/verify-email?email=${encodeURIComponent(email)}`)
-  redirect(landingRoute())
+  if (verificationRequired) redirect(withContinuation(`/verify-email?email=${encodeURIComponent(email)}`, data.get('next')))
+  redirect(safeContinuation(data.get('next')) ?? landingRoute())
 }
 
 export async function loginAction(_: FormState, data: FormData): Promise<FormState> {
@@ -153,7 +155,7 @@ export async function loginAction(_: FormState, data: FormData): Promise<FormSta
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect(landingRoute())
+  redirect(safeContinuation(data.get('next')) ?? landingRoute())
 }
 
 export async function verifyEmailAction(_: FormState, data: FormData): Promise<FormState> {
@@ -166,7 +168,7 @@ export async function verifyEmailAction(_: FormState, data: FormData): Promise<F
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect(landingRoute())
+  redirect(safeContinuation(data.get('next')) ?? landingRoute())
 }
 
 export async function resendVerificationAction(_: FormState, data: FormData): Promise<FormState> {
@@ -200,10 +202,11 @@ export async function resetPasswordAction(_: FormState, data: FormData): Promise
     if (error instanceof AuthError) return { error: error.message }
     throw error
   }
-  redirect('/login?reset=1')
+  redirect(withContinuation('/login?reset=1', data.get('next')))
 }
 
 export async function logoutAction() {
+  await clearDeviceIntent()
   const found = await currentSession()
   if (found) destroySession(found.session.id)
   await clearSessionCookie()
@@ -213,10 +216,13 @@ export async function logoutAction() {
 
 export async function createInvoiceAction(_: FormState, data: FormData): Promise<FormState> {
   const found = await currentSession()
-  if (!found) redirect('/login')
+  if (!found) {
+    const next = safeContinuation(data.get('next'))?.replace('/user/reports/new', '/user/add-funds')
+    redirect(withContinuation('/login', next ?? '/user/add-funds'))
+  }
 
   const cents = parseUsd(String(data.get('amount') ?? ''))
-  if (cents === null) return { error: 'Enter an amount like 25 or 25.50.' }
+  if (cents === null) return { error: 'Enter a USD amount with no more than 2 decimal places, such as 0.05 or 1.25.' }
 
   let reference: string
   try {
@@ -226,12 +232,12 @@ export async function createInvoiceAction(_: FormState, data: FormData): Promise
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect(`/user/invoice/${reference}`)
+  redirect(withContinuation(`/user/invoice/${reference}`, data.get('next')))
 }
 
 export async function submitReferenceAction(_: FormState, data: FormData): Promise<FormState> {
   const found = await currentSession()
-  if (!found) redirect('/login')
+  if (!found) redirect(withContinuation('/login', withContinuation(`/user/invoice/${String(data.get('reference') ?? '')}`, data.get('next'))))
 
   const reference = String(data.get('reference') ?? '')
   try {
@@ -246,7 +252,7 @@ export async function submitReferenceAction(_: FormState, data: FormData): Promi
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect(`/user/invoice/${reference}`)
+  redirect(withContinuation(`/user/invoice/${reference}`, data.get('next')))
 }
 
 /**
@@ -255,7 +261,7 @@ export async function submitReferenceAction(_: FormState, data: FormData): Promi
  */
 export async function approveInvoiceAction(_: FormState, data: FormData): Promise<FormState> {
   const found = await currentSession()
-  if (!found) redirect('/login')
+  if (!found) redirect(withContinuation('/login', withContinuation(`/user/invoice/${String(data.get('reference') ?? '')}`, data.get('next'))))
   if (!selfApprovalEnabled()) return { error: 'Confirmation is done by an administrator.' }
 
   const reference = String(data.get('reference') ?? '')
@@ -266,5 +272,5 @@ export async function approveInvoiceAction(_: FormState, data: FormData): Promis
     throw error
   }
   revalidatePath('/', 'layout')
-  redirect(`/user/invoice/${reference}`)
+  redirect(withContinuation(`/user/invoice/${reference}`, data.get('next')))
 }

@@ -1,0 +1,39 @@
+[Unit]
+Description=Poll the supplier for unlock, paid-service and IMEI-check results still in flight
+After=unlockservice.service
+# Nothing to poll if the app never came up; the timer simply skips this run.
+Requisite=unlockservice.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/apps/unlockservice
+Environment=NODE_ENV=production
+Environment=IUNLOCKMOBILE_DB=/home/ubuntu/apps/unlockservice/data/iunlockmobile.db
+# The same file the app reads. Without a supplier configured in it,
+# pollProviderJobs() returns immediately and this run does nothing at all —
+# which is why the timer is safe to leave enabled before the provider is.
+EnvironmentFile=/etc/unlockservice.env
+EnvironmentFile=/etc/unlockservice-dhru.env
+ExecStart=/usr/bin/npm run provider:poll -- 40
+# A supplier that is briefly unreachable leaves credit held and is retried by
+# a later poll. A non-zero exit remains visible to operators/systemd.
+SuccessExitStatus=0
+TimeoutStartSec=120
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=false
+ReadWritePaths=/home/ubuntu/apps/unlockservice/data
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+SystemCallArchitectures=native
+UMask=0077

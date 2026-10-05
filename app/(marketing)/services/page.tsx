@@ -1,21 +1,24 @@
-import type { Metadata } from 'next'
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
 import { CUSTOMER_PRODUCT_COUNTS } from '@/lib/customer-provider-products'
+import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 
-export const metadata: Metadata = {
-  title: 'Unlock Service and Phone Check',
-  description: 'Choose Phone Check or Unlock Service before browsing products, prices and availability.',
-}
+
+
+export const dynamic = 'force-dynamic'
+
+export const metadata = pageMetadata("/services", "Phone Unlock & IMEI Check Services", "Compare phone unlocking and IMEI check services. Browse device requirements, report types, prices and availability before choosing a service.")
 
 export default function ServicesPage() {
+  const availableCount = listPublicProviderProducts('imei_check').filter((product) => product.status === 'available').length
   return (
     <>
       <section className="section section--tint">
         <div className="shell">
           <div className="section-head">
             <span className="kicker"><Icon name="grid" /> Service categories</span>
-            <h1 className="t-display">Choose what you need.</h1>
+            <h1 className="t-display">Phone unlocking and IMEI check services.</h1>
             <p className="t-lead">
               Phone checks and unlocking are different services. Select one category first so you only see relevant products, prices and next steps.
             </p>
@@ -35,7 +38,7 @@ export default function ServicesPage() {
               </div>
               <div className="service-hub-stats">
                 <div><strong>{CUSTOMER_PRODUCT_COUNTS.imeiCheck}</strong><span>published checks</span></div>
-                <div><strong>25</strong><span>available online</span></div>
+                <div><strong>{availableCount}</strong><span>available online</span></div>
               </div>
               <div className="service-hub-actions">
                 <Link className="button button--primary" href="/services/imei-check">
@@ -72,3 +75,4 @@ export default function ServicesPage() {
     </>
   )
 }
+

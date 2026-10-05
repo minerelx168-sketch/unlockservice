@@ -2,32 +2,56 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Brand } from './brand'
-import { Icon } from './icons'
+import { Icon, type IconName } from './icons'
 import { ThemeToggle } from './theme-toggle'
 
-const NAV = [
-  { href: '/services/unlock', label: 'Unlock Service' },
-  { href: '/services/imei-check', label: 'Phone Check' },
-  { href: '/#how', label: 'How it works' },
-  { href: '/#faq', label: 'FAQ' },
-  { href: '/login', label: 'Order Tracking' },
+const NAV: Array<{ href: string; label: string; icon: IconName }> = [
+  { href: '/services/unlock', label: 'Unlock Service', icon: 'lock' },
+  { href: '/services/imei-check', label: 'Phone Check', icon: 'search' },
+  { href: '/articles', label: 'Article', icon: 'file' },
+  { href: '/login', label: 'Order Tracking', icon: 'clock' },
+  { href: '/contact', label: 'Contact us', icon: 'mail' },
 ]
 
 /**
  * Actions read toggle → quiet account → Signal Blue catalog CTA, so the
- * strongest action sits furthest right. Below 940px the nav becomes a panel and the buttons
+ * strongest action sits furthest right. Below 1320px the nav becomes a panel and the buttons
  * step aside — see the media queries in components.css.
  */
 export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
-  const accountHref = isAuthenticated ? '/user/unlock' : '/login'
+  const headerRef = useRef<HTMLElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const accountHref = isAuthenticated ? '/user/check' : '/login'
   const accountLabel = isAuthenticated ? 'My account' : 'Sign in'
 
+  useEffect(() => {
+    if (!open) return
+    headerRef.current?.querySelector<HTMLAnchorElement>('.site-nav a')?.focus()
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setOpen(false)
+      toggleRef.current?.focus()
+    }
+    function dismissOutside(event: PointerEvent | FocusEvent) {
+      if (event.target instanceof Node && !headerRef.current?.contains(event.target)) setOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('pointerdown', dismissOutside)
+    document.addEventListener('focusin', dismissOutside)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('pointerdown', dismissOutside)
+      document.removeEventListener('focusin', dismissOutside)
+    }
+  }, [open])
+
   return (
-    <header className="site-header">
+    <header className="site-header" ref={headerRef}>
       <div className="shell">
         <Brand />
 
@@ -39,26 +63,27 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
         >
           {NAV.map((item) => {
             const href = item.label === 'Order Tracking' && isAuthenticated ? '/user/orders' : item.href
-            /* Comparing the whole href to the pathname never matched,
-               because four of the five links are anchors into the homepage —
-               so nothing was ever marked current. Matching on the path alone
-               marks all four at once on the homepage, which is no more
-               useful. An anchor into a section is not the current page, so
-               only a link that is itself a page carries the mark. */
-            const [path, hash] = href.split('#')
+            // Keep the section highlighted while reading an individual article.
+            const active = pathname === href || pathname.startsWith(`${href}/`)
             return (
               <Link
                 key={item.label}
                 href={href}
-                aria-current={!hash && path === pathname ? 'page' : undefined}
+                className={`nav-link${item.href === '/articles' ? ' nav-link--article' : ''}`}
+                data-active={active ? 'true' : undefined}
+                aria-current={href === pathname ? 'page' : undefined}
                 onClick={() => setOpen(false)}
               >
-                {item.label}
+                <Icon name={item.icon} strokeWidth={1.9} />
+                <span>{item.label}</span>
               </Link>
             )
           })}
           <Link className="nav-cta" href="/services" onClick={() => setOpen(false)}>
             Browse services
+          </Link>
+          <Link className="nav-account" href={accountHref} onClick={() => setOpen(false)}>
+            {accountLabel}
           </Link>
         </nav>
 
@@ -78,12 +103,13 @@ export function SiteHeader({ isAuthenticated = false }: { isAuthenticated?: bool
           <button
             type="button"
             className="icon-action nav-toggle"
+            ref={toggleRef}
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-controls="site-nav"
-            aria-label="Toggle navigation"
+            aria-label={open ? 'Close navigation' : 'Open navigation'}
           >
-            <Icon name="menu" />
+            <Icon name={open ? 'cross' : 'menu'} />
           </button>
         </div>
       </div>

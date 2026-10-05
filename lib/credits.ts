@@ -125,6 +125,20 @@ function refuseReplay(refType: string, refId: string, type: LedgerType) {
   if (hasCreditTransition(refType, refId, type)) throw new DuplicateLedgerEffect(refType, refId, type)
 }
 
+/** Aggregate held credit is not proof that THIS order owns that reservation. */
+function assertReservation(userId: number, amountCents: number, refType: string, refId: string, opposite: 'charge' | 'refund') {
+  const reserved = db().prepare(
+    `SELECT user_id, amount_cents FROM credit_ledger
+       WHERE ref_type = ? AND ref_id = ? AND type = 'hold'`,
+  ).get(refType, refId) as { user_id: number; amount_cents: number } | undefined
+  if (!reserved || reserved.user_id !== userId || reserved.amount_cents !== -amountCents) {
+    throw new Error('settlement does not match the original credit reservation')
+  }
+  if (hasCreditTransition(refType, refId, opposite)) {
+    throw new Error('credit reservation already settled with the opposite outcome')
+  }
+}
+
 export class InsufficientCredit extends Error {
   constructor(readonly availableCents: number, readonly requiredCents: number) {
     super('Not enough credit for this service.')
@@ -144,12 +158,13 @@ export function hold(userId: number, amountCents: number, refType: string, refId
     const after = getBalance(userId)
     writeLedger(userId, -amountCents, 'hold', refType, refId, after.availableCents)
     return after
-  })()
+  }).immediate()
 }
 
 export function charge(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('charge amount must be positive cents')
   return db().transaction(() => {
+    assertReservation(userId, amountCents, refType, refId, 'refund')
     if (hasCreditTransition(refType, refId, 'charge')) return getBalance(userId)
     const before = getBalance(userId)
     if (before.heldCents < amountCents || before.creditCents < amountCents) {
@@ -161,12 +176,13 @@ export function charge(userId: number, amountCents: number, refType: string, ref
     const after = getBalance(userId)
     writeLedger(userId, -amountCents, 'charge', refType, refId, after.availableCents)
     return after
-  })()
+  }).immediate()
 }
 
 export function refund(userId: number, amountCents: number, refType: string, refId: string): Balance {
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('refund amount must be positive cents')
   return db().transaction(() => {
+    assertReservation(userId, amountCents, refType, refId, 'charge')
     if (hasCreditTransition(refType, refId, 'refund')) return getBalance(userId)
     const before = getBalance(userId)
     if (before.heldCents < amountCents) throw new Error('cannot release more credit than is reserved')
@@ -174,7 +190,7 @@ export function refund(userId: number, amountCents: number, refType: string, ref
     const after = getBalance(userId)
     writeLedger(userId, amountCents, 'refund', refType, refId, after.availableCents)
     return after
-  })()
+  }).immediate()
 }
 
 /** Adds credit once for a stable external reference. Duplicate settlement is a no-op. */
@@ -199,7 +215,7 @@ export function credit(
     const after = getBalance(userId)
     writeLedger(userId, amountCents, type, refType, refId, after.availableCents)
     return after
-  })()
+  }).immediate()
 }
 
 export type LedgerRow = {

@@ -9,7 +9,14 @@ const workDir = mkdtempSync(join(tmpdir(), 'iunlockmobile-backend-'))
 const databasePath = join(workDir, 'legacy.db')
 
 process.env.IUNLOCKMOBILE_DB = databasePath
-process.env.IUNLOCKMOBILE_USDT_BEP20_ADDRESS = '0x1111111111111111111111111111111111111111'
+process.env.IUNLOCKMOBILE_TOPUP_ENABLED = '1'
+process.env.IUNLOCKMOBILE_EVM_RECEIVING_ADDRESS = '0x1111111111111111111111111111111111111111'
+process.env.IUNLOCKMOBILE_TRON_RECEIVING_ADDRESS = 'TBXSw8fM4jpQkGc6zZjsVABFpVN7UvXPdV'
+process.env.IUNLOCKMOBILE_TOPUP_BEP20_BSC_USD_ENABLED = '1'
+process.env.IUNLOCKMOBILE_TOPUP_ERC20_USDT_ENABLED = '1'
+process.env.IUNLOCKMOBILE_TOPUP_TRC20_USDT_ENABLED = '1'
+process.env.IUNLOCKMOBILE_ETHERSCAN_API_KEY = 'test-etherscan-key'
+process.env.IUNLOCKMOBILE_TRONGRID_API_KEY = 'test-trongrid-key'
 delete process.env.IUNLOCKMOBILE_REQUIRE_EMAIL_VERIFICATION
 
 const legacy = new Database(databasePath)
@@ -190,9 +197,17 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-08-provider-architecture-v1',
       '2026-08-unlockservice-native-v2',
       '2026-09-admin-credit-adjustments-v1',
+      '2026-09-bscscan-invoice-verification-v1',
+      '2026-09-bscscan-invoice-verification-v2',
+      '2026-09-imei-check-imei-encryption-v1',
       '2026-09-ledger-effect-uniqueness-v1',
+      '2026-09-multichain-topup-v1',
       '2026-09-paid-imei-reports-v1',
+      '2026-09-paid-report-imei-encryption-v1',
+      '2026-09-provider-code-v1',
       '2026-09-provider-product-catalog-v2',
+      '2026-09-provider-product-catalog-v3-strict-rollout',
+      '2026-09-usdt-verified-amount-v1',
     ],
   )
 
@@ -215,10 +230,10 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
 
 test('provider product catalog publishes only reviewed products and keeps activation fail-closed', () => {
   assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 130)
-  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 109)
-  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 25)
-  assert.equal(providerProducts.COMING_SOON_PROVIDER_PRODUCTS.length, 84)
-  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 13)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 108)
+  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 99)
+  assert.equal(providerProducts.COMING_SOON_PROVIDER_PRODUCTS.length, 9)
+  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 14)
   assert.equal(providerProducts.RESTRICTED_PROVIDER_PRODUCTS.length, 8)
   assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map((product) => product.productCode)).size, 130)
   assert.partialDeepStrictEqual(
@@ -232,12 +247,11 @@ test('provider product catalog publishes only reviewed products and keeps activa
   )
   assert.equal(
     providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter((product) => product.domain === 'unlock').length,
-    55,
+    54,
   )
   assert.equal(
     providerProducts.AVAILABLE_PROVIDER_PRODUCTS.every((product) =>
-      product.domain === 'imei_check'
-      && product.inputType === 'imei'
+      product.inputType === 'imei'
       && product.priceCents * 10_000 > product.providerCostMicros,
     ),
     true,
@@ -246,7 +260,11 @@ test('provider product catalog publishes only reviewed products and keeps activa
   const paidRows = database.db()
     .prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products')
     .get() as { total: number; active: number }
-  assert.deepEqual(paidRows, { total: 25, active: 25 })
+  assert.deepEqual(paidRows, { total: 99, active: 99 })
+
+  assert.equal(providerProducts.etaMinutesFromLabel('1-10 sec'), 1)
+  assert.equal(providerProducts.etaMinutesFromLabel('10 minutes-1 hour'), 60)
+  assert.equal(providerProducts.etaMinutesFromLabel('Instant to 5 days'), 7_200)
 })
 
 test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate routes', () => {
@@ -260,6 +278,7 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   const servicesHub = readFileSync(join(process.cwd(), 'app/(marketing)/services/page.tsx'), 'utf8')
   const imeiPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/imei-check/page.tsx'), 'utf8')
   const unlockPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/unlock/page.tsx'), 'utf8')
+  const unlockCatalogPage = readFileSync(join(process.cwd(), 'app/(marketing)/services/unlock/catalog/page.tsx'), 'utf8')
   const basicCheckPage = readFileSync(join(process.cwd(), 'app/(marketing)/check/page.tsx'), 'utf8')
   const basicCheckForm = readFileSync(join(process.cwd(), 'components/imei-check-form.tsx'), 'utf8')
 
@@ -278,12 +297,18 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.match(servicesHub, /href="\/services\/imei-check"/)
   assert.match(servicesHub, /href="\/services\/unlock"/)
   assert.doesNotMatch(servicesHub, /<ProductCatalog/)
-  assert.match(imeiPage, /products=\{CUSTOMER_IMEI_CHECK_PRODUCTS\} domain="imei_check"/)
+  assert.match(imeiPage, /listPublicProviderProducts\('imei_check'\)/)
+  assert.match(imeiPage, /domain="imei_check"/)
   assert.doesNotMatch(imeiPage, /CUSTOMER_UNLOCK_PRODUCTS/)
-  assert.match(unlockPage, /products=\{CUSTOMER_UNLOCK_PRODUCTS\} domain="unlock"/)
-  assert.match(unlockPage, /<h1 className="t-display">Unlock Service\.<\/h1>/)
+  assert.doesNotMatch(unlockPage, /<ProductCatalog|<ServiceBrowser|<UnlockServiceCatalog/)
+  assert.match(unlockPage, /unlockPreviewProducts\(listPublicProviderProducts\('unlock'\)\)/)
+  assert.match(unlockPage, /<UnlockDeviceEntry/)
+  assert.match(unlockCatalogPage, /listPublicProviderProducts\('unlock'\)/)
+  assert.match(unlockCatalogPage, /<UnlockServiceCatalog/)
+  assert.ok(unlockCatalogPage.indexOf("redirect('/services/unlock')") < unlockCatalogPage.indexOf("listPublicProviderProducts('unlock')"))
+  assert.match(unlockPage, /<h1[^>]*>Phone unlock services<\/h1>/)
   assert.doesNotMatch(unlockPage, /CUSTOMER_IMEI_CHECK_PRODUCTS/)
-  assert.match(imeiPage, /<h1 className="t-display">Phone Check\.<\/h1>/)
+  assert.match(imeiPage, /<h1[^>]*>IMEI check reports<\/h1>/)
   assert.match(basicCheckPage, /Basic IMEI validation/)
   assert.doesNotMatch(basicCheckPage, /Free IMEI check/i)
   assert.match(basicCheckForm, /Choose a paid Phone Check/)
@@ -297,8 +322,8 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.match(catalog, /customerText\(product\.name\)/)
   assert.match(catalog, /formatUsd\(product\.priceCents\)/)
   assert.match(catalog, /Choose report/)
-  assert.doesNotMatch(catalog, /Estimated delivery/)
-  assert.doesNotMatch(catalog, /product\.etaLabel/)
+  assert.match(catalog, /Estimated delivery/)
+  assert.match(catalog, /product\.etaLabel/)
   assert.doesNotMatch(catalog, /Provider ID/)
   assert.doesNotMatch(catalog, /product\.serviceId/)
   assert.doesNotMatch(catalog, /⭐|🌟|✅|🔍|🔒/u)
@@ -322,8 +347,8 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   assert.match(appStyles, /\.service-hub-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2/s)
   assert.match(appStyles, /\.product-subcategory-list\s*\{[^}]*gap:\s*52px/s)
   assert.match(appStyles, /\.product-card-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3/s)
-  assert.match(appStyles, /\.product-card\s*\{[^}]*gap:\s*14px[^}]*padding:\s*20px/s)
-  assert.match(appStyles, /\.product-card-action\s*\{[^}]*min-height:\s*46px/s)
+  // Card spacing and target sizes are checked in the responsive browser QA;
+  // pinning exact CSS pixels here prevents fluid padding and larger targets.
   assert.match(appStyles, /\.order-review-actions\s*\{[^}]*grid-template-columns:/s)
 })
 
@@ -629,7 +654,11 @@ test('free IMEI checks are repeatable, owner-scoped, and never touch credit', as
   assert.equal(first.status, 'completed')
   assert.equal(first.result?.demo, true)
   assert.equal(first.maskedImei, '49·········7518')
-  assert.equal('imei' in first, false)
+  assert.equal(first.imei, '490154203237518')
+  const encrypted = database.db().prepare('SELECT masked_imei, imei_encrypted FROM imei_checks WHERE id = ?').get(first.id) as { masked_imei: string; imei_encrypted: string }
+  assert.equal(encrypted.masked_imei, '49·········7518')
+  assert.ok(encrypted.imei_encrypted)
+  assert.doesNotMatch(encrypted.imei_encrypted, /490154203237518/)
   assert.notEqual(first.id, repeat.id)
   assert.equal(replay.id, replayAgain.id)
   assert.equal(imeiChecks.getImeiCheck(2, first.id), undefined)
@@ -649,7 +678,9 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     url: process.env.IUNLOCKMOBILE_PROVIDER_URL,
     apiKey: process.env.IUNLOCKMOBILE_PROVIDER_API_KEY,
     dhruKey: process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY,
+    dhruUrl: process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL,
     username: process.env.IUNLOCKMOBILE_PROVIDER_USERNAME,
+    dhruUsername: process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME,
     unlockMap: process.env.IUNLOCKMOBILE_UNLOCK_SERVICE_MAP,
     imeiMap: process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP,
     maintenance: process.env.IUNLOCKMOBILE_MAINTENANCE,
@@ -708,8 +739,9 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     assert.deepEqual(credits.getBalance(alice.id), aliceCredit)
 
     process.env.IUNLOCKMOBILE_PROVIDER_NAME = 'dhru'
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_URL = 'https://provider.example/api/index.php'
     process.env.IUNLOCKMOBILE_PROVIDER_DHRU_KEY = 'dhru-secret-key'
-    process.env.IUNLOCKMOBILE_PROVIDER_USERNAME = 'provider-user'
+    process.env.IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME = 'provider-user'
     process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
       'check:basic': { id: '900', mode: 'dhru' },
     })
@@ -720,27 +752,32 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
 
     let checkPlaced = false
     let orderPlaced = false
-    globalThis.fetch = async (input) => {
+    globalThis.fetch = async (input, init) => {
       const url = new URL(String(input))
-      assert.equal(url.searchParams.get('apiaccesskey'), 'dhru-secret-key')
-      const action = url.searchParams.get('action')
-      if (action === 'placeimeiorder' && url.searchParams.get('service') === '900') {
+      const body = new URLSearchParams(String(init?.body))
+      assert.equal(url.href, 'https://provider.example/api/index.php')
+      assert.equal(init?.method, 'POST')
+      assert.equal(body.get('apiaccesskey'), 'dhru-secret-key')
+      assert.equal(body.get('requestformat'), 'JSON')
+      const action = body.get('action')
+      const parameters = body.get('parameters') ?? ''
+      if (action === 'placeimeiorder' && parameters.includes('<ID>900</ID>')) {
         checkPlaced = true
         return new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'dhru-check-1' }] }), { status: 200 })
       }
-      if (action === 'placeimeiorder' && url.searchParams.get('service') === '901') {
+      if (action === 'placeimeiorder' && parameters.includes('<ID>901</ID>')) {
         orderPlaced = true
         return new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'dhru-order-1' }] }), { status: 200 })
       }
-      if (action === 'getimeiorder' && url.searchParams.get('id') === 'dhru-check-1') {
+      if (action === 'getimeiorder' && parameters.includes('<ID>dhru-check-1</ID>')) {
         return new Response(
-          JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Brand: Apple\\nModel: iPhone 14' }] }),
+          JSON.stringify({ SUCCESS: [{ STATUS: 4, CODE: 'Brand: Apple\\nModel: iPhone 14' }] }),
           { status: 200 },
         )
       }
-      if (action === 'getimeiorder' && url.searchParams.get('id') === 'dhru-order-1') {
+      if (action === 'getimeiorder' && parameters.includes('<ID>dhru-order-1</ID>')) {
         return new Response(
-          JSON.stringify({ SUCCESS: [{ STATUS: 'SUCCESS', REPLY: 'Status: Unlocked\\nPermanent: Yes' }] }),
+          JSON.stringify({ SUCCESS: [{ STATUS: 4, CODE: 'Status: Unlocked\\nPermanent: Yes' }] }),
           { status: 200 },
         )
       }
@@ -801,10 +838,12 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     assert.deepEqual(await providerJobs.pollProviderJobs(), {
       enabled: false,
       ordersSeen: 0,
+      reportsSeen: 0,
       checksSeen: 0,
       completed: 0,
       unavailable: 0,
       processing: 0,
+      manualReview: 0,
       errors: 0,
     })
   } finally {
@@ -818,7 +857,9 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     restore('IUNLOCKMOBILE_PROVIDER_URL', saved.url)
     restore('IUNLOCKMOBILE_PROVIDER_API_KEY', saved.apiKey)
     restore('IUNLOCKMOBILE_PROVIDER_DHRU_KEY', saved.dhruKey)
+    restore('IUNLOCKMOBILE_PROVIDER_DHRU_URL', saved.dhruUrl)
     restore('IUNLOCKMOBILE_PROVIDER_USERNAME', saved.username)
+    restore('IUNLOCKMOBILE_PROVIDER_DHRU_USERNAME', saved.dhruUsername)
     restore('IUNLOCKMOBILE_UNLOCK_SERVICE_MAP', saved.unlockMap)
     restore('IUNLOCKMOBILE_IMEI_SERVICE_MAP', saved.imeiMap)
     restore('IUNLOCKMOBILE_MAINTENANCE', saved.maintenance)
@@ -847,7 +888,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     const freeChecksBefore = imeiChecks.listImeiChecks(alice.id).length
 
     const activeCatalog = paidReports.listPaidReportProducts()
-    assert.equal(activeCatalog.length, 25)
+    assert.equal(activeCatalog.length, 99)
     assert.equal(activeCatalog.every((product) => product.isActive), true)
     assert.equal(activeCatalog.every((product) => !product.providerReady), true)
     const seeded = paidReports.getPaidReportProduct('APPLE_BASIC')
@@ -937,11 +978,15 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(providerCalls, 1)
     assert.equal(paidReports.getPaidReport(1, delivered.order.id), undefined)
 
-    const storedDelivered = JSON.stringify(paidReports.getPaidReport(alice.id, delivered.order.id))
-    assert.equal(storedDelivered.includes('490154203237518'), false)
-    assert.equal(storedDelivered.includes('PAID-RAW-SERIAL-1234'), false)
-    assert.equal(storedDelivered.includes('must never be stored'), false)
-    assert.match(storedDelivered, /iPhone 15 Pro/)
+    const deliveredView = paidReports.getPaidReport(alice.id, delivered.order.id)
+    const storedSummary = JSON.stringify(deliveredView?.report)
+    assert.equal(storedSummary.includes('490154203237518'), false)
+    assert.equal(storedSummary.includes('PAID-RAW-SERIAL-1234'), false)
+    assert.equal(storedSummary.includes('must never be stored'), false)
+    assert.match(storedSummary, /iPhone 15 Pro/)
+    assert.match(deliveredView?.providerCode ?? '', /IMEI: 490154203237518/)
+    assert.match(deliveredView?.providerCode ?? '', /Serial Number: PAID-RAW-SERIAL-1234/)
+    assert.match(deliveredView?.providerCode ?? '', /providerInternalNote: must never be stored/)
 
     const replay = await paidReports.createPaidReport(alice.id, {
       productCode: 'APPLE_BASIC',
@@ -1047,14 +1092,27 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(columns.some((column) => column.name === 'raw_response'), false)
     assert.equal(columns.some((column) => column.name === 'imei_fingerprint'), true)
     assert.equal(columns.some((column) => column.name === 'masked_imei'), true)
+    assert.equal(columns.some((column) => column.name === 'imei_encrypted'), true)
+    assert.equal(columns.some((column) => column.name === 'provider_code_encrypted'), true)
+    assert.equal(columns.some((column) => column.name === 'provider_code_sha256'), true)
 
     const paidRows = connection
-      .prepare('SELECT imei_fingerprint, masked_imei, report_json FROM paid_report_orders')
-      .all() as Array<{ imei_fingerprint: string; masked_imei: string; report_json: string | null }>
+      .prepare('SELECT imei_fingerprint, masked_imei, imei_encrypted, report_json, provider_code_encrypted, provider_code_sha256 FROM paid_report_orders')
+      .all() as Array<{
+        imei_fingerprint: string
+        masked_imei: string
+        imei_encrypted: string | null
+        report_json: string | null
+        provider_code_encrypted: string | null
+        provider_code_sha256: string | null
+      }>
     const persistedText = JSON.stringify(paidRows)
     assert.equal(persistedText.includes('490154203237518'), false)
     assert.equal(persistedText.includes('356938035643809'), false)
     assert.equal(persistedText.includes('paid-report-secret'), false)
+    assert.equal(paidRows.some((row) => Boolean(row.imei_encrypted)), true)
+    assert.equal(paidRows.some((row) => Boolean(row.provider_code_encrypted)), true)
+    assert.equal(paidRows.some((row) => /^[a-f0-9]{64}$/.test(row.provider_code_sha256 ?? '')), true)
 
     const auditRows = connection
       .prepare("SELECT metadata_json FROM provider_events WHERE resource_type = 'paid_imei_report'")
@@ -1081,10 +1139,49 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
   }
 })
 
+test('top-ups accept positive cent amounts without a minimum and settle exactly once', async () => {
+  const user = auth.register('small-topups', 'small-topups@example.test', 'correct-horse-battery-staple')
+  const { parseUsd } = await import('../lib/money')
+  const gateway = payments.GATEWAYS.find((entry) => entry.id === 'bsc-usdt-peg')!
+  const previousFee = gateway.feeBasisPoints
+  gateway.feeBasisPoints = 200
+  let totalCredit = 0
+
+  try {
+    for (const [amount, cents, fee] of [['0.01', 1, 0], ['0.05', 5, 0], ['0.25', 25, 1], ['4.99', 499, 10], ['5.00', 500, 10]] as const) {
+      assert.equal(parseUsd(amount), cents)
+      const invoice = payments.createInvoice(user.id, gateway.id, cents)
+      assert.equal(invoice.credit_amount_cents, cents)
+      assert.equal(invoice.fee_cents, fee)
+      assert.equal(invoice.total_due_cents, cents + fee)
+      assert.equal(payments.createInvoice(user.id, gateway.id, cents).reference, invoice.reference)
+
+      payments.submitPaymentReference(invoice.reference, user.id, `0x${cents.toString(16).padStart(64, '0')}`, '')
+      assert.equal(credits.getBalance(user.id).creditCents, totalCredit)
+      payments.approveInvoice(invoice.reference, user.id)
+      payments.approveInvoice(invoice.reference, user.id)
+      totalCredit += cents
+      assert.equal(credits.getBalance(user.id).creditCents, totalCredit)
+      const effects = database.db().prepare(
+        "SELECT COUNT(*) AS count FROM credit_ledger WHERE user_id = ? AND ref_type = 'invoice' AND ref_id = ? AND type = 'topup'",
+      ).get(user.id, invoice.reference) as { count: number }
+      assert.equal(effects.count, 1)
+    }
+
+    for (const invalid of [0, -1, 0.5, NaN, Infinity, payments.MAX_TOPUP_CENTS + 1, Number.MAX_SAFE_INTEGER + 1]) {
+      assert.throws(() => payments.createInvoice(user.id, gateway.id, invalid), payments.PaymentError)
+    }
+    assert.equal(parseUsd('0.001'), null)
+    assert.equal(payments.createInvoice(user.id, gateway.id, payments.MAX_TOPUP_CENTS).credit_amount_cents, payments.MAX_TOPUP_CENTS)
+  } finally {
+    gateway.feeBasisPoints = previousFee
+  }
+})
+
 test('invoice confirmation is idempotent and writes one invoice ledger effect', () => {
   const user = auth.authenticate('alice', 'correct-horse-battery-staple')
-  const invoice = payments.createInvoice(user.id, 'crypto_networks', 2500)
-  payments.submitPaymentReference(invoice.reference, user.id, 'TX_REFERENCE_123456', 'integration test')
+  const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 2500)
+  payments.submitPaymentReference(invoice.reference, user.id, `0x${'a'.repeat(64)}`, 'integration test')
 
   payments.approveInvoice(invoice.reference, user.id, 'provider-charge-1')
   const afterFirst = credits.getBalance(user.id)
@@ -1254,7 +1351,8 @@ test('only one settlement of an order moves money', async () => {
   ])
 
   assert.equal(a.status, 'delivered')
-  assert.equal(b.status, 'delivered')
+  assert.equal(b.status, 'processing', 'an in-flight poll returns its saved status without a duplicate provider call')
+  assert.equal(orders.getOrder(placed.orderId, user.id)?.status, 'delivered')
   const charges = database
     .db()
     .prepare(
@@ -1507,4 +1605,127 @@ test('a contact message is kept even when it cannot be sent', async () => {
   process.env.IUNLOCKMOBILE_SUPPORT_EMAIL = 'help@example.invalid'
   assert.equal(site.supportEmail(), 'help@example.invalid')
   delete process.env.IUNLOCKMOBILE_SUPPORT_EMAIL
+})
+
+test('every guide is indexable, internally consistent, and links somewhere real', async () => {
+  const articles = await import('../lib/articles')
+  const all = articles.listArticles()
+  assert.ok(all.length >= 3, 'the section is not worth publishing with fewer')
+
+  /* Routes a guide is allowed to link to. A link that 404s is worse than
+     no link at all, and it is the kind of rot nobody notices for months. */
+  const routes = new Set([
+    '/',
+    '/articles',
+    '/check',
+    '/contact',
+    '/services',
+    '/services/imei-check',
+    '/services/unlock',
+    '/user/reports/new',
+    ...all.map((article) => `/articles/${article.slug}`),
+  ])
+
+  const slugs = new Set<string>()
+  const titles = new Set<string>()
+  const descriptions = new Set<string>()
+
+  for (const article of all) {
+    assert.match(article.slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/, `${article.slug} is not a clean slug`)
+    assert.ok(!slugs.has(article.slug), `duplicate slug ${article.slug}`)
+    slugs.add(article.slug)
+
+    /* Two pages with the same title compete with each other, which is the
+       one thing an SEO section must not do to itself. */
+    assert.ok(!titles.has(article.title), `duplicate title ${article.title}`)
+    titles.add(article.title)
+    assert.ok(!descriptions.has(article.description), 'duplicate meta description')
+    descriptions.add(article.description)
+
+    /* The layout appends " — iUnlockMobile", so the budget is what a
+       search result shows minus the suffix it will always carry. */
+    const rendered = `${article.title} — iUnlockMobile`
+    assert.ok(rendered.length <= 60, `${article.slug} renders a ${rendered.length}-char title`)
+    assert.ok(
+      article.description.length >= 110 && article.description.length <= 175,
+      `${article.slug} description is ${article.description.length} chars`,
+    )
+
+    for (const date of [article.published, article.updated]) {
+      assert.match(date, /^\d{4}-\d{2}-\d{2}$/, `${article.slug} has a malformed date`)
+      assert.ok(!Number.isNaN(Date.parse(`${date}T00:00:00Z`)), `${article.slug} date does not parse`)
+    }
+    assert.ok(article.updated >= article.published, `${article.slug} was updated before it existed`)
+
+    const headings = article.blocks.filter((block) => block.kind === 'h2')
+    assert.ok(headings.length >= 3, `${article.slug} has ${headings.length} sections`)
+    const ids = headings.map((block) => (block.kind === 'h2' ? block.id : ''))
+    assert.equal(new Set(ids).size, ids.length, `${article.slug} repeats a heading id`)
+    for (const id of ids) assert.match(id, /^[a-z0-9-]+$/, `${id} is not usable as an anchor`)
+
+    for (const block of article.blocks) {
+      if (block.kind === 'cta') {
+        assert.ok(routes.has(block.href), `${article.slug} links to ${block.href}, which is not a route`)
+      }
+      if (block.kind === 'table') {
+        for (const row of block.rows) {
+          assert.equal(row.length, block.head.length, `${article.slug} has a ragged table row`)
+        }
+      }
+    }
+
+    /* The body has to carry the words the guide is published for. */
+    const words = article.blocks
+      .flatMap((block) => {
+        if (block.kind === 'p' || block.kind === 'note') return [block.text]
+        if (block.kind === 'list') return block.items
+        if (block.kind === 'table') return [...block.head, ...block.rows.flat()]
+        return []
+      })
+      .join(' ')
+      .split(/\s+/).length
+    assert.ok(words >= 350, `${article.slug} is ${words} words — too thin to rank or to help`)
+  }
+
+  /* And the sitemap has to name every one of them, or none of this is
+     discoverable. */
+  const sitemap = (await import('../app/sitemap')).default()
+  const urls = new Set(sitemap.map((entry) => entry.url))
+  for (const article of all) {
+    assert.ok(
+      [...urls].some((url) => url.endsWith(`/articles/${article.slug}`)),
+      `${article.slug} is missing from the sitemap`,
+    )
+  }
+  assert.ok([...urls].some((url) => url.endsWith('/articles')), 'the index is missing from the sitemap')
+})
+
+test('a second process can wait for the writer instead of failing', async () => {
+  const connection = database.db()
+
+  /* The poll timer opens this same file while the app is running. WAL lets
+     it read during a write, but two writers still take turns — and with no
+     busy timeout the one that loses gets SQLITE_BUSY straight away instead
+     of waiting. Five seconds is far longer than any transaction here. */
+  const [{ timeout }] = connection.pragma('busy_timeout') as Array<{ timeout: number }>
+  assert.ok(timeout >= 5_000, `busy_timeout is ${timeout}ms`)
+
+  const [{ journal_mode: journal }] = connection.pragma('journal_mode') as Array<{ journal_mode: string }>
+  assert.equal(journal, 'wal', 'the second process must be able to read during a write')
+
+  /* And the batch poller does nothing at all while no supplier is
+     configured, which is what makes the timer safe to leave running before
+     the provider is turned on. */
+  const summary = await providerJobs.pollProviderJobs(5)
+  assert.deepEqual(summary, {
+    enabled: false,
+    ordersSeen: 0,
+    reportsSeen: 0,
+    checksSeen: 0,
+    completed: 0,
+    unavailable: 0,
+    processing: 0,
+    manualReview: 0,
+    errors: 0,
+  })
 })

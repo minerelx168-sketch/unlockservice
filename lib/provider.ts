@@ -10,8 +10,8 @@ import {
  * Supplier adapter.
  *
  * The application owns order, escrow, and delivery semantics. A supplier only
- * accepts a normalized request and returns an accepted, delivered, or
- * unavailable outcome. The configured adapter supports synchronous provider
+ * accepts a normalized request and returns an accepted, delivered, unavailable
+ * or uncertain outcome. The configured adapter supports synchronous provider
  * APIs and asynchronous DHRU placement/polling without leaking those protocols
  * into the order service.
  */
@@ -45,6 +45,7 @@ export type SupplierResult =
       provider?: SupplierProviderMeta
     }
   | { status: 'unavailable'; orderId: string | null; message: string; provider?: SupplierProviderMeta }
+  | { status: 'uncertain'; orderId: string | null; message: string; provider?: SupplierProviderMeta }
 
 export interface Supplier {
   readonly name: string
@@ -163,13 +164,13 @@ const configuredSupplier: Supplier = {
         provider,
       }
     }
-    return { status: 'unavailable', orderId: outcome.providerId, message: outcome.message, provider }
+    return { status: outcome.retryable ? 'uncertain' : 'unavailable', orderId: outcome.providerId, message: outcome.message, provider }
   },
 
   async poll(orderId, request) {
     const service = unlockProviderService(request.mappingKey)
     if (!service) {
-      return { status: 'unavailable', orderId, message: 'This service is no longer mapped to an active supplier.' }
+      return { status: 'uncertain', orderId, message: 'This service is no longer mapped to an active supplier.' }
     }
     const outcome = await pollProviderRequest(orderId)
     const provider = {
@@ -192,7 +193,7 @@ const configuredSupplier: Supplier = {
       }
     }
     return {
-      status: 'unavailable',
+      status: outcome.retryable ? 'uncertain' : 'unavailable',
       orderId: outcome.providerId ?? orderId,
       message: outcome.message,
       provider,

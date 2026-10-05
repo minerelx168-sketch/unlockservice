@@ -1,8 +1,9 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { SESSION_COOKIE } from './cookie-names'
+import { withContinuation } from './continuation'
 import { db } from './db'
 import { clearAttempts, consumeAttempt } from './rate-limit'
 
@@ -218,7 +219,9 @@ export const currentSession = cache(readSession)
 
 export async function requireSession() {
   const found = await currentSession()
-  if (!found) redirect('/login')
+  if (!found) {
+    redirect(withContinuation('/login', (await headers()).get('x-continuation-path')))
+  }
   return found
 }
 

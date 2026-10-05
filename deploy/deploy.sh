@@ -89,6 +89,8 @@ fi
 # ---- system units -----------------------------------------------------
 say "Installing systemd units and the Caddy site"
 sudo install -m 644 "$APP_DIR/deploy/unlockservice.service" /etc/systemd/system/unlockservice.service
+sudo install -m 644 "$APP_DIR/deploy/unlockservice-poll.service" /etc/systemd/system/unlockservice-poll.service
+sudo install -m 644 "$APP_DIR/deploy/unlockservice-poll.timer" /etc/systemd/system/unlockservice-poll.timer
 if command -v caddy >/dev/null; then
   sudo install -m 644 "$APP_DIR/deploy/caddy.service" /etc/systemd/system/caddy.service
   sudo mkdir -p /etc/caddy
@@ -100,6 +102,10 @@ fi
 sudo systemctl daemon-reload
 sudo systemctl enable --now unlockservice
 sudo systemctl restart unlockservice
+# Inert until a supplier is configured — pollProviderJobs() returns on its
+# first line while the provider is disabled — but running from the day it is,
+# so an order is never left held because the customer closed the tab.
+sudo systemctl enable --now unlockservice-poll.timer
 if command -v caddy >/dev/null; then
   sudo systemctl enable --now caddy
   sudo systemctl reload caddy || sudo systemctl restart caddy

@@ -42,7 +42,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         <div>
           <Link className="link-arrow" href="/user/checks"><span style={{ display: 'inline-flex', transform: 'rotate(180deg)' }}><Icon name="arrowRight" /></span> Back to checks</Link>
           <h1 style={{ marginTop: 16 }}>IMEI check report</h1>
-          <p>{check.maskedImei} · {new Date(check.createdAt).toLocaleString()}</p>
+          <p>{check.imei ?? check.maskedImei} · {new Date(check.createdAt).toLocaleString()}</p>
         </div>
         <span className={check.status === 'completed' ? 'badge badge--success' : 'badge'}>{check.status}</span>
       </div>
@@ -58,18 +58,18 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
           {isProviderReport ? (
             <p className="field-note" role="note">
               <Icon name="shield" strokeWidth={1.9} />
-              <span>Identifiers are masked. Provider results are a point-in-time lookup, not proof of ownership or a guarantee of unlock eligibility.</span>
+              <span>The IMEI is shown only to the signed-in owner. Provider results are a point-in-time lookup, not proof of ownership or a guarantee of unlock eligibility.</span>
             </p>
           ) : null}
           {items.length > 0 ? (
-            <div className="data-table" style={{ marginTop: 20 }}>
+            <dl className="report-details" style={{ marginTop: 20 }}>
               {items.map((item, index) => (
-                <div className="row" key={item.key ?? item.label ?? index}>
-                  <span>{item.label ?? 'Check'}</span>
-                  <b className={item.status === 'passed' ? 'status' : undefined}>{checkValue(item)}</b>
+                <div key={item.key ?? item.label ?? index}>
+                  <dt>{item.label ?? 'Check'}</dt>
+                  <dd className={item.status === 'passed' ? 'status' : undefined}>{checkValue(item)}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           ) : null}
         </section>
 
@@ -92,14 +92,14 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
                 <div className="card-topline">
                   <span className="kicker"><Icon name="device" /> {section.title ?? 'Report details'}</span>
                 </div>
-                <div className="data-table">
+                <dl className="report-details">
                   {sectionItems.map((item, itemIndex) => (
-                    <div className="row" key={item.key ?? item.label ?? itemIndex}>
-                      <span>{item.label ?? 'Detail'}</span>
-                      <b>{item.value ?? 'Not returned'}</b>
+                    <div key={item.key ?? item.label ?? itemIndex}>
+                      <dt>{item.label ?? 'Detail'}</dt>
+                      <dd>{item.value ?? 'Not returned'}</dd>
                     </div>
                   ))}
-                </div>
+                </dl>
               </section>
             )
           })}

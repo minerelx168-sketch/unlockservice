@@ -8,8 +8,8 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 /**
  * SQLite so the whole thing runs with `npm run dev` and nothing to
  * provision. Plain SQL against a schema that keeps the reference's
- * shape — users, orders, invoices, a credit ledger — so moving to
- * Postgres later is a driver swap rather than a redesign.
+ * shape — users, orders, invoices, a credit ledger. A PostgreSQL migration
+ * can preserve the accounting contract but needs new SQL/transaction adapters.
  */
 
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
@@ -122,10 +122,111 @@ CREATE TABLE IF NOT EXISTS invoices (
   idempotency_key    TEXT,
   paid_at            TEXT,
   credited_at        TEXT,
+  payment_route_id   TEXT,
+  payment_network_id TEXT,
+  payment_chain_kind TEXT,
+  payment_chain_id   INTEGER,
+  payment_asset_code TEXT,
+  payment_token_contract TEXT,
+  payment_token_decimals INTEGER,
+  payment_destination_address TEXT,
+  payment_confirmations_required INTEGER,
+  payment_provider_mode TEXT,
   created_at         TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at         TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS invoices_user ON invoices(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS invoice_verifications (
+  invoice_reference    TEXT    PRIMARY KEY REFERENCES invoices(reference) ON DELETE RESTRICT,
+  chain_id             INTEGER NOT NULL,
+  token_contract       TEXT    NOT NULL,
+  token_decimals       INTEGER NOT NULL,
+  destination_address TEXT    NOT NULL,
+  tx_hash              TEXT    NOT NULL COLLATE NOCASE UNIQUE,
+  matched_log_index    INTEGER,
+  matched_amount_raw   TEXT,
+  requested_credit_cents INTEGER,
+  verified_credit_cents INTEGER,
+  receipt_block_number INTEGER,
+  receipt_block_timestamp TEXT,
+  payment_route_id      TEXT,
+  network_id            TEXT,
+  chain_kind            TEXT,
+  asset_code            TEXT,
+  provider_mode         TEXT,
+  confirmations_required INTEGER,
+  status               TEXT    NOT NULL DEFAULT 'submitted',
+  confirmations        INTEGER NOT NULL DEFAULT 0,
+  attempt_count        INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at      TEXT,
+  last_checked_at      TEXT,
+  error_code           TEXT,
+  created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at           TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS invoice_verifications_poll
+  ON invoice_verifications(status, next_attempt_at, updated_at);
+CREATE UNIQUE INDEX IF NOT EXISTS invoice_verifications_transfer
+  ON invoice_verifications(chain_id, tx_hash, matched_log_index)
+  WHERE matched_log_index IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS invoice_verification_events (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  public_id         TEXT    NOT NULL UNIQUE,
+  invoice_reference TEXT    NOT NULL REFERENCES invoices(reference) ON DELETE RESTRICT,
+  admin_user_id     INTEGER REFERENCES users(id) ON DELETE RESTRICT,
+  action            TEXT    NOT NULL,
+  idempotency_key   TEXT    NOT NULL UNIQUE,
+  reason            TEXT,
+  metadata_json     TEXT,
+  created_at        TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS invoice_verification_events_invoice
+  ON invoice_verification_events(invoice_reference, id DESC);
+CREATE TRIGGER IF NOT EXISTS invoice_verification_events_no_update
+  BEFORE UPDATE ON invoice_verification_events
+  BEGIN SELECT RAISE(ABORT, 'invoice verification events are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS invoice_verification_events_no_delete
+  BEFORE DELETE ON invoice_verification_events
+  BEGIN SELECT RAISE(ABORT, 'invoice verification events are append-only'); END;
+
+-- Every token transfer into a receiving wallet, read off the chain by the
+-- payment watcher. A row exists whether or not it found an invoice: the
+-- unmatched ones are the payments a person has to look at.
+CREATE TABLE IF NOT EXISTS chain_transfers (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  route_id          TEXT    NOT NULL,
+  tx_hash           TEXT    NOT NULL COLLATE NOCASE,
+  log_index         INTEGER NOT NULL,
+  block_number      INTEGER,
+  block_time        TEXT    NOT NULL,
+  from_address      TEXT,
+  amount_raw        TEXT    NOT NULL,
+  -- The same amount floored to 1/10,000 of a token: the precision invoice codes use.
+  amount_e4         INTEGER NOT NULL,
+  -- unmatched → matched (attached to an invoice by its code) | dismissed (a person decided)
+  status            TEXT    NOT NULL DEFAULT 'unmatched',
+  invoice_reference TEXT    REFERENCES invoices(reference),
+  note              TEXT,
+  seen_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (route_id, tx_hash, log_index)
+);
+CREATE INDEX IF NOT EXISTS chain_transfers_status ON chain_transfers(status, block_time DESC);
+
+-- How far the watcher has read on each route, and a short lease so the
+-- poll timer and a customer's open invoice never scan the same range at once.
+CREATE TABLE IF NOT EXISTS payment_watch_cursors (
+  route_id      TEXT PRIMARY KEY,
+  last_block    INTEGER,
+  last_time_ms  INTEGER,
+  resume_from_ms INTEGER,
+  lease_until   TEXT,
+  lease_token   TEXT,
+  last_scan_at  TEXT,
+  last_ok_at    TEXT,
+  last_error    TEXT
+);
 
 CREATE TABLE IF NOT EXISTS credit_ledger (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -226,9 +327,10 @@ CREATE TABLE IF NOT EXISTS api_access (
 		  id                      INTEGER PRIMARY KEY AUTOINCREMENT,
 		  user_id                 INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 		  check_type              TEXT    NOT NULL DEFAULT 'basic',
-		  imei_fingerprint        TEXT    NOT NULL,
-		  masked_imei             TEXT    NOT NULL,
-		  status                  TEXT    NOT NULL DEFAULT 'queued',
+			  imei_fingerprint        TEXT    NOT NULL,
+			  masked_imei             TEXT    NOT NULL,
+			  imei_encrypted          TEXT,
+			  status                  TEXT    NOT NULL DEFAULT 'queued',
 		  provider                TEXT    NOT NULL DEFAULT 'local-validation',
 		  provider_check_id       TEXT,
 		  provider_mode           TEXT,
@@ -270,12 +372,15 @@ CREATE TABLE IF NOT EXISTS api_access (
         input_type              TEXT NOT NULL DEFAULT 'imei',
         imei_fingerprint        TEXT NOT NULL,
         masked_imei             TEXT NOT NULL,
+        imei_encrypted          TEXT,
         status                  TEXT NOT NULL DEFAULT 'processing',
         price_cents             INTEGER NOT NULL CHECK (price_cents > 0),
         provider_cost_micros    INTEGER NOT NULL DEFAULT 0 CHECK (provider_cost_micros >= 0),
         source                  TEXT NOT NULL DEFAULT 'website',
         idempotency_key         TEXT,
         report_json             TEXT,
+        provider_code_encrypted TEXT,
+        provider_code_sha256    TEXT,
         provider_order_id       TEXT,
         provider_name           TEXT,
         provider_mode           TEXT,
@@ -293,6 +398,43 @@ CREATE TABLE IF NOT EXISTS api_access (
         ON paid_report_orders(user_id, created_at DESC);
       CREATE INDEX IF NOT EXISTS paid_report_orders_status
         ON paid_report_orders(status, provider_last_polled_at);
+
+      CREATE TABLE IF NOT EXISTS provider_poll_leases (
+        resource_type TEXT NOT NULL,
+        resource_id INTEGER NOT NULL,
+        token TEXT NOT NULL,
+        expires_at INTEGER NOT NULL,
+        PRIMARY KEY (resource_type, resource_id)
+      );
+
+      -- A receipt and its money/status effects commit together. No raw webhook
+      -- payload is retained; the digest detects event-ID reuse with new data.
+      CREATE TABLE IF NOT EXISTS provider_webhook_receipts (
+        provider TEXT NOT NULL,
+        event_id TEXT NOT NULL,
+        payload_sha256 TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY (provider, event_id)
+      );
+
+      -- Durable notification intent: a crash after settlement cannot lose it.
+      CREATE TABLE IF NOT EXISTS order_notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        resource_type TEXT NOT NULL CHECK (resource_type IN ('order', 'paid_imei_report')),
+        resource_id INTEGER NOT NULL,
+        event TEXT NOT NULL CHECK (event IN ('success', 'rejected')),
+        attempts INTEGER NOT NULL DEFAULT 0,
+        available_at INTEGER NOT NULL DEFAULT 0,
+        lease_token TEXT,
+        lease_until INTEGER NOT NULL DEFAULT 0,
+        sent_at TEXT,
+        last_error TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE (resource_type, resource_id, event)
+      );
+      CREATE INDEX IF NOT EXISTS order_notifications_pending
+        ON order_notifications(available_at, lease_until) WHERE sent_at IS NULL;
 
 					CREATE TABLE IF NOT EXISTS provider_events (
 				  id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -358,6 +500,7 @@ export function db(): Database.Database {
   const connection = new Database(DB_PATH)
   connection.pragma('journal_mode = WAL')
   connection.pragma('foreign_keys = ON')
+  connection.pragma('busy_timeout = 5000')
 	  connection.exec(SCHEMA)
 		  migrate(connection)
 			  seedCatalog(connection)
@@ -404,6 +547,21 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'invoices', 'idempotency_key TEXT')
     addColumn(connection, 'invoices', 'paid_at TEXT')
     addColumn(connection, 'invoices', 'credited_at TEXT')
+    addColumn(connection, 'invoices', 'payment_route_id TEXT')
+    addColumn(connection, 'invoices', 'payment_network_id TEXT')
+    addColumn(connection, 'invoices', 'payment_chain_kind TEXT')
+    addColumn(connection, 'invoices', 'payment_chain_id INTEGER')
+    addColumn(connection, 'invoices', 'payment_asset_code TEXT')
+    addColumn(connection, 'invoices', 'payment_token_contract TEXT')
+    addColumn(connection, 'invoices', 'payment_token_decimals INTEGER')
+    addColumn(connection, 'invoices', 'payment_destination_address TEXT')
+    addColumn(connection, 'invoices', 'payment_confirmations_required INTEGER')
+    addColumn(connection, 'invoices', 'payment_provider_mode TEXT')
+    // The exact token amount to send, in 1/10,000 of a token. Its last two
+    // digits are the invoice's code, which is how the watcher ties a transfer
+    // to an invoice without the customer pasting anything. Null on invoices
+    // created before codes existed; those keep the paste-only flow.
+    addColumn(connection, 'invoices', 'payment_amount_e4 INTEGER')
     addColumn(connection, 'orders', 'provider_name TEXT')
     addColumn(connection, 'orders', 'provider_mode TEXT')
     addColumn(connection, 'orders', 'provider_service_id TEXT')
@@ -415,7 +573,20 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'imei_checks', 'provider_last_polled_at TEXT')
     addColumn(connection, 'imei_checks', 'provider_attempts INTEGER NOT NULL DEFAULT 0')
     addColumn(connection, 'imei_checks', 'provider_error_code TEXT')
+    addColumn(connection, 'imei_checks', 'imei_encrypted TEXT')
     addColumn(connection, 'orders', 'idempotency_key TEXT')
+    addColumn(connection, 'paid_report_orders', 'provider_code_encrypted TEXT')
+    addColumn(connection, 'paid_report_orders', 'provider_code_sha256 TEXT')
+    addColumn(connection, 'paid_report_orders', 'imei_encrypted TEXT')
+    addColumn(connection, 'invoice_verifications', 'receipt_block_timestamp TEXT')
+    addColumn(connection, 'invoice_verifications', 'requested_credit_cents INTEGER')
+    addColumn(connection, 'invoice_verifications', 'verified_credit_cents INTEGER')
+    addColumn(connection, 'invoice_verifications', 'payment_route_id TEXT')
+    addColumn(connection, 'invoice_verifications', 'network_id TEXT')
+    addColumn(connection, 'invoice_verifications', 'chain_kind TEXT')
+    addColumn(connection, 'invoice_verifications', 'asset_code TEXT')
+    addColumn(connection, 'invoice_verifications', 'provider_mode TEXT')
+    addColumn(connection, 'invoice_verifications', 'confirmations_required INTEGER')
 
     if (!migrationApplied(connection, '2026-08-imeihub-backend-v1')) {
 
@@ -573,8 +744,69 @@ function migrate(connection: Database.Database) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-imei-reports-v1')
     }
 
+    if (!migrationApplied(connection, '2026-09-provider-code-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-provider-code-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-paid-report-imei-encryption-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-paid-report-imei-encryption-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-imei-check-imei-encryption-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-imei-check-imei-encryption-v1')
+    }
+
     if (!migrationApplied(connection, '2026-09-admin-credit-adjustments-v1')) {
       connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-admin-credit-adjustments-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-bscscan-invoice-verification-v1')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-bscscan-invoice-verification-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-bscscan-invoice-verification-v2')) {
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-bscscan-invoice-verification-v2')
+    }
+
+    if (!migrationApplied(connection, '2026-09-usdt-verified-amount-v1')) {
+      connection.prepare(
+        `UPDATE invoice_verifications
+            SET requested_credit_cents = COALESCE(
+              requested_credit_cents,
+              (SELECT credit_amount_cents FROM invoices WHERE reference = invoice_reference)
+            )
+          WHERE requested_credit_cents IS NULL`,
+      ).run()
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-usdt-verified-amount-v1')
+    }
+
+    if (!migrationApplied(connection, '2026-09-multichain-topup-v1')) {
+      connection.prepare(
+        `UPDATE invoice_verifications
+            SET payment_route_id = COALESCE(payment_route_id, 'bsc-usdt-peg'),
+                network_id = COALESCE(network_id, 'bsc-mainnet'),
+                chain_kind = COALESCE(chain_kind, 'evm'),
+                asset_code = COALESCE(asset_code, 'BSC-USD'),
+                provider_mode = COALESCE(provider_mode, 'bnb_rpc'),
+                confirmations_required = COALESCE(confirmations_required, 15)
+          WHERE chain_id = 56
+            AND lower(token_contract) = '0x55d398326f99059ff775485246999027b3197955'`,
+      ).run()
+      connection.prepare(
+        `UPDATE invoices
+            SET payment_route_id = COALESCE(payment_route_id, (SELECT payment_route_id FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_network_id = COALESCE(payment_network_id, (SELECT network_id FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_chain_kind = COALESCE(payment_chain_kind, (SELECT chain_kind FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_chain_id = COALESCE(payment_chain_id, (SELECT chain_id FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_asset_code = COALESCE(payment_asset_code, (SELECT asset_code FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_token_contract = COALESCE(payment_token_contract, (SELECT token_contract FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_token_decimals = COALESCE(payment_token_decimals, (SELECT token_decimals FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_destination_address = COALESCE(payment_destination_address, (SELECT destination_address FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_confirmations_required = COALESCE(payment_confirmations_required, (SELECT confirmations_required FROM invoice_verifications WHERE invoice_reference = invoices.reference)),
+                payment_provider_mode = COALESCE(payment_provider_mode, (SELECT provider_mode FROM invoice_verifications WHERE invoice_reference = invoices.reference))
+          WHERE EXISTS (SELECT 1 FROM invoice_verifications WHERE invoice_reference = invoices.reference)`,
+      ).run()
+      connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run('2026-09-multichain-topup-v1')
     }
 
     connection.exec(`
@@ -582,6 +814,11 @@ function migrate(connection: Database.Database) {
         ON invoices(idempotency_key) WHERE idempotency_key IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS invoices_provider_charge
         ON invoices(provider, provider_charge_id) WHERE provider_charge_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS invoice_verifications_tx_hash
+        ON invoice_verifications(tx_hash COLLATE NOCASE);
+      CREATE UNIQUE INDEX IF NOT EXISTS invoice_verifications_transfer
+        ON invoice_verifications(chain_id, tx_hash, matched_log_index)
+        WHERE matched_log_index IS NOT NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS imei_checks_idempotency
         ON imei_checks(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
@@ -594,6 +831,10 @@ function migrate(connection: Database.Database) {
       CREATE UNIQUE INDEX IF NOT EXISTS paid_report_orders_idempotency
         ON paid_report_orders(user_id, idempotency_key)
         WHERE idempotency_key IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS orders_provider_reference
+        ON orders(provider_name, provider_order_id) WHERE provider_order_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS paid_reports_provider_reference
+        ON paid_report_orders(provider_name, provider_order_id) WHERE provider_order_id IS NOT NULL;
     `)
   })()
 }
@@ -672,7 +913,14 @@ function seedPaidReportCatalog(connection: Database.Database) {
 }
 
 function applyProviderProductCatalogRollout(connection: Database.Database) {
-  const version = '2026-09-provider-product-catalog-v2'
+  // Preserve the historical marker on fresh databases. Existing production
+  // already has v2; changing or reusing that ID would make migration state lie.
+  const previousVersion = '2026-09-provider-product-catalog-v2'
+  if (!migrationApplied(connection, previousVersion)) {
+    connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run(previousVersion)
+  }
+
+  const version = '2026-09-provider-product-catalog-v3-strict-rollout'
   if (migrationApplied(connection, version)) return
 
   connection.transaction(() => {

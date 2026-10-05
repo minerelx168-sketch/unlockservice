@@ -16,6 +16,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  scroll-padding-top: 96px;
 }
 
 body {
@@ -23,7 +24,7 @@ body {
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 16.5px;
+  font-size: 1.03125rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -123,6 +124,7 @@ h4 {
   font-family: var(--font-display);
   color: var(--ink-strong);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Balance the section heads, but never the hero — its line break is set by
@@ -143,35 +145,35 @@ h4 {
    service is and what you get before paying, and at that length 68 ran to
    four lines and pushed the paragraph under it off the first screen. */
 .t-hero {
-  font-size: clamp(34px, 4.4vw, 58px);
+  font-size: clamp(2.125rem, 4.4vw, 3.625rem);
   line-height: 1.06;
   letter-spacing: -0.03em;
   font-weight: 700;
 }
 
 .t-display {
-  font-size: clamp(34px, 4.9vw, 62px);
+  font-size: clamp(2.125rem, 4.9vw, 3.875rem);
   line-height: 1.08;
   letter-spacing: -0.028em;
   font-weight: 640;
 }
 
 .t-section {
-  font-size: clamp(30px, 4.1vw, 50px);
+  font-size: clamp(1.875rem, 4.1vw, 3.125rem);
   line-height: 1.14;
   letter-spacing: -0.024em;
   font-weight: 680;
 }
 
 .t-card {
-  font-size: 20px;
+  font-size: 1.25rem;
   line-height: 1.4;
   letter-spacing: -0.012em;
   font-weight: 660;
 }
 
 .t-lead {
-  font-size: 19px;
+  font-size: 1.1875rem;
   line-height: 1.65;
   letter-spacing: -0.004em;
   color: var(--muted);
@@ -182,7 +184,7 @@ h4 {
 }
 
 .t-body {
-  font-size: 16.5px;
+  font-size: 1.03125rem;
   line-height: 1.7;
   color: var(--ink);
   margin: 0;
@@ -191,17 +193,15 @@ h4 {
 /* 15px is the floor for anything a customer has to read. Below that the
    line is a label, not a sentence. */
 .t-small {
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.7;
   color: var(--muted);
   margin: 0;
 }
 
-/* An all-caps 9px line at 0.14em was decoration that happened to contain
-   words. Eleven pixels and a little less tracking makes it readable
-   without making it loud. */
+/* Supporting labels follow the browser's text size preference too. */
 .t-micro {
-  font-size: 11px;
+  font-size: 0.75rem;
   line-height: 1.6;
   font-weight: 650;
   letter-spacing: 0.1em;
@@ -265,6 +265,7 @@ h4 {
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
 }

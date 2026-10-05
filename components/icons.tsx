@@ -53,6 +53,12 @@ const PATHS = {
       <path d="M14 4v5h4" />
     </>
   ),
+  mail: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="3" />
+      <path d="m4 7 8 6 8-6" />
+    </>
+  ),
   menu: (
     <>
       <path d="M4 7h16" />

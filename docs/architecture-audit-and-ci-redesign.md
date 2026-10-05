@@ -552,3 +552,27 @@ rate limit 5 ครั้ง/ชั่วโมงต่ออีเมล อ�
 เพิ่มเติมจาก `DEPLOY_HOST` — ตอนนี้ยังไม่ได้ตั้ง จึง **merge เข้า branch ได้โดยไม่ขึ้น production**
 ตั้งค่าที่ Settings → Secrets and variables → Actions → Variables เมื่อพร้อม deploy
 (หรือสั่ง workflow_dispatch จากแท็บ Actions ซึ่งผ่านสวิตช์ตัวเดียวกัน)
+
+## 15. Backend review รอบที่สอง (Place order · Webhook · Security · Admin credit)
+
+รีวิวรอบนี้ทำบน `main` ซึ่งเดินหน้าไปแล้ว 6 commit จาก branch deploy — งานของ Codex
+(`3a56759` signed webhooks + notification delivery, `f0fa6c7` polling reliability) ครอบคลุม
+ประเด็น webhook และ `busy_timeout` ไปแล้ว จึงเหลือสองเรื่องที่ยังไม่มีใครแตะ
+
+### แก้ในรอบนี้
+
+| เรื่อง | เดิม | ตอนนี้ |
+| --- | --- | --- |
+| ปุ่ม admin credit ยืนยันด้วย `window.confirm()` | เบราว์เซอร์ที่บล็อก dialog ทำให้ปุ่ม**เงียบสนิท** — ไม่มี request ไม่มี error ไม่มีอะไรให้รายงาน | ขั้นยืนยันอยู่ในหน้า (`.admin-confirm`): กด "Add credit" → panel สรุปยอดก่อน/หลัง → "Yes, record it" |
+| ไม่มีอะไรตามเก็บ order ที่ค้าง (F-B22) | ลูกค้าปิดเบราว์เซอร์ → ไม่มีใคร poll → order ค้าง `processing` เงินค้าง hold | `deploy/unlockservice-poll.timer` ทุก 2 นาที เรียก `npm run provider:poll` |
+
+timer ปลอดภัยที่จะเปิดทิ้งไว้ก่อน provider พร้อม เพราะ `pollProviderJobs()` return ทันที
+เมื่อยังไม่มี supplier — และหยิบเฉพาะแถว `provider_mode = 'dhru'` เพราะโหมด `sync` จบในคำขอเดียวอยู่แล้ว
+
+### ยังเปิดอยู่ (จาก review รอบนี้)
+
+| ID | ประเด็น | ข้อเสนอ |
+| --- | --- | --- |
+| F-B33 | `orders.imei` เก็บ IMEI ดิบ ขณะที่ `imei_checks` / `paid_report_orders` เก็บแค่ fingerprint + masked | unlock ต้องใช้เลขจริงตอนยื่นกับ network — แต่ไม่ต้องเก็บถาวรหลัง settle เสนอ mask ทิ้งตอน delivered/unavailable พร้อมเขียน retention policy |
+| F-B34 | idempotency key ที่ถูกใช้ซ้ำกับ order คนละตัว คืน order เดิมเงียบ ๆ | ทำแบบเดียวกับฝั่ง admin: เทียบพารามิเตอร์ ถ้าไม่ตรงให้โยน `idempotency_conflict` (409) |
+| F-B35 | supplier call อยู่ใน request cycle หลัง hold | รูปแบบที่ถูกคือ outbox: commit แถว + hold → worker ยิง supplier → retry ได้ timer กู้เคสที่ค้างแล้วได้ แต่ไม่ได้กันไม่ให้ค้าง |
