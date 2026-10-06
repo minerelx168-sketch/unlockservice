@@ -58,7 +58,7 @@ function TransferActions({ csrfToken, item }: { csrfToken: string; item: Unmatch
       }
       setSuccess(body.replayed ? 'Decision already recorded.' : body.status === 'credited'
         ? 'Credit settled after independent on-chain verification.'
-        : body.status === 'review' ? 'Transfer associated; finish review in Payment verification queue above.'
+        : body.status === 'review' ? 'Transfer associated, but no credit added. Check the owner, then use Confirm manual payment & credit in the Payment verification queue above.'
           : 'Transfer closed without changing credit.')
       router.refresh()
     } catch {
@@ -119,7 +119,7 @@ function TransferActions({ csrfToken, item }: { csrfToken: string; item: Unmatch
         </div>
       ) : (
         <div className="admin-invoice-actions">
-          <button className="button button--primary" type="button" disabled={!invoiceReference || reason.trim().length < 8 || busy} onClick={() => choose('confirm')}>Confirm</button>
+          <button className="button button--primary" type="button" disabled={!invoiceReference || reason.trim().length < 8 || busy} onClick={() => choose('confirm')}>Verify &amp; associate</button>
           <button className="button button--quiet" type="button" disabled={reason.trim().length < 8 || busy} onClick={() => choose('dismiss')}>Dismiss</button>
           <button className="button button--quiet" type="button" disabled={reason.trim().length < 8 || busy} onClick={() => choose('reject')}>Reject</button>
         </div>

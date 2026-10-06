@@ -146,15 +146,12 @@ function releaseLease(routeId: string, token: string, error: string | null) {
 
 /* ---- recording and matching --------------------------------------------- */
 
-/** Stores a transfer once. Below-floor transfers require one eligible coded invoice. */
+/** Stores a transfer once. Below-floor transfers need a plausible open request; a changed code never auto-credits. */
 function recordTransfer(route: PaymentRouteConfig, transfer: IncomingTransfer): number | null {
   const amountE4 = rawToE4(transfer.rawAmount, route.tokenDecimals)
   if (amountE4 === null || amountE4 <= 0) return null
-  if (amountE4 < DUST_FLOOR_E4 && codeCandidates({
-    route_id: route.id,
-    amount_e4: amountE4,
-    block_time: transfer.blockTimestamp,
-  }).length !== 1) return null
+  const candidate = { route_id: route.id, amount_e4: amountE4, block_time: transfer.blockTimestamp }
+  if (amountE4 < DUST_FLOOR_E4 && feeShortfallCandidates(candidate).length === 0) return null
   const result = db()
     .prepare(
       `INSERT INTO chain_transfers
@@ -185,6 +182,24 @@ type CodedCandidate = { reference: string; payment_amount_e4: number; total_due_
 function withinLowValueShortfall(invoice: CodedCandidate, receivedE4: number): boolean {
   return carriesInvoiceCode(invoice, receivedE4)
     && receivedE4 >= invoice.payment_amount_e4 - shortfallToleranceCents(invoice.total_due_cents) * 100
+}
+
+/** A short on-chain amount may be due to an exchange withdrawal fee, not a chain gas deduction.
+ * This is a list for human review and ambiguity checks, NEVER an ownership proof. */
+function feeShortfallCandidates(transfer: Pick<ChainTransferRow, 'route_id' | 'amount_e4' | 'block_time'>): CodedCandidate[] {
+  return (
+    db().prepare(
+      `SELECT reference, payment_amount_e4, total_due_cents FROM invoices
+        WHERE payment_route_id = ? AND status = 'pending' AND payment_reference IS NULL
+          AND payment_amount_e4 IS NOT NULL
+          AND payment_amount_e4 BETWEEN ? AND ?
+          AND julianday(created_at) < julianday(?)
+          AND julianday(created_at) >= julianday(?) - ?`,
+    ).all(
+      transfer.route_id, transfer.amount_e4, transfer.amount_e4 + 10_000,
+      transfer.block_time, transfer.block_time, INVOICE_TTL_DAYS,
+    ) as CodedCandidate[]
+  ).filter((invoice) => transfer.amount_e4 >= invoice.payment_amount_e4 - shortfallToleranceCents(invoice.total_due_cents) * 100)
 }
 
 function codeCandidates(transfer: Pick<ChainTransferRow, 'route_id' | 'amount_e4' | 'block_time'>): CodedCandidate[] {
@@ -265,14 +280,25 @@ export function matchRecordedTransfers(routeId?: string): string[] {
       }
       const candidates = codeCandidates(transfer)
       if (candidates.length === 0) {
-        // An invoice created in the future cannot own a past transfer.
-        // Annotate once for human review instead of rechecking thousands of
-        // old unmatched rows on every subsequent TronGrid page.
-        noteTransfer(transfer.id, 'No eligible open payment request — manual reconciliation required.')
+        // A withdrawal fee can change the last two digits of a coded amount.
+        // A plausible nearby invoice is not proof of ownership: only an
+        // administrator with independent customer evidence may associate it.
+        noteTransfer(transfer.id, feeShortfallCandidates(transfer).length
+          ? 'Possible withdrawal-fee shortfall changed the code — verify customer ownership before manual confirmation.'
+          : 'No eligible open payment request — manual reconciliation required.')
         continue
       }
       if (candidates.length > 1) {
         noteTransfer(transfer.id, `Code matches ${candidates.length} open payment requests — needs a person.`)
+        continue
+      }
+      // For exceptional below-$1 deposits, another open request might have
+      // sent the same net amount after a fractional fee. Hold that ambiguous
+      // low-value exception for the admin; do not change the normal coded
+      // transfer path for standard-sized payments with many open invoices.
+      if (transfer.amount_e4 < DUST_FLOOR_E4
+        && feeShortfallCandidates(transfer).some((candidate) => candidate.reference !== candidates[0].reference)) {
+        noteTransfer(transfer.id, 'Net amount could belong to another request after withdrawal fees — manual owner check required.')
         continue
       }
       const reference = candidates[0].reference
@@ -305,9 +331,9 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
   const snapshot = snapshotOf(route)
   const startedAt = Date.now()
   const safeHead = await evmFinalizedBlock(snapshot)
-  // Only fetch a below-$1 block when the code and amount could belong to an
-  // open request. A final time-bound query in recordTransfer rejects old/spam
-  // transfers, and receipt verification still decides whether to credit.
+  // Only fetch a below-$1 block when its net amount could belong to an open
+  // request within the shortfall cap. A changed code goes to the admin queue;
+  // the later time check rejects unrelated dust before it is recorded.
   const lowInvoices = db().prepare(
     `SELECT reference, payment_amount_e4, total_due_cents FROM invoices
       WHERE payment_route_id = ? AND status = 'pending' AND payment_reference IS NULL
@@ -316,7 +342,8 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
   const belowFloorCandidate = (rawAmount: bigint): boolean => {
     const receivedE4 = rawToE4(rawAmount, route.tokenDecimals)
     return receivedE4 !== null && receivedE4 > 0 && receivedE4 < DUST_FLOOR_E4
-      && lowInvoices.some((invoice) => withinLowValueShortfall(invoice, receivedE4))
+      && lowInvoices.some((invoice) => receivedE4 <= invoice.payment_amount_e4
+        && receivedE4 >= invoice.payment_amount_e4 - shortfallToleranceCents(invoice.total_due_cents) * 100)
   }
   let last = cursor.last_block ?? Math.max(0, safeHead - FIRST_SCAN_LOOKBACK_BLOCKS)
   let next = cursor.last_block === null ? last + 1 : Math.max(0, last + 1 - EVM_OVERLAP_BLOCKS)

@@ -136,8 +136,8 @@ export default async function InvoicePage({
                       <>
                         <CodedAmount amount={codedAmount} asset={gateway.asset} />
                         <p className="coded-amount-note">
-                          The last two digits, <strong>{code}</strong>, are this request&rsquo;s code. Send the amount exactly as shown.
-                          {!watched ? ' Automatic detection is temporarily unavailable; after sending, paste your transaction ID below for manual verification.' : ' We can recognise the payment without a transaction ID.'}
+                          The last two digits, <strong>{code}</strong>, are this request&rsquo;s code. Check the amount the recipient will receive after any exchange withdrawal fee.
+                          {!watched ? ' Automatic detection is temporarily unavailable; after sending, paste your transaction ID below for manual verification.' : ' Automatic detection needs the on-chain amount to retain these two digits. If the fee changes them, paste your transaction ID below for administrator review; do not send twice.'}
                         </p>
                       </>
                     ) : (
@@ -166,7 +166,7 @@ export default async function InvoicePage({
                         Send only {gateway.asset} on {gateway.network} to this address. The token contract and network must match this request.
                         {coded
                           ? tolerance > 0
-                            ? ` If your exchange takes its withdrawal fee out of the amount, up to ${formatUsd(tolerance)} short still counts in full.`
+                            ? ` If your exchange deducts a withdrawal fee, a shortfall of up to ${formatUsd(tolerance)} may credit the full request only when the on-chain amount keeps this request's code. Otherwise a person must verify the payment; manual credit uses the verified amount.`
                             : ''
                           : ' Credit is based on the verified on-chain amount; amounts that cannot be represented exactly in cents require manual review.'}
                         {' '}Blockchain transfers cannot be reversed.

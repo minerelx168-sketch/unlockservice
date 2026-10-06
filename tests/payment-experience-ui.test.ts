@@ -56,6 +56,24 @@ test('uncoded legacy invoice explains manual-only status and safe way to request
   assert.doesNotMatch(page, /Send supported USDT, then paste your transaction hash/)
 })
 
+test('fractional withdrawal fees never imply automatic credit without the invoice code', () => {
+  const invoice = read('app/(app)/user/invoice/[reference]/page.tsx')
+  const watcher = read('lib/payment-watcher.ts')
+  const panel = read('app/(app)/admin/page.tsx')
+  const association = read('components/admin-unmatched-transfers.tsx')
+  const approval = read('components/admin-invoice-review.tsx')
+  assert.match(invoice, /amount the recipient will receive after any exchange withdrawal fee/)
+  assert.match(invoice, /If the fee changes them, paste your transaction ID below for administrator review/)
+  assert.match(invoice, /manual credit uses the verified amount/)
+  assert.match(watcher, /feeShortfallCandidates\(candidate\)/)
+  assert.match(watcher, /another request after withdrawal fees/)
+  assert.match(panel, /Unmatched transfers — manual payment check/)
+  assert.match(association, /Verify &amp; associate/)
+  assert.match(approval, /Confirm manual payment &amp; credit/)
+  assert.match(approval, /\/api\/admin\/invoice-verifications/)
+  assert.doesNotMatch(invoice, /short still counts in full/)
+})
+
 test('bounded payment reconciliation runs inside the existing provider poll entrypoint', () => {
   const script = read('scripts/poll-provider-jobs.ts')
   assert.match(script, /pollInvoiceVerifications/)

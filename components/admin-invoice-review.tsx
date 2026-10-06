@@ -144,13 +144,13 @@ function ReviewCard({ item, csrfToken }: { item: InvoiceReviewItem; csrfToken: s
           <p>
             <strong>
               {decision === 'approve'
-                ? `Approve ${formatUsd(approvalCreditCents)} credit for ${item.username}?`
+                ? `Confirm manual payment and add ${formatUsd(approvalCreditCents)} verified credit for ${item.username}?`
                 : `Reject payment request for ${item.username}?`}
             </strong>
           </p>
           <p className="t-small">
             {decision === 'approve'
-              ? 'Approval writes one top-up ledger effect using the verified amount when available. Confirm contract, recipient, amount and finality independently.'
+              ? 'After checking customer ownership, this server rereads the receipt and adds exactly one verified on-chain credit. A nearby amount alone is not proof of payment.'
               : 'Rejection closes this request without changing the customer balance.'}
           </p>
           <div className="admin-confirm-actions">
@@ -160,14 +160,14 @@ function ReviewCard({ item, csrfToken }: { item: InvoiceReviewItem; csrfToken: s
               disabled={!validReason || busy || (decision === 'approve' && !canApprove)}
               onClick={submit}
             >
-              {busy ? 'Recording…' : `Yes, ${decision} request`}
+              {busy ? 'Recording…' : decision === 'approve' ? 'Yes, confirm manual payment' : 'Yes, reject request'}
             </button>
             <button className="button button--quiet" type="button" disabled={busy} onClick={() => setDecision(null)}>Cancel</button>
           </div>
         </div>
       ) : (
         <div className="admin-invoice-actions">
-          <button className="button button--primary" type="button" disabled={!validReason || !canApprove || busy} onClick={() => choose('approve')}>Approve credit</button>
+          <button className="button button--primary" type="button" disabled={!validReason || !canApprove || busy} onClick={() => choose('approve')}>Confirm manual payment &amp; credit</button>
           <button className="button button--quiet" type="button" disabled={!validReason || busy} onClick={() => choose('reject')}>Reject request</button>
         </div>
       )}

@@ -92,11 +92,11 @@ export default async function AdminPage() {
 
       <div style={{ height: 22 }} />
 
-      <section className="panel admin-invoice-review-panel">
+      <section className="panel admin-invoice-review-panel" id="payment-verification">
         <header>
           <div>
             <h2>Payment verification queue</h2>
-            <p className="t-small">Automatic verification is the default. Approve only with independent on-chain evidence; every decision is permanent and audited.</p>
+            <p className="t-small">For manual payments, confirm customer ownership independently, then use Confirm manual payment &amp; credit below. The server rereads the chain receipt, applies only verified credit once, and audits the decision.</p>
           </div>
           <span>{invoiceReviews.length} awaiting decision</span>
         </header>
@@ -110,10 +110,11 @@ export default async function AdminPage() {
       <section className="panel">
         <header>
           <div>
-            <h2>Transfers with no payment request</h2>
+            <h2>Unmatched transfers — manual payment check</h2>
             <p className="t-small">
-              These transfers have no unambiguous payment code. Confirm a nearby request only after checking customer ownership:
-              the server rereads the receipt, and uncoded transfers still require approval in the verification queue above.
+              Exchange withdrawal fees can change an invoice code, including on deposits below $1. A nearby amount is never proof of the payer.
+              Verify customer ownership first, then use Verify &amp; associate to reread the receipt. For code-changed payments,
+              credit is added only after the separate Confirm manual payment &amp; credit action in the verification queue above.
               Reject or Dismiss closes the transfer without a refund or credit. If no payment request exists, investigate
               independently before using Adjust user credit, then Dismiss with the adjustment reference.
             </p>

@@ -371,6 +371,78 @@ test('a $1 TRC-20 transfer below the dust floor after a small withdrawal fee mat
   assert.equal(credits.getBalance(user.id).creditCents, 100)
 })
 
+for (const routeId of ['bsc-usdt-peg', 'usdt-trc20'] as const) {
+  test(`${routeId} fractional exchange fee changes the code: queued below $1, manual proof then one verified credit`, async () => {
+    const decisions = await import('../lib/admin-payment-transfers')
+    const admin = newUser()
+    database.db().prepare("UPDATE users SET account_type='admin' WHERE id=?").run(admin.id)
+    const customer = newUser()
+    const invoice = request(customer.id, routeId, 100)
+    const netE4 = invoice.payment_amount_e4! - 100 - codes.paymentCode(invoice.payment_amount_e4!)
+    assert.equal(netE4, 9_900, 'a fractional fee changes the code to 00')
+    const tx = routeId === 'usdt-trc20' ? sendTron(tronRaw(netE4)) : sendBsc(bscRaw(netE4))
+    mine(20)
+    await scan()
+    assert.equal(payments.getInvoice(invoice.reference, customer.id)!.status, 'pending')
+    assert.equal(credits.getBalance(customer.id).creditCents, 0)
+    const transfer = watcher.unmatchedTransfers().rows.find((row) => row.tx_hash === tx)
+    assert.ok(transfer, 'fractional-fee transfer is visible to the administrator')
+    assert.ok(transfer.candidates.some((candidate) => candidate.reference === invoice.reference))
+    assert.match(transfer.note ?? '', /withdrawal-fee shortfall/)
+
+    const attach = { transferId: transfer.id, invoiceReference: invoice.reference, decision: 'confirm' as const,
+      reason: 'Customer ownership independently checked against this final receipt.', idempotencyKey: `fractional-associate-${routeId}` }
+    await assert.rejects(decisions.decideUnmatchedTransfer(customer.id, attach), /Administrator access/)
+    assert.equal((await decisions.decideUnmatchedTransfer(admin.id, attach)).status, 'review')
+    assert.equal(credits.getBalance(customer.id).creditCents, 0, 'association alone never credits')
+    assert.equal(verification.getInvoiceVerification(invoice.reference, customer.id)?.error_code, 'amount_without_invoice_code')
+    const approve = { invoiceReference: invoice.reference, decision: 'approve' as const,
+      reason: 'Receipt finalized and customer ownership independently established.', idempotencyKey: `fractional-approve-${routeId}` }
+    assert.equal((await verification.decideInvoiceVerification(admin.id, approve)).replayed, false)
+    assert.equal(credits.getBalance(customer.id).creditCents, 99, 'manual credit is the verified net, not an assumed full dollar')
+    assert.equal((await verification.decideInvoiceVerification(admin.id, approve)).replayed, true)
+    await scan()
+    assert.equal(credits.getBalance(customer.id).creditCents, 99)
+    const effect = database.db().prepare("SELECT COUNT(*) AS n FROM credit_ledger WHERE ref_type='invoice' AND ref_id=? AND type='topup'")
+      .get(invoice.reference) as { n: number }
+    assert.equal(effect.n, 1)
+  })
+}
+
+test('changed-code dust outside the shortfall cap is dropped before recording', async () => {
+  const customer = newUser()
+  const invoice = request(customer.id, 'bsc-usdt-peg', 100)
+  const outside = sendBsc(bscRaw(invoice.payment_amount_e4! - 500))
+  mine()
+  await scan()
+  assert.equal(payments.getInvoice(invoice.reference, customer.id)?.status, 'pending')
+  assert.equal((database.db().prepare('SELECT COUNT(*) AS n FROM chain_transfers WHERE tx_hash=?').get(outside) as { n: number }).n, 0)
+  database.db().prepare("UPDATE invoices SET status='failed' WHERE reference=? AND status='pending'").run(invoice.reference)
+})
+
+test('a matching code does not auto-credit when another open request could explain the same net after a fractional fee', async () => {
+  const first = newUser(), second = newUser()
+  const feePayer = request(first.id, 'bsc-usdt-peg', 100)
+  const apparentCodeOwner = request(second.id, 'bsc-usdt-peg', 100)
+  const firstCode = codes.paymentCode(feePayer.payment_amount_e4!)
+  const secondCode = codes.paymentCode(apparentCodeOwner.payment_amount_e4!)
+  assert.notEqual(firstCode, secondCode)
+  const received = feePayer.payment_amount_e4! - 100 - ((firstCode - secondCode + 100) % 100)
+  assert.equal(codes.paymentCode(received), secondCode)
+  const tx = sendBsc(bscRaw(received))
+  mine()
+  await scan()
+  assert.equal(credits.getBalance(first.id).creditCents, 0)
+  assert.equal(credits.getBalance(second.id).creditCents, 0)
+  assert.equal(payments.getInvoice(feePayer.reference, first.id)?.status, 'pending')
+  assert.equal(payments.getInvoice(apparentCodeOwner.reference, second.id)?.status, 'pending')
+  const transfer = watcher.unmatchedTransfers().rows.find((row) => row.tx_hash === tx)
+  assert.ok(transfer)
+  assert.match(transfer.note ?? '', /another request after withdrawal fees/)
+  database.db().prepare("UPDATE invoices SET status='failed' WHERE reference IN (?, ?) AND status='pending'")
+    .run(feePayer.reference, apparentCodeOwner.reference)
+})
+
 test('a transfer is not attached until it is past the confirmation threshold, then credited', async () => {
   const user = newUser()
   const invoice = request(user.id, 'bsc-usdt-peg', 1200)
@@ -468,15 +540,17 @@ test('an administrator rejecting a pasted transfer releases it for the request i
   assert.equal(credits.getBalance(thief.id).creditCents, 0)
 })
 
-test('zero-value and dust transfers are never recorded', async () => {
-  for (let index = 0; index < 5; index += 1) sendBsc(0n)
-  sendBsc(bscRaw(5_000)) // 0.5
+test('zero-value and unrelated dust transfers are never recorded', async () => {
+  const zero = Array.from({ length: 5 }, () => sendBsc(0n))
+  const dust = sendBsc(bscRaw(5_000)) // 0.5, not near any open payment request
   const real = sendBsc(bscRaw(420_000))
   mine()
   await scan()
   const { rows } = watcher.unmatchedTransfers()
   assert.ok(rows.some((row) => row.tx_hash === real))
-  assert.ok(rows.every((row) => row.amount_e4 >= codes.DUST_FLOOR_E4))
+  const count = database.db().prepare('SELECT COUNT(*) AS n FROM chain_transfers WHERE tx_hash=?')
+  assert.equal((count.get(dust) as { n: number }).n, 0)
+  for (const tx of zero) assert.equal((count.get(tx) as { n: number }).n, 0)
 })
 
 test('a node that answers eth_getLogs with null stops the scan instead of skipping blocks', async () => {
