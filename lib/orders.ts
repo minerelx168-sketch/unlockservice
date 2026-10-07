@@ -14,6 +14,7 @@ import { recordProviderEvent } from './provider-events'
 import { claimProviderPoll } from './provider-poll-lease'
 import { enqueueOrderNotification } from './order-notifications'
 import { consumeAttempt } from './rate-limit'
+import { purchaseConversion, type PurchaseConversion } from './purchase-conversion'
 
 /**
  * The order pipeline.
@@ -78,6 +79,7 @@ export type OrderPayload = {
   success: boolean
   orderId: number
   status: OrderStatus
+  conversion: PurchaseConversion | null
   title: string
   imei: string
   priceCents: number
@@ -162,6 +164,8 @@ function payload(
     success: true,
     orderId: order.id,
     status: order.status,
+    conversion: order.status === 'delivered' && order.source === 'website'
+      ? purchaseConversion(order.user_id, 'order', order.id, order.price_cents) : null,
     title: order.title,
     imei: order.imei,
     priceCents: order.price_cents,

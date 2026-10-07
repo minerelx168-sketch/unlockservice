@@ -6,6 +6,8 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { IMEI_LENGTH } from '@/lib/imei'
 import { deviceImei } from '@/lib/device-intent-value'
 import { formatUsd } from '@/lib/money'
+import type { PurchaseConversion } from '@/lib/purchase-conversion'
+import { GoogleAdsPurchaseConversion } from './google-ads-purchase-conversion'
 import { Icon } from './icons'
 import { ServicePicker } from './service-picker'
 import { saveDeviceIntentAction, clearAcceptedDeviceIntentAction } from '@/lib/device-intent-actions'
@@ -37,6 +39,7 @@ type PaidReportView = {
 type PaidReportPayload = {
   success: true
   order: PaidReportView
+  conversion: PurchaseConversion | null
   credit: {
     heldCents: number
     chargedCents: number
@@ -126,9 +129,13 @@ export function PaidReportConsole({
           cache: 'no-store',
           headers: { 'X-Requested-With': 'XMLHttpRequest' },
         })
-        const data = (await response.json()) as { success?: boolean; report?: PaidReportView }
+        const data = (await response.json()) as { success?: boolean; report?: PaidReportView; conversion?: PurchaseConversion | null }
         if (!response.ok || !data.success || !data.report || cancelled) return
-        setPayload((current) => current ? { ...current, order: data.report! } : current)
+        setPayload((current) => current ? {
+          ...current,
+          order: data.report!,
+          conversion: data.report!.status === 'completed' ? data.conversion ?? null : null,
+        } : current)
         if (data.report.status !== 'processing') router.refresh()
       } catch {
         // Background refresh is best effort. The two-minute server worker remains authoritative.
@@ -462,6 +469,7 @@ export function PaidReportConsole({
 
       {payload ? (
         <section className="card service-workbench-result" role="status" ref={resultRef} tabIndex={-1}>
+          {payload.order.status === 'completed' ? <GoogleAdsPurchaseConversion purchase={payload.conversion} /> : null}
           <div className="card-topline">
             <span className="kicker"><Icon name="file" /> {payload.order.productName}</span>
             <span className={payload.order.status === 'completed' ? 'badge badge--success' : 'badge'}>{statusLabel(payload.order.status)}</span>

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { GoogleAdsPurchaseConversion } from '@/components/google-ads-purchase-conversion'
 import { Icon } from '@/components/icons'
 import { PaidReportRefresh } from '@/components/paid-report-refresh'
 import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 import { getPaidReport } from '@/lib/paid-reports'
+import { purchaseConversion } from '@/lib/purchase-conversion'
 
 export const metadata: Metadata = { title: 'Paid IMEI report' }
 export const dynamic = 'force-dynamic'
@@ -32,6 +34,8 @@ export default async function PaidReportDetailPage({ params }: { params: Promise
   if (order.status === 'completed') {
     return (
       <section className="report-result-only" aria-label="Result">
+        <GoogleAdsPurchaseConversion purchase={order.origin === 'website'
+          ? purchaseConversion(user.id, 'paid_imei_report', order.id, order.priceCents) : null} />
         <h1 className="visually-hidden">{order.productName}</h1>
         {order.providerCode ? (
           <pre className="provider-code-result provider-code-result--standalone">{order.providerCode}</pre>

@@ -30,6 +30,7 @@ import { recordProviderEvent } from './provider-events'
 import { claimProviderPoll } from './provider-poll-lease'
 import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
+import { purchaseConversion, type PurchaseConversion } from './purchase-conversion'
 
 export type PaidReportStatus = 'processing' | 'completed' | 'refunded' | 'manual_review'
 
@@ -101,6 +102,7 @@ export type PaidReportView = {
   imei?: string
   status: PaidReportStatus
   priceCents: number
+  origin: string
   source: string
   report: ProviderReport | null
   providerCode?: string
@@ -113,6 +115,7 @@ export type PaidReportView = {
 export type PaidReportPayload = {
   success: true
   order: PaidReportView
+  conversion: PurchaseConversion | null
   credit: {
     beforeCents: number
     heldCents: number
@@ -240,6 +243,7 @@ function toView(row: PaidReportOrderRow): PaidReportView {
     imei: decryptPaidReportImei(row.imei_encrypted) ?? undefined,
     status: row.status,
     priceCents: row.price_cents,
+    origin: row.source,
     source: row.provider_name ?? 'provider',
     report: parseReport(row.report_json),
     providerCode: decryptProviderCode(row.provider_code_encrypted) ?? undefined,
@@ -312,6 +316,8 @@ function payload(row: PaidReportOrderRow, before: Balance, after = getBalance(ro
   return {
     success: true,
     order: toView(current),
+    conversion: current.status === 'completed' && current.source === 'website'
+      ? purchaseConversion(current.user_id, 'paid_imei_report', current.id, current.price_cents) : null,
     credit: creditSnapshot(before, after, current.status, current.price_cents),
   }
 }

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { GoogleAdsPurchaseConversion } from '@/components/google-ads-purchase-conversion'
 import { Icon } from '@/components/icons'
 import { formatEta, OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 import { getOrder } from '@/lib/orders'
+import { purchaseConversion } from '@/lib/purchase-conversion'
 
 export const metadata: Metadata = { title: 'Order' }
 export const dynamic = 'force-dynamic'
@@ -23,9 +25,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     ([key]) => key !== 'note' && key !== 'source' && key !== 'identifier',
   )
   const note = typeof result?.note === 'string' ? result.note : null
+  const conversion = order.status === 'delivered' && order.source === 'website'
+    ? purchaseConversion(user.id, 'order', order.id, order.price_cents) : null
 
   return (
     <>
+      <GoogleAdsPurchaseConversion purchase={conversion} />
       <div className="app-head">
         <div>
           <h1>Order #{order.id}</h1>
