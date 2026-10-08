@@ -40,28 +40,37 @@ const THEME_GUARD = `(function(){try{var s=localStorage.getItem('iunlockmobile-t
 /* The latin subsets only — latin-ext covers accented names and is fetched
    on demand by the browser when a glyph in it is actually used. */
 const PRELOADED_FONTS = ['/fonts/inter-latin.woff2', '/fonts/inter-tight-latin.woff2']
+const GTM_ID = 'GTM-PDB4DNWC'
+// Single analytics loader: the published container owns Ads, GA4, Conversion
+// Linker, and charged-purchase tracking. Never load gtag.js separately here.
+const GTM_BOOTSTRAP = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  /* Minted per request in middleware.ts, which is also where the policy that
-     makes it mean anything is written. Next.js stamps its own streamed
-     scripts with it; this one has to be given the nonce by hand. */
+  /* Minted per request in middleware.ts. strict-dynamic authorizes GTM's
+     script only through this nonce-bearing bootstrap. */
   const nonce = (await headers()).get('x-nonce') ?? undefined
-  const googleAdsTag = 'AW-18465855968'
-  const googleAnalyticsTag = 'G-9WCELVR3V3'
-  // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
-  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${googleAdsTag}'); gtag('config', '${googleAnalyticsTag}');`
 
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: GTM_BOOTSTRAP }} />
         {PRELOADED_FONTS.map((href) => (
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_GUARD }} />
-        <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} />
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            title="Google Tag Manager"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
+        {children}
+      </body>
     </html>
   )
 }

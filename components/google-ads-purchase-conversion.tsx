@@ -3,9 +3,7 @@
 import { useEffect } from 'react'
 import type { PurchaseConversion } from '@/lib/purchase-conversion'
 
-const SEND_TO = 'AW-18465855968/NzXJCKKYj5QdEOCzmuVE'
-
-/** The sitewide Google tag is already in <head>; fire only on a verified, charged purchase. */
+/** GTM owns the Ads conversion tag; never call gtag('conversion') here as well. */
 export function GoogleAdsPurchaseConversion({ purchase }: { purchase: PurchaseConversion | null }) {
   useEffect(() => {
     if (!purchase) return
@@ -16,10 +14,12 @@ export function GoogleAdsPurchaseConversion({ purchase }: { purchase: PurchaseCo
       // Google Ads also deduplicates by transaction_id if storage is unavailable.
     }
 
-    const tag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
-    if (typeof tag !== 'function') return
-    tag('event', 'conversion', {
-      send_to: SEND_TO,
+    // The nonce-bearing GTM bootstrap initializes this queue in <head>. If a
+    // blocked GTM load leaves no queue, still retain the event until it loads.
+    const w = window as Window & { dataLayer?: Record<string, unknown>[] }
+    w.dataLayer = w.dataLayer || []
+    w.dataLayer.push({
+      event: 'iunlockmobile_purchase',
       value: purchase.value,
       currency: purchase.currency,
       transaction_id: purchase.transactionId,
