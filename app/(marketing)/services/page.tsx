@@ -1,8 +1,7 @@
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
-import { CUSTOMER_PRODUCT_COUNTS } from '@/lib/customer-provider-products'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { storefrontAvailability } from '@/lib/storefront-availability'
 
 
 
@@ -11,7 +10,8 @@ export const dynamic = 'force-dynamic'
 export const metadata = pageMetadata("/services", "Phone Unlock & IMEI Check Services", "Compare phone unlocking and IMEI check services. Browse device requirements, report types, prices and availability before choosing a service.")
 
 export default function ServicesPage() {
-  const availableCount = listPublicProviderProducts('imei_check').filter((product) => product.status === 'available').length
+  const checks = storefrontAvailability('imei_check')
+  const unlock = storefrontAvailability('unlock')
   return (
     <>
       <section className="section section--tint">
@@ -37,8 +37,8 @@ export default function ServicesPage() {
                 <p>Check device, carrier, warranty, blacklist and lock-status information before buying, selling or unlocking a phone.</p>
               </div>
               <div className="service-hub-stats">
-                <div><strong>{CUSTOMER_PRODUCT_COUNTS.imeiCheck}</strong><span>published checks</span></div>
-                <div><strong>{availableCount}</strong><span>available online</span></div>
+                <div><strong>{checks.publishedCount}</strong><span>published checks</span></div>
+                <div><strong>{checks.availableCount}</strong><span>available online</span></div>
               </div>
               <div className="service-hub-actions">
                 <Link className="button button--primary" href="/services/imei-check">
@@ -56,8 +56,8 @@ export default function ServicesPage() {
                 <p>Browse published network, activation-lock and device-unlock prices by carrier, country and device type.</p>
               </div>
               <div className="service-hub-stats">
-                <div><strong>{CUSTOMER_PRODUCT_COUNTS.unlock}</strong><span>published services</span></div>
-                <div><strong>View only</strong><span>online ordering pending</span></div>
+                <div><strong>{unlock.publishedCount}</strong><span>published services</span></div>
+                <div><strong>{unlock.availableCount}</strong><span>{unlock.accepting ? 'available online' : 'currently unavailable'}</span></div>
               </div>
               <div className="service-hub-actions">
                 <Link className="button button--primary" href="/services/unlock">

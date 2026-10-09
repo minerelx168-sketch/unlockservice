@@ -8,7 +8,7 @@ import { GATEWAYS } from '@/lib/payments'
 import { hasServiceOutputExample } from '@/lib/service-output-examples'
 
 /** Workspace entry points and payment returns share one explicit review flow. */
-export async function ServiceOrderWorkspace({ domain, requestedProduct }: { domain?: DeviceDomain; requestedProduct?: string }) {
+export async function ServiceOrderWorkspace({ domain, requestedProduct, fallbackImei }: { domain?: DeviceDomain; requestedProduct?: string; fallbackImei?: string }) {
   const [{ user, session }, intent] = await Promise.all([requireSession(), readDeviceIntent()])
   const products = listPaidReportProducts()
   const selected = products.find((product) => product.code === requestedProduct && (!domain || product.domain === domain))
@@ -32,7 +32,7 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct }: { doma
         availableCents={user.credit_cents - user.held_cents}
         initialProductCode={selected?.code}
         initialDomain={initialDomain}
-        initialImei={intentImeiFor(intent, initialDomain, selected?.code)}
+        initialImei={intentImeiFor(intent, initialDomain, selected?.code) || (initialDomain === 'unlock' ? fallbackImei : undefined)}
         paymentMethods={GATEWAYS.map((gateway) => `${gateway.asset} on ${gateway.network}`)}
       />
       <p className="t-small" style={{ marginTop: 18 }}>

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { Icon } from '@/components/icons'
 import { WaitlistForm } from '@/components/waitlist-form'
 import { CARRIERS } from '@/lib/catalog'
-import { unlockOrderingEnabled } from '@/lib/provider'
+import { storefrontAvailability } from '@/lib/storefront-availability'
 
 
 
@@ -15,7 +15,7 @@ export const metadata = pageMetadata("/unlock-waitlist", "Phone Unlock Availabil
 export default function UnlockWaitlistPage() {
   /* The moment ordering opens this page has nothing to offer, and the
      ticket asked that every route come back without a deploy. */
-  if (unlockOrderingEnabled()) redirect('/services/unlock')
+  if (storefrontAvailability('unlock').accepting) redirect('/services/unlock')
 
   return (
     <section className="section section--tint">
@@ -24,11 +24,11 @@ export default function UnlockWaitlistPage() {
           <span className="kicker">
             <Icon name="lock" strokeWidth={2} /> Unlock Service
           </span>
-          <h1 className="t-section">Unlock ordering opens soon.</h1>
+          <h1 className="t-section">Unlock availability updates.</h1>
           <p className="t-lead">
-            We are still finishing the supplier connection that files unlocks with the networks. We
-            have not set a date, and we would rather say so than name one we might miss. Leave an
-            address and you will hear the day it is live — once, from us, and not again.
+            No unlock services are currently available for online ordering. Availability depends on
+            the service and its verified ordering requirements. Leave an address for an availability
+            update. We have not set a reopening date.
           </p>
           <p className="hero-asides">
             <Link href="/services/unlock">See unlock prices</Link>

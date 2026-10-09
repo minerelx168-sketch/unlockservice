@@ -2,7 +2,7 @@ import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ImeiCheckForm } from '@/components/imei-check-form'
 import { currentSession } from '@/lib/auth'
-import { serviceStatus } from '@/lib/provider'
+import { storefrontAvailability } from '@/lib/storefront-availability'
 import { Icon } from '@/components/icons'
 
 
@@ -12,7 +12,7 @@ export const metadata = pageMetadata("/check", "IMEI Number Validation: Format &
 
 export default async function CheckPage() {
   const found = await currentSession()
-  const status = serviceStatus()
+  const unlock = storefrontAvailability('unlock')
 
   return (
     <section className="section">
@@ -27,18 +27,12 @@ export default async function CheckPage() {
             This free tool validates IMEI format and checksum only. For carrier, blacklist, warranty,
             lock-status and device reports, choose a paid Phone Check service.
           </p>
-          {status ? (
-            <p className="alert" role="status">
-              <Icon name="info" strokeWidth={1.9} />
-              <span>
-                <b>{status.heading}.</b> {status.detail} The free check below is unaffected.{' '}
-                <Link href="/unlock-waitlist">Get told when unlocking opens</Link>.
-              </span>
-            </p>
-          ) : null}
           <div className="cta-actions">
             <Link className="button button--primary" href="/services/imei-check">
               Browse Phone Check services <Icon name="arrowRight" />
+            </Link>
+            <Link className="button button--secondary" href={unlock.accepting ? '/services/unlock' : '/unlock-waitlist'}>
+              {unlock.accepting ? 'Browse Unlock services' : 'Unlock availability updates'} <Icon name="arrowRight" />
             </Link>
           </div>
           <div className="feature-list">
