@@ -1,4 +1,5 @@
 import { db } from './db'
+import { snapshotWebsiteAttribution } from './order-attribution'
 import {
   charge,
   getBalance,
@@ -637,6 +638,7 @@ export async function createPaidReport(
     throw error
   }
 
+  await snapshotWebsiteAttribution('paid_report_order', row.id, source)
   recordProviderEvent({
     resourceType: 'paid_imei_report',
     resourceId: row.id,

@@ -11,7 +11,7 @@ export default function PrivacyPage() {
     <article className="auth-card legal-card">
       <Brand />
       <h1>Privacy Policy</h1>
-      <p className="legal-meta">Last updated: August 28, 2026</p>
+      <p className="legal-meta">Last updated: October 9, 2026</p>
 
       <section>
         <h2>Information we collect</h2>
@@ -40,7 +40,10 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2>Cookies and security</h2>
+        <h2>Cookies and optional measurement</h2>
+        <p>Free format and Luhn checksum validation runs locally in your browser and does not send the IMEI to a device-data provider. Paid services require an account and explicit order confirmation.</p>
+        <p>Optional analytics and advertising storage are denied by default. You can allow or reject them using Privacy choices on any page. With consent, we save validated Google click identifiers (gclid, gbraid and wbraid) in signed, HttpOnly cookies for up to 90 days and snapshot them on accepted website orders for attribution. Rejection clears these cookies and disables optional funnel events. Existing transaction records remain subject to the retention policy below.</p>
+        <p>Funnel events contain only allowlisted service categories, statuses, currency and amounts. We do not include raw IMEI numbers, emails, names, wallet addresses, transaction hashes, CSRF tokens, customer identifiers or provider order identifiers. Google advertising purchase conversions are limited to delivered services with a matching charge; adding account credit or submitting an order is not a purchase conversion. Google may process consent-mode signals under its own privacy terms.</p>
         <p>
           The website uses secure, HttpOnly cookies to maintain signed-in sessions and short-lived OAuth
           transactions. Passwords are stored as salted hashes. Access controls, rate limits, encrypted

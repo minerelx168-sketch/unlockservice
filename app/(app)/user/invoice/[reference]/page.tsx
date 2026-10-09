@@ -1,3 +1,4 @@
+import { PaymentFunnelEvents } from '@/components/payment-funnel-events'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -88,6 +89,7 @@ export default async function InvoicePage({
 
   return (
     <>
+      <PaymentFunnelEvents reference={invoice.reference} settled={settled} />
       <section className="payment-request-head">
         <div>
           <span className="eyebrow">Payment request {shortReference(invoice.reference)}</span>

@@ -51,7 +51,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         <section className="card">
           <div className="card-topline">
             <span className="kicker"><Icon name="check" /> Result</span>
-            <span className="t-micro">{check.provider}</span>
+
           </div>
           <h2 className="t-card">{String(report.title ?? 'IMEI check')}</h2>
           <p className="t-small">{String(report.summary ?? check.message ?? 'The report is not available yet.')}</p>
@@ -77,7 +77,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
           <div className="card-topline">
             <span className="kicker"><Icon name="info" /> Next step</span>
           </div>
-          <p className="t-small">{String(report.nextStep ?? 'You can run another check when you need a fresh result.')}</p>
+          <p className="t-small">{check.provider === 'local-validation' ? 'For carrier, blacklist, warranty or lock status, choose a paid Phone Check service.' : String(report.nextStep ?? 'You can run another check when you need a fresh result.')}</p>
           <Link className="button button--quiet" href="/check">Run another check</Link>
         </section>
       </div>

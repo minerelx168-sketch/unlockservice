@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import { publicOrigin } from '@/lib/site'
 import '@/styles/globals.css'
+import { AnalyticsConsent } from '@/components/analytics-consent'
 
 const DESCRIPTION =
   'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, with reserved account credit returned if the carrier refuses.'
@@ -49,7 +50,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const googleAdsTag = 'AW-18465855968'
   const googleAnalyticsTag = 'G-9WCELVR3V3'
   // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
-  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${googleAdsTag}'); gtag('config', '${googleAnalyticsTag}');`
+  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); gtag('set', {page_location: location.origin + (['user','admin','api'].includes(location.pathname.split('/')[1]) ? '/account' : location.pathname), page_referrer: '', page_title: 'iUnlockMobile'}); gtag('js', new Date()); gtag('config', '${googleAdsTag}', {page_location: location.origin + (['user','admin','api'].includes(location.pathname.split('/')[1]) ? '/account' : location.pathname), page_referrer: '', page_title: 'iUnlockMobile'}); gtag('config', '${googleAnalyticsTag}', {page_location: location.origin + (['user','admin','api'].includes(location.pathname.split('/')[1]) ? '/account' : location.pathname), page_referrer: '', page_title: 'iUnlockMobile'});`
 
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
@@ -58,10 +59,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_GUARD }} />
-        <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} />
+        <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} />
       </head>
-      <body>{children}</body>
+      <body>{children}<AnalyticsConsent /></body>
     </html>
   )
 }

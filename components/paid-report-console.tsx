@@ -8,6 +8,7 @@ import { deviceImei } from '@/lib/device-intent-value'
 import { formatUsd } from '@/lib/money'
 import type { PurchaseConversion } from '@/lib/purchase-conversion'
 import { GoogleAdsPurchaseConversion } from './google-ads-purchase-conversion'
+import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 import { ServicePicker } from './service-picker'
 import { saveDeviceIntentAction, clearAcceptedDeviceIntentAction } from '@/lib/device-intent-actions'
@@ -89,6 +90,7 @@ export function PaidReportConsole({
   const [balanceCents, setBalanceCents] = useState(availableCents)
   const [imeiTouched, setImeiTouched] = useState(false)
   const imeiRef = useRef<HTMLInputElement>(null)
+  const startedRef = useRef(false)
   const reviewRef = useRef<HTMLHeadingElement>(null)
   const resultRef = useRef<HTMLElement>(null)
   const inFlight = useRef(false)
@@ -219,6 +221,7 @@ export function PaidReportConsole({
     }
     if (!affordable) return setError('Not enough credit for this report.')
     setError(null)
+    trackFunnelEvent('begin_checkout', { service_category: product.domain, currency: 'USD', value: product.priceCents / 100 })
     setReviewing(true)
   }
 
@@ -235,7 +238,9 @@ export function PaidReportConsole({
     setBusy(true)
     setError(null)
     try {
+      trackFunnelEvent('order_submission', { service_category: product.domain })
       const result = await post('/api/imei/reports', { productCode: product.code, imei: digits, idempotencyKey })
+      trackFunnelEvent('order_accepted', { service_category: product.domain, status: result.order.status })
       setPayload(result)
       setBalanceCents(result.credit.balanceCents)
       // Cleanup has its own short request so another tab's newer draft survives.
@@ -326,6 +331,7 @@ export function PaidReportConsole({
                 placeholder="Enter your 15-digit IMEI"
                 value={imei}
                 onChange={(event) => {
+                  if (event.currentTarget.value && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: domain }) }
                   // Keep invalid characters visible so the customer can correct them.
                   setImei(event.currentTarget.value)
                   setError(null)
@@ -384,6 +390,7 @@ export function PaidReportConsole({
               onChange={(code) => {
                 if (locked) return
                 setProductCode(code)
+                trackFunnelEvent('service_selection', { service_category: domain })
                 setError(null)
                 resetRequestIdentity()
               }}

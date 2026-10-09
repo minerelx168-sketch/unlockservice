@@ -8,6 +8,7 @@ import {
   submitReferenceAction,
   type FormState,
 } from '@/lib/actions'
+import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 
 const EMPTY: FormState = {}
@@ -51,7 +52,7 @@ export function AddFundsForm({
   const fee = valid && gateway ? Math.round(cents * gateway.feeBasisPoints / 10_000) : 0
 
   return (
-    <form action={action} className="funding-form">
+    <form action={action} className="funding-form" onSubmit={() => { if (valid && gatewayId) trackFunnelEvent('begin_checkout', { service_category: 'account_credit', currency: 'USD', value: cents / 100 }) }}>
       <Problem message={state.error} />
       <input type="hidden" name="next" value={returnTo ?? ''} />
       <input type="hidden" name="gateway" value={gatewayId} />
@@ -161,7 +162,7 @@ export function PaymentReferenceForm({
   const isTron = chainKind === 'tron'
 
   return (
-    <form action={action} className="form-grid payment-hash-form">
+    <form action={action} className="form-grid payment-hash-form" onSubmit={() => trackFunnelEvent('payment_verification_requested', { service_category: 'account_credit', payment_method: chainKind })}>
       <Problem message={state.error} />
       <input type="hidden" name="reference" value={reference} />
       <input type="hidden" name="next" value={returnTo ?? ''} />

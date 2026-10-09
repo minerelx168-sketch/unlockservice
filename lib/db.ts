@@ -15,6 +15,14 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
 
 const SCHEMA = `
+CREATE TABLE IF NOT EXISTS order_attribution (
+  order_type TEXT NOT NULL CHECK (order_type IN ('order', 'paid_report_order')),
+  order_id INTEGER NOT NULL CHECK (order_id > 0),
+  gclid TEXT, gbraid TEXT, wbraid TEXT,
+  consent_state TEXT NOT NULL CHECK (consent_state = 'granted'),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (order_type, order_id)
+);
 CREATE TABLE IF NOT EXISTS users (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   username           TEXT    NOT NULL UNIQUE,

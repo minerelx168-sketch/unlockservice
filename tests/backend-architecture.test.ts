@@ -650,7 +650,10 @@ test('free IMEI checks are repeatable, owner-scoped, and never touch credit', as
   })
 
   assert.equal(first.status, 'completed')
-  assert.equal(first.result?.demo, true)
+  assert.equal(first.result?.kind, 'format_checksum')
+  assert.equal(first.result?.demo, undefined)
+  assert.equal(first.result?.source, undefined)
+  assert.equal(first.result?.nextStep, undefined)
   assert.equal(first.maskedImei, '49·········7518')
   assert.equal(first.imei, '490154203237518')
   const encrypted = database.db().prepare('SELECT masked_imei, imei_encrypted FROM imei_checks WHERE id = ?').get(first.id) as { masked_imei: string; imei_encrypted: string }

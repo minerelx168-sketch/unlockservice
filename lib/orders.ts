@@ -1,3 +1,4 @@
+import { snapshotWebsiteAttribution } from './order-attribution'
 import {
   db,
   getBrand,
@@ -404,6 +405,7 @@ export async function submitOrder(
     throw error
   }
 
+  if (!replayed) await snapshotWebsiteAttribution('order', orderId, source)
   let order = getOrder(orderId, userId)!
   if (replayed) return restingPayload(order, readBalance(userId).availableCents)
   const config = providerConfiguration()

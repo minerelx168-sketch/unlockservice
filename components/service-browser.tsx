@@ -7,6 +7,7 @@ import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
 import { IMEI_LENGTH, luhnValid } from '@/lib/imei'
 import { formatUsd } from '@/lib/money'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
+import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 import { ServicePicker, serviceDisplayText } from './service-picker'
 
@@ -35,6 +36,7 @@ export function ServiceBrowser({
   const [touched, setTouched] = useState(false)
   const [state, action, pending] = useActionState(continueDeviceServiceAction, EMPTY)
   const inputRef = useRef<HTMLInputElement>(null)
+  const startedRef = useRef(false)
   const isUnlock = domain === 'unlock'
   const selected = products.find((product) => product.productCode === selectedCode)
   const available = selected?.status === 'available'
@@ -57,7 +59,10 @@ export function ServiceBrowser({
       event.preventDefault()
       setTouched(true)
       if (!validImei) inputRef.current?.focus()
+      trackFunnelEvent('validation_result', { service_category: domain, validation_status: 'failed' })
+      return
     }
+    trackFunnelEvent('review_login_intent', { service_category: domain, status: isAuthenticated ? 'review' : 'login' })
   }
 
   return (
@@ -96,7 +101,7 @@ export function ServiceBrowser({
               autoComplete="off"
               spellCheck={false}
               value={imei}
-              onChange={(event) => { setImei(event.currentTarget.value.replace(/[\s-]/g, '')); setTouched(false) }}
+              onChange={(event) => { const next = event.currentTarget.value.replace(/[\s-]/g, ''); if (next && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: domain }) } setImei(next); setTouched(false) }}
               onBlur={() => { if (imei) setTouched(true) }}
               placeholder="Enter your 15-digit IMEI"
               disabled={pending}
@@ -111,7 +116,7 @@ export function ServiceBrowser({
           </p>
         </div>
 
-        <ServicePicker options={options} value={selectedCode} onChange={setSelectedCode} disabled={pending} label={isUnlock ? 'Unlock service' : 'Lookup service'} id={`${domain}-browse-service`} />
+        <ServicePicker options={options} value={selectedCode} onChange={(code) => { setSelectedCode(code); trackFunnelEvent('service_selection', { service_category: domain }) }} disabled={pending} label={isUnlock ? 'Unlock service' : 'Lookup service'} id={`${domain}-browse-service`} />
 
         {selected ? (
           <div className="service-browser__summary" aria-live="polite">
