@@ -20,16 +20,18 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
   const returnTo = product ? `/user/reports/new?product=${encodeURIComponent(product.code)}` : null
   const ready = GATEWAYS.length > 0
   const autoDetecting = GATEWAYS.some((gateway) => watchableRoute(gateway))
+  const onlyBep20 = GATEWAYS.length > 0 && GATEWAYS.every((gateway) => gateway.chainKind === 'evm' && gateway.chainId === 56)
 
   return (
     <>
       <section className="funding-hero">
         <div>
           <span className="eyebrow">Secure account funding</span>
-          <h1>Add funds with USDT or USDC.</h1>
+          <h1>{onlyBep20 ? 'Add funds on BEP20.' : 'Add funds with USDT or USDC.'}</h1>
           <p>
-            Enter your credit amount and choose a network. We’ll create a payment request with the exact amount,
-            wallet address and QR code. Send only after you see those details.
+            {onlyBep20
+              ? 'Choose USDT or USDC on BEP20 (BNB Smart Chain). We’ll create a payment request with the exact amount, wallet address and QR code. Send only after you see those details.'
+              : 'Enter your credit amount and choose a network. We’ll create a payment request with the exact amount, wallet address and QR code. Send only after you see those details.'}
           </p>
         </div>
         <div className="funding-balance-card">

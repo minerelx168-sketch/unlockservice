@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { credit } from './credits'
 import { db } from './db'
 import {
-  enabledPaymentRoutes,
+  newRequestPaymentRoutes,
   paymentRouteDefinition,
   type PaymentChainKind,
   type PaymentProviderMode,
@@ -95,7 +95,7 @@ function gatewayFromRoute(route: PaymentRouteConfig): Gateway {
 }
 
 /** A route is sellable only when the global gate, route gate, wallet and provider are ready. */
-export const GATEWAYS: Gateway[] = enabledPaymentRoutes().map(gatewayFromRoute)
+export const GATEWAYS: Gateway[] = newRequestPaymentRoutes().map(gatewayFromRoute)
 
 export function gatewayById(gatewayId: string): Gateway | undefined {
   return GATEWAYS.find((entry) => entry.id === gatewayId)
