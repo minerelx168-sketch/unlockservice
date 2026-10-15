@@ -4,6 +4,8 @@ import type { ReactNode } from 'react'
 import { publicOrigin } from '@/lib/site'
 import '@/styles/globals.css'
 import { AnalyticsConsent } from '@/components/analytics-consent'
+import { GoogleAnalyticsNavigation } from '@/components/google-analytics-navigation'
+import { analyticsHostAllowed } from '@/lib/site'
 
 const DESCRIPTION =
   'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, with reserved account credit returned if the carrier refuses.'
@@ -46,7 +48,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   /* Minted per request in middleware.ts, which is also where the policy that
      makes it mean anything is written. Next.js stamps its own streamed
      scripts with it; this one has to be given the nonce by hand. */
-  const nonce = (await headers()).get('x-nonce') ?? undefined
+  const requestHeaders = await headers()
+  const nonce = requestHeaders.get('x-nonce') ?? undefined
+  const requestHost = requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim() ?? requestHeaders.get('host') ?? ''
+  const analyticsEnabled = analyticsHostAllowed(requestHost)
   const googleAdsTag = 'AW-18465855968'
   const googleAnalyticsTag = 'G-9WCELVR3V3'
   // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
@@ -59,10 +64,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_GUARD }} />
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} />
-        <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} />
+        {analyticsEnabled ? <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} /> : null}
+        {analyticsEnabled ? <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} /> : null}
       </head>
-      <body>{children}<AnalyticsConsent /></body>
+      <body>{children}<GoogleAnalyticsNavigation /><AnalyticsConsent /></body>
     </html>
   )
 }

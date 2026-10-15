@@ -62,6 +62,10 @@ export function ServiceBrowser({
       trackFunnelEvent('validation_result', { service_category: domain, validation_status: 'failed' })
       return
     }
+    if (domain === 'unlock') {
+      trackFunnelEvent('unlock_imei_submitted', { service_category: domain })
+      trackFunnelEvent('begin_checkout', { service_category: domain, currency: 'USD', value: selected?.priceCents ? selected.priceCents / 100 : undefined })
+    }
     trackFunnelEvent('review_login_intent', { service_category: domain, status: isAuthenticated ? 'review' : 'login' })
   }
 
@@ -116,7 +120,7 @@ export function ServiceBrowser({
           </p>
         </div>
 
-        <ServicePicker options={options} value={selectedCode} onChange={(code) => { setSelectedCode(code); trackFunnelEvent('service_selection', { service_category: domain }) }} disabled={pending} label={isUnlock ? 'Unlock service' : 'Lookup service'} id={`${domain}-browse-service`} />
+        <ServicePicker options={options} value={selectedCode} onChange={(code) => { setSelectedCode(code); trackFunnelEvent('service_selection', { service_category: domain }); if (domain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: domain }) }} disabled={pending} label={isUnlock ? 'Unlock service' : 'Lookup service'} id={`${domain}-browse-service`} />
 
         {selected ? (
           <div className="service-browser__summary" aria-live="polite">

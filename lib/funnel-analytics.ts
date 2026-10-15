@@ -2,8 +2,10 @@
 
 export const FUNNEL_EVENTS = [
   'imei_input_started',
+  'unlock_imei_submitted',
   'validation_result',
   'service_selection',
+  'unlock_service_selected',
   'review_login_intent',
   'begin_checkout',
   'order_submission',
@@ -35,6 +37,8 @@ export function allowlistedFunnelParams(input: Record<string, unknown>): Record<
 
 export function trackFunnelEvent(name: FunnelEventName, input: Record<string, unknown> = {}): void {
   if (typeof window === 'undefined' || (window as Window & { iunlockmobileAnalyticsConsent?: string }).iunlockmobileAnalyticsConsent !== 'granted') return
+  const host = window.location.hostname.toLowerCase().replace(/\.$/, '')
+  if (host !== 'iunlockmobile.com' && host !== 'www.iunlockmobile.com') return
   const params = allowlistedFunnelParams(input)
   const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
   gtag?.('event', name, params)

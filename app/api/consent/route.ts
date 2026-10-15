@@ -2,13 +2,20 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { ATTRIBUTION_COOKIE, CONSENT_COOKIE } from '@/lib/cookie-names'
 import { CLICK_ID_FIELDS, validateClickId, type AttributionSnapshot } from '@/lib/attribution'
-import { ATTRIBUTION_MAX_AGE_SECONDS, encodeSignedConsent, parseSignedConsent } from '@/lib/order-attribution'
+import { ATTRIBUTION_MAX_AGE_SECONDS, encodeSignedConsent, parseAttributionCookie, parseSignedConsent } from '@/lib/order-attribution'
 import { readCommandJson } from '@/lib/request-json'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export async function GET() {
-  const consent = parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent ?? 'unknown'
-  return NextResponse.json({ consent }, { headers: { 'Cache-Control': 'no-store' } })
+  const jar = await cookies()
+  const consentPayload = parseSignedConsent(jar.get(CONSENT_COOKIE)?.value)
+  const attribution = consentPayload?.consent === 'granted'
+    ? parseAttributionCookie(jar.get(ATTRIBUTION_COOKIE)?.value)
+    : null
+  const clickIds = attribution
+    ? Object.fromEntries(CLICK_ID_FIELDS.flatMap((field) => attribution[field] ? [[field, attribution[field]]] : []))
+    : {}
+  return NextResponse.json({ consent: consentPayload?.consent ?? 'unknown', clickIds }, { headers: { 'Cache-Control': 'no-store' } })
 }
 export async function POST(request: Request) {
   let sameOrigin = false
@@ -33,6 +40,10 @@ export async function POST(request: Request) {
     if (body.consent === 'denied') jar.set(ATTRIBUTION_COOKIE, '', { ...options, maxAge: 0 })
     else if (CLICK_ID_FIELDS.some((field) => snapshot[field])) jar.set(ATTRIBUTION_COOKIE, encodeSignedConsent('granted', snapshot), options)
     else if (existing?.consent !== 'granted') jar.set(ATTRIBUTION_COOKIE, '', { ...options, maxAge: 0 })
-    return NextResponse.json({ consent: body.consent }, { headers: { 'Cache-Control': 'no-store' } })
+    const stored = body.consent === 'granted'
+      ? (CLICK_ID_FIELDS.some((field) => snapshot[field]) ? snapshot : existing?.consent === 'granted' ? existing : {})
+      : {}
+    const clickIds = Object.fromEntries(CLICK_ID_FIELDS.flatMap((field) => stored[field] ? [[field, stored[field]]] : []))
+    return NextResponse.json({ consent: body.consent, clickIds }, { headers: { 'Cache-Control': 'no-store' } })
   } catch { return NextResponse.json({ error: 'Consent storage is unavailable. Optional tracking remains disabled.' }, { status: 503 }) }
 }

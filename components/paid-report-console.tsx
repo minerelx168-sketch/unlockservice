@@ -238,6 +238,7 @@ export function PaidReportConsole({
     setBusy(true)
     setError(null)
     try {
+      if (product.domain === 'unlock') trackFunnelEvent('unlock_imei_submitted', { service_category: product.domain })
       trackFunnelEvent('order_submission', { service_category: product.domain })
       const result = await post('/api/imei/reports', { productCode: product.code, imei: digits, idempotencyKey })
       trackFunnelEvent('order_accepted', { service_category: product.domain, status: result.order.status })
@@ -390,7 +391,7 @@ export function PaidReportConsole({
               onChange={(code) => {
                 if (locked) return
                 setProductCode(code)
-                trackFunnelEvent('service_selection', { service_category: domain })
+                trackFunnelEvent('service_selection', { service_category: domain }); if (domain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: domain })
                 setError(null)
                 resetRequestIdentity()
               }}

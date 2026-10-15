@@ -67,13 +67,16 @@ test('funnel allowlist strips identifiers, unknown keys and arbitrary unsafe str
 test('funnel transport is denied until consent and emits exactly one gtag event without PII', () => {
   const calls: unknown[][] = []
   const previous = Object.getOwnPropertyDescriptor(globalThis, 'window')
-  const browser = { iunlockmobileAnalyticsConsent: 'denied', gtag: (...args: unknown[]) => calls.push(args) }
+  const browser = { location: { hostname: 'iunlockmobile.com' }, iunlockmobileAnalyticsConsent: 'denied', gtag: (...args: unknown[]) => calls.push(args) }
   Object.defineProperty(globalThis, 'window', { configurable: true, value: browser })
   try {
     trackFunnelEvent('service_selection', { service_category: 'unlock', email: 'secret@example.test' }); assert.equal(calls.length, 0)
     browser.iunlockmobileAnalyticsConsent = 'granted'
     trackFunnelEvent('service_selection', { service_category: 'unlock', imei: '490154203237518' })
     assert.deepEqual(calls, [['event', 'service_selection', { service_category: 'unlock' }]])
+    browser.location.hostname = 'unlockservice.35-237-31-173.sslip.io'
+    trackFunnelEvent('service_selection', { service_category: 'unlock' })
+    assert.equal(calls.length, 1)
   } finally { if (previous) Object.defineProperty(globalThis, 'window', previous); else Reflect.deleteProperty(globalThis, 'window') }
 })
 test('public pricing and structured free results require no login or provider network request', () => {
