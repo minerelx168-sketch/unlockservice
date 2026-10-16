@@ -88,8 +88,8 @@ export async function PublicFooter() {
   const facts: FooterFact[] = [
     { icon: 'globe', title: `${networks} networks listed`, caption: 'Across four countries' },
     { icon: 'file', title: `${articles.length} guides`, caption: 'Written for buyers and sellers' },
-    { icon: 'shieldCheck', title: 'Held, then charged', caption: 'Refused orders refund in full' },
-    { icon: 'lock', title: 'Masked identifiers', caption: 'Full IMEIs never shown in lists' },
+    { icon: 'shieldCheck', title: 'Held, then charged', caption: 'Refused orders release reserved credit' },
+    { icon: 'lock', title: 'Account-protected results', caption: 'Full IMEIs visible only to the owner' },
   ]
   const guides = articles.slice(0, 6).map((article) => ({ href: `/articles/${article.slug}`, label: article.title }))
 

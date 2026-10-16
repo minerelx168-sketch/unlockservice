@@ -47,3 +47,12 @@ test('hero price-check CSS is actually imported so assurance icons and quote lay
   assert.match(read('styles/globals.css'), /@import '\.\/hero-price-check\.css'/)
   assert.match(read('styles/hero-price-check.css'), /\.price-check-assurance svg\s*\{[^}]*width:\s*15px[^}]*height:\s*15px/s)
 })
+
+test('footer privacy copy matches owner-visible identifiers and Unlock history uses orders', () => {
+  const chrome = read('components/site-chrome.tsx')
+  assert.match(chrome, /Full IMEIs visible only to the owner/)
+  assert.doesNotMatch(chrome, /Full IMEIs never shown in lists|Refused orders refund in full/)
+  const unlock = read('app/(marketing)/services/unlock/page.tsx')
+  assert.match(unlock, /href="\/user\/orders"/)
+  assert.doesNotMatch(unlock, /href="\/user\/reports"/)
+})
