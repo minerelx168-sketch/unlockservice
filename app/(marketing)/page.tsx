@@ -1,102 +1,94 @@
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
-import { DeviceBrowseForm } from '@/components/device-browse-form'
+import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-check'
+import { Icon, type IconName } from '@/components/icons'
+import { Testimonials } from '@/components/testimonials'
+import { BRANDS, CARRIERS } from '@/lib/catalog'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { SAMPLE_TESTIMONIALS } from '@/lib/testimonials'
+import { unlockCategory } from '@/lib/unlock-catalog-view'
 import { StructuredData } from './structured-data'
-import { Icon, type IconName } from '@/components/icons'
 
-const TRUST = [
-  { title: 'Remote unlock', caption: 'No cables, software or shop visit' },
-  { title: 'Quoted turnaround', caption: 'The estimate for your network, before you order' },
-  { title: 'Permanent result', caption: 'Use the phone with another network' },
-  { title: 'Live tracking', caption: 'Follow every order from your account' },
-]
-
-const SERVICES: Array<{
-  icon: IconName
-  tint: string
-  title: string
-  body: string
-  action: { href: string; label: string }
-}> = [
+const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   {
-    icon: 'device',
-    tint: '',
-    title: 'Unlock services',
-    body: 'Browse carrier, activation-lock, MDM and device unlock services. Check the price and availability for your device before proceeding.',
-    action: { href: '/services/unlock', label: 'Browse unlock services' },
+    icon: 'shield',
+    title: 'Not reported lost or stolen',
+    body: 'A theft or loss report blocks every network. A Phone Check report shows the status before you spend anything.',
   },
   {
+    icon: 'check',
+    title: 'Account in good standing',
+    body: 'An unpaid balance or an active contract on the original line is the most common reason a network says no.',
+  },
+  {
+    icon: 'wallet',
+    title: 'Financed? Often still fine',
+    body: 'Many networks release financed handsets once the account is current. If yours refuses, the held credit returns in full.',
+  },
+]
+
+const STEPS: Array<{ title: string; body: string; art: 'imei' | 'review' | 'done' }> = [
+  {
+    title: 'Enter the IMEI',
+    body: 'Dial *#06# on the phone and type the 15 digits. We validate the number before anything becomes an order.',
+    art: 'imei',
+  },
+  {
+    title: 'Confirm the quote',
+    body: 'The price and the typical wait for your network are shown first. Credit is held, not charged, while the network checks the device.',
+    art: 'review',
+  },
+  {
+    title: 'Use any SIM',
+    body: 'Apple devices release over the air; other brands receive a code to type once. Refused devices give the whole amount back.',
+    art: 'done',
+  },
+]
+
+const HUB: Array<{ icon: IconName; tint: string; title: string; body: string; href: string; chip?: string }> = [
+  {
     icon: 'lock',
-    tint: ' icon-tile--accent',
-    title: 'IMEI check reports',
-    body: 'Apple, Samsung, carrier, blacklist and device-status reports on a phone you are about to buy or sell. The free check validates the number itself.',
-    action: { href: '/services/imei-check', label: 'Browse IMEI reports' },
+    tint: '',
+    title: 'Network unlock',
+    body: 'Remove the carrier lock by IMEI. Price and turnaround quoted per network.',
+    href: '/services/unlock',
   },
   {
     icon: 'search',
-    tint: ' icon-tile--moss',
-    title: 'Track every order',
-    body: 'See when a request is processing, delivered or refused. Delivered codes and instructions stay attached to the original order.',
-    action: { href: '/user/orders', label: 'Track an order' },
+    tint: ' icon-tile--accent',
+    title: 'Phone Check reports',
+    body: 'Carrier, blacklist, warranty, activation lock and more, from the IMEI alone.',
+    href: '/services/imei-check',
   },
-]
-
-const STEPS: Array<{ icon: IconName; tint: string; title: string; body: string }> = [
+  {
+    icon: 'shield',
+    tint: ' icon-tile--moss',
+    title: 'Blacklist and lost-or-stolen',
+    body: 'The one report to run before paying for a used phone.',
+    href: '/services/imei-check',
+  },
   {
     icon: 'keypad',
     tint: '',
-    title: 'Submit your phone details',
-    body: 'Choose the original carrier and enter the IMEI. We validate the number before it becomes an order.',
+    title: 'Basic IMEI validation',
+    body: 'Confirms the number is a real, well-formed IMEI. Nothing is ordered.',
+    href: '/check',
+    chip: 'Free',
   },
   {
-    icon: 'bolt',
+    icon: 'clock',
     tint: ' icon-tile--accent',
-    title: 'We verify and process',
-    body: 'Review the price and delivery estimate, then confirm. Your account credit is reserved while the provider checks eligibility.',
+    title: 'Track an order',
+    body: 'Live status for every order, and the result kept on the order page.',
+    href: '/track',
   },
   {
-    icon: 'check',
+    icon: 'file',
     tint: ' icon-tile--moss',
-    title: 'Your phone is unlocked',
-    body: 'We update the order when it completes. Apple devices unlock remotely; supported devices receive clear code instructions.',
-  },
-]
-
-const BAND_ROWS: Array<{ icon: IconName; title: string; caption: string }> = [
-  {
-    icon: 'shield',
-    title: 'Filed at the source',
-    caption: 'The carrier or manufacturer that holds the lock, not a workaround',
-  },
-  {
-    icon: 'clock',
-    title: 'Tracked while it runs',
-    caption: 'Follow the status and view the result in your account',
-  },
-  {
-    icon: 'window',
-    title: 'Held, then charged',
-    caption: 'If refused, reserved credit returns to your account balance',
-  },
-]
-
-const FEATURES: Array<{ icon: IconName; title: string; body: string }> = [
-  {
-    icon: 'check',
-    title: 'The code, front and centre',
-    body: 'A delivered unlock puts the code where you cannot miss it, with what to do next in plain words.',
-  },
-  {
-    icon: 'shield',
-    title: 'Masked identifiers',
-    body: 'Full IMEIs are never shown in lists or shared views — first two digits and last four only.',
-  },
-  {
-    icon: 'clock',
-    title: 'Orders that keep',
-    body: 'A code from three months ago is still there, on the order you bought it with.',
+    title: 'Guides',
+    body: 'Carrier policies, unlock timing and what an IMEI check really tells you.',
+    href: '/articles',
   },
 ]
 
@@ -135,15 +127,84 @@ const FAQ = [
 
 export const metadata = pageMetadata("/", "IMEI Phone Unlocking & Device Check Reports", "Compare IMEI phone unlock services and device reports. Review availability, prices and delivery estimates before ordering with iUnlockMobile.")
 
+/* Small, original line drawings for the three steps. */
+function StepArt({ kind }: { kind: 'imei' | 'review' | 'done' }) {
+  if (kind === 'imei') {
+    return (
+      <svg viewBox="0 0 150 100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect className="soft" x="52" y="8" width="46" height="84" rx="9" stroke="none" />
+        <rect x="52" y="8" width="46" height="84" rx="9" />
+        <path d="M68 16h14" />
+        <rect x="60" y="30" width="30" height="12" rx="3" className="ink" />
+        <path d="M64 36h4M70 36h4M76 36h4M82 36h4" className="ink" />
+        <path d="M60 52h30M60 60h30M60 68h22" opacity=".55" />
+        <path d="M18 50h22M28 40l10 10-10 10" />
+      </svg>
+    )
+  }
+  if (kind === 'review') {
+    return (
+      <svg viewBox="0 0 150 100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect className="soft" x="22" y="18" width="106" height="64" rx="10" stroke="none" />
+        <rect x="22" y="18" width="106" height="64" rx="10" />
+        <path d="M34 34h40" className="ink" />
+        <path d="M34 46h28" opacity=".55" />
+        <rect x="86" y="30" width="30" height="20" rx="5" />
+        <path d="M92 40h18" className="ink" />
+        <path d="M34 64h82" opacity=".35" />
+        <circle cx="112" cy="68" r="9" className="soft" stroke="none" />
+        <path d="M107 68l3.5 3.5 6-7" className="ok" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 150 100" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect className="soft" x="54" y="8" width="42" height="84" rx="9" stroke="none" />
+      <rect x="54" y="8" width="42" height="84" rx="9" />
+      <path d="M69 16h12" />
+      <rect x="64" y="34" width="22" height="30" rx="5" className="ink" />
+      <path d="M70 34v-5a5 5 0 0 1 10 0" className="ink" />
+      <path d="M22 30h8l6 10 6-20 6 24 6-14h10" className="ok" />
+      <path d="M104 44l18-10M104 56h18M104 68l18 10" opacity=".5" />
+    </svg>
+  )
+}
+
 export default function HomePage() {
-  const ordering = unlockOrderingEnabled() || listPublicProviderProducts('unlock').some((product) => product.status === 'available')
+  const unlockProducts = listPublicProviderProducts('unlock')
+  const checkProducts = listPublicProviderProducts('imei_check')
+  const ordering = unlockOrderingEnabled() || unlockProducts.some((product) => product.status === 'available')
   const status = !ordering && serviceStatus()
+  const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size
+  const countries = [...new Set(CARRIERS.map((carrier) => carrier.country))]
+
+  const unlockWidget: PriceCheckProduct[] = unlockProducts.map((product) => ({
+    code: product.productCode,
+    name: product.name,
+    category: unlockCategory(product),
+    priceCents: product.priceCents,
+    etaLabel: product.etaLabel,
+  }))
+  const checkWidget: PriceCheckProduct[] = checkProducts.map((product) => ({
+    code: product.productCode,
+    name: product.name,
+    category: product.group,
+    priceCents: product.priceCents,
+    etaLabel: product.etaLabel,
+  }))
+
+  const heroTiles: Array<{ icon: IconName; title: string; caption: string }> = [
+    { icon: 'bolt', title: 'Remote', caption: 'Nothing installed, no shop visit' },
+    { icon: 'shieldCheck', title: 'Held, not charged', caption: 'Credit returns if the network refuses' },
+    { icon: 'lock', title: 'Permanent', caption: 'Recorded against the IMEI itself' },
+    { icon: 'globe', title: `${networks} networks`, caption: `Across ${countries.length} countries, more on request` },
+  ]
 
   return (
     <>
       <StructuredData faq={FAQ} />
 
-      {/* 02 · Hero */}
+      {/* 01 · Hero */}
       <section className="hero home-hero" id="check">
         <div className="shell">
           <div className="hero-copy">
@@ -156,92 +217,125 @@ export default function HomePage() {
               </p>
             ) : null}
 
+            <span className="hero-chip">
+              <Icon name="shieldCheck" strokeWidth={2} />
+              Filed with the network that holds the lock
+            </span>
+
             <h1 className="t-hero">
               {ordering ? 'Unlock your phone by IMEI.' : 'Find the right service for your phone.'}
               <br />
-              <span className="accent">{ordering ? 'Price and delivery time before you pay.' : 'Browse prices and check availability.'}</span>
+              <span className="accent">
+                {ordering ? 'See the price and the wait before you pay.' : 'Browse prices and check availability.'}
+              </span>
             </h1>
 
             <p className="t-lead">
               {ordering
-                ? 'Enter your IMEI, then choose a service. Compare prices and delivery estimates before you confirm an order.'
+                ? 'Pick the network your phone is locked to and the quote appears — then enter the IMEI. Credit is held while the network works and returned in full if it refuses.'
                 : 'Explore device reports and unlock services. Enter your IMEI to get started, or browse prices first. You can compare services before creating an account.'}
             </p>
 
-            {/* One filled button per screen. These were three competing calls
-                to action pointing three different ways, in a row that also
-                asked the visitor to learn our service taxonomy first. The
-                form to the right is the primary action; these are the two
-                ways past it. */}
+            <div className="hero-tiles">
+              {heroTiles.map((tile) => (
+                <div className="hero-tile" key={tile.title}>
+                  <span className="trust-bar-icon" aria-hidden="true">
+                    <Icon name={tile.icon} strokeWidth={1.9} />
+                  </span>
+                  <b>{tile.title}</b>
+                  <span>{tile.caption}</span>
+                </div>
+              ))}
+            </div>
+
             <p className="hero-asides">
               <Link href="/services/imei-check">Just want a device report?</Link>
               <span aria-hidden="true">·</span>
-              <Link href="/user/orders">Track an order</Link>
+              <Link href="/track">Track an order</Link>
             </p>
           </div>
 
           <div className="hero-panel">
-            <div className="hero-panel-head">
-              <span className="kicker">
-                <Icon name="device" strokeWidth={2} />
-                Start with your device
-              </span>
-              <span className="t-micro">{ordering ? 'Reserved credit returned if refused' : 'Prices and availability before you choose'}</span>
-            </div>
-
-            <DeviceBrowseForm />
+            <HeroPriceCheck unlock={unlockWidget} check={checkWidget} ordering={ordering} />
           </div>
         </div>
       </section>
 
-      {/* 03 · Trust bar */}
-      <section className="section section--flush-top home-trust">
+      {/* 02 · Networks */}
+      <section className="section section--tint home-section" id="networks">
         <div className="shell">
-          <div className="trust-bar">
-            {TRUST.map((item) => (
-              <div key={item.title}>
-                <b>{item.title}</b>
-                <span>{item.caption}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 04 · Benefit grid */}
-      <section className="section section--tint home-section" id="services">
-        <div className="shell">
-          <div className="section-head">
+          <div className="section-head section-head--center">
             <span className="kicker">
-              <Icon name="sparkle" strokeWidth={2} />
-              Unlock services
+              <Icon name="globe" strokeWidth={2} />
+              Networks
             </span>
-            <h2 className="t-section">Everything you need to unlock with confidence.</h2>
+            <h2 className="t-section">
+              Locked to one of these? <span className="accent">Start here.</span>
+            </h2>
             <p className="t-lead">
-              Start with a network unlock, check an unknown phone first, then follow the order until
-              the result is delivered.
+              The networks the catalog lists today. Each one shows its own price and typical turnaround
+              before you order.
             </p>
           </div>
 
-          <div className="grid-3 home-card-grid">
-            {SERVICES.map((service) => (
-              <article className="card card--benefit" key={service.title}>
-                <span className={`icon-tile${service.tint}`} aria-hidden="true">
-                  <Icon name={service.icon} strokeWidth={1.7} />
-                </span>
-                <h3 className="t-card">{service.title}</h3>
-                <p className="t-small">{service.body}</p>
-                <Link className="link-arrow" href={service.action.href}>
-                  {service.action.label}
-                  <Icon name="arrowRight" strokeWidth={2.2} />
+          <ul className="tile-grid" aria-label="Networks">
+            {CARRIERS.map((carrier) => (
+              <li key={carrier.id}>
+                <Link className="tile" href="/services/unlock">
+                  <i aria-hidden="true">{carrier.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 2)}</i>
+                  <span>
+                    {carrier.name}
+                    <small>{carrier.country}</small>
+                  </span>
                 </Link>
-              </article>
+              </li>
             ))}
+          </ul>
+
+          <div className="tile-foot">
+            <p className="t-small">
+              Not listed? The unlock catalog carries more networks than fit here, and new ones are added as suppliers open them.
+            </p>
+            <Link className="button button--quiet" href="/services/unlock">
+              <Icon name="search" strokeWidth={1.9} />
+              Find your network
+            </Link>
+          </div>
+
+          <div className="eligibility">
+            <div className="section-head">
+              <span className="kicker">
+                <Icon name="check" strokeWidth={2} />
+                Before you order
+              </span>
+              <h2 className="t-card" style={{ fontSize: 28, letterSpacing: '-0.03em' }}>
+                Is your phone eligible?
+              </h2>
+              <p className="t-small">Thirty seconds of checking saves a refused order. Three things decide it.</p>
+            </div>
+            <div className="eligibility-grid">
+              {ELIGIBILITY.map((item) => (
+                <div className="eligibility-item" key={item.title}>
+                  <span className="icon-tile icon-tile--sm" aria-hidden="true">
+                    <Icon name={item.icon} />
+                  </span>
+                  <b>{item.title}</b>
+                  <p>{item.body}</p>
+                </div>
+              ))}
+            </div>
+            <p className="eligibility-note">
+              <Icon name="info" strokeWidth={1.9} />
+              <span>
+                Not sure? Order with the best information you have. If the network turns the device down,
+                the held credit returns to your balance — nothing is charged for a refusal.
+              </span>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* 05 · Steps */}
+      {/* 03 · How it works */}
       <section className="section home-section" id="how">
         <div className="shell">
           <div className="section-head section-head--center">
@@ -249,24 +343,22 @@ export default function HomePage() {
               <Icon name="pulse" strokeWidth={2} />
               How it works
             </span>
-            <h2 className="t-section">Unlock your phone in three simple steps.</h2>
-            <p className="t-lead">
-              Your phone stays with you throughout the process.
-            </p>
+            <h2 className="t-section">
+              Three steps. <span className="accent">Nothing to install.</span>
+            </h2>
+            <p className="t-lead">The phone stays in your hand the whole time.</p>
           </div>
 
           <div className="grid-3 home-card-grid">
             {STEPS.map((step, index) => (
               <article className="card card--step" key={step.title}>
                 <span className="step-numeral" aria-hidden="true">
-                  {String(index + 1).padStart(2, '0')}
+                  {index + 1}
                 </span>
-                <span className={`icon-tile${step.tint}`} aria-hidden="true">
-                  <Icon name={step.icon} strokeWidth={1.7} />
-                </span>
-                <h3 className="t-card" style={{ marginTop: 20 }}>
-                  {step.title}
-                </h3>
+                <div className="step-art" aria-hidden="true">
+                  <StepArt kind={step.art} />
+                </div>
+                <h3 className="t-card">{step.title}</h3>
                 <p className="t-small" style={{ marginTop: 9 }}>
                   {step.body}
                 </p>
@@ -276,138 +368,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 06 · Gradient band — the one saturated block on the page */}
-      <section className="section band home-section">
-        <div className="shell band-grid">
-          <div className="stack" style={{ gap: 20 }}>
-            <span className="kicker">
-              <Icon name="shield" strokeWidth={2} />
-              Why it sticks
-            </span>
-            <h2 className="t-display">The lock is released where it was set.</h2>
-            <p className="t-lead">
-              A carrier lock lives in the network&rsquo;s own database, against your IMEI. That is
-              where we file, which is why the unlock survives a factory reset and why nothing has to
-              be installed on the phone.
-            </p>
-          </div>
+      {/* 04 · Reviews — sample content, labelled as such */}
+      <Testimonials items={SAMPLE_TESTIMONIALS} />
 
-          <div className="band-panel">
-            {BAND_ROWS.map((row) => (
-              <div className="band-row" key={row.title}>
-                <Icon name={row.icon} />
-                <span>
-                  <b>{row.title}</b>
-                  <span>{row.caption}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 07 · Product split */}
-      <section className="section home-section">
-        <div className="shell split">
-          <div className="scene">
-            <div className="window">
-              <div className="window-bar">
-                <i aria-hidden="true" />
-                <i aria-hidden="true" />
-                <i aria-hidden="true" />
-                <span className="addr">iunlockmobile.com / orders</span>
-              </div>
-              <div className="window-body">
-                <div className="data-table">
-                  <div className="row row--head">
-                    <span>Device</span>
-                    <span>Service</span>
-                    <span>Status</span>
-                  </div>
-                  <div className="row">
-                    <b>35······0095</b>
-                    <span>AT&amp;T unlock</span>
-                    <span className="status">Unlocked</span>
-                  </div>
-                  <div className="row">
-                    <b>35······4471</b>
-                    <span>O2 unlock</span>
-                    <span className="status">Unlocked</span>
-                  </div>
-                  <div className="row">
-                    <b>86······7620</b>
-                    <span>MDM removal</span>
-                    <span className="status">Unlocked</span>
-                  </div>
-                </div>
-                <div className="hero-mini">
-                  <div className="mini-stat">
-                    <span className="label">Held for open orders</span>
-                    <span className="value">$0.00</span>
-                  </div>
-                  <div className="mini-stat">
-                    <span className="label">Identifier shown</span>
-                    <span className="value">Masked</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="device" aria-hidden="true">
-              <div className="screen">
-                <span className="t-micro">iUnlockMobile</span>
-                <div className="float-card" style={{ boxShadow: 'none' }}>
-                  <span className="icon-tile icon-tile--sm">
-                    <Icon name="check" />
-                  </span>
-                  <span>
-                    <span className="label">Network</span>
-                    <span className="value">Unlocked</span>
-                  </span>
-                </div>
-                <div className="mini-stat">
-                  <span className="label">Unlock code</span>
-                  <span className="value">4187 2290</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="stack" style={{ gap: 24 }}>
-            <span className="kicker">
-              <Icon name="window" strokeWidth={2} />
-              The order view
-            </span>
-            <h2 className="t-section">Watch it run, then keep the result.</h2>
-            <p className="t-lead">
-              Every order shows where it is while the carrier has it, and what came back once they
-              answer — the code, what to do with it, and whether the credit was charged or returned.
-            </p>
-
-            <ul className="feature-list">
-              {FEATURES.map((feature) => (
-                <li key={feature.title}>
-                  <span className="icon-tile icon-tile--sm" aria-hidden="true">
-                    <Icon name={feature.icon} />
-                  </span>
-                  <span>
-                    <b>{feature.title}</b>
-                    <span>{feature.body}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <Link className="button button--primary" href={ordering ? '#check' : '/services/imei-check'} style={{ justifySelf: 'start' }}>
-              <Icon name="bolt" strokeWidth={1.9} />
-              {ordering ? 'See your unlock price' : 'Browse phone reports'}
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 08 · FAQ */}
-      <section className="section section--tint home-section" id="faq">
+      {/* 05 · FAQ */}
+      <section className="section home-section" id="faq">
         <div className="shell faq">
           <div className="section-head">
             <span className="kicker">
@@ -415,51 +380,112 @@ export default function HomePage() {
               Common questions
             </span>
             <h2 className="t-section">Straight answers before you pay.</h2>
-            <p className="t-lead">
-              Including the one most unlock sites leave out — when it will not work.
-            </p>
+            <p className="t-lead">Including the one most unlock sites leave out — when it will not work.</p>
           </div>
 
-          <div className="faq-list">
-            {FAQ.map((item, index) => (
-              <details className="faq-item" key={item.question} open={index === 0}>
-                <summary>
-                  {item.question}
-                  <span className="plus" aria-hidden="true">
-                    <Icon name="plus" strokeWidth={2.6} />
-                  </span>
-                </summary>
-                <div className="answer">{item.answer}</div>
-              </details>
-            ))}
+          <div>
+            <div className="faq-list">
+              {FAQ.map((item, index) => (
+                <details className="faq-item" key={item.question} open={index === 0}>
+                  <summary>
+                    {item.question}
+                    <span className="plus" aria-hidden="true">
+                      <Icon name="plus" strokeWidth={2.6} />
+                    </span>
+                  </summary>
+                  <div className="answer">{item.answer}</div>
+                </details>
+              ))}
+            </div>
+            <p className="faq-foot">
+              <Link className="link-arrow" href="/support">
+                Still have a question? Visit the help centre
+                <Icon name="arrowRight" strokeWidth={2.2} />
+              </Link>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* 09 · CTA band */}
-      <section className="section home-section">
+      {/* 06 · Brands */}
+      <section className="section section--tint home-section" id="brands">
         <div className="shell">
-          <div className="cta">
-            <div className="stack" style={{ gap: 10 }}>
-              <span className="kicker">
-                <Icon name="bolt" strokeWidth={2} />
-                Ready when you are
-              </span>
-              <h2 className="t-card" style={{ fontSize: 30, letterSpacing: '-0.035em' }}>
-                Ready to use your phone on another network?
-              </h2>
-              <p className="t-small">
-                {ordering
-                  ? 'Start with the country, original carrier and IMEI. You will see service details before confirming the order.'
-                  : 'Unlock ordering is not open yet. Browse phone report prices and availability — those can be ordered today.'}
+          <div className="section-head section-head--center">
+            <span className="kicker">
+              <Icon name="device" strokeWidth={2} />
+              Supported devices
+            </span>
+            <h2 className="t-section">
+              Brands we <span className="accent">work with.</span>
+            </h2>
+            <p className="t-lead">
+              Apple devices are released over the air. Every other brand receives a code to type in once.
+            </p>
+          </div>
+
+          <ul className="tile-grid" aria-label="Brands">
+            {BRANDS.map((brand) => (
+              <li key={brand.id}>
+                <Link className="tile" href="/services/unlock">
+                  <i aria-hidden="true">{brand.name.slice(0, 1)}</i>
+                  <span>
+                    {brand.name}
+                    <small>{brand.delivery === 'remote' ? 'Released remotely' : 'Unlock code'}</small>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* 07 · Service hub + help band */}
+      <section className="section home-section" id="services">
+        <div className="shell">
+          <div className="section-head section-head--center">
+            <span className="kicker">
+              <Icon name="grid" strokeWidth={2} />
+              Everything on offer
+            </span>
+            <h2 className="t-section">
+              One place for the lock <span className="accent">and the facts.</span>
+            </h2>
+          </div>
+
+          <div className="hub-grid">
+            {HUB.map((item) => (
+              <Link className="hub-card" href={item.href} key={item.title}>
+                <span className={`icon-tile${item.tint}`} aria-hidden="true">
+                  <Icon name={item.icon} strokeWidth={1.8} />
+                </span>
+                <h3>
+                  {item.title}
+                  {item.chip ? <span className="hub-chip">{item.chip}</span> : null}
+                </h3>
+                <p>{item.body}</p>
+                <span className="link-arrow">
+                  Learn more
+                  <Icon name="arrowRight" strokeWidth={2.2} />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="help-band">
+            <div>
+              <h3>Not sure which one you need?</h3>
+              <p>
+                The help centre walks through the common cases — buying used, switching network, a phone
+                that says “SIM not supported” — and points you at the right service.
               </p>
             </div>
             <div className="cta-actions">
-              <Link className="button button--primary" href={ordering ? '#check' : '/services/imei-check'}>
-                {ordering ? 'Unlock Phone Now' : 'Browse phone reports'}
+              <Link className="button button--primary" href="/support">
+                Open the help centre
+                <Icon name="arrowRight" strokeWidth={2.2} />
               </Link>
-              <Link className="button button--quiet" href="/user/orders">
-                Track an Order
+              <Link className="button button--quiet" href="/contact">
+                Contact support
               </Link>
             </div>
           </div>
@@ -468,4 +494,3 @@ export default function HomePage() {
     </>
   )
 }
-
