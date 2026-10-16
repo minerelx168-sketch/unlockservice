@@ -14,10 +14,20 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = pageMetadata("/services/imei-check", "IMEI Check Reports: Carrier, Blacklist & Warranty", "Compare paid IMEI reports for carrier, blacklist, warranty and lock-status information. Check what each report includes, its price and availability.")
 
-export default async function ImeiCheckServicesPage() {
-  const [found, intent] = await Promise.all([currentSession(), readDeviceIntent()])
+export default async function ImeiCheckServicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string | string[] }>
+}) {
+  const [found, intent, query] = await Promise.all([currentSession(), readDeviceIntent(), searchParams])
   const products = listPublicProviderProducts('imei_check')
   const available = products.some((product) => product.status === 'available')
+  /* A code in the address (from the hero widget or the drawer) preselects
+     the report, but only if it is one we list — anything else is ignored. */
+  const requested = typeof query.product === 'string' ? query.product : undefined
+  const initialProductCode =
+    (intent?.domain === 'imei_check' ? intent.productCode : undefined)
+    ?? products.find((product) => product.productCode === requested)?.productCode
   return (
       <section className="section section--tint service-entry-section">
         <div className="shell">
@@ -31,7 +41,7 @@ export default async function ImeiCheckServicesPage() {
             products={products}
             domain="imei_check"
             initialImei={intentImeiFor(intent, 'imei_check')}
-            initialProductCode={intent?.domain === 'imei_check' ? intent.productCode : undefined}
+            initialProductCode={initialProductCode}
             isAuthenticated={found !== null}
             availableCents={found ? found.user.credit_cents - found.user.held_cents : undefined}
           />

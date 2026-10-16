@@ -16,14 +16,22 @@ export async function browseDevicesAction(_: IntentState, form: FormData): Promi
   if (!domain) return { error: 'Choose Phone Check or Unlock.' }
   const raw = form.get('imei')
   if (typeof raw !== 'string') return { error: 'Enter a valid 15-digit IMEI, or browse without one.' }
+  /* A report chosen in the hero widget travels with the visitor. Anything
+     that is not in today's catalog is dropped, not errored: the page they
+     land on lists what is. */
+  const requestedCode = form.get('productCode')
+  const product = typeof requestedCode === 'string' && requestedCode
+    ? listPublicProviderProducts(domain).find((entry) => entry.productCode === requestedCode)
+    : undefined
   if (raw.trim()) {
     const imei = deviceImei(raw)
     if (!imei) return { error: 'Enter a valid 15-digit IMEI, or clear it to browse without one.' }
-    await writeDeviceIntent(imei, domain)
+    await writeDeviceIntent(imei, domain, product?.productCode)
   } else {
     await clearDeviceIntent()
   }
-  redirect(domain === 'unlock' ? (raw.trim() ? '/services/unlock/catalog' : '/services/unlock') : '/services/imei-check')
+  if (domain === 'unlock') redirect(raw.trim() ? '/services/unlock/catalog' : '/services/unlock')
+  redirect(product ? `/services/imei-check?product=${encodeURIComponent(product.productCode)}` : '/services/imei-check')
 }
 
 /** The unlock catalog is revealed only after the same IMEI validation for every visitor.
