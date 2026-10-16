@@ -132,6 +132,90 @@ const PATHS = {
       <rect x="13" y="13" width="7" height="7" rx="2" />
     </>
   ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2.5V5" />
+      <path d="M12 19v2.5" />
+      <path d="M2.5 12H5" />
+      <path d="M19 12h2.5" />
+      <path d="M5.3 5.3l1.8 1.8" />
+      <path d="M16.9 16.9l1.8 1.8" />
+      <path d="M5.3 18.7l1.8-1.8" />
+      <path d="M16.9 7.1l1.8-1.8" />
+    </>
+  ),
+  chevronDown: <path d="M6 9l6 6 6-6" />,
+  chevronRight: <path d="M9 6l6 6-6 6" />,
+  arrowLeft: (
+    <>
+      <path d="M19 12H6" />
+      <path d="M11 6l-6 6 6 6" />
+    </>
+  ),
+  user: (
+    <>
+      <circle cx="12" cy="8.5" r="3.6" />
+      <path d="M4.8 20a7.2 7.2 0 0114.4 0" />
+    </>
+  ),
+  logout: (
+    <>
+      <path d="M10 4H6a2 2 0 00-2 2v12a2 2 0 002 2h4" />
+      <path d="M14 8l4 4-4 4" />
+      <path d="M18 12H9" />
+    </>
+  ),
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3a14 14 0 010 18" />
+      <path d="M12 3a14 14 0 000 18" />
+    </>
+  ),
+  star: <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.9l-5.3 2.8 1.1-5.9-4.3-4.1 5.9-.8z" />,
+  refresh: (
+    <>
+      <path d="M20 12a8 8 0 01-14.3 4.9" />
+      <path d="M4 12a8 8 0 0114.3-4.9" />
+      <path d="M18.5 3.5v4h-4" />
+      <path d="M5.5 20.5v-4h4" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="2.8" />
+    </>
+  ),
+  eyeOff: (
+    <>
+      <path d="M4 4l16 16" />
+      <path d="M10.6 6.1A10 10 0 0121.5 12a15 15 0 01-3 3.6" />
+      <path d="M6.6 6.9A14.7 14.7 0 002.5 12s3.5 6.5 9.5 6.5a9.4 9.4 0 004-.9" />
+      <path d="M9.9 9.9a2.8 2.8 0 004 4" />
+    </>
+  ),
+  wallet: (
+    <>
+      <rect x="3" y="6" width="18" height="13" rx="3" />
+      <path d="M3 10h18" />
+      <path d="M16 14.5h.01" />
+    </>
+  ),
+  ticket: (
+    <>
+      <path d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 000-4z" />
+      <path d="M12 6v12" />
+    </>
+  ),
+  home: (
+    <>
+      <path d="M4 11l8-7 8 7" />
+      <path d="M6 10v10h12V10" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>
 
 export type IconName = keyof typeof PATHS

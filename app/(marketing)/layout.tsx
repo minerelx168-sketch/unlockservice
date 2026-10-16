@@ -1,17 +1,13 @@
 import type { ReactNode } from 'react'
-import { SiteFooter } from '@/components/site-footer'
-import { SiteHeader } from '@/components/site-header'
-import { currentSession } from '@/lib/auth'
+import { PublicFooter, PublicHeader } from '@/components/site-chrome'
 
-/** Public pages keep the marketing chrome and resolve account state on the server. */
-export default async function MarketingLayout({ children }: { children: ReactNode }) {
-  const isAuthenticated = (await currentSession()) !== null
-
+/** Public pages keep the marketing chrome; account state is resolved on the server. */
+export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <SiteHeader isAuthenticated={isAuthenticated} />
+      <PublicHeader />
       <main>{children}</main>
-      <SiteFooter isAuthenticated={isAuthenticated} />
+      <PublicFooter />
     </>
   )
 }

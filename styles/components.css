@@ -784,68 +784,20 @@
   box-shadow: 0 12px 28px color-mix(in srgb, var(--primary) 40%, transparent);
 }
 
-.nav-toggle,
-.site-nav .nav-cta,
-.site-nav .nav-account {
-  display: none;
+/* The menu button is permanent: on a wide screen it opens the full
+   service tree, on a phone it is the navigation. */
+.nav-toggle {
+  display: grid;
 }
 
 @media (max-width: 1320px) {
-  .nav-toggle {
-    display: grid;
-  }
-
-  /* Collapsed by default so the panel is closed on first paint, with no
-     hidden-attribute flash while the header hydrates. */
+  /* The inline links hand over to the drawer; nothing is duplicated. */
   .site-nav {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 0;
-    margin: 0;
-    padding: 8px var(--gutter) 18px;
-    background: var(--page);
-    border-bottom: 1px solid var(--line);
-    box-shadow: var(--shadow-soft);
-    max-height: calc(100vh - 75px);
-    max-height: calc(100dvh - 75px);
-    overflow-y: auto;
-  }
-
-  .site-nav[data-open='true'] {
-    display: flex;
-  }
-
-  .site-nav a {
-    padding-block: 12px;
-    border-top: 1px solid var(--line);
-    font-size: 1rem;
-    white-space: normal;
-  }
-
-  .site-nav a[aria-current='page']::after {
     display: none;
   }
 
   .header-actions .button--quiet {
     display: none;
-  }
-
-  /* The header CTA moves into the panel rather than competing for the
-     last 40px of a phone header. */
-  .site-nav .nav-cta,
-  .site-nav .nav-account {
-    display: flex;
-    color: var(--primary);
-  }
-
-  .site-nav .nav-cta {
-    margin-top: 14px;
   }
 }
 
@@ -1383,8 +1335,84 @@
 
 .footer-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
-  gap: 48px;
+  grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr));
+  gap: 40px;
+}
+
+/* Three facts about how the service works — not follower counts. Each is
+   derived from data on the server, so it cannot drift from the catalog. */
+.footer-facts {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+  max-width: 360px;
+}
+
+.footer-fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--footer-line);
+  border-radius: var(--radius-control);
+  background: rgb(255 255 255 / 4%);
+  color: var(--footer-ink);
+  font-size: 0.8125rem;
+  font-weight: 620;
+  line-height: 1.35;
+}
+
+.footer-fact svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--primary-glow);
+}
+
+.footer-fact span {
+  display: block;
+  font-weight: 450;
+  color: var(--footer-muted);
+}
+
+/* "We accept": only what we actually take. */
+.footer-accept {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  margin-top: 44px;
+  padding-top: 22px;
+  border-top: 1px solid var(--footer-line);
+  font-size: 0.8125rem;
+}
+
+.pay-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--footer-line);
+  background: rgb(255 255 255 / 6%);
+  color: var(--footer-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.pay-badge i {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #26a17b;
+  color: #fff;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .site-footer h4 {
@@ -1430,16 +1458,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 48px;
-  padding-top: 22px;
-  border-top: 1px solid var(--footer-line);
+  margin-top: 18px;
   font-size: 0.875rem;
 }
 
-@media (max-width: 940px) {
+@media (max-width: 1080px) {
   .footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 34px;
+  }
+
+  .footer-grid > div:first-child {
+    grid-column: 1 / -1;
   }
 }
 

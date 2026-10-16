@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { SiteFooter } from '@/components/site-footer'
-import { SiteHeader } from '@/components/site-header'
+import { PublicFooter, PublicHeader } from '@/components/site-chrome'
 import { Icon } from '@/components/icons'
 import { currentSession } from '@/lib/auth'
 
@@ -24,7 +23,7 @@ export default async function NotFound() {
 
   return (
     <>
-      <SiteHeader isAuthenticated={isAuthenticated} />
+      <PublicHeader />
       <main className="section">
         <div className="shell stack" style={{ gap: 22, maxWidth: 640 }}>
           <span className="kicker">
@@ -45,14 +44,14 @@ export default async function NotFound() {
             <Link className="button button--quiet" href="/services">
               Browse all services
             </Link>
-            <Link className="button button--quiet" href={isAuthenticated ? '/user/orders' : '/login'}>
+            <Link className="button button--quiet" href={isAuthenticated ? '/user/orders' : '/track'}>
               <Icon name="clock" strokeWidth={1.9} />
               {isAuthenticated ? 'Your orders' : 'Find an order'}
             </Link>
           </div>
         </div>
       </main>
-      <SiteFooter isAuthenticated={isAuthenticated} />
+      <PublicFooter />
     </>
   )
 }
