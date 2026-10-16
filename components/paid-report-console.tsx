@@ -7,6 +7,7 @@ import { IMEI_LENGTH } from '@/lib/imei'
 import { deviceImei } from '@/lib/device-intent-value'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
+import { ImeiSegments } from './imei-segments'
 import { ReportCard } from './report-card'
 import { ServicePicker } from './service-picker'
 import { saveDeviceIntentAction, clearAcceptedDeviceIntentAction } from '@/lib/device-intent-actions'
@@ -334,6 +335,7 @@ export function PaidReportConsole({
                 imeiRef.current?.focus()
               }}><Icon name="cross" /></button> : null}
             </div>
+            <ImeiSegments count={digitCount} valid={imeiValid} />
             <div className="service-workbench-help">
               <p className="field-note" id="paid-report-imei-help" data-state={imeiInvalid ? 'invalid' : undefined}>
                 <Icon name="info" strokeWidth={1.9} />

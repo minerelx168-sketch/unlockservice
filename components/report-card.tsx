@@ -1,64 +1,65 @@
+import { parseReport, type ReportRow } from '@/lib/report-card-parse'
 import { Icon } from './icons'
 
 /**
- * Provider output arrives as "Key: Value" lines. Rendered as a report card —
- * label left, value right, with a status badge where the value states a
- * condition a buyer checks for. Text that does not parse falls back to the
- * monospace block unchanged, so unlock codes and prose are never mangled.
+ * Provider output rendered the way a buyer reads it: the conditions they
+ * are checking for first, as badged rows, then who the device is, then
+ * the rest. Text that does not parse falls back to the monospace block
+ * unchanged, so unlock codes and prose are never mangled.
  *
  * React escapes every string: provider text is never executed as HTML.
+ * The colour logic lives in lib/report-card-parse.ts, where it is tested.
  */
 
-type Row = { label: string; value: string; tone: 'good' | 'warn' | 'bad' | null }
-
-const GOOD = new Set(['clean', 'off', 'no', 'unlocked', 'valid', 'active', 'out of blacklist', 'not found', 'none'])
-const BAD = new Set(['blacklisted', 'lost', 'stolen', 'barred', 'blocked', 'in blacklist', 'lost or stolen'])
-const WARN = new Set(['on', 'yes', 'locked', 'expired', 'inactive', 'unknown'])
-
-function tone(label: string, value: string): Row['tone'] {
-  const v = value.trim().toLocaleLowerCase('en')
-  if (GOOD.has(v)) return 'good'
-  if (BAD.has(v)) return 'bad'
-  if (WARN.has(v)) return 'warn'
-  return null
+function Rows({ rows }: { rows: ReportRow[] }) {
+  return (
+    <dl className="report-card-rows">
+      {rows.map((row, index) => (
+        <div className="report-card-row" key={`${row.label || 'line'}-${index}`}>
+          <dt>{row.label || '—'}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )
 }
 
-function parseRows(text: string): Row[] | null {
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-  if (lines.length < 2) return null
-  const rows: Row[] = []
-  let matched = 0
-  for (const line of lines) {
-    const split = line.match(/^([^:]{1,48}):\s*(.+)$/)
-    if (split) {
-      matched += 1
-      rows.push({ label: split[1].trim(), value: split[2].trim(), tone: tone(split[1], split[2]) })
-    } else {
-      rows.push({ label: '', value: line, tone: null })
-    }
-  }
-  // Mostly labelled lines, or it is not a report — codes and prose stay verbatim.
-  return matched >= Math.max(2, Math.ceil(lines.length * 0.6)) ? rows : null
-}
+type Limit = { critical?: number; identity?: number; details?: number }
 
-export function ReportCard({ text, fallbackClassName = 'provider-code-result' }: { text: string; fallbackClassName?: string }) {
-  const rows = parseRows(text)
-  if (!rows) return <pre className={fallbackClassName}>{text}</pre>
-
-  const statusRows = rows.filter((row) => row.tone !== null && row.label)
-  const infoRows = rows.filter((row) => row.tone === null || !row.label)
+export function ReportCard({
+  text,
+  fallbackClassName = 'provider-code-result',
+  limit,
+}: {
+  text: string
+  fallbackClassName?: string
+  /** For a preview: how many rows of each group to show. Real reports are never cut. */
+  limit?: Limit
+}) {
+  const parsed = parseReport(text)
+  if (!parsed) return <pre className={fallbackClassName}>{text}</pre>
+  const report = limit
+    ? {
+        critical: parsed.critical.slice(0, limit.critical ?? parsed.critical.length),
+        identity: parsed.identity.slice(0, limit.identity ?? parsed.identity.length),
+        details: parsed.details.slice(0, limit.details ?? parsed.details.length),
+      }
+    : parsed
 
   return (
     <div className="report-card">
-      {statusRows.length ? (
+      {report.critical.length ? (
         <section className="report-card-group">
-          <h3 className="report-card-heading"><span className="report-card-dot" aria-hidden="true" />Status</h3>
+          <h3 className="report-card-heading">
+            <span className="report-card-dot" aria-hidden="true" />
+            Critical status
+          </h3>
           <ul className="report-card-status-list">
-            {statusRows.map((row, index) => (
+            {report.critical.map((row, index) => (
               <li className={`report-card-status report-card-status--${row.tone}`} key={`${row.label}-${index}`}>
                 <span className="report-card-status-label">{row.label}</span>
                 <span className="report-card-badge">
-                  <Icon name={row.tone === 'good' ? 'checkSmall' : 'info'} strokeWidth={2.4} />
+                  <Icon name={row.tone === 'good' ? 'checkSmall' : row.tone === 'bad' ? 'cross' : 'info'} strokeWidth={2.4} />
                   {row.value}
                 </span>
               </li>
@@ -67,17 +68,23 @@ export function ReportCard({ text, fallbackClassName = 'provider-code-result' }:
         </section>
       ) : null}
 
-      {infoRows.length ? (
+      {report.identity.length ? (
         <section className="report-card-group">
-          <h3 className="report-card-heading"><span className="report-card-dot" aria-hidden="true" />Device information</h3>
-          <dl className="report-card-rows">
-            {infoRows.map((row, index) => (
-              <div className="report-card-row" key={`${row.label || 'line'}-${index}`}>
-                <dt>{row.label || '—'}</dt>
-                <dd>{row.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <h3 className="report-card-heading">
+            <span className="report-card-dot" aria-hidden="true" />
+            Device information
+          </h3>
+          <Rows rows={report.identity} />
+        </section>
+      ) : null}
+
+      {report.details.length ? (
+        <section className="report-card-group">
+          <h3 className="report-card-heading">
+            <span className="report-card-dot" aria-hidden="true" />
+            {report.identity.length || report.critical.length ? 'Additional details' : 'Report'}
+          </h3>
+          <Rows rows={report.details} />
         </section>
       ) : null}
     </div>
