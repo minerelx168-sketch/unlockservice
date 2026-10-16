@@ -7,6 +7,7 @@ import { BRANDS, CARRIERS } from '@/lib/catalog'
 import { FAQ } from '@/lib/faq'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { quickPicks } from '@/lib/quick-picks'
 import { SAMPLE_TESTIMONIALS } from '@/lib/testimonials'
 import { unlockCategory } from '@/lib/unlock-catalog-view'
 import { StructuredData } from './structured-data'
@@ -162,6 +163,10 @@ export default function HomePage() {
     etaLabel: product.etaLabel,
   }))
 
+  /* Two report chips from the catalog and the unlock itself: the three
+     things a visitor arrives for, one tap from the headline. */
+  const picks = quickPicks(checkProducts, 2)
+
   const heroTiles: Array<{ icon: IconName; title: string; caption: string }> = [
     { icon: 'bolt', title: 'Remote', caption: 'Nothing installed, no shop visit' },
     { icon: 'shieldCheck', title: 'Held, not charged', caption: 'Credit returns if the network refuses' },
@@ -205,6 +210,39 @@ export default function HomePage() {
                 : 'Explore device reports and unlock services. Enter your IMEI to get started, or browse prices first. You can compare services before creating an account.'}
             </p>
 
+            <div className="quick-picks">
+              <div className="quick-picks-label">
+                <span>Quick picks</span>
+                <Link href="/services">All services →</Link>
+              </div>
+              <div className="quick-pick-row">
+                <Link className="quick-pick" href="/services/unlock">
+                  <span className="icon-tile icon-tile--sm" aria-hidden="true">
+                    <Icon name="lock" />
+                  </span>
+                  <span>
+                    Unlock my phone
+                    <small>{networks} networks</small>
+                  </span>
+                </Link>
+                {picks.map((pick) => (
+                  <Link
+                    key={pick.product.productCode}
+                    className="quick-pick"
+                    href={`/services/imei-check?product=${encodeURIComponent(pick.product.productCode)}`}
+                  >
+                    <span className="icon-tile icon-tile--sm" aria-hidden="true">
+                      <Icon name={pick.icon} />
+                    </span>
+                    <span>
+                      {pick.short}
+                      <small>{pick.kicker}</small>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             <div className="hero-tiles">
               {heroTiles.map((tile) => (
                 <div className="hero-tile" key={tile.title}>
@@ -217,10 +255,10 @@ export default function HomePage() {
               ))}
             </div>
 
-            <p className="hero-asides">
-              <Link href="/services/imei-check">Just want a device report?</Link>
-              <span aria-hidden="true">·</span>
-              <Link href="/track">Track an order</Link>
+            <p className="quick-form-help hero-imei-tip">
+              Dial <kbd>*#06#</kbd> on the phone to see its IMEI.
+              <Link href="/support#faq"><Icon name="question" strokeWidth={2} />How to find my IMEI</Link>
+              <Link href="/track"><Icon name="clock" strokeWidth={2} />Track an order</Link>
             </p>
           </div>
 

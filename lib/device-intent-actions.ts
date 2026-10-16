@@ -31,7 +31,12 @@ export async function browseDevicesAction(_: IntentState, form: FormData): Promi
     await clearDeviceIntent()
   }
   if (domain === 'unlock') redirect(raw.trim() ? '/services/unlock/catalog' : '/services/unlock')
-  redirect(product ? `/services/imei-check?product=${encodeURIComponent(product.productCode)}` : '/services/imei-check')
+  /* With an IMEI in hand the visitor is ready to order, so the page lands
+     them on the form rather than at the top. A hash would be dropped by
+     the action redirect; the page reads this flag instead. */
+  const start = raw.trim() ? 'start=1' : ''
+  const query = [product ? `product=${encodeURIComponent(product.productCode)}` : '', start].filter(Boolean).join('&')
+  redirect(query ? `/services/imei-check?${query}` : '/services/imei-check')
 }
 
 /** The unlock catalog is revealed only after the same IMEI validation for every visitor.

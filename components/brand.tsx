@@ -4,9 +4,11 @@ import { Icon } from './icons'
 /**
  * The lockup, used by the header, the footer and the sign-in card. The
  * leading "i" takes the accent; the rest stays in ink, because the rest of
- * the page rations colour and a two-tone wordmark would fight it.
+ * the page rations colour and a two-tone wordmark would fight it. The
+ * tagline says what the three things on offer are, in the order a buyer
+ * meets them.
  */
-export function Brand() {
+export function Brand({ tagline = 'Unlock · Check · Track' }: { tagline?: string }) {
   return (
     <Link className="brand" href="/">
       <span className="mark" aria-hidden="true">
@@ -16,7 +18,7 @@ export function Brand() {
         <span className="name">
           <span className="name-i">i</span>UnlockMobile
         </span>
-        <span className="t-micro">IMEI unlocking</span>
+        <span className="t-micro brand-tagline">{tagline}</span>
       </span>
     </Link>
   )

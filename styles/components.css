@@ -1603,3 +1603,186 @@
     border-top: 1px solid var(--line);
   }
 }
+
+/* ==== header menus ================================================== */
+
+/* The tagline reads as a sentence, not a label: lower case, no tracking. */
+.brand-tagline {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.75rem;
+  font-weight: 560;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+
+.nav-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-caret {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 44px;
+  margin-left: -2px;
+  border-radius: 8px;
+  color: var(--muted);
+}
+
+.nav-caret svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.18s ease;
+}
+
+.nav-caret:hover {
+  color: var(--ink-strong);
+}
+
+.nav-item[data-open='true'] .nav-link,
+.nav-item[data-open='true'] .nav-caret {
+  color: var(--primary-dark);
+}
+
+.nav-item[data-open='true'] .nav-caret svg {
+  transform: rotate(180deg);
+}
+
+/* The panel. A transparent strip above it bridges the gap to the link so
+   the pointer can travel down without the menu closing on the way. */
+.nav-menu {
+  position: absolute;
+  top: calc(100% - 4px);
+  left: -14px;
+  z-index: 50;
+  width: 344px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: nav-menu-in 0.16s ease both;
+}
+
+.nav-menu::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+}
+
+.nav-menu[hidden] {
+  display: none;
+}
+
+.nav-menu-primary {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 16px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--ink-strong);
+}
+
+.nav-menu-primary b {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.nav-menu-primary small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.nav-menu-primary > svg {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
+
+.nav-menu-list {
+  display: grid;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-menu-list a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.nav-menu-list a:hover {
+  background: var(--page-tint);
+  color: var(--ink-strong);
+}
+
+.nav-menu-list svg {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+}
+
+.nav-menu-foot {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.nav-menu-foot .button {
+  width: 100%;
+  min-height: 40px;
+  font-size: 0.875rem;
+}
+
+.header-help {
+  color: var(--ink);
+}
+
+@keyframes nav-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1320px) {
+  .header-help {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-menu {
+    animation: none;
+  }
+
+  .nav-caret svg {
+    transition: none;
+  }
+}
