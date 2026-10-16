@@ -40,7 +40,7 @@ export function UnlockDeviceEntry({ initialImei = '' }: { initialImei?: string }
     <section className="service-browser unlock-device-entry" aria-labelledby="unlock-entry-heading">
       <nav className="service-browser__tabs" aria-label="Unlock workspace">
         <span aria-current="page"><Icon name="lock" /> New order</span>
-        <Link href="/user/reports"><Icon name="clock" /> Order history</Link>
+        <Link href="/user/orders"><Icon name="clock" /> Order history</Link>
       </nav>
 
       <header className="service-browser__header">

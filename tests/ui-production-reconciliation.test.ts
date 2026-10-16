@@ -52,7 +52,7 @@ test('footer privacy copy matches owner-visible identifiers and Unlock history u
   const chrome = read('components/site-chrome.tsx')
   assert.match(chrome, /Full IMEIs visible only to the owner/)
   assert.doesNotMatch(chrome, /Full IMEIs never shown in lists|Refused orders refund in full/)
-  const unlock = read('app/(marketing)/services/unlock/page.tsx')
+  const unlock = read('components/unlock-device-entry.tsx')
   assert.match(unlock, /href="\/user\/orders"/)
   assert.doesNotMatch(unlock, /href="\/user\/reports"/)
 })
