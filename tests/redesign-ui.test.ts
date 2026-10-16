@@ -25,7 +25,9 @@ test('sample reviews are labelled as samples and never aggregated', () => {
   assert.ok(SAMPLE_TESTIMONIALS.length >= 3)
   assert.ok(SAMPLE_TESTIMONIALS.every((item) => item.sample === true))
   const component = read('components/testimonials.tsx')
-  assert.match(component, /Sample reviews/)
+  // One disclosure, under the heading, for as long as the rows are personas.
+  assert.match(component, /Illustrative examples while verified customer reviews are collected/)
+  assert.match(component, /allSample\s*\?/)
   assert.doesNotMatch(component, /AggregateRating|ratingValue|reviewCount/)
   const home = read('app/(marketing)/page.tsx')
   assert.doesNotMatch(home, /AggregateRating|ratingValue|reviewCount/)

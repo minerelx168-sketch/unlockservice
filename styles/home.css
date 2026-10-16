@@ -228,20 +228,51 @@
 
 /* ---- reviews ------------------------------------------------------- */
 
-.reviews-track {
+/* Two rows that drift in opposite directions. Each row holds the cards
+   twice; moving by half the row plus one gap lands exactly on the copy,
+   so the loop has no seam. The edges fade so cards appear rather than
+   pop in. */
+.reviews-marquee {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  margin: 34px 0 0;
+  margin-top: 34px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.reviews-row {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: reviews-left 72s linear infinite;
+}
+
+.reviews-row[data-direction='right'] {
+  animation-name: reviews-right;
+}
+
+.reviews-marquee:hover .reviews-row,
+.reviews-marquee:focus-within .reviews-row {
+  animation-play-state: paused;
+}
+
+.reviews-track {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 20px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .review-card {
   display: grid;
-  gap: 12px;
+  flex: 0 0 380px;
+  width: 380px;
+  gap: 14px;
   align-content: start;
-  padding: 26px;
+  padding: 24px 26px;
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -273,26 +304,23 @@
   color: var(--success);
 }
 
-.review-sample {
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  border: 1px dashed var(--line-strong);
-  color: var(--muted);
-  font-size: 0.6875rem;
-  font-weight: 740;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.review-quote {
+  margin: 0;
 }
 
-.review-card .t-card {
-  font-size: 1.0625rem;
+.review-quote p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: normal;
 }
 
 .review-meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 2px;
   padding-top: 14px;
   border-top: 1px solid var(--line);
 }
@@ -300,14 +328,20 @@
 .review-avatar {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--avatar-1);
   color: #fff;
   font-weight: 760;
   font-size: 0.875rem;
 }
+
+.review-avatar--2 { background: var(--avatar-2); }
+.review-avatar--3 { background: var(--avatar-3); }
+.review-avatar--4 { background: var(--avatar-4); }
+.review-avatar--5 { background: var(--avatar-5); }
 
 .review-meta b {
   display: block;
@@ -319,6 +353,46 @@
   display: block;
   font-size: 0.75rem;
   color: var(--muted);
+}
+
+@keyframes reviews-left {
+  to {
+    transform: translateX(calc(-50% - 10px));
+  }
+}
+
+@keyframes reviews-right {
+  from {
+    transform: translateX(calc(-50% - 10px));
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Reduced motion: still rows the reader scrolls, one copy of each card. */
+@media (prefers-reduced-motion: reduce) {
+  .reviews-marquee {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .reviews-row {
+    width: auto;
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    animation: none;
+  }
+
+  .reviews-track[aria-hidden='true'] {
+    display: none;
+  }
+
+  .review-card {
+    scroll-snap-align: start;
+  }
 }
 
 /* ---- service hub ---------------------------------------------------- */
@@ -441,7 +515,6 @@
 /* ---- responsive ----------------------------------------------------- */
 
 @media (max-width: 1080px) {
-  .reviews-track,
   .hub-grid,
   .eligibility-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -480,25 +553,35 @@
     grid-template-columns: 1fr;
   }
 
-  /* One card per swipe; the row scrolls sideways instead of stacking
-     three long cards on top of the FAQ. */
-  .reviews-track {
-    display: flex;
+  .reviews-marquee {
     gap: 14px;
-    margin-inline: calc(var(--gutter) * -1);
-    padding-inline: var(--gutter);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
   }
 
-  .reviews-track::-webkit-scrollbar {
-    display: none;
+  .reviews-row,
+  .reviews-track {
+    gap: 14px;
   }
 
   .review-card {
-    flex: 0 0 86%;
-    scroll-snap-align: start;
+    flex-basis: 300px;
+    width: 300px;
+    padding: 20px;
+  }
+
+  @keyframes reviews-left {
+    to {
+      transform: translateX(calc(-50% - 7px));
+    }
+  }
+
+  @keyframes reviews-right {
+    from {
+      transform: translateX(calc(-50% - 7px));
+    }
+
+    to {
+      transform: translateX(0);
+    }
   }
 
   .help-band {
@@ -525,3 +608,8 @@
   margin-bottom: 12px; border-radius: 12px; background: var(--primary-soft);
   border: 1px solid var(--primary-border); color: var(--primary-dark); }
 .trust-bar-icon svg { width: 19px; height: 19px; }
+
+/* PR #12 accessibility: explicit pause control and focusable original tracks. */
+.reviews[data-motion-paused='true'] .reviews-row { animation-play-state: paused; }
+.reviews .review-motion-toggle { justify-self: center; }
+.reviews-track:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
