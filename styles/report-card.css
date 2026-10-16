@@ -162,26 +162,3 @@
     text-align: left;
   }
 }
-
-/* The blue "sample data" note under an example. */
-.report-card-callout {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  margin: 18px 0 0;
-  padding: 12px 14px;
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius-control);
-  background: var(--accent-soft);
-  color: var(--ink);
-  font-size: 0.8438rem;
-  line-height: 1.55;
-}
-
-.report-card-callout svg {
-  width: 17px;
-  height: 17px;
-  flex: 0 0 auto;
-  margin-top: 2px;
-  color: var(--accent-dark);
-}

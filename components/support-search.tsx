@@ -39,7 +39,6 @@ export function SupportSearch({ guides }: { guides: SearchableGuide[] }) {
           onChange={(event) => setQuery(event.currentTarget.value)}
           autoComplete="off"
           aria-controls={`${id}-results`}
-          aria-expanded={results.length > 0}
         />
         {query ? (
           <button type="button" aria-label="Clear search" onClick={() => setQuery('')}>
