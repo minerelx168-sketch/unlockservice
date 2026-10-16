@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Icon } from '@/components/icons'
 import { PaidReportRefresh } from '@/components/paid-report-refresh'
+import { ReportCard } from '@/components/report-card'
 import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 import { getPaidReport } from '@/lib/paid-reports'
@@ -34,7 +35,7 @@ export default async function PaidReportDetailPage({ params }: { params: Promise
       <section className="report-result-only" aria-label="Result">
         <h1 className="visually-hidden">{order.productName}</h1>
         {order.providerCode ? (
-          <pre className="provider-code-result provider-code-result--standalone">{order.providerCode}</pre>
+          <ReportCard text={order.providerCode} fallbackClassName="provider-code-result provider-code-result--standalone" />
         ) : (
           <p className="alert alert--error" role="status">
             The Provider result is unavailable. Please contact support.
