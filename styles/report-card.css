@@ -1,0 +1,187 @@
+/**
+ * Report card — provider output rendered the way a buyer reads it: the
+ * conditions they are checking for first, as badged status rows, then the
+ * identity of the device as label/value pairs. Unparseable output falls
+ * back to the monospace block and never reaches these classes.
+ */
+
+.report-card {
+  display: grid;
+  gap: 22px;
+}
+
+.report-card-group {
+  display: grid;
+  gap: 10px;
+}
+
+.report-card-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 740;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.report-card-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.report-card-status-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.report-card-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--page-soft);
+}
+
+.report-card-status--good {
+  border-color: color-mix(in srgb, var(--success) 32%, var(--line));
+  background: color-mix(in srgb, var(--success) 7%, var(--surface));
+}
+
+.report-card-status--warn {
+  border-color: color-mix(in srgb, var(--warning) 36%, var(--line));
+  background: color-mix(in srgb, var(--warning) 8%, var(--surface));
+}
+
+.report-card-status--bad {
+  border-color: color-mix(in srgb, var(--danger) 36%, var(--line));
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+}
+
+.report-card-status-label {
+  font-size: 0.9375rem;
+  font-weight: 650;
+  color: var(--ink-strong);
+  overflow-wrap: anywhere;
+}
+
+.report-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 740;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.report-card-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.report-card-status--good .report-card-badge {
+  background: var(--success);
+  color: #ffffff;
+}
+
+.report-card-status--warn .report-card-badge {
+  background: var(--warning);
+  color: #ffffff;
+}
+
+.report-card-status--bad .report-card-badge {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+:root[data-theme='dark'] .report-card-status--good .report-card-badge,
+:root[data-theme='dark'] .report-card-status--warn .report-card-badge,
+:root[data-theme='dark'] .report-card-status--bad .report-card-badge {
+  color: #10091d;
+}
+
+.report-card-rows {
+  display: grid;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.report-card-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 16px;
+}
+
+.report-card-row + .report-card-row {
+  border-top: 1px solid var(--line);
+}
+
+.report-card-row dt {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.report-card-row dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  color: var(--ink-strong);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .report-card-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .report-card-row dd {
+    text-align: left;
+  }
+}
+
+/* The blue "sample data" note under an example. */
+.report-card-callout {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-control);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 0.8438rem;
+  line-height: 1.55;
+}
+
+.report-card-callout svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--accent-dark);
+}

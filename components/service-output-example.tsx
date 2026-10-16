@@ -169,6 +169,10 @@ export function ServiceOutputExample({ productCode, productName, className = '' 
                   <pre>{variant.output}</pre>
                 </section>
               ))}
+              <p className="report-card-callout">
+                <Icon name="info" strokeWidth={1.9} />
+                <span>This is sample data. A real report describes your device at the moment it is run and is delivered on the order page and by email.</span>
+              </p>
             </div>
           ) : null}
         </div>

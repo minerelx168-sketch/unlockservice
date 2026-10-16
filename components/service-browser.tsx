@@ -9,6 +9,7 @@ import { formatUsd } from '@/lib/money'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
+import { ImeiSegments } from './imei-segments'
 import { ServicePicker, serviceDisplayText } from './service-picker'
 
 const EMPTY: FormState = {}
@@ -40,6 +41,9 @@ export function ServiceBrowser({
   const isUnlock = domain === 'unlock'
   const selected = products.find((product) => product.productCode === selectedCode)
   const available = selected?.status === 'available'
+  /* The lowest sort order is the catalog's own first choice; the pill says
+     so only when there is more than one thing to choose between. */
+  const firstChoice = products.length > 1 ? products.reduce((best, product) => (product.sortOrder < best.sortOrder ? product : best), products[0]) : undefined
   const validImei = imei.length === IMEI_LENGTH && luhnValid(imei)
   const showInvalid = !validImei && (touched || imei.length >= IMEI_LENGTH)
   const inputId = `${domain}-browse-imei`
@@ -91,8 +95,8 @@ export function ServiceBrowser({
         <input type="hidden" name="productCode" value={selectedCode} />
         <div className="service-browser__field">
           <div className="service-browser__label-row">
-            <label htmlFor={inputId}>IMEI number</label>
-            <span className={validImei ? 'service-browser__valid' : ''}>{validImei ? 'Ready' : `${imei.length} / ${IMEI_LENGTH}`}</span>
+            <label htmlFor={inputId}><span className="step-no" aria-hidden="true">1</span>IMEI number</label>
+            <span className={validImei ? 'service-browser__valid' : ''}>{validImei ? <><Icon name="checkSmall" strokeWidth={2.6} /> Valid</> : `${imei.length} / ${IMEI_LENGTH}`}</span>
           </div>
           <div className="service-browser__imei" data-invalid={showInvalid || undefined}>
             <Icon name="device" />
@@ -115,33 +119,11 @@ export function ServiceBrowser({
             />
             {imei && !imeiReadOnly ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setTouched(false); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}
           </div>
+          <ImeiSegments count={imei.replace(/\D/g, '').length} valid={validImei} />
           <p id={`${inputId}-hint`} className={showInvalid ? 'service-browser__error' : 'service-browser__hint'} role={showInvalid ? 'alert' : undefined}>
             {showInvalid ? 'Enter a valid 15-digit IMEI. Check the number in your phone settings.' : imeiReadOnly ? <>Check each service’s device and network requirements before choosing. <Link href="/services/unlock" className="service-browser__change-imei">Change IMEI</Link></> : 'Find it in Settings or dial *#06#. You can browse services before entering it.'}
           </p>
         </div>
 
+        <p className="service-browser__stepline"><span className="step-no" aria-hidden="true">2</span>{isUnlock ? 'Choose the unlock service' : 'Choose the report'}</p>
         <ServicePicker options={options} value={selectedCode} onChange={(code) => { setSelectedCode(code); trackFunnelEvent('service_selection', { service_category: domain }); if (domain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: domain }) }} disabled={pending} label={isUnlock ? 'Unlock service' : 'Lookup service'} id={`${domain}-browse-service`} />
-
-        {selected ? (
-          <div className="service-browser__summary" aria-live="polite">
-            <div><span>{available ? 'Service price' : 'Listed price · currently unavailable'}</span><strong>{formatUsd(selected.priceCents)} <small>USD</small></strong></div>
-            <div><span>Estimated delivery</span><strong>{serviceDisplayText(selected.etaLabel)}</strong></div>
-            <p>{serviceDisplayText(selected.summary)}</p>
-          </div>
-        ) : null}
-
-        {state.error ? <p className="service-browser__error" role="alert">{state.error}</p> : null}
-
-        <div className="service-browser__actions">
-          <button type="submit" className="button button--primary" disabled={pending || !available} aria-describedby={`${domain}-browse-next`}>
-            {pending ? 'Opening review…' : 'Continue to review'} <Icon name="arrowRight" />
-          </button>
-          <p id={`${domain}-browse-next`} className="service-browser__hint">
-            {!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service to continue.' : isAuthenticated ? 'No credit is charged until you confirm on the next page.' : 'Sign in next to review your order. Nothing is charged here.'}
-          </p>
-          {selected && !available && isUnlock ? <Link className="service-browser__waitlist" href="/unlock-waitlist">Notify me when unlock ordering opens <Icon name="arrowRight" /></Link> : null}
-        </div>
-      </form>
-    </section>
-  )
-}
