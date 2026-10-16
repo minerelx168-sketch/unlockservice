@@ -24,7 +24,7 @@ Simple Icons 13.21.0 matches the SVG source family used by the reference. Marks 
 - EE: https://www.google.com/s2/favicons?domain=ee.co.uk&sz=128
 - Metro by T-Mobile: https://www.google.com/s2/favicons?domain=metrobyt-mobile.com&sz=128
 - Cricket Wireless: https://www.google.com/s2/favicons?domain=cricketwireless.com&sz=128
-- US Cellular: https://www.google.com/s2/favicons?domain=uscellular.com&sz=128
+- US Cellular: https://companieslogo.com — standalone U.S. Cellular mark; the official-domain favicon redirects to T-Mobile, so it is not used.
 - Dish: https://www.google.com/s2/favicons?domain=dish.com&sz=128
 - Three: https://www.google.com/s2/favicons?domain=three.co.uk&sz=128
 - Rogers: https://www.google.com/s2/favicons?domain=rogers.com&sz=128
