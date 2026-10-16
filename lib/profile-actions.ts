@@ -66,7 +66,7 @@ export async function confirmEmailChangeAction(_: FormState, form: FormData): Pr
   }
 }
 
-export async function cancelEmailChangeAction(_: FormState): Promise<FormState> {
+export async function cancelEmailChangeAction(): Promise<FormState> {
   try {
     const found = await signedIn()
     cancelEmailChange(found.user.id)
