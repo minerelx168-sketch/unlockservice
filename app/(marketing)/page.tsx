@@ -1,16 +1,17 @@
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
-import { DeviceBrowseForm } from '@/components/device-browse-form'
+import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-check'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { unlockCategory } from '@/lib/unlock-catalog-view'
 import { StructuredData } from './structured-data'
 import { Icon, type IconName } from '@/components/icons'
 
-const TRUST = [
-  { title: 'Remote unlock', caption: 'No cables, software or shop visit' },
-  { title: 'Quoted turnaround', caption: 'The estimate for your network, before you order' },
-  { title: 'Permanent result', caption: 'Use the phone with another network' },
-  { title: 'Live tracking', caption: 'Follow every order from your account' },
+const TRUST: Array<{ icon: IconName; title: string; caption: string }> = [
+  { icon: 'bolt', title: 'Remote unlock', caption: 'No cables, software or shop visit' },
+  { icon: 'clock', title: 'Quoted turnaround', caption: 'The estimate for your network, before you order' },
+  { icon: 'shieldCheck', title: 'Permanent result', caption: 'Use the phone with another network' },
+  { icon: 'pulse', title: 'Live tracking', caption: 'Follow every order from your account' },
 ]
 
 const SERVICES: Array<{
@@ -136,8 +137,24 @@ const FAQ = [
 export const metadata = pageMetadata("/", "IMEI Phone Unlocking & Device Check Reports", "Compare IMEI phone unlock services and device reports. Review availability, prices and delivery estimates before ordering with iUnlockMobile.")
 
 export default function HomePage() {
-  const ordering = unlockOrderingEnabled() || listPublicProviderProducts('unlock').some((product) => product.status === 'available')
+  const unlockProducts = listPublicProviderProducts('unlock')
+  const ordering = unlockOrderingEnabled() || unlockProducts.some((product) => product.status === 'available')
   const status = !ordering && serviceStatus()
+
+  const unlockWidget: PriceCheckProduct[] = unlockProducts.map((product) => ({
+    code: product.productCode,
+    name: product.name,
+    category: unlockCategory(product),
+    priceCents: product.priceCents,
+    etaLabel: product.etaLabel,
+  }))
+  const checkWidget: PriceCheckProduct[] = listPublicProviderProducts('imei_check').map((product) => ({
+    code: product.productCode,
+    name: product.name,
+    category: product.group,
+    priceCents: product.priceCents,
+    etaLabel: product.etaLabel,
+  }))
 
   return (
     <>
@@ -156,10 +173,15 @@ export default function HomePage() {
               </p>
             ) : null}
 
+            <span className="hero-chip">
+              <Icon name="unlockMark" strokeWidth={2} />
+              Unlock by IMEI — remote and permanent
+            </span>
+
             <h1 className="t-hero">
-              {ordering ? 'Unlock your phone by IMEI.' : 'Find the right service for your phone.'}
+              {ordering ? 'Unlock your phone.' : 'Find the right service for your phone.'}
               <br />
-              <span className="accent">{ordering ? 'Price and delivery time before you pay.' : 'Browse prices and check availability.'}</span>
+              <span className="accent">{ordering ? 'Use any SIM, on any network.' : 'Browse prices and check availability.'}</span>
             </h1>
 
             <p className="t-lead">
@@ -181,15 +203,7 @@ export default function HomePage() {
           </div>
 
           <div className="hero-panel">
-            <div className="hero-panel-head">
-              <span className="kicker">
-                <Icon name="device" strokeWidth={2} />
-                Start with your device
-              </span>
-              <span className="t-micro">{ordering ? 'Reserved credit returned if refused' : 'Prices and availability before you choose'}</span>
-            </div>
-
-            <DeviceBrowseForm />
+            <HeroPriceCheck unlock={unlockWidget} check={checkWidget} ordering={ordering} />
           </div>
         </div>
       </section>
@@ -200,6 +214,9 @@ export default function HomePage() {
           <div className="trust-bar">
             {TRUST.map((item) => (
               <div key={item.title}>
+                <span className="trust-bar-icon" aria-hidden="true">
+                  <Icon name={item.icon} strokeWidth={1.8} />
+                </span>
                 <b>{item.title}</b>
                 <span>{item.caption}</span>
               </div>

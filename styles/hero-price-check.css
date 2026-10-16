@@ -1,0 +1,132 @@
+/**
+ * Hero price check — the storefront's first interaction. Price and
+ * turnaround are answered in the card itself, before any navigation,
+ * which is the single biggest friction cut on the page.
+ */
+
+.price-check {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.price-check-head {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+}
+
+.price-check-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  letter-spacing: -0.035em;
+  color: var(--ink-strong);
+}
+
+.price-check-sub {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.price-check .field > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.price-check-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-border);
+  color: var(--primary-dark);
+  font-size: 0.6875rem;
+  font-weight: 740;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.price-check-start::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+/* The quote itself: the two numbers the visitor came for. */
+.price-check-quote {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-control);
+  background: var(--primary-border);
+  overflow: hidden;
+}
+
+.price-check-quote > div {
+  display: grid;
+  gap: 2px;
+  padding: 13px 16px;
+  background: var(--primary-soft);
+}
+
+.price-check-quote dt {
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.price-check-quote dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 720;
+  letter-spacing: -0.03em;
+  color: var(--primary-dark);
+  overflow-wrap: anywhere;
+}
+
+.price-check-quote > div:last-child dd {
+  font-size: 1.0625rem;
+  align-self: center;
+}
+
+.price-check-assurance {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.price-check-assurance span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.price-check-assurance svg {
+  width: 15px;
+  height: 15px;
+  color: var(--success);
+}
+
+@media (max-width: 420px) {
+  .price-check-quote {
+    grid-template-columns: 1fr;
+  }
+}

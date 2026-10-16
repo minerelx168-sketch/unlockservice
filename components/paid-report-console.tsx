@@ -7,6 +7,7 @@ import { IMEI_LENGTH } from '@/lib/imei'
 import { deviceImei } from '@/lib/device-intent-value'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
+import { ReportCard } from './report-card'
 import { ServicePicker } from './service-picker'
 import { saveDeviceIntentAction, clearAcceptedDeviceIntentAction } from '@/lib/device-intent-actions'
 
@@ -468,7 +469,7 @@ export function PaidReportConsole({
           </div>
           <h3 className="t-card">IMEI {payload.order.imei ?? digits ?? payload.order.maskedImei}</h3>
           {payload.order.status === 'completed' && payload.order.providerCode ? (
-            <pre className="provider-code-result service-workbench-inline-code">{payload.order.providerCode}</pre>
+            <ReportCard text={payload.order.providerCode} fallbackClassName="provider-code-result service-workbench-inline-code" />
           ) : null}
           <p className="t-small">
             {payload.order.message ?? (payload.order.status === 'completed'
