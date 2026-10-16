@@ -378,7 +378,8 @@
     mask-image: none;
   }
 
-  .reviews-row {
+  .reviews-row,
+  .reviews-row[data-direction='right'] {
     width: auto;
     padding-inline: var(--gutter);
     overflow-x: auto;

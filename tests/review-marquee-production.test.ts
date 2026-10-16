@@ -44,7 +44,7 @@ test('reduced-motion disables animation and visual duplicates while retaining ma
   const css = read('styles/home.css')
   assert.match(css, /prefers-reduced-motion: reduce/)
   assert.match(css, /overflow-x: auto/)
-  assert.match(css, /animation: none/)
+  assert.match(css, /reviews-row\[data-direction='right'\][^}]*animation: none/)
   assert.match(css, /reviews-track\[aria-hidden='true'\][^}]*display: none/)
   assert.match(css, /hero-chip svg[^}]*width: 16px/)
 })
