@@ -56,11 +56,13 @@ export function LoginForm({
   oauthError,
   returnTo,
   googleEnabled = false,
+  defaultIdentity = '',
 }: {
   resetComplete?: boolean
   oauthError?: string
   returnTo?: string | null
   googleEnabled?: boolean
+  defaultIdentity?: string
 }) {
   const [state, action, pending] = useActionState(loginAction, EMPTY)
 
@@ -83,7 +85,7 @@ export function LoginForm({
       <Notice state={state} />
       <div className="field">
         <label htmlFor="identity">Username or email</label>
-        <input id="identity" name="identity" autoComplete="username" required />
+        <input id="identity" name="identity" autoComplete="username" defaultValue={defaultIdentity} required />
       </div>
       <div className="field">
         <label htmlFor="password">Password</label>

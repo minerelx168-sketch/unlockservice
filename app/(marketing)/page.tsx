@@ -4,6 +4,7 @@ import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-
 import { Icon, type IconName } from '@/components/icons'
 import { Testimonials } from '@/components/testimonials'
 import { BRANDS, CARRIERS } from '@/lib/catalog'
+import { FAQ } from '@/lib/faq'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 import { SAMPLE_TESTIMONIALS } from '@/lib/testimonials'
@@ -92,38 +93,6 @@ const HUB: Array<{ icon: IconName; tint: string; title: string; body: string; hr
   },
 ]
 
-const FAQ = [
-  {
-    question: 'Is this permanent, and is my warranty safe?',
-    answer:
-      'Yes to both. The unlock is recorded against the IMEI in the carrier or manufacturer database, so it survives updates, resets and new SIMs. Nothing is installed on the device and no software is modified, which is what puts a warranty at risk.',
-  },
-  {
-    question: 'How long does it take?',
-    answer:
-      'It depends on the network — some authorise within hours, others take a couple of days. The turnaround for your exact carrier is quoted before you order, and the order shows its live status until it lands.',
-  },
-  {
-    question: 'What if my device cannot be unlocked?',
-    answer:
-      'Your account credit is reserved while the order is with the carrier and charged only when the unlock is delivered. If the carrier refuses the order, the full reserved amount returns to your account balance. This releases account credit; it is not a refund to your original payment method.',
-  },
-  {
-    question: 'Where do I find my IMEI?',
-    answer:
-      'Dial *#06# on the device — it works on iOS and Android. It is also printed on the SIM tray, on the original box, and shown in the settings app under the device’s About screen.',
-  },
-  {
-    question: 'Do I have to send my phone anywhere?',
-    answer:
-      'No. Everything is done remotely against the IMEI. Apple devices are released over the air — connect to Wi-Fi and follow the prompt. Other brands receive a code you enter once, with a SIM from the new network in the device.',
-  },
-  {
-    question: 'Can you unlock a phone that is still on contract?',
-    answer:
-      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, the full reserved credit returns to your account balance.',
-  },
-]
 
 export const metadata = pageMetadata("/", "IMEI Phone Unlocking & Device Check Reports", "Compare IMEI phone unlock services and device reports. Review availability, prices and delivery estimates before ordering with iUnlockMobile.")
 

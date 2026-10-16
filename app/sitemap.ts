@@ -23,6 +23,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     })),
+    { url: `${origin}/support`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${origin}/track`, changeFrequency: 'yearly', priority: 0.6 },
     { url: `${origin}/contact`, changeFrequency: 'yearly', priority: 0.6 },
     ...(unlockOrderingEnabled()
       ? []
