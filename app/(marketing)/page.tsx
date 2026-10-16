@@ -424,7 +424,7 @@ export default function HomePage() {
               Top Brands <span className="accent">We Support</span>
             </h2>
             <p className="t-lead">
-              Explore services for leading phone manufacturers. Device eligibility and delivery method depend on the selected service; review the requirements before ordering.
+              Explore services for {BRANDS.length} leading phone brands. Review eligibility and compatible radio bands before ordering.
             </p>
           </div>
 
