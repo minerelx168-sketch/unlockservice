@@ -267,7 +267,7 @@ test('provider product catalog publishes only reviewed products and keeps activa
   assert.equal(providerProducts.etaMinutesFromLabel('Instant to 5 days'), 7_200)
 })
 
-test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate routes', () => {
+test('redesigned services hub keeps Unlock and Phone Check catalogs on separate routes', () => {
   const tokens = readFileSync(join(process.cwd(), 'styles/tokens.css'), 'utf8')
   const buttons = readFileSync(join(process.cwd(), 'styles/components.css'), 'utf8')
   const appStyles = readFileSync(join(process.cwd(), 'styles/app.css'), 'utf8')
@@ -285,9 +285,9 @@ test('Signal Blue services hub keeps Unlock and Phone Check catalogs on separate
   /* The hexes live on the --color-* palette layer and the component names
      resolve to it, so the assertion follows the value to where it is now
      written rather than pinning the old shape. */
-  assert.match(tokens, /--color-brand-primary:\s*#0057b8/)
-  assert.match(tokens, /--color-brand-primary-strong:\s*#003f87/)
-  assert.match(tokens, /--color-brand-primary-soft:\s*#e8f2ff/)
+  assert.match(tokens, /--color-brand-primary:\s*#7435e6/)
+  assert.match(tokens, /--color-brand-primary-strong:\s*#5d24c7/)
+  assert.match(tokens, /--color-brand-primary-soft:\s*#f1ebfe/)
   assert.match(tokens, /--primary:\s*var\(--color-brand-primary\)/)
   assert.match(buttons, /\.button--secondary/)
   assert.match(header, /href: '\/services\/unlock', label: 'Unlock Service'/)

@@ -4,6 +4,7 @@ import { useActionState, useMemo, useRef, useState, type FormEvent } from 'react
 import { browseDevicesAction, showUnlockServicesAction } from '@/lib/device-intent-actions'
 import { deviceImei } from '@/lib/device-intent-value'
 import { formatUsd } from '@/lib/money'
+import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 
 /** Serialized on the server — no provider identifiers, public fields only. */
@@ -49,6 +50,7 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
   const [imei, setImei] = useState('')
   const [error, setError] = useState<string | null>(null)
   const input = useRef<HTMLInputElement>(null)
+  const started = useRef(false)
 
   const activeCategory = category[domain] ?? categories[0] ?? ''
   const inCategory = products.filter((product) => product.category === activeCategory)
@@ -67,7 +69,12 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
       event.preventDefault()
       setError(imeiRequired ? 'Enter a valid 15-digit IMEI to see unlock services for your phone.' : 'Enter a valid 15-digit IMEI, or clear it to browse without one.')
       input.current?.focus()
+      trackFunnelEvent('validation_result', { service_category: domain, validation_status: 'failed' })
+      return
     }
+    if (imei.trim()) trackFunnelEvent('validation_result', { service_category: domain, validation_status: 'passed' })
+    if (unlockReady) trackFunnelEvent('unlock_imei_submitted', { service_category: domain })
+    if (selected) trackFunnelEvent('service_selection', { service_category: domain })
   }
 
   return (
@@ -125,7 +132,7 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
               id="pc-service"
               value={selected?.code ?? ''}
               disabled={pending}
-              onChange={(event) => { setService({ ...service, [domain]: event.currentTarget.value }); setError(null) }}
+              onChange={(event) => { setService({ ...service, [domain]: event.currentTarget.value }); setError(null); trackFunnelEvent('service_selection', { service_category: domain }); if (domain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: domain }) }}
             >
               {inCategory.map((product) => (
                 <option key={product.code} value={product.code}>{product.name}</option>
@@ -170,7 +177,7 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
             disabled={pending}
             aria-describedby="pc-imei-help"
             aria-invalid={!!error}
-            onChange={(event) => { setImei(event.currentTarget.value); setError(null) }}
+            onChange={(event) => { if (event.currentTarget.value && !started.current) { started.current = true; trackFunnelEvent('imei_input_started', { service_category: domain }) } setImei(event.currentTarget.value); setError(null) }}
           />
           {imei ? (
             <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setError(null); input.current?.focus() }}>

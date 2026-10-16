@@ -35,9 +35,9 @@ export default function SupportPage() {
       lead: 'Before, during and after a network unlock.',
       links: present([
         guide('network-unlock-explained', 'How unlocking works'),
-        guide('how-long-does-iphone-carrier-unlock-take', 'How long it takes'),
+        guide('imei-unlock-iphone-service-checklist', 'Price and delivery checks'),
         guide('iphone-unlocked-but-no-service-troubleshooting', 'Unlocked but no service'),
-        guide('can-you-unlock-financed-iphone-before-payoff', 'Financed phones'),
+        guide('iphone-carrier-unlock-eligibility', 'Carrier eligibility'),
       ]),
       cta: { href: '#unlock', label: 'Unlock troubleshooting' },
     },
@@ -50,7 +50,7 @@ export default function SupportPage() {
         guide('what-an-imei-check-tells-you', 'What an IMEI check tells you'),
         guide('checks-before-buying-a-used-phone', 'Checks before buying used'),
         guide('blacklisted-iphone-unlock-carrier-lock-difference', 'Blacklist vs carrier lock'),
-        guide('how-to-find-carrier-on-iphone-before-unlock', 'Finding the carrier'),
+        guide('how-to-check-if-iphone-is-unlocked', 'Check your lock status'),
       ]),
       cta: { href: '/services/imei-check', label: 'Browse reports' },
     },
@@ -72,9 +72,7 @@ export default function SupportPage() {
   const topIssues = present([
     guide('iphone-sim-not-supported-after-switching-carriers', 'SIM not supported after unlock'),
     guide('iphone-unlocked-but-no-service-troubleshooting', 'Unlocked but no service'),
-    guide('can-unlocked-iphone-be-locked-again', 'Phone appears locked again'),
-    guide('iphone-dual-sim-two-carriers-unlock-guide', 'Dual SIM and eSIM after unlock'),
-    guide('invalid-sim-iphone-carrier-lock-or-sim-failure', '“Invalid SIM”'),
+    guide('sim-locked-iphone-carrier-lock-or-sim-pin', 'What SIM locked means'),
     guide('how-to-unlock-esim-on-iphone', 'eSIM'),
   ])
 
@@ -155,7 +153,7 @@ export default function SupportPage() {
             <Icon name="info" strokeWidth={2} />
             <span>
               <b>The device must not be reported lost or stolen.</b> A Phone Check report shows the status
-              before you order. Financed devices are usually accepted once the account is current.
+              before you order. Check the original carrier’s current financing and account requirements before ordering.
             </span>
           </p>
 

@@ -572,6 +572,8 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'users', 'banned_at TEXT')
     addColumn(connection, 'users', "avatar_style TEXT NOT NULL DEFAULT 'violet'")
     addColumn(connection, 'users', 'pending_email TEXT')
+    // Fail closed on semantic duplicates; deployment audits this invariant first.
+    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_email_casefold_unique ON users(lower(email))')
     addColumn(connection, 'credit_ledger', 'description TEXT')
     addColumn(connection, 'credit_ledger', 'affects_balance INTEGER NOT NULL DEFAULT 1')
     addColumn(connection, 'invoices', 'provider TEXT')

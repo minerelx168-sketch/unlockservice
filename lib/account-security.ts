@@ -261,6 +261,7 @@ export function resetPassword(email: string, code: string, password: string) {
       )
       .run(hashPassword(password), nowIso(), row.user_id)
     db().prepare('DELETE FROM sessions WHERE user_id = ?').run(row.user_id)
+    cancelEmailChange(row.user_id)
     return null
   })()
 
@@ -276,15 +277,22 @@ const EMAIL_SHAPE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
  * only someone who controls it can finish. The current address keeps
  * receiving everything until the code is confirmed.
  */
-export async function startEmailChange(userId: number, requested: string) {
+function requireCurrentPassword(userId: number, current: string) {
+  requireAttempt('email-change-reauth', String(userId), 10, OTP_SEND_WINDOW_SECONDS)
+  const row = db().prepare('SELECT password_hash FROM users WHERE id = ?').get(userId) as { password_hash: string } | undefined
+  if (!row || !verifyPassword(current, row.password_hash)) throw new AuthError('The current password is not right.')
+}
+
+export async function startEmailChange(userId: number, requested: string, current: string) {
   requireEmailDelivery()
+  requireCurrentPassword(userId, current)
   const mail = normalizeEmail(requested)
   if (!EMAIL_SHAPE.test(mail) || mail.length > 254) throw new AuthError('Enter a valid email address.')
   const user = getUser(userId)
   if (!user) throw new AuthError('Sign in again to change your email.')
   if (mail === normalizeEmail(user.email)) throw new AuthError('That is already the address on this account.')
   requireAttempt('email-change-send', String(userId), OTP_SEND_LIMIT, OTP_SEND_WINDOW_SECONDS)
-  if (db().prepare('SELECT 1 FROM users WHERE email = ? AND id <> ?').get(mail, userId)) {
+  if (db().prepare('SELECT 1 FROM users WHERE lower(email) = ? AND id <> ?').get(mail, userId)) {
     throw new AuthError('That address cannot be used on this account.')
   }
   db()
@@ -301,9 +309,10 @@ export function cancelEmailChange(userId: number) {
   db().prepare('UPDATE users SET pending_email = NULL WHERE id = ?').run(userId)
 }
 
-export function confirmEmailChange(userId: number, code: string): User {
+export function confirmEmailChange(userId: number, code: string, current: string, keepSessionId: string): User {
   if (!/^\d{6}$/.test(code)) throw new AuthError('Code must be 6 digits.')
   requireAttempt('email-change-code', String(userId))
+  requireCurrentPassword(userId, current)
 
   const error = db().transaction(() => {
     const row = db()
@@ -318,12 +327,15 @@ export function confirmEmailChange(userId: number, code: string): User {
       )
       .get(userId) as (VerificationRow & { pending_email: string | null }) | undefined
     if (!row || !row.pending_email) return 'No email change is waiting. Start again from the profile page.'
+    if (!db().prepare('SELECT 1 FROM sessions WHERE id = ? AND user_id = ? AND expires_at > ?').get(keepSessionId, userId, nowIso())) return 'Your session has expired. Sign in again.'
+    if (db().prepare('SELECT 1 FROM users WHERE lower(email) = ? AND id <> ?').get(normalizeEmail(row.pending_email), userId)) return 'That address cannot be used on this account.'
     const verificationError = consumeCode(row, code)
     if (verificationError) return verificationError
     try {
       db()
         .prepare('UPDATE users SET email = ?, pending_email = NULL, email_verified_at = ? WHERE id = ?')
-        .run(row.pending_email, nowIso(), userId)
+        .run(normalizeEmail(row.pending_email), nowIso(), userId)
+      db().prepare('DELETE FROM sessions WHERE user_id = ? AND id <> ?').run(userId, keepSessionId)
     } catch {
       /* The unique index on email: the address was taken between the two steps. */
       return 'That address cannot be used on this account.'
@@ -349,7 +361,9 @@ export function changePassword(userId: number, current: string, next: string, ke
   if (!row || !verifyPassword(current, row.password_hash)) throw new AuthError('The current password is not right.')
   if (current === next) throw new AuthError('Choose a password you have not used here before.')
   db().transaction(() => {
+    if (!db().prepare('SELECT 1 FROM sessions WHERE id = ? AND user_id = ? AND expires_at > ?').get(keepSessionId, userId, nowIso())) throw new AuthError('Your session has expired. Sign in again.')
     db().prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(next), userId)
+    cancelEmailChange(userId)
     db().prepare('DELETE FROM sessions WHERE user_id = ? AND id <> ?').run(userId, keepSessionId)
   })()
 }

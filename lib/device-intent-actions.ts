@@ -6,6 +6,7 @@ import { withContinuation } from './continuation'
 import { clearDeviceIntent, readDeviceIntent, writeDeviceIntent } from './device-intent'
 import { deviceDomain, deviceImei } from './device-intent-value'
 import { listPaidReportProducts } from './paid-reports'
+import { listPublicProviderProducts } from './public-provider-catalog'
 
 type IntentState = { error?: string }
 

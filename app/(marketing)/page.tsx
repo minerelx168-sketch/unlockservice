@@ -16,7 +16,7 @@ const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   {
     icon: 'shield',
     title: 'Not reported lost or stolen',
-    body: 'A theft or loss report blocks every network. A Phone Check report shows the status before you spend anything.',
+    body: 'A lost-or-stolen report may prevent unlocking or activation. Review the selected report’s coverage and the carrier’s eligibility policy before ordering.',
   },
   {
     icon: 'check',
@@ -25,8 +25,8 @@ const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   },
   {
     icon: 'wallet',
-    title: 'Financed? Often still fine',
-    body: 'Many networks release financed handsets once the account is current. If yours refuses, the held credit returns in full.',
+    title: 'Check financing requirements',
+    body: 'Financing and account requirements depend on the original carrier. Check its current policy before ordering; if the service is refused, the held credit returns to your account balance.',
   },
 ]
 
@@ -42,8 +42,8 @@ const STEPS: Array<{ title: string; body: string; art: 'imei' | 'review' | 'done
     art: 'review',
   },
   {
-    title: 'Use any SIM',
-    body: 'Apple devices release over the air; other brands receive a code to type once. Refused devices give the whole amount back.',
+    title: 'Use a supported SIM',
+    body: 'When the service is delivered, follow its device-specific instructions. Use a SIM from a network whose bands your phone supports. A refused order releases the reserved account credit.',
     art: 'done',
   },
 ]
@@ -170,7 +170,7 @@ export default function HomePage() {
   const heroTiles: Array<{ icon: IconName; title: string; caption: string }> = [
     { icon: 'bolt', title: 'Remote', caption: 'Nothing installed, no shop visit' },
     { icon: 'shieldCheck', title: 'Held, not charged', caption: 'Credit returns if the network refuses' },
-    { icon: 'lock', title: 'Permanent', caption: 'Recorded against the IMEI itself' },
+    { icon: 'lock', title: 'Carrier-approved', caption: 'Eligibility and method depend on the selected service' },
     { icon: 'globe', title: `${networks} networks`, caption: `Across ${countries.length} countries, more on request` },
   ]
 
@@ -193,7 +193,7 @@ export default function HomePage() {
 
             <span className="hero-chip">
               <Icon name="shieldCheck" strokeWidth={2} />
-              Filed with the network that holds the lock
+              Compare service quotes before you order
             </span>
 
             <h1 className="t-hero">
@@ -426,7 +426,7 @@ export default function HomePage() {
               Brands we <span className="accent">work with.</span>
             </h2>
             <p className="t-lead">
-              Apple devices are released over the air. Every other brand receives a code to type in once.
+              The delivery method depends on the device and selected service. Follow the instructions shown with your completed order; the new network must support your device’s radio bands.
             </p>
           </div>
 

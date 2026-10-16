@@ -55,8 +55,8 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
           <div>
             <Brand />
             <p className="blurb">
-              Permanent IMEI unlocking and device reports, filed with the network or manufacturer
-              that holds the record. For people selling a phone, switching network, or travelling
+              Network-unlock services and device reports for phones you own.
+              For people selling a phone, switching network, or travelling
               with one they already own.
             </p>
             <div className="footer-facts">
@@ -105,7 +105,7 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
         <div className="footer-accept">
           <span>We accept</span>
           <span className="pay-badge">
-            <i aria-hidden="true">₮</i>USDT · TRC20
+            <i aria-hidden="true">$</i>USDC · BEP20
           </span>
           <span className="pay-badge">
             <i aria-hidden="true">₮</i>USDT · BEP20

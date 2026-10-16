@@ -121,8 +121,8 @@ export default async function UnlockServicesPage() {
                 { icon: 'shieldCheck', text: 'A refused order returns the held credit in full' },
               ]}
               action={
-                <Link className="button button--secondary" href="/articles/how-long-does-iphone-carrier-unlock-take">
-                  How long an unlock takes
+                <Link className="button button--secondary" href="/articles/imei-unlock-iphone-service-checklist">
+                  Price and delivery checklist
                   <Icon name="arrowRight" strokeWidth={2} />
                 </Link>
               }

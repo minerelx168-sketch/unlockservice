@@ -7,9 +7,9 @@ export type FaqEntry = { question: string; answer: string }
 
 export const FAQ: FaqEntry[] = [
   {
-    question: 'Is this permanent, and is my warranty safe?',
+    question: 'What does a network unlock change?',
     answer:
-      'Yes to both. The unlock is recorded against the IMEI in the carrier or manufacturer database, so it survives updates, resets and new SIMs. Nothing is installed on the device and no software is modified, which is what puts a warranty at risk.',
+      'A network unlock removes the carrier restriction for an eligible device. It does not remove Activation Lock, a finance agreement or a theft report. The method, eligibility and warranty terms depend on the device, carrier and selected service; review them before ordering.',
   },
   {
     question: 'How long does it take?',
@@ -39,7 +39,7 @@ export const FAQ: FaqEntry[] = [
   {
     question: 'How do I pay, and what is "credit"?',
     answer:
-      'You add credit to your account with USDT on the TRC20 or BEP20 network, and orders are paid from that balance. Credit is held while an order runs and only becomes a charge when the result is delivered, which is what makes a refused order free.',
+      'New top-ups use USDT or USDC on BNB Smart Chain (BEP20), and orders are paid from your account balance. Follow the amount and network shown on your invoice. Credit is held while an order runs and charged only when the result is delivered. If a service cannot be delivered, the reserved account credit is released; this is not a refund to the original payment method.',
   },
   {
     question: 'Will any SIM work after the unlock?',

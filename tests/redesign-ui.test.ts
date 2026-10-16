@@ -36,7 +36,8 @@ test('sample reviews are labelled as samples and never aggregated', () => {
 test('the footer and the homepage claim only what the catalog and the payment rails support', () => {
   const footer = read('components/site-footer.tsx')
   assert.doesNotMatch(footer, /Visa|Mastercard|Apple Pay|Google Pay|Stripe|Bitcoin|PayPal/i)
-  assert.match(footer, /USDT · TRC20/)
+  assert.doesNotMatch(footer, /TRC20/)
+  assert.match(footer, /USDC · BEP20/)
   assert.match(footer, /USDT · BEP20/)
   const chrome = read('components/site-chrome.tsx')
   assert.match(chrome, /CARRIERS\.map/)

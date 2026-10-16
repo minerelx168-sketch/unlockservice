@@ -514,3 +514,14 @@
     justify-content: center;
   }
 }
+
+/* UI reconciliation: structural icon sizing from the redesign foundation.
+   Additive only; existing payment and form styles remain untouched. */
+.hero-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px;
+  border: 1px solid var(--primary-border); border-radius: var(--radius-pill);
+  background: var(--primary-soft); color: var(--primary-dark); font-size: .8125rem; font-weight: 680; }
+.hero-chip svg { width: 16px; height: 16px; flex: 0 0 16px; }
+.trust-bar-icon { display: grid; place-items: center; width: 38px; height: 38px;
+  margin-bottom: 12px; border-radius: 12px; background: var(--primary-soft);
+  border: 1px solid var(--primary-border); color: var(--primary-dark); }
+.trust-bar-icon svg { width: 19px; height: 19px; }

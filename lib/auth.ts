@@ -76,7 +76,7 @@ export function register(username: string, email: string, password: string): Use
      that a given email address has an account here, which it cannot. */
   const usernameTaken = db().prepare('SELECT id FROM users WHERE lower(username) = lower(?)').get(clean)
   if (usernameTaken) throw new AuthError('That username is taken. Try another.')
-  const emailTaken = db().prepare('SELECT id FROM users WHERE email = ?').get(mail)
+  const emailTaken = db().prepare('SELECT id FROM users WHERE lower(email) = ?').get(mail)
   if (emailTaken) {
     throw new AuthError('That email cannot be used to register. Try signing in, or reset your password.')
   }

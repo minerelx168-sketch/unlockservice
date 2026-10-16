@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import type { FormState } from './actions'
 import { currentSession } from './auth'
 import { consumeAttempt } from './rate-limit'
-import { cleanIdentityHint, parseOrderReference } from './track'
+import { parseOrderReference } from './track'
 
 /**
  * The public "find my order" box. It never looks an order up itself: a
@@ -17,13 +17,14 @@ export async function findOrderAction(_: FormState, form: FormData): Promise<For
   const id = parseOrderReference(form.get('reference'))
   if (!id) return { error: 'Enter the order number from your confirmation email — digits only, for example 1234.' }
 
-  const identity = cleanIdentityHint(form.get('email'))
-  if (!consumeAttempt('track-order', identity ?? 'anonymous', 30, 10 * 60)) {
+  const found = await currentSession()
+  // Anonymous requests only redirect to sign-in; there is no lookup to throttle.
+  // Signed-in limits are tied to the verified account, never a caller-supplied hint.
+  if (found && !consumeAttempt('track-order', String(found.user.id), 30, 10 * 60)) {
     return { error: 'Too many attempts. Please wait a few minutes and try again.' }
   }
 
-  const found = await currentSession()
   if (found) redirect(`/user/find/${id}`)
   const next = encodeURIComponent(`/user/find/${id}`)
-  redirect(identity ? `/login?next=${next}&identity=${encodeURIComponent(identity)}` : `/login?next=${next}`)
+  redirect(`/login?next=${next}`)
 }

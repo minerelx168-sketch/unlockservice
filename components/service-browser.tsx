@@ -127,3 +127,40 @@ export function ServiceBrowser({
 
         <p className="service-browser__stepline"><span className="step-no" aria-hidden="true">2</span>{isUnlock ? 'Choose the unlock service' : 'Choose the report'}</p>
         <ServicePicker options={options} value={selectedCode} onChange={(code) => { setSelectedCode(code); trackFunnelEvent('service_selection', { service_category: domain }); if (domain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: domain }) }} disabled={pending} label={isUnlock ? 'Unlock service' : 'Lookup service'} id={`${domain}-browse-service`} />
+
+        {selected ? (
+          <div className="service-selected" aria-live="polite">
+            <span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span>
+            <div className="service-selected-copy">
+              {selected === firstChoice ? <span className="service-selected-pill">Suggested</span> : null}
+              <h3>{serviceDisplayText(selected.name)}</h3>
+              <p>{serviceDisplayText(selected.summary)}</p>
+            </div>
+            <div className="service-selected-price">
+              <strong>{formatUsd(selected.priceCents)}</strong>
+              <span>{available ? 'One-time · paid from credit' : 'Listed price · currently unavailable'}</span>
+              <em>{serviceDisplayText(selected.etaLabel)}</em>
+            </div>
+          </div>
+        ) : null}
+
+        {state.error ? <p className="service-browser__error" role="alert">{state.error}</p> : null}
+
+        <div className="service-browser__actions">
+          <button type="submit" className="button button--primary" disabled={pending || !available} aria-describedby={`${domain}-browse-next`}>
+            {pending ? 'Opening review…' : selected && available ? `Continue to review — ${formatUsd(selected.priceCents)}` : 'Continue to review'} <Icon name="arrowRight" />
+          </button>
+          <p id={`${domain}-browse-next`} className="service-browser__hint">
+            {!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service to continue.' : isAuthenticated ? 'No credit is charged until you confirm on the next page.' : 'Sign in next to review your order. Nothing is charged here.'}
+          </p>
+          {selected && !available && isUnlock ? <Link className="service-browser__waitlist" href="/unlock-waitlist">Notify me when unlock ordering opens <Icon name="arrowRight" /></Link> : null}
+          <ul className="service-assurance" aria-label="Assurances">
+            <li><Icon name="shieldCheck" strokeWidth={2.2} />Held, not charged</li>
+            <li><Icon name="lock" strokeWidth={2.2} />Private to your account</li>
+            <li><Icon name="clock" strokeWidth={2.2} />Live status</li>
+          </ul>
+        </div>
+      </form>
+    </section>
+  )
+}
