@@ -2,7 +2,7 @@
 
 Reference layout: https://unlockriver.com/ — 5-column desktop / 3-column mobile logo-name cards.
 
-Simple Icons 13.21.0 matches the SVG source family used by the reference. Marks remain trademarks of their owners and identify catalog entries; no affiliation or blanket eligibility is implied. Other carrier marks are site favicons from the listed official domains, stored locally; TELUS uses Wikimedia Commons PD-textlogo SVG.
+Simple Icons 13.21.0 matches the SVG source family used by the reference. Marks remain trademarks of their owners and identify catalog entries; no affiliation or blanket eligibility is implied. Other carrier marks are site favicons from the listed official domains, stored locally; TELUS uses the canonical HTTPS-domain favicon. US Cellular uses the separately verified standalone mark because its old domain redirects to T-Mobile.
 
 - AT&T: https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/atandt.svg
 - T-Mobile: https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/tmobile.svg
