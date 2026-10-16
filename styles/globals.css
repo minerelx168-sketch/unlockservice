@@ -10,6 +10,7 @@
 @import './app.css';
 @import './responsive-marketing.css';
 @import './navigation-home.css';
+@import './drawer.css';
 @import './service-picker.css';
 @import './service-workbench.css';
 @import './device-browse.css';
