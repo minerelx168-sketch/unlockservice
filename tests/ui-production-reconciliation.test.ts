@@ -42,3 +42,8 @@ test('public tracking carries only an order continuation, not caller identity, a
   assert.match(forms, /profile-email-start-password/)
   assert.match(forms, /profile-email-confirm-password/)
 })
+
+test('hero price-check CSS is actually imported so assurance icons and quote layout apply', () => {
+  assert.match(read('styles/globals.css'), /@import '\.\/hero-price-check\.css'/)
+  assert.match(read('styles/hero-price-check.css'), /\.price-check-assurance svg\s*\{[^}]*width:\s*15px[^}]*height:\s*15px/s)
+})

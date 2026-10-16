@@ -8,12 +8,12 @@ import { GoogleAnalyticsNavigation } from '@/components/google-analytics-navigat
 import { analyticsHostAllowed } from '@/lib/site'
 
 const DESCRIPTION =
-  'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, with reserved account credit returned if the carrier refuses.'
+  'Compare phone network-unlock services and device reports by IMEI. Review carrier eligibility, service prices and delivery estimates before ordering; refused services release reserved account credit.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicOrigin()),
   title: {
-    default: 'iUnlockMobile — permanent IMEI phone unlocking',
+    default: 'iUnlockMobile — phone unlocking and device reports',
     template: '%s — iUnlockMobile',
   },
   description: DESCRIPTION,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: 'iUnlockMobile',
-    title: 'iUnlockMobile — permanent IMEI phone unlocking',
+    title: 'iUnlockMobile — phone unlocking and device reports',
     description: DESCRIPTION,
     url: '/',
   },
