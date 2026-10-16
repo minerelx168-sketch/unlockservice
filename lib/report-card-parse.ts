@@ -16,6 +16,8 @@ export type Tone = 'good' | 'warn' | 'bad' | null
 export type ReportRow = { label: string; value: string; tone: Tone }
 
 export type ParsedReport = {
+  /** Every row, in the order the provider wrote them. */
+  rows: ReportRow[]
   /** Toned rows: the conditions a buyer is checking for. */
   critical: ReportRow[]
   /** Who the device is: identifiers, model, colour, capacity. */
@@ -101,5 +103,5 @@ export function parseReport(text: string): ParsedReport | null {
   const critical = rows.filter((row) => row.tone !== null && row.label)
   const identity = rows.filter((row) => row.tone === null && row.label && IDENTITY_LABEL.test(row.label))
   const details = rows.filter((row) => !critical.includes(row) && !identity.includes(row))
-  return { critical, identity, details }
+  return { rows, critical, identity, details }
 }
