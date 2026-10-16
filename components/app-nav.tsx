@@ -9,20 +9,24 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
   {
     heading: 'Work',
     items: [
-      { href: '/user/dashboard', label: 'Dashboard', icon: 'window' },
+      { href: '/user/dashboard', label: 'Dashboard', icon: 'grid' },
       { href: '/user/check', label: 'Check IMEI', icon: 'search' },
       { href: '/user/services/unlock', label: 'Unlock services', icon: 'lock' },
       { href: '/user/orders', label: 'Orders', icon: 'clock' },
       { href: '/user/reports', label: 'Service history', icon: 'file' },
-      { href: '/user/checks', label: 'Free checks', icon: 'search' },
+      { href: '/user/checks', label: 'Free checks', icon: 'keypad' },
     ],
   },
   {
     heading: 'Money',
     items: [
-      { href: '/user/add-funds', label: 'Add funds', icon: 'search' },
-      { href: '/user/payments', label: 'Payments', icon: 'file' },
+      { href: '/user/add-funds', label: 'Add funds', icon: 'wallet' },
+      { href: '/user/payments', label: 'Payments', icon: 'ticket' },
     ],
+  },
+  {
+    heading: 'Account',
+    items: [{ href: '/user/profile', label: 'Profile', icon: 'user' }],
   },
 ]
 

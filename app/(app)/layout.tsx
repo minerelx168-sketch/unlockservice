@@ -2,11 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { AppNav } from '@/components/app-nav'
+import { Avatar } from '@/components/avatar'
 import { Brand } from '@/components/brand'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { logoutAction } from '@/lib/actions'
 import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
+import { getAccountProfile } from '@/lib/profile'
 
 export const metadata: Metadata = { robots: { index: false, follow: false } }
 
@@ -18,6 +20,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const { user } = found
 
   const available = user.credit_cents - user.held_cents
+  const profile = getAccountProfile(user.id)
 
   return (
     <div className="app-shell">
@@ -39,10 +42,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
         <AppNav isAdmin={user.account_type === 'admin'}>
           <div className="app-account-actions">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <ThemeToggle />
-              <span className="t-small">{user.username}</span>
-            </div>
+            <Link className="app-account" href="/user/profile">
+              <Avatar username={user.username} style={profile.avatarStyle} size={36} />
+              <span>
+                <b>{user.username}</b>
+                <small>Profile and security</small>
+              </span>
+            </Link>
+            <ThemeToggle />
             <Link className="button button--quiet" href="/">
               Back to site
             </Link>

@@ -10,6 +10,13 @@
   min-width: 0;
 }
 
+/* A select is as wide as its longest option unless told otherwise, and
+   "AT&T USA Status + Unlock (Clean)" is wider than a phone. */
+.price-check select {
+  width: 100%;
+  min-width: 0;
+}
+
 .price-check-head {
   display: grid;
   gap: 6px;

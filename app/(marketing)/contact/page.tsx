@@ -18,9 +18,16 @@ export default async function ContactPage() {
   return (
     <section className="section section--tint">
       <div className="shell">
-        <div className="section-head">
+        <nav className="service-breadcrumb" aria-label="Breadcrumb" style={{ marginBottom: 18 }}>
+          <Link href="/">Home</Link>
+          <span aria-hidden="true">/</span>
+          <Link href="/support">Help centre</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Contact</span>
+        </nav>
+        <div className="section-head" style={{ marginBottom: 26 }}>
           <span className="kicker">
-            <Icon name="info" strokeWidth={2} /> Contact
+            <Icon name="mail" strokeWidth={2} /> Contact
           </span>
           <h1 className="t-section">Talk to a person.</h1>
           <p className="t-lead">
@@ -28,6 +35,21 @@ export default async function ContactPage() {
             below and it reaches the same inbox as an email to us — or write to that address
             directly, whichever you prefer.
           </p>
+        </div>
+
+        <div className="contact-shortcuts">
+          <Link className="hub-card" href="/track">
+            <span className="icon-tile icon-tile--accent" aria-hidden="true"><Icon name="clock" strokeWidth={1.8} /></span>
+            <h3>Where is my order?</h3>
+            <p>The order page has the live status and the result. No message needed.</p>
+            <span className="link-arrow">Track an order <Icon name="arrowRight" strokeWidth={2.2} /></span>
+          </Link>
+          <Link className="hub-card" href="/support">
+            <span className="icon-tile icon-tile--moss" aria-hidden="true"><Icon name="question" strokeWidth={1.8} /></span>
+            <h3>Help centre</h3>
+            <p>Guides, troubleshooting after an unlock, and the questions everyone asks.</p>
+            <span className="link-arrow">Open the help centre <Icon name="arrowRight" strokeWidth={2.2} /></span>
+          </Link>
         </div>
 
         <div className="contact-grid">

@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import { Brand } from './brand'
+import { Icon, type IconName } from './icons'
+
+export type FooterGuide = { href: string; label: string }
+export type FooterFact = { icon: IconName; title: string; caption: string }
 
 const COLUMNS = [
   {
@@ -8,28 +12,42 @@ const COLUMNS = [
       { href: '/services', label: 'Service categories' },
       { href: '/services/unlock', label: 'Unlock Service' },
       { href: '/services/imei-check', label: 'Phone Check' },
-      { href: '/user/reports/new', label: 'Paid IMEI reports' },
+      { href: '/check', label: 'Basic IMEI validation' },
       { href: '/register', label: 'Create an account' },
     ],
   },
   {
-    heading: 'Learn',
+    heading: 'Support',
     links: [
-      { href: '/articles', label: 'Guides' },
-      { href: '/#how', label: 'How it works' },
+      { href: '/track', label: 'Track an order' },
+      { href: '/support', label: 'Help centre' },
+      { href: '/contact', label: 'Contact us' },
       { href: '/#faq', label: 'Common questions' },
+      { href: '/login', label: 'Sign in' },
     ],
   },
   {
-    heading: 'Contact',
+    heading: 'Legal',
     links: [
-      { href: '/contact', label: 'Contact us' },
-      { href: '/login', label: 'Sign in' },
+      { href: '/terms', label: 'Terms of service' },
+      { href: '/privacy', label: 'Privacy policy' },
+      { href: '/terms#refunds', label: 'Refunds and refused orders' },
     ],
   },
 ]
 
-export function SiteFooter({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
+type Props = {
+  isAuthenticated?: boolean
+  guides: FooterGuide[]
+  facts: FooterFact[]
+}
+
+/**
+ * Brand and three facts, four link columns, then what we accept. The facts
+ * come from the server so the footer can never claim more networks or
+ * guides than the catalog actually holds.
+ */
+export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
   return (
     <footer className="site-footer">
       <div className="shell">
@@ -37,9 +55,21 @@ export function SiteFooter({ isAuthenticated = false }: { isAuthenticated?: bool
           <div>
             <Brand />
             <p className="blurb">
-              Permanent IMEI unlocking, filed with the network that holds the lock. For people
-              selling a phone, switching network, or travelling with one they already own.
+              Permanent IMEI unlocking and device reports, filed with the network or manufacturer
+              that holds the record. For people selling a phone, switching network, or travelling
+              with one they already own.
             </p>
+            <div className="footer-facts">
+              {facts.map((fact) => (
+                <div className="footer-fact" key={fact.title}>
+                  <Icon name={fact.icon} strokeWidth={2} />
+                  <div>
+                    {fact.title}
+                    <span>{fact.caption}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {COLUMNS.map((column) => (
@@ -48,7 +78,7 @@ export function SiteFooter({ isAuthenticated = false }: { isAuthenticated?: bool
               <ul className="footer-links">
                 {column.links.map((link) => (
                   <li key={`${column.heading}-${link.label}`}>
-                    <Link href={link.href === '/login' && isAuthenticated ? '/user/unlock' : link.href}>
+                    <Link href={link.href === '/login' && isAuthenticated ? '/user/dashboard' : link.href}>
                       {link.href === '/login' && isAuthenticated ? 'My account' : link.label}
                     </Link>
                   </li>
@@ -56,6 +86,31 @@ export function SiteFooter({ isAuthenticated = false }: { isAuthenticated?: bool
               </ul>
             </div>
           ))}
+
+          <div>
+            <h4>Guides</h4>
+            <ul className="footer-links">
+              {guides.map((guide) => (
+                <li key={guide.href}>
+                  <Link href={guide.href}>{guide.label}</Link>
+                </li>
+              ))}
+              <li>
+                <Link href="/articles">All guides →</Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-accept">
+          <span>We accept</span>
+          <span className="pay-badge">
+            <i aria-hidden="true">₮</i>USDT · TRC20
+          </span>
+          <span className="pay-badge">
+            <i aria-hidden="true">₮</i>USDT · BEP20
+          </span>
+          <span>Credit is held, then charged only when the result is delivered.</span>
         </div>
 
         <div className="footer-base">

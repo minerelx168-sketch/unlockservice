@@ -540,6 +540,8 @@ function migrate(connection: Database.Database) {
   connection.transaction(() => {
     addColumn(connection, 'users', 'email_verified_at TEXT')
     addColumn(connection, 'users', 'banned_at TEXT')
+    addColumn(connection, 'users', "avatar_style TEXT NOT NULL DEFAULT 'violet'")
+    addColumn(connection, 'users', 'pending_email TEXT')
     addColumn(connection, 'credit_ledger', 'description TEXT')
     addColumn(connection, 'credit_ledger', 'affects_balance INTEGER NOT NULL DEFAULT 1')
     addColumn(connection, 'invoices', 'provider TEXT')

@@ -181,6 +181,24 @@
   --radius-band: 28px;
   --radius-device: 40px;
   --radius-pill: 999px;
+  /* Text "logo" tiles (networks, brands) and the labelled read-only boxes
+     on the order page. A tile is quieter than a card: no shadow, a soft
+     ground, a hairline edge. */
+  --radius-tile: 16px;
+  --tile-bg: var(--color-surface);
+  --tile-border: var(--color-border);
+  --tile-hover: var(--color-bg-tint);
+
+  /* Initials avatars. Pairs are picked so white initials clear 4.5:1 on
+     the darker stop; the lighter stop is decoration behind them. */
+  --avatar-1: linear-gradient(135deg, #5d24c7, #9d6bfa);
+  --avatar-2: linear-gradient(135deg, #0f766e, #34d399);
+  --avatar-3: linear-gradient(135deg, #b45309, #f59e0b);
+  --avatar-4: linear-gradient(135deg, #be185d, #f472b6);
+  --avatar-5: linear-gradient(135deg, #1d4ed8, #60a5fa);
+
+  /* An order that timed out is neither good nor bad news — it is grey. */
+  --status-expired: #6b6485;
 
   /* ---- type ---------------------------------------------------------
    * Inter for reading, Inter Tight for headlines. One superfamily, so the
@@ -258,6 +276,11 @@
 
   --footer-ground: #0b0718;
   --footer-muted: #a295c5;
+
+  --tile-bg: var(--color-surface-elevated);
+  --tile-border: var(--color-border);
+  --tile-hover: var(--color-bg-tint);
+  --status-expired: #a9a2c2;
 }
 
 @media (max-width: 1080px) {

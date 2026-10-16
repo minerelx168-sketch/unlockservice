@@ -334,7 +334,9 @@ test('a transfer without the code waits in the admin list; pasting it sends it t
 })
 
 test('a request opened after the money moved can never catch it', async () => {
-  const victimTx = sendBsc(bscRaw(520_042), { secondsFromNow: -5 })
+  // Further back than request() backdates (60s), so no later test's request can
+  // predate this transfer and pick it up if its random code happens to be 42.
+  const victimTx = sendBsc(bscRaw(520_042), { secondsFromNow: -120 })
   mine()
   await scan()
   const hunter = newUser()

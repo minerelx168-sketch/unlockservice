@@ -58,7 +58,9 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
   const [state, action, pending] = useActionState(unlockReady ? showUnlockServicesAction : browseDevicesAction, {})
 
   const digits = imei.replace(/[\s-]/g, '')
-  const imeiRequired = domain === 'unlock'
+  /* An IMEI is only demanded when it is about to be used: opening the
+     unlock catalog for a device. Browsing never needs one. */
+  const imeiRequired = unlockReady
 
   function validate(event: FormEvent<HTMLFormElement>) {
     if ((imeiRequired || imei.trim()) && !deviceImei(imei)) {
@@ -71,9 +73,9 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
   return (
     <form className="price-check" action={action} onSubmit={validate} aria-label="Check price and unlock time" aria-busy={pending}>
       <div className="price-check-head">
-        <h2 className="price-check-title">Check Price &amp; Unlock Time</h2>
+        <h2 className="price-check-title">Your price and turnaround, up front</h2>
         <p className="price-check-sub">
-          Choose the service your phone needs — the exact price and time estimate appear instantly, before you pay anything.
+          Pick the service. The price and the typical wait show before you enter an IMEI or pay anything.
         </p>
       </div>
 
@@ -145,7 +147,7 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
       ) : (
         <p className="alert" role="status">
           <Icon name="info" strokeWidth={1.9} />
-          <span><b>Live prices are loading.</b> Browse the catalog to see current services.</span>
+          <span><b>Nothing listed for this right now.</b> Browse the catalog to see what is available today.</span>
         </p>
       )}
 
@@ -182,7 +184,7 @@ export function HeroPriceCheck({ unlock, check, ordering }: Props) {
         </p>
       </div>
 
-      {unlockReady && selected ? <input type="hidden" name="productCode" value={selected.code} /> : null}
+      {selected ? <input type="hidden" name="productCode" value={selected.code} /> : null}
 
       {error || state.error ? (
         <p className="alert alert--error" role="alert"><Icon name="info" /><span>{error || state.error}</span></p>
