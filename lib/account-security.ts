@@ -1,5 +1,5 @@
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto'
-import { AuthError, getUser, hashPassword, type User, validatePassword } from './auth'
+import { AuthError, getUser, hashPassword, type User, validatePassword, verifyPassword } from './auth'
 import { db } from './db'
 import { consumeAttempt } from './rate-limit'
 
@@ -10,7 +10,7 @@ const OTP_MAX_ATTEMPTS = 5
 const OTP_SEND_LIMIT = 3
 const OTP_SEND_WINDOW_SECONDS = 5 * 60
 
-type OtpPurpose = 'signup' | 'reset'
+type OtpPurpose = 'signup' | 'reset' | 'email_change'
 
 type VerificationRow = {
   user_id: number
@@ -122,11 +122,14 @@ function issueOtp(userId: number, purpose: OtpPurpose): string {
 }
 
 async function sendOtpEmail(email: string, code: string, purpose: OtpPurpose) {
-  const action = purpose === 'signup' ? 'verify your email' : 'reset your password'
+  const action =
+    purpose === 'signup' ? 'verify your email' : purpose === 'reset' ? 'reset your password' : 'confirm your new email address'
   const subject =
     purpose === 'signup'
       ? `iUnlockMobile verification code: ${code}`
-      : `iUnlockMobile reset code: ${code}`
+      : purpose === 'reset'
+        ? `iUnlockMobile reset code: ${code}`
+        : `iUnlockMobile email change code: ${code}`
   const text = `Use ${code} to ${action}. It expires in ${OTP_TTL_MINUTES} minutes.`
   const html = `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:auto;padding:32px"><h2>iUnlockMobile</h2><p>Use this code to ${action}. It expires in ${OTP_TTL_MINUTES} minutes.</p><div style="font-family:monospace;font-size:32px;font-weight:700;letter-spacing:.3em;padding:20px;background:#f3f4f6;border-radius:12px;text-align:center">${code}</div><p>If you did not request this, you can ignore this email.</p></div>`
   await sendEmail(email, subject, html, text)
@@ -262,4 +265,91 @@ export function resetPassword(email: string, code: string, password: string) {
   })()
 
   if (error) throw new AuthError(error)
+}
+
+/* ---- changes made while signed in ----------------------------------- */
+
+const EMAIL_SHAPE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+
+/**
+ * Step one of changing the address: the code goes to the NEW inbox, so
+ * only someone who controls it can finish. The current address keeps
+ * receiving everything until the code is confirmed.
+ */
+export async function startEmailChange(userId: number, requested: string) {
+  requireEmailDelivery()
+  const mail = normalizeEmail(requested)
+  if (!EMAIL_SHAPE.test(mail) || mail.length > 254) throw new AuthError('Enter a valid email address.')
+  const user = getUser(userId)
+  if (!user) throw new AuthError('Sign in again to change your email.')
+  if (mail === normalizeEmail(user.email)) throw new AuthError('That is already the address on this account.')
+  requireAttempt('email-change-send', String(userId), OTP_SEND_LIMIT, OTP_SEND_WINDOW_SECONDS)
+  if (db().prepare('SELECT 1 FROM users WHERE email = ? AND id <> ?').get(mail, userId)) {
+    throw new AuthError('That address cannot be used on this account.')
+  }
+  db()
+    .prepare("UPDATE email_verifications SET consumed_at = ? WHERE user_id = ? AND purpose = 'email_change' AND consumed_at IS NULL")
+    .run(nowIso(), userId)
+  db().prepare('UPDATE users SET pending_email = ? WHERE id = ?').run(mail, userId)
+  await sendOtpEmail(mail, issueOtp(userId, 'email_change'), 'email_change')
+}
+
+export function cancelEmailChange(userId: number) {
+  db()
+    .prepare("UPDATE email_verifications SET consumed_at = ? WHERE user_id = ? AND purpose = 'email_change' AND consumed_at IS NULL")
+    .run(nowIso(), userId)
+  db().prepare('UPDATE users SET pending_email = NULL WHERE id = ?').run(userId)
+}
+
+export function confirmEmailChange(userId: number, code: string): User {
+  if (!/^\d{6}$/.test(code)) throw new AuthError('Code must be 6 digits.')
+  requireAttempt('email-change-code', String(userId))
+
+  const error = db().transaction(() => {
+    const row = db()
+      .prepare(
+        `SELECT u.id AS user_id, u.pending_email, ev.id AS verification_id,
+                ev.code_hash, ev.attempts, ev.expires_at
+           FROM users u
+           LEFT JOIN email_verifications ev
+             ON ev.user_id = u.id AND ev.purpose = 'email_change' AND ev.consumed_at IS NULL
+          WHERE u.id = ?
+          ORDER BY ev.id DESC LIMIT 1`,
+      )
+      .get(userId) as (VerificationRow & { pending_email: string | null }) | undefined
+    if (!row || !row.pending_email) return 'No email change is waiting. Start again from the profile page.'
+    const verificationError = consumeCode(row, code)
+    if (verificationError) return verificationError
+    try {
+      db()
+        .prepare('UPDATE users SET email = ?, pending_email = NULL, email_verified_at = ? WHERE id = ?')
+        .run(row.pending_email, nowIso(), userId)
+    } catch {
+      /* The unique index on email: the address was taken between the two steps. */
+      return 'That address cannot be used on this account.'
+    }
+    return null
+  })()
+
+  if (error) throw new AuthError(error)
+  const user = getUser(userId)
+  if (!user) throw new AuthError('Sign in again.')
+  return user
+}
+
+/**
+ * The current password is required, and every other session is signed
+ * out — if the reason for the change is that someone else knows the old
+ * one, that is the part that matters.
+ */
+export function changePassword(userId: number, current: string, next: string, keepSessionId: string) {
+  validatePassword(next)
+  requireAttempt('password-change', String(userId))
+  const row = db().prepare('SELECT password_hash FROM users WHERE id = ?').get(userId) as { password_hash: string } | undefined
+  if (!row || !verifyPassword(current, row.password_hash)) throw new AuthError('The current password is not right.')
+  if (current === next) throw new AuthError('Choose a password you have not used here before.')
+  db().transaction(() => {
+    db().prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(next), userId)
+    db().prepare('DELETE FROM sessions WHERE user_id = ? AND id <> ?').run(userId, keepSessionId)
+  })()
 }
