@@ -2,12 +2,17 @@ import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ProductCatalog } from '@/components/product-catalog'
 import { Icon, type IconName } from '@/components/icons'
-import { ReportCard } from '@/components/report-card'
+import { ImeiQuickForm } from '@/components/imei-quick-form'
+import { PhoneArt, SampleReportCard } from '@/components/sample-report-card'
+import { ScrollTo } from '@/components/scroll-to'
 import { ServiceBrowser } from '@/components/service-browser'
+import { ServiceOutputExample } from '@/components/service-output-example'
 import { currentSession } from '@/lib/auth'
 import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor } from '@/lib/device-intent-value'
-import { listPublicProviderProducts, type PublicProviderProduct } from '@/lib/public-provider-catalog'
+import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { preferredSample, quickPicks } from '@/lib/quick-picks'
+import { sampleRows } from '@/lib/sample-report'
 import { getServiceOutputExample } from '@/lib/service-output-examples'
 import { serviceText } from '@/lib/unlock-catalog-view'
 
@@ -22,26 +27,10 @@ const STEPS: Array<{ icon: IconName; title: string; body: string }> = [
   { icon: 'file', title: 'Read the result', body: 'On the order page and by email, kept on the order for as long as you need it.' },
 ]
 
-/* The three reports most buyers reach for first, found by name so the
-   chips follow the catalog rather than a hard-coded code. */
-function quickPicks(products: PublicProviderProduct[]) {
-  const wanted: Array<{ pattern: RegExp; icon: IconName; kicker: string }> = [
-    { pattern: /black ?list|lost|stolen/i, icon: 'shield', kicker: 'Any brand' },
-    { pattern: /carrier|sim ?lock|network|unlock status/i, icon: 'lock', kicker: 'Lock status' },
-    { pattern: /warranty|basic|info|activation/i, icon: 'device', kicker: 'Device facts' },
-  ]
-  const picks: Array<{ product: PublicProviderProduct; icon: IconName; kicker: string }> = []
-  for (const want of wanted) {
-    const product = products.find((entry) => want.pattern.test(entry.name) && !picks.some((pick) => pick.product === entry))
-    if (product) picks.push({ product, icon: want.icon, kicker: want.kicker })
-  }
-  return picks
-}
-
 export default async function ImeiCheckServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ product?: string | string[] }>
+  searchParams: Promise<{ product?: string | string[]; start?: string | string[] }>
 }) {
   const [found, intent, query] = await Promise.all([currentSession(), readDeviceIntent(), searchParams])
   const products = listPublicProviderProducts('imei_check')
@@ -55,10 +44,20 @@ export default async function ImeiCheckServicesPage({
 
   /* The sample card shows a reviewed example from the catalog itself, so
      what the visitor sees is the shape of what they would buy. */
-  const sample = products
-    .map((product) => ({ product, example: getServiceOutputExample(product.productCode) }))
-    .find((entry) => entry.example !== null)
+  const sample = preferredSample(
+    products
+      .map((product) => {
+        const example = getServiceOutputExample(product.productCode)
+        const table = example ? sampleRows(example.variants[0].output, 6) : null
+        return { product, example, table }
+      })
+      /* A one-line verdict makes no card; only a report with rows is shown. */
+      .filter((entry) => entry.example !== null && entry.table !== null && entry.table.rows.length >= 4),
+  )
+  const sampleTable = sample?.table ?? null
   const picks = quickPicks(products)
+  const start = query.start === '1'
+  const instant = products.filter((product) => /^instant/i.test(product.etaLabel)).length
 
   return (
     <section className="section section--tint service-entry-section">
@@ -73,7 +72,7 @@ export default async function ImeiCheckServicesPage({
           <div className="service-hero-copy">
             <span className="hero-chip">
               <Icon name="shieldCheck" strokeWidth={2} />
-              Read from the carrier and manufacturer records
+              {products.length} reports · read from carrier and manufacturer records
             </span>
             <h1 className="service-entry-title">IMEI check reports</h1>
             <p className="service-hero-tagline">Know the phone before you pay for it.</p>
@@ -82,64 +81,44 @@ export default async function ImeiCheckServicesPage({
               alone. Works on any brand, with the price shown before anything is ordered.
             </p>
 
-            {picks.length ? (
-              <div className="quick-picks">
-                <div className="quick-picks-label">
-                  <span>Quick picks</span>
-                  <a href="#phone-check-catalog">See all {products.length} reports ↓</a>
-                </div>
-                <div className="quick-pick-row">
-                  {picks.map((pick) => (
-                    <Link
-                      key={pick.product.productCode}
-                      className="quick-pick"
-                      href={`/services/imei-check?product=${encodeURIComponent(pick.product.productCode)}#imei-check-browse`}
-                    >
-                      <span className="icon-tile icon-tile--sm" aria-hidden="true">
-                        <Icon name={pick.icon} />
-                      </span>
-                      <span>
-                        {serviceText(pick.product.name)}
-                        <small>{pick.kicker}</small>
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            <ImeiQuickForm
+              picks={picks.map((pick) => ({ code: pick.product.productCode, short: pick.short, kicker: pick.kicker, icon: pick.icon }))}
+              initialCode={initialProductCode}
+              allHref="#phone-check-catalog"
+              allLabel={`See all ${products.length} reports ↓`}
+            />
 
             <ul className="service-micro" aria-label="How reports are delivered">
-              <li><Icon name="bolt" strokeWidth={2} />Most reports in minutes</li>
+              <li><Icon name="bolt" strokeWidth={2} />{instant} of {products.length} reports are instant</li>
               <li><Icon name="shieldCheck" strokeWidth={2} />Credit held, not charged</li>
               <li><Icon name="lock" strokeWidth={2} />IMEI masked in every list</li>
             </ul>
           </div>
 
-          {sample?.example ? (
-            <aside className="sample-report" aria-label="Sample report">
-              <div className="sample-report-head">
-                <span>
-                  <span className="icon-tile icon-tile--sm" aria-hidden="true">
-                    <Icon name="file" />
-                  </span>
-                  <span>
-                    <small>Sample report</small>
-                    <b>{serviceText(sample.product.name)}</b>
-                  </span>
-                </span>
-                <span className="sample-pill">Illustrative</span>
-              </div>
-              <div className="sample-imei">
-                <span>IMEI</span>
-                <b>35•• •••• ••80</b>
-                <span>masked</span>
-              </div>
-              <ReportCard text={sample.example.variants[0].output} fallbackClassName="provider-code-result" limit={{ critical: 5, identity: 3, details: 0 }} />
-              <p className="sample-report-foot">
-                <span><Icon name="checkSmall" strokeWidth={2.4} />Shortened — the full report has more rows</span>
-                <span>Example data, not a real device</span>
-              </p>
-            </aside>
+          {sample?.example && sampleTable ? (
+            <div className="sample-stage">
+              <PhoneArt />
+              <SampleReportCard
+                eyebrow="Sample report"
+                title={serviceText(sample.product.name)}
+                pill="Example data"
+                icon="shield"
+                meta={['Format · as delivered', `${sampleTable.rows.length} of ${sampleTable.total} fields shown`]}
+                imei="35•• •••• ••80"
+                rows={sampleTable.rows}
+                facts={[
+                  { icon: 'clock', text: `Typical delivery: ${serviceText(sample.product.etaLabel)}` },
+                  { icon: 'checkSmall', text: 'Example data from a reviewed sample, not a real device' },
+                ]}
+                action={
+                  <ServiceOutputExample
+                    productCode={sample.product.productCode}
+                    productName={serviceText(sample.product.name)}
+                    label={`See the full ${sample.product.name.match(/black ?list/i) ? 'blacklist' : 'report'} sample`}
+                  />
+                }
+              />
+            </div>
           ) : null}
         </div>
 
@@ -157,6 +136,7 @@ export default async function ImeiCheckServicesPage({
         </ol>
 
         <div id="imei-check-browse">
+          {start ? <ScrollTo targetId="imei-check-browse" /> : null}
           <ServiceBrowser
             products={products}
             domain="imei_check"

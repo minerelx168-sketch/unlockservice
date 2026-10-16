@@ -27,10 +27,12 @@ function readExample(payload: unknown): Example | null {
 }
 
 /** Render only for a service with a reviewed example, beside (never inside) its selection button. */
-export function ServiceOutputExample({ productCode, productName, className = '' }: {
+export function ServiceOutputExample({ productCode, productName, className = '', label = 'View example output' }: {
   productCode: string
   productName: string
   className?: string
+  /** The trigger's text. The accessible name always names the service. */
+  label?: string
 }) {
   const id = useId()
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -114,7 +116,7 @@ export function ServiceOutputExample({ productCode, productName, className = '' 
         onClick={(event) => { event.stopPropagation(); openExample() }}
       >
         <Icon name="file" />
-        <span>View example output</span>
+        <span>{label}</span>
       </button>
       <dialog
         ref={dialogRef}

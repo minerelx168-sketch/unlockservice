@@ -1,0 +1,307 @@
+/**
+ * The sample report card on the service landings and the phone drawn
+ * behind it. Numbered rows, a label with an icon, the value on the right
+ * and a badge on the rows that carry a verdict — the shape a report has
+ * on the order page, so what the visitor sees is what they will get.
+ */
+
+.sample-stage {
+  position: relative;
+  align-self: start;
+}
+
+.phone-art {
+  position: absolute;
+  z-index: -1;
+  top: -34px;
+  right: -46px;
+  width: 190px;
+  height: auto;
+  transform: rotate(16deg);
+  filter: drop-shadow(0 24px 40px rgb(30 12 70 / 14%));
+  pointer-events: none;
+}
+
+.sample-card {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.sample-card::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: calc(var(--radius-card) + 14px);
+  background: radial-gradient(closest-side, var(--hero-wash-a), transparent);
+  pointer-events: none;
+}
+
+.sample-card-head {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+.sample-card-head .icon-tile--sm {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+}
+
+.sample-card-head .icon-tile--sm svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sample-card-title {
+  min-width: 0;
+}
+
+.sample-card-title small {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 740;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sample-card-title b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ink-strong);
+  overflow-wrap: anywhere;
+}
+
+.sample-card-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 0.6875rem;
+  font-weight: 740;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sample-card-pill i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.sample-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sample-card-imei {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--page-tint);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.sample-card-imei b {
+  font-size: 1.0625rem;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+  color: var(--ink-strong);
+}
+
+.sample-card-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sample-card-rows li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(0, auto);
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 2px;
+  border-top: 1px solid var(--line);
+}
+
+.sample-card-rows li:first-child {
+  border-top: 0;
+}
+
+.sample-card-rows em {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+
+.sample-card-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sample-card-label svg {
+  flex: 0 0 15px;
+  width: 15px;
+  height: 15px;
+  color: var(--ink);
+}
+
+.sample-card-value {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  text-align: right;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+  overflow-wrap: anywhere;
+}
+
+.sample-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 0.6875rem;
+  font-weight: 740;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sample-card-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+li[data-tone='good'] .sample-card-badge {
+  background: color-mix(in srgb, var(--success) 14%, var(--surface));
+  color: var(--success);
+}
+
+li[data-tone='warn'] .sample-card-badge {
+  background: color-mix(in srgb, var(--warning) 16%, var(--surface));
+  color: var(--warning);
+}
+
+li[data-tone='bad'] .sample-card-badge {
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+  color: var(--danger);
+}
+
+.sample-card-facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 0 0;
+  list-style: none;
+  border-top: 1px dashed var(--line-strong);
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.sample-card-facts li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sample-card-facts svg {
+  flex: 0 0 15px;
+  width: 15px;
+  height: 15px;
+  color: var(--success);
+}
+
+.sample-card-action {
+  display: flex;
+  justify-content: center;
+}
+
+.sample-card-action .service-output-example__trigger,
+.sample-card-action .button {
+  border-radius: var(--radius-pill);
+}
+
+@media (max-width: 1080px) {
+  .phone-art {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .sample-card {
+    padding: 16px;
+  }
+
+  .sample-card-head {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .sample-card-pill {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .sample-card-rows li {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+
+  .sample-card-value {
+    grid-column: 2;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .sample-card-imei b {
+    font-size: 0.875rem;
+    letter-spacing: 0.12em;
+  }
+}
