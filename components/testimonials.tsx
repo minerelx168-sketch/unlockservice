@@ -39,9 +39,11 @@ function ReviewCard({ item, index }: { item: Testimonial; index: number }) {
  * focus, and with reduced motion they become ordinary scrollable rows
  * with a single copy of each card.
  *
- * While every row is a sample, the section says so once, in the eyebrow
- * and the line under the heading, rather than on each card; the cards
- * themselves carry only the review. The section never shows an average
+ * While every row is a sample, the section says so once, in the line
+ * under the heading, rather than on each card or in a label above it;
+ * the cards themselves carry only the review. That one line is the
+ * disclosure that keeps persona cards from reading as customer reviews,
+ * and it goes away by itself once real rows replace them. The section never shows an average
  * or a count — there is nothing honest to compute one from until real
  * reviews exist.
  */
@@ -55,16 +57,18 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
     <section className="section section--tint home-section reviews" id="reviews" aria-labelledby="reviews-heading">
       <div className="shell">
         <div className="section-head section-head--center">
-          <span className="kicker">
-            <Icon name="star" strokeWidth={2} />
-            {allSample ? 'Sample reviews' : 'Customer reviews'}
-          </span>
+          {allSample ? null : (
+            <span className="kicker">
+              <Icon name="star" strokeWidth={2} />
+              Customer reviews
+            </span>
+          )}
           <h2 className="t-section" id="reviews-heading">
             What people check for, <span className="accent">in their words.</span>
           </h2>
           <p className="t-lead">
             {allSample
-              ? 'Illustrative cards while verified reviews are collected. No rating or review count is claimed.'
+              ? 'Illustrative examples while verified customer reviews are collected. No rating or review count is claimed.'
               : 'Feedback from traders, repair shops and travellers who checked or unlocked a phone here.'}
           </p>
         </div>
