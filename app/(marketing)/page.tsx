@@ -1,5 +1,6 @@
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
+import { BrandLogo } from '@/components/brand-logo'
 import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-check'
 import { Icon, type IconName } from '@/components/icons'
 import { Testimonials } from '@/components/testimonials'
@@ -269,31 +270,28 @@ export default function HomePage() {
       </section>
 
       {/* 02 · Networks */}
-      <section className="section section--tint home-section" id="networks">
+      <section className="section section--tint home-section logo-section" id="networks">
         <div className="shell">
           <div className="section-head section-head--center">
             <span className="kicker">
               <Icon name="globe" strokeWidth={2} />
-              Networks
+              Global carriers
             </span>
             <h2 className="t-section">
-              Locked to one of these? <span className="accent">Start here.</span>
+              Carriers <span className="accent">We Unlock</span>
             </h2>
             <p className="t-lead">
-              The networks the catalog lists today. Each one shows its own price and typical turnaround
-              before you order.
+              Browse {networks} listed networks across {countries.length} countries. Check your carrier’s current
+              availability, price and typical turnaround before you order.
             </p>
           </div>
 
-          <ul className="tile-grid" aria-label="Networks">
+          <ul className="logo-grid" aria-label="Networks">
             {CARRIERS.map((carrier) => (
               <li key={carrier.id}>
-                <Link className="tile" href="/services/unlock">
-                  <i aria-hidden="true">{carrier.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 2)}</i>
-                  <span>
-                    {carrier.name}
-                    <small>{carrier.country}</small>
-                  </span>
+                <Link className="logo-card" href="/services/unlock">
+                  <BrandLogo name={carrier.name} />
+                  <h3>{carrier.name}</h3>
                 </Link>
               </li>
             ))}
@@ -415,7 +413,7 @@ export default function HomePage() {
       </section>
 
       {/* 06 · Brands */}
-      <section className="section section--tint home-section" id="brands">
+      <section className="section section--tint home-section logo-section" id="brands">
         <div className="shell">
           <div className="section-head section-head--center">
             <span className="kicker">
@@ -423,22 +421,19 @@ export default function HomePage() {
               Supported devices
             </span>
             <h2 className="t-section">
-              Brands we <span className="accent">work with.</span>
+              Top Brands <span className="accent">We Support</span>
             </h2>
             <p className="t-lead">
-              The delivery method depends on the device and selected service. Follow the instructions shown with your completed order; the new network must support your device’s radio bands.
+              Explore services for leading phone manufacturers. Device eligibility and delivery method depend on the selected service; review the requirements before ordering.
             </p>
           </div>
 
-          <ul className="tile-grid" aria-label="Brands">
+          <ul className="logo-grid" aria-label="Brands">
             {BRANDS.map((brand) => (
               <li key={brand.id}>
-                <Link className="tile" href="/services/unlock">
-                  <i aria-hidden="true">{brand.name.slice(0, 1)}</i>
-                  <span>
-                    {brand.name}
-                    <small>{brand.delivery === 'remote' ? 'Released remotely' : 'Unlock code'}</small>
-                  </span>
+                <Link className="logo-card" href="/services/unlock">
+                  <BrandLogo name={brand.name} />
+                  <h3>{brand.name}</h3>
                 </Link>
               </li>
             ))}
