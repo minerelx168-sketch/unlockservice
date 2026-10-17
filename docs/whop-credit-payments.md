@@ -49,7 +49,12 @@ endpoint documents these permissions (the dashboard displays friendly names):
 
 This integration does not call charge, refund or payout APIs. Enter the real
 account and product identifiers; sandbox needs its own credentials and product.
-Pin both the key and webhook to API date **2026-10-15-1**, API version **v1**.
+Pin the key and REST client to API date **2026-10-15-1**. Use API version **v1**
+for the webhook. API-created webhooks can use the same date pin. The dashboard
+does not expose that setting: its unpinned v1 envelope uses `company_id` instead
+of `account_id`. Both supported envelopes are signature/account checked; other
+date pins are rejected. The handler takes only the payment ID from the event and
+always retrieves the payment using the date-pinned REST client before settlement.
 `@whop/sdk` is pinned to 2.6.0. Review schema changes before upgrading either.
 
 Set these only in the server's protected environment file, shared by the app and

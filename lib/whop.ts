@@ -96,13 +96,13 @@ export async function createWhopCheckout(userId: number, amountCents: number, re
     account_id: config.accountId, mode: 'payment',
     plan: { account_id: config.accountId, product_id: config.productId, currency: 'usd',
       initial_price: amountCents / 100, plan_type: 'one_time', renewal_price: 0,
-      title: `iUnlockMobile service credits — USD ${(amountCents / 100).toFixed(2)}`,
+      title: `Service credits — USD ${(amountCents / 100).toFixed(2)}`,
       description: 'Prepaid credits on iunlockmobile.com for device reports, carrier unlocking and available device services, including iCloud activation-lock, MDM profile and Google account (FRP) removal, subject to eligibility.',
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true,
       three_ds_level: 'mandate_challenge',
-      payment_method_configuration: { enabled: ['card'], include_platform_defaults: false } },
+      payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
     metadata: { invoice_reference: topup.invoice_reference, integration: 'iunlockmobile-credit-v1' },
-    payment_method_configuration: { enabled: ['card'], include_platform_defaults: false },
+    payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false },
     redirect_url: `${publicOrigin()}/user/invoice/${topup.invoice_reference}`,
   }, { idempotencyKey: `whop-topup-${topup.invoice_reference}` })
   if (!checkout.purchase_url || !/^ch_[A-Za-z0-9]+$/.test(checkout.id)
@@ -126,8 +126,15 @@ export function enqueueWhopEvent(raw: string, headers: Record<string, string>): 
   const config = whopConfiguration()
   if (!config) throw new WhopPaymentError('Whop webhook is not configured.', 503)
   const event = record(unwrapWebhook(raw, { headers, key: config.secret }))
+  // Dashboard-created v1 webhooks have no date pin and use company_id.
+  // Only the payment ID is consumed here; settlement always retrieves the
+  // authoritative payment through our date-pinned API client.
+  const dashboardEnvelope = event.api_version_date == null
+  const accountId = dashboardEnvelope ? event.company_id : event.account_id
   if (event.id !== headers['webhook-id'] || typeof event.id !== 'string' || event.id.length > 200
-    || event.account_id !== config.accountId || event.api_version !== 'v1' || event.api_version_date !== WHOP_API_VERSION) {
+    || accountId !== config.accountId || event.api_version !== 'v1'
+    || (!dashboardEnvelope && event.api_version_date !== WHOP_API_VERSION)
+    || [event.account_id, event.company_id].some(value => value !== undefined && value !== config.accountId)) {
     throw new WhopPaymentError('Webhook account or version mismatch.')
   }
   if (!WHOP_EVENTS.includes(event.type as typeof WHOP_EVENTS[number])) return 'ignored'

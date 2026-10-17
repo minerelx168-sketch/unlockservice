@@ -112,9 +112,10 @@ test('checkout is server-priced, card-only, one-time, owner scoped and idempoten
   const plan = body.plan as Record<string, unknown>
   assert.equal(plan.initial_price, 10)
   assert.equal(plan.plan_type, 'one_time')
+  assert.ok(String(plan.title).length <= 30)
   assert.equal(plan.stock, 1)
   assert.equal(plan.three_ds_level, 'mandate_challenge')
-  assert.deepEqual(body.payment_method_configuration, { enabled: ['card'], include_platform_defaults: false })
+  assert.deepEqual(body.payment_method_configuration, { enabled: ['card'], disabled: [], include_platform_defaults: false })
   assert.match(String(plan.description), /iunlockmobile.com.*carrier unlocking.*iCloud.*MDM.*FRP/)
   assert.equal(body.redirect_url, `https://iunlockmobile.com/user/invoice/${first.invoice_reference}`)
   await assert.rejects(whop.createWhopCheckout(userId, 2000, key), /different payment/)
@@ -143,10 +144,28 @@ test('invalid signatures, replay, wrong accounts and versions never enter the in
   assert.throws(() => whop.enqueueWhopEvent(event.raw, { ...event.headers, 'webhook-signature': 'v1,invalid' }))
   for (const bad of [signed('payment.succeeded', { id: 'pay_test' }, {}, Math.floor(Date.now() / 1000) - 400),
     signed('payment.succeeded', { id: 'pay_test' }, { account_id: 'biz_other' }),
-    signed('payment.succeeded', { id: 'pay_test' }, { api_version_date: '2020-01-01' })]) {
+    signed('payment.succeeded', { id: 'pay_test' }, { api_version_date: '2020-01-01' }),
+    signed('payment.succeeded', { id: 'pay_test' }, { api_version: 'v5' }),
+    signed('payment.succeeded', { id: 'pay_test' }, { api_version_date: null, company_id: 'biz_other' }),
+    signed('payment.succeeded', { id: 'pay_test' }, { api_version_date: null }),
+    signed('payment.succeeded', { id: 'pay_test' }, { api_version_date: null, company_id: 'biz_test', account_id: 'biz_other' })]) {
     assert.throws(() => whop.enqueueWhopEvent(bad.raw, bad.headers))
   }
   assert.equal((database.db().prepare('SELECT COUNT(*) AS n FROM whop_webhook_events').get() as {n:number}).n, 0)
+})
+
+test('dashboard v1 envelopes only supply IDs; authoritative retrieval decides credit', async () => {
+  for (const date of [null, undefined]) {
+    const row = await topup()
+    const p = payment(row)
+    remotePayments.set(p.id, p)
+    const event = signed('payment.succeeded', { id: p.id, total: money('999.00'), status: 'failed' },
+      { account_id: undefined, company_id: 'biz_test', api_version_date: date })
+    assert.equal(whop.enqueueWhopEvent(event.raw, event.headers), 'queued')
+    assert.equal(credits.getBalance(row.user_id).creditCents, 0)
+    assert.deepEqual(await whop.processWhopEvents(), { processed: 1, errors: 0 })
+    assert.equal(credits.getBalance(row.user_id).creditCents, 1000)
+  }
 })
 
 test('duplicate and concurrent deliveries credit a verified payment exactly once', async () => {
