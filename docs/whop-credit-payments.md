@@ -33,6 +33,13 @@ invoice ($1–$1,000). Do not distribute a generic checkout link: it lacks the l
 invoice reference needed to credit the correct customer. Disable discounts and
 affiliates unless their effect on settlement has been explicitly implemented.
 
+The card form offers $10, $25, $50, $100, $250 and $500 shortcuts plus a custom
+USD amount with at most two decimal places. Its live summary shows the credit
+the customer will receive. The $1–$1,000 range is this application's current
+limit, not a claimed Whop-wide limit. Shortcuts outside a configured range are
+hidden. Each choice uses the same owner-bound checkout flow; do not create
+public reusable price links for the shortcuts.
+
 ## Configuration
 
 Use a company API key for the correct Whop account. The current create-checkout
