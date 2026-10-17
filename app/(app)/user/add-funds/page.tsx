@@ -7,12 +7,14 @@ import { MAX_TOPUP_CENTS, GATEWAYS } from '@/lib/payments'
 import { watchableRoute } from '@/lib/payment-watcher'
 import { formatUsd } from '@/lib/money'
 import { listPaidReportProducts } from '@/lib/paid-reports'
+import { whopCheckoutEnabled, WHOP_MIN_CENTS, WHOP_MAX_CENTS } from '@/lib/whop'
+import { WhopPaymentForm } from '@/components/whop-payment-form'
 
 export const metadata: Metadata = { title: 'Add funds' }
 export const dynamic = 'force-dynamic'
 
 export default async function AddFundsPage({ searchParams }: { searchParams: Promise<{ product?: string }> }) {
-  const { user } = await requireSession()
+  const { user, session } = await requireSession()
   const productCode = (await searchParams).product
   const product = productCode ? listPaidReportProducts().find((entry) => entry.code === productCode && entry.providerReady) : undefined
   const available = user.credit_cents - user.held_cents
@@ -21,15 +23,18 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
   const ready = GATEWAYS.length > 0
   const autoDetecting = GATEWAYS.some((gateway) => watchableRoute(gateway))
   const onlyBep20 = GATEWAYS.length > 0 && GATEWAYS.every((gateway) => gateway.chainKind === 'evm' && gateway.chainId === 56)
+  const cardReady = whopCheckoutEnabled()
 
   return (
     <>
       <section className="funding-hero">
         <div>
           <span className="eyebrow">Secure account funding</span>
-          <h1>{onlyBep20 ? 'Add funds on BEP20.' : 'Add funds with USDT or USDC.'}</h1>
+          <h1>{cardReady ? 'Add credit to your account.' : onlyBep20 ? 'Add funds on BEP20.' : 'Add funds with USDT or USDC.'}</h1>
           <p>
-            {onlyBep20
+            {cardReady
+              ? 'Pay by credit or debit card, or choose an available cryptocurrency. Your credit is added after payment has been verified.'
+              : onlyBep20
               ? 'Choose USDT or USDC on BEP20 (BNB Smart Chain). We’ll create a payment request with the exact amount, wallet address and QR code. Send only after you see those details.'
               : 'Enter your credit amount and choose a network. We’ll create a payment request with the exact amount, wallet address and QR code. Send only after you see those details.'}
           </p>
@@ -37,11 +42,19 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
         <div className="funding-balance-card">
           <span>Available credit</span>
           <strong>{formatUsd(available)}</strong>
-          <small>{autoDetecting ? 'On-chain payment detection active' : ready ? 'Manual verification available' : 'Payment channel unavailable'}</small>
+          <small>{autoDetecting ? 'On-chain payment detection active' : cardReady ? 'Card payment verification ready' : ready ? 'Manual verification available' : 'Payment channel unavailable'}</small>
         </div>
       </section>
 
-      <ol className="funding-journey" aria-label="How adding funds works">
+      {cardReady ? <section className="panel funding-panel" aria-label="Pay by card">
+        <header><h2>Credit or debit card</h2><p className="t-small">Secure checkout powered by Whop</p></header>
+        <div className="panel-body"><WhopPaymentForm csrfToken={session.csrfToken}
+          minCents={WHOP_MIN_CENTS} maxCents={WHOP_MAX_CENTS}
+          initialCents={shortfall > 0 ? Math.min(WHOP_MAX_CENTS, Math.max(WHOP_MIN_CENTS, shortfall)) : undefined} /></div>
+      </section> : null}
+
+      {cardReady ? <p className="eyebrow">Pay with cryptocurrency</p> : null}
+      <ol className="funding-journey" aria-label={cardReady ? 'How cryptocurrency funding works' : 'How adding funds works'}>
         <li><span>01</span><div><strong>Choose amount and network</strong><small>Set how much credit you want.</small></div></li>
         <li><span>02</span><div><strong>Copy your payment details</strong><small>See the exact amount, address and QR on your request.</small></div></li>
         <li><span>03</span><div><strong>Send and track</strong><small>{autoDetecting ? 'We detect eligible transfers automatically.' : 'Send your transaction ID for manual review.'}</small></div></li>
