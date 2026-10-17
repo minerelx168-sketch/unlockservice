@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseUsd, formatUsd } from '@/lib/money'
 
@@ -14,6 +14,12 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const key = useRef<string | null>(null)
+  useEffect(() => {
+    // Back from hosted checkout may restore the page with its pending state.
+    const onPageShow = (event: PageTransitionEvent) => { if (event.persisted) setBusy(false) }
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [])
   const amountCents = parseUsd(amount)
   const valid = amountCents !== null && amountCents >= minCents && amountCents <= maxCents
   function chooseAmount(value: string) {
@@ -39,6 +45,14 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Could not create checkout.')
       if (!/^\/user\/invoice\/[a-f0-9]{32}$/.test(data.invoiceUrl)) throw new Error('Invalid invoice response.')
+      if (data.checkoutUrl != null) {
+        const checkout = new URL(data.checkoutUrl)
+        if (checkout.protocol !== 'https:' || !['whop.com', 'sandbox.whop.com'].includes(checkout.hostname)
+          || checkout.username || checkout.password || checkout.port) throw new Error('Invalid checkout response.')
+        window.location.assign(checkout.href)
+        return
+      }
+      // A previously completed payment still opens its status page.
       router.push(data.invoiceUrl)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Could not connect. Please retry.')
