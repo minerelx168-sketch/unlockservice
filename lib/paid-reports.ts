@@ -633,7 +633,7 @@ export async function createPaidReport(
       return payload(replay, balance, balance)
     }
     if (error instanceof InsufficientCredit) {
-      throw new PaidReportError('Not enough credit for this report. Add funds and try again.', 'insufficient_credit')
+      throw new PaidReportError(error.message, 'insufficient_credit')
     }
     throw error
   }
