@@ -6,38 +6,47 @@ import { requireSession } from '@/lib/auth'
 import { MAX_TOPUP_CENTS, GATEWAYS } from '@/lib/payments'
 import { formatUsd } from '@/lib/money'
 import { listPaidReportProducts } from '@/lib/paid-reports'
+import { whopCheckoutEnabled, WHOP_MIN_CENTS, WHOP_MAX_CENTS } from '@/lib/whop'
+import { WhopPaymentForm } from '@/components/whop-payment-form'
 
 export const metadata: Metadata = { title: 'Add funds' }
 export const dynamic = 'force-dynamic'
 
 export default async function AddFundsPage({ searchParams }: { searchParams: Promise<{ product?: string }> }) {
-  const { user } = await requireSession()
+  const { user, session } = await requireSession()
   const productCode = (await searchParams).product
   const product = productCode ? listPaidReportProducts().find((entry) => entry.code === productCode && entry.providerReady) : undefined
   const available = user.credit_cents - user.held_cents
   const shortfall = product ? Math.max(0, product.priceCents - available) : 0
   const returnTo = product ? `/user/reports/new?product=${encodeURIComponent(product.code)}` : null
   const ready = GATEWAYS.length > 0
+  const cardReady = whopCheckoutEnabled()
 
   return (
     <>
       <section className="funding-hero">
         <div>
           <span className="eyebrow">Secure account funding</span>
-          <h1>Add credit in four clear steps.</h1>
+          <h1>Add credit to your account.</h1>
           <p>
-            Choose a supported token and network, create a locked payment request, then paste the transaction ID.
-            The server verifies the allowlisted contract, receiving wallet and on-chain amount before adding credit.
+            Choose an available payment method. Your credit is added after payment has been verified.
           </p>
         </div>
         <div className="funding-balance-card">
           <span>Available credit</span>
           <strong>{formatUsd(available)}</strong>
-          <small>{ready ? 'Automatic verification ready' : 'Payment channel unavailable'}</small>
+          <small>{ready || cardReady ? 'Automatic verification ready' : 'Payment channel unavailable'}</small>
         </div>
       </section>
 
-      <ol className="funding-progress" aria-label="Add funds process">
+      {cardReady ? <section className="panel funding-panel" aria-label="Pay by card">
+        <header><h2>Credit or debit card</h2><p className="t-small">Secure checkout powered by Whop</p></header>
+        <div className="panel-body"><WhopPaymentForm csrfToken={session.csrfToken}
+          minCents={WHOP_MIN_CENTS} maxCents={WHOP_MAX_CENTS}
+          initialCents={shortfall > 0 ? Math.min(WHOP_MAX_CENTS, Math.max(WHOP_MIN_CENTS, shortfall)) : undefined} /></div>
+      </section> : null}
+
+      <ol className="funding-progress" aria-label="Token payment process">
         <li><span>1</span><strong>Choose amount</strong><small>Preview the exact total</small></li>
         <li><span>2</span><strong>Create request</strong><small>Numbers are locked</small></li>
         <li><span>3</span><strong>Send and paste ID</strong><small>Match the selected network</small></li>
@@ -63,7 +72,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
         <section className="panel funding-panel">
           <header>
             <div>
-              <h2>Create payment request</h2>
+              <h2>Pay with cryptocurrency</h2>
               <p className="t-small">Select one token and network; your invoice locks the verified route before you send.</p>
             </div>
             <span>No minimum top-up</span>
