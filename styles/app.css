@@ -2419,6 +2419,75 @@ table.account-table td {
   gap: 20px;
 }
 
+.funding-method-selector > header {
+  align-items: flex-start;
+}
+
+.funding-method-selector > header p {
+  margin: 5px 0 0;
+}
+
+.funding-method-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.funding-method-option {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 14px;
+  min-height: 100px;
+  padding: 20px;
+  appearance: none;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  color: var(--ink-strong);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.funding-method-option:hover,
+.funding-method-option[aria-pressed='true'] {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+
+.funding-method-option[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.funding-method-symbol {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-panel);
+  background: var(--page-soft);
+  color: var(--primary-dark);
+  font-size: 1.5rem;
+  font-weight: 750;
+}
+
+.funding-method-copy strong,
+.funding-method-copy small {
+  display: block;
+}
+
+.funding-method-copy small {
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.funding-method-status {
+  margin: 16px 0 22px;
+  color: var(--muted);
+}
+
 .funding-panel > header {
   align-items: flex-start;
 }
@@ -2992,7 +3061,8 @@ table.account-table td {
     flex-direction: column;
   }
 
-  .funding-journey {
+  .funding-journey,
+  .funding-method-options {
     grid-template-columns: minmax(0, 1fr);
   }
 
