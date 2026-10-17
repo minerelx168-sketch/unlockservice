@@ -2434,6 +2434,10 @@ table.account-table td {
   gap: 10px;
 }
 
+.quick-amounts--card {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .quick-amount,
 .payment-method-card,
 .payment-filter {

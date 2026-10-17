@@ -14,6 +14,8 @@ import { paymentAddressQrDataUrl } from '@/lib/payment-qr'
 import { paymentTransactionUrl } from '@/lib/payment-config'
 import { codedInvoiceExpired, formatE4, paymentCode, shortfallToleranceCents } from '@/lib/payment-codes'
 import { nudgeInvoicePayment, watchableRoute } from '@/lib/payment-watcher'
+import { getWhopTopup } from '@/lib/whop'
+import { WhopInvoice } from '@/components/whop-invoice'
 
 export const metadata: Metadata = { title: 'Payment request' }
 export const dynamic = 'force-dynamic'
@@ -58,6 +60,11 @@ export default async function InvoicePage({
   const returnTo = safeContinuation((await searchParams).next)
   const invoice = getInvoice(reference, user.id)
   if (!invoice) notFound()
+  if (invoice.gateway === 'whop_card') {
+    const topup = getWhopTopup(reference, user.id)
+    if (!topup) notFound()
+    return <WhopInvoice topup={topup} />
+  }
 
   /* While the customer has this page open, look for their transfer now
      rather than at the next timer tick. Deferred past this render and not
