@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { AddFundsForm } from '@/components/payment-forms'
 import { Icon } from '@/components/icons'
 import { requireSession } from '@/lib/auth'
-import { MAX_TOPUP_CENTS, GATEWAYS } from '@/lib/payments'
+import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS, GATEWAYS } from '@/lib/payments'
 import { watchableRoute } from '@/lib/payment-watcher'
 import { formatUsd } from '@/lib/money'
 import { listPaidReportProducts } from '@/lib/paid-reports'
@@ -54,7 +54,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
             <p className="t-small">
               Available credit: {formatUsd(available)}.{' '}
               {shortfall > 0
-                ? `Add ${formatUsd(shortfall)} to cover the exact shortfall, or choose a larger amount for future orders.`
+                ? `You need ${formatUsd(shortfall)} more credit. Add ${formatUsd(MIN_TOPUP_CENTS)}–${formatUsd(MAX_TOPUP_CENTS)} per top-up.`
                 : 'You already have enough credit for this report.'}
             </p>
             <Link className="link-arrow" href={returnTo}>Return to this report</Link>
@@ -83,7 +83,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
                   <h2>Set up your payment</h2>
                   <p className="t-small">Choose your credit amount and the token/network you will use. Review the exact transfer instructions next.</p>
                 </div>
-                <span>No minimum top-up</span>
+                <span>{formatUsd(MIN_TOPUP_CENTS)}–{formatUsd(MAX_TOPUP_CENTS)} per top-up</span>
               </header>
               <div className="panel-body">
                 <AddFundsForm
@@ -96,8 +96,9 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
                     automaticVerification: watchableRoute(gateway),
                     riskClassification: gateway.riskClassification,
                   }))}
+                  minCents={MIN_TOPUP_CENTS}
                   maxCents={MAX_TOPUP_CENTS}
-                  initialCents={shortfall > 0 ? Math.min(MAX_TOPUP_CENTS, shortfall) : undefined}
+                  initialCents={shortfall > 0 ? Math.min(MAX_TOPUP_CENTS, Math.max(MIN_TOPUP_CENTS, shortfall)) : undefined}
                   returnTo={returnTo}
                 />
               </div>

@@ -463,7 +463,7 @@ export function PaidReportConsole({
                 ) : null}
                 {product && product.providerReady && !affordable ? (
                   <p className="t-small" role="status">
-                    You need {formatUsd(product.priceCents - balanceCents)} more credit. No minimum top-up.
+                    You need {formatUsd(product.priceCents - balanceCents)} more credit. Choose your amount on the add-funds page.
                     {paymentMethods.length > 0 ? ` Payment: ${paymentMethods.join(', ')}; transfers are verified before credit is available.` : ' Top-ups are currently unavailable; contact support for help.'}
                     {' '}Your IMEI and selected service are kept privately for 15 minutes. You will review and confirm the order after returning.
                   </p>

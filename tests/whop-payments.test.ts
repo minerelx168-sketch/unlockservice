@@ -120,9 +120,24 @@ test('checkout is server-priced, card-only, one-time, owner scoped and idempoten
   assert.equal(body.redirect_url, `https://iunlockmobile.com/user/invoice/${first.invoice_reference}`)
   await assert.rejects(whop.createWhopCheckout(userId, 2000, key), /different payment/)
   await assert.rejects(whop.createWhopCheckout(userId, 99, randomUUID()), /amount/)
-  await assert.rejects(whop.createWhopCheckout(userId, 100001, randomUUID()), /amount/)
+  await assert.rejects(whop.createWhopCheckout(userId, 10001, randomUUID()), /amount/)
   await assert.rejects(whop.createWhopCheckout(userId, 100.5, randomUUID()), /amount/)
   assert.throws(() => whop.safeWhopCheckoutUrl('https://whop.com.evil.test/checkout', 'live'))
+})
+
+test('checkout accepts $1 and $100 and rejects out-of-range requests without creating invoices', async () => {
+  const userId = customer()
+  for (const cents of [100, 10000]) {
+    const row = await whop.createWhopCheckout(userId, cents, randomUUID())
+    assert.equal(row.credit_amount_cents, cents)
+    assert.equal((checkoutCalls.at(-1)!.body.plan as Record<string, unknown>).initial_price, cents / 100)
+  }
+  for (const cents of [0, 99, 10001, 100000, 100.5, NaN, Infinity]) {
+    await assert.rejects(whop.createWhopCheckout(userId, cents, randomUUID()), /amount from \$1\.00 to \$100\.00/)
+  }
+  assert.equal(checkoutCalls.length, 2)
+  assert.equal((database.db().prepare('SELECT COUNT(*) AS n FROM invoices WHERE user_id = ?').get(userId) as { n: number }).n, 2)
+  assert.equal(credits.getBalance(userId).creditCents, 0)
 })
 
 test('a network retry reuses the invoice and the provider idempotency key', async () => {

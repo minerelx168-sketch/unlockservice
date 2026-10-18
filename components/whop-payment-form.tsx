@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseUsd, formatUsd } from '@/lib/money'
 
-const QUICK_AMOUNTS = [1, 10, 25, 50, 100, 250, 500]
+const QUICK_AMOUNTS = [1, 10, 25, 50, 100]
 
 export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }: {
   csrfToken: string; initialCents?: number; minCents: number; maxCents: number

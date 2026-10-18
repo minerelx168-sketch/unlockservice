@@ -3,13 +3,14 @@ import { WhopClient, WhopEnvironment, type Whop } from '@whop/sdk'
 import { unwrapWebhook } from '@whop/sdk/helpers'
 import { db } from './db'
 import { credit, getBalance } from './credits'
-import { parseUsd } from './money'
+import { formatUsd, parseUsd } from './money'
 import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
+import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from './topup-limits'
 
 export const WHOP_API_VERSION = '2026-10-15-1'
-export const WHOP_MIN_CENTS = 100
-export const WHOP_MAX_CENTS = 100_000
+export const WHOP_MIN_CENTS = MIN_TOPUP_CENTS
+export const WHOP_MAX_CENTS = MAX_TOPUP_CENTS
 export const WHOP_EVENTS = ['payment.succeeded', 'payment.failed', 'payment.canceled',
   'refund.created', 'refund.updated', 'dispute.created', 'dispute.updated', 'dispute_alert.created',
   'resolution_center_case.created', 'resolution_center_case.updated', 'resolution_center_case.decided'] as const
@@ -63,7 +64,7 @@ export async function createWhopCheckout(userId: number, amountCents: number, re
   const config = whopConfiguration()
   if (!config || !whopCheckoutEnabled()) throw new WhopPaymentError('Card payments are not available yet.', 503)
   if (!Number.isSafeInteger(amountCents) || amountCents < WHOP_MIN_CENTS || amountCents > WHOP_MAX_CENTS) {
-    throw new WhopPaymentError('Enter an amount from $1.00 to $1,000.00.')
+    throw new WhopPaymentError(`Enter an amount from ${formatUsd(WHOP_MIN_CENTS)} to ${formatUsd(WHOP_MAX_CENTS)}.`)
   }
   if (!/^[A-Za-z0-9_-]{16,80}$/.test(requestKey)) throw new WhopPaymentError('Invalid request key.')
   const topup = db().transaction(() => {

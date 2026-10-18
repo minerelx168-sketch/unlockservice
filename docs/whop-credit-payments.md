@@ -29,16 +29,19 @@ enabling this integration. Never use a different description to hide a service.
 
 Keep the product hidden. Keep any manually created placeholder price at stock 0.
 The application creates a hidden, one-use, one-time price for each authenticated
-invoice ($1–$1,000). Do not distribute a generic checkout link: it lacks the local
+invoice ($1–$100). Do not distribute a generic checkout link: it lacks the local
 invoice reference needed to credit the correct customer. Disable discounts and
 affiliates unless their effect on settlement has been explicitly implemented.
 
-The card form offers $10, $25, $50, $100, $250 and $500 shortcuts plus a custom
-USD amount with at most two decimal places. Its live summary shows the credit
-the customer will receive. The $1–$1,000 range is this application's current
+The card form offers $1, $10, $25, $50 and $100 shortcuts plus an Enter amount
+button for a custom USD amount with at most two decimal places. Its live summary shows the credit
+the customer will receive. The $1–$100 range is this application's current
 limit, not a claimed Whop-wide limit. Shortcuts outside a configured range are
 hidden. Each choice uses the same owner-bound checkout flow; do not create
-public reusable price links for the shortcuts.
+public reusable price links for the shortcuts. Continue with card opens the
+validated Whop checkout directly; completed payments open their invoice status.
+The same $1–$100 credit limits apply to new cryptocurrency requests. Existing
+invoices retain their amounts and payment verification/refund handling.
 
 ## Configuration
 
