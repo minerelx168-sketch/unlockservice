@@ -15,7 +15,7 @@ test('Add funds presents invoice-first auto detection, safe estimate and explici
   assert.doesNotMatch(page, /Add credit in four clear steps|Send and paste ID|Automatic verification ready/)
   assert.doesNotMatch(page, /Never reuse a transaction ID/)
   assert.doesNotMatch(page, /wallet password, private key, seed phrase/)
-  assert.match(form, /QUICK_AMOUNTS = \[10, 25, 50, 100\]/)
+  assert.match(form, /QUICK_AMOUNTS = \[1, 10, 25, 50, 100\]/)
   assert.match(form, /Estimated request total/)
   assert.match(form, /Do not send this estimate/)
   assert.match(form, /automaticVerification \? 'Auto detection' : 'Manual review'/)
