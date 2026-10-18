@@ -16,7 +16,7 @@ export default async function ContactPage() {
   const support = supportEmail()
 
   return (
-    <section className="section section--tint">
+    <section className="section section--tint contact-page">
       <div className="shell">
         <nav className="service-breadcrumb" aria-label="Breadcrumb" style={{ marginBottom: 18 }}>
           <Link href="/">Home</Link>

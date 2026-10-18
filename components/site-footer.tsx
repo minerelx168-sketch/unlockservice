@@ -103,18 +103,15 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
         </div>
 
         <div className="footer-accept">
-          <span>We accept</span>
-          <span className="pay-badge">
-            <i aria-hidden="true">$</i>USDC · BEP20
-          </span>
-          <span className="pay-badge">
-            <i aria-hidden="true">₮</i>USDT · BEP20
-          </span>
+          <span>We Accept:</span>
+          {['Visa', 'Mastercard', 'Google Pay', 'Apple Pay', 'Bitcoin', 'USDT'].map((method) => (
+            <span className="pay-badge" key={method}>{method}</span>
+          ))}
           <span>Credit is held, then charged only when the result is delivered.</span>
         </div>
 
         <div className="footer-base">
-          <span>&copy; {new Date().getFullYear()} iUnlockMobile. All rights reserved.</span>
+          <span>&copy; 2016–{new Date().getFullYear()} iUnlockMobile. All rights reserved.</span>
           <span>Unlocking releases a device you own — it does not remove a finance agreement or a theft report.</span>
         </div>
       </div>

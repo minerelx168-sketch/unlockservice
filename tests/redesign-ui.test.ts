@@ -35,12 +35,12 @@ test('sample reviews are labelled as samples and never aggregated', () => {
   assert.doesNotMatch(structured, /"Review"|AggregateRating/)
 })
 
-test('the footer and the homepage claim only what the catalog and the payment rails support', () => {
+test('footer shows the requested payment labels and catalog counts remain derived', () => {
   const footer = read('components/site-footer.tsx')
-  assert.doesNotMatch(footer, /Visa|Mastercard|Apple Pay|Google Pay|Stripe|Bitcoin|PayPal/i)
-  assert.doesNotMatch(footer, /TRC20/)
-  assert.match(footer, /USDC · BEP20/)
-  assert.match(footer, /USDT · BEP20/)
+  for (const method of ['Visa', 'Mastercard', 'Google Pay', 'Apple Pay', 'Bitcoin', 'USDT']) {
+    assert.ok(footer.includes(method))
+  }
+  assert.doesNotMatch(footer, /Stripe|PayPal/)
   const chrome = read('components/site-chrome.tsx')
   assert.match(chrome, /CARRIERS\.map/)
   assert.match(chrome, /listArticles\(\)/)

@@ -610,7 +610,5 @@
   border: 1px solid var(--primary-border); color: var(--primary-dark); }
 .trust-bar-icon svg { width: 19px; height: 19px; }
 
-/* PR #12 accessibility: explicit pause control and focusable original tracks. */
-.reviews[data-motion-paused='true'] .reviews-row { animation-play-state: paused; }
-.reviews .review-motion-toggle { justify-self: center; }
+/* Keep keyboard focus visible on review tracks. */
 .reviews-track:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }

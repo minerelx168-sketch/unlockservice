@@ -23,10 +23,11 @@
 @import './service-output-example.css';
 @import './unlock-device-entry.css';
 @import './mobile-storefront.css';
+@import './mobile-pages.css';
+@import './cookie-banner.css';
 
 /* Browser-only validation and privacy controls. */
 .validation-results { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
 .validation-results th, .validation-results td { padding: 12px 16px; border-bottom: 1px solid var(--line, #d9dee5); }
 .validation-results thead { font-size: .875rem; }
 .validation-results td { font-weight: 600; }
-.analytics-consent { padding: 16px; max-width: 760px; margin: 0 auto; }

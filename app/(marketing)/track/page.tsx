@@ -36,6 +36,11 @@ export default async function TrackOrderPage() {
               and keeps its result on the order page for as long as you need it.
             </p>
 
+          </div>
+
+          <TrackOrderForm defaultEmail={found?.user.email ?? ''} />
+
+          <div className="track-details">
             <ul className="track-facts">
               <li>
                 <Icon name="pulse" strokeWidth={2} />
@@ -57,8 +62,6 @@ export default async function TrackOrderPage() {
               </p>
             ) : null}
           </div>
-
-          <TrackOrderForm defaultEmail={found?.user.email ?? ''} />
         </div>
       </div>
     </section>

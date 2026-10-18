@@ -198,7 +198,7 @@ export default function HomePage() {
 
             <span className="hero-chip">
               <Icon name="shieldCheck" strokeWidth={2} />
-              Remote service. Clear pricing.
+              Official carrier unlocks since 2016
             </span>
 
             <h1 className="t-hero">
