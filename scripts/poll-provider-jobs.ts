@@ -2,6 +2,7 @@ import { deliverOrderNotifications } from '../lib/order-notifications'
 import { pollProviderJobs } from '../lib/provider-jobs'
 import { pollInvoiceVerifications } from '../lib/payment-verification'
 import { scanPaymentWallets } from '../lib/payment-watcher'
+import { processWhopEvents, reconcileWhopPayments } from '../lib/whop'
 
 async function main() {
   const limit = Number(process.argv[2] ?? 20)
@@ -11,12 +12,16 @@ async function main() {
   // transfer detected now is verified in this same run.
   const watcher = await scanPaymentWallets()
   const payments = await pollInvoiceVerifications(boundedLimit)
+  const whop = await processWhopEvents(Math.min(boundedLimit, 5))
+  const whopReconciliation = await reconcileWhopPayments(Math.min(boundedLimit, 5))
   const notifications = await deliverOrderNotifications(boundedLimit)
-  process.stdout.write(`${JSON.stringify({ provider, watcher, payments, notifications })}\n`)
+  process.stdout.write(`${JSON.stringify({ provider, watcher, payments, whop, whopReconciliation, notifications })}\n`)
   if (
     provider.errors > 0
     || watcher.errors > 0
     || payments.errors > 0
+    || whop.errors > 0
+    || whopReconciliation.errors > 0
     || notifications.failed > 0
     || notifications.leaseLost > 0
   ) {

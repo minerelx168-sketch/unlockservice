@@ -137,6 +137,44 @@ CREATE TABLE IF NOT EXISTS invoices (
 );
 CREATE INDEX IF NOT EXISTS invoices_user ON invoices(user_id, created_at DESC);
 
+-- Card top-ups retain their own immutable processor identity. Existing token
+-- invoices and balances are not rewritten by this additive schema.
+CREATE TABLE IF NOT EXISTS whop_topups (
+  invoice_reference TEXT PRIMARY KEY REFERENCES invoices(reference),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  request_key TEXT NOT NULL,
+  account_id TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  environment TEXT NOT NULL,
+  checkout_id TEXT UNIQUE,
+  plan_id TEXT,
+  checkout_url TEXT,
+  payment_id TEXT UNIQUE,
+  credited INTEGER NOT NULL DEFAULT 0,
+  reversed_cents INTEGER NOT NULL DEFAULT 0,
+  reversal_due_cents INTEGER NOT NULL DEFAULT 0,
+  review_reason TEXT,
+  processor_updated_at TEXT,
+  last_checked_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, request_key)
+);
+CREATE INDEX IF NOT EXISTS whop_topups_review ON whop_topups(user_id, review_reason);
+CREATE TABLE IF NOT EXISTS whop_webhook_events (
+  event_id TEXT PRIMARY KEY,
+  event_type TEXT NOT NULL,
+  payment_id TEXT NOT NULL,
+  account_id TEXT NOT NULL,
+  state TEXT NOT NULL DEFAULT 'pending',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  locked_until TEXT,
+  next_attempt_at TEXT,
+  last_error TEXT,
+  received_at TEXT NOT NULL DEFAULT (datetime('now')),
+  processed_at TEXT
+);
+CREATE INDEX IF NOT EXISTS whop_events_pending ON whop_webhook_events(state, next_attempt_at);
+
 CREATE TABLE IF NOT EXISTS invoice_verifications (
   invoice_reference    TEXT    PRIMARY KEY REFERENCES invoices(reference) ON DELETE RESTRICT,
   chain_id             INTEGER NOT NULL,

@@ -7,7 +7,7 @@ const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.ur
 test('Add funds presents quick amounts, locked summary and explicit multi-chain method selection', () => {
   const page = read('app/(app)/user/add-funds/page.tsx')
   const form = read('components/payment-forms.tsx')
-  assert.match(page, /Add credit in four clear steps/)
+  assert.match(page, /Add credit to your account/)
   assert.match(page, /Automatic verification ready/)
   assert.match(page, /Use only the token, network, amount and wallet shown on your invoice/)
   assert.doesNotMatch(page, /Never reuse a transaction ID/)

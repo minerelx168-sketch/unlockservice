@@ -395,7 +395,7 @@ export async function submitOrder(
     }).immediate()
   } catch (error) {
     if (error instanceof InsufficientCredit) {
-      throw new OrderError('Not enough credit for this order. Add funds and try again.', 'insufficient_credit')
+      throw new OrderError(error.message, 'insufficient_credit')
     }
     throw error
   }

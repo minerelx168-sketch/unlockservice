@@ -278,6 +278,7 @@ export function approveInvoice(reference: string, userId: number, providerCharge
   return db().transaction(() => {
     const invoice = invoiceRow(reference, userId)
     if (!invoice) throw new PaymentError('No such invoice.')
+    if (invoice.gateway === 'whop_card') throw new PaymentError('Card payments must be verified with Whop.')
     if (invoice.status === 'success') return getInvoice(reference, userId)!
     if (!['pending', 'review'].includes(invoice.status)) {
       throw new PaymentError(`Invoice cannot be confirmed while ${invoice.status}.`)
