@@ -7,6 +7,7 @@ import { formatUsd, parseUsd } from './money'
 import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
 import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from './topup-limits'
+import { cardFeeCents } from './card-fee'
 
 export const WHOP_API_VERSION = '2026-10-15-1'
 export const WHOP_MIN_CENTS = MIN_TOPUP_CENTS
@@ -46,9 +47,9 @@ export type WhopTopup = {
   environment: 'live' | 'sandbox'; checkout_id: string | null; plan_id: string | null
   checkout_url: string | null; payment_id: string | null; credited: number; reversed_cents: number
   reversal_due_cents: number; review_reason: string | null; processor_updated_at: string | null
-  credit_amount_cents: number; status: string
+  credit_amount_cents: number; fee_cents: number; tax_cents: number; total_due_cents: number; status: string
 }
-const TOPUP_SELECT = 'SELECT w.*, i.credit_amount_cents, i.status FROM whop_topups w JOIN invoices i ON i.reference = w.invoice_reference'
+const TOPUP_SELECT = 'SELECT w.*, i.credit_amount_cents, i.fee_cents, i.tax_cents, i.total_due_cents, i.status FROM whop_topups w JOIN invoices i ON i.reference = w.invoice_reference'
 export function getWhopTopup(reference: string, userId: number): WhopTopup | undefined {
   return db().prepare(`${TOPUP_SELECT} WHERE w.invoice_reference = ? AND w.user_id = ?`).get(reference, userId) as WhopTopup | undefined
 }
@@ -84,21 +85,24 @@ export async function createWhopCheckout(userId: number, amountCents: number, re
     }
     if (!consumeAttempt('whop-checkout', String(userId), 10, 3600)) throw new WhopPaymentError('Too many payment requests. Please try again later.', 429)
     const reference = randomBytes(16).toString('hex')
-    db().prepare(`INSERT INTO invoices (reference, user_id, gateway, credit_amount_cents, total_due_cents, provider, idempotency_key)
-      VALUES (?, ?, 'whop_card', ?, ?, 'whop', ?)`).run(reference, userId, amountCents, amountCents, `whop-${reference}`)
+    const feeCents = cardFeeCents(amountCents)
+    db().prepare(`INSERT INTO invoices (reference, user_id, gateway, credit_amount_cents, fee_cents, total_due_cents, provider, idempotency_key)
+      VALUES (?, ?, 'whop_card', ?, ?, ?, 'whop', ?)`).run(reference, userId, amountCents, feeCents, amountCents + feeCents, `whop-${reference}`)
     db().prepare(`INSERT INTO whop_topups (invoice_reference, user_id, request_key, account_id, product_id, environment)
       VALUES (?, ?, ?, ?, ?, ?)`).run(reference, userId, requestKey, config.accountId, config.productId, config.mode)
     return getWhopTopup(reference, userId)!
   }).immediate()
   if (topup.checkout_url || topup.credited) return topup
+  const subtotalCents = topup.credit_amount_cents + topup.fee_cents
 
   // The hosted page collects all card data. This server never receives a PAN/CVC.
   const checkout = await client(config).checkoutConfigurations.create({
     account_id: config.accountId, mode: 'payment',
     plan: { account_id: config.accountId, product_id: config.productId, currency: 'usd',
-      initial_price: amountCents / 100, plan_type: 'one_time', renewal_price: 0,
+      initial_price: subtotalCents / 100, plan_type: 'one_time', renewal_price: 0,
       title: `Service credits — USD ${(amountCents / 100).toFixed(2)}`,
-      description: 'Prepaid credits on iunlockmobile.com for device reports, carrier unlocking and available device services, including iCloud activation-lock, MDM profile and Google account (FRP) removal, subject to eligibility.',
+      description: 'Prepaid credits on iunlockmobile.com for device reports, carrier unlocking and available device services, including iCloud activation-lock, MDM profile and Google account (FRP) removal, subject to eligibility.'
+        + (topup.fee_cents > 0 ? ` Includes ${formatUsd(topup.credit_amount_cents)} service credits and ${formatUsd(topup.fee_cents)} card payment fee. The fee is not added to your credit balance.` : ''),
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true,
       three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
@@ -108,7 +112,7 @@ export async function createWhopCheckout(userId: number, amountCents: number, re
   }, { idempotencyKey: `whop-topup-${topup.invoice_reference}` })
   if (!checkout.purchase_url || !/^ch_[A-Za-z0-9]+$/.test(checkout.id)
     || checkout.account_id !== config.accountId || checkout.plan?.plan_type !== 'one_time'
-    || checkout.plan.currency !== 'usd' || Math.round(checkout.plan.initial_price * 100) !== amountCents) {
+    || checkout.plan.currency !== 'usd' || Math.round(checkout.plan.initial_price * 100) !== subtotalCents) {
     throw new WhopPaymentError('The payment provider returned an unexpected checkout. Please contact support.', 502)
   }
   const url = safeWhopCheckoutUrl(checkout.purchase_url, config.mode)
@@ -197,9 +201,10 @@ function settlePayment(payment: Whop.Payment, config: Configuration): string {
     const refund = cents(payment.refunded_amount, true)
     const taxRefund = cents(payment.tax_refunded_amount, true)
     const amount = topup.credit_amount_cents
-    if (payment.currency !== 'usd' || subtotal !== amount || total < amount
-      || (tax > 0 && payment.tax_behavior !== 'exclusive') || total - tax !== amount
-      || refund > total || taxRefund > tax || taxRefund > refund || refund - taxRefund > amount
+    const expectedSubtotal = amount + topup.fee_cents
+    if (payment.currency !== 'usd' || subtotal !== expectedSubtotal || total < expectedSubtotal
+      || (tax > 0 && payment.tax_behavior !== 'exclusive') || total - tax !== expectedSubtotal
+      || refund > total || taxRefund > tax || taxRefund > refund || refund - taxRefund > expectedSubtotal
       || payment.promo_code_id || payment.payment_method_type !== 'card'
       || !['one_time', 'subscription_create'].includes(payment.billing_reason ?? '')) {
       db().prepare("UPDATE whop_topups SET review_reason = 'payment_amount_mismatch' WHERE invoice_reference = ?").run(ref)
@@ -208,9 +213,11 @@ function settlePayment(payment: Whop.Payment, config: Configuration): string {
     }
     const disputeResolved = ['dispute_won', 'dispute_warning_closed', 'resolution_won'].includes(payment.substatus)
     const disputed = (/dispute|resolution/.test(payment.substatus) || Boolean(payment.dispute_alerted_at)) && !disputeResolved
-    // Only refunded service principal reverses credit; tax was never credited.
+    // Tax and card fees were never credited. Allocate a partial pretax refund
+    // proportionally between credit and the invoice's stored fee. Fee-free
+    // invoices retain their original dollar-for-dollar reversal behavior.
     const fullyRefunded = refund >= total || ['refunded', 'auto_refunded'].includes(payment.substatus)
-    const targetReversed = fullyRefunded ? amount : refund - taxRefund
+    const targetReversed = fullyRefunded ? amount : Math.min(amount, Math.round((refund - taxRefund) * amount / expectedSubtotal))
     const successful = payment.status === 'paid' && ['succeeded', 'partially_refunded', 'dispute_won', 'dispute_warning_closed', 'resolution_won'].includes(payment.substatus)
     let credited = topup.credited
     if (!credited && successful && !fullyRefunded && !disputed) {
