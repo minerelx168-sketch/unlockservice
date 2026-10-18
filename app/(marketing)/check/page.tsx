@@ -18,18 +18,29 @@ export default async function CheckPage() {
   const products = listPublicProviderProducts('imei_check')
 
   return (
-    <section className="section">
-      <div className="shell split">
-        <div className="stack" style={{ gap: 18 }}>
+    <section className="section free-check-page">
+      <div className="shell free-check-layout">
+        <div className="stack free-check-intro" style={{ gap: 12 }}>
           <span className="kicker">
             <Icon name="search" strokeWidth={2} />
             Phone Check
           </span>
-          <h1 className="t-section">Validate your IMEI number format and checksum.</h1>
+          <h1 className="t-section">Check your IMEI for free.</h1>
           <p className="t-lead">
             This free tool validates IMEI format and checksum only. For carrier, blacklist, warranty,
             lock-status and device reports, choose a paid Phone Check service.
           </p>
+
+        </div>
+
+        <div className="card free-check-form">
+          <div className="card-topline">
+            <span className="kicker"><Icon name="device" /> Basic IMEI validation</span>
+            {found ? <Link className="link-arrow" href="/user/checks">History <Icon name="arrowRight" /></Link> : null}
+          </div>
+          <ImeiCheckForm csrfToken={found?.session.csrfToken} />
+        </div>
+        <div className="stack free-check-extras">
           <div className="cta-actions">
             <Link className="button button--primary" href="/services/imei-check">
               Browse Phone Check services <Icon name="arrowRight" />
@@ -48,14 +59,6 @@ export default async function CheckPage() {
               <span><b>Check again when needed</b><span>Format and checksum checks do not confirm device status or ownership.</span></span>
             </div>
           </div>
-        </div>
-
-        <div className="card">
-          <div className="card-topline">
-            <span className="kicker"><Icon name="device" /> Basic IMEI validation</span>
-            {found ? <Link className="link-arrow" href="/user/checks">History <Icon name="arrowRight" /></Link> : null}
-          </div>
-          <ImeiCheckForm csrfToken={found?.session.csrfToken} />
         </div>
       </div>
       <div className="shell" style={{ marginTop: 32 }}>

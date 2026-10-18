@@ -82,7 +82,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
       <section className="section">
         <div className="shell article-layout">
-          <div>
+          <div className="article-content">
             <ArticleBody blocks={article.blocks} />
 
             {article.faq?.length ? (
@@ -110,8 +110,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
           <aside className="article-aside">
             {contents.length ? (
-              <nav className="article-contents" aria-label="On this page">
-                <span className="kicker">On this page</span>
+              <details className="article-contents">
+                <summary>On this page</summary>
+                <nav aria-label="On this page">
                 <ul>
                   {contents.map((block) => (
                     <li key={block.id}>
@@ -124,7 +125,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                     </li>
                   ) : null}
                 </ul>
-              </nav>
+                </nav>
+              </details>
             ) : null}
 
             {related.length ? (

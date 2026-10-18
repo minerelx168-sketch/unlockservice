@@ -3,9 +3,25 @@
 .track-layout > .section-head { grid-area: intro; margin-bottom: 0; }
 .track-layout > .track-card { grid-area: form; }
 .track-details { grid-area: details; min-width: 0; }
+.free-check-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'intro form' 'extras form'; align-items: start; gap: 24px 40px; }
+.free-check-intro { grid-area: intro; }
+.free-check-form { grid-area: form; min-width: 0; }
+.free-check-extras { grid-area: extras; }
+.article-contents { border: 1px solid var(--line); border-radius: 14px; padding: 0 16px; background: var(--surface); }
+.article-contents summary { min-height: 48px; padding-block: 12px; cursor: pointer; font-weight: 650; color: var(--ink-strong); }
+.article-contents nav { padding-bottom: 12px; }
+.article-contents a, .article-related a { display: flex; align-items: center; min-height: 44px; }
 
 @media (max-width: 940px) {
   .track-layout { grid-template-areas: 'intro' 'form' 'details'; }
+  .free-check-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'intro' 'form' 'extras'; }
+}
+
+@media (max-width: 900px) {
+  .article-aside { display: contents; }
+  .article-contents { grid-row: 1; }
+  .article-content { grid-row: 2; min-width: 0; }
+  .article-related { grid-row: 3; }
 }
 
 @media (max-width: 767px) {
@@ -66,4 +82,50 @@
   .track-layout .section-head { gap: 10px; }
   .auth-card { padding: 22px 18px; }
   .auth-aside a { display: inline-flex; align-items: center; min-height: 44px; }
+
+  /* Shared geometry across service, help, account and authentication pages. */
+  .button { min-height: 44px; white-space: normal; text-align: center; overflow-wrap: anywhere; }
+  .button > svg { flex-shrink: 0; }
+  .field textarea { min-height: 128px; }
+  .alert { align-items: flex-start; overflow-wrap: anywhere; }
+  .alert > svg { flex-shrink: 0; }
+  .service-breadcrumb { flex-wrap: wrap; gap: 6px 10px; }
+  .service-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; }
+  .free-check-page, .contact-page { padding-top: 24px; }
+  .free-check-intro .t-section { font-size: 2rem; line-height: 1.15; }
+  .free-check-intro .t-lead, .contact-page .t-lead { font-size: .9375rem; line-height: 1.6; }
+  .free-check-form { padding: 20px 16px; }
+  .free-check-extras .cta-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .contact-page .contact-shortcuts { gap: 10px; margin-bottom: 20px; }
+  .contact-shortcuts .hub-card { padding: 16px; }
+  .contact-shortcuts .hub-card .link-arrow { min-height: 44px; }
+  .article-head .t-section { font-size: clamp(1.75rem, 7vw, 2.25rem); line-height: 1.2; }
+  .article-head .t-lead { font-size: 1rem; line-height: 1.6; }
+  .article-layout { gap: 20px; }
+  .article-body { font-size: 1rem; line-height: 1.75; overflow-wrap: anywhere; }
+  .article-contents ul, .article-related ul { gap: 4px; }
+  .article-body .table-wrap { max-width: 100%; }
+  .article-cta { padding: 18px 16px; }
+  .article-cta .button { width: 100%; }
+  .faq-item summary { min-height: 52px; line-height: 1.45; }
+  .legal-card h2 { line-height: 1.35; }
+  .auth-foot a { display: inline-flex; align-items: center; min-height: 44px; }
+  .app-nav-toggle { min-width: 80px; }
+  .app-sidebar .credit-card { padding: 10px 12px; }
+  .app-head-actions, .order-foot .button, .service-workbench-result-actions .button { width: 100%; }
+  .pager { flex-wrap: wrap; gap: 10px; }
+  .pager .button { flex: 1 1 auto; }
+  .funding-journey { gap: 8px; }
+  .funding-journey li { padding: 12px; }
+  .funding-balance-card { padding: 12px 14px; }
+  .funding-balance-card strong { font-size: 1.5rem; margin-block: 4px; }
+  .service-picker__results { max-height: min(360px, 45dvh); }
+}
+
+@media (max-width: 380px) {
+  /* Long service names need the full card width on the smallest phones. */
+  table.account-table td, table.account-table td.mono, table.account-table td.num { grid-template-columns: minmax(0, 1fr); gap: 4px; overflow-wrap: anywhere; }
+  table.account-table td.account-table-action { justify-content: stretch; }
+  .account-table-action a { width: 100%; min-height: 44px; }
+  .funding-progress, .invoice-progress { grid-template-columns: minmax(0, 1fr); }
 }

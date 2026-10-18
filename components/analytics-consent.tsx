@@ -7,6 +7,17 @@ export function AnalyticsConsent() {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const noticeRef = useRef<HTMLElement>(null)
+  const [noticeHeight, setNoticeHeight] = useState(0)
+  useEffect(() => {
+    if (!open || !noticeRef.current) return
+    const notice = noticeRef.current
+    const measure = () => setNoticeHeight(Math.ceil(notice.getBoundingClientRect().height))
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(notice)
+    return () => observer.disconnect()
+  }, [open])
   const capturedAt = useRef(Date.now())
   const clicks = useRef<Partial<Record<ClickIdField, string>>>({})
   useEffect(() => {
@@ -45,7 +56,9 @@ export function AnalyticsConsent() {
       if (state === 'denied') clicks.current = {}
     } catch (error) { setError(error instanceof Error ? error.message : 'Unable to save your choice.') } finally { setBusy(false) }
   }
-  return <aside className="analytics-consent" data-open={open} aria-label="Privacy choices">
+  return <>
+    {open ? <div aria-hidden="true" style={{ height: noticeHeight }} /> : null}
+    <aside ref={noticeRef} className="analytics-consent" data-open={open} aria-label="Privacy choices">
     {open ? <div className="cookie-banner" role="region" aria-label="Cookie notice" aria-busy={busy}>
       <p>We use cookies to ensure that we give you the best experience on our website. If you continue to use this site we will assume that you are happy with it</p>
       <button type="button" className="button button--primary cookie-accept" disabled={busy} onClick={() => void choose('granted')}>{busy ? 'Saving…' : 'Accept'}</button>
@@ -53,6 +66,7 @@ export function AnalyticsConsent() {
       {error ? <p className="cookie-error" role="alert">{error}</p> : null}
     </div> : <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>Privacy choices{consent === 'denied' ? ' · optional tracking off' : ''}</button>}
   </aside>
+  </>
 }
 function readClickIds(input: unknown): Partial<Record<ClickIdField, string>> {
   if (!input || typeof input !== 'object') return {}
