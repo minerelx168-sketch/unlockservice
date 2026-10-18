@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useRef, useState } from 'react'
 import { formatUsd, parseUsd } from '@/lib/money'
 import {
   approveInvoiceAction,
@@ -12,7 +12,7 @@ import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 
 const EMPTY: FormState = {}
-const QUICK_AMOUNTS = [10, 25, 50, 100]
+const QUICK_AMOUNTS = [1, 10, 25, 50, 100]
 
 function Problem({ message }: { message?: string }) {
   if (!message) return null
@@ -26,6 +26,7 @@ function Problem({ message }: { message?: string }) {
 
 export function AddFundsForm({
   gateways,
+  minCents,
   maxCents,
   initialCents,
   returnTo,
@@ -39,15 +40,18 @@ export function AddFundsForm({
     automaticVerification: boolean
     riskClassification: 'issuer_native' | 'third_party_pegged'
   }>
+  minCents: number
   maxCents: number
   initialCents?: number
   returnTo?: string | null
 }) {
   const [state, action, pending] = useActionState(createInvoiceAction, EMPTY)
   const [amount, setAmount] = useState(initialCents ? (initialCents / 100).toFixed(2) : '10.00')
+  const [customAmount, setCustomAmount] = useState(!QUICK_AMOUNTS.some(quick => quick * 100 === (initialCents ?? 1000)))
+  const amountInput = useRef<HTMLInputElement>(null)
   const [gatewayId, setGatewayId] = useState(gateways[0]?.id ?? '')
   const cents = parseUsd(amount)
-  const valid = cents !== null && cents > 0 && cents <= maxCents
+  const valid = cents !== null && cents >= minCents && cents <= maxCents
   const gateway = gateways.find((entry) => entry.id === gatewayId)
   const fee = valid && gateway ? Math.round(cents * gateway.feeBasisPoints / 10_000) : 0
 
@@ -57,26 +61,33 @@ export function AddFundsForm({
       <input type="hidden" name="next" value={returnTo ?? ''} />
       <input type="hidden" name="gateway" value={gatewayId} />
 
-      <fieldset className="funding-step">
+      <fieldset className="funding-step" disabled={pending}>
         <legend><span>1</span> Choose credit amount</legend>
-        <div className="quick-amounts" aria-label="Quick credit amounts">
-          {QUICK_AMOUNTS.map((quick) => (
+        <div className="quick-amounts" role="group" aria-label="Quick credit amounts">
+          {QUICK_AMOUNTS.filter(quick => quick * 100 >= minCents && quick * 100 <= maxCents).map((quick) => (
             <button
-              className={amount === quick.toFixed(2) ? 'quick-amount quick-amount--active' : 'quick-amount'}
+              className={!customAmount && cents === quick * 100 ? 'quick-amount quick-amount--active' : 'quick-amount'}
               key={quick}
               type="button"
-              onClick={() => setAmount(quick.toFixed(2))}
-              aria-pressed={amount === quick.toFixed(2)}
+              onClick={() => { setAmount(quick.toFixed(2)); setCustomAmount(false) }}
+              aria-pressed={!customAmount && cents === quick * 100}
             >
               ${quick}
             </button>
           ))}
+          <button type="button"
+            className={customAmount ? 'quick-amount quick-amount--active' : 'quick-amount'}
+            aria-pressed={customAmount} aria-controls="amount"
+            onClick={() => { setCustomAmount(true); amountInput.current?.focus(); amountInput.current?.select() }}>
+            Enter amount
+          </button>
         </div>
         <div className="field funding-amount-field">
           <label htmlFor="amount">Custom amount (USD)</label>
           <div className="money-input">
             <span aria-hidden="true">$</span>
             <input
+              ref={amountInput}
               id="amount"
               name="amount"
               className="mono"
@@ -84,13 +95,13 @@ export function AddFundsForm({
               autoComplete="off"
               placeholder="10.00"
               value={amount}
-              onChange={(event) => setAmount(event.currentTarget.value)}
+              onChange={(event) => { setAmount(event.currentTarget.value); setCustomAmount(true) }}
               aria-describedby="amount-help"
               required
             />
           </div>
           <p className="field-note" id="amount-help">
-            Enter any amount above $0.00, up to {formatUsd(maxCents)}, using no more than two decimal places.
+            Minimum {formatUsd(minCents)} · Maximum {formatUsd(maxCents)}. Use up to two decimal places.
           </p>
         </div>
       </fieldset>

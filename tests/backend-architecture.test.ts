@@ -1140,7 +1140,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
   }
 })
 
-test('top-ups accept positive cent amounts without a minimum and settle exactly once', async () => {
+test('top-ups accept $1–$100 with cent precision and settle exactly once', async () => {
   const user = auth.register('small-topups', 'small-topups@example.test', 'correct-horse-battery-staple')
   const { parseUsd } = await import('../lib/money')
   const gateway = payments.GATEWAYS.find((entry) => entry.id === 'bsc-usdt-peg')!
@@ -1149,7 +1149,7 @@ test('top-ups accept positive cent amounts without a minimum and settle exactly 
   let totalCredit = 0
 
   try {
-    for (const [amount, cents, fee] of [['0.01', 1, 0], ['0.05', 5, 0], ['0.25', 25, 1], ['4.99', 499, 10], ['5.00', 500, 10]] as const) {
+    for (const [amount, cents, fee] of [['1.00', 100, 2], ['1.01', 101, 2], ['4.99', 499, 10], ['5.00', 500, 10], ['100.00', 10000, 200]] as const) {
       assert.equal(parseUsd(amount), cents)
       const invoice = payments.createInvoice(user.id, gateway.id, cents)
       assert.equal(invoice.credit_amount_cents, cents)
@@ -1169,9 +1169,11 @@ test('top-ups accept positive cent amounts without a minimum and settle exactly 
       assert.equal(effects.count, 1)
     }
 
-    for (const invalid of [0, -1, 0.5, NaN, Infinity, payments.MAX_TOPUP_CENTS + 1, Number.MAX_SAFE_INTEGER + 1]) {
+    const beforeInvalid = database.db().prepare('SELECT COUNT(*) AS count FROM invoices WHERE user_id = ?').get(user.id)
+    for (const invalid of [0, -1, 0.5, 1, 99, NaN, Infinity, 10001, Number.MAX_SAFE_INTEGER + 1]) {
       assert.throws(() => payments.createInvoice(user.id, gateway.id, invalid), payments.PaymentError)
     }
+    assert.deepEqual(database.db().prepare('SELECT COUNT(*) AS count FROM invoices WHERE user_id = ?').get(user.id), beforeInvalid)
     assert.equal(parseUsd('0.001'), null)
     assert.equal(payments.createInvoice(user.id, gateway.id, payments.MAX_TOPUP_CENTS).credit_amount_cents, payments.MAX_TOPUP_CENTS)
   } finally {

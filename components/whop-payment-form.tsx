@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseUsd, formatUsd } from '@/lib/money'
 
-const QUICK_AMOUNTS = [10, 25, 50, 100, 250, 500]
+const QUICK_AMOUNTS = [1, 10, 25, 50, 100]
 
 export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }: {
   csrfToken: string; initialCents?: number; minCents: number; maxCents: number
@@ -13,13 +13,27 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
   const [amount, setAmount] = useState(((initialCents ?? 1000) / 100).toFixed(2))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [customAmount, setCustomAmount] = useState(!QUICK_AMOUNTS.some(quick => quick * 100 === (initialCents ?? 1000)))
+  const amountInput = useRef<HTMLInputElement>(null)
   const key = useRef<string | null>(null)
+  useEffect(() => {
+    // Back from hosted checkout may restore the page with its pending state.
+    const onPageShow = (event: PageTransitionEvent) => { if (event.persisted) setBusy(false) }
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [])
   const amountCents = parseUsd(amount)
   const valid = amountCents !== null && amountCents >= minCents && amountCents <= maxCents
-  function chooseAmount(value: string) {
+  function chooseAmount(value: string, custom = false) {
     setAmount(value)
+    setCustomAmount(custom)
     key.current = null
     setError('')
+  }
+  function enterAmount() {
+    setCustomAmount(true)
+    amountInput.current?.focus()
+    amountInput.current?.select()
   }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -39,6 +53,14 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Could not create checkout.')
       if (!/^\/user\/invoice\/[a-f0-9]{32}$/.test(data.invoiceUrl)) throw new Error('Invalid invoice response.')
+      if (data.checkoutUrl != null) {
+        const checkout = new URL(data.checkoutUrl)
+        if (checkout.protocol !== 'https:' || !['whop.com', 'sandbox.whop.com'].includes(checkout.hostname)
+          || checkout.username || checkout.password || checkout.port) throw new Error('Invalid checkout response.')
+        window.location.assign(checkout.href)
+        return
+      }
+      // A previously completed payment still opens its status page.
       router.push(data.invoiceUrl)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Could not connect. Please retry.')
@@ -52,22 +74,27 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
         <div className="quick-amounts quick-amounts--card" role="group" aria-label="Quick card credit amounts">
           {QUICK_AMOUNTS.filter(quick => quick * 100 >= minCents && quick * 100 <= maxCents).map(quick => (
             <button key={quick} type="button" disabled={busy}
-              className={amountCents === quick * 100 ? 'quick-amount quick-amount--active' : 'quick-amount'}
-              aria-pressed={amountCents === quick * 100} onClick={() => chooseAmount(quick.toFixed(2))}>
+              className={!customAmount && amountCents === quick * 100 ? 'quick-amount quick-amount--active' : 'quick-amount'}
+              aria-pressed={!customAmount && amountCents === quick * 100} onClick={() => chooseAmount(quick.toFixed(2))}>
               ${quick}
             </button>
           ))}
+          <button type="button" disabled={busy}
+            className={customAmount ? 'quick-amount quick-amount--active' : 'quick-amount'}
+            aria-pressed={customAmount} aria-controls="card-credit-amount" onClick={enterAmount}>
+            Enter amount
+          </button>
         </div>
         <div className="field funding-amount-field">
           <label htmlFor="card-credit-amount">Custom amount (USD)</label>
           <div className="money-input">
             <span aria-hidden="true">$</span>
-            <input id="card-credit-amount" name="amount" type="text" className="mono" inputMode="decimal"
+            <input ref={amountInput} id="card-credit-amount" name="amount" type="text" className="mono" inputMode="decimal"
               autoComplete="off" placeholder="10.00" aria-describedby="card-amount-help" value={amount}
-              disabled={busy} onChange={event => chooseAmount(event.target.value)} required />
+              disabled={busy} onChange={event => chooseAmount(event.target.value, true)} required />
           </div>
           <p className="field-note" id="card-amount-help">
-            Enter {formatUsd(minCents)}–{formatUsd(maxCents)}, with up to two decimal places.
+            Minimum {formatUsd(minCents)} · Maximum {formatUsd(maxCents)}. Use up to two decimal places.
           </p>
         </div>
       </fieldset>

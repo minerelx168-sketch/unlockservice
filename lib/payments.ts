@@ -11,6 +11,8 @@ import {
 import { submitInvoiceTransaction } from './payment-verification'
 import { allocatePaymentAmount, codedInvoiceExpired, expireStaleCodedInvoices } from './payment-codes'
 import { consumeAttempt } from './rate-limit'
+import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from './topup-limits'
+export { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from './topup-limits'
 
 /**
  * An invoice locks its numbers and chain/token route at creation. A customer may
@@ -130,7 +132,6 @@ export type GatewayId = string
 
 export class PaymentError extends Error {}
 
-export const MAX_TOPUP_CENTS = 1_000_000
 /** Every open coded invoice holds a code; these keep one account from holding them all. */
 const MAX_OPEN_INVOICES = 5
 const NEW_INVOICES_PER_HOUR = 10
@@ -154,9 +155,9 @@ function invoiceRow(reference: string, userId?: number): InvoiceRow | undefined 
 export function createInvoice(userId: number, gatewayId: string, creditCents: number): Invoice {
   const gateway = gatewayById(gatewayId)
   if (!gateway) throw new PaymentError('No payment method is configured. Contact support before sending funds.')
-  if (!Number.isSafeInteger(creditCents) || creditCents <= 0 || creditCents > MAX_TOPUP_CENTS) {
+  if (!Number.isSafeInteger(creditCents) || creditCents < MIN_TOPUP_CENTS || creditCents > MAX_TOPUP_CENTS) {
     throw new PaymentError(
-      `Enter an amount greater than $0.00, up to $${(MAX_TOPUP_CENTS / 100).toFixed(2)}, with no more than 2 decimal places.`,
+      `Enter an amount from $${(MIN_TOPUP_CENTS / 100).toFixed(2)} to $${(MAX_TOPUP_CENTS / 100).toFixed(2)}, with no more than 2 decimal places.`,
     )
   }
 
