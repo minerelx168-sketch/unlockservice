@@ -19,6 +19,8 @@ const tronUsdt = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 const tronUsdtHex = 'a614f803b6fd780986a42c78ec9c7f77e6ded13c'
 const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 
+// Requests are stubbed below; use the adapter's test mode instead of real-network pacing.
+Object.assign(process.env, { NODE_ENV: 'test' })
 process.env.IUNLOCKMOBILE_DB = join(workDir, 'watcher.db')
 process.env.IUNLOCKMOBILE_TOPUP_ENABLED = '1'
 process.env.IUNLOCKMOBILE_EVM_RECEIVING_ADDRESS = wallet
