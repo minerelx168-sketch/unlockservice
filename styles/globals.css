@@ -23,6 +23,7 @@
 @import './service-output-example.css';
 @import './unlock-device-entry.css';
 @import './mobile-storefront.css';
+@import './mobile-pages.css';
 
 /* Browser-only validation and privacy controls. */
 .validation-results { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
