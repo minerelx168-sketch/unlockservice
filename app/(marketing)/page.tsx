@@ -33,13 +33,13 @@ const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
 
 const STEPS: Array<{ title: string; body: string; art: 'imei' | 'review' | 'done' }> = [
   {
-    title: 'Enter the IMEI',
-    body: 'Dial *#06# on the phone and type the 15 digits. We validate the number before anything becomes an order.',
+    title: 'Choose your service',
+    body: 'Select your original network or report. See the service price and estimated delivery before entering an IMEI.',
     art: 'imei',
   },
   {
-    title: 'Confirm the quote',
-    body: 'The price and the typical wait for your network are shown first. Credit is held, not charged, while the network checks the device.',
+    title: 'Add your IMEI and review',
+    body: 'Dial *#06# to find the 15 digits. Review the requirements before ordering; credit is held while the service is processed.',
     art: 'review',
   },
   {
@@ -153,6 +153,8 @@ export default function HomePage() {
     code: product.productCode,
     name: product.name,
     category: unlockCategory(product),
+    summary: product.summary,
+    available: product.status === 'available',
     priceCents: product.priceCents,
     etaLabel: product.etaLabel,
   }))
@@ -160,6 +162,8 @@ export default function HomePage() {
     code: product.productCode,
     name: product.name,
     category: product.group,
+    summary: product.summary,
+    available: product.status === 'available',
     priceCents: product.priceCents,
     etaLabel: product.etaLabel,
   }))
@@ -194,23 +198,31 @@ export default function HomePage() {
 
             <span className="hero-chip">
               <Icon name="shieldCheck" strokeWidth={2} />
-              Compare service quotes before you order
+              Remote service. Clear pricing.
             </span>
 
             <h1 className="t-hero">
-              {ordering ? 'Unlock your phone by IMEI.' : 'Find the right service for your phone.'}
+              {ordering ? 'Unlock your phone.' : 'Know your phone.'}
               <br />
               <span className="accent">
-                {ordering ? 'See the price and the wait before you pay.' : 'Browse prices and check availability.'}
+                See your options.
               </span>
             </h1>
 
             <p className="t-lead">
               {ordering
-                ? 'Pick the network your phone is locked to and the quote appears — then enter the IMEI. Credit is held while the network works and returned in full if it refuses.'
-                : 'Explore device reports and unlock services. Enter your IMEI to get started, or browse prices first. You can compare services before creating an account.'}
+                ? 'Compare prices and delivery times for your original network. Review the service before you pay.'
+                : 'Explore device reports and unlock services. Compare prices and availability before creating an account.'}
             </p>
 
+
+          </div>
+
+          <div className="hero-panel">
+            <HeroPriceCheck unlock={unlockWidget} check={checkWidget} ordering={ordering} />
+          </div>
+
+          <div className="hero-extras">
             <div className="quick-picks">
               <div className="quick-picks-label">
                 <span>Quick picks</span>
@@ -261,10 +273,6 @@ export default function HomePage() {
               <Link href="/support#faq"><Icon name="question" strokeWidth={2} />How to find my IMEI</Link>
               <Link href="/track"><Icon name="clock" strokeWidth={2} />Track an order</Link>
             </p>
-          </div>
-
-          <div className="hero-panel">
-            <HeroPriceCheck unlock={unlockWidget} check={checkWidget} ordering={ordering} />
           </div>
         </div>
       </section>

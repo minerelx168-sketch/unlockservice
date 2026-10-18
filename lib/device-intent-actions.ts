@@ -44,7 +44,14 @@ export async function browseDevicesAction(_: IntentState, form: FormData): Promi
 export async function showUnlockServicesAction(_: IntentState, form: FormData): Promise<IntentState> {
   const imei = deviceImei(form.get('imei'))
   if (!imei) return { error: 'Enter a valid 15-digit IMEI before viewing unlock services.' }
-  await writeDeviceIntent(imei, 'unlock')
+  const requestedCode = form.get('productCode')
+  const product = typeof requestedCode === 'string' && requestedCode
+    ? listPublicProviderProducts('unlock').find((entry) => entry.productCode === requestedCode)
+    : undefined
+  if (requestedCode !== null && (!product || product.status !== 'available')) {
+    return { error: 'This service is no longer available. Choose another service or refresh the page.' }
+  }
+  await writeDeviceIntent(imei, 'unlock', product?.productCode)
   redirect('/services/unlock/catalog')
 }
 
