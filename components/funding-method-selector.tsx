@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { Icon } from './icons'
+import { CARD_FEE_PERCENT } from '@/lib/card-fee'
 
 export function FundingMethodSelector({ card, cryptocurrency, cryptoDescription }: {
   card?: ReactNode
@@ -26,7 +27,7 @@ export function FundingMethodSelector({ card, cryptocurrency, cryptoDescription 
               <span className="funding-method-symbol"><Icon name="wallet" /></span>
               <span className="funding-method-copy">
                 <strong>Credit or debit card</strong>
-                <small>Secure checkout with Whop</small>
+                <small>Secure checkout with Whop · {CARD_FEE_PERCENT}% fee</small>
               </span>
               <Icon name={selected === 'card' ? 'checkSmall' : 'arrowRight'} />
             </button>

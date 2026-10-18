@@ -29,13 +29,18 @@ enabling this integration. Never use a different description to hide a service.
 
 Keep the product hidden. Keep any manually created placeholder price at stock 0.
 The application creates a hidden, one-use, one-time price for each authenticated
-invoice ($1–$100). Do not distribute a generic checkout link: it lacks the local
+invoice ($1–$100 in credit, plus a 5% card fee rounded to the nearest cent). Do not distribute a generic checkout link: it lacks the local
 invoice reference needed to credit the correct customer. Disable discounts and
 affiliates unless their effect on settlement has been explicitly implemented.
 
 The card form offers $1, $10, $25, $50 and $100 shortcuts plus an Enter amount
 button for a custom USD amount with at most two decimal places. Its live summary shows the credit
-the customer will receive. The $1–$100 range is this application's current
+the customer will receive, the 5% card fee, and the total before tax. For example,
+$10 credit costs $10.50 before any Whop tax or additional checkout charges. The
+server calculates and persists the fee; browser-supplied totals are never trusted.
+Only the selected credit amount is added to the balance. Existing invoices and
+retries use their stored fee, including older invoices with no fee. There is no
+fixed fee or minimum fee. This card fee does not change cryptocurrency pricing. The $1–$100 range is this application's current
 limit, not a claimed Whop-wide limit. Shortcuts outside a configured range are
 hidden. Each choice uses the same owner-bound checkout flow; do not create
 public reusable price links for the shortcuts. Continue with card opens the
@@ -144,8 +149,13 @@ Duplicate webhooks and concurrent workers cannot add credit twice. A second
 settled payment for the same invoice is flagged for manual review/refund, not
 credited again. Old provider snapshots cannot roll a payment back.
 
-Refunds reverse only the refunded service principal (`refunded_amount` minus
-`tax_refunded_amount`). Full refunds reverse the full credit. The debit never
+For card invoices with a fee, partial refunds allocate the cumulative pretax
+refund (`refunded_amount` minus `tax_refunded_amount`) proportionally between
+credit and the stored fee, rounded to cents. For example, refunding $5.25 of a
+$10.50 pretax payment reverses $5 credit. Whop exposes an aggregate refund, so
+fee-only or other non-proportional refund adjustments require operator review.
+Older fee-free invoices retain dollar-for-dollar principal reversals. Full refunds
+reverse the full credit only; fees and tax were never added to the balance. The debit never
 consumes an existing order's reserved balance or makes the balance negative.
 If available credit is insufficient, the remaining debt is recorded and new
 service orders are blocked through the shared credit reservation function. A

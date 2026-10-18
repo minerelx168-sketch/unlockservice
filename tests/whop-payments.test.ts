@@ -4,6 +4,7 @@ import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test, { after, before, beforeEach } from 'node:test'
+import { cardFeeCents } from '../lib/card-fee'
 
 const workDir = mkdtempSync(join(tmpdir(), 'iunlockmobile-whop-'))
 process.env.IUNLOCKMOBILE_DB = join(workDir, 'whop.db')
@@ -73,7 +74,8 @@ function payment(topup: Topup, overrides: Record<string, unknown> = {}): Record<
   return { id: `pay_${++counter}`, account_id: 'biz_test', product_id: 'prod_test', plan_id: topup.plan_id,
     checkout_configuration_id: topup.checkout_id, currency: 'usd',
     metadata: { invoice_reference: topup.invoice_reference, integration: 'iunlockmobile-credit-v1' },
-    status: 'paid', substatus: 'succeeded', subtotal: money('10.00'), total: money('10.00'),
+    status: 'paid', substatus: 'succeeded', subtotal: money(((topup.credit_amount_cents + topup.fee_cents) / 100).toFixed(2)),
+    total: money(((topup.credit_amount_cents + topup.fee_cents) / 100).toFixed(2)),
     tax_amount: null, tax_refunded_amount: null, tax_behavior: null, refunded_amount: money('0.00'),
     payment_method_type: 'card', billing_reason: 'one_time', promo_code_id: null, dispute_alerted_at: null,
     paid_at: '2026-10-17T00:00:00Z', updated_at: '2026-10-17T00:00:00Z', ...overrides }
@@ -110,7 +112,10 @@ test('checkout is server-priced, card-only, one-time, owner scoped and idempoten
   assert.throws(() => legacyPayments.approveInvoice(first.invoice_reference, userId), /verified with Whop/)
   const body = checkoutCalls[0].body
   const plan = body.plan as Record<string, unknown>
-  assert.equal(plan.initial_price, 10)
+  assert.equal(plan.initial_price, 10.5)
+  assert.equal(first.fee_cents, 50)
+  assert.equal(first.total_due_cents, 1050)
+  assert.match(String(plan.description), /\$10\.00 service credits and \$0\.50 card payment fee/)
   assert.equal(plan.plan_type, 'one_time')
   assert.ok(String(plan.title).length <= 30)
   assert.equal(plan.stock, 1)
@@ -130,7 +135,7 @@ test('checkout accepts $1 and $100 and rejects out-of-range requests without cre
   for (const cents of [100, 10000]) {
     const row = await whop.createWhopCheckout(userId, cents, randomUUID())
     assert.equal(row.credit_amount_cents, cents)
-    assert.equal((checkoutCalls.at(-1)!.body.plan as Record<string, unknown>).initial_price, cents / 100)
+    assert.equal((checkoutCalls.at(-1)!.body.plan as Record<string, unknown>).initial_price, (cents + cardFeeCents(cents)) / 100)
   }
   for (const cents of [0, 99, 10001, 100000, 100.5, NaN, Infinity]) {
     await assert.rejects(whop.createWhopCheckout(userId, cents, randomUUID()), /amount from \$1\.00 to \$100\.00/)
@@ -225,23 +230,23 @@ test('wrong amount or method cannot mint credit; foreign account and checkout st
 
 test('partial refunds reverse service principal once and exclude refunded tax', async () => {
   const row = await topup()
-  const p = payment(row, { total: money('10.70'), tax_amount: money('0.70'), tax_behavior: 'exclusive' })
+  const p = payment(row, { total: money('11.20'), tax_amount: money('0.70'), tax_behavior: 'exclusive' })
   await settle(p)
-  const partial = { ...p, substatus: 'partially_refunded', refunded_amount: money('5.35'), tax_refunded_amount: money('0.35'), updated_at: '2026-10-17T01:00:00Z' }
+  const partial = { ...p, substatus: 'partially_refunded', refunded_amount: money('5.60'), tax_refunded_amount: money('0.35'), updated_at: '2026-10-17T01:00:00Z' }
   await settle(partial, 'refund.updated')
   await settle(partial, 'refund.updated')
   assert.equal(credits.getBalance(row.user_id).creditCents, 500)
   // An older successful response cannot restore the removed credit.
   await settle(p)
   assert.equal(credits.getBalance(row.user_id).creditCents, 500)
-  await settle({ ...partial, substatus: 'refunded', refunded_amount: money('10.70'), tax_refunded_amount: money('0.70'), updated_at: '2026-10-17T02:00:00Z' }, 'refund.updated')
+  await settle({ ...partial, substatus: 'refunded', refunded_amount: money('11.20'), tax_refunded_amount: money('0.70'), updated_at: '2026-10-17T02:00:00Z' }, 'refund.updated')
   assert.equal(credits.getBalance(row.user_id).creditCents, 0)
   assert.equal(whop.getWhopTopup(row.invoice_reference, row.user_id)?.status, 'refunded')
 })
 
 test('a refund arriving before success never creates spendable credit', async () => {
   const row = await topup()
-  await settle(payment(row, { substatus: 'refunded', refunded_amount: money('10.00') }), 'refund.created')
+  await settle(payment(row, { substatus: 'refunded', refunded_amount: money('10.50') }), 'refund.created')
   assert.equal(credits.getBalance(row.user_id).creditCents, 0)
   assert.equal(whop.getWhopTopup(row.invoice_reference, row.user_id)?.credited, 0)
 })
@@ -251,7 +256,7 @@ test('refund shortfalls preserve order holds, pause new spending and reconcile a
   const p = payment(row)
   await settle(p)
   credits.hold(row.user_id, 700, 'test-order', row.invoice_reference)
-  const refunded = { ...p, substatus: 'refunded', refunded_amount: money('10.00'), updated_at: '2026-10-17T01:00:00Z' }
+  const refunded = { ...p, substatus: 'refunded', refunded_amount: money('10.50'), updated_at: '2026-10-17T01:00:00Z' }
   await settle(refunded, 'refund.updated')
   assert.deepEqual(credits.getBalance(row.user_id), { creditCents: 700, heldCents: 700, availableCents: 0 })
   assert.equal(whop.getWhopTopup(row.invoice_reference, row.user_id)?.reversal_due_cents, 700)
@@ -301,8 +306,64 @@ test('disabling new checkout still processes refunds for existing payments', asy
   await settle(p)
   process.env.IUNLOCKMOBILE_WHOP_ENABLED = '0'
   await assert.rejects(topup(), /not available/)
-  await settle({ ...p, substatus: 'refunded', refunded_amount: money('10.00'), updated_at: '2026-10-17T01:00:00Z' }, 'refund.updated')
+  await settle({ ...p, substatus: 'refunded', refunded_amount: money('10.50'), updated_at: '2026-10-17T01:00:00Z' }, 'refund.updated')
   assert.equal(credits.getBalance(row.user_id).creditCents, 0)
   assert.equal(credits.creditIntegrity().mismatches, 0)
   assert.equal(credits.creditIntegrity().invalidHolds, 0)
+})
+
+
+test('5% card fee rounds to cents and is never added to credit', async () => {
+  for (const [amount, fee] of [[100, 5], [109, 5], [110, 6], [2345, 117], [2500, 125], [5000, 250], [10000, 500]]) {
+    const row = await whop.createWhopCheckout(customer(), amount, randomUUID())
+    assert.equal(cardFeeCents(amount), fee)
+    assert.equal(row.fee_cents, fee)
+    assert.equal(row.total_due_cents, amount + fee)
+    assert.equal((checkoutCalls.at(-1)!.body.plan as Record<string, unknown>).initial_price, (amount + fee) / 100)
+    await settle(payment(row))
+    assert.equal(credits.getBalance(row.user_id).creditCents, amount)
+  }
+})
+
+test('paying only the credit amount without the quoted fee requires review', async () => {
+  const row = await topup()
+  await settle(payment(row, { subtotal: money('10.00'), total: money('10.00') }))
+  assert.equal(credits.getBalance(row.user_id).creditCents, 0)
+  assert.equal(whop.getWhopTopup(row.invoice_reference, row.user_id)?.review_reason, 'payment_amount_mismatch')
+})
+
+test('legacy fee-free invoices retain their checkout price, settlement and refund behavior', async () => {
+  const userId = customer()
+  const key = randomUUID()
+  checkoutError = true
+  await assert.rejects(whop.createWhopCheckout(userId, 1000, key))
+  // An invoice persisted before the fee rollout, with no checkout response yet.
+  database.db().prepare("UPDATE invoices SET fee_cents = 0, total_due_cents = 1000 WHERE user_id = ?").run(userId)
+  checkoutError = false
+  const row = await whop.createWhopCheckout(userId, 1000, key)
+  const plan = checkoutCalls.at(-1)!.body.plan as Record<string, unknown>
+  assert.equal(plan.initial_price, 10)
+  assert.doesNotMatch(String(plan.description), /card payment fee/)
+  assert.equal(row.fee_cents, 0)
+  const p = payment(row)
+  await settle(p)
+  assert.equal(credits.getBalance(userId).creditCents, 1000)
+  await settle({ ...p, substatus: 'partially_refunded', refunded_amount: money('5.00'), updated_at: '2026-10-17T01:00:00Z' }, 'refund.updated')
+  assert.equal(credits.getBalance(userId).creditCents, 500)
+  await settle({ ...p, substatus: 'refunded', refunded_amount: money('10.00'), updated_at: '2026-10-17T02:00:00Z' }, 'refund.updated')
+  assert.equal(credits.getBalance(userId).creditCents, 0)
+})
+
+test('incremental partial refunds use cumulative credit allocation and never reverse the fee', async () => {
+  const row = await topup()
+  const p = payment(row)
+  await settle(p)
+  for (const [refund, expected, hour] of [['0.01', 999, '01'], ['5.25', 500, '02'], ['10.49', 1, '03'], ['10.50', 0, '04']] as const) {
+    const update = { ...p, substatus: refund === '10.50' ? 'refunded' : 'partially_refunded', refunded_amount: money(refund), updated_at: `2026-10-17T${hour}:00:00Z` }
+    await settle(update, 'refund.updated')
+    await settle(update, 'refund.updated')
+    assert.equal(credits.getBalance(row.user_id).creditCents, expected)
+  }
+  assert.equal(whop.getWhopTopup(row.invoice_reference, row.user_id)?.reversed_cents, 1000)
+  assert.equal(credits.creditIntegrity().mismatches, 0)
 })

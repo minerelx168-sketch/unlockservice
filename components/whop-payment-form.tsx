@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseUsd, formatUsd } from '@/lib/money'
+import { CARD_FEE_PERCENT, cardFeeCents } from '@/lib/card-fee'
 
 const QUICK_AMOUNTS = [1, 10, 25, 50, 100]
 
@@ -24,6 +25,7 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
   }, [])
   const amountCents = parseUsd(amount)
   const valid = amountCents !== null && amountCents >= minCents && amountCents <= maxCents
+  const feeCents = valid ? cardFeeCents(amountCents) : 0
   function chooseAmount(value: string, custom = false) {
     setAmount(value)
     setCustomAmount(custom)
@@ -99,7 +101,9 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
         </div>
       </fieldset>
       <section className="funding-summary" aria-live="polite" aria-label="Card credit summary">
-        <div className="funding-summary-total"><span>Credit you will receive</span><strong>{valid ? formatUsd(amountCents) : '—'}</strong></div>
+        <div><span>Credit you will receive</span><strong>{valid ? formatUsd(amountCents) : '—'}</strong></div>
+        <div><span>Card payment fee ({CARD_FEE_PERCENT}%)</span><strong>{valid ? formatUsd(feeCents) : '—'}</strong></div>
+        <div className="funding-summary-total"><span>Total before tax</span><strong>{valid ? formatUsd(amountCents + feeCents) : '—'}</strong></div>
         <p className="t-small">One-time purchase. Credit is added after payment verification.
           Review any applicable tax or fee on Whop before confirming payment.</p>
       </section>
