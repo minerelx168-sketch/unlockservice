@@ -76,11 +76,13 @@ test('quick picks follow the catalog and the landing sample prefers the blacklis
 })
 
 test('every landing sample is labelled as an example and shows a masked identifier only', () => {
+  // Unlock now opens with the quote form; Phone Check retains the sample report.
+  const samplePage = read('app/(marketing)/services/imei-check/page.tsx')
+  assert.match(samplePage, /<SampleReportCard/)
+  assert.match(samplePage, /pill="Example/)
+  assert.match(samplePage, /imei="35•• •••• ••80"/)
   for (const path of ['app/(marketing)/services/imei-check/page.tsx', 'app/(marketing)/services/unlock/page.tsx']) {
     const source = read(path)
-    assert.match(source, /<SampleReportCard/)
-    assert.match(source, /pill="Example/)
-    assert.match(source, /imei="35•• •••• ••80"/)
     assert.doesNotMatch(source, /LIVE DATA|Live source|Bank-grade|6,000\+|Trusted by/i)
   }
   const card = read('components/sample-report-card.tsx')
