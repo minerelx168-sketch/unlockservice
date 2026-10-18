@@ -1,5 +1,4 @@
 'use client'
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { PENDING_ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateClickId, type ClickIdField } from '@/lib/attribution'
 import { analyticsHostAllowed } from '@/lib/site'
@@ -17,7 +16,7 @@ export function AnalyticsConsent() {
     void fetch('/api/consent', { cache: 'no-store', credentials: 'same-origin' }).then((response) => response.json()).then(async (data) => {
       if (!active) return
       const state = data.consent === 'granted' ? 'granted' : data.consent === 'denied' ? 'denied' : 'unknown'
-      setConsent(state); setOpen(state === 'unknown')
+      setConsent(state); setOpen(true)
       if (state !== 'granted') updateGoogleConsent('denied')
       if (state === 'granted') {
         // New landing click IDs are accepted only after previously saved consent is verified.
@@ -46,8 +45,13 @@ export function AnalyticsConsent() {
       if (state === 'denied') clicks.current = {}
     } catch (error) { setError(error instanceof Error ? error.message : 'Unable to save your choice.') } finally { setBusy(false) }
   }
-  return <aside className="analytics-consent" aria-label="Privacy choices">
-    {open ? <div className="card stack" style={{ gap: 12 }}><strong>Optional analytics and advertising</strong><p className="t-small">With your permission, we measure service steps and save Google advertising click identifiers for up to 90 days. We never send your IMEI, email or payment details in these events. <Link href="/privacy">Privacy policy</Link></p><div className="cta-actions"><button className="button button--primary" disabled={busy} onClick={() => void choose('granted')}>Allow optional tracking</button><button className="button button--quiet" disabled={busy} onClick={() => void choose('denied')}>Reject optional tracking</button></div>{error ? <p role="alert">{error}</p> : null}</div> : <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>Privacy choices{consent === 'denied' ? ' · optional tracking off' : ''}</button>}
+  return <aside className="analytics-consent" data-open={open} aria-label="Privacy choices">
+    {open ? <div className="cookie-banner" role="region" aria-label="Cookie notice" aria-busy={busy}>
+      <p>We use cookies to ensure that we give you the best experience on our website. If you continue to use this site we will assume that you are happy with it</p>
+      <button type="button" className="button button--primary cookie-accept" disabled={busy} onClick={() => void choose('granted')}>{busy ? 'Saving…' : 'Accept'}</button>
+      <button type="button" className="cookie-close" aria-label="Close cookie notice without accepting optional tracking" disabled={busy} onClick={() => void choose('denied')}>×</button>
+      {error ? <p className="cookie-error" role="alert">{error}</p> : null}
+    </div> : <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>Privacy choices{consent === 'denied' ? ' · optional tracking off' : ''}</button>}
   </aside>
 }
 function readClickIds(input: unknown): Partial<Record<ClickIdField, string>> {

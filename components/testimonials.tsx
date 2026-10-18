@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import type { Testimonial } from '@/lib/testimonials'
 import { Icon } from './icons'
 
@@ -51,7 +50,6 @@ function ReviewCard({ item, index }: { item: Testimonial; index: number }) {
  * reviews exist.
  */
 export function Testimonials({ items }: { items: Testimonial[] }) {
-  const [paused, setPaused] = useState(false)
   if (items.length === 0) return null
   const allSample = items.every((item) => item.sample)
   const hasSamples = items.some((item) => item.sample)
@@ -59,7 +57,7 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
   const rows = [items, [...items.slice(half), ...items.slice(0, half)]]
 
   return (
-    <section className="section section--tint home-section reviews" id="reviews" aria-labelledby="reviews-heading" data-motion-paused={paused}>
+    <section className="section section--tint home-section reviews" id="reviews" aria-labelledby="reviews-heading">
       <div className="shell">
         <div className="section-head section-head--center">
           {allSample ? null : (
@@ -78,10 +76,7 @@ export function Testimonials({ items }: { items: Testimonial[] }) {
                 ? 'Includes illustrative examples; no verified rating or review count is claimed.'
                 : 'Feedback from traders, repair shops and travellers who checked or unlocked a phone here.'}
           </p>
-          <button type="button" className="button button--quiet review-motion-toggle"
-            aria-pressed={paused} onClick={() => setPaused((value) => !value)}>
-            {paused ? 'Resume animation' : 'Pause animation'}
-          </button>
+
         </div>
       </div>
 

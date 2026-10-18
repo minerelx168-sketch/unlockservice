@@ -30,12 +30,10 @@ test('marquee duplicates are hidden to assistive tech and original tracks suppor
   assert.match(s, /aria-label=\{`Review examples row/)
 })
 
-test('continuous motion has a real pause button plus pointer and keyboard pause', () => {
+test('review motion keeps pointer and keyboard pause without a separate button', () => {
   const s = read('components/testimonials.tsx')
-  assert.match(s, /aria-pressed=\{paused\}/)
-  assert.match(s, /onClick=\{\(\) => setPaused/)
+  assert.doesNotMatch(s, /Pause animation|Resume animation|review-motion-toggle/)
   const css = read('styles/home.css')
-  assert.match(css, /data-motion-paused='true'[^}]*animation-play-state: paused/)
   assert.match(css, /reviews-marquee:hover/)
   assert.match(css, /reviews-marquee:focus-within/)
 })
