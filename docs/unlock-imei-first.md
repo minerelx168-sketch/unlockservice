@@ -1,8 +1,8 @@
 # Unlock catalog browsing
 
-`/services/unlock` is an IMEI entry page. It never loads the product catalog or passes product names, prices or codes into HTML or the React Server Component payload. A saved draft may prefill the IMEI, but does not skip this page.
+`/services/unlock` and the homepage use the same quote-first entry form. They expose the existing public quote projection (service name/code, category, selling price, estimated delivery, summary and availability), so visitors can choose a service before entering an IMEI. No country or service is selected by default. Country/region choices and other service categories are separate. A saved draft may restore the IMEI and selected service, but does not skip the entry page. Detailed catalog browsing remains on the separate intent-gated route.
 
-Submitting **Show unlock services** validates the full 15-digit IMEI and checksum on the server, writes the existing 15-minute HttpOnly device-intent cookie, and redirects to `/services/unlock/catalog`. The homepage Unlock form uses the same handoff. IMEIs are not placed in navigation URLs. Phone Check still supports browsing without an IMEI.
+Submitting **Continue to service details** validates the full 15-digit IMEI and checksum on the server. If a service code is supplied, it must match an available public Unlock product; unknown, empty or unavailable codes are rejected before writing the draft. The existing 15-minute HttpOnly device-intent cookie retains both IMEI and selected product code, and redirects to `/services/unlock/catalog`. Existing IMEI-only entry forms still work. IMEIs are not placed in navigation URLs. Phone Check still supports browsing without an IMEI. The server does not accept client-supplied prices.
 
 The catalog route validates the unexpired Unlock intent before constructing product props. Missing, malformed, expired or Phone Check intents return to the entry page. The catalog keeps the IMEI read-only with a **Change IMEI** link; selecting a service retains the existing sign-in, review and funding flow. Browsing does not call the provider, create an order or change credit.
 
