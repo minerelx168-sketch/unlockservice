@@ -2,29 +2,11 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
+import { safeAnalyticsPage } from '@/lib/analytics-page'
 
 type BrowserWithAnalytics = Window & {
   iunlockmobileAnalyticsConsent?: string
   gtag?: (...args: unknown[]) => void
-}
-
-function safeExternalReferrerOrigin(): string {
-  try {
-    const referrer = document.referrer
-    if (!referrer) return ''
-    const url = new URL(referrer)
-    const host = url.hostname.toLowerCase().replace(/\.$/, '')
-    if (!['http:', 'https:'].includes(url.protocol)) return ''
-    if (host === 'iunlockmobile.com' || host === 'www.iunlockmobile.com' || host === 'accounts.google.com') return ''
-    return url.origin
-  } catch {
-    return ''
-  }
-}
-
-function pagePath(pathname: string): string {
-  const first = pathname.split('/')[1]
-  return ['user', 'admin', 'api'].includes(first) ? '/account' : pathname || '/'
 }
 
 /** The root gtag config owns the initial page_view; this covers later App Router navigations only. */
@@ -37,7 +19,6 @@ export function GoogleAnalyticsNavigation() {
     const browser = window as BrowserWithAnalytics
     const host = window.location.hostname.toLowerCase().replace(/\.$/, '')
     if (host !== 'iunlockmobile.com' && host !== 'www.iunlockmobile.com') return
-    const nextPath = pagePath(pathname)
     if (firstPath.current === null) {
       firstPath.current = pathname
       lastPath.current = pathname
@@ -47,11 +28,11 @@ export function GoogleAnalyticsNavigation() {
     lastPath.current = pathname
     if (browser.iunlockmobileAnalyticsConsent !== 'granted') return
     if (typeof browser.gtag !== 'function') return
-    browser.gtag('event', 'page_view', {
-      page_location: `${window.location.origin}${nextPath}`,
-      page_referrer: safeExternalReferrerOrigin(),
-      page_title: 'iUnlockMobile',
-    })
+    const page = safeAnalyticsPage(window.location.href, document.referrer)
+    // Keep subsequent custom events on the same sanitized current page as well.
+    browser.gtag('set', page)
+    for (const tag of ['AW-18465855968', 'G-9WCELVR3V3']) browser.gtag('config', tag, { ...page, send_page_view: false })
+    browser.gtag('event', 'page_view', page)
   }, [pathname])
 
   return null

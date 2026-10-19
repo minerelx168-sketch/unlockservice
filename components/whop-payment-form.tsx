@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { parseUsd, formatUsd } from '@/lib/money'
 import { CARD_FEE_PERCENT, cardFeeCents } from '@/lib/card-fee'
+import { trackFunnelEventOnce } from '@/lib/funnel-analytics'
 
 const QUICK_AMOUNTS = [1, 10, 25, 50, 100]
 
@@ -46,6 +47,7 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
       return
     }
     key.current ??= crypto.randomUUID()
+    trackFunnelEventOnce('begin_checkout', key.current, { service_category: 'account_credit', payment_method: 'card', currency: 'USD', value: amountCents / 100 })
     setBusy(true)
     setError('')
     try {
@@ -55,10 +57,12 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Could not create checkout.')
       if (!/^\/user\/invoice\/[a-f0-9]{32}$/.test(data.invoiceUrl)) throw new Error('Invalid invoice response.')
+      const reference = data.invoiceUrl.slice('/user/invoice/'.length)
       if (data.checkoutUrl != null) {
         const checkout = new URL(data.checkoutUrl)
         if (checkout.protocol !== 'https:' || !['whop.com', 'sandbox.whop.com'].includes(checkout.hostname)
           || checkout.username || checkout.password || checkout.port) throw new Error('Invalid checkout response.')
+        if (checkout.hostname === 'whop.com') trackFunnelEventOnce('payment_request_created', reference, { service_category: 'account_credit', payment_method: 'card', status: 'created' })
         window.location.assign(checkout.href)
         return
       }

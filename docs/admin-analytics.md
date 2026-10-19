@@ -28,6 +28,14 @@ The existing GA4 tag `G-9WCELVR3V3` receives the opaque ID as a **configuration*
 
 Use GA4 User Explorer with the corresponding User-ID. Reporting Identity should be Observed or Blended. No GA4 account settings are changed by this release. Incoming Google events must still be confirmed in the property's Realtime/DebugView using a consenting customer; administrator traffic is deliberately excluded. Existing GA4 anonymous browsing remains separate. No historical behavior is reconstructed.
 
+### Marketing measurement follow-up
+
+The initial Google tag and SPA page views share a sanitizer that retains only `utm_source`, `utm_medium`, `utm_campaign`, `utm_id`, and `utm_content` as Google campaign fields. Labels must be 1–80 ASCII letters, digits, dots, underscores or hyphens, without email/URL syntax, 13-digit identifiers or long hexadecimal identifiers. Use nonpersonal campaign labels such as `autumn-unlock-2026`. Free-text `utm_term` and every other arbitrary query parameter are discarded. Private account/admin/API URLs are collapsed to `/account`; external referrers retain their origin only. The existing initial cookieless page view under default denied consent remains; consent timing and click-ID persistence are unchanged.
+
+Card checkout creation, verified live card invoice views, and the crypto modal now use the existing funding funnel. `payment_request_created` is emitted only by a successful creation response, never by viewing an existing invoice. `payment_completed` means verified account credit, never a service `purchase`. Modal and invoice views share browser deduplication markers for 90 days, with a session/in-memory fallback when persistent storage is blocked; references remain local deduplication keys. Storage is read/written only after consent. These events require an open customer browser. They are best-effort funnel counts, not an exactly-once financial log: storage clearing, different browsers and simultaneous first events can still produce repeats, while closed pages can miss events. Use the credit ledger for exact top-up totals; no earlier funding activity is reconstructed.
+
+Verified service purchases from administrator accounts are excluded from both Google Ads and GA4 conversions. Service conversion values, fee calculations, provider requests and ledger behavior are unchanged. Keep only one purchase conversion source primary in Ads if both direct Ads and imported GA4 purchases are configured.
+
 Detailed activity is only displayed for the last 90 days. An hourly opportunistic cleanup deletes up to 1,000 older visits per run; the identity remains for account correlation until an eligible deletion. The privacy page describes scope, consent and retention. Withdrawing consent stops future optional collection; historical deletion is handled through the existing account support process.
 
 Official reference: https://developers.google.com/analytics/devguides/collection/ga4/user-id

@@ -31,6 +31,10 @@ export function purchaseConversion(
       || !Number.isSafeInteger(orderId) || orderId < 1
       || !Number.isSafeInteger(priceCents) || priceCents < 1) return null
 
+  // Administrator test orders must not train advertising or revenue reports.
+  const customer = db().prepare("SELECT 1 FROM users WHERE id = ? AND account_type != 'admin'").get(userId)
+  if (!customer) return null
+
   const charge = db().prepare(
     `SELECT id, created_at FROM credit_ledger
       WHERE user_id = ? AND type = 'charge' AND ref_type = ? AND ref_id = ?

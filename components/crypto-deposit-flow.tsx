@@ -8,6 +8,8 @@ import type { CryptoDeposit } from '@/lib/crypto-deposit'
 import { formatUsd, parseUsd } from '@/lib/money'
 import { CopyValue } from './invoice-actions'
 import { Icon } from './icons'
+import { PaymentFunnelEvents } from './payment-funnel-events'
+import { trackFunnelEventOnce } from '@/lib/funnel-analytics'
 
 type Token = { id: string; asset: string; feeBasisPoints: number }
 
@@ -26,6 +28,7 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
   const mounted = useRef(true)
   const busy = useRef(false)
   const credited = useRef(false)
+  const checkoutAttempt = useRef<string | null>(null)
   const [amount, setAmount] = useState((initialCents / 100).toFixed(2))
   const [gateway, setGateway] = useState(gateways[0]?.id ?? '')
   const [deposit, setDeposit] = useState<CryptoDeposit | null>(initialDeposit ?? null)
@@ -45,6 +48,11 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
 
   const command = useCallback(async (action: 'create' | 'check' | 'status', values: Record<string, unknown>) => {
     if (busy.current) return false
+    if (action === 'create') {
+      checkoutAttempt.current ??= crypto.randomUUID()
+      trackFunnelEventOnce('begin_checkout', checkoutAttempt.current, { service_category: 'account_credit', payment_method: 'crypto', currency: 'USD', value: typeof values.amountCents === 'number' ? values.amountCents / 100 : undefined })
+    }
+    if (action === 'check' && typeof values.reference === 'string') trackFunnelEventOnce('payment_verification_requested', values.reference, { service_category: 'account_credit', payment_method: 'crypto' })
     busy.current = true
     if (action !== 'status') { setPending(true); setError('') }
     try {
@@ -57,7 +65,10 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
       if (!mounted.current) return false
       setDeposit(result.deposit)
       setError('')
-      if (action === 'create') heading.current?.focus()
+      if (action === 'create') {
+        trackFunnelEventOnce('payment_request_created', result.deposit.reference, { service_category: 'account_credit', payment_method: 'crypto', status: 'created' })
+        heading.current?.focus()
+      }
       if (result.deposit.status === 'success' && !credited.current) {
         credited.current = true
         router.refresh()
@@ -94,6 +105,7 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
   const showStatus = deposit && (waiting || deposit.status !== 'pending')
   return (
     <div className="crypto-flow" ref={root}>
+      {deposit ? <PaymentFunnelEvents reference={deposit.reference} settled={deposit.status === 'success'} paymentMethod="crypto" /> : null}
       <header className="crypto-heading">
         {deposit && waiting && status === 'pending' ? <button type="button" className="crypto-back" aria-label="Back to QR code" onClick={() => setWaiting(false)}><Icon name="arrowLeft" /></button> : null}
         <h2 ref={heading} tabIndex={-1}>{!deposit ? 'Add money' : showStatus ? 'Deposit status' : 'Deposit crypto'}</h2>

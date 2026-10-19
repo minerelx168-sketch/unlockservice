@@ -7,6 +7,7 @@ import { CustomerEngagement } from '@/components/customer-engagement'
 import { AnalyticsConsent } from '@/components/analytics-consent'
 import { GoogleAnalyticsNavigation } from '@/components/google-analytics-navigation'
 import { analyticsHostAllowed } from '@/lib/site'
+import { safeAnalyticsPage } from '@/lib/analytics-page'
 
 const DESCRIPTION =
   'Compare phone network-unlock services and device reports by IMEI. Review carrier eligibility, service prices and delivery estimates before ordering; refused services release reserved account credit.'
@@ -56,7 +57,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const googleAdsTag = 'AW-18465855968'
   const googleAnalyticsTag = 'G-9WCELVR3V3'
   // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
-  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); gtag('set', {page_location: location.origin + (['user','admin','api'].includes(location.pathname.split('/')[1]) ? '/account' : location.pathname), page_referrer: '', page_title: 'iUnlockMobile'}); gtag('js', new Date()); gtag('config', '${googleAdsTag}', {page_location: location.origin + (['user','admin','api'].includes(location.pathname.split('/')[1]) ? '/account' : location.pathname), page_referrer: '', page_title: 'iUnlockMobile'}); gtag('config', '${googleAnalyticsTag}', {page_location: location.origin + (['user','admin','api'].includes(location.pathname.split('/')[1]) ? '/account' : location.pathname), page_referrer: '', page_title: 'iUnlockMobile'});`
+  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); var safeAnalyticsContext = (${safeAnalyticsPage.toString()})(location.href, document.referrer); gtag('set', safeAnalyticsContext); gtag('js', new Date()); gtag('config', '${googleAdsTag}', safeAnalyticsContext); gtag('config', '${googleAnalyticsTag}', safeAnalyticsContext);`
 
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>

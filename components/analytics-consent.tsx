@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { PENDING_ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateClickId, type ClickIdField } from '@/lib/attribution'
 import { analyticsHostAllowed } from '@/lib/site'
+import { safeAnalyticsPage } from '@/lib/analytics-page'
 export function AnalyticsConsent() {
   const [consent, setConsent] = useState<'unknown' | 'granted' | 'denied'>('unknown')
   const [open, setOpen] = useState(false)
@@ -78,20 +79,6 @@ function readClickIds(input: unknown): Partial<Record<ClickIdField, string>> {
   return result
 }
 
-function safeExternalReferrerOrigin(): string {
-  try {
-    const referrer = document.referrer
-    if (!referrer) return ''
-    const url = new URL(referrer)
-    const host = url.hostname.toLowerCase().replace(/\.$/, '')
-    if (!['http:', 'https:'].includes(url.protocol)) return ''
-    if (host === 'iunlockmobile.com' || host === 'www.iunlockmobile.com' || host === 'accounts.google.com') return ''
-    return url.origin
-  } catch {
-    return ''
-  }
-}
-
 function updateGoogleConsent(state: 'granted' | 'denied', clickIds: Partial<Record<ClickIdField, string>> = {}) {
   const browser = window as Window & { iunlockmobileAnalyticsConsent?: string; gtag?: (...args: unknown[]) => void }
   browser.iunlockmobileAnalyticsConsent = state
@@ -104,16 +91,15 @@ function updateGoogleConsent(state: 'granted' | 'denied', clickIds: Partial<Reco
     const safeIds = readClickIds(clickIds)
     if (typeof browser.gtag === 'function') {
       if (Object.keys(safeIds).length) browser.gtag('set', safeIds)
-      const pageReferrer = safeExternalReferrerOrigin()
-      const safeLocation = new URL(window.location.origin + (['user', 'admin', 'api'].includes(window.location.pathname.split('/')[1]) ? '/account' : window.location.pathname))
+      const page = safeAnalyticsPage(window.location.href, document.referrer)
+      const safeLocation = new URL(page.page_location)
       for (const field of CLICK_ID_FIELDS) if (safeIds[field]) safeLocation.searchParams.set(field, safeIds[field]!)
       for (const tag of ['AW-18465855968', 'G-9WCELVR3V3']) {
         browser.gtag('config', tag, {
           ...safeIds,
+          ...page,
           send_page_view: false,
           page_location: safeLocation.href,
-          page_referrer: pageReferrer,
-          page_title: 'iUnlockMobile',
         })
       }
     }
