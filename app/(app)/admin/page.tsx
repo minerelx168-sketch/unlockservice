@@ -1,3 +1,4 @@
+import { AdminSalesDashboard } from '@/components/admin-sales-dashboard'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { adminOverview, listAdminUsers } from '@/lib/admin'
@@ -47,10 +48,12 @@ export default async function AdminPage() {
       <div className="app-head">
         <div>
           <h1>Control panel</h1>
-          <p>Signed in as {administrator.username}. Administrator access and every financial mutation are enforced on the server.</p>
+          <p>Welcome, {administrator.username}. Track business growth and manage customer accounts.</p>
         </div>
         <Link className="button button--secondary" href="/admin/payments">View payment history</Link>
       </div>
+
+      <AdminSalesDashboard />
 
       <div className="stat-grid">
         <div className="stat">
@@ -152,35 +155,35 @@ export default async function AdminPage() {
           <span>{adjustments.length} shown</span>
         </header>
         <div className="table-wrap">
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>Reference</th>
-                <th>User</th>
-                <th>Administrator</th>
-                <th className="num">Amount</th>
-                <th className="num">Available after</th>
-                <th>Reason</th>
-                <th>Recorded</th>
+          <table className="grid account-table" role="table">
+            <thead role="rowgroup">
+              <tr role="row">
+                <th scope="col" role="columnheader">Reference</th>
+                <th scope="col" role="columnheader">User</th>
+                <th scope="col" role="columnheader">Administrator</th>
+                <th scope="col" role="columnheader" className="num">Amount</th>
+                <th scope="col" role="columnheader" className="num">Available after</th>
+                <th scope="col" role="columnheader">Reason</th>
+                <th scope="col" role="columnheader">Recorded</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody role="rowgroup">
               {adjustments.map((adjustment) => (
-                <tr key={adjustment.public_id}>
-                  <td className="mono">{adjustment.public_id}</td>
-                  <td>
+                <tr role="row" key={adjustment.public_id}>
+                  <td role="cell" data-label="Reference" className="mono">{adjustment.public_id}</td>
+                  <td role="cell" data-label="User">
                     <strong>{adjustment.target_username}</strong>
                     <div className="t-small">{adjustment.target_email}</div>
                   </td>
-                  <td>{adjustment.admin_username}</td>
-                  <td className="num">
+                  <td role="cell" data-label="Administrator">{adjustment.admin_username}</td>
+                  <td role="cell" data-label="Amount" className="num">
                     <span className={adjustment.amount_cents >= 0 ? 'money-positive' : 'money-negative'}>
                       {adjustment.amount_cents >= 0 ? '+' : ''}{formatUsd(adjustment.amount_cents)}
                     </span>
                   </td>
-                  <td className="num">{formatUsd(adjustment.credit_after_cents - adjustment.held_after_cents)}</td>
-                  <td>{adjustment.reason}</td>
-                  <td>{adjustment.created_at.replace('T', ' ').slice(0, 16)} UTC</td>
+                  <td role="cell" data-label="Available after" className="num">{formatUsd(adjustment.credit_after_cents - adjustment.held_after_cents)}</td>
+                  <td role="cell" data-label="Reason">{adjustment.reason}</td>
+                  <td role="cell" data-label="Recorded">{adjustment.created_at.replace('T', ' ').slice(0, 16)} UTC</td>
                 </tr>
               ))}
             </tbody>
@@ -200,31 +203,31 @@ export default async function AdminPage() {
           <span>{users.length} shown</span>
         </header>
         <div className="table-wrap">
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Tier</th>
-                <th className="num">Available credit</th>
-                <th className="num">Held</th>
-                <th>Created</th>
+          <table className="grid account-table" role="table">
+            <thead role="rowgroup">
+              <tr role="row">
+                <th scope="col" role="columnheader">User</th>
+                <th scope="col" role="columnheader">Role</th>
+                <th scope="col" role="columnheader">Status</th>
+                <th scope="col" role="columnheader">Tier</th>
+                <th scope="col" role="columnheader" className="num">Available credit</th>
+                <th scope="col" role="columnheader" className="num">Held</th>
+                <th scope="col" role="columnheader">Created</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody role="rowgroup">
               {users.map((user) => (
-                <tr key={user.id}>
-                  <td>
+                <tr role="row" key={user.id}>
+                  <td role="cell" data-label="User">
                     <strong>{user.username}</strong>
                     <div className="t-small">{user.email}</div>
                   </td>
-                  <td>{user.account_type}</td>
-                  <td>{user.status}</td>
-                  <td>{user.membership_tier}</td>
-                  <td className="num">{formatUsd(user.credit_cents - user.held_cents)}</td>
-                  <td className="num">{formatUsd(user.held_cents)}</td>
-                  <td>{user.created_at.slice(0, 10)}</td>
+                  <td role="cell" data-label="Role">{user.account_type}</td>
+                  <td role="cell" data-label="Status">{user.status}</td>
+                  <td role="cell" data-label="Tier">{user.membership_tier}</td>
+                  <td role="cell" data-label="Available credit" className="num">{formatUsd(user.credit_cents - user.held_cents)}</td>
+                  <td role="cell" data-label="Held" className="num">{formatUsd(user.held_cents)}</td>
+                  <td role="cell" data-label="Created">{user.created_at.slice(0, 10)}</td>
                 </tr>
               ))}
             </tbody>

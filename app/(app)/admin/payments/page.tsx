@@ -74,7 +74,7 @@ export default async function AdminPaymentHistoryPage({
           <h1>Payment history</h1>
           <p>Review payment requests across accounts. Only a verified, credited invoice counts as paid.</p>
         </div>
-        <Link className="button button--secondary" href="/admin">Back to control panel</Link>
+        <div className="admin-payment-nav"><Link className="button button--secondary" href="/admin/analytics?view=payments">Top-up analytics</Link><Link className="button button--quiet" href="/admin">Control panel</Link></div>
       </div>
 
       <div className="stat-grid">

@@ -56,6 +56,7 @@ export function AppNav({ isAdmin = false, children }: { isAdmin?: boolean; child
           items: [
             { href: '/admin', label: 'Control panel', icon: 'window' as IconName },
             { href: '/admin/payments', label: 'Payment history', icon: 'file' as IconName },
+            { href: '/admin/analytics', label: 'Customer analytics', icon: 'grid' as IconName },
           ],
         },
       ]
