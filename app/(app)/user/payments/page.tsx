@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireSession } from '@/lib/auth'
@@ -129,7 +130,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                       {STATUS_LABEL[invoice.status] ?? invoice.status}
                     </span>
                   </td>
-                  <td role="cell" data-label="Created">{invoice.created_at}</td>
+                  <td role="cell" data-label="Created"><LocalTime value={invoice.created_at} /></td>
                   <td role="cell" className="account-table-action" data-label="Action">
                     <Link className="link-arrow" href={`/user/invoice/${invoice.reference}`}>
                       {invoice.status === 'pending' ? 'Continue' : 'View details'}

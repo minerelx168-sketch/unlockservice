@@ -1,3 +1,4 @@
+import { LocalTime, LocalTodayOrders } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -7,7 +8,7 @@ import { OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
 import { creditSummary } from '@/lib/credits'
 import { formatUsd } from '@/lib/money'
-import { listOrders, orderStats } from '@/lib/orders'
+import { listOrders, orderStats, recentOrderCounts } from '@/lib/orders'
 import { listPaidReports, type PaidReportView } from '@/lib/paid-reports'
 import { getAccountProfile } from '@/lib/profile'
 import { unlockOrderingEnabled } from '@/lib/provider'
@@ -86,7 +87,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <Avatar username={user.username} style={profile.avatarStyle} size={52} />
           <div>
             <h1>Welcome back, {user.username}.</h1>
-            <p>Member since {user.created_at.slice(0, 10)}. Start an order, check a status, or manage your account.</p>
+            <p>Member since <LocalTime value={user.created_at} dateOnly />. Start an order, check a status, or manage your account.</p>
           </div>
         </div>
         <Link className="button button--quiet" href="/user/profile">
@@ -136,7 +137,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
         <div className="stat">
           <span className="label">Placed today</span>
-          <span className="value">{stats.today}</span>
+          <span className="value"><LocalTodayOrders buckets={recentOrderCounts(user.id)} fallback={stats.today} /></span>
           <span className="caption">Across every brand and network</span>
         </div>
       </div>
@@ -180,7 +181,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   <span className="order-meta">
                     {row.status}
                     {row.device}
-                    <span>{row.created.slice(0, 10)}</span>
+                    <span><LocalTime value={row.created} /></span>
                   </span>
                   <span className="order-price">
                     {formatUsd(row.priceCents)}

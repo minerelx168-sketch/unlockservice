@@ -3352,3 +3352,7 @@ table.account-table td {
 .admin-payment-nav { display:flex; flex-wrap:wrap; gap:8px; }
 @media(max-width:900px) { .admin-insight-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:600px) { .admin-growth .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .admin-growth .stat { padding:16px 12px; } .admin-growth .stat .label { font-size:10px; min-height:28px; } .admin-growth .stat .value { font-size:24px; } .admin-insight-links a { padding:14px; } }
+
+/* Customer timestamps may wrap inside compact table cards on small screens. */
+.customer-local-time { white-space: normal; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.customer-time-notice { margin: 24px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }

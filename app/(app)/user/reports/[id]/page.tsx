@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -57,7 +58,7 @@ export default async function PaidReportDetailPage({ params }: { params: Promise
             Back to paid reports
           </Link>
           <h1 style={{ marginTop: 16 }}>{order.productName}</h1>
-          <p>{order.imei ?? order.maskedImei} · {new Date(order.createdAt).toLocaleString()}</p>
+          <p>{order.imei ?? order.maskedImei} · <LocalTime value={order.createdAt} /></p>
         </div>
         <span className="badge">{statusLabel(order.status)}</span>
       </div>

@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
@@ -53,6 +54,7 @@ export default async function PaidReportsPage() {
                 <th role="columnheader" scope="col">IMEI</th>
                 <th role="columnheader" scope="col" className="num">Price</th>
                 <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col">Created</th>
                 <th role="columnheader" scope="col"><span className="visually-hidden">Action</span></th>
               </tr></thead>
               <tbody role="rowgroup">
@@ -62,6 +64,7 @@ export default async function PaidReportsPage() {
                     <td role="cell" className="mono" data-label="IMEI">{report.imei ?? report.maskedImei}</td>
                     <td role="cell" className="num" data-label="Price">{formatUsd(report.priceCents)}</td>
                     <td role="cell" data-label="Status">{statusLabel(report.status)}</td>
+                    <td role="cell" data-label="Created"><LocalTime value={report.createdAt} /></td>
                     <td role="cell" className="account-table-action" data-label="Action">
                       <Link className="link-arrow" href={`/user/reports/${report.id}`} aria-label={`View report ${report.id}`}>
                         View <Icon name="arrowRight" />
