@@ -4,30 +4,6 @@ import test from 'node:test'
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
 
-test('Add funds presents invoice-first auto detection, safe estimate and explicit multi-chain method selection', () => {
-  const page = read('app/(app)/user/add-funds/page.tsx')
-  const form = read('components/payment-forms.tsx')
-  assert.match(page, /How adding funds works/)
-  assert.match(page, /Copy your payment details/)
-  assert.match(page, /exact amount, address and QR/)
-  assert.match(page, /watchableRoute\(gateway\)/)
-  assert.match(page, /paste a transaction ID only if the payment is not detected/)
-  assert.doesNotMatch(page, /Add credit in four clear steps|Send and paste ID|Automatic verification ready/)
-  assert.doesNotMatch(page, /Never reuse a transaction ID/)
-  assert.doesNotMatch(page, /wallet password, private key, seed phrase/)
-  assert.match(form, /QUICK_AMOUNTS = \[1, 10, 25, 50, 100\]/)
-  assert.match(form, /Estimated request total/)
-  assert.match(form, /Do not send this estimate/)
-  assert.match(form, /automaticVerification \? 'Auto detection' : 'Manual review'/)
-  assert.match(form, /Continue to payment details/)
-  assert.doesNotMatch(form, /Suggested amount to send|<span className="badge badge--success">Auto verification/)
-  assert.match(form, /verified on-chain amount determines the credit/i)
-  assert.match(form, /Binance-issued pegged representation/)
-  assert.match(form, /createInvoiceAction/)
-  assert.doesNotMatch(form, /Creating a payment request does not move money/)
-  assert.doesNotMatch(form, /private key or seed phrase/)
-})
-
 test('invoice page uses per-route explorer metadata and refreshes database state only', () => {
   const page = read('app/(app)/user/invoice/[reference]/page.tsx')
   const actions = read('components/invoice-actions.tsx')

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Icon } from './icons'
 import { CARD_FEE_PERCENT } from '@/lib/card-fee'
 
@@ -10,6 +10,15 @@ export function FundingMethodSelector({ card, cryptocurrency, cryptoDescription 
   cryptoDescription: string
 }) {
   const [selected, setSelected] = useState<'card' | 'crypto' | null>(null)
+  const dialog = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    if (selected === 'crypto') dialog.current?.showModal()
+    else dialog.current?.close()
+    if (selected !== 'crypto') return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previous }
+  }, [selected])
 
   return (
     <div className="funding-method-flow">
@@ -47,11 +56,14 @@ export function FundingMethodSelector({ card, cryptocurrency, cryptoDescription 
       </section>
       <p className="funding-method-status t-small" role="status">
         {selected === 'card' ? 'Card selected. Enter your credit amount below.'
-          : selected === 'crypto' ? 'Cryptocurrency selected. Choose your amount, token and network below.'
+          : selected === 'crypto' ? 'Cryptocurrency selected. Complete your deposit in the popup.'
           : 'Choose a payment method above to get started.'}
       </p>
       {card ? <div id="funding-card-panel" hidden={selected !== 'card'}>{card}</div> : null}
-      {cryptocurrency ? <div id="funding-crypto-panel" hidden={selected !== 'crypto'}>{cryptocurrency}</div> : null}
+      {cryptocurrency ? <dialog id="funding-crypto-panel" ref={dialog} className="crypto-dialog" aria-label="Crypto deposit" onClose={() => setSelected(null)} onCancel={() => setSelected(null)}>
+        <button type="button" className="crypto-close" aria-label="Close crypto deposit" onClick={() => dialog.current?.close()}>×</button>
+        {cryptocurrency}
+      </dialog> : null}
     </div>
   )
 }

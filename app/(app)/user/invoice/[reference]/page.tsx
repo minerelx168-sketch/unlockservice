@@ -17,6 +17,9 @@ import { codedInvoiceExpired, formatE4, paymentCode, shortfallToleranceCents } f
 import { nudgeInvoicePayment, watchableRoute } from '@/lib/payment-watcher'
 import { getWhopTopup } from '@/lib/whop'
 import { WhopInvoice } from '@/components/whop-invoice'
+import { CryptoDepositFlow } from '@/components/crypto-deposit-flow'
+import { getCryptoDeposit } from '@/lib/crypto-deposit'
+import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from '@/lib/topup-limits'
 
 export const metadata: Metadata = { title: 'Payment request' }
 export const dynamic = 'force-dynamic'
@@ -56,7 +59,7 @@ export default async function InvoicePage({
   params: Promise<{ reference: string }>
   searchParams: Promise<{ next?: string }>
 }) {
-  const { user } = await requireSession()
+  const { user, session } = await requireSession()
   const { reference } = await params
   const returnTo = safeContinuation((await searchParams).next)
   const invoice = getInvoice(reference, user.id)
@@ -65,6 +68,17 @@ export default async function InvoicePage({
     const topup = getWhopTopup(reference, user.id)
     if (!topup) notFound()
     return <WhopInvoice topup={topup} />
+  }
+
+  if (invoice.payment_credit_policy === 'actual_received' && invoice.payment_chain_id === 56) {
+    const deposit = await getCryptoDeposit(reference, user.id)
+    return <>
+      <PaymentFunnelEvents reference={reference} settled={invoice.status === 'success'} />
+      <div className="crypto-page-top"><Link href="/user/add-funds">← Add funds</Link><Link href="/user/payments">Payment history</Link></div>
+      <section className="crypto-page-panel" aria-label="Crypto deposit">
+        <CryptoDepositFlow csrfToken={session.csrfToken} gateways={[]} minCents={MIN_TOPUP_CENTS} maxCents={MAX_TOPUP_CENTS} initialDeposit={deposit} returnTo={returnTo} />
+      </section>
+    </>
   }
 
   /* While the customer has this page open, look for their transfer now

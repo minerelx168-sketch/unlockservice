@@ -634,6 +634,9 @@ function migrate(connection: Database.Database) {
     // to an invoice without the customer pasting anything. Null on invoices
     // created before codes existed; those keep the paste-only flow.
     addColumn(connection, 'invoices', 'payment_amount_e4 INTEGER')
+    // Preserve existing requests' promised shortfall allowance. New crypto
+    // deposits snapshot actual_received and credit only confirmed net funds.
+    addColumn(connection, 'invoices', "payment_credit_policy TEXT NOT NULL DEFAULT 'legacy_allowance'")
     addColumn(connection, 'payment_watch_cursors', 'resume_fingerprint TEXT')
     addColumn(connection, 'orders', 'provider_name TEXT')
     addColumn(connection, 'orders', 'provider_mode TEXT')

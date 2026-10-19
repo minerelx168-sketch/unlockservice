@@ -73,6 +73,7 @@ export type CodedInvoiceTerms = {
   credit_amount_cents: number
   total_due_cents: number
   payment_amount_e4: number
+  payment_credit_policy?: 'legacy_allowance' | 'actual_received'
 }
 
 /** True when this amount is the invoice's: same code, inside the band. */
@@ -105,6 +106,7 @@ export function reservedCodeOwners(routeId: string, receivedE4: number, sentAt: 
  * in full, otherwise the verified amount is credited, floored to the cent.
  */
 export function creditForCodedTransfer(invoice: CodedInvoiceTerms, receivedE4: number): number {
+  if (invoice.payment_credit_policy === 'actual_received') return Math.floor(receivedE4 / 100)
   const askedE4 = invoice.payment_amount_e4
   if (receivedE4 >= askedE4) return invoice.credit_amount_cents + Math.floor((receivedE4 - askedE4) / 100)
   const shortCents = Math.ceil((askedE4 - receivedE4) / 100)

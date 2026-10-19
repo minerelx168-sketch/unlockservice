@@ -44,6 +44,7 @@ export type Invoice = {
   payment_provider_mode: PaymentProviderMode | null
   /** Exact amount to send, in 1/10,000 of a token; the last two digits are the code. */
   payment_amount_e4: number | null
+  payment_credit_policy: 'legacy_allowance' | 'actual_received'
   created_at: string
   updated_at: string
 }
@@ -142,7 +143,7 @@ const INVOICE_COLUMNS = `
   payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
   payment_asset_code, payment_token_contract, payment_token_decimals,
   payment_destination_address, payment_confirmations_required, payment_provider_mode,
-  payment_amount_e4, created_at, updated_at
+  payment_amount_e4, payment_credit_policy, created_at, updated_at
 `
 
 function invoiceRow(reference: string, userId?: number): InvoiceRow | undefined {
@@ -204,8 +205,8 @@ export function createInvoice(userId: number, gatewayId: string, creditCents: nu
             payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
             payment_asset_code, payment_token_contract, payment_token_decimals,
             payment_destination_address, payment_confirmations_required, payment_provider_mode,
-            payment_amount_e4)
-         VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            payment_amount_e4, payment_credit_policy)
+         VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'actual_received')`,
       )
       .run(
         reference,

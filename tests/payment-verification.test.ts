@@ -708,9 +708,10 @@ test('a coded invoice never accepts a transfer from the same moment it was creat
   assert.equal(credits.getBalance(user.id).creditCents, 0)
 })
 
-test('exchange withdrawal fees within the smaller of $1 or 3% credit the full invoice', async () => {
+test('legacy requests retain their original withdrawal fee allowance', async () => {
   const user = auth.register('fee-absorbed', 'fee-absorbed@example.test', 'correct-horse-battery-staple')
   const invoice = payments.createInvoice(user.id, 'bsc-usdt-peg', 4000)
+  database.db().prepare("UPDATE invoices SET payment_credit_policy = 'legacy_allowance' WHERE reference = ?").run(invoice.reference)
   backdate(invoice.reference)
   const txHash = `0x${'9c'.repeat(32)}`
   payments.submitPaymentReference(invoice.reference, user.id, txHash, '')

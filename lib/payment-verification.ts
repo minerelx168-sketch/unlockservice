@@ -55,6 +55,7 @@ type InvoiceVerificationRow = {
   invoice_created_at: string
   /** The invoice's coded amount; null on invoices from before codes existed. */
   payment_amount_e4: number | null
+  payment_credit_policy: 'legacy_allowance' | 'actual_received'
   status: VerificationStatus
   confirmations: number
   attempt_count: number
@@ -117,7 +118,7 @@ class UpstreamVerificationError extends Error {
 
 const VERIFICATION_SELECT = `
   SELECT v.*, i.user_id, i.status AS invoice_status,
-         i.created_at AS invoice_created_at, i.payment_amount_e4,
+         i.created_at AS invoice_created_at, i.payment_amount_e4, i.payment_credit_policy,
          i.credit_amount_cents, i.total_due_cents, i.fee_cents, i.tax_cents
     FROM invoice_verifications v
     JOIN invoices i ON i.reference = v.invoice_reference`
@@ -719,6 +720,7 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
           credit_amount_cents: row.credit_amount_cents,
           total_due_cents: row.total_due_cents,
           payment_amount_e4: row.payment_amount_e4!,
+          payment_credit_policy: row.payment_credit_policy,
         },
         receivedE4,
       )
