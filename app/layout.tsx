@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import { publicOrigin } from '@/lib/site'
 import '@/styles/globals.css'
+import { CustomerEngagement } from '@/components/customer-engagement'
 import { AnalyticsConsent } from '@/components/analytics-consent'
 import { GoogleAnalyticsNavigation } from '@/components/google-analytics-navigation'
 import { analyticsHostAllowed } from '@/lib/site'
@@ -67,7 +68,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {analyticsEnabled ? <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} /> : null}
         {analyticsEnabled ? <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} /> : null}
       </head>
-      <body>{children}<GoogleAnalyticsNavigation /><AnalyticsConsent /></body>
+      <body>{children}<GoogleAnalyticsNavigation /><CustomerEngagement /><AnalyticsConsent /></body>
     </html>
   )
 }
