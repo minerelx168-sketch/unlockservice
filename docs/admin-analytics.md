@@ -36,6 +36,14 @@ Card checkout creation, verified live card invoice views, and the crypto modal n
 
 Verified service purchases from administrator accounts are excluded from both Google Ads and GA4 conversions. Service conversion values, fee calculations, provider requests and ledger behavior are unchanged. Keep only one purchase conversion source primary in Ads if both direct Ads and imported GA4 purchases are configured.
 
+### GA4 collector CSP correction
+
+The GA4 tag diagnostic identified blocked measurement resources. The site's existing CSP allowed `*.google-analytics.com`, but omitted the separate Google Analytics collector family documented for regional collection. `img-src` and `connect-src` now also allow `https://analytics.google.com` and `https://*.analytics.google.com`. The detailed diagnostic also listed the missing connection origin `https://stats.g.doubleclick.net`, so it is added to `connect-src` only. Other listed connection origins (`ad.doubleclick.net`, `www.google.com`, `www.googleadservices.com`) were already allowed and are not duplicated.
+
+Script nonces, `strict-dynamic`, all other policy directives and consent behavior are unchanged; this does not grant script execution to additional origins. No general `*.google.com`, invalid `www.google.*` source or guessed country domains are added. Some diagnostic entries may describe earlier page loads: the deployed browser must verify current event delivery and inspect concrete blocked URLs before expanding the policy further. The script warning for `googleads.g.doubleclick.net` is not used to weaken the nonce-based script policy without a reproducible current failure.
+
+Official collector reference: https://support.google.com/analytics/answer/12017362?hl=en
+
 Detailed activity is only displayed for the last 90 days. An hourly opportunistic cleanup deletes up to 1,000 older visits per run; the identity remains for account correlation until an eligible deletion. The privacy page describes scope, consent and retention. Withdrawing consent stops future optional collection; historical deletion is handled through the existing account support process.
 
 Official reference: https://developers.google.com/analytics/devguides/collection/ga4/user-id
