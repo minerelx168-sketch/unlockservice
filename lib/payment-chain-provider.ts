@@ -1,4 +1,5 @@
 import {
+  ETHERSCAN_V2_URL,
   normalizeTransactionId,
   paymentProviderConfiguration,
   tronAddressToHex20,
@@ -395,7 +396,7 @@ export async function listEvmIncomingTransfers(
   belowFloorCandidate?: (rawAmount: bigint) => boolean,
 ): Promise<IncomingTransfer[]> {
   if (snapshot.providerMode !== 'bnb_rpc') throw new PaymentProviderError('provider_scan_unsupported')
-  const result = rpcResult(
+  const rpcLogs = rpcResult(
     await evmCall(
       snapshot,
       'eth_getLogs',
@@ -416,7 +417,32 @@ export async function listEvmIncomingTransfers(
   )
   /* A node that answers null, or anything but a list, has not said "no
      transfers"; treating it so would move the cursor past blocks nobody read. */
-  if (!Array.isArray(result)) throw new PaymentProviderError('provider_invalid_logs')
+  if (!Array.isArray(rpcLogs)) throw new PaymentProviderError('provider_invalid_logs')
+  let result: unknown[] = rpcLogs
+
+  // Optional BscScan discovery via Etherscan V2 (chain 56). Keep the RPC
+  // range complete even if the explorer is delayed, paginated or unavailable.
+  // Explorer candidates still need a fresh canonical receipt before credit.
+  const explorerKey = process.env.IUNLOCKMOBILE_ETHERSCAN_API_KEY?.trim()
+  if (process.env.IUNLOCKMOBILE_BSCSCAN_DISCOVERY === '1' && explorerKey && snapshot.chainId === 56) {
+    try {
+      const url = new URL(ETHERSCAN_V2_URL)
+      const parameters = {
+        chainid: '56', module: 'logs', action: 'getLogs', address: tokenContract.toLowerCase(),
+        fromBlock: String(fromBlock), toBlock: String(toBlock), topic0: TRANSFER_EVENT_TOPIC,
+        topic2: addressTopic(destination), topic0_2_opr: 'and', page: '1', offset: '1000', apikey: explorerKey,
+      }
+      for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value)
+      const payload = await requestJson(url.toString(), { method: 'GET', headers: { accept: 'application/json' } }, LOG_RESPONSE_BYTES)
+      const extra = rpcResult(payload)
+      if (Array.isArray(extra)) {
+        const keys = new Set(result.map(log => JSON.stringify([(log as Record<string, unknown>)?.transactionHash, (log as Record<string, unknown>)?.logIndex]).toLowerCase()))
+        result = [...result, ...extra.filter(log => !keys.has(JSON.stringify([log?.transactionHash, log?.logIndex]).toLowerCase()))]
+      }
+    } catch {
+      // Never turn an explorer outage or plan limit into a missed deposit.
+    }
+  }
 
   const wantedContract = tokenContract.toLowerCase()
   const wantedTopic = addressTopic(destination)
@@ -437,6 +463,7 @@ export async function listEvmIncomingTransfers(
       || topics[2] !== wantedTopic
       || !transactionId
       || blockNumber === null
+      || blockNumber < fromBlock || blockNumber > toBlock
       || logIndex === null
       || rawAmount === null
       || rawAmount <= 0n

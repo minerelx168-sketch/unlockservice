@@ -251,6 +251,68 @@ function request(userId: number, routeId: string, cents: number) {
 const bscRaw = (e4: number) => BigInt(e4) * 10n ** 14n
 const tronRaw = (e4: number) => BigInt(e4) * 100n
 
+test('new deposits credit the actual net amount and preserve ownership across nearby requests', async () => {
+  const owner = newUser()
+  const other = newUser()
+  const invoice = request(owner.id, 'bsc-usdt-peg', 1000)
+  const nearby = request(other.id, 'bsc-usdt-peg', 999)
+  assert.equal(invoice.payment_credit_policy, 'actual_received')
+  // A 1-cent withdrawal fee is closest to the OTHER customer's requested
+  // amount; the original code still identifies the rightful owner.
+  const tx = sendBsc(bscRaw(invoice.payment_amount_e4! - 100))
+  mine()
+  await scan()
+  assert.equal(credits.getBalance(owner.id).creditCents, 999)
+  assert.equal(credits.getBalance(other.id).creditCents, 0)
+  assert.equal(payments.getInvoice(nearby.reference, other.id)!.status, 'pending')
+  await scan()
+  assert.equal(credits.getBalance(owner.id).creditCents, 999)
+  assert.throws(() => payments.submitPaymentReference(nearby.reference, other.id, tx, ''), /another|already|duplicate/i)
+  const { getCryptoDeposit } = await import('../lib/crypto-deposit')
+  const detail = await getCryptoDeposit(invoice.reference, owner.id)
+  assert.equal(detail.status, 'success')
+  assert.equal(detail.creditedCents, 999)
+  assert.equal(detail.requestedCents, 1000)
+  await assert.rejects(getCryptoDeposit(invoice.reference, other.id), /not found/)
+})
+
+test('actual-received policy floors subcent amounts and includes overpayments', () => {
+  const terms = { payment_amount_e4: 100_037, credit_amount_cents: 1000, total_due_cents: 1000, payment_credit_policy: 'actual_received' as const }
+  assert.equal(codes.creditForCodedTransfer(terms, 100_037), 1000)
+  assert.equal(codes.creditForCodedTransfer(terms, 99_937), 999)
+  assert.equal(codes.creditForCodedTransfer(terms, 120_037), 1200)
+  assert.equal(codes.creditForCodedTransfer(terms, 1_037), 10)
+})
+
+test('optional BscScan discovery verifies through RPC and survives explorer plan errors', async () => {
+  const owner = newUser()
+  const invoice = request(owner.id, 'bsc-usdt-peg', 4200)
+  sendBsc(bscRaw(invoice.payment_amount_e4! + 100))
+  mine()
+  const original = globalThis.fetch
+  let explorerReads = 0
+  process.env.IUNLOCKMOBILE_BSCSCAN_DISCOVERY = '1'
+  process.env.IUNLOCKMOBILE_ETHERSCAN_API_KEY = 'test-explorer-key'
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = new URL(String(input))
+    if (url.hostname === 'api.etherscan.io') {
+      explorerReads += 1
+      assert.equal(url.searchParams.get('chainid'), '56')
+      assert.equal(url.searchParams.get('action'), 'getLogs')
+      assert.equal(url.searchParams.get('topic2'), topic(wallet))
+      return new Response(JSON.stringify({ status: '0', message: 'NOTOK', result: 'Free API access is not supported for this chain' }))
+    }
+    return original(input, init)
+  }) as typeof fetch
+  try { await scan() } finally {
+    globalThis.fetch = original
+    delete process.env.IUNLOCKMOBILE_BSCSCAN_DISCOVERY
+    delete process.env.IUNLOCKMOBILE_ETHERSCAN_API_KEY
+  }
+  assert.ok(explorerReads > 0)
+  assert.equal(credits.getBalance(owner.id).creditCents, 4201)
+})
+
 before(async () => {
   database = await import('../lib/db')
   auth = await import('../lib/auth')
@@ -317,13 +379,13 @@ test('a $1 BEP-20 transfer below the dust floor after a small withdrawal fee mat
   mine()
   await scan()
   assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
-  assert.equal(credits.getBalance(user.id).creditCents, 100)
+  assert.equal(credits.getBalance(user.id).creditCents, 99)
   assert.equal(verification.getInvoiceVerification(invoice.reference, user.id)!.status, 'verified')
   const transferCount = database.db().prepare('SELECT COUNT(*) AS count FROM chain_transfers WHERE tx_hash = ?')
   assert.equal((transferCount.get(paid) as { count: number }).count, 1)
   assert.equal((transferCount.get(unrelatedDust) as { count: number }).count, 0)
   await scan()
-  assert.equal(credits.getBalance(user.id).creditCents, 100, 'the credited transfer is never applied twice')
+  assert.equal(credits.getBalance(user.id).creditCents, 99, 'the credited transfer is never applied twice')
 })
 test('BSC first scan stays in the free-tier log-query budget without skipping later blocks', async () => {
   const user = newUser()
@@ -370,7 +432,7 @@ test('a $1 TRC-20 transfer below the dust floor after a small withdrawal fee mat
   mine(20)
   await scan()
   assert.equal(payments.getInvoice(invoice.reference, user.id)!.status, 'success')
-  assert.equal(credits.getBalance(user.id).creditCents, 100)
+  assert.equal(credits.getBalance(user.id).creditCents, 99)
 })
 
 for (const routeId of ['bsc-usdt-peg', 'usdt-trc20'] as const) {
