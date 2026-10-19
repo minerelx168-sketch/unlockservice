@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -91,7 +92,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             </div>
             <div className="field-box">
               <dt><Icon name="clock" strokeWidth={2} />Created</dt>
-              <dd>{order.created_at}</dd>
+              <dd><LocalTime value={order.created_at} /></dd>
             </div>
             <div className="field-box">
               <dt><Icon name="bolt" strokeWidth={2} />Delivered as</dt>

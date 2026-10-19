@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import { PaymentFunnelEvents } from '@/components/payment-funnel-events'
 import type { Metadata } from 'next'
 import Image from 'next/image'
@@ -67,7 +68,7 @@ export default async function InvoicePage({
   if (invoice.gateway === 'whop_card') {
     const topup = getWhopTopup(reference, user.id)
     if (!topup) notFound()
-    return <WhopInvoice topup={topup} />
+    return <><WhopInvoice topup={topup} /><p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p></>
   }
 
   if (invoice.payment_credit_policy === 'actual_received' && invoice.payment_chain_id === 56) {
@@ -75,6 +76,7 @@ export default async function InvoicePage({
     return <>
       <PaymentFunnelEvents reference={reference} settled={invoice.status === 'success'} />
       <div className="crypto-page-top"><Link href="/user/add-funds">← Add funds</Link><Link href="/user/payments">Payment history</Link></div>
+      <p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p>
       <section className="crypto-page-panel" aria-label="Crypto deposit">
         <CryptoDepositFlow csrfToken={session.csrfToken} gateways={[]} minCents={MIN_TOPUP_CENTS} maxCents={MAX_TOPUP_CENTS} initialDeposit={deposit} returnTo={returnTo} />
       </section>
@@ -116,6 +118,7 @@ export default async function InvoicePage({
           <span className="eyebrow">Payment request {shortReference(invoice.reference)}</span>
           <h1>{status.label}</h1>
           <p>{status.message}</p>
+          <p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p>
         </div>
         <div className={`payment-status payment-status--${status.tone}`}>
           <span aria-hidden="true" />

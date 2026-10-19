@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -42,7 +43,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         <div>
           <Link className="link-arrow" href="/user/checks"><span style={{ display: 'inline-flex', transform: 'rotate(180deg)' }}><Icon name="arrowRight" /></span> Back to checks</Link>
           <h1 style={{ marginTop: 16 }}>IMEI check report</h1>
-          <p>{check.imei ?? check.maskedImei} · {new Date(check.createdAt).toLocaleString()}</p>
+          <p>{check.imei ?? check.maskedImei} · <LocalTime value={check.createdAt} /></p>
         </div>
         <span className={check.status === 'completed' ? 'badge badge--success' : 'badge'}>{check.status}</span>
       </div>

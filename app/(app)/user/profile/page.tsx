@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Avatar } from '@/components/avatar'
@@ -58,7 +59,7 @@ export default async function ProfilePage() {
             </div>
             <div className="field-box">
               <dt>Member since</dt>
-              <dd>{user.created_at.slice(0, 10)}</dd>
+              <dd><LocalTime value={user.created_at} dateOnly /></dd>
             </div>
             <div className="field-box">
               <dt>Account type</dt>
@@ -66,7 +67,7 @@ export default async function ProfilePage() {
             </div>
             <div className="field-box">
               <dt>Email verified</dt>
-              <dd>{user.email_verified_at ? user.email_verified_at.slice(0, 10) : 'Not yet'}</dd>
+              <dd>{user.email_verified_at ? <LocalTime value={user.email_verified_at} dateOnly /> : 'Not yet'}</dd>
             </div>
           </dl>
         </section>

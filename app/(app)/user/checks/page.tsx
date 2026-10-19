@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
@@ -49,6 +50,7 @@ export default async function ChecksPage() {
                 <th role="columnheader" scope="col">Device</th>
                 <th role="columnheader" scope="col">Type</th>
                 <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col">Created</th>
                 <th role="columnheader" scope="col"><span className="visually-hidden">Action</span></th>
               </tr></thead>
               <tbody role="rowgroup">
@@ -57,6 +59,7 @@ export default async function ChecksPage() {
                     <td role="cell" className="mono" data-label="Device">{check.imei ?? check.maskedImei}</td>
                     <td role="cell" data-label="Type">{check.checkType === 'basic' ? 'Free IMEI check' : check.checkType}</td>
                     <td role="cell" data-label="Status">{statusLabel(check.status)}</td>
+                    <td role="cell" data-label="Created"><LocalTime value={check.createdAt} /></td>
                     <td role="cell" className="account-table-action" data-label="Action">
                       <Link className="link-arrow" href={`/user/checks/${check.id}`} aria-label={`View check ${check.id}`}>
                         View <Icon name="arrowRight" />

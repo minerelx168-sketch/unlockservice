@@ -689,6 +689,16 @@ export function countOrders(userId: number): number {
   return row.count
 }
 
+/** 48 hours covers the current local day in every supported IANA timezone.
+ * Minute buckets keep the payload bounded (at most 2,881 rows) for busy accounts.
+ * Modern timezone offsets, including 30/45-minute zones, align to these buckets.
+ */
+export function recentOrderCounts(userId: number, now = Date.now()): import('./customer-time').OrderMinuteCount[] {
+  return db().prepare(`SELECT strftime('%Y-%m-%d %H:%M:00', created_at) AS at, COUNT(*) AS count
+    FROM orders WHERE user_id = ? AND julianday(created_at) >= julianday(?) AND julianday(created_at) <= julianday(?)
+    GROUP BY at ORDER BY at`).all(userId, new Date(now - 2 * 86_400_000).toISOString(), new Date(now).toISOString()) as import('./customer-time').OrderMinuteCount[]
+}
+
 export function orderStats(userId: number) {
   const row = db()
     .prepare(
