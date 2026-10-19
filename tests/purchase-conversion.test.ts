@@ -53,6 +53,16 @@ test('historic purchase is not backfilled when revisited and still identifies re
   assert.equal(purchaseConversion(oldUser, 'paid_imei_report', 4, 320)?.newCustomer, false)
 })
 
+test('administrator orders never emit a marketing purchase, even with a valid charge', () => {
+  connection.prepare("INSERT INTO users (username,email,password_hash,account_type) VALUES ('admin-measurement','admin@example.test','synthetic','admin')").run()
+  const admin = Number((connection.prepare("SELECT id FROM users WHERE username='admin-measurement'").get() as {id:number}).id)
+  insert.run(admin, -500, 'charge', 'order', '9901', now)
+  insert.run(admin, -200, 'charge', 'paid_imei_report', '9902', now)
+  assert.equal(purchaseConversion(admin, 'order', 9901, 500), null)
+  assert.equal(purchaseConversion(admin, 'paid_imei_report', 9902, 200), null)
+  assert.equal((connection.prepare('SELECT count(*) AS n FROM credit_ledger WHERE user_id = ?').get(admin) as {n:number}).n, 2)
+})
+
 test('source protects all completion points and no sitewide purchase snippet is duplicated', () => {
   const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
   const layout = read('app/layout.tsx')

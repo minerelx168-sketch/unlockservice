@@ -91,7 +91,7 @@ test('public pricing and structured free results require no login or provider ne
 test('consent defaults precede Google configuration and no GTM/custom conversion replacement is installed', () => {
   const layout = read('app/layout.tsx')
   assert.ok(layout.indexOf("gtag('consent', 'default'") < layout.indexOf("gtag('config'"))
-  assert.match(layout, /analytics_storage: 'denied'/); assert.match(layout, /page_location: location.origin/); assert.match(layout, /'\/account'/)
+  assert.match(layout, /analytics_storage: 'denied'/); assert.match(layout, /safeAnalyticsPage.toString\(\)/); assert.match(read('lib/analytics-page.ts'), /'\/account'/)
   assert.doesNotMatch(layout, /GTM-PDB4DNWC|gtm\.js|iunlockmobile_purchase/)
   assert.match(read('components/google-ads-purchase-conversion.tsx'), /AW-18465855968\/NzXJCKKYj5QdEOCzmuVE/)
   const route = read('app/api/consent/route.ts')
