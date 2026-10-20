@@ -1,3 +1,4 @@
+import { deliverPaymentAnalytics } from '../lib/payment-analytics'
 import { deliverOrderNotifications } from '../lib/order-notifications'
 import { pollProviderJobs } from '../lib/provider-jobs'
 import { pollInvoiceVerifications } from '../lib/payment-verification'
@@ -14,8 +15,9 @@ async function main() {
   const payments = await pollInvoiceVerifications(boundedLimit)
   const whop = await processWhopEvents(Math.min(boundedLimit, 5))
   const whopReconciliation = await reconcileWhopPayments(Math.min(boundedLimit, 5))
+  const paymentAnalytics = await deliverPaymentAnalytics(boundedLimit).catch(() => ({ failed: true }))
   const notifications = await deliverOrderNotifications(boundedLimit)
-  process.stdout.write(`${JSON.stringify({ provider, watcher, payments, whop, whopReconciliation, notifications })}\n`)
+  process.stdout.write(`${JSON.stringify({ provider, watcher, payments, whop, whopReconciliation, paymentAnalytics, notifications })}\n`)
   if (
     provider.errors > 0
     || watcher.errors > 0

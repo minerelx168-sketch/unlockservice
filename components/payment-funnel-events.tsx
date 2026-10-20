@@ -6,9 +6,8 @@ export function PaymentFunnelEvents({ reference, settled, paymentMethod }: { ref
     const browser = window as Window & { iunlockmobileAnalyticsConsent?: string }
     const emit = () => {
       if (browser.iunlockmobileAnalyticsConsent !== 'granted') return
-      for (const event of ['payment_viewed', ...(settled ? ['payment_completed'] as const : [])] as const) {
-        trackFunnelEventOnce(event, reference, { service_category: 'account_credit', status: event === 'payment_completed' ? 'verified' : 'created', payment_method: paymentMethod })
-      }
+      // Completion is emitted only by the verified server payment worker.
+      trackFunnelEventOnce('payment_viewed', reference, { service_category: 'account_credit', status: settled ? 'verified' : 'created', payment_method: paymentMethod })
     }
     emit()
     window.addEventListener('iunlockmobile-consent', emit)

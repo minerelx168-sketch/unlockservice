@@ -15,6 +15,18 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
 
 const SCHEMA = `
+CREATE TABLE IF NOT EXISTS payment_analytics (
+  invoice_reference TEXT PRIMARY KEY REFERENCES invoices(reference),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  client_id TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  consent INTEGER NOT NULL DEFAULT 1 CHECK(consent IN (0,1)),
+  state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','sending','submitted','uncertain','suppressed','expired')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  attempted_at TEXT
+);
+CREATE INDEX IF NOT EXISTS payment_analytics_pending ON payment_analytics(state,created_at);
+
 CREATE TABLE IF NOT EXISTS order_attribution (
   order_type TEXT NOT NULL CHECK (order_type IN ('order', 'paid_report_order')),
   order_id INTEGER NOT NULL CHECK (order_id > 0),

@@ -1,3 +1,5 @@
+import { currentSession } from '@/lib/auth'
+import { revokePaymentAnalytics } from '@/lib/payment-analytics'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { ATTRIBUTION_COOKIE, CONSENT_COOKIE } from '@/lib/cookie-names'
@@ -34,6 +36,10 @@ export async function POST(request: Request) {
   const jar = await cookies()
   const options = { path: '/', httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production', maxAge: ATTRIBUTION_MAX_AGE_SECONDS }
   try {
+    if (body.consent === 'denied') {
+      const session = await currentSession()
+      if (session) revokePaymentAnalytics(session.user.id)
+    }
     const signed = encodeSignedConsent(body.consent)
     const existing = parseSignedConsent(jar.get(ATTRIBUTION_COOKIE)?.value)
     jar.set(CONSENT_COOKIE, signed, options)

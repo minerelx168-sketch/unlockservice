@@ -1,3 +1,4 @@
+import { snapshotPaymentAnalytics } from '@/lib/payment-analytics-request'
 import { NextResponse } from 'next/server'
 import { guard } from '@/lib/api'
 import { createWhopCheckout, safeWhopCheckoutUrl, WhopPaymentError } from '@/lib/whop'
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
     const topup = await createWhopCheckout(found.user.id,
       typeof body.amountCents === 'number' ? body.amountCents : NaN,
       typeof body.requestKey === 'string' ? body.requestKey : '')
+    await snapshotPaymentAnalytics(topup.invoice_reference, found.user.id, body.analyticsContext)
     const checkoutUrl = topup.checkout_url && !topup.credited && topup.status !== 'refunded' && !topup.review_reason
       ? safeWhopCheckoutUrl(topup.checkout_url, topup.environment) : null
     return NextResponse.json({ success: true, invoiceUrl: `/user/invoice/${topup.invoice_reference}`, checkoutUrl },

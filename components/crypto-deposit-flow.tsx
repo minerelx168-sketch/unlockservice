@@ -1,4 +1,5 @@
 'use client'
+import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -58,7 +59,7 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
     try {
       const response = await fetch('/api/payments/crypto', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, csrfToken, ...values }),
+        body: JSON.stringify({ action, csrfToken, ...values, analyticsContext: action === 'create' ? await paymentAnalyticsContext() : undefined }),
       })
       const result = await response.json()
       if (!response.ok || !result.deposit) throw new Error(result.error ?? 'Unable to check your deposit.')

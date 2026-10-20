@@ -1,3 +1,4 @@
+import { snapshotPaymentAnalytics } from '@/lib/payment-analytics-request'
 import { NextResponse, after } from 'next/server'
 import { guard } from '@/lib/api'
 import { createInvoice, gatewayById, PaymentError, submitPaymentReference } from '@/lib/payments'
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
       if (gateway?.chainId !== 56 || gateway.chainKind !== 'evm') throw new PaymentError('Choose a supported token on BNB Smart Chain.')
       reference = createInvoice(found.user.id, gatewayId, typeof body.amountCents === 'number' ? body.amountCents : NaN).reference
     }
+    if (body.action === 'create') await snapshotPaymentAnalytics(reference, found.user.id, body.analyticsContext)
     // Read the owned request before accepting a hash or triggering a scan.
     let deposit = await getCryptoDeposit(reference, found.user.id)
     if (body.action === 'check' && typeof body.txId === 'string' && body.txId.trim()) {

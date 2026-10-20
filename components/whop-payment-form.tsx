@@ -1,4 +1,5 @@
 'use client'
+import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -53,7 +54,7 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
     try {
       const response = await fetch('/api/payments/whop/checkout', { method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ csrfToken, amountCents, requestKey: key.current }) })
+        body: JSON.stringify({ csrfToken, amountCents, requestKey: key.current, analyticsContext: await paymentAnalyticsContext() }) })
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Could not create checkout.')
       if (!/^\/user\/invoice\/[a-f0-9]{32}$/.test(data.invoiceUrl)) throw new Error('Invalid invoice response.')
