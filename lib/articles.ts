@@ -42,102 +42,13431 @@ export type Article = {
 
 const ARTICLES: Article[] = [
   {
-    slug: 'puretalk-unlock-policy-iphone-guide',
-    title: 'PureTalk Unlock Policy for iPhone',
-    heading: 'PureTalk Unlock Policy for iPhone: Is a Request Needed?',
-    description: 'Use PureTalk’s current device guidance to check whether an iPhone is unlocked and choose the correct carrier route.',
-    standfirst: 'PureTalk says phones it sells are unlocked, while Apple says the carrier that controls a restriction must authorize an iPhone unlock.',
-    published: '2026-09-30',
-    updated: '2026-09-30',
-    minutes: 5,
-    topic: 'PureTalk unlock policy',
-    blocks: [
-      { kind: 'p', text: 'PureTalk’s current FAQ says phones purchased from PureTalk are unlocked, that it does not lock unlocked phones brought to its service, and that it cannot unlock a device locked by another carrier.', links: [{ label: 'Read PureTalk’s current device and compatibility FAQ', href: 'https://www.puretalk.com/faq/network-coverage-compatibility' }] },
-      { kind: 'h2', id: 'key-takeaways', text: 'Key Takeaways' },
-      { kind: 'list', items: [
-        'PureTalk’s compatibility guidance is not the same as the iPhone’s Carrier Lock status.',
-        'If another carrier’s restriction remains, use the official route for the carrier that controls it.',
-        'Apple says only a carrier can authorize an iPhone carrier unlock.',
-        'The iPhone-side completion check is No SIM restrictions in Settings.',
-      ] },
-      { kind: 'h2', id: 'check-status', text: 'Check Carrier Lock on the iPhone' },
-      { kind: 'list', ordered: true, items: [
-        'Open Settings on the iPhone.',
-        'Select General, then About.',
-        'Find Carrier Lock.',
-        'No SIM restrictions means the iPhone is carrier-unlocked.',
-        'If a restriction appears, use the carrier’s official support route rather than asking PureTalk to change another carrier’s status.',
-      ] },
-      { kind: 'p', text: 'PureTalk says its Compatibility Checker cannot confirm whether a phone is unlocked. Apple’s guidance identifies No SIM restrictions as the device status to verify and says the carrier must authorize the unlock. These pages cover compatibility and carrier-unlock status as separate checks.', links: [{ label: 'Follow Apple’s current iPhone unlock guidance', href: 'https://support.apple.com/en-us/109316' }, { label: 'Check PureTalk’s compatibility guidance', href: 'https://www.puretalk.com/faq/network-coverage-compatibility' }] },
-      { kind: 'h2', id: 'after-approval', text: 'What to do after the carrier approves an unlock' },
-      { kind: 'p', text: 'Apple says inserting another carrier’s SIM can complete activation after approval. If no other SIM is available, Apple describes backup, erase and restore as an after-approval path.', links: [{ label: 'Review Apple’s post-approval steps', href: 'https://support.apple.com/en-us/109316' }] },
-      { kind: 'h2', id: 'puretalk-route', text: 'Use the correct support route' },
-      { kind: 'p', text: 'Use PureTalk for its service, compatibility and support questions. Use the carrier that controls the restriction for a carrier-unlock request.', links: [{ label: 'Read PureTalk’s current FAQ', href: 'https://www.puretalk.com/faq/network-coverage-compatibility' }] },
-      { kind: 'h2', id: 'read-the-pages-together', text: 'Read the PureTalk and Apple pages together' },
-      { kind: 'p', text: 'PureTalk’s FAQ says phones purchased from PureTalk are unlocked. It also says PureTalk does not lock a phone that was already unlocked when it was brought to the service. The same FAQ says its Compatibility Checker cannot confirm whether a phone is unlocked. Use that page for PureTalk’s own device and compatibility statements, not as a replacement for the iPhone’s Carrier Lock field.', links: [{ label: 'Review PureTalk’s device and compatibility FAQ', href: 'https://www.puretalk.com/faq/network-coverage-compatibility' }] },
-      { kind: 'p', text: 'Apple’s guide supplies the device-side check and the carrier-authorization rule. Open Settings, General, About and read Carrier Lock. When it says No SIM restrictions, Apple identifies the iPhone as carrier-unlocked. When another carrier has approved the change, Apple explains how a new SIM can complete activation or how backup, erase and restore can be used when another SIM is unavailable.', links: [{ label: 'Follow Apple’s carrier-unlock guide', href: 'https://support.apple.com/en-us/109316' }] },
-      { kind: 'p', text: 'PureTalk’s published compatibility information should be read with its stated limitation: the checker does not confirm unlock status. Apple’s Carrier Lock field is the separate device check described in Apple’s guide.', links: [{ label: 'Review PureTalk’s stated checker limitation', href: 'https://www.puretalk.com/faq/network-coverage-compatibility' }] },
-      { kind: 'cta', text: 'Need help understanding the Carrier Lock status shown on your iPhone?', href: '/contact', label: 'Contact iUnlockMobile' },
-    ],
-    faq: [
-      { question: 'Are iPhones sold by PureTalk carrier-unlocked?', answer: 'PureTalk’s current FAQ says phones purchased from PureTalk are unlocked. Verify the individual iPhone in Settings, General, About, where No SIM restrictions indicates carrier-unlocked status.' },
-      { question: 'Can PureTalk unlock an iPhone locked by another carrier?', answer: 'PureTalk says it cannot unlock a device locked by another carrier. Use the official route for the carrier that controls the restriction.' },
-      { question: 'Does PureTalk’s compatibility checker prove an iPhone is unlocked?', answer: 'No. PureTalk says its Compatibility Checker cannot confirm unlock status. Check Carrier Lock on the iPhone.' },
-      { question: 'Can a factory reset create a carrier unlock?', answer: 'No. Apple describes erase and restore only after carrier approval when another SIM is unavailable; the reset does not create approval.' },
-      { question: 'How do I verify the unlock?', answer: 'Open Settings, General, About. The carrier unlock is complete when Carrier Lock shows No SIM restrictions.' },
-    ],
-  },
+      "slug": "unlock-lebara-phone-iphone-guide",
+      "title": "Unlock a Lebara Phone",
+      "heading": "How to Unlock a Lebara Phone: iPhone and SIM-Free Checks",
+      "description": "Check whether a Lebara-connected iPhone is SIM Free, carrier-locked, Activation Locked, SIM-PIN protected or blocked, then follow the right official route.",
+      "standfirst": "Lebara Phones currently labels listed devices as SIM Free, but a phone used with a Lebara SIM keeps the carrier history of the company that supplied the handset.",
+      "published": "2026-10-19",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "Lebara iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "To unlock a Lebara-connected iPhone, first establish whether Lebara Phones sold the handset or whether a Lebara SIM was simply inserted into a phone from somewhere else. The current Lebara Phones catalogue labels the listed Apple devices, including refurbished models, SIM Free. That catalogue label is useful context, not a substitute for checking the individual device. A used, imported or replacement iPhone can still carry a restriction from its original supplier, so the handset history and its Network Provider Lock status matter more than the network name on the SIM.",
+          "links": [
+            {
+              "label": "Check Lebara Phones’ current SIM-free catalogue",
+              "href": "https://phones.lebara.co.uk/sim-free"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Lebara Phones currently labels its listed Apple devices SIM Free, so confirm the individual handset before paying for any unlock-related service.",
+            "A Lebara SIM does not make Lebara responsible for a carrier lock created by Apple, another network provider or the original seller.",
+            "On a UK iPhone, No SIM restrictions beside Network Provider Lock in Settings > General > About is Apple’s on-device indication that the carrier lock is absent.",
+            "Ofcom’s UK ban on mobile companies selling locked handsets took effect on 17 December 2021. It is a useful sale-date filter, not proof of an older, imported or replacement phone’s status.",
+            "Carrier Lock is separate from a SIM PIN or PUK, passcode, Activation Lock, MDM or supervision, blacklist status, finance and eSIM provisioning."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "which-lebara-phone",
+          "text": "Which kind of Lebara phone do you have?"
+        },
+        {
+          "kind": "p",
+          "text": "The phrase Lebara phone can describe a SIM-free handset bought from the Lebara Phones retail site, a phone bundled with a Lebara line, or any unlocked or locked handset using a Lebara SIM. Those cases do not share one unlock owner. Start with the invoice, country of sale and any replacement record. Lebara Phones’ setup guidance explains how to insert a SIM and complete device setup; it does not change the device’s carrier history.",
+          "links": [
+            {
+              "label": "Read Lebara Phones’ SIM-free setup guidance",
+              "href": "https://phones.lebara.co.uk/help/simfree"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device history",
+            "Likely position",
+            "Best evidence"
+          ],
+          "rows": [
+            [
+              "Bought as SIM Free from Lebara Phones",
+              "The listing indicates no intended carrier restriction, but verify the actual unit",
+              "Invoice and Network Provider Lock status"
+            ],
+            [
+              "Existing phone moved to a Lebara SIM",
+              "Its original supplier may control any carrier lock",
+              "Original receipt and current Network Provider Lock status"
+            ],
+            [
+              "Refurbished iPhone from Lebara Phones",
+              "The listing may say SIM Free, but verify the actual unit and paperwork",
+              "Sales or replacement record and device identifiers kept private"
+            ],
+            [
+              "Used or imported iPhone",
+              "A previous carrier or country may control eligibility or compatibility",
+              "Seller trail, country and current device status"
+            ],
+            [
+              "Warranty or insurance replacement",
+              "The replacement has its own device record",
+              "Replacement paperwork and replacement device status"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A Lebara SIM working in the phone proves only that the Lebara line can connect or activate. It does not prove the device will accept every other provider. Read the iPhone’s Network Provider Lock field for the stronger carrier-lock check."
+        },
+        {
+          "kind": "h2",
+          "id": "check-lebara-iphone",
+          "text": "How to check a Lebara iPhone before requesting an unlock"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock. Apple may use different wording in other regions, including Carrier Lock.",
+            "If it says No SIM restrictions, the iPhone reports no carrier lock. Do not order another carrier unlock for that status.",
+            "If it shows a restriction, record the exact wording and keep the current device identifier private. Do not paste a complete identifier into a public message.",
+            "Match the device status to the receipt, box and replacement paperwork so you do not submit an old or returned device.",
+            "Identify the company and country that supplied the handset, then ask that provider which eligibility record applies."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says that Apple cannot unlock an iPhone for a different network provider; only the current network provider can do that. After the provider confirms an unlock, insert a different SIM or activate the other provider’s eSIM and let the device activate. If no other SIM is available, Apple documents a backup, erase and restore route. Completion should be checked on the phone: No SIM restrictions is the relevant carrier-lock result, not merely an email, order number or successful payment.",
+          "links": [
+            {
+              "label": "Follow Apple’s current UK iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Use four ways to check iPhone unlock status",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "uk-sale-date",
+          "text": "Use the UK sale date as a filter"
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom’s rules banning mobile companies from selling customers locked handsets came into force in the UK on 17 December 2021. A UK purchase after that date therefore deserves an explanation if the phone reports a carrier lock. The rule does not prove the history of an older handset, an overseas import or a later replacement, so keep the invoice when the on-device result conflicts with the listing.",
+          "links": [
+            {
+              "label": "Read Ofcom’s locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "who-unlocks-lebara-phone",
+          "text": "Who should handle a genuine Lebara phone lock?"
+        },
+        {
+          "kind": "p",
+          "text": "If a handset bought as SIM Free from Lebara Phones reports a carrier lock, contact the retailer with the order details and the current device status because the product listing and device record do not match. If the phone came from another network, that original provider or seller is the place to ask about its carrier record. Lebara mobile support can troubleshoot a Lebara line, but inserting or porting that line does not transfer control of another provider’s handset record.",
+          "links": [
+            {
+              "label": "Open Lebara’s official SIM troubleshooting guidance",
+              "href": "https://www.lebara.co.uk/en/help/new-members/my-sim-card-not-working.html"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "What it means",
+            "Correct first route"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions",
+              "No iPhone carrier lock is reported",
+              "Troubleshoot line activation, coverage or compatibility"
+            ],
+            [
+              "A carrier lock on a Lebara Phones SIM-free purchase",
+              "The product description and device status conflict",
+              "Lebara Phones order support with proof of purchase"
+            ],
+            [
+              "A carrier lock on a phone bought elsewhere",
+              "The original supplier may control the restriction",
+              "That network provider or retailer"
+            ],
+            [
+              "SIM PIN or PUK requested",
+              "The mobile line is protected or blocked",
+              "The carrier that issued that SIM or eSIM"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Apple Activation Lock is active",
+              "The legitimate owner or Apple’s documented support route"
+            ],
+            [
+              "Remote Management, supervision or a device-management profile",
+              "An organization may control settings or restrictions",
+              "The owning organization or its administrator"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Do not repeatedly enter guessed network or SIM codes. Apple’s carrier-unlock process is handled by the network provider and device activation, while a SIM PIN or PUK protects one SIM or eSIM line. Apple warns that guessing a SIM PIN or PUK can permanently lock the SIM or eSIM; contact the carrier that issued it instead.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "lebara-sim-esim",
+          "text": "If the Lebara SIM or eSIM still will not work"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock and line activation are separate. If the iPhone says No SIM restrictions, a carrier-unlock request will not repair a plan that is inactive, a failed eSIM download, incorrect mobile-data settings, poor coverage or a device that the provider has blocked. Check the line and device compatibility before escalating the handset. An unlocked iPhone is also not a guarantee of service on every network or in every country: model, regional compatibility, coverage, roaming and provider acceptance can still matter.",
+          "links": [
+            {
+              "label": "Check Apple’s current SOS and No Service troubleshooting",
+              "href": "https://support.apple.com/en-is/120000"
+            },
+            {
+              "label": "Check Apple’s worldwide eSIM provider and compatibility information",
+              "href": "https://support.apple.com/en-us/101569"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "items": [
+            "For a physical SIM, confirm it is inserted correctly and is not asking for a SIM PIN or PUK.",
+            "For eSIM, confirm the line is turned on and the provider has supplied the required activation method for that iPhone and plan.",
+            "For dual SIM, review the intended line for mobile data, calls and messages after both lines activate.",
+            "If the status shows SOS, Searching or No Service, review account status, coverage, carrier settings and whether the provider has barred the device instead of buying another unlock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A device can also be blocked or barred after being reported lost or stolen. That is different from a carrier lock and is handled through the provider’s device and account processes. Do not treat a third-party status report as proof that a provider will remove a valid block.",
+          "links": [
+            {
+              "label": "Read Ofcom’s lost or stolen phone guidance",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/lost-or-stolen-phone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-lebara-locks",
+          "text": "Do not confuse Carrier Lock with another restriction"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Problem",
+            "What it controls",
+            "Who can help"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: carrier restriction",
+              "Whether the iPhone can be activated with another provider",
+              "The network provider controlling the handset restriction"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to one Lebara SIM or eSIM line",
+              "The carrier that issued that line"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to local device data",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "Activation Lock or iPhone Locked to Owner",
+              "Apple Account ownership activation",
+              "The legitimate owner or Apple’s documented support process"
+            ],
+            [
+              "MDM, supervision or Remote Management",
+              "Organization-controlled settings, profiles or restrictions",
+              "The owning organization or its administrator"
+            ],
+            [
+              "Lost or stolen device block",
+              "Whether providers accept the device for cellular service",
+              "The reporting provider or lawful owner"
+            ],
+            [
+              "Finance or contract obligation",
+              "Payment and ownership terms",
+              "The seller, lender or account holder"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is not a carrier lock. Apple says Activation Lock is removed with the Apple Account and password used to set up the device, through the legitimate owner’s iCloud removal route, or through Apple’s documented support request when proof of purchase is available. A carrier unlock does not bypass it.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock removal options",
+              "href": "https://support.apple.com/en-us/108934"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "MDM and supervision are different again. Apple says supervision gives a school or business greater control over a device it owns, and the Supervision message and VPN & Device Management settings can show that management. A network provider cannot be assumed to remove an organization’s profile; contact the owning organization or administrator.",
+          "links": [
+            {
+              "label": "See Apple’s supervised-device guidance",
+              "href": "https://support.apple.com/en-us/102291"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-lebara-unlock",
+          "text": "Where a third-party unlock service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may offer device-status research or help organize a submission, but this article does not verify any provider’s availability, eligibility decision, fee, completion time or outcome. It cannot be treated as permission to bypass Activation Lock or MDM, remove a valid lost-or-stolen block, settle finance, or override the original provider’s rules. The safest completion check remains the phone’s own Network Provider Lock status and the relevant provider’s confirmation.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before sharing anything with a service, ask which restriction it is addressing, which carrier or organization controls it, what happens if the responsible party refuses, and what the completion test is. Never share an Apple Account password, Lebara password, SIM PIN or PUK. Keep the complete device identifier private and disclose it only through a verified support channel when genuinely needed.",
+          "links": [
+            {
+              "label": "Check Apple’s official unlock status steps first",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Not sure whether Lebara Phones, an earlier network provider, Apple Account owner or an organization controls the restriction? Share the exact on-screen wording and purchase history for a general route review, without passwords, PINs, PUKs or a publicly visible device identifier.",
+          "href": "/contact",
+          "label": "Review the correct route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are phones from Lebara unlocked?",
+          "answer": "Lebara Phones currently labels its listed Apple devices SIM Free. Confirm the specific iPhone reports No SIM restrictions in Settings > General > About, especially if it is refurbished, used or a replacement."
+        },
+        {
+          "question": "Can Lebara unlock a phone bought from another network?",
+          "answer": "A Lebara SIM does not transfer control of a handset lock. Apple says only the current network provider can unlock an iPhone for a different provider, so identify the supplier in the phone’s history and ask that provider or retailer."
+        },
+        {
+          "question": "Why does my Lebara SIM fail in an unlocked iPhone?",
+          "answer": "If the iPhone says No SIM restrictions, check SIM or eSIM activation, plan status, carrier settings, model compatibility, coverage and whether the provider has barred the device instead of ordering another unlock."
+        },
+        {
+          "question": "Is a Lebara PUK the same as a carrier unlock code?",
+          "answer": "No. A PUK restores access to a blocked SIM or eSIM after incorrect PIN attempts. Carrier Lock controls whether the iPhone can be activated with another network provider."
+        },
+        {
+          "question": "Can a Lebara phone unlock remove Activation Lock or MDM?",
+          "answer": "No. Activation Lock is tied to the Apple Account and legitimate ownership. MDM or supervision is controlled by the owning organization. A carrier unlock does not bypass either restriction."
+        }
+      ]
+    },
   {
-    slug: 'safelink-iphone-unlock-policy-guide',
-    title: 'SafeLink Unlock Policy for iPhone',
-    heading: 'SafeLink Unlock Policy for iPhone: Which Route Applies?',
-    description: 'Use SafeLink and Apple’s current guidance to separate BYOP compatibility, Line Lock and iPhone Carrier Lock status.',
-    standfirst: 'SafeLink’s support pages describe different device and account routes, while Apple provides the device-side Carrier Lock check.',
-    published: '2026-09-30',
-    updated: '2026-09-30',
-    minutes: 6,
-    topic: 'SafeLink unlock policy',
-    blocks: [
-      { kind: 'p', text: 'SafeLink’s BYOP guidance says a phone brought to the service must be compatible and unlocked. SafeLink also publishes a separate support route for personal T-Mobile devices. Use the current SafeLink or TracFone policy page for the route that matches the device record.', links: [{ label: 'Review SafeLink’s BYOP requirement', href: 'https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/3087441/' }, { label: 'See SafeLink’s personal T-Mobile route', href: 'https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/3099344/' }, { label: 'Open the current TracFone unlocking policy', href: 'https://www.tfwunlockpolicy.com/wps/portal/home' }] },
-      { kind: 'h2', id: 'key-takeaways', text: 'Key Takeaways' },
-      { kind: 'list', items: [
-        'A BYOP iPhone must meet SafeLink’s compatibility and unlocked-device requirement.',
-        'A personal T-Mobile device has a separate SafeLink support route.',
-        'Use the live policy and support pages instead of copying an old waiting period.',
-        'SafeLink Line Lock is an account feature; Carrier Lock is checked on the iPhone.',
-        'Apple says No SIM restrictions confirms the iPhone’s carrier-unlocked status.',
-      ] },
-      { kind: 'h2', id: 'choose-route', text: 'Choose the route that matches the device' },
-      { kind: 'table', head: ['Situation', 'Official starting point', 'What to verify'], rows: [
-        ['BYOP iPhone', 'SafeLink BYOP support', 'Compatibility and unlocked status'],
-        ['Personal T-Mobile iPhone', 'SafeLink’s T-Mobile support route', 'The device-specific instructions shown there'],
-        ['SafeLink or TracFone device policy question', 'Current policy and support pages', 'The current terms for the device record'],
-        ['Carrier Lock question', 'Apple iPhone Settings', 'Whether Carrier Lock shows No SIM restrictions'],
-      ] },
-      { kind: 'p', text: 'SafeLink’s support pages are the right place to identify the applicable service route. They should not be replaced with a copied date from a forum or an assumption based only on the SIM currently in the phone.', links: [{ label: 'Read SafeLink account support', href: 'https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/3087441/' }, { label: 'Open the current policy page', href: 'https://www.tfwunlockpolicy.com/wps/portal/home' }] },
-      { kind: 'h2', id: 'line-lock', text: 'Do not use Line Lock as the Carrier Lock check' },
-      { kind: 'p', text: 'SafeLink provides separate help for Line Lock. If the question is whether an iPhone can use another carrier, use Apple’s Carrier Lock screen instead of treating a Line Lock instruction as an iPhone unlock result.', links: [{ label: 'Read SafeLink’s Line Lock guidance', href: 'https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/2120822/' }, { label: 'Follow Apple’s Carrier Lock check', href: 'https://support.apple.com/en-us/109316' }] },
-      { kind: 'h2', id: 'verify', text: 'Verify the iPhone result' },
-      { kind: 'list', ordered: true, items: [
-        'Open Settings on the iPhone.',
-        'Select General, then About.',
-        'Find Carrier Lock.',
-        'No SIM restrictions means the iPhone is carrier-unlocked.',
-        'If a restriction appears, follow the current official route for the carrier that controls it.',
-      ] },
-      { kind: 'h2', id: 'use-current-pages', text: 'Use the current SafeLink pages in order' },
-      { kind: 'p', text: 'Start with the SafeLink page that matches the device path. The BYOP page describes the compatible-and-unlocked requirement. The personal T-Mobile page provides a separate support route. The Line Lock page describes a different account feature. If the question is the current unlocking policy, open the current TracFone unlocking policy separately when it applies and read the terms shown there.', links: [{ label: 'Review SafeLink’s BYOP requirement', href: 'https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/3087441/' }, { label: 'See SafeLink’s personal T-Mobile route', href: 'https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/3099344/' }, { label: 'Read SafeLink’s Line Lock guidance', href: 'https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/2120822/' }] },
-      { kind: 'p', text: 'After reading the applicable policy, verify the phone itself. Apple says to open Settings, General, About and read Carrier Lock. No SIM restrictions is the device-side completion status. This check keeps the SafeLink service route and the iPhone carrier-status check in their proper places.', links: [{ label: 'Follow Apple’s iPhone unlock verification', href: 'https://support.apple.com/en-us/109316' }] },
-      { kind: 'cta', text: 'Need help reading the SafeLink route or the Carrier Lock status?', href: '/contact', label: 'Contact iUnlockMobile' },
-    ],
-    faq: [
-      { question: 'What should I check first for a SafeLink BYOP iPhone?', answer: 'SafeLink’s BYOP guidance says the phone must be compatible and unlocked. Check those requirements before activation.' },
-      { question: 'Does SafeLink publish a separate route for a personal T-Mobile iPhone?', answer: 'Yes. SafeLink has a support page specifically for personal T-Mobile devices. Follow the instructions on that current page.' },
-      { question: 'Is SafeLink Line Lock the same as iPhone Carrier Lock?', answer: 'No. Use SafeLink’s Line Lock guidance for the line feature and Apple’s Settings screen for iPhone Carrier Lock.' },
-      { question: 'Where should I find current SafeLink or TracFone policy terms?', answer: 'Use the current SafeLink support pages and open the current TracFone unlocking policy separately when it applies rather than relying on an old waiting period.' },
-      { question: 'How do I confirm that an iPhone is unlocked?', answer: 'Open Settings, General, About. The iPhone is carrier-unlocked when Carrier Lock shows No SIM restrictions.' },
-    ],
-  },
+      "slug": "are-talkmobile-phones-unlocked-guide",
+      "title": "Are Talkmobile Phones Unlocked?",
+      "heading": "Are Talkmobile Phones Unlocked? iPhone and Upgrade Checks",
+      "description": "Are Talkmobile phones unlocked? Learn how to check an iPhone, separate carrier lock from SIM and ownership locks, and choose the right support route.",
+      "standfirst": "Talkmobile’s service pages and the UK locked-handset rule do not prove an individual iPhone’s status. Check Network Provider Lock and trace the original seller before asking for help.",
+      "published": "2026-10-19",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "Talkmobile iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Are Talkmobile phones unlocked? Do not infer the answer from the Talkmobile name or from a working Talkmobile SIM. Talkmobile currently lists phone upgrades and SIM-only services, but the pages reviewed do not give one universal lock status for every handset. Check the individual iPhone and its supply history before assuming that it needs an unlock or that Talkmobile controls an older lock.",
+          "links": [
+            {
+              "label": "See Talkmobile’s current phone upgrades",
+              "href": "https://talkmobile.co.uk/upgrades"
+            },
+            {
+              "label": "Read Ofcom’s locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Ofcom says mobile companies have been banned from selling customers locked handsets under rules that came into force on 17 December 2021. That rule is not, by itself, proof of the status of a particular phone or of the remedy available for it.",
+            "Talkmobile’s public pages reviewed here do not provide a blanket unlocked statement for every old, new, refurbished or replacement handset, so verify the device itself.",
+            "On an iPhone, No SIM restrictions next to Network Provider Lock in Settings > General > About is Apple’s check for an absent carrier lock.",
+            "A phone using a Talkmobile SIM may have been supplied by Talkmobile, Apple, another network, a retailer or an overseas seller. The original supply record is important when a lock is present.",
+            "Carrier Lock is different from a Talkmobile SIM PIN or PUK, a device passcode, Activation Lock, an IMEI bar, a supervised or MDM-managed device, and payment or contract terms."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "talkmobile-phone-origin",
+          "text": "Was the phone supplied by Talkmobile?"
+        },
+        {
+          "kind": "p",
+          "text": "Talkmobile lists phone upgrades as well as SIM-only plans. A handset brought to a SIM-only plan keeps the carrier history created by its original supplier. A phone bought through a Talkmobile upgrade has a different paper trail: keep the order, product description and current device details so support can identify the relevant transaction if the on-device status is unexpected. The existence of an order does not itself establish that the phone is unlocked.",
+          "links": [
+            {
+              "label": "Review Talkmobile’s upgrade offers",
+              "href": "https://talkmobile.co.uk/upgrades"
+            },
+            {
+              "label": "Read Talkmobile’s buying terms",
+              "href": "https://talkmobile.co.uk/buying-online"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Phone origin",
+            "What can be concluded",
+            "Useful evidence"
+          ],
+          "rows": [
+            [
+              "Talkmobile phone upgrade",
+              "The order identifies the seller, but does not prove the on-device lock status",
+              "Talkmobile order, product description and Network Provider Lock"
+            ],
+            [
+              "Existing iPhone moved to a Talkmobile SIM-only plan",
+              "Talkmobile SIM use does not identify the original handset supplier",
+              "Original receipt and Network Provider Lock"
+            ],
+            [
+              "Phone bought directly from Apple or another retailer",
+              "The seller’s record and the device’s current status need to be checked separately",
+              "Receipt and Network Provider Lock"
+            ],
+            [
+              "Used or imported iPhone",
+              "A named network in the lock field can limit use to that provider; country and seller records may matter",
+              "Seller trail, country and Network Provider Lock"
+            ],
+            [
+              "Warranty or insurance replacement",
+              "Treat the replacement as the device being checked and retain its paperwork",
+              "Replacement paperwork and Network Provider Lock"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A Talkmobile SIM working in the phone shows that this line can connect. It does not establish that the handset accepts every other provider. Use the iPhone’s Network Provider Lock field as the primary carrier-lock check."
+        },
+        {
+          "kind": "h2",
+          "id": "check-talkmobile-iphone",
+          "text": "How to check whether a Talkmobile iPhone is unlocked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, then tap General and About.",
+            "Find Network Provider Lock. Apple may show related wording such as Carrier Lock in some regions or support pages.",
+            "If it says No SIM restrictions, Apple says the iPhone is unlocked for use with a different network provider. Do not order another carrier unlock merely because the Talkmobile line or eSIM is not working.",
+            "If it shows a network provider or another lock message, record the exact wording and keep the device identifier private. Do not publish a full identifier in a message or screenshot.",
+            "Match the device being checked to the Talkmobile order, original receipt or replacement paperwork. If the records do not match, ask the seller which device record applies.",
+            "If convenient, test an active SIM or eSIM from a different provider. Treat a failed test as a clue, not automatic proof of Carrier Lock, because Apple also lists plan, provider-settings, SIM, eSIM and service causes for Invalid SIM or No SIM alerts."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says that only the current network provider can unlock an iPhone; Apple cannot authorize the change. After the provider confirms an unlock, follow the provider’s SIM or eSIM activation steps and check Network Provider Lock again. Apple’s documented success wording is No SIM restrictions, but a separate activation or service problem can still need troubleshooting.",
+          "links": [
+            {
+              "label": "Follow Apple’s current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Read Apple’s Invalid SIM troubleshooting",
+              "href": "https://support.apple.com/en-gb/108914"
+            },
+            {
+              "label": "Check an iPhone’s unlock status on iUnlockMobile",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "talkmobile-sale-date",
+          "text": "Why the UK sale date matters"
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom’s official page says mobile companies were banned from selling customers locked handsets under rules that came into force on 17 December 2021. Use that as regulatory context, not as an automatic finding about a particular Talkmobile phone: the seller, transaction, device record and any exception or dispute still need to be checked. If a recent purchase appears locked, preserve the invoice and contact the seller or provider that supplied that device.",
+          "links": [
+            {
+              "label": "Read Ofcom’s current locked-handset explanation",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "talkmobile-unlock-route",
+          "text": "Choose the correct Talkmobile unlock route"
+        },
+        {
+          "kind": "p",
+          "text": "For a Talkmobile-supplied phone that shows a provider lock, contact Talkmobile with the order and the exact Network Provider Lock wording, while keeping the full device identifier private. Ask which seller or network record owns the restriction. For a phone that only uses a Talkmobile SIM, start with the company that originally sold or supplied the handset. Talkmobile’s SIM service does not, on its own, prove that it created an older device lock.",
+          "links": [
+            {
+              "label": "Contact Talkmobile support",
+              "href": "https://talkmobile.co.uk/contact-us"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Talkmobile publishes webchat and phone support routes. Use the channel shown on its current contact page to document an unexpected status on a Talkmobile order. If support identifies another retailer or network as the supplier, take the record to that supplier instead of assuming that a new request will change the result.",
+          "links": [
+            {
+              "label": "See Talkmobile’s current contact options",
+              "href": "https://talkmobile.co.uk/contact-us"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "What it may indicate",
+            "First route"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions",
+              "Apple reports no iPhone carrier lock",
+              "Check the SIM, eSIM, plan and service separately"
+            ],
+            [
+              "A provider name or SIM-locked message",
+              "A provider restriction may still be present",
+              "Identify the supplying carrier or retailer from the order trail"
+            ],
+            [
+              "Invalid SIM or No SIM",
+              "Possible plan, provider-settings, SIM, eSIM or carrier-lock issue",
+              "Follow Apple’s troubleshooting, then contact the relevant provider"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "The line’s SIM security is being requested or has been blocked",
+              "Talkmobile or the provider of that SIM"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Apple Activation Lock is linked to an Apple Account",
+              "The legitimate owner’s removal process; do not treat it as a carrier unlock"
+            ],
+            [
+              "Supervision message or a profile in VPN & Device Management",
+              "The device may be managed by an organisation through supervision or MDM",
+              "The owning organisation or its administrator"
+            ],
+            [
+              "No service after a loss or theft report",
+              "An IMEI bar may be separate from Carrier Lock",
+              "The reporting provider; do not assume a third-party unlock can remove a bar"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "talkmobile-esim-byod",
+          "text": "Talkmobile eSIM and bring-your-own-device checks"
+        },
+        {
+          "kind": "p",
+          "text": "Talkmobile says its SIM-only plans are available with eSIM on compatible devices and describes activation through its app. eSIM support does not prove or remove Carrier Lock. If the iPhone says No SIM restrictions but a Talkmobile eSIM will not activate, check the plan or line provisioning, the current app or setup flow, model and location compatibility, Wi-Fi and the device details supplied to the provider.",
+          "links": [
+            {
+              "label": "See Talkmobile’s current eSIM guidance",
+              "href": "https://talkmobile.co.uk/sim-only/esim"
+            },
+            {
+              "label": "Use the iPhone eSIM activation guide",
+              "href": "/articles/how-to-unlock-esim-on-iphone"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "items": [
+            "For a physical SIM, confirm that the plan is active and identify whether the prompt is a SIM PIN or PUK rather than a carrier lock.",
+            "For eSIM, confirm that the plan is ready to download, the iPhone supports the required setup and the provider’s current activation flow is being followed.",
+            "For dual SIM, choose the intended line for mobile data, calls and messages after activation; this setting does not change Carrier Lock.",
+            "If the phone shows SOS or No Service, review the plan, provider settings, coverage, model and device acceptance before attributing the symptom to Carrier Lock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "An unlocked iPhone can still have a separate activation or service problem. Apple notes that cellular capabilities depend on the wireless network, iPhone model and location, and its troubleshooting also asks users to check the active plan, provider settings and SIM or eSIM. None of those checks promises that a new carrier unlock will fix the issue.",
+          "links": [
+            {
+              "label": "Read Apple’s cellular and SIM troubleshooting",
+              "href": "https://support.apple.com/en-gb/108914"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-talkmobile-locks",
+          "text": "Do not confuse Carrier Lock with another restriction"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Restriction",
+            "What it controls",
+            "Who can help"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: a provider name or SIM-locked message",
+              "Whether the iPhone can be used with another mobile provider",
+              "The network provider that controls the device restriction"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to one SIM or mobile line",
+              "The provider that issued the SIM; do not guess a PIN"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to the local device and its data",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "Activation Lock",
+              "Apple Account ownership and device reactivation",
+              "The legitimate owner’s Apple Account or Apple’s documented support route"
+            ],
+            [
+              "Supervision or MDM profile",
+              "Organisation-managed settings and restrictions",
+              "The organisation that owns or manages the device"
+            ],
+            [
+              "Lost or stolen IMEI bar",
+              "Whether mobile networks accept the device after a report",
+              "The reporting provider or lawful owner; removal is not promised here"
+            ],
+            [
+              "Finance or contract terms",
+              "Payment, service or ownership obligations",
+              "The seller, lender, provider or account holder under the relevant agreement"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple describes SIM PIN as a PIN that protects a SIM, while Activation Lock is linked to Find My and the owner’s Apple Account. Apple also says a supervised device can show a supervision message and organisation-controlled restrictions in Settings > General > VPN & Device Management. These are separate checks from Network Provider Lock, so an unlock request should not be used to bypass an ownership or management control.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN guidance",
+              "href": "https://support.apple.com/en-gb/guide/iphone/iph3f11fba92/ios"
+            },
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-gb/108794"
+            },
+            {
+              "label": "Read Apple’s supervised-device guidance",
+              "href": "https://support.apple.com/en-gb/102291"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-talkmobile-unlock",
+          "text": "Where a third-party unlock service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service is not the same as an official carrier decision. Do not assume that a paid check can unlock a device, override carrier eligibility, remove an IMEI bar, settle finance, remove Activation Lock or change an MDM profile. Apple’s documented authority for a carrier unlock is the network provider, and the relevant organisation or legitimate owner controls the other restrictions described above.",
+          "links": [
+            {
+              "label": "Read Apple’s carrier-unlock guidance",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Use the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before paying for any service, ask it to state exactly what it checks, which carrier or country record it is addressing, what happens if the record is ineligible, and what it treats as success. Never share a Talkmobile password, Apple Account password, SIM PIN or PUK. Keep the full device identifier private and send only the minimum information needed through a trusted support channel.",
+          "links": [
+            {
+              "label": "Review the iUnlockMobile service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Unsure whether Talkmobile or the phone’s original seller owns the restriction? Share the exact Network Provider Lock wording and purchase history without passwords, PINs, PUKs or a publicly visible device identifier.",
+          "href": "/contact",
+          "label": "Review the correct unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are Talkmobile phones unlocked?",
+          "answer": "Talkmobile’s public pages do not establish one status for every handset. Check the individual iPhone at Settings > General > About; Apple says No SIM restrictions next to Network Provider Lock means the iPhone is unlocked."
+        },
+        {
+          "question": "Does the UK locked-handset rule prove that my Talkmobile phone is unlocked?",
+          "answer": "No. Ofcom says mobile companies were banned from selling customers locked handsets under rules that came into force on 17 December 2021, but the seller, transaction and individual device record still need to be checked."
+        },
+        {
+          "question": "Does using a Talkmobile SIM mean Talkmobile locked the phone?",
+          "answer": "No. A Talkmobile SIM can be used in a handset supplied by another seller or network. The SIM’s current service and the handset’s Network Provider Lock are separate facts."
+        },
+        {
+          "question": "Can Talkmobile unlock a phone bought from another provider?",
+          "answer": "Apple says only the current network provider can unlock an iPhone. Identify the original supplier from the order or receipt and contact the provider that controls the device restriction."
+        },
+        {
+          "question": "Why can Talkmobile eSIM fail on an unlocked iPhone?",
+          "answer": "If the iPhone says No SIM restrictions, investigate the plan or line, current eSIM setup flow, model and location compatibility, provider settings and service before ordering another unlock. Talkmobile’s eSIM page also says compatibility must be checked."
+        },
+        {
+          "question": "Can a Talkmobile unlock remove Activation Lock or an MDM profile?",
+          "answer": "No. Activation Lock is linked to the legitimate owner’s Apple Account, while supervision or MDM is controlled by the organisation managing the device. Neither is a carrier lock."
+        }
+      ]
+    },
+  {
+      "slug": "are-voxi-phones-unlocked-guide",
+      "title": "Are VOXI Phones Unlocked?",
+      "heading": "Are VOXI Phones Unlocked? iPhone and BYOD Checks",
+      "description": "Find out whether VOXI phones are unlocked, how to check an iPhone’s Carrier Lock, and which activation or device-management issue needs the right provider.",
+      "standfirst": "VOXI says most devices it sells are already unlocked and lists Apple phones as always sold unlocked. A phone bought elsewhere can have a different carrier history, so check the individual device before requesting help.",
+      "published": "2026-10-18",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "VOXI iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Are VOXI phones unlocked? VOXI says most devices it sells are already unlocked and lists Apple, Google, OnePlus, Oppo and Xiaomi phones as always sold unlocked. That statement applies to devices sold by VOXI; a used, imported or bring-your-own iPhone may have a restriction set by a different original provider. Check the individual iPhone before paying for any unlock.",
+          "links": [
+            {
+              "label": "Read VOXI’s current unlocked-phone answer",
+              "href": "https://www.voxi.co.uk/help/products/are-phones-bought-from-voxi-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "VOXI says most devices it sells are already unlocked and that Apple phones sold by VOXI are always unlocked.",
+            "A phone brought to VOXI from another retailer, network or country can retain a different provider’s device history; the current VOXI SIM does not establish who controls a restriction.",
+            "Apple says No SIM restrictions next to Carrier Lock in Settings, General, About means the iPhone reports no carrier restriction.",
+            "VOXI points customers who bought a phone directly from VOXI or Vodafone to Vodafone’s Network Unlock Code route. Apple’s guidance says only the current carrier can unlock an iPhone.",
+            "Carrier Lock is separate from a SIM PIN or PUK, iPhone passcode, Activation Lock, mobile-device management, a lost-or-stolen network bar, finance or contract obligations, and eSIM activation."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "voxi-supplied-or-brought-in",
+          "text": "Was the phone bought from VOXI?"
+        },
+        {
+          "kind": "p",
+          "text": "The seller matters more than the SIM currently in the phone. VOXI says it cannot supply a Network Unlock Code if the phone was not bought directly from VOXI or Vodafone, giving a different retailer as an example, and says to contact the shop where it was bought. That does not determine the status of an imported or second-hand phone; use the purchase record and the device’s current Carrier Lock status.",
+          "links": [
+            {
+              "label": "Check VOXI’s current purchase-source guidance",
+              "href": "https://www.voxi.co.uk/help/products/are-phones-bought-from-voxi-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device history",
+            "What the official guidance supports",
+            "Correct evidence to check"
+          ],
+          "rows": [
+            [
+              "iPhone bought directly from VOXI",
+              "VOXI lists Apple phones as always sold unlocked",
+              "Carrier Lock status on that iPhone"
+            ],
+            [
+              "Phone bought from Vodafone",
+              "Vodafone says most Apple devices should already be unlocked and provides a route if a device is still locked",
+              "Vodafone records, receipt and current Carrier Lock status"
+            ],
+            [
+              "Existing phone used with a VOXI SIM",
+              "The current SIM does not establish the phone’s earlier provider history",
+              "Original receipt and Carrier Lock status"
+            ],
+            [
+              "VOXI refurbished or replacement phone",
+              "The replacement is a separate device record; check the actual handset",
+              "Replacement paperwork and its current device status"
+            ],
+            [
+              "Imported or second-hand iPhone",
+              "A different seller, country or carrier may hold the relevant restriction record",
+              "Country of sale, seller records and Carrier Lock status"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A phone that connects on VOXI is not proof that it will accept every other network. Apple’s Carrier Lock field is the direct on-device check for a carrier restriction."
+        },
+        {
+          "kind": "h2",
+          "id": "check-voxi-iphone-lock",
+          "text": "How to check a VOXI iPhone before requesting an unlock"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Carrier Lock. If your regional wording differs, use the field that identifies the network or provider lock.",
+            "If it says No SIM restrictions, the iPhone reports no carrier restriction. That does not guarantee service on every plan or network.",
+            "If it shows a restriction or another message, save the exact wording and keep the current device identifier private; do not post a full IMEI or IMEI2 publicly.",
+            "Identify who sold the phone and whether the current handset was later replaced.",
+            "Test an active, compatible SIM or eSIM from a genuinely different provider, but treat a failed test as a clue because plan, activation, coverage and compatibility can also fail."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says Apple cannot unlock an iPhone for a different carrier; only the current carrier can do that. After the carrier confirms the change, insert the other carrier’s SIM and let the iPhone activate, or follow that carrier’s supported eSIM setup. Then check the Carrier Lock field again.",
+          "links": [
+            {
+              "label": "Follow Apple’s current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Use the iUnlockMobile iPhone unlock-status guide",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "uk-sale-date",
+          "text": "Why the UK sale date still matters"
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom says UK mobile companies have been banned from selling locked handsets under rules that came into force on 17 December 2021. That date does not establish the history of an older handset, an import or a later replacement, so verify the actual device when the on-device status conflicts with what a seller said.",
+          "links": [
+            {
+              "label": "Read Ofcom’s locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "voxi-nuc-route",
+          "text": "When the VOXI or Vodafone unlock route applies"
+        },
+        {
+          "kind": "p",
+          "text": "VOXI says that customers who bought a phone directly from VOXI or Vodafone and still need a Network Unlock Code should use Vodafone’s form. Vodafone’s current form asks whether the phone was bought directly, says it cannot unlock a phone bought from another provider or retailer, and says it cannot unlock a device reported lost or stolen. Use the form only after confirming both the on-device restriction and the purchase route; a form submission is not an approval or a guarantee of an unlock.",
+          "links": [
+            {
+              "label": "Read VOXI’s route to the Vodafone form",
+              "href": "https://www.voxi.co.uk/help/products/are-phones-bought-from-voxi-unlocked"
+            },
+            {
+              "label": "Open Vodafone’s current Network Unlock Code form",
+              "href": "https://www.vodafone.co.uk/forms/static/network-unlock-code"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "What it means",
+            "Next step"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions",
+              "The iPhone reports no carrier restriction",
+              "Troubleshoot plan, activation, coverage or compatibility"
+            ],
+            [
+              "Carrier Lock indicates a restriction",
+              "A carrier authorization may still be needed",
+              "Contact the provider that sold or currently controls the device record"
+            ],
+            [
+              "SIM PIN or PUK requested",
+              "The line itself is protected or blocked",
+              "Ask the SIM issuer for the correct code; do not guess"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Apple Activation Lock is active",
+              "Use the legitimate owner, organization or Apple’s documented process"
+            ],
+            [
+              "Remote Management or a managed-device message",
+              "An organization’s device-management enrollment or settings may apply",
+              "Contact the organization’s IT team or administrator, not a carrier unlock route"
+            ],
+            [
+              "A device reported lost or stolen",
+              "Vodafone’s form says it cannot unlock that device",
+              "Use the reporting carrier or lawful owner’s process; do not expect an unlock service to remove the report"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Network Unlock Code is a term used across phone brands. Vodafone’s Apple-specific instructions say Apple devices are unlocked as standard and, if a locked Apple device has an NUC, to confirm the unlock email, insert a non-Vodafone SIM and follow the on-screen setup. Do not assume that an Android or older-phone code-entry procedure belongs on an iPhone.",
+          "links": [
+            {
+              "label": "See Vodafone’s Apple NUC instructions",
+              "href": "https://www.vodafone.co.uk/help/account/how-to-use-your-nuc"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "voxi-esim-byod",
+          "text": "VOXI SIM, eSIM and bring-your-own-device checks"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock and eSIM provisioning are separate. If a compatible iPhone says No SIM restrictions but a VOXI SIM or eSIM will not activate, check the plan, carrier support, QR code or app flow, Wi-Fi connection and model support with the carrier. An unlock request cannot fix a failed eSIM download, an account problem or a coverage issue.",
+          "links": [
+            {
+              "label": "Read Apple’s eSIM setup requirements",
+              "href": "https://support.apple.com/en-us/HT212780"
+            },
+            {
+              "label": "Review Apple’s invalid-SIM troubleshooting",
+              "href": "https://support.apple.com/en-us/108914"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "items": [
+            "For a physical SIM, confirm that the plan is active, the card is seated correctly and the iPhone is not asking for a SIM PIN or PUK.",
+            "For eSIM, confirm that the model and carrier support eSIM, connect to Wi-Fi when required by the setup flow, and use the carrier’s QR code, link or app if provided.",
+            "For dual SIM, choose the intended line for mobile data, calls and messages after the lines activate.",
+            "If the phone shows SOS or No Service, review the plan, coverage, SIM or eSIM setup and device compatibility before attributing the problem to Carrier Lock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "An unlocked iPhone is not guaranteed to work with every plan or in every country. Model support, radio compatibility, roaming settings, coverage, account status and a network bar can still affect service."
+        },
+        {
+          "kind": "h2",
+          "id": "different-voxi-locks",
+          "text": "Do not confuse Carrier Lock with another restriction"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Problem",
+            "What it controls",
+            "Who can help"
+          ],
+          "rows": [
+            [
+              "Carrier Lock or Network Provider Lock",
+              "Whether the iPhone may use another mobile carrier",
+              "The carrier that controls the device restriction"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to one SIM or eSIM line",
+              "The provider that issued that line"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to local device data",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "Activation Lock",
+              "Apple Account ownership during activation",
+              "The legitimate owner, organization or Apple’s documented route"
+            ],
+            [
+              "Mobile-device management (MDM)",
+              "Organization settings, configurations, restrictions or remote actions",
+              "The organization’s IT team or device-management administrator"
+            ],
+            [
+              "Lost or stolen report / network bar",
+              "Whether a provider may allow the device onto its network",
+              "The reporting carrier or lawful owner"
+            ],
+            [
+              "Finance or contract balance",
+              "Payment and ownership obligations",
+              "The seller, lender or account holder"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple describes device management as an organization service that can configure devices, enforce policies and remotely lock or wipe them. An MDM enrollment is therefore a management or ownership issue, not a Carrier Lock result, and a carrier unlock does not remove the organization’s controls.",
+          "links": [
+            {
+              "label": "Read Apple’s device-management guide",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            },
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-voxi-help",
+          "text": "Where a third-party unlock service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service cannot replace the original carrier’s authority. This article does not promise an unlock, blacklist or lost-device-report removal, Activation Lock bypass, financing or ownership resolution, warranty outcome, provider availability or a completion time. Use the official carrier, Apple or organization route that matches the restriction."
+        },
+        {
+          "kind": "p",
+          "text": "Before sharing anything, ask what status is being checked, which provider is responsible, what evidence is needed, whether the request can be refused and what completion test will be used. Never share an Apple Account password, device passcode, SIM PIN or PUK, and do not post a full IMEI publicly.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need to distinguish a VOXI SIM issue from Carrier Lock? Bring the exact on-device wording and purchase history for a route review—without passwords, PINs, PUKs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the correct unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are VOXI phones unlocked?",
+          "answer": "VOXI says most devices it sells are already unlocked and lists Apple phones as always sold unlocked. Check the individual iPhone’s Carrier Lock field; No SIM restrictions is Apple’s on-device status for no carrier restriction."
+        },
+        {
+          "question": "Can VOXI unlock a phone bought from another retailer?",
+          "answer": "VOXI says it cannot supply a Network Unlock Code when the phone was bought from a different provider or retailer. Contact the seller or carrier that holds the device record and follow its current policy."
+        },
+        {
+          "question": "How do I check a VOXI iPhone before requesting an unlock?",
+          "answer": "Open Settings, General, About and check Carrier Lock. If it says No SIM restrictions, troubleshoot activation or compatibility rather than requesting another carrier unlock."
+        },
+        {
+          "question": "Why does a different SIM fail in an unlocked VOXI iPhone?",
+          "answer": "If the iPhone says No SIM restrictions, investigate the plan, SIM or eSIM activation, model support, coverage, account status and any network bar. A failed activation test alone does not prove Carrier Lock."
+        },
+        {
+          "question": "Does a VOXI unlock remove a SIM PIN or PUK?",
+          "answer": "No. A SIM PIN or PUK protects one mobile line and comes from that SIM issuer. Carrier Lock controls whether the phone can use another network."
+        },
+        {
+          "question": "Can a VOXI unlock remove Activation Lock or MDM?",
+          "answer": "No. Activation Lock is tied to the Apple Account and legitimate ownership, while MDM is an organization’s device-management control. Use the previous owner, organization administrator or Apple’s documented process as appropriate."
+        }
+      ]
+    },
+  {
+      "slug": "unlock-bt-mobile-phone-guide",
+      "title": "Unlock a BT Mobile Phone",
+      "heading": "How to Unlock a BT Mobile Phone: iPhone Checks",
+      "description": "Learn how to check an iPhone Carrier Lock, identify the controlling provider and separate BT SIM, PUK, Activation Lock and MDM issues before contacting support.",
+      "standfirst": "A BT Mobile SIM problem, an older BT-supplied handset and an iPhone Carrier Lock are different cases. Start with the device message and its supply history.",
+      "published": "2026-10-18",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "BT Mobile iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "To unlock a BT Mobile phone, first check whether the iPhone has a carrier restriction. BT’s current help pages cover getting started, managing service, SIM faults, PIN or PUK help and roaming, while its unlock guidance says older devices may be locked to BT or another network. It does not establish that every BT device has the same eligibility or outcome. For an iPhone, use Network Provider Lock (called Carrier Lock in some regions), the purchase history and the original supplier to choose the right support route.",
+          "links": [
+            {
+              "label": "Open BT’s current mobile help hub",
+              "href": "https://www.bt.com/help/mobile"
+            },
+            {
+              "label": "Read BT’s current mobile-unlock guidance",
+              "href": "https://www.bt.com/help/mobile/help-unlocking-your-model-of-phone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Start in Settings, General, About. If No SIM restrictions appears next to Network Provider Lock, the iPhone is not carrier-locked; investigate another cause.",
+            "A BT Mobile SIM does not prove that BT sold or locked the handset.",
+            "Ofcom banned mobile companies from selling locked handsets from 17 December 2021. That rule does not prove the status of a particular older, imported or replacement device.",
+            "Apple cannot unlock an iPhone for another network; only the network provider controlling the restriction can do that.",
+            "Carrier Lock, a SIM PIN or PUK, an iPhone passcode, Activation Lock, MDM management, an IMEI block and a finance or contract issue need different support routes."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "confirm-bt-carrier-lock",
+          "text": "Confirm that Carrier Lock is the problem"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings on the iPhone.",
+            "Tap General, then About.",
+            "Find Network Provider Lock. Apple’s US documentation calls the equivalent field Carrier Lock.",
+            "If it says No SIM restrictions, stop treating the issue as a carrier unlock. Check the SIM, eSIM, coverage and account instead.",
+            "If the phone shows a lock or unsupported-SIM message, record the exact wording. The message alone does not prove that BT controls the restriction.",
+            "Keep the receipt, original account, country of sale and any repair or replacement history. If a provider asks for the current IMEI or IMEI2, share it only through an official support channel and never post it publicly."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the network provider controlling the restriction can unlock an iPhone. After that provider confirms that the change has been applied, insert another SIM or activate another provider’s eSIM and check the About screen again. If no other SIM is available, Apple documents backup, erase and restore as an alternative activation path. A request number, email or case reference is not proof that the status changed; the useful device check is No SIM restrictions.",
+          "links": [
+            {
+              "label": "Follow Apple’s current iPhone-unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Check whether your iPhone is unlocked",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result or message",
+            "What it may indicate",
+            "First route"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions",
+              "Carrier Lock is not active",
+              "Check SIM, eSIM, coverage and account status"
+            ],
+            [
+              "A lock message or SIM Not Supported",
+              "A carrier restriction may still be active, or activation or compatibility may be the issue",
+              "Check Network Provider Lock and identify the controlling provider"
+            ],
+            [
+              "SIM PIN or PUK",
+              "The inserted SIM or eSIM line is protected or blocked",
+              "Contact the network that issued that line"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Apple Activation Lock is linked to another Apple Account",
+              "Ask the legitimate owner to remove it; use Apple’s documented process"
+            ],
+            [
+              "Management profile or Remote Management",
+              "An organisation’s device-management enrolment or policy is involved",
+              "Contact the organisation or administrator; this is not a carrier unlock"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "who-sold-bt-phone",
+          "text": "Identify who actually supplied the phone"
+        },
+        {
+          "kind": "p",
+          "text": "The network serving the SIM today may not be the provider that supplied or restricted the handset. BT says that if you are unsure which network a device is locked to, check the original paperwork or contact the retailer. Its SIM guidance likewise points to the provider from which the device was originally bought. Use that history instead of assuming that the current BT SIM owns the restriction.",
+          "links": [
+            {
+              "label": "Read BT’s guidance on identifying the locked network",
+              "href": "https://www.bt.com/help/mobile/help-unlocking-your-model-of-phone"
+            },
+            {
+              "label": "Read BT’s SIM troubleshooting guidance",
+              "href": "https://www.bt.com/help/mobile/fix-a-problem/my-bt-mobile-sim-card-doesn-t-work"
+            },
+            {
+              "label": "Find the original carrier before an unlock request",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Phone history",
+            "Possible support route",
+            "Useful evidence"
+          ],
+          "rows": [
+            [
+              "Bought directly from BT Mobile",
+              "BT’s mobile support route, without assuming approval",
+              "BT order or account record and the current device status"
+            ],
+            [
+              "Bought from Apple or an independent retailer",
+              "Check the device status and the seller paperwork; do not infer a lock from the seller name alone",
+              "Receipt showing seller, model and country"
+            ],
+            [
+              "Bought from another network",
+              "Contact the provider that originally supplied or restricted it, if the records identify one",
+              "Original contract or device receipt"
+            ],
+            [
+              "Used, imported or replaced iPhone",
+              "Trace the current device’s own history; a previous owner or replacement can change which record matters",
+              "Seller trail, repair or replacement documents and current device status"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not choose a provider from network affiliation or the SIM currently inserted alone. Use the original sale record and the exact on-device message, and keep any device identifier private."
+        },
+        {
+          "kind": "h3",
+          "id": "bt-phone-sale-date",
+          "text": "Use the purchase date as a filter, not a guarantee"
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom says mobile companies were banned from selling locked handsets from 17 December 2021. That is useful context for a UK purchase, but it is not a status check for an individual phone. An older handset, an import or a later replacement may have a different supply record. If a UK purchase still shows a carrier-lock message, keep the receipt and ask the seller or relevant provider to explain the record rather than inferring an exception or a guaranteed unlock.",
+          "links": [
+            {
+              "label": "Read Ofcom’s official locked-handset guidance",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "contact-bt-mobile",
+          "text": "How to take a genuine lock issue to BT Mobile"
+        },
+        {
+          "kind": "p",
+          "text": "BT’s current unlock page says to contact the network that the device is locked to and directs customers to BT chat for a BT device that is not unlocked. BT’s public pages do not establish one universal eligibility rule, fee, completion time or outcome for every handset. Use an official support route, provide the order or retail evidence and exact Network Provider Lock wording, and send an IMEI only if the provider requests it through that route.",
+          "links": [
+            {
+              "label": "Read BT’s current unlock route",
+              "href": "https://www.bt.com/help/mobile/help-unlocking-your-model-of-phone"
+            },
+            {
+              "label": "Open BT’s contact options",
+              "href": "https://www.bt.com/help/contact-bt"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that the current iPhone still shows a carrier-lock message rather than No SIM restrictions.",
+            "Match the device record to the phone now in your hand, especially after a repair or replacement.",
+            "Gather the order or receipt and account-holder details without posting them publicly.",
+            "Ask which provider owns the restriction and what evidence it needs; do not assume BT can approve a device it did not supply.",
+            "Keep the case reference and ask for the current status. Do not rely on an estimated time or a third-party promise.",
+            "After the provider confirms the change, connect to Wi-Fi if needed, activate another provider’s line and verify No SIM restrictions."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Do not erase the iPhone as the first troubleshooting step. Apple presents backup, erase and restore as a finishing option when another SIM is unavailable; erasing does not create carrier authorisation and does not independently remove a carrier restriction.",
+          "links": [
+            {
+              "label": "See Apple’s unlock and activation steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "See why a factory reset does not unlock an iPhone",
+              "href": "/articles/will-factory-reset-unlock-iphone-carrier"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "bt-sim-esim-troubleshooting",
+          "text": "When the BT SIM or eSIM is the real problem"
+        },
+        {
+          "kind": "p",
+          "text": "If Settings says No SIM restrictions, an unlock request is not the first fix. BT separates SIM problems from its other mobile support and suggests checking activation, seating and the SIM itself. For a SIM PIN or PUK prompt, Apple says to contact the network that supplied the SIM or eSIM and not to guess the code. Check the BT line, eSIM provisioning, plan and coverage through the relevant support route.",
+          "links": [
+            {
+              "label": "Read BT’s SIM troubleshooting steps",
+              "href": "https://www.bt.com/help/mobile/fix-a-problem/my-bt-mobile-sim-card-doesn-t-work"
+            },
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-gb/118228"
+            },
+            {
+              "label": "Open BT’s mobile help hub",
+              "href": "https://www.bt.com/help/mobile"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Symptom with No SIM restrictions",
+            "More likely cause",
+            "Next check"
+          ],
+          "rows": [
+            [
+              "BT SIM asks for PUK",
+              "The SIM or eSIM line has been locked after PIN attempts",
+              "Contact BT or the line’s issuing network for the PUK; do not guess"
+            ],
+            [
+              "No Service or SOS",
+              "Coverage, outage, account, device compatibility or a network block may be involved",
+              "Use BT fault and coverage support, and ask about any device block"
+            ],
+            [
+              "eSIM will not download",
+              "Provisioning, plan, model or activation issue",
+              "Use the relevant provider’s eSIM activation support"
+            ],
+            [
+              "Other SIM works but BT SIM fails",
+              "BT line, activation or SIM issue",
+              "Check activation and request BT SIM or account support"
+            ],
+            [
+              "BT SIM works but a travel eSIM fails",
+              "Travel eSIM activation or compatibility issue",
+              "Contact the travel eSIM provider and check the plan"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Carrier unlocking changes a carrier restriction; it does not promise roaming, coverage or international compatibility. A phone may still lack a required radio band, have roaming disabled, use a regional model that a provider does not support or be blocked after a lost-or-stolen report. Check those issues separately before ordering anything.",
+          "links": [
+            {
+              "label": "Read Ofcom’s lost-or-stolen phone guidance",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/lost-or-stolen-phone"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "bt-lock-types",
+          "text": "Separate the commonly confused locks"
+        },
+        {
+          "kind": "p",
+          "text": "These restrictions are controlled by different systems. Apple describes Activation Lock as a Find My and Apple Account protection, SIM PIN or PUK as protection for one SIM or eSIM line, and device management as an organisation’s configuration and command layer. Ofcom separately explains that a provider can bar a lost or stolen phone’s IMEI. None of those checks is a substitute for the iPhone’s Network Provider Lock result.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-gb/108794"
+            },
+            {
+              "label": "Read Apple’s device-management guidance",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            },
+            {
+              "label": "Read Ofcom’s lost-phone guidance",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/lost-or-stolen-phone"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Restriction",
+            "What it controls",
+            "Correct owner or route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "Whether the iPhone can activate with another mobile provider",
+              "The network provider controlling the device restriction"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to one SIM or eSIM line",
+              "The network that issued that line"
+            ],
+            [
+              "iPhone passcode",
+              "Access to local device data",
+              "The owner’s passcode or Apple’s documented reset process"
+            ],
+            [
+              "Activation Lock",
+              "Apple Account ownership during activation after erase or recovery",
+              "The legitimate owner, or Apple’s documented process where applicable"
+            ],
+            [
+              "MDM or device management",
+              "Organisation settings, compliance controls and remote management commands",
+              "The enrolling organisation or its administrator; not a carrier unlock"
+            ],
+            [
+              "IMEI lost-or-stolen block",
+              "Network acceptance after a provider reports a lost or stolen phone",
+              "The provider that applied the block or the lawful account holder"
+            ],
+            [
+              "Finance or contract issue",
+              "Payment, account or ownership obligations",
+              "The seller, lender or account holder; it is not cleared by a carrier-status check"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-bt-unlock",
+          "text": "Where an information service fits"
+        },
+        {
+          "kind": "p",
+          "text": "An information service may help organise evidence or explain a supported submission path, but it cannot substitute for the controlling provider’s records or an organisation’s MDM administration. No service should be presented as able to guarantee an unlock, remove a legitimate blacklist, settle finance or bypass Activation Lock, a passcode or MDM controls.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before paying any provider, ask it to name the target carrier and country, state what evidence it needs and explain what happens if the request is declined. Availability, fees and handling differ by provider and are not established by this article. Never share a BT password, Apple Account password, SIM PIN, PUK or a publicly visible IMEI."
+        },
+        {
+          "kind": "cta",
+          "text": "Unsure whether BT Mobile or the phone’s original seller owns the restriction? Share the exact on-device message and purchase history through the contact route, without passwords, PINs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the correct unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "How do I unlock a BT Mobile iPhone?",
+          "answer": "Start in Settings, General, About and check Network Provider Lock. If the phone shows a carrier restriction, use the purchase record to identify the provider that controls it. BT’s current guidance says to contact the network the device is locked to; it does not promise the same eligibility or outcome for every handset."
+        },
+        {
+          "question": "Does a BT Mobile SIM mean BT locked the phone?",
+          "answer": "No. A BT SIM can be used in a phone supplied by Apple, another network or a retailer. The current SIM is not proof that BT controls the iPhone’s Carrier Lock."
+        },
+        {
+          "question": "Can Apple unlock a BT Mobile iPhone?",
+          "answer": "No. Apple says it cannot unlock an iPhone for another network. Only the network provider controlling the restriction can apply that change."
+        },
+        {
+          "question": "Will a factory reset unlock a BT Mobile phone?",
+          "answer": "No. Apple documents erase and restore as an activation option when another SIM is unavailable after the provider has confirmed the unlock. Erasing does not create the provider’s authorisation."
+        },
+        {
+          "question": "Is a BT SIM PUK the same as a phone unlock code?",
+          "answer": "No. A PUK restores access to a SIM or eSIM line after incorrect PIN attempts. Carrier Lock controls whether the iPhone can use another mobile provider."
+        },
+        {
+          "question": "Does an MDM profile mean the iPhone is carrier-locked?",
+          "answer": "No. MDM is an organisation’s device-management enrolment and can apply settings or commands. Check Network Provider Lock separately, and contact the organisation’s administrator about an MDM restriction."
+        }
+      ]
+    },
+  {
+      "slug": "are-id-mobile-phones-unlocked-guide",
+      "title": "Are iD Mobile Phones Unlocked?",
+      "heading": "Are iD Mobile Phones Unlocked? iPhone and BYOD Checks",
+      "description": "Find out whether iD Mobile phones are unlocked, how to check an iPhone, and how to separate Carrier Lock from SIM, eSIM, Activation Lock and MDM issues.",
+      "standfirst": "iD Mobile’s public support statements say its supplied devices are not network-locked, but an iPhone bought elsewhere can retain a restriction from its original provider.",
+      "published": "2026-10-17",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "iD Mobile iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Are iD Mobile phones unlocked? Recent iD Mobile employee replies in the provider’s public community say that iD does not network-lock its devices. That is useful provider information, but it is not a substitute for checking the individual iPhone. A bring-your-own, imported or second-hand iPhone may still carry a restriction from the provider that originally supplied it.",
+          "links": [
+            {
+              "label": "Read iD Mobile’s recent device-unlock guidance",
+              "href": "https://community.idmobile.co.uk/your-phone-sim-26/how-to-unlock-my-old-phone-89249"
+            },
+            {
+              "label": "See Apple’s iPhone carrier-lock check",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "iD Mobile employee replies say iD does not network-lock its devices; check the individual iPhone instead of treating that statement as proof about every handset.",
+            "An iD SIM inside an iPhone bought elsewhere does not identify the provider that originally applied a Carrier Lock.",
+            "No SIM restrictions next to Network Provider Lock in Settings, General, About is Apple’s on-device indication that the iPhone has no carrier restriction.",
+            "A failed iD SIM or travel eSIM can have provisioning, plan, compatibility, account, coverage or outage causes even when Carrier Lock is clear.",
+            "Carrier Lock is separate from a SIM PIN or PUK, iPhone passcode, Activation Lock, MDM restrictions, blacklist status and finance or contract issues."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "id-supplied-or-byod",
+          "text": "Was the phone supplied by iD Mobile?"
+        },
+        {
+          "kind": "p",
+          "text": "The phone’s purchase history matters more than the SIM currently installed. iD Mobile employee replies say the provider does not network-lock its devices. Ofcom says UK mobile companies have been banned from selling locked handsets under rules that took effect on 17 December 2021. That regulatory page is historical context, not proof that a particular older, imported or second-hand iPhone is unlocked. Check the actual device and the provider that supplied it.",
+          "links": [
+            {
+              "label": "Read iD Mobile’s public answer about network locks",
+              "href": "https://community.idmobile.co.uk/your-phone-sim-26/unlock-your-phone-that-is-locked-86536"
+            },
+            {
+              "label": "Read Ofcom’s locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device history",
+            "What can be concluded",
+            "Best evidence to check"
+          ],
+          "rows": [
+            [
+              "Phone bought directly from iD Mobile",
+              "iD’s public employee guidance says its devices are not network-locked; verify the individual device",
+              "Network Provider Lock status and purchase records"
+            ],
+            [
+              "SIM-only customer using an existing iPhone",
+              "The original supplier may control a carrier restriction",
+              "Receipt, old account and Network Provider Lock status"
+            ],
+            [
+              "Used or refurbished iPhone",
+              "Seller, original carrier and replacement history may matter",
+              "Current device status and records from the seller or original provider"
+            ],
+            [
+              "Imported iPhone",
+              "A non-UK carrier policy may apply",
+              "Country of sale and original carrier confirmation"
+            ],
+            [
+              "Warranty or insurance replacement",
+              "The replacement is a different device and must be checked separately",
+              "Replacement paperwork and the replacement device’s own status"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not pay for an unlock solely because a new SIM or eSIM failed. First read the iPhone’s Network Provider Lock wording and identify the phone’s original seller or carrier."
+        },
+        {
+          "kind": "h2",
+          "id": "check-id-mobile-iphone",
+          "text": "How to check an iD Mobile iPhone"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock. You may also see the term Carrier Lock used for the same carrier-restriction check.",
+            "If it says No SIM restrictions, the iPhone reports no carrier restriction. Do not buy another carrier unlock on the basis of a failed activation alone.",
+            "If it reports a SIM lock, record the exact wording and copy the IMEI or IMEI2 from that same device only when an official provider asks for it. Keep the full identifier private.",
+            "Check the receipt, old account, box and replacement paperwork to identify the provider that originally supplied the iPhone.",
+            "Test an active, compatible SIM or eSIM from a genuinely different provider, but treat failure as a clue rather than proof because activation can fail for other reasons."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says that No SIM restrictions next to Network Provider Lock means the iPhone is unlocked for another network, and that only the network provider can unlock a restricted iPhone. Apple cannot approve the carrier change. After that provider confirms an unlock, follow Apple’s activation steps and verify the device status again rather than relying only on a message that a request was completed.",
+          "links": [
+            {
+              "label": "Follow Apple’s current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Use four ways to check iPhone unlock status",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "id-sim-does-not-prove-origin",
+          "text": "An iD SIM does not prove iD sold the phone"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM-only customer may use iD service in an iPhone originally sold by another UK network, a retailer or a provider outside the UK. If that iPhone reports a SIM lock, identify the original carrier before submitting any request. Choosing iD merely because its SIM is installed can send the device details to the wrong provider.",
+          "links": [
+            {
+              "label": "Find the carrier before an iPhone unlock request",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "id-mobile-byod-locked",
+          "text": "What to do if a bring-your-own iPhone is locked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that About reports a carrier or SIM lock rather than No SIM restrictions.",
+            "Identify the provider that originally sold or locked the current iPhone.",
+            "Read that provider’s current eligibility rules for ownership, account standing and device status. Do not assume that another provider’s rules apply.",
+            "Use the original provider’s official support channel if you need to ask about eligibility. Share the current IMEI or IMEI2 only through that channel and keep any case reference private.",
+            "Wait for that provider to confirm the result before erasing the phone or repeatedly downloading eSIMs.",
+            "Connect to Wi-Fi and activate the iD SIM or eSIM after the controlling provider confirms the carrier change.",
+            "Return to Settings, General, About and verify No SIM restrictions, then test calls, messages and data."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If a phone supplied by iD reports a carrier lock, use iD’s public support route with the purchase details and exact on-screen wording. iD’s public guidance says its devices are not network-locked, so the support team must investigate the individual device rather than a third-party service promising a result.",
+          "links": [
+            {
+              "label": "Open iD Mobile live chat",
+              "href": "https://www.idmobile.co.uk/live-chat"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "id-esim-travel",
+          "text": "Using a second SIM or travel eSIM"
+        },
+        {
+          "kind": "p",
+          "text": "An unlocked, compatible iPhone may use an iD line and a second provider’s line, subject to the model, plan and provider support. Apple says a Dual SIM/eSIM setup requires an unlocked iPhone unless both plans are from the same provider, and that plans must be ready to use. Coverage, outages, account or billing-related blocks, and provider support can affect setup separately from Carrier Lock.",
+          "links": [
+            {
+              "label": "Read Apple’s Dual SIM and eSIM troubleshooting",
+              "href": "https://support.apple.com/en-gb/109322"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result",
+            "What it suggests",
+            "Next step"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and both lines work",
+              "The carrier restriction is clear and the lines are active",
+              "Choose the intended data and voice lines"
+            ],
+            [
+              "No SIM restrictions but eSIM will not download",
+              "Plan readiness, provider support, coverage, outage or account setup may be involved",
+              "Ask the eSIM provider to review activation"
+            ],
+            [
+              "No SIM restrictions but iD shows SOS",
+              "Carrier Lock is not shown as the blocker",
+              "Check coverage, service status, account and device acceptance with the provider"
+            ],
+            [
+              "A SIM lock remains",
+              "Another provider may control the restriction",
+              "Identify and contact the original carrier"
+            ],
+            [
+              "SIM PIN or PUK requested",
+              "The line’s SIM security is being requested, not a carrier unlock",
+              "Contact the provider that issued that SIM or eSIM"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Unlock status does not guarantee signal, roaming or eSIM activation. If the iPhone shows No SIM restrictions, investigate the plan, device compatibility, provider support, coverage, account status and any network acceptance issue rather than ordering another carrier unlock.",
+          "links": [
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            },
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-gb/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-id-locks",
+          "text": "Carrier Lock is not every kind of lock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or problem",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock or Carrier Lock: SIM locked",
+              "Whether the iPhone can be used with another carrier",
+              "The provider controlling the carrier restriction"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security for one SIM card or eSIM line",
+              "The provider that issued that line"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to the device and its local data",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate owner or Apple’s documented process"
+            ],
+            [
+              "MDM or organisation management",
+              "Restrictions applied by an enrolled or supervised organisation device-management service",
+              "The organisation or administrator that manages the device"
+            ],
+            [
+              "Barred or blacklisted IMEI",
+              "Whether networks accept the device, including with a different SIM",
+              "The reporting carrier or lawful owner"
+            ],
+            [
+              "Finance or contract dispute",
+              "A billing or ownership obligation",
+              "The seller, lender or account holder"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A carrier unlock does not provide a SIM PIN or PUK, reset a screen passcode, remove Activation Lock, remove an organisation’s MDM restrictions, or by itself reverse a blacklist or settle a finance issue. Those are separate routes with separate controlling parties. Do not keep guessing a SIM code: Apple warns that incorrect PIN or PUK attempts can lock the SIM or eSIM.",
+          "links": [
+            {
+              "label": "Check Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-gb/108794"
+            },
+            {
+              "label": "Read Apple’s device-management restrictions reference",
+              "href": "https://support.apple.com/guide/deployment/restrictions-for-iphone-and-ipad-devices-dep0f7dd3d8/web"
+            },
+            {
+              "label": "See iD Mobile’s lost-and-stolen blacklist guidance",
+              "href": "https://www.idmobile.co.uk/help-and-support/lost-and-stolen"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-id-mobile",
+          "text": "Where an informational service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help you read the device wording, identify which provider to contact and organise a supported submission. It cannot authorise another provider’s unlock, override that provider’s eligibility decision, guarantee that a SIM or eSIM will activate, or remove Activation Lock, MDM restrictions or a blacklist.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before paying for any service, verify that the iPhone actually reports a carrier lock, identify the original provider and country of sale, and ask what evidence would count as completion. Never share an Apple Account password, screen passcode, SIM PIN or PUK. Keep the full IMEI private unless an official provider’s secure channel requires it.",
+          "links": [
+            {
+              "label": "Check the iPhone before requesting an unlock",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Unsure whether iD Mobile or an earlier provider controls the restriction? Send the exact Network Provider Lock wording and purchase history—without passwords, PINs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the correct unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are iD Mobile phones unlocked?",
+          "answer": "Recent iD Mobile employee replies say that iD does not network-lock its devices. That is provider guidance, not a per-handset guarantee. Confirm the individual iPhone shows No SIM restrictions next to Network Provider Lock."
+        },
+        {
+          "question": "Can iD Mobile unlock an iPhone bought from another network?",
+          "answer": "The provider that controls the iPhone’s carrier restriction is the correct route. Identify the original seller or carrier first; an iD SIM in the phone does not transfer control of that restriction to iD."
+        },
+        {
+          "question": "Can I use a travel eSIM with an iD Mobile iPhone?",
+          "answer": "An unlocked, compatible iPhone may use another provider’s eSIM, subject to the model, plan and provider support. No SIM restrictions addresses Carrier Lock; eSIM download and activation remain separate checks."
+        },
+        {
+          "question": "Why does another SIM fail if my iPhone is unlocked?",
+          "answer": "If the phone shows No SIM restrictions, investigate plan or eSIM activation, provider support, model compatibility, account status, coverage, outages and network acceptance rather than buying another unlock."
+        },
+        {
+          "question": "Does an iD Mobile unlock remove Activation Lock or MDM?",
+          "answer": "No. Activation Lock is linked to the Apple Account and legitimate ownership, while MDM restrictions are applied by an organisation’s device-management service. Both are separate from Carrier Lock and require their own controlling party."
+        }
+      ]
+    },
+  {
+      "slug": "virgin-mobile-uk-iphone-unlock-guide",
+      "title": "Virgin Mobile UK iPhone Unlock",
+      "heading": "Virgin Mobile UK iPhone Unlock: Legacy Device Checks",
+      "description": "Check a legacy UK Virgin Mobile iPhone, separate carrier lock from SIM, Activation Lock and MDM issues, and use official support routes.",
+      "standfirst": "Virgin Mobile plans moved to O2, but that service change does not identify an older iPhone's carrier-lock owner or prove that the device is unlocked.",
+      "published": "2026-10-17",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "Virgin Mobile UK iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Virgin Media's current mobile help says Virgin Mobile plans stopped being sold at the end of August 2023. Former customers are now on equivalent O2 plans, while the contract remains with Virgin Mobile and services are provided by O2. That service change does not prove whether a particular iPhone is carrier-locked, who sold it, or which provider controls the restriction. Check the device and its purchase history before choosing a support route.",
+          "links": [
+            {
+              "label": "Read Virgin Media's current mobile help",
+              "href": "https://www.virginmedia.com/help/mobile"
+            },
+            {
+              "label": "See O2's current Virgin Mobile information",
+              "href": "https://www.o2.co.uk/virgin-mobile"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The move from Virgin Mobile to O2 is a service and account change, not proof that an older iPhone is unlocked.",
+            "In Settings > General > About, Apple's current UK guide says that No SIM restrictions beside Network Provider Lock means the iPhone is unlocked.",
+            "Only the network provider that controls the restriction can unlock an iPhone; Apple cannot approve a carrier unlock.",
+            "Ofcom's UK ban on mobile companies selling locked handsets took effect on 17 December 2021, but the rule does not identify the history of every imported, second-hand or replacement phone.",
+            "Carrier Lock is separate from a SIM PIN or PUK, Apple Account Activation Lock, an organisation's MDM profile, an IMEI bar, and account or contract questions. A carrier unlock is not proof that any of those other issues is cleared."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "virgin-moved-to-o2",
+          "text": "What the Virgin Mobile move to O2 changes"
+        },
+        {
+          "kind": "p",
+          "text": "Virgin Media's live mobile page says that former Virgin Mobile customers are on equivalent O2 plans and that their services are now provided by O2. It directs current device and SIM help to O2 and also lists legacy Virgin billing, terms and an unlock-phone entry. The migration page contains the move timetable and historical contact instructions, but it is not an unlock decision for a particular device.",
+          "links": [
+            {
+              "label": "Open Virgin Media mobile help",
+              "href": "https://www.virginmedia.com/help/mobile"
+            },
+            {
+              "label": "Read Virgin Media's move-to-O2 information",
+              "href": "https://www.virginmedia.com/support/help/mobile/your-move-to-o2"
+            },
+            {
+              "label": "Open O2 device and SIM help",
+              "href": "https://www.o2.co.uk/help/phones-sims-and-devices"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Situation",
+            "What the current information supports",
+            "What it does not prove"
+          ],
+          "rows": [
+            [
+              "Former Virgin Mobile line now on O2",
+              "O2 is the current service route",
+              "That the iPhone has no historical carrier lock"
+            ],
+            [
+              "Virgin contract retained after migration",
+              "Legacy account evidence may still matter",
+              "That a device record or unlock eligibility transferred"
+            ],
+            [
+              "O2 SIM works in the iPhone",
+              "That line can activate on the device",
+              "That every other provider will be accepted"
+            ],
+            [
+              "Different SIM or eSIM fails",
+              "That further diagnosis is needed",
+              "That Carrier Lock is definitely the cause"
+            ],
+            [
+              "Second-hand Virgin-branded device",
+              "The seller reports a Virgin history",
+              "The original seller, country, replacement history or current lock state"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Virgin Media's current page lists a legacy unlock-phone link, but the linked page did not expose readable policy content during this review. Do not infer current eligibility, price, timing or approval from the link alone. Use the exact Network Provider Lock message and official support records instead."
+        },
+        {
+          "kind": "h2",
+          "id": "check-virgin-mobile-iphone",
+          "text": "How to check a legacy Virgin Mobile iPhone"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Read the exact message beside Network Provider Lock.",
+            "If it says No SIM restrictions, Apple treats the iPhone as unlocked. Do not buy another carrier-unlock service on the basis of the Virgin name alone.",
+            "If the field does not say No SIM restrictions, save the exact wording. Keep the device's IMEI or IMEI2 private rather than posting it publicly.",
+            "Find the original receipt or contract, seller, country of sale, and any replacement or insurance paperwork.",
+            "If you test another SIM or eSIM, treat the result as a diagnostic clue. Activation, plan and device-compatibility issues can be separate from Carrier Lock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says that only the network provider can unlock an iPhone; Apple cannot do it. After the provider confirms an unlock, insert a different SIM and let the iPhone activate, or follow Apple's eSIM instructions. The device-level confirmation remains No SIM restrictions beside Network Provider Lock.",
+          "links": [
+            {
+              "label": "Follow Apple's current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Use iUnlockMobile's four-way check guide",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "date-and-country-matter",
+          "text": "Purchase date and country matter"
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom says UK mobile companies were banned from selling customers locked handsets from 17 December 2021. That rule applies to the sale by a UK mobile company; it is not a retrospective status check for every phone now carrying a Virgin label. A phone bought earlier, imported, or supplied as a replacement can have a different history, so verify the individual device rather than relying on a date or brand.",
+          "links": [
+            {
+              "label": "Read Ofcom's locked-handset announcement",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "find-legacy-carrier",
+          "text": "Find the provider that controls the old restriction"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that the iPhone reports a carrier restriction, rather than a SIM PIN, PUK, passcode, Activation Lock or management-profile message.",
+            "Use the receipt, old Virgin account, country of sale and replacement records to establish where this device came from.",
+            "Use current O2 support for a migrated line or account question. Ask whether it can identify a relevant legacy record, but do not assume O2 can unlock a phone that was not bought directly from O2.",
+            "Use Virgin Media's current mobile-help and legacy-account routes for questions about the former Virgin relationship. The accessible pages do not establish a universal current unlock policy for every legacy device.",
+            "Ask the provider controlling the restriction what eligibility or ownership evidence is required. Do not submit repeated paid orders until that provider and country are identified.",
+            "After the provider confirms an unlock, connect the destination line and check Network Provider Lock again."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "O2's current unlock guidance says it can unlock devices bought directly from O2 and tells customers to contact their provider if the device was bought elsewhere. That is why a migrated Virgin line, an old Virgin handset, and a second-hand iPhone should not be treated as the same case. The relevant provider must confirm the record; no public page reviewed here proves that every Virgin-era device is eligible.",
+          "links": [
+            {
+              "label": "Read O2's current device-unlock guidance",
+              "href": "https://www.o2.co.uk/help/device-and-sim-support/unlocking-an-o2-mobile-to-use-on-a-different-network"
+            },
+            {
+              "label": "Find the carrier before an iPhone unlock request",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "virgin-o2-support-evidence",
+          "text": "What to send support"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Evidence",
+            "Why it helps",
+            "Keep private"
+          ],
+          "rows": [
+            [
+              "Exact Network Provider Lock wording",
+              "Separates a carrier question from a line or account symptom",
+              "Share only with official support"
+            ],
+            [
+              "Current IMEI or IMEI2",
+              "Links the request to this physical device",
+              "Never post the full identifier publicly"
+            ],
+            [
+              "Original receipt or contract",
+              "Shows seller, date and country",
+              "Redact unrelated billing details"
+            ],
+            [
+              "Migration notice or old Virgin account reference",
+              "Helps support trace the former relationship",
+              "Use an official account or contact route"
+            ],
+            [
+              "Replacement or insurance paperwork",
+              "Explains why the device may differ from the contract phone",
+              "Include only the relevant case evidence"
+            ],
+            [
+              "Failed-SIM, eSIM or activation wording",
+              "Shows where setup stops",
+              "Do not share passwords, SIM PINs or PUKs"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Send identifiers only through an official support channel. Apple says not to guess a SIM PIN or PUK: the provider that issued the SIM or eSIM is the correct route for that line-security problem. An unlock request should not require an Apple Account password.",
+          "links": [
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-gb/118228"
+            },
+            {
+              "label": "Open Virgin Media's current mobile support",
+              "href": "https://www.virginmedia.com/help/mobile"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "not-a-virgin-carrier-lock",
+          "text": "Problems an iPhone carrier unlock cannot fix"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or symptom",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock shows a carrier restriction",
+              "Whether another provider can be used",
+              "The network provider controlling that restriction"
+            ],
+            [
+              "Locked SIM, SIM PIN or PUK prompt",
+              "Security on one SIM or eSIM line",
+              "The provider that issued the line; stop guessing"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Apple Account Activation Lock and ownership",
+              "The legitimate owner or Apple's documented support process"
+            ],
+            [
+              "Remote Management or an installed profile",
+              "Organisation-managed settings and restrictions",
+              "The school, employer or other organisation that installed it"
+            ],
+            [
+              "Barred or blacklisted IMEI",
+              "Whether networks accept the device identifier",
+              "The reporting provider and lawful owner; no removal is promised"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to the device",
+              "Apple's documented passcode-reset process"
+            ],
+            [
+              "Finance, account or warranty question",
+              "A contract, account or seller/provider record",
+              "The relevant contract, account or seller/provider; Carrier Lock is not proof of status"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock, SIM security, MDM and an IMEI bar have different owners and remedies. A carrier unlock cannot bypass Apple Account ownership, supply a PUK, remove an organisation's management, or turn a blocked device into an approved one. Ofcom and O2 describe provider blocking for lost or stolen phones; neither source supports promising blacklist removal.",
+          "links": [
+            {
+              "label": "See Apple's Activation Lock process",
+              "href": "https://support.apple.com/en-gb/108934"
+            },
+            {
+              "label": "Read Apple's device-profile guidance",
+              "href": "https://support.apple.com/en-gb/guide/personal-safety/ips327569a75/web"
+            },
+            {
+              "label": "Read Ofcom's lost-or-stolen phone guidance",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/lost-or-stolen-phone"
+            },
+            {
+              "label": "Read O2's lost-or-stolen device guidance",
+              "href": "https://www.o2.co.uk/help/safety-and-security/device-security/lost-stolen-device"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "check-mdm-separately",
+          "text": "Check MDM and configuration profiles separately"
+        },
+        {
+          "kind": "p",
+          "text": "If Settings > General > VPN & Device Management shows a configuration profile or Remote Management message, treat it as an organisation-management issue, not Carrier Lock. Apple says profiles and MDM can manage device settings; if the iPhone belongs to a school or business, check with the administrator before removing anything. Removal can depend on who installed the profile.",
+          "links": [
+            {
+              "label": "Review Apple's profile and MDM guidance",
+              "href": "https://support.apple.com/en-gb/guide/personal-safety/ips327569a75/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "virgin-esim-after-unlock",
+          "text": "Activate a new SIM or eSIM after provider confirmation"
+        },
+        {
+          "kind": "p",
+          "text": "After the controlling provider confirms the unlock, follow Apple's steps for the new SIM or eSIM. If Network Provider Lock already says No SIM restrictions but an eSIM will not download, investigate the destination plan, device setup and activation instructions instead of ordering another carrier unlock. If no other SIM is available, Apple documents a backup, erase and restore path; do not erase the phone without a usable backup.",
+          "links": [
+            {
+              "label": "Follow Apple's post-approval activation steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result",
+            "What it suggests",
+            "Next action"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and the new line works",
+              "The carrier restriction is not blocking that activation",
+              "Keep the provider confirmation and device check"
+            ],
+            [
+              "No SIM restrictions but eSIM setup fails",
+              "A setup, plan or device issue needs investigation",
+              "Ask the eSIM provider to review activation"
+            ],
+            [
+              "A carrier restriction remains",
+              "The provider, device record or history still needs review",
+              "Return to the relevant network provider with the case reference"
+            ],
+            [
+              "A SIM PIN or PUK is requested",
+              "The line is protected or blocked after PIN attempts",
+              "Contact the line issuer and stop guessing"
+            ],
+            [
+              "Remote Management appears",
+              "The device is subject to an organisation profile",
+              "Contact the organisation administrator; do not treat it as a carrier unlock"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "An iPhone can show No SIM restrictions and still have a separate service, coverage, account, compatibility, eSIM or IMEI-bar problem. A failed connection alone is not proof of Carrier Lock, and a working O2 line is not proof that every other network will accept the device."
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-virgin-mobile",
+          "text": "Where a third-party service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help organise device evidence or explain a submission route, but it cannot be presented as Virgin, O2 or Apple and cannot guarantee an unlock. It cannot override a provider's eligibility decision, bypass Activation Lock or MDM, or clear a valid IMEI bar. No official source reviewed here supports a universal Virgin-branded-phone result."
+        },
+        {
+          "kind": "p",
+          "text": "Before paying, ask which exact provider and country control the restriction, what evidence is required, what happens if the provider refuses, and what counts as completion. Treat No SIM restrictions as the device check, not a marketing promise. Never give a service an Apple Account password, SIM PIN or PUK, and do not publish an unmasked IMEI.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help tracing a legacy Virgin Mobile UK iPhone? Share the exact Network Provider Lock wording, purchase country and replacement history through the official support route—without passwords, PINs, PUKs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the legacy unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can I still request a Virgin Mobile UK iPhone unlock?",
+          "answer": "The current Virgin Media help page lists a legacy unlock-phone route, but the linked policy was not readable during this review, so current eligibility and outcome are not confirmed here. First check Network Provider Lock, then use the provider that controls the restriction and keep the original sale evidence."
+        },
+        {
+          "question": "Did moving from Virgin Mobile to O2 unlock my iPhone?",
+          "answer": "No conclusion follows from the service migration alone. Open Settings > General > About. Apple's confirmation is No SIM restrictions beside Network Provider Lock."
+        },
+        {
+          "question": "Who unlocks an old Virgin Mobile UK iPhone?",
+          "answer": "Apple says only the network provider can unlock an iPhone. Use O2 for a current migrated line or account question, but do not assume O2 controls a handset bought elsewhere; the relevant provider must identify the record and confirm its process."
+        },
+        {
+          "question": "Is a Virgin Mobile iPhone supplied in the UK after 17 December 2021 locked?",
+          "answer": "Ofcom's ban means UK mobile companies could not sell customers locked handsets from that date. It does not prove the status of an imported, earlier, second-hand or replacement device, so check the individual iPhone."
+        },
+        {
+          "question": "Can a Virgin or O2 unlock remove iPhone Locked to Owner?",
+          "answer": "No. That is Apple Account Activation Lock, not Carrier Lock. The legitimate owner or Apple's documented support process must address it."
+        },
+        {
+          "question": "What if the iPhone shows Remote Management?",
+          "answer": "Remote Management or a configuration profile is an MDM issue. Check Settings > General > VPN & Device Management and contact the organisation that installed the profile; a carrier unlock does not remove it."
+        }
+      ]
+    },
+  {
+      "slug": "are-sky-iphones-unlocked-guide",
+      "title": "Are Sky iPhones Unlocked?",
+      "heading": "Are Sky iPhones Unlocked? UK Status and Checks",
+      "description": "Are Sky iPhones unlocked? Check Sky-supplied and used devices, distinguish Carrier Lock from SIM PIN and Activation Lock, and troubleshoot safely.",
+      "standfirst": "Sky says the phones and tablets it supplies come already unlocked, but an iPhone bought elsewhere can retain a restriction from its original network provider.",
+      "published": "2026-10-16",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "Sky Mobile iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Are Sky iPhones unlocked? Sky's current SIM-free device page says its phones and tablets come already unlocked, and its activation guidance says Sky Mobile devices come already unlocked. That statement applies to devices supplied by Sky; it does not establish the status of an iPhone bought from another network, retailer or private seller. A Sky SIM can be used only after the phone is compatible and any carrier restriction is handled by the provider that controls it.",
+          "links": [
+            {
+              "label": "Read Sky Mobile's SIM-free device statement",
+              "href": "https://www.sky.com/help/articles/buy-a-sky-mobile-sim-free-phone-or-tablet"
+            },
+            {
+              "label": "See Sky's SIM activation guidance",
+              "href": "https://www.sky.com/help/articles/sky-mobile-activate-your-sim"
+            },
+            {
+              "label": "Read Apple's current carrier-unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Sky says phones and tablets it supplies come already unlocked; check the individual iPhone instead of relying only on the sales channel.",
+            "An iPhone bought elsewhere may still be locked to the provider that supplied it. Apple says only the current network provider can unlock an iPhone.",
+            "In Settings, General, About, Apple's No SIM restrictions message beside Network Provider Lock is the device's reported carrier-unlock status.",
+            "A failed Sky SIM or eSIM does not by itself prove Carrier Lock; active-plan, carrier-settings, SIM, eSIM and compatibility issues can also need attention.",
+            "Carrier Lock is separate from a SIM PIN or PUK, Activation Lock, and Mobile Device Management (MDM). None of those checks should be treated as a promise about blacklist status, financing, warranty, price, timing or service on every network."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "sky-supplied-or-byod",
+          "text": "Sky-supplied iPhone or bring your own device?"
+        },
+        {
+          "kind": "p",
+          "text": "Sky's published SIM-free statement says its phones and tablets come already unlocked, so a device supplied by Sky should not normally need a carrier-unlock request. That is a statement about Sky-supplied devices, not proof about an iPhone obtained from another shop, network or private seller. Ofcom's UK ban on mobile companies selling locked handsets took effect on 17 December 2021, but that regulatory background is not an individual phone check and does not establish the history of a used device.",
+          "links": [
+            {
+              "label": "See Sky's SIM-free device statement",
+              "href": "https://www.sky.com/help/articles/buy-a-sky-mobile-sim-free-phone-or-tablet"
+            },
+            {
+              "label": "Read Ofcom's locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "iPhone history",
+            "What the evidence supports",
+            "Best next check"
+          ],
+          "rows": [
+            [
+              "Bought directly from Sky Mobile",
+              "Sky says devices it supplies come already unlocked",
+              "Check No SIM restrictions and activate a compatible line"
+            ],
+            [
+              "Bought SIM-free from Sky",
+              "Sky says its SIM-free phones and tablets come already unlocked",
+              "Check the phone and confirm the other network is compatible"
+            ],
+            [
+              "Used with a Sky SIM but bought elsewhere",
+              "The current SIM does not prove how the phone was supplied or locked",
+              "Use receipts and device history to identify the controlling provider"
+            ],
+            [
+              "Second-hand or refurbished iPhone",
+              "The installed SIM does not prove origin or Activation Lock status",
+              "Check Network Provider Lock and make sure the device is not Locked to Owner"
+            ],
+            [
+              "Warranty or insurance replacement",
+              "The replacement is the device that must be checked",
+              "Use the replacement's details if a provider requests them; keep them private"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A Sky SIM working in an iPhone does not prove that the phone is unlocked for every compatible network. Check Apple's Network Provider Lock field and, where practical, test a genuinely different provider; treat a failed test as a troubleshooting clue rather than proof of Carrier Lock."
+        },
+        {
+          "kind": "h2",
+          "id": "check-sky-iphone",
+          "text": "How to check whether a Sky iPhone is unlocked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Scroll to Network Provider Lock. Apple uses Carrier Lock in some regional documentation.",
+            "If it says No SIM restrictions, the iPhone reports no carrier restriction. That does not by itself confirm that a Sky line is active or that an eSIM has been provisioned.",
+            "If the field does not show No SIM restrictions, record the exact wording. If a provider asks for the IMEI or IMEI2, use the number shown on that device and keep it private.",
+            "Check the receipt, account, box and replacement paperwork to learn who originally supplied the iPhone.",
+            "If practical, test an active compatible SIM or eSIM from a different provider. A failed test is a clue, because plan status, carrier settings, SIM condition and eSIM setup can also cause trouble."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the current network provider can unlock an iPhone; Apple does not approve the carrier-side change. After that provider confirms the unlock, Apple documents activation with a new SIM or eSIM. Sky's SIM activation guidance is consistent with that division: a device from another provider might need unlocking first, while Sky-supplied devices come already unlocked.",
+          "links": [
+            {
+              "label": "Follow Apple's current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "See Sky's SIM activation guidance",
+              "href": "https://www.sky.com/help/articles/sky-mobile-activate-your-sim"
+            },
+            {
+              "label": "Use four ways to check iPhone unlock status",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "identify-original-carrier",
+          "text": "Identify the original carrier before submitting anything"
+        },
+        {
+          "kind": "p",
+          "text": "The network currently providing service is not necessarily the network that controls Carrier Lock. A Sky SIM-only customer may be using an iPhone originally sold by another UK network, a non-UK provider or an independent retailer. Use purchase history and seller records to identify the likely controlling provider, then use that provider's current official route; do not choose Sky merely because its SIM is installed.",
+          "links": [
+            {
+              "label": "Find the carrier on an iPhone before an unlock request",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            },
+            {
+              "label": "Read Apple's provider responsibility guidance",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "sky-sim-only-locked-phone",
+          "text": "What to do if a bring-your-own iPhone is locked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that Settings, General, About does not show No SIM restrictions.",
+            "Identify the provider that originally supplied or controls the current iPhone from reliable purchase records.",
+            "Read that provider's current eligibility and ownership requirements before submitting anything; do not assume a request will be accepted.",
+            "Use the provider's official channel and only the current device details it requests. Never publish a full IMEI or share an Apple Account password.",
+            "Wait for provider confirmation before repeating eSIM downloads or treating the carrier status as changed.",
+            "After confirmation, connect to Wi-Fi and activate a compatible Sky SIM or eSIM using Sky's and Apple's setup instructions.",
+            "Return to Settings, General, About and verify No SIM restrictions, then troubleshoot calls, messages and data separately from the carrier-lock question."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Sky's activation guidance says a device from another provider might need to be unlocked before a new Sky SIM is used, while Apple assigns the unlock decision to the current network provider. A Sky account or SIM does not transfer that authority from the provider controlling the phone's Carrier Lock.",
+          "links": [
+            {
+              "label": "See Sky's device and SIM activation guidance",
+              "href": "https://www.sky.com/help/articles/sky-mobile-activate-your-sim"
+            },
+            {
+              "label": "Read Apple's current carrier-unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "not-a-carrier-lock",
+          "text": "Carrier Lock, SIM PIN, Activation Lock and MDM are different"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or symptom",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: not No SIM restrictions",
+              "Whether the iPhone reports a carrier restriction",
+              "The network provider that controls Carrier Lock"
+            ],
+            [
+              "No SIM restrictions",
+              "Apple reports no carrier restriction",
+              "Sky for line activation, eSIM or plan support if service still fails"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security or recovery for one SIM or eSIM line",
+              "The carrier that issued that SIM or eSIM"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to the device and its local data",
+              "Apple's documented passcode-reset process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate previous owner and Apple's documented process"
+            ],
+            [
+              "Remote Management screen",
+              "An organization's Mobile Device Management configuration and control",
+              "The organization or management service shown on the device"
+            ],
+            [
+              "Invalid SIM, No SIM or eSIM setup failure",
+              "Line, SIM, eSIM or carrier-settings state",
+              "Apple's troubleshooting steps and Sky for the Sky line"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A PUK helps recover a SIM or eSIM after too many wrong SIM PIN attempts; it does not change the iPhone's Network Provider Lock. A carrier unlock also does not remove Activation Lock or an organization's MDM profile. Do not guess an unfamiliar code: Apple says to contact the carrier that supplied the SIM or eSIM for SIM PIN or PUK help.",
+          "links": [
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "See Sky's PUK and SIM PIN guidance",
+              "href": "https://www.sky.com/help/articles/sky-mobile-puk-code-and-sim-pin"
+            },
+            {
+              "label": "Read Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple's device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "sky-esim-after-unlock",
+          "text": "Finish setup with a Sky SIM or eSIM"
+        },
+        {
+          "kind": "p",
+          "text": "After the controlling provider confirms an unlock, use Apple's instructions to insert a new SIM or activate an eSIM. Sky says a new eSIM also needs to be activated and installed. If Network Provider Lock already says No SIM restrictions but the eSIM will not install, investigate the line, plan, device compatibility or provisioning rather than ordering another unlock.",
+          "links": [
+            {
+              "label": "Follow Apple's post-approval activation steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "See Sky's eSIM activation guidance",
+              "href": "https://www.sky.com/help/articles/sky-mobile-activate-your-sim"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result",
+            "What it suggests",
+            "Next action"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and Sky service works",
+              "Apple reports no carrier restriction and the line is working",
+              "Keep the provider confirmation and line records private"
+            ],
+            [
+              "No SIM restrictions but eSIM will not download",
+              "The remaining issue may involve the plan, device, eSIM or provisioning",
+              "Ask Sky to review the line and device"
+            ],
+            [
+              "No SIM restrictions but Invalid SIM or No SIM appears",
+              "Carrier lock is not the only possible cause",
+              "Check active plan, carrier settings and SIM or eSIM steps in Apple's guide"
+            ],
+            [
+              "A carrier-lock restriction remains",
+              "The controlling provider or device history may still be unclear",
+              "Return to that provider with the exact wording and current device details"
+            ],
+            [
+              "PUK requested",
+              "The SIM or eSIM is asking for its own recovery code",
+              "Contact the carrier that issued the line; do not treat it as a carrier unlock"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "An iPhone can report no carrier restriction while the line still needs troubleshooting. Apple lists an active plan, carrier-settings update, physical SIM checks and eSIM support among the steps for Invalid SIM or No SIM alerts. Those checks are separate from asking a network provider to change Carrier Lock.",
+          "links": [
+            {
+              "label": "Read Apple's Invalid SIM and No SIM troubleshooting",
+              "href": "https://support.apple.com/en-us/108914"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-sky",
+          "text": "Where a third-party iPhone unlock service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help organize device history or explain a submission route, but it is not the controlling network provider's approval. It cannot substitute for that provider's eligibility decision, remove Activation Lock or MDM, or provide the PUK for a Sky SIM. Treat any claim about universal provider support, blacklist removal, financing, warranty, price or completion time as unverified unless the responsible provider's current policy supports it.",
+          "links": [
+            {
+              "label": "Read Apple's provider responsibility guidance",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Review Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before paying, verify the current iPhone's Network Provider Lock wording and ask the service to name the proposed carrier, country and official route. Ask what happens if the provider refuses and define completion as Apple showing No SIM restrictions. Never provide an Apple Account password, SIM PIN or PUK, and do not post a full IMEI publicly.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            },
+            {
+              "label": "Use Apple's carrier-lock check",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Not sure whether Sky or an earlier provider controls the restriction? Share the exact Carrier Lock wording and purchase history for a route review, without passwords, PINs, PUKs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the correct unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are Sky iPhones unlocked?",
+          "answer": "Sky says phones and tablets it supplies come already unlocked. Confirm the individual iPhone in Settings, General, About: Apple reports an unlocked carrier state when No SIM restrictions appears beside Network Provider Lock."
+        },
+        {
+          "question": "Can Sky unlock an iPhone bought from another network?",
+          "answer": "Do not assume that Sky can. Sky says a device from another provider might need unlocking first, and Apple says only the network provider controlling the lock can authorize the unlock."
+        },
+        {
+          "question": "Why does a Sky SIM fail in an unlocked iPhone?",
+          "answer": "If Apple shows No SIM restrictions, check the Sky line's active plan, eSIM or physical-SIM setup, carrier settings and compatibility. A failed Sky connection is not, by itself, proof of Carrier Lock."
+        },
+        {
+          "question": "Does a Sky iPhone need an unlock code?",
+          "answer": "A Sky-supplied iPhone is described by Sky as already unlocked. If another provider controls the lock, use that provider's official route and Apple activation steps; do not confuse a carrier unlock with a SIM PIN or PUK prompt."
+        },
+        {
+          "question": "Can a carrier unlock remove iPhone Locked to Owner?",
+          "answer": "No. Apple identifies iPhone Locked to Owner as Activation Lock, which is tied to the previous owner's Apple Account. The legitimate owner must remove that association through Apple's documented process; a carrier unlock is separate."
+        }
+      ]
+    },
+  {
+      "slug": "are-giffgaff-iphones-unlocked-guide",
+      "title": "Are giffgaff iPhones Unlocked?",
+      "heading": "Are giffgaff iPhones Unlocked? New, Refurbished and BYOD",
+      "description": "Are giffgaff iPhones unlocked? Check new, refurbished and BYOD phones, spot a carrier lock, and separate it from SIM, Activation Lock and MDM issues.",
+      "standfirst": "giffgaff says phones it sells, including refurbished phones, are unlocked for UK networks; an iPhone bought elsewhere may still have a carrier lock.",
+      "published": "2026-10-16",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "giffgaff iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "giffgaff's current phone-buying guidance says every phone it sells is completely unlocked for any UK network's SIM. Its current refurbished-phone guide separately says refurbished phones come unlocked for a SIM from any UK network. Those statements describe phones sold by giffgaff; an iPhone bought from another seller can still report a carrier lock from its original network. Check the iPhone itself instead of treating a giffgaff SIM as proof that every network will work.",
+          "links": [
+            {
+              "label": "Read giffgaff's current phone-buying guidance",
+              "href": "https://help.giffgaff.com/en/articles/258294-buying-a-giffgaff-phone"
+            },
+            {
+              "label": "Read giffgaff's current refurbished-phone guide",
+              "href": "https://help.giffgaff.com/en/articles/245342-guide-to-refurbished-phones"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "giffgaff says phones it sells, including iPhones, are unlocked for any UK network's SIM; verify the received device.",
+            "giffgaff says its refurbished phones come unlocked for a SIM from any UK network.",
+            "A bring-your-own iPhone can retain a carrier lock from a previous provider; Apple says only the current network provider can unlock it.",
+            "On iPhone, Settings > General > About > Network Provider Lock is the primary check; 'No SIM restrictions' means no carrier restriction is reported.",
+            "Because giffgaff says it uses the O2 network, an O2 SIM is not a genuinely different-network test."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "new-refurbished-or-byod",
+          "text": "New, refurbished or bring your own iPhone?"
+        },
+        {
+          "kind": "p",
+          "text": "The handset's source tells you which evidence to start with. giffgaff states that its phones and refurbished phones are unlocked. Ofcom's UK rule banning mobile companies from selling locked handsets took effect on 17 December 2021. That is regulatory context, not a device-specific approval: a used, imported, or privately transferred iPhone still needs its own status checked.",
+          "links": [
+            {
+              "label": "See giffgaff's phone-buying guidance",
+              "href": "https://help.giffgaff.com/en/articles/258294-buying-a-giffgaff-phone"
+            },
+            {
+              "label": "See giffgaff's refurbished-phone guidance",
+              "href": "https://help.giffgaff.com/en/articles/245342-guide-to-refurbished-phones"
+            },
+            {
+              "label": "Read Ofcom's locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "iPhone source",
+            "What official guidance supports",
+            "What to verify"
+          ],
+          "rows": [
+            [
+              "New iPhone bought from giffgaff",
+              "giffgaff says it is unlocked",
+              "Check Network Provider Lock and confirm the model can use the intended SIM or eSIM."
+            ],
+            [
+              "Refurbished iPhone bought from giffgaff",
+              "giffgaff says it comes unlocked",
+              "Check the received device; do not rely only on the listing."
+            ],
+            [
+              "BYOD iPhone from another provider",
+              "The prior or current network provider may control the carrier lock",
+              "Use the About screen and purchase or account history to identify the responsible provider."
+            ],
+            [
+              "Private-sale or replacement iPhone",
+              "Seller history does not prove carrier or Activation Lock status",
+              "Check Network Provider Lock and complete Apple's used-device setup checks before accepting it."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "An active giffgaff SIM can show that this line connects, but it does not by itself prove that the iPhone accepts every other network."
+        },
+        {
+          "kind": "h2",
+          "id": "check-giffgaff-iphone",
+          "text": "How to check a giffgaff iPhone correctly"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock. giffgaff's guide may call the same field Carrier lock.",
+            "If it says No SIM restrictions, the iPhone reports no carrier restriction. This does not prove coverage, an active giffgaff plan, eSIM compatibility, or a clean Activation Lock state.",
+            "If it names a network or does not show No SIM restrictions, treat the carrier status as unresolved. Do not pay for another unlock based only on a failed SIM test.",
+            "Use the receipt, seller, account record, or provider response to identify the network that can handle the request. If support asks for an IMEI or IMEI2, use an official private channel and never publish the complete identifier.",
+            "If you use a second SIM, choose an active line on a genuinely different host network. A SIM test is supplementary and can also reflect activation or service problems."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "giffgaff's lock-check guide tells iPhone users to inspect Settings, General, About and warns not to use an O2 SIM as the different-network test because giffgaff uses the O2 network. Apple's current guidance likewise identifies No SIM restrictions as the device-level check. Use that status first, then use a SIM test only as supporting evidence.",
+          "links": [
+            {
+              "label": "Follow giffgaff's official lock-check guide",
+              "href": "https://help.giffgaff.com/en/articles/233989-how-to-check-if-your-phone-is-locked-to-another-network"
+            },
+            {
+              "label": "Read Apple's current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "See four ways to check iPhone unlock status",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "find-old-provider",
+          "text": "Find the previous provider, not just the current SIM brand"
+        },
+        {
+          "kind": "p",
+          "text": "Apple states that Apple cannot unlock an iPhone for a different network; only the current network provider can. For a BYOD phone, use the original seller, receipt, account record, or provider's official response to establish who controls the lock. Do not assume a giffgaff membership, number transfer, or eSIM switch changes a previous provider's record.",
+          "links": [
+            {
+              "label": "Read Apple's current network-provider guidance",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "See giffgaff's guidance for phones locked to another network",
+              "href": "https://help.giffgaff.com/en/articles/233989-how-to-check-if-your-phone-is-locked-to-another-network"
+            },
+            {
+              "label": "Find the carrier on an iPhone before unlocking",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "byod-locked-to-old-network",
+          "text": "What to do when a BYOD iPhone is locked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm the exact About-screen wording and keep a private note of the device identifier only if official support requests it.",
+            "Identify the network provider named by the device or documented by the seller. If the provider is unknown, do not guess from the SIM brand.",
+            "Read that provider's current official requirements and use its support route. This article cannot predict eligibility, approval, price, or completion time.",
+            "Wait for the provider to confirm its own action. Do not erase the phone or repeatedly replace eSIMs as a substitute for that confirmation.",
+            "After confirmation, follow Apple's activation steps with the giffgaff SIM or eSIM, then check both No SIM restrictions and actual service.",
+            "If the status already says No SIM restrictions but the line fails, use giffgaff's account, coverage, SIM or eSIM, and settings troubleshooting instead of ordering another carrier unlock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A giffgaff account, number transfer, or eSIM conversion may help set up service but is not evidence that another provider's carrier lock has been removed. giffgaff's own check guidance tells customers who joined from another network to contact the previous provider.",
+          "links": [
+            {
+              "label": "Read giffgaff's guidance for joining with a locked phone",
+              "href": "https://help.giffgaff.com/en/articles/233989-how-to-check-if-your-phone-is-locked-to-another-network"
+            },
+            {
+              "label": "Read Apple's activation steps after an unlock",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "avoid-wrong-unlock-code",
+          "text": "Do not put a generic unlock code into an iPhone prompt"
+        },
+        {
+          "kind": "p",
+          "text": "An iPhone carrier unlock is an authorization by the current network provider followed by activation; it is not a universal code to type into an iPhone prompt. A prompt for SIM PIN or PUK, device passcode, Apple Account, or organization management is a different control. Do not guess or share those credentials.",
+          "links": [
+            {
+              "label": "Read Apple's carrier-unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-gb/118228"
+            },
+            {
+              "label": "Read Apple's passcode-reset guidance",
+              "href": "https://support.apple.com/en-gb/118430"
+            },
+            {
+              "label": "Read Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple's device-management guidance",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Prompt or symptom",
+            "What it means",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: SIM locked or a network name appears",
+              "A carrier lock is reported",
+              "The network provider responsible for that lock."
+            ],
+            [
+              "No SIM restrictions",
+              "No carrier restriction is reported",
+              "Troubleshoot the giffgaff line or device separately; this is not a service guarantee."
+            ],
+            [
+              "SIM PIN, PUK, or Locked SIM",
+              "SIM or eSIM access control",
+              "The provider that issued the line; do not guess codes."
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Local iPhone access control",
+              "Apple's reset process; resetting can erase the device's current data."
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock tied to a previous Apple Account",
+              "The legitimate owner must remove the device from the account before a used-device handover."
+            ],
+            [
+              "Organisation enrolment or management profile",
+              "Mobile Device Management (MDM) controls and configurations",
+              "The organisation or IT administrator; a carrier unlock is not the route."
+            ],
+            [
+              "Reported lost, stolen, or otherwise barred device or service",
+              "A provider or device-status restriction separate from Carrier Lock",
+              "The reporting provider or lawful owner; do not assume an unlock changes that status."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "These checks are separate: a carrier unlock does not itself remove Activation Lock, reset a forgotten passcode, unlock a SIM or PUK, remove an MDM enrolment, or change a provider or device-status bar.",
+          "links": [
+            {
+              "label": "See Apple's Activation Lock explanation",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "See Apple's SIM PIN and PUK instructions",
+              "href": "https://support.apple.com/en-gb/118228"
+            },
+            {
+              "label": "See Apple's MDM explanation",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "giffgaff-esim-service",
+          "text": "Verify service after the carrier check"
+        },
+        {
+          "kind": "p",
+          "text": "After the network provider confirms an unlock, Apple says a different SIM can activate the iPhone. For a giffgaff eSIM, giffgaff says the device must support eSIM, be network unlocked, and use the giffgaff app with an internet connection. If the phone already reports No SIM restrictions but the eSIM will not install or service is missing, troubleshoot the account, coverage, SIM or eSIM, and settings instead of treating the symptom as proof of a carrier lock.",
+          "links": [
+            {
+              "label": "Read Apple's activation guidance",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Follow giffgaff's eSIM setup and troubleshooting guide",
+              "href": "https://help.giffgaff.com/en/articles/261570-switching-to-an-esim-with-giffgaff"
+            },
+            {
+              "label": "Use giffgaff's network and service troubleshooting guide",
+              "href": "https://help.giffgaff.com/en/articles/639659-network-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result",
+            "What it supports",
+            "Next check"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and calls or data work",
+              "Carrier status and the current line both appear usable",
+              "Keep the provider's confirmation, but do not generalise the result to every network."
+            ],
+            [
+              "No SIM restrictions but eSIM will not install",
+              "A possible eSIM, app, device, connection, or account issue",
+              "Verify eSIM support, Wi-Fi or data, and activation in the giffgaff app."
+            ],
+            [
+              "No SIM restrictions but SOS or no service",
+              "A carrier restriction is not shown; a service problem remains open",
+              "Check giffgaff coverage, account, settings, and SIM or eSIM guidance."
+            ],
+            [
+              "SIM locked or a network name appears",
+              "A carrier restriction is still reported",
+              "Return to the responsible network provider."
+            ],
+            [
+              "PUK requested",
+              "A SIM or eSIM PIN or PUK issue",
+              "Contact the line provider; do not guess codes."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Unlocked status and working service are separate checks. A successful carrier unlock cannot guarantee signal, roaming, VoLTE, or acceptance by every destination network.",
+          "links": [
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-giffgaff",
+          "text": "Where a third-party service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service can explain the distinction between a carrier lock and other device controls, or help you follow the responsible provider's published route. It cannot replace that provider's decision, remove Activation Lock or MDM without the legitimate owner or administrator, provide a SIM PUK, or promise that a device or service bar will be cleared.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before paying, confirm the exact on-screen wording, responsible provider, what work is actually included, and what happens if the provider declines. Treat claims of a universal code, guaranteed approval, guaranteed bar removal, fixed price, or fixed completion time as unsupported unless the responsible provider documents them. Never share an Apple Account password, SIM PIN, PUK, or complete device identifier.",
+          "links": [
+            {
+              "label": "Use the IMEI unlock service checklist before paying",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help separating a giffgaff purchase from a previous-provider lock? Send the exact on-screen wording and purchase history—never passwords, PINs, PUKs, or a complete device identifier.",
+          "href": "/contact",
+          "label": "Check the correct carrier route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are giffgaff iPhones unlocked?",
+          "answer": "giffgaff says phones it sells, including iPhones, are unlocked for any UK network's SIM. Confirm the received iPhone reports No SIM restrictions in Settings, General, About; the statement does not decide the status of a phone bought elsewhere."
+        },
+        {
+          "question": "Are refurbished giffgaff phones unlocked?",
+          "answer": "Yes, according to giffgaff’s current refurbished-phone guide: its refurbished phones come unlocked for a SIM from any UK network. Check the received device rather than relying only on a listing."
+        },
+        {
+          "question": "Can giffgaff unlock an iPhone from another network?",
+          "answer": "giffgaff's guidance directs people who joined from another network to contact the previous provider, and Apple says only the current network provider can unlock an iPhone. Do not assume a giffgaff SIM or account can change another provider's lock."
+        },
+        {
+          "question": "Can I use an O2 SIM as the different-network test?",
+          "answer": "Not reliably. giffgaff says it uses the O2 network, so an O2 SIM is not a genuinely different host-network test. Use the iPhone's Network Provider Lock status first and treat a SIM test as supporting evidence."
+        },
+        {
+          "question": "Does an iPhone use a generic giffgaff network-unlock code?",
+          "answer": "No universal code should be entered into an iPhone prompt. Carrier unlock authorization comes from the responsible network provider; SIM PIN, PUK, device passcode, Apple Account, and MDM prompts are different controls."
+        },
+        {
+          "question": "Does a carrier unlock remove Activation Lock or MDM?",
+          "answer": "No. 'iPhone Locked to Owner' is Activation Lock linked to a previous Apple Account, while MDM is organisation device management. The legitimate owner or organisation administrator must handle those controls; a carrier-lock status check does not clear them."
+        }
+      ]
+    },
+  {
+      "slug": "three-uk-iphone-unlock-guide",
+      "title": "Three UK iPhone Unlock Guide",
+      "heading": "Three iPhone Unlock: UK Status and Official Route",
+      "description": "Use this Three iPhone unlock guide to check UK device status, handle an older locked iPhone, and avoid passcode, PUK and eSIM mistakes.",
+      "standfirst": "Three’s official article published in 2017 says it stopped selling locked phones in 2014; check the individual iPhone and confirm the current support route.",
+      "published": "2026-10-15",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "Three UK iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A Three UK iPhone unlock is first a status check, not proof that a new request is needed. Three’s official article, published in 2017, says it stopped selling locked phones on 1 January 2014 and says older Three phones could be unlocked free in a store. That is historical guidance, not a current approval for a particular device. A used, imported or replacement iPhone can have a different history, so start with Apple’s on-device status instead of assuming the current SIM identifies the locking network.",
+          "links": [
+            {
+              "label": "Read Three’s official 2017 unlocked-phone article",
+              "href": "https://www.three.co.uk/blog/what-is-an-unlocked-phone"
+            },
+            {
+              "label": "Check Apple’s current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Three’s 2017 article says it stopped selling locked phones on 1 January 2014; do not treat that dated statement as a device-specific approval.",
+            "Apple says No SIM restrictions beside Network Provider Lock is the iPhone’s reported unlocked status.",
+            "For an older Three handset, use Three’s current public support route to ask what review is available; the older article does not establish today’s eligibility, fee or timing.",
+            "A Three brand name does not identify the country or provider record by itself. Use the sales country, paperwork and device history.",
+            "Carrier Lock is separate from a SIM PIN or PUK, screen passcode, Activation Lock and MDM. This guide does not determine blacklist, finance or warranty status."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "already-unlocked",
+          "text": "Is a Three UK iPhone already unlocked?"
+        },
+        {
+          "kind": "p",
+          "text": "For a phone bought directly from Three UK in 2014 or later, Three’s official 2017 article says it stopped selling locked phones from 1 January 2014. Ofcom’s rule took effect on 17 December 2021 and says mobile companies are banned from selling locked handsets to customers. Neither source is a device-specific result, and a used, imported or replacement iPhone still needs the Apple status check.",
+          "links": [
+            {
+              "label": "Read Three’s dated statement",
+              "href": "https://www.three.co.uk/blog/what-is-an-unlocked-phone"
+            },
+            {
+              "label": "Read Ofcom’s locked-handset rule notice",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            },
+            {
+              "label": "See Apple’s status check",
+              "href": "https://support.apple.com/en-gb/104999"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device history",
+            "What the source or history indicates",
+            "What to verify"
+          ],
+          "rows": [
+            [
+              "Bought from Three UK in 2014 or later",
+              "Three’s 2017 article says phones sold from 1 January 2014 were unlocked",
+              "Check Network Provider Lock and keep the purchase history"
+            ],
+            [
+              "Older Three UK handset",
+              "The dated article describes a free store route; current eligibility is not established here",
+              "Ask Three through its current public support route to review the device"
+            ],
+            [
+              "Second-hand or refurbished iPhone",
+              "The seller’s SIM does not prove the phone’s origin or lock status",
+              "Check Apple’s status, supplier history and the provider that controls the record"
+            ],
+            [
+              "Insurance or warranty replacement",
+              "Treat the replacement as a different device for status checking",
+              "Use the current device’s identifier and do not publish its full IMEI"
+            ],
+            [
+              "Three Ireland or another country",
+              "The brand name alone does not identify the provider record",
+              "Use the sales country and the provider’s official route"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not contact Three UK just because a Three SIM is installed. The active service provider and the provider controlling Network Provider Lock may be different."
+        },
+        {
+          "kind": "h2",
+          "id": "check-three-status",
+          "text": "How to check a Three iPhone before seeking help"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock. Record the exact wording shown on the iPhone rather than relying on a search result or a seller’s description.",
+            "If it says No SIM restrictions, Apple reports that the iPhone is unlocked. That does not by itself activate a plan or solve coverage, compatibility or eSIM issues.",
+            "If the field shows a provider or another restriction, note the exact wording and copy the IMEI or IMEI2 from the same iPhone. Keep the full identifier private.",
+            "Check the receipt, account, box and repair paperwork to distinguish Three UK from Three Ireland or another supplier.",
+            "If the field is absent or the screen differs, do not infer the status. Use Apple’s current guidance and ask the relevant provider to identify the record."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says it cannot unlock an iPhone for a different network provider. Only the current network provider can authorize the carrier unlock. Apple’s instructions also say to check the status after the provider confirms the request, so a submitted request or an IMEI report is not the same as a completed unlock.",
+          "links": [
+            {
+              "label": "Follow Apple’s current UK carrier-unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "three-uk-not-ireland",
+          "text": "Confirm Three UK, not Three Ireland"
+        },
+        {
+          "kind": "p",
+          "text": "A Three brand name does not tell you which country or provider record controls a restriction. Use the original sales country, account paperwork and provider response. Three UK’s current public contact page lists live chat and phone support, but it does not by itself confirm unlock eligibility or completion.",
+          "links": [
+            {
+              "label": "Use Three UK’s current public contact page",
+              "href": "https://www.three.co.uk/support/contact-us"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "older-three-iphone",
+          "text": "What to do with an older locked Three iPhone"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm About still reports a carrier restriction and gather evidence that Three UK supplied the phone. If another country or provider appears in the history, use that route instead.",
+            "Collect the IMEI from the current device plus purchase or replacement evidence. Send it only through a trusted official support channel and do not publish it.",
+            "Use Three’s current public support route and ask whether it can review a legacy carrier restriction. Do not assume a store, free service or particular response time from the dated article.",
+            "Ask which device record and country were reviewed, and keep any case reference supplied by the provider.",
+            "Wait for provider confirmation before erasing the iPhone or repeatedly swapping lines. An erase does not create a carrier unlock.",
+            "After the provider confirms the unlock, follow Apple’s activation steps with a compatible SIM or eSIM from another provider.",
+            "Return to Settings, General, About and verify No SIM restrictions, then test the destination line’s calls, messages and data."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Three’s official page published in 2017 says an older Three phone could be unlocked free in a Three store. Because that page is dated and does not establish current eligibility, confirm the current channel with Three before travelling or paying. The current contact page provides a support route, not a guarantee that a particular device will be accepted or unlocked.",
+          "links": [
+            {
+              "label": "Read the dated Three guidance",
+              "href": "https://www.three.co.uk/blog/what-is-an-unlocked-phone"
+            },
+            {
+              "label": "Check Three’s current contact options",
+              "href": "https://www.three.co.uk/support/contact-us"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "unlock-or-other-problem",
+          "text": "Carrier Lock, SIM PIN, Activation Lock and MDM are different"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or symptom",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock does not say No SIM restrictions",
+              "The iPhone reports a carrier restriction",
+              "The current provider controlling the lock; use Apple’s carrier-unlock guidance"
+            ],
+            [
+              "No SIM restrictions",
+              "Apple reports no carrier restriction",
+              "The destination provider for service or eSIM setup"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "Security on one SIM or eSIM line",
+              "The provider that issued that line; do not guess the code"
+            ],
+            [
+              "Forgotten screen passcode",
+              "Access to local iPhone data",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate previous owner or Apple’s documented process"
+            ],
+            [
+              "Remote Management or a management profile",
+              "Organization device-management settings, commands or restrictions",
+              "The organization or MDM administrator; this is not a carrier-unlock route"
+            ],
+            [
+              "SOS or No Service",
+              "A service, plan, coverage or compatibility symptom after activation",
+              "The destination provider and device/plan checks"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple describes MDM as a device-management service that can send configurations, profiles and commands, including remote lock or wipe. Its enrollment and removal rules depend on how the organization enrolled the device, so contact the organization or MDM administrator. MDM is a different control from Network Provider Lock and is not removed by a carrier unlock.",
+          "links": [
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "esim-and-verification",
+          "text": "Finish the unlock with a SIM or eSIM"
+        },
+        {
+          "kind": "p",
+          "text": "After the current network provider confirms the unlock, Apple says a different physical SIM can activate the iPhone, and it provides a separate eSIM setup route. If no other SIM is available, Apple documents backup, erase and restore steps. Those steps complete activation after approval; they do not create an unlock. Three’s SIM support pages explain Three SIM and eSIM setup, but they do not themselves establish carrier-unlock approval.",
+          "links": [
+            {
+              "label": "See Apple’s post-approval activation guidance",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "See Three’s current SIM support hub",
+              "href": "https://www.three.co.uk/support/sim-support"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result",
+            "What it suggests",
+            "Next step"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and service works",
+              "Apple reports no carrier restriction and the destination line is active",
+              "Keep the provider response and test record"
+            ],
+            [
+              "No SIM restrictions but eSIM will not download",
+              "The carrier-lock field is not reporting a restriction",
+              "Ask the destination provider to check its eSIM setup, plan and compatibility"
+            ],
+            [
+              "No SIM restrictions but SOS appears",
+              "The carrier-lock field is not reporting the cause of the service problem",
+              "Check the destination plan, coverage and compatibility"
+            ],
+            [
+              "A carrier restriction remains after provider contact",
+              "The iPhone still reports a restriction",
+              "Ask the provider to confirm the current device and country record it reviewed"
+            ],
+            [
+              "PUK requested",
+              "The SIM or eSIM line needs its issuer’s security process",
+              "Contact the line issuer and do not guess the PUK"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If the About screen already shows No SIM restrictions, a new unlock order cannot change that carrier-lock status. Troubleshoot the destination network, plan, coverage, compatibility or eSIM provisioning instead, and do not treat a blacklist, finance or warranty question as answered by this screen.",
+          "links": [
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            },
+            {
+              "label": "Check whether an iPhone is unlocked four ways",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-three",
+          "text": "Where a third-party service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help organize device history or explain public routes, but it cannot authorize an iPhone carrier unlock. Treat an IMEI report, an order submission or a claimed approval as information until the provider has confirmed the result and the iPhone shows No SIM restrictions. No third-party result is verified in this article.",
+          "links": [
+            {
+              "label": "See Apple’s completion check",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Three’s dated article says newer devices were sold unlocked and describes free help for older Three phones. Before paying any third party, ask it to identify Three UK specifically, explain why the official route is unsuitable and state what happens if it cannot complete the work. This guide makes no promise about price, timing, financing, warranty, blacklist removal or another provider accepting the device.",
+          "links": [
+            {
+              "label": "Use the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Unsure whether Three UK controls the restriction? Send the exact Network Provider Lock wording and device history—without passwords, PINs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the Three unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are Three UK iPhones unlocked?",
+          "answer": "Three’s official article published in 2017 says it stopped selling locked phones on 1 January 2014. That dated statement is not an approval for an individual phone; check Settings, General, About and look for No SIM restrictions beside Network Provider Lock."
+        },
+        {
+          "question": "Can Three unlock an older iPhone?",
+          "answer": "Three’s 2017 UK article says an older Three phone could be unlocked free in a Three store. Confirm the current support channel and device eligibility with Three; do not rely on that dated page for a promise about price or timing."
+        },
+        {
+          "question": "Can Apple unlock a Three iPhone?",
+          "answer": "No. Apple says only the current network provider can authorize an iPhone carrier unlock. Apple documents how to verify the status and complete activation after the provider confirms it."
+        },
+        {
+          "question": "Does a Three iPhone need an unlock code?",
+          "answer": "An iPhone carrier unlock is authorized by the provider and completed through Apple activation. Do not enter a generic network code into a SIM PIN, PUK or screen-passcode prompt."
+        },
+        {
+          "question": "How do I verify a Three iPhone unlock?",
+          "answer": "Check for No SIM restrictions in Settings, General, About, then activate and test a compatible SIM or eSIM from another provider. A submitted request or an IMEI report is not final proof."
+        },
+        {
+          "question": "Will a carrier unlock remove MDM or Activation Lock?",
+          "answer": "No. Activation Lock is linked to the previous owner’s Apple Account, while MDM is controlled by the enrolling organization or administrator. Use the legitimate owner or organization route for those separate controls."
+        }
+      ]
+    },
+  {
+      "slug": "tesco-mobile-iphone-unlock-guide",
+      "title": "Tesco Mobile iPhone Unlock",
+      "heading": "Tesco Mobile iPhone Unlock: UK Checks and Steps",
+      "description": "Check a Tesco Mobile iPhone for carrier lock, use Tesco’s official UK route when eligible, and keep PUK, Activation Lock and MDM issues separate.",
+      "standfirst": "Tesco Mobile says its Pay Monthly phones are unlocked, but an individual iPhone still needs a Network Provider Lock check and the correct official route.",
+      "published": "2026-10-15",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "Tesco Mobile UK iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A Tesco Mobile iPhone unlock begins by checking whether there is a carrier restriction at all. Tesco Mobile says all its Pay Monthly phones are unlocked and its help page says its handsets are now unlocked, but it also describes a free request for a Tesco-supplied phone that is still locked. Apple’s Network Provider Lock field separates that carrier-lock question from a SIM, account, activation or management problem.",
+          "links": [
+            {
+              "label": "Read Tesco Mobile’s official unlock guidance",
+              "href": "https://www.tescomobile.com/help/device-help/unlock-your-phone/unlock-your-tesco-mobile-phone"
+            },
+            {
+              "label": "Read Apple’s iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Tesco Mobile says all its Pay Monthly phones are unlocked and its unlock page says its handsets are now unlocked; verify the individual iPhone before requesting work.",
+            "In Settings, General, About, Apple says No SIM restrictions beside Network Provider Lock means the iPhone reports no carrier restriction.",
+            "Tesco Mobile says it does not charge to unlock its Pay Monthly or Pay As You Go phones and provides an online request for an eligible Tesco-locked device.",
+            "Tesco says it cannot unlock a phone locked to another network or a device it did not supply.",
+            "A SIM PIN or PUK deals with the SIM line, not the iPhone’s carrier lock; Activation Lock and MDM or supervision are separate controls."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "current-or-legacy",
+          "text": "Is a Tesco Mobile iPhone already unlocked?"
+        },
+        {
+          "kind": "p",
+          "text": "Tesco Mobile’s current Pay Monthly page says all Tesco Mobile Pay Monthly phones are unlocked, and its SIM-free page says SIM-free phones are unlocked. Ofcom’s UK rule banning mobile companies from selling locked handsets took effect on 17 December 2021. That rule and Tesco’s current statements reduce the likelihood that a recent UK Tesco purchase needs a carrier unlock, but they do not prove the status of a particular used, imported, repaired or older iPhone. Check the device itself.",
+          "links": [
+            {
+              "label": "See Tesco Mobile’s current Pay Monthly statement",
+              "href": "https://www.tescomobile.com/shop/pay-monthly"
+            },
+            {
+              "label": "See Tesco Mobile’s SIM-free statement",
+              "href": "https://www.tescomobile.com/sim-free"
+            },
+            {
+              "label": "Read Ofcom’s locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Tesco iPhone history",
+            "What the published guidance says",
+            "What to verify"
+          ],
+          "rows": [
+            [
+              "Current Tesco Mobile Pay Monthly purchase",
+              "Tesco says all Pay Monthly phones are unlocked",
+              "Check Network Provider Lock and destination-provider compatibility"
+            ],
+            [
+              "Tesco Mobile SIM-free purchase",
+              "Tesco says SIM-free phones are unlocked",
+              "Check the individual iPhone and the destination provider’s service requirements"
+            ],
+            [
+              "Older Tesco-supplied iPhone",
+              "A carrier restriction may still be present on a particular device",
+              "Use Tesco’s official request only if the device reports a Tesco lock"
+            ],
+            [
+              "Second-hand or refurbished iPhone",
+              "The seller’s SIM does not establish the current device history",
+              "Check the supplier, device status and ownership history without posting sensitive identifiers"
+            ],
+            [
+              "Phone supplied by another network",
+              "Tesco says it cannot unlock another network’s locked phone",
+              "Contact the provider that controls the carrier restriction"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-tesco-status",
+          "text": "How to check a Tesco Mobile iPhone"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock. Some iOS versions or regions may use the label Carrier Lock.",
+            "If it says No SIM restrictions, Apple says the iPhone reports no carrier restriction. Do not request another carrier unlock on that basis.",
+            "If it shows a lock, note the exact wording and use device details only in Tesco’s official request form; never post a full device identifier publicly.",
+            "Use purchase, account and repair records to check whether Tesco Mobile UK supplied this particular iPhone.",
+            "A compatible active non-Tesco SIM or eSIM can test service, but a failed test can also reflect the plan, SIM or eSIM, carrier settings, coverage or other compatibility conditions."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the current network provider can unlock an iPhone. Apple’s on-device check is evidence about the carrier-lock field, not a promise that a destination network will provide service. If the device says No SIM restrictions but still shows SOS, No Service or an invalid-SIM alert, check the destination provider’s plan and setup before treating it as a carrier-lock problem.",
+          "links": [
+            {
+              "label": "Follow Apple’s current UK unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Read Apple’s invalid-SIM troubleshooting",
+              "href": "https://support.apple.com/en-us/108914"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Tesco Mobile UK and Tesco Mobile Ireland use different support sites and carrier records. This guide covers the UK provider at tescomobile.com, not tescomobile.ie."
+        },
+        {
+          "kind": "h2",
+          "id": "official-tesco-route",
+          "text": "Use Tesco Mobile’s official request"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that the iPhone shows a carrier lock and that Tesco Mobile UK supplied the device.",
+            "Use only the current device and account details requested by Tesco’s official form; do not send passwords, SIM PINs, PUKs or full identifiers to a public service.",
+            "Submit the request through Tesco Mobile’s official help page, not through an unverified form or intermediary.",
+            "For an older Pay As You Go device, follow Tesco’s current active-number instructions before submitting the request if they apply to that device.",
+            "Keep the request reference and the device details you submitted so you can ask Tesco about the same case.",
+            "After Tesco confirms its carrier-side action, follow the iPhone-specific activation steps rather than entering a generic code into a SIM PIN, PUK or passcode prompt.",
+            "Insert or activate another provider’s compatible SIM or eSIM and then recheck Network Provider Lock and service."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Tesco Mobile’s current generic unlock page says the request is free and that it will text a code and a link within seven days. That is Tesco’s published guidance for its request flow, not a guarantee of completion or a universal iPhone deadline. Apple describes iPhone unlocking as provider authorization followed by activation, so do not assume that an iPhone needs a typed network code.",
+          "links": [
+            {
+              "label": "Open Tesco Mobile’s official request guidance",
+              "href": "https://www.tescomobile.com/help/device-help/unlock-your-phone/unlock-your-tesco-mobile-phone"
+            },
+            {
+              "label": "See Apple’s provider-authorization steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "pay-as-you-go",
+          "text": "Older Tesco Pay As You Go phones"
+        },
+        {
+          "kind": "p",
+          "text": "Tesco’s current page says that if a locked handset was purchased, a Pay As You Go SIM with an active number may be needed before the online request. Tesco defines an active number there as one that has made a chargeable call. This condition is tied to its published legacy locked-handset flow; it does not mean every current Tesco iPhone must be activated that way."
+        },
+        {
+          "kind": "h3",
+          "id": "what-tesco-cannot-unlock",
+          "text": "When Tesco Mobile is not the right provider"
+        },
+        {
+          "kind": "p",
+          "text": "Tesco says it cannot unlock phones locked to another network or devices it did not supply. If the iPhone came from O2, EE, Three, Vodafone or an overseas provider, a Tesco SIM does not transfer control of the carrier lock to Tesco. Identify the supplying provider before submitting any request.",
+          "links": [
+            {
+              "label": "Read Tesco’s guidance for a phone from another network",
+              "href": "https://www.tescomobile.com/help/getting-started/get-going-with-tesco-mobile/unlock-a-device-from-another-network"
+            },
+            {
+              "label": "Find the carrier controlling an iPhone lock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "unlock-not-puk",
+          "text": "Tesco unlock, PUK and passcode are different"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Prompt or status",
+            "What is restricted",
+            "Correct owner or route"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: SIM locked",
+              "Use of another carrier",
+              "The provider that controls the carrier lock; Tesco only for an eligible Tesco lock"
+            ],
+            [
+              "No SIM restrictions",
+              "No carrier restriction is reported by the iPhone",
+              "The destination provider still controls plan and service setup"
+            ],
+            [
+              "SIM PIN or PUK",
+              "One SIM or eSIM line",
+              "The carrier that issued that line"
+            ],
+            [
+              "Forgotten passcode",
+              "Access to the iPhone and its local data",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate owner, organization or Apple’s documented support route"
+            ],
+            [
+              "Supervision or MDM profile",
+              "Organization-applied settings and restrictions",
+              "The owning organization or its administrator"
+            ],
+            [
+              "Network-barred status",
+              "Network acceptance of the device",
+              "The reporting provider or legitimate account route; a carrier unlock is not a blacklist-removal promise"
+            ]
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock-and-mdm",
+          "text": "Activation Lock and MDM need an ownership check"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is linked to Find My and the previous Apple Account. Apple says a used iPhone showing iPhone Locked to Owner must not be taken over until the previous owner removes it, or an eligible owner starts Apple’s documented support route with proof of purchase. A carrier unlock does not remove Activation Lock.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple’s Activation Lock removal options",
+              "href": "https://support.apple.com/en-us/108934"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "MDM is device management, not a SIM or carrier lock. Apple says a supervised iPhone can show a supervision message in Settings and can have organization profiles, restrictions or configurations. Check Settings, General, VPN & Device Management and contact the owning organization or administrator; do not treat a Tesco unlock request as an MDM-removal route.",
+          "links": [
+            {
+              "label": "See Apple’s supervised-device guidance",
+              "href": "https://support.apple.com/en-us/102291"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Tesco Mobile provides a separate PUK route for a blocked SIM. Its current guidance says three incorrect SIM PIN entries can block the SIM, and ten incorrect PUK entries can permanently block that SIM. A PUK does not change Network Provider Lock, remove Activation Lock or remove an MDM profile.",
+          "links": [
+            {
+              "label": "See Tesco Mobile’s PUK guidance",
+              "href": "https://www.tescomobile.com/help/device-help/unlock-your-phone/unlock-your-phone-with-a-puk-code"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "finish-tesco-unlock",
+          "text": "Finish and verify the Tesco iPhone unlock"
+        },
+        {
+          "kind": "p",
+          "text": "After the network provider confirms its change, Apple says to insert a SIM from another provider and let the iPhone activate. If no other SIM is available, Apple documents backing up, erasing and restoring the iPhone. Erasing before provider authorization cannot make an ineligible device eligible, and it should not be used as a diagnostic shortcut.",
+          "links": [
+            {
+              "label": "Follow Apple’s activation steps after authorization",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result after the request",
+            "What it suggests",
+            "Next step"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and new service works",
+              "The carrier lock appears cleared and the line activated",
+              "Keep Tesco’s confirmation and check the service terms"
+            ],
+            [
+              "No SIM restrictions but SOS or No Service",
+              "Carrier lock is not the only possible blocker",
+              "Check the destination plan, SIM or eSIM, carrier settings, coverage and compatibility"
+            ],
+            [
+              "SIM locked remains",
+              "The controlling provider or submitted device details may be different from expected",
+              "Return to Tesco or the controlling provider with the exact wording and case reference"
+            ],
+            [
+              "SIM Not Supported",
+              "Activation still rejects the line",
+              "Recheck provider authorization and destination compatibility"
+            ],
+            [
+              "PUK requested",
+              "The SIM is blocked",
+              "Contact the carrier that issued the SIM"
+            ],
+            [
+              "iPhone Locked to Owner or a supervision message",
+              "An ownership or organization-management control remains",
+              "Stop and use the legitimate owner or organization route"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "When No SIM restrictions is already present, focus on the destination carrier and device status rather than paying for another carrier-unlock request. An unlocked status does not by itself confirm a plan, coverage, compatibility or ownership issue is resolved.",
+          "links": [
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            },
+            {
+              "label": "Understand what a network unlock changes",
+              "href": "/articles/network-unlock-explained"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-tesco",
+          "text": "Where a third-party service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service cannot be treated as the authority for Tesco’s device record. It cannot be assumed to remove a carrier lock, a valid network bar, Activation Lock or an MDM profile merely because it accepts an IMEI or says a request was submitted. Verify the iPhone’s status yourself and do not share passwords, PINs, PUKs or full device identifiers publicly."
+        },
+        {
+          "kind": "p",
+          "text": "Because Tesco Mobile provides a free official route for eligible Tesco-locked devices, compare any paid offer with that route first. Ask what eligibility is being checked, what happens if the provider refuses the request and what evidence will show completion. Treat completion as the iPhone reporting No SIM restrictions, not as a payment receipt or a submitted-status message.",
+          "links": [
+            {
+              "label": "Check an IMEI unlock service before paying",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Unsure whether Tesco Mobile UK controls the restriction? Send the exact Network Provider Lock wording and device history—without passwords, PINs or a publicly visible device identifier.",
+          "href": "/contact",
+          "label": "Review the Tesco unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are Tesco Mobile iPhones unlocked?",
+          "answer": "Tesco Mobile says all its Pay Monthly phones are unlocked and its current help page says its handsets are now unlocked. Check the individual iPhone in Settings, General, About; Apple says No SIM restrictions is the reported unlocked status."
+        },
+        {
+          "question": "Does Tesco Mobile charge to unlock an iPhone?",
+          "answer": "Tesco Mobile’s current UK help page says it does not charge to unlock its Pay Monthly or Pay As You Go phones. Use the official online request only for a Tesco-supplied device that still reports a Tesco carrier lock."
+        },
+        {
+          "question": "How long does a Tesco Mobile unlock take?",
+          "answer": "Tesco Mobile says its generic request flow will text a code and link within seven days, while Apple says a provider may take a few days. These are published guidance points, not a guaranteed completion time, and an iPhone uses provider authorization and activation rather than necessarily a typed code."
+        },
+        {
+          "question": "Can Tesco unlock an iPhone from another network?",
+          "answer": "Tesco says it cannot unlock devices locked to another network or phones it did not supply. Contact the provider that controls the carrier restriction."
+        },
+        {
+          "question": "Is a Tesco Mobile PUK the same as an iPhone unlock?",
+          "answer": "No. A PUK unblocks a Tesco SIM after incorrect SIM PIN attempts. It does not change Network Provider Lock, remove Activation Lock or remove an MDM profile."
+        },
+        {
+          "question": "Can an iPhone carrier unlock remove Activation Lock or MDM?",
+          "answer": "No. Carrier lock concerns use with another network. Activation Lock follows Find My and the previous Apple Account, while MDM or supervision is controlled by an owning organization. Use the legitimate owner, Apple support or organization administrator route that applies."
+        }
+      ]
+    },
+  {
+      "slug": "ee-uk-iphone-unlock-guide",
+      "title": "EE UK iPhone Unlock Guide",
+      "heading": "EE iPhone Unlock: UK Status and Official Steps",
+      "description": "Check an EE iPhone’s carrier-lock status, use EE’s official route, and distinguish Activation Lock, SIM PIN, MDM, and network compatibility.",
+      "standfirst": "EE says it has been selling devices unlocked lately. Check the individual iPhone first, then use EE’s current route only if Network Provider Lock still shows a restriction.",
+      "published": "2026-10-14",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "EE UK iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Start with the status shown on the iPhone, not an online code seller. EE says it has been selling devices unlocked lately, provides a free online IMEI check and unlock route, and does not require an unlock code for Apple devices. An older, second-hand, imported or replacement iPhone may still need its own device record checked.",
+          "links": [
+            {
+              "label": "Read EE’s current device-unlock guidance",
+              "href": "https://ee.co.uk/help/mobile/manage-use/unlock-device/unlock-an-ee-device-to-use-with-another-network"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Check Settings, General, About first. No SIM restrictions beside Network Provider Lock is Apple’s on-device indication that the iPhone has no reported carrier restriction.",
+            "EE says its online device check and unlock route is free and requires the IMEI for the iPhone being checked.",
+            "EE states that Apple devices do not use an unlock code. After the carrier-side change, activation with another provider completes the process.",
+            "A second-hand, replacement or imported iPhone must be checked by its own device record; a seller’s statement about another phone or line is not proof.",
+            "Carrier Lock is separate from a SIM PIN or PUK, passcode, Activation Lock, MDM or supervision, lost-or-stolen or blacklist status, financing, warranty terms and destination-network compatibility."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "modern-or-legacy",
+          "text": "Is an EE iPhone already unlocked?"
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom says mobile companies have been banned from selling customers locked handsets since 17 December 2021. That makes a newly supplied UK consumer iPhone less likely to need an EE unlock, but it does not establish the status of an older, imported, business, replacement or second-hand device. Check the individual iPhone rather than inferring its status from its age or sales channel.",
+          "links": [
+            {
+              "label": "Read Ofcom’s locked-handset rule",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device history",
+            "What the history suggests",
+            "What to verify"
+          ],
+          "rows": [
+            [
+              "Newer EE consumer purchase",
+              "It may have been supplied unlocked under the current UK rules",
+              "Check Network Provider Lock and test a compatible line"
+            ],
+            [
+              "Older EE purchase",
+              "A legacy EE restriction is possible",
+              "Use EE’s current IMEI checker"
+            ],
+            [
+              "Second-hand or refurbished iPhone",
+              "The result depends on this device’s record",
+              "Check the iPhone’s own IMEI, seller evidence and locking provider"
+            ],
+            [
+              "Replacement iPhone",
+              "The replacement has its own identifiers and record",
+              "Use the replacement iPhone’s IMEI, not the returned phone’s record"
+            ],
+            [
+              "Imported or bought from another provider",
+              "EE may not control the restriction",
+              "Identify the provider that supplied or currently controls the lock"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not treat “sold on an EE plan” and “locked to EE” as the same fact. The active line identifies the service; Network Provider Lock identifies the carrier restriction reported by the iPhone. Neither result proves a clean lost-or-stolen or blacklist status, a financing position, warranty coverage or compatibility with every destination network."
+        },
+        {
+          "kind": "h2",
+          "id": "check-ee-status",
+          "text": "How to check an EE iPhone before requesting an unlock"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock. Apple may use the label Carrier Lock in some regions.",
+            "If it says No SIM restrictions, the iPhone reports no carrier lock. Move on to destination-network compatibility and activation.",
+            "If it says SIM locked, copy the current iPhone’s IMEI or IMEI2 from the same About screen and keep it private.",
+            "EE says Apple customers can also text UNLOCK to 150 to check whether the phone is unlocked.",
+            "If the field is missing or EE’s checker does not recognise the IMEI, contact EE with the purchase, repair or replacement history instead of guessing which provider controls the device."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the current network provider can authorise an iPhone carrier unlock. Apple’s own check is No SIM restrictions next to Network Provider Lock; Apple cannot change EE’s carrier record.",
+          "links": [
+            {
+              "label": "Follow Apple’s current UK unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "dual-imei",
+          "text": "Which IMEI should you use?"
+        },
+        {
+          "kind": "p",
+          "text": "Use the identifier shown by the iPhone in your hand. EE says that when two IMEIs appear, you should try both in its online checker. Dual-SIM capability does not prove that the phone is unlocked, and packaging or an old account record can identify a different device after a replacement. Do not publish an IMEI in a screenshot or message.",
+          "links": [
+            {
+              "label": "See EE’s IMEI and dual-IMEI guidance",
+              "href": "https://ee.co.uk/help/mobile/manage-use/unlock-device/unlock-an-ee-device-to-use-with-another-network"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "official-ee-route",
+          "text": "Use the official EE unlock route"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that Network Provider Lock does not already say No SIM restrictions.",
+            "Confirm EE is the locking provider rather than merely the provider of the SIM currently installed.",
+            "Open EE’s official device-unlock page and enter the IMEI requested by the checker.",
+            "Keep EE’s result or case reference private and note which device identifier it reviewed.",
+            "Wait for EE to confirm the carrier-side change before erasing the iPhone or repeatedly testing activation.",
+            "After EE’s confirmation, install current software if needed, connect to Wi-Fi and activate a compatible SIM or eSIM from another provider.",
+            "Return to Settings, General, About and confirm No SIM restrictions. Then test calls, messages and cellular data with the destination provider."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "EE’s current consumer help page says its online check and unlock route is free of charge, regardless of when the device was bought. Use that current page and the instructions for the relevant account and device type rather than relying on an old fee or waiting-time claim.",
+          "links": [
+            {
+              "label": "Check EE’s current online unlock route",
+              "href": "https://ee.co.uk/plans-subscriptions/mobile/settings-permissions/device-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "no-iphone-code",
+          "text": "An EE iPhone does not need an unlock code"
+        },
+        {
+          "kind": "p",
+          "text": "EE distinguishes Android-style unlock codes from Apple devices: Apple devices do not need one. A page that tells every iPhone owner to type a network code into a prompt is applying a generic phone workflow to the wrong platform.",
+          "links": [
+            {
+              "label": "Read EE’s explanation of Apple unlocks",
+              "href": "https://ee.co.uk/help/mobile/manage-use/unlock-device/unlock-an-ee-device-to-use-with-another-network"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "separate-locks",
+          "text": "Keep carrier lock, SIM security, ownership and MDM separate"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock controls whether another network provider can activate the iPhone. A SIM PIN or PUK protects the particular SIM or eSIM line. Activation Lock links the device to an Apple Account after Find My is enabled. MDM or supervision can apply organisation-owned management and restrictions. None of those checks authorises the others, so use the provider or legitimate owner responsible for the specific status.",
+          "links": [
+            {
+              "label": "Apple’s carrier-unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-gb/118228"
+            },
+            {
+              "label": "Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-gb/108794"
+            },
+            {
+              "label": "Apple’s device-supervision guidance",
+              "href": "https://support.apple.com/en-gb/guide/deployment/dep1d89f0bff/web"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Status or prompt",
+            "What it concerns",
+            "Who should handle it"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: SIM locked",
+              "Carrier restriction preventing another provider’s SIM or eSIM from activating",
+              "The provider that controls the carrier lock, such as EE if EE is confirmed"
+            ],
+            [
+              "No SIM restrictions",
+              "The iPhone reports no carrier restriction",
+              "The destination provider for plan, coverage and activation questions"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security for one SIM or eSIM line",
+              "The provider that issued that line; do not guess the code"
+            ],
+            [
+              "Forgotten passcode",
+              "Access to data on the iPhone",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and the previous owner’s Apple Account",
+              "The legitimate owner; do not treat a carrier unlock as a bypass"
+            ],
+            [
+              "Supervised or managed iPhone",
+              "Organisation device management, configuration or restrictions",
+              "The organisation or its device-management administrator"
+            ],
+            [
+              "Lost-or-stolen or blacklist concern",
+              "A separate device-status or network-acceptance question",
+              "The relevant carrier or official authority; a carrier-lock check is not clearance"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If a SIM PIN or PUK prompt appears, stop guessing. Apple says the wrong SIM PIN can lock the SIM or eSIM permanently and that the issuing provider may need to provide the PUK or replace the line. A PUK does not remove an EE carrier restriction. If the screen says iPhone Locked to Owner or shows organisation supervision, follow the legitimate owner or administrator route instead of ordering another unlock.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN and PUK instructions",
+              "href": "https://support.apple.com/en-gb/118228"
+            },
+            {
+              "label": "Read Apple’s Activation Lock instructions",
+              "href": "https://support.apple.com/en-gb/108794"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "finish-ee-unlock",
+          "text": "Finish and verify the EE iPhone unlock"
+        },
+        {
+          "kind": "p",
+          "text": "EE tells customers to install current software, remove the old SIM, insert the new active SIM and complete setup after EE has unlocked the device. Apple also documents activation with another provider’s eSIM. If no other SIM is available, Apple documents a backup, erase and restore route, but erasing before carrier approval cannot create eligibility.",
+          "links": [
+            {
+              "label": "Review EE’s iPhone completion steps",
+              "href": "https://ee.co.uk/help/mobile/manage-use/unlock-device/set-up-my-iphone-or-ipad-after-its-been-unlocked"
+            },
+            {
+              "label": "Review Apple’s post-unlock activation steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result",
+            "What it may mean",
+            "Next step"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and service works",
+              "The carrier restriction and destination activation appear complete",
+              "Keep EE’s confirmation and the destination provider’s service details"
+            ],
+            [
+              "No SIM restrictions but No Service or SOS",
+              "The carrier restriction may be cleared, but service is not",
+              "Check the plan, coverage, device compatibility and destination provider’s acceptance"
+            ],
+            [
+              "SIM locked remains after EE confirmation",
+              "The carrier record may be incomplete or may not match this IMEI",
+              "Return to EE with the confirmation and exact device identifier"
+            ],
+            [
+              "New SIM asks for PUK",
+              "The line is blocked, not necessarily the iPhone’s carrier status",
+              "Contact the provider that issued the SIM or eSIM"
+            ],
+            [
+              "eSIM will not download",
+              "Provisioning, plan or compatibility needs review",
+              "Ask the destination provider to check the eSIM details and plan"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If No SIM restrictions is present but the new line cannot connect, troubleshoot service rather than ordering another unlock.",
+          "links": [
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            },
+            {
+              "label": "Check whether an iPhone is unlocked four ways",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-ee",
+          "text": "Where a third-party service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A responsible service may help identify the locking provider, organise the correct device identifier and explain a supported request. It cannot replace the current provider’s authorisation, remove Activation Lock, bypass organisation management or prove that a lost-or-stolen or blacklist concern has been cleared. It also cannot reveal a SIM PIN or PUK that belongs to another provider’s line.",
+          "links": [
+            {
+              "label": "Check Apple’s rule on who can unlock an iPhone",
+              "href": "https://support.apple.com/en-gb/109316"
+            },
+            {
+              "label": "Check Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-gb/108794"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Because EE provides a free official route, compare any paid offer against that route first. Ask the provider to name EE UK, state the exact deliverable and refusal policy, and define completion as No SIM restrictions rather than an email that merely says “submitted.”",
+          "links": [
+            {
+              "label": "Use the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Unsure whether EE controls the restriction? Send the exact Network Provider Lock wording and device history—without passwords, PINs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the EE unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are EE iPhones unlocked?",
+          "answer": "EE says it has been selling devices unlocked lately, and Ofcom says mobile companies have been banned from selling customers locked handsets since 17 December 2021. Check the individual iPhone: No SIM restrictions beside Network Provider Lock is Apple’s reported carrier-lock status."
+        },
+        {
+          "question": "How much does EE charge to unlock an iPhone?",
+          "answer": "EE’s current consumer help page says its online device check and unlock route is free of charge, regardless of when the device was bought. Use the current EE page for the relevant account and device type."
+        },
+        {
+          "question": "Does an EE iPhone need an unlock code?",
+          "answer": "No unlock code is required for an Apple device under EE’s guidance. EE authorises the carrier-side change, then the iPhone completes activation with a compatible SIM or eSIM from another provider."
+        },
+        {
+          "question": "Can EE unlock a second-hand iPhone?",
+          "answer": "Start with EE’s IMEI checker if the phone actually reports a restriction and EE is the locking provider. Use the second-hand phone’s own identifier and contact EE if the checker cannot resolve its record. This does not remove Activation Lock, MDM or a separate lost-or-stolen or blacklist issue."
+        },
+        {
+          "question": "How do I know the EE unlock worked?",
+          "answer": "Confirm No SIM restrictions in Settings, General, About, then activate and test a compatible SIM or eSIM from another provider. A request receipt by itself is not proof, and a carrier-lock result does not prove service, ownership or blacklist status."
+        }
+      ]
+    },
+  {
+      "slug": "o2-uk-iphone-unlock-guide",
+      "title": "O2 UK iPhone Unlock Guide",
+      "heading": "O2 iPhone Unlock: UK Status and Official Steps",
+      "description": "Check whether an O2 iPhone is carrier-locked, follow O2's current UK request route, and verify the result without confusing SIM or Activation Lock.",
+      "standfirst": "Most Apple devices bought directly from O2 since 1 August 2018 are not locked, but a used or older iPhone still needs an individual status check.",
+      "published": "2026-10-14",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "O2 UK iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "An O2 iPhone unlock is mainly a legacy-device question today. O2 says Apple devices bought directly from O2 since 1 August 2018 are no longer locked, while its current page provides a free request for an older O2-supplied device that remains restricted. Check the phone before switching networks so you do not confuse a carrier lock with a blocked SIM, an Apple Account or Activation Lock, a forgotten passcode, or an organisation-managed device.",
+          "links": [
+            {
+              "label": "Read O2's current UK unlock guidance",
+              "href": "https://www.o2.co.uk/help/account/joining-and-leaving-o2/unlocking-an-o2-mobile-to-use-on-a-different-network"
+            },
+            {
+              "label": "Read Apple's current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "O2 says Apple devices bought directly from O2 since 1 August 2018 are no longer locked; check the individual device rather than relying on its age alone.",
+            "Apple identifies an unlocked iPhone by No SIM restrictions beside Network Provider Lock in Settings, General, About.",
+            "O2 says Pay Monthly and Pay As You Go customers in the UK can ask for an O2-supplied device to be unlocked at any time, free of charge.",
+            "Unlocking the handset does not end an O2 minimum contract term or cancel the mobile service.",
+            "O2 can only unlock a device bought directly from O2; identify the locking provider before sending a request or IMEI."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "which-o2-iphone",
+          "text": "Which O2 iPhones may still be locked?"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "O2 iPhone history",
+            "What O2's guidance supports",
+            "Best check"
+          ],
+          "rows": [
+            [
+              "Bought directly from O2 on or after 1 August 2018",
+              "O2 says Apple devices bought directly from it since this date are not locked",
+              "Confirm No SIM restrictions on the device"
+            ],
+            [
+              "Older O2-supplied iPhone",
+              "May retain a legacy O2 restriction",
+              "Check Network Provider Lock and use O2's request route"
+            ],
+            [
+              "Second-hand iPhone described as “O2”",
+              "Could be O2-supplied, another provider’s device, or already unlocked",
+              "Verify the current lock status and the provider that supplied it"
+            ],
+            [
+              "Replacement or insurance device",
+              "The replacement hardware may have a different carrier record",
+              "Check the current device, not an old or returned device"
+            ],
+            [
+              "iPhone bought outside O2",
+              "O2 says it can only unlock devices bought directly from O2",
+              "Contact the provider that supplied or locked it"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom says mobile companies have been banned from selling locked handsets under rules that took effect on 17 December 2021. This helps explain why a recent UK purchase may not need a new unlock, but it does not establish the status of every used, replacement, or legacy iPhone; check the device itself.",
+          "links": [
+            {
+              "label": "Read Ofcom's locked-handset announcement",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-o2-status",
+          "text": "How to check whether an O2 iPhone is unlocked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock.",
+            "If it says No SIM restrictions, the iPhone reports no carrier restriction.",
+            "If it says SIM locked, note the exact wording. Use the current device’s IMEI only if O2 asks for it.",
+            "If safe for the line, test with a compatible active non-O2 SIM or eSIM after checking that the new line is ready to use.",
+            "If the field is missing or conflicts with O2’s record, contact O2 and ask it to confirm which device record it checked."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple's current UK instructions say No SIM restrictions is the confirmation and only the current network provider can unlock an iPhone. Apple cannot change an O2 carrier record on O2’s behalf.",
+          "links": [
+            {
+              "label": "Use Apple's current iPhone unlock steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A non-O2 SIM or eSIM can fail for reasons independent of a carrier lock, such as an inactive line or a compatibility problem. Treat the About screen and the destination provider’s activation result separately; a single error is not proof that an unlock was approved."
+        },
+        {
+          "kind": "h2",
+          "id": "official-o2-route",
+          "text": "How to request an O2 iPhone unlock"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that the iPhone is actually locked and O2 supplied it.",
+            "Use the current device’s IMEI; O2 says its unique IMEI is needed. Do not use an identifier from a different or returned device.",
+            "For Pay Monthly or Pay As You Go, follow the contact instructions on O2's current unlock page while you are in the UK.",
+            "For an O2 Business device, the main account holder should use O2's Business contact route; O2 also says the request must be made while in the UK.",
+            "Keep O2’s text or email response for your records.",
+            "After O2 confirms approval, insert a compatible non-O2 SIM; for an eSIM, follow Apple's current setup instructions.",
+            "Verify No SIM restrictions and test voice, messages, and mobile data on the destination network."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "contract-still-applies",
+          "text": "Unlocking does not end the O2 contract"
+        },
+        {
+          "kind": "p",
+          "text": "O2 says Pay Monthly customers still need to see out the minimum contract term even if they put a non-O2 SIM in the device. Unlocking changes network access only; it does not itself cancel the O2 service or change the contract. Ask O2 separately about cancellation, number transfer, or any device-payment terms."
+        },
+        {
+          "kind": "h3",
+          "id": "second-hand-o2",
+          "text": "What if the O2 iPhone is second-hand?"
+        },
+        {
+          "kind": "p",
+          "text": "The seller’s O2 SIM, receipt, or description does not by itself prove the current carrier lock. Check Network Provider Lock, use the current device’s history, and confirm O2 supplied the device. If it did not, O2’s page directs you to the provider that supplied it.",
+          "links": [
+            {
+              "label": "Find the carrier controlling an iPhone lock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "unlock-not-unblock",
+          "text": "O2 unlock and O2 unblock are different"
+        },
+        {
+          "kind": "p",
+          "text": "O2 distinguishes unlocking a handset for another network from unblocking a SIM. If too many incorrect SIM PIN attempts block the line, the SIM issuer provides a PUK. A PUK does not remove an O2 carrier restriction, and a carrier-unlock request does not reset a forgotten device passcode."
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "What is restricted",
+            "Who can fix it"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: SIM locked",
+              "Use of other carriers",
+              "The current network provider; O2 only if O2 controls the lock"
+            ],
+            [
+              "No SIM restrictions",
+              "No carrier restriction is reported",
+              "The destination carrier for any separate service issue"
+            ],
+            [
+              "SIM PIN or PUK",
+              "One physical SIM or eSIM line",
+              "The carrier that issued the line"
+            ],
+            [
+              "Forgotten passcode",
+              "Access to local device data",
+              "Apple's documented reset process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The previous owner or Apple’s documented support route"
+            ],
+            [
+              "Organisation message or management profile",
+              "Mobile Device Management (MDM) control, separate from carrier lock",
+              "The owning organisation or its IT administrator"
+            ],
+            [
+              "Lost, stolen, or network-barred status",
+              "Network acceptance or device status, separate from carrier lock",
+              "Ask the reporting provider about its process; an unlock request is not a blacklist-removal request"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Mobile Device Management (MDM) is a separate ownership and administration layer. Apple says managed devices can use organisation-linked or user-linked Activation Lock and can be managed through Apple Business, Apple School Manager, or a device-management service. If an iPhone shows an organisation message or management profile, contact the owning organisation or its IT administrator; do not assume an O2 carrier unlock removes that control.",
+          "links": [
+            {
+              "label": "Read Apple's device-management guidance",
+              "href": "https://support.apple.com/guide/deployment/activation-lock-depf4ab94ef1/web"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "O2's current SIM help says that entering the wrong PIN too many times blocks the SIM and that a PUK is needed to unblock it. Obtain the PUK from the line issuer and do not guess. This is a SIM-unblock step, not a carrier-unlock request.",
+          "links": [
+            {
+              "label": "See O2's current PUK instructions",
+              "href": "https://www.o2.co.uk/help/phones-and-devices/sims-and-numbers/unblock-your-phone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-o2-result",
+          "text": "Complete and verify the O2 iPhone unlock"
+        },
+        {
+          "kind": "p",
+          "text": "O2 tells retail iPhone customers to insert a non-O2 SIM after its confirmation. Apple's current instructions also support activating another provider’s eSIM and show No SIM restrictions as the final status. Follow the current iPhone screens rather than expecting an Android-style network code.",
+          "links": [
+            {
+              "label": "Use Apple's current completion steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "After O2 responds",
+            "What the result suggests",
+            "Next action"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and new service works",
+              "The carrier restriction appears cleared and the destination service is active",
+              "Keep the O2 confirmation"
+            ],
+            [
+              "No SIM restrictions but SOS or No Service",
+              "The About screen shows no carrier restriction, but a separate service issue remains",
+              "Check plan activation, coverage, compatibility, and whether the IMEI is accepted"
+            ],
+            [
+              "SIM locked remains",
+              "The status did not change, or O2 may not control the lock",
+              "Ask O2 which device record it reviewed and which provider controls it"
+            ],
+            [
+              "SIM Not Supported",
+              "Apple’s activation message still rejects the inserted line",
+              "Recheck current provider approval and destination compatibility"
+            ],
+            [
+              "PUK requested",
+              "The SIM is blocked",
+              "Contact the SIM issuer; do not order another carrier unlock"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple documents a backup, erase, and restore method when no other SIM is available, but only after the network provider has confirmed approval. Erasing the iPhone first does not force an O2 unlock.",
+          "links": [
+            {
+              "label": "Learn how to finish an unlock without another SIM",
+              "href": "/articles/unlock-iphone-without-sim-card-after-approval"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-o2",
+          "text": "Where a third-party service fits"
+        },
+        {
+          "kind": "p",
+          "text": "Only the current network provider can unlock an iPhone. A third-party service cannot substitute for O2’s decision, remove Activation Lock, provide a SIM PUK, or promise that a lost, stolen, or network-barred status will be cleared. This article does not verify any third-party provider’s eligibility result, timing, price, financing, or warranty terms."
+        },
+        {
+          "kind": "p",
+          "text": "O2 already publishes a free route for O2-supplied devices. If you consider paid help, verify the exact carrier and country, eligibility terms, refusal handling, and what evidence counts as completion. Verify completion yourself with No SIM restrictions; do not accept a promise that every O2 or Tesco device follows one record, or that an unlock clears a blacklist or contract.",
+          "links": [
+            {
+              "label": "Review a checklist before paying for an IMEI service",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Not sure whether O2 supplied or locked the iPhone? Send the exact Network Provider Lock wording and device history—without passwords, PINs or full identifiers in an ordinary message.",
+          "href": "/contact",
+          "label": "Review the O2 unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are O2 iPhones unlocked?",
+          "answer": "O2 says Apple devices bought directly from O2 since 1 August 2018 are no longer locked. Confirm the individual iPhone in Settings, General, About; No SIM restrictions is the reported unlocked status."
+        },
+        {
+          "question": "Does O2 charge to unlock an iPhone?",
+          "answer": "O2's current UK page says Pay Monthly and Pay As You Go customers can ask for an O2-supplied locked device to be unlocked free of charge while in the UK. Use O2's current route and keep the response."
+        },
+        {
+          "question": "Can O2 unlock a second-hand iPhone?",
+          "answer": "Only if O2 actually supplied or controls the locked device. Check the current IMEI and carrier history first; O2 says a device bought from another provider must be handled by that provider."
+        },
+        {
+          "question": "Does unlocking an O2 iPhone cancel the contract?",
+          "answer": "No. O2 says Pay Monthly customers must still see out the minimum contract term even if they use a non-O2 SIM. Unlocking changes carrier access; ask O2 separately about cancellation, number transfer, or any device-payment terms."
+        },
+        {
+          "question": "How do I verify an O2 iPhone unlock?",
+          "answer": "After O2 confirms approval, check for No SIM restrictions in Settings, General, About and activate a compatible non-O2 SIM or eSIM. A confirmation text alone is not the strongest proof; check the device status and service activation."
+        }
+      ]
+    },
+  {
+      "slug": "vodafone-uk-iphone-unlock-guide",
+      "title": "Vodafone UK iPhone Unlock Guide",
+      "heading": "Vodafone iPhone Unlock: UK Status and Safe Steps",
+      "description": "Check a Vodafone UK iPhone's Carrier Lock, follow the official route, and keep NUC, PUK, Activation Lock and MDM issues separate.",
+      "standfirst": "Most Vodafone UK Apple devices should already be unlocked, but check the iPhone itself and identify the controlling record before submitting any details.",
+      "published": "2026-10-12",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "Vodafone UK iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Start a Vodafone UK iPhone unlock with a status check, not an order. Vodafone says most of its Apple devices should already be unlocked and asks customers to try another network first. If the iPhone still reports a carrier restriction, use Vodafone's current Network Unlock Code form only when Vodafone supplied the device and the form accepts the request. Vodafone says it cannot unlock a phone bought from a different provider or one reported lost or stolen.",
+          "links": [
+            {
+              "label": "Check Vodafone UK's current unlock form",
+              "href": "https://www.vodafone.co.uk/forms/static/network-unlock-code"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Vodafone UK says most of its Apple devices should already be unlocked, so verify Network Provider Lock before requesting anything.",
+            "On iPhone, No SIM restrictions next to Network Provider Lock in Settings, General, About means the phone reports no carrier restriction.",
+            "A Vodafone NUC concerns a phone locked to the Vodafone network; a PUK unlocks a Vodafone SIM after incorrect SIM PIN attempts.",
+            "Vodafone's form says it cannot unlock a phone bought from another provider, so identify the supplying or locking provider first.",
+            "A carrier unlock changes network-provider access only. It does not by itself remove Activation Lock, a passcode, an MDM enrolment, destination-network requirements or any separate account or contract terms."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-status-first",
+          "text": "Check whether the Vodafone iPhone is already unlocked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, tap General, then About.",
+            "Find Network Provider Lock. Apple may show the equivalent Carrier Lock wording on some iOS versions or regions.",
+            "If it says No SIM restrictions, the iPhone reports no carrier restriction. Move on to destination-network compatibility and activation.",
+            "If it says SIM locked, record the exact wording and identify which provider supplied or locked the device before sharing details.",
+            "If the field is missing or unclear, follow Apple's guidance to contact the network provider. Do not treat a missing field, a generic error or one working Vodafone SIM as proof of an unlock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple's current instructions use No SIM restrictions as the on-device confirmation and state that only the current network provider can unlock an iPhone. Apple cannot authorize a Vodafone record on the carrier's behalf.",
+          "links": [
+            {
+              "label": "Read Apple's current iPhone unlock guidance",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Ofcom says UK mobile companies have been banned from selling customers locked handsets under rules in force since 17 December 2021. That regulator page does not establish the status of an individual older or second-hand iPhone, so check the device and the controlling provider rather than relying on the rule alone.",
+          "links": [
+            {
+              "label": "Read Ofcom's UK locked-handset guidance",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A Vodafone SIM only shows that the current Vodafone line can activate. To test a carrier change, use a compatible, active SIM or eSIM from a genuinely different network when available. A successful activation still does not guarantee coverage, plan features or compatibility everywhere."
+        },
+        {
+          "kind": "h2",
+          "id": "choose-owner",
+          "text": "Identify who controls the restriction before requesting an unlock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device history or result",
+            "Likely controlling record",
+            "Best next step"
+          ],
+          "rows": [
+            [
+              "Bought directly from Vodafone UK and Network Provider Lock says SIM locked",
+              "Vodafone UK carrier record",
+              "Use the current Vodafone UK unlock form or support route"
+            ],
+            [
+              "Bought from another retailer or network",
+              "The supplying or locking provider",
+              "Ask that provider; Vodafone says it cannot unlock devices bought elsewhere"
+            ],
+            [
+              "Second-hand iPhone with unknown history",
+              "Unknown until verified",
+              "Identify the locking provider and obtain seller documentation before paying"
+            ],
+            [
+              "No SIM restrictions but a new line will not activate",
+              "Destination provider or device-service issue",
+              "Check the destination provider's activation, compatibility and coverage requirements"
+            ],
+            [
+              "SIM locked or PUK prompt",
+              "The carrier that issued the SIM or eSIM",
+              "Use the SIM issuer's PIN or PUK recovery process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Apple Account Activation Lock",
+              "Ask the legitimate owner to remove the device through Apple's documented process"
+            ],
+            [
+              "Remote Management or another managed-device message",
+              "An organisation's MDM enrolment",
+              "Contact the owning organisation or its device-management administrator"
+            ],
+            [
+              "Lost, stolen or another IMEI status",
+              "The reporting provider or legitimate account holder",
+              "Contact the relevant provider through its authenticated route; do not treat it as a routine carrier-unlock request"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Vodafone's form says it cannot unlock a phone bought from another provider or a device reported lost or stolen. Apple separately describes Activation Lock as an Apple Account control, while Apple's device-management documentation describes MDM as an organisation's configuration and command system. These are different records from Carrier Lock; this article does not claim a generic blacklist-removal route.",
+          "links": [
+            {
+              "label": "Find the locking carrier before you request an unlock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            },
+            {
+              "label": "Read Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-gb/108794"
+            },
+            {
+              "label": "Read Apple's device-management overview",
+              "href": "https://support.apple.com/guide/deployment/depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "official-request",
+          "text": "How to use the official Vodafone UK request route"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that Network Provider Lock still shows a restriction, that Vodafone UK supplied the phone, and that the form's eligibility questions fit your situation.",
+            "Prepare the email address, contact number, manufacturer, model and IMEI requested by Vodafone's form. Use the identifier from the iPhone you are actually submitting.",
+            "For a business or corporate account, use the account option and support route currently shown by Vodafone for your account; do not assume a personal route or an unverified corporate workflow.",
+            "Submit the current Vodafone UK form only through Vodafone's site and keep its confirmation and subsequent messages. A submission is not proof that the carrier record has changed.",
+            "Wait for Vodafone's confirmation that the handset has been unlocked before testing activation or erasing the iPhone.",
+            "After confirmation, insert a compatible non-Vodafone SIM or set up the other provider's eSIM and follow the on-screen activation instructions.",
+            "Return to Settings, General, About and verify No SIM restrictions. Then test the destination service without assuming that carrier unlock guarantees coverage or every feature."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "imei-selection",
+          "text": "Use the IMEI from the device in your hand"
+        },
+        {
+          "kind": "p",
+          "text": "Vodafone's form requests the manufacturer, model and IMEI. Apple says the IMEI, EID and ICCID can be found in Settings, General, About, with other lookup methods available before setup. Copy the identifier carefully, send it only to the intended authenticated form, and do not post it publicly or reuse an identifier from another iPhone.",
+          "links": [
+            {
+              "label": "See Apple's official identifier lookup methods",
+              "href": "https://support.apple.com/en-gb/108037"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "iphone-no-code-box",
+          "text": "What if the iPhone never shows a code box?"
+        },
+        {
+          "kind": "p",
+          "text": "Vodafone's general help page describes code entry for some devices, but its Apple instructions say that a locked Apple device with a NUC should first receive Vodafone's confirmation email, then use a non-Vodafone SIM and follow the on-screen setup. Do not put a NUC into a SIM PIN, device-passcode or PUK prompt. If Vodafone confirms the unlock but Network Provider Lock still says SIM locked, return to Vodafone with the case reference and exact screen wording.",
+          "links": [
+            {
+              "label": "Read Vodafone's Apple NUC instructions",
+              "href": "https://www.vodafone.co.uk/help/account/how-to-use-your-nuc"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "puk-versus-nuc",
+          "text": "Do not confuse a Vodafone PUK with a network unlock"
+        },
+        {
+          "kind": "p",
+          "text": "Vodafone distinguishes the two codes. If you enter a SIM PIN incorrectly three times, Vodafone says you need a PUK to unlock that SIM. Entering the wrong PUK ten times permanently blocks the SIM. A NUC addresses a phone locked to the Vodafone network, not the credentials of one SIM. Stop guessing and contact the SIM issuer if a PUK prompt appears.",
+          "links": [
+            {
+              "label": "Review Vodafone UK's PUK and NUC explanation",
+              "href": "https://www.vodafone.co.uk/help/sim/puk-code"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Prompt or status",
+            "What it controls",
+            "Who can resolve it"
+          ],
+          "rows": [
+            [
+              "Network Provider Lock: SIM locked",
+              "Use of other compatible networks",
+              "The locking network provider"
+            ],
+            [
+              "Network Provider Lock: No SIM restrictions",
+              "The iPhone reports no carrier restriction",
+              "Destination provider handles separate service activation"
+            ],
+            [
+              "SIM PIN or PUK",
+              "One physical SIM or eSIM line",
+              "The carrier that issued that line"
+            ],
+            [
+              "Forgotten device passcode",
+              "Access to local iPhone data",
+              "Apple's documented passcode-reset process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate owner or Apple's documented support route"
+            ],
+            [
+              "Remote Management or managed profile",
+              "Organisation device-management controls",
+              "The owning organisation or its MDM administrator"
+            ],
+            [
+              "Lost, stolen or another IMEI status",
+              "A provider or ownership record",
+              "The reporting provider or legitimate account holder; no generic removal is promised"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "after-approval",
+          "text": "Verify the unlock after Vodafone confirms it"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says to use another provider's SIM after the network provider confirms the unlock, or set up the other provider's eSIM. If no other SIM is available, Apple documents a backup, erase and restore route. Erasing first does not make Vodafone approve a locked device, so do not use that route as a substitute for provider confirmation.",
+          "links": [
+            {
+              "label": "Follow Apple's post-approval activation steps",
+              "href": "https://support.apple.com/en-gb/109316"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result after confirmation",
+            "What it suggests",
+            "Next action"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions and service works",
+              "The carrier restriction is not reported and the destination service activated",
+              "Keep Vodafone's confirmation and finish the destination account setup"
+            ],
+            [
+              "No SIM restrictions but No Service or SOS",
+              "The carrier restriction appears removed; service is a separate issue",
+              "Check the destination plan, compatibility, coverage and provider-side activation"
+            ],
+            [
+              "SIM locked remains",
+              "The carrier-side status has not changed or has not reached activation",
+              "Ask Vodafone to review the device record and case"
+            ],
+            [
+              "SIM Not Supported",
+              "The inserted SIM or eSIM is still rejected, or compatibility remains unresolved",
+              "Recheck provider confirmation, compatibility and the locking provider"
+            ],
+            [
+              "Locked SIM or PUK prompt",
+              "The line credential is blocked",
+              "Contact the SIM issuer and do not guess"
+            ],
+            [
+              "iPhone Locked to Owner or Remote Management",
+              "Apple Account or organisation management still controls setup",
+              "Use the legitimate owner or organisation administrator route, not a carrier-unlock request"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If the iPhone shows No SIM restrictions but cannot register on the new network, stop buying unlocks and troubleshoot service instead. A carrier-unlock check does not verify destination coverage, plan provisioning, every radio band, blacklist status or an organisation's management record.",
+          "links": [
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            },
+            {
+              "label": "Check iPhone carrier-unlock eligibility",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "Where a third-party unlock service fits"
+        },
+        {
+          "kind": "p",
+          "text": "This article does not verify any third-party service's authorisation, provider access or outcome. A third party may help you read instructions or organise information, but only the current network provider can change the carrier-unlock record. An IMEI report, paid submission or approval email from an intermediary is not the same as the iPhone showing No SIM restrictions.",
+          "links": [
+            {
+              "label": "Use the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before paying anyone, ask for the exact carrier and country, a defined deliverable, refusal handling and a verification step based on Network Provider Lock. This article does not confirm provider availability, blacklist removal, financing or warranty outcomes, price, or completion time for any service. Protect your IMEI and account details and use Vodafone directly for the carrier record.",
+          "links": [
+            {
+              "label": "Check the service checklist before sharing details",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Still unsure whether Vodafone UK controls the restriction? Share the Network Provider Lock wording, device source and known carrier history through the review route—without passwords, PINs or a publicly visible IMEI.",
+          "href": "/contact",
+          "label": "Review the Vodafone unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are Vodafone UK iPhones already unlocked?",
+          "answer": "Vodafone UK says most of its Apple devices should already be unlocked. Confirm the individual iPhone in Settings, General, About: No SIM restrictions next to Network Provider Lock means it reports no carrier lock."
+        },
+        {
+          "question": "How do I unlock a Vodafone UK iPhone?",
+          "answer": "Check Network Provider Lock, confirm Vodafone UK supplied or locked the device, use Vodafone's current official route if the form accepts the request, wait for confirmation, then activate a compatible SIM or eSIM from another network. The request itself is not proof of completion."
+        },
+        {
+          "question": "Is a Vodafone PUK the same as an iPhone carrier unlock?",
+          "answer": "No. A PUK recovers a Vodafone SIM after incorrect SIM PIN entries. A carrier unlock changes whether the iPhone may activate on other compatible networks."
+        },
+        {
+          "question": "Can Vodafone UK unlock an iPhone bought from another provider?",
+          "answer": "Vodafone's current form says it cannot unlock a device bought from another provider. Identify and contact the supplying or locking provider instead."
+        },
+        {
+          "question": "Does a carrier unlock remove Activation Lock or MDM?",
+          "answer": "No. Carrier Lock concerns network-provider access. Activation Lock is tied to the Apple Account and Find My, while MDM is an organisation's device-management control. Use the legitimate owner or organisation administrator route for those records."
+        },
+        {
+          "question": "How do I prove the Vodafone iPhone unlock is complete?",
+          "answer": "Check that Network Provider Lock says No SIM restrictions, then activate and test a compatible SIM or eSIM from another network. A submitted request, an IMEI report or a third-party message alone is not proof of completion."
+        }
+      ]
+    },
+  {
+      "slug": "are-replacement-iphones-unlocked",
+      "title": "Are Replacement iPhones Unlocked?",
+      "heading": "Are Replacement iPhones Unlocked From the Carrier?",
+      "description": "Learn how to check a replacement iPhone’s Carrier Lock, use the correct device record, and separate carrier, eSIM, SIM PIN, Activation Lock, and MDM issues.",
+      "standfirst": "A replacement iPhone has its own device record. Check its Carrier Lock status and do not assume the old phone’s result transfers.",
+      "published": "2026-10-12",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "Replacement iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Are replacement iPhones unlocked? There is no universal answer for every replacement or country. Check the replacement iPhone itself in Settings, General, About. If Carrier Lock does not show No SIM restrictions, ask the relevant carrier to review the replacement record. Use the replacement’s identifiers when support asks, and keep them private."
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Check the replacement iPhone itself; an old-device unlock confirmation does not establish the new device’s status.",
+            "No SIM restrictions beside Carrier Lock is Apple’s on-device indication that the replacement reports no carrier restriction.",
+            "Have the replacement serial number, IMEI or IMEI2, EID when relevant, and exchange documentation available; share identifiers only through a verified channel and only as requested.",
+            "Apple cannot carrier-unlock a replacement iPhone; only the current carrier can authorize an unlock for use with another carrier.",
+            "Do not erase, jailbreak, or pay for another unlock until you separate a carrier lock from eSIM transfer, SIM PIN, Activation Lock, MDM, and service-provisioning problems."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-replacement",
+          "text": "Check the replacement before transferring everything"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Connect the replacement iPhone to trusted Wi-Fi and complete only the setup required to reach Settings.",
+            "Open Settings, General, About, and read the Carrier Lock field.",
+            "Record the replacement serial number, IMEI or IMEI2, and EID when eSIM is involved. Keep these identifiers private.",
+            "Compare those identifiers with the carrier account and the repair, insurance, or exchange paperwork. Do not submit the original phone’s saved IMEI by habit.",
+            "If Carrier Lock says No SIM restrictions, test a compatible active SIM or eSIM from the destination network when that network supports the model and plan.",
+            "If it says SIM locked, use the device history to identify the relevant carrier and ask it to review the replacement record."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple documents No SIM restrictions as the unlocked result and says only the current carrier can unlock an iPhone. For a replacement from Apple service, a carrier, an insurer, or a retailer, check the replacement’s own status and ask the responsible carrier or issuing organization about the applicable record and eligibility; Apple’s general guidance alone does not establish the result.",
+          "links": [
+            {
+              "label": "Read Apple’s current carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "why-imei-matters",
+          "text": "Why the replacement IMEI matters"
+        },
+        {
+          "kind": "p",
+          "text": "A carrier may ask for the replacement IMEI or other identifiers to locate the relevant device record; requirements and workflows vary by carrier and country. Apple lists the Settings, Hello screen, Finder, Apple Account, and original packaging locations for IMEI, IMEI2, EID, and related identifiers.",
+          "links": [
+            {
+              "label": "Use Apple’s official identifier lookup methods",
+              "href": "https://support.apple.com/en-us/108037"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Keep this evidence",
+            "Why it helps",
+            "Do not share publicly"
+          ],
+          "rows": [
+            [
+              "Replacement IMEI or IMEI2",
+              "May help the carrier locate the replacement record when requested",
+              "Yes"
+            ],
+            [
+              "EID for an eSIM issue",
+              "May help with eSIM provisioning when the carrier requests it",
+              "Yes"
+            ],
+            [
+              "Original-device IMEI",
+              "Provides context about the replacement chain when the old device had an earlier result",
+              "Yes"
+            ],
+            [
+              "Repair, warranty, insurance, or exchange case number",
+              "Connects the old and replacement devices through the issuing organization",
+              "Treat as private account information"
+            ],
+            [
+              "Carrier unlock confirmation for the original device",
+              "Shows the earlier outcome but does not prove the replacement status",
+              "Share only with verified support"
+            ],
+            [
+              "Carrier Lock screenshot with personal data cropped",
+              "Records the exact status and time of the check",
+              "Crop phone numbers and identifiers"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "An IMEI check can organize the investigation, but it does not authorize a carrier unlock. The responsible carrier still decides eligibility and applies any status change."
+        },
+        {
+          "kind": "h2",
+          "id": "replacement-source",
+          "text": "Follow the route for the replacement source"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "How you received the replacement",
+            "First contact",
+            "What to request"
+          ],
+          "rows": [
+            [
+              "Apple repair or Express Replacement Service",
+              "The carrier identified from the device history or lock record, with Apple service documentation available",
+              "Ask whether the replacement IMEI is linked to the relevant record and what eligibility review applies"
+            ],
+            [
+              "Carrier warranty exchange",
+              "The carrier’s warranty and unlock support teams",
+              "Ask whether the exchange IMEI is linked to the account and how any earlier decision is treated"
+            ],
+            [
+              "Insurance replacement",
+              "The insurer for documentation, then the carrier identified from the device history",
+              "Keep proof of the replacement chain and ask for a review of the current device record"
+            ],
+            [
+              "Retailer return or exchange",
+              "The retailer for provenance, then the carrier identified from the device history",
+              "Ask whether source records can be corrected and which carrier route applies"
+            ],
+            [
+              "Second-hand replacement from a seller",
+              "The seller and the carrier identified from the device history",
+              "Ask for purchase or account evidence; use available buyer-protection channels if the history was misrepresented"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple’s Express Replacement instructions describe a kit containing a replacement iPhone and materials to return the original, and direct customers to prepare the original for service. They do not establish that the replacement is unlocked or that the original device’s carrier status follows it. Express Replacement is an AppleCare benefit that is not available in all countries or regions, and service terms can apply.",
+          "links": [
+            {
+              "label": "Review Apple’s Express Replacement preparation steps",
+              "href": "https://support.apple.com/en-us/102781"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-case",
+          "text": "What to say in a carrier support case"
+        },
+        {
+          "kind": "p",
+          "text": "Use a precise request: “This is a replacement for a device with an IMEI ending in [last four]. The original device had [status or case number]. The replacement currently shows [exact Carrier Lock wording]. Please review which carrier is responsible for this device record and whether the replacement is eligible.” Keep full identifiers inside the carrier’s authenticated channel."
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Ask for the carrier name controlling the restriction, not merely the active SIM’s brand.",
+            "Ask whether the account, original device and replacement device records are correctly linked.",
+            "Ask for the exact eligibility or denial reason in writing rather than a generic “not eligible” response.",
+            "Keep the case number and confirmation message, and note which IMEI the agent reviewed.",
+            "After approval, reconnect to Wi-Fi, activate the destination SIM or eSIM and recheck Carrier Lock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "No universal replacement-unlock eligibility rule is established here. Financing payoff, activation or usage period, account standing, lost, stolen, or blocked status, warranty or insurance terms, and any temporary-unlock option may depend on the responsible carrier and country. Check the carrier’s current policy before relying on an outcome; do not infer a price or completion time from this article. For U.S. examples, the FCC, Verizon, T-Mobile, and AT&T publish separate rules; those examples are not a universal replacement rule.",
+          "links": [
+            {
+              "label": "FCC consumer guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Verizon policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            },
+            {
+              "label": "T-Mobile policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "AT&T policy",
+              "href": "https://www.att.com/support/article/wireless/KM1008728/"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If you cannot identify the relevant carrier, start with the device history and a reliable carrier check before opening cases with unrelated providers.",
+          "links": [
+            {
+              "label": "Find the carrier that controls an iPhone lock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            },
+            {
+              "label": "Check carrier-unlock eligibility before paying",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "separate-problems",
+          "text": "Separate Carrier Lock from replacement setup problems"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "What it usually concerns",
+            "Correct owner"
+          ],
+          "rows": [
+            [
+              "Carrier Lock: SIM locked",
+              "Restriction on using another carrier",
+              "The carrier responsible for the device record"
+            ],
+            [
+              "Carrier Lock: No SIM restrictions",
+              "No carrier restriction shown",
+              "Destination carrier for activation or service issues"
+            ],
+            [
+              "Transfer Not Supported or eSIM will not move",
+              "Line transfer or carrier provisioning",
+              "The carrier that issued the line"
+            ],
+            [
+              "Locked SIM or PUK prompt",
+              "Security on one SIM or eSIM",
+              "The SIM issuer; do not guess the code"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate owner or the organization’s documented route"
+            ],
+            [
+              "Remote management or organization enrollment",
+              "MDM or organization control; separate review from Carrier Lock",
+              "The organization or its device-management administrator"
+            ],
+            [
+              "Forgotten passcode",
+              "Access to local device data",
+              "Apple’s documented reset process"
+            ],
+            [
+              "No Service or SOS",
+              "Line activation, coverage, compatibility, or other service diagnostics",
+              "Destination carrier after checking Carrier Lock"
+            ]
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "esim-transfer",
+          "text": "eSIM transfer is not a carrier unlock"
+        },
+        {
+          "kind": "p",
+          "text": "An eSIM transfer or carrier activation moves or activates a plan according to the line-issuing carrier’s support. It does not by itself prove that a different carrier may activate the replacement. Do not treat a successful transfer on the original carrier as a Carrier Lock result; ask that carrier to reprovision the replacement EID or IMEI when necessary.",
+          "links": [
+            {
+              "label": "Read Apple’s eSIM setup guidance",
+              "href": "https://support.apple.com/en-us/118669"
+            },
+            {
+              "label": "Use the iPhone eSIM carrier-unlock guide",
+              "href": "/articles/how-to-unlock-esim-on-iphone"
+            },
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock",
+          "text": "Activation Lock is not a carrier lock"
+        },
+        {
+          "kind": "p",
+          "text": "“iPhone Locked to Owner” is an Apple Account ownership control. It is not a carrier unlock. Apple says the Apple Account password is required to turn off Find My, erase the device, or reactivate it. Use the legitimate owner’s credentials or Apple’s documented support route; never give an Apple Account password or verification code to an unlock service.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "mdm",
+          "text": "MDM and organization controls are separate"
+        },
+        {
+          "kind": "p",
+          "text": "A replacement can also be enrolled in Mobile Device Management or linked to an organization. Apple documents organization-linked and user-linked Activation Lock management through Apple School Manager, Apple Business, and a device-management service. The organization or its administrator must handle those controls; a carrier-unlock request does not establish that MDM or ownership controls are cleared. Ask the organization for its documented release or management process, and do not try to bypass it.",
+          "links": [
+            {
+              "label": "Read Apple’s deployment guidance for Activation Lock and device management",
+              "href": "https://support.apple.com/guide/deployment/activation-lock-depf4ab94ef1/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-result",
+          "text": "Verify the replacement after the carrier responds"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Wait for written confirmation that the replacement IMEI—not only the original IMEI—was approved or corrected.",
+            "Connect the replacement to Wi-Fi and follow the carrier’s activation instructions.",
+            "Open Settings, General, About and confirm Carrier Lock says No SIM restrictions.",
+            "Activate a compatible SIM or eSIM from another carrier and test calls, messages and cellular data.",
+            "If service fails despite No SIM restrictions, troubleshoot provisioning, plan status, bands, coverage and IMEI acceptance instead of ordering another unlock."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A carrier response that mentions only the old IMEI is not confirmation for the new hardware. A response that identifies the replacement record, together with No SIM restrictions on the replacement, is stronger evidence; a destination-network test can still reveal compatibility or provisioning issues.",
+          "links": [
+            {
+              "label": "Check an iPhone unlock four reliable ways",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "Where an iPhone unlock service can help"
+        },
+        {
+          "kind": "p",
+          "text": "An independent service is not the carrier and cannot be treated as proof that a replacement can be unlocked. An IMEI check or document review may organize the facts, but only the responsible carrier can decide eligibility and apply a carrier status change. No outside service can legitimately remove Activation Lock, override an organization’s MDM controls, or clear a valid lost-or-stolen report."
+        },
+        {
+          "kind": "p",
+          "text": "If you consider an independent service, ask what it will actually do, which replacement identifier it will review, what happens if the carrier declines, and what evidence would count as completion. Do not infer a price or time from this article. Avoid software downloads, jailbreak claims, and anyone asking for your Apple Account password, passcode, SIM PIN, or one-time code.",
+          "links": [
+            {
+              "label": "Use the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Replacement iPhone showing the wrong carrier status? Share the exact Carrier Lock wording, replacement source, and case history—without passwords or full identifiers in an ordinary message.",
+          "href": "/contact",
+          "label": "Review the replacement unlock case"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are Apple replacement iPhones automatically unlocked?",
+          "answer": "Do not assume they are. Check the replacement in Settings, General, About. No SIM restrictions confirms the device reports no carrier restriction; SIM locked means the controlling carrier must review it."
+        },
+        {
+          "question": "Does an unlock from my old iPhone transfer to the replacement?",
+          "answer": "An old confirmation does not prove the replacement status. Give the carrier both devices’ case history and the replacement IMEI, then verify No SIM restrictions on the replacement itself."
+        },
+        {
+          "question": "Can Apple unlock a replacement iPhone from a carrier?",
+          "answer": "No. Apple’s current guidance says only the current carrier can unlock an iPhone for use with another carrier. Apple service documentation can help explain the replacement chain."
+        },
+        {
+          "question": "Which IMEI should I use for a replacement iPhone unlock?",
+          "answer": "Provide the identifier the responsible carrier requests—typically the replacement device’s IMEI or IMEI2 when relevant—and confirm with the carrier which identifier it reviewed. Keep the original IMEI and exchange case as supporting history."
+        },
+        {
+          "question": "Why is my replacement iPhone unlocked but showing No Service?",
+          "answer": "If Carrier Lock says No SIM restrictions, the problem may involve line provisioning, eSIM transfer, device compatibility, coverage, plan status, or the carrier’s device acceptance checks. Ask the destination carrier to troubleshoot service."
+        }
+      ]
+    },
+  {
+      "slug": "can-apple-unlock-my-iphone-carrier-lock",
+      "title": "Can Apple Unlock Your iPhone?",
+      "heading": "Can Apple Unlock My iPhone From a Carrier?",
+      "description": "Can Apple unlock an iPhone? Learn who handles Carrier Lock and how it differs from Activation Lock, passcodes, SIM PIN, and MDM.",
+      "standfirst": "Apple documents how to check Carrier Lock and complete activation, but only the current carrier can authorize a carrier unlock.",
+      "published": "2026-10-11",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "Apple support and iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Can Apple unlock my iPhone from a carrier? No. Apple says it cannot unlock an iPhone for use with a different carrier; only the current carrier can unlock it. Apple documents where to check Carrier Lock and what to do after the carrier confirms the change, but the network authorization must come from the carrier that controls the restriction.",
+          "links": [
+            {
+              "label": "Read Apple's current carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Apple cannot authorize a carrier unlock; Apple says only the current carrier can do that.",
+            "An Apple support visit does not replace the carrier's decision on Carrier Lock.",
+            "A passcode reset and Activation Lock recovery are Apple processes, but they solve different problems.",
+            "A SIM PIN or PUK belongs to the carrier that issued that SIM or eSIM, not to Apple.",
+            "Apple says No SIM restrictions beside Carrier Lock means the iPhone is unlocked; network compatibility and activation are separate checks."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "why-apple-cannot-approve",
+          "text": "Why Apple cannot approve a carrier unlock"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock is a network restriction, not an Apple Account or passcode problem. Apple's published process directs customers to the current carrier because Apple does not authorize that carrier-side change. Eligibility, account status, payment terms, and request steps vary by carrier, plan, device source, and country. The FCC says unlocking does not guarantee technical compatibility with another network, and official carrier policies show why you must check the policy for the carrier that controls the restriction.",
+          "links": [
+            {
+              "label": "Read the FCC consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Check AT&T's official unlock requirements",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Check T-Mobile's official unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Check Verizon's official unlock policy",
+              "href": "https://www.verizon.com/about/consumer-safety/device-unlocking-policy"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "This distinction matters when a seller says “Apple will unlock it” or a shop says an Apple visit is all that remains. First identify which carrier controls the restriction and read that carrier’s current eligibility policy. A purchase receipt may matter in a separate Apple ownership process, but it does not replace the carrier’s decision on Carrier Lock.",
+          "links": [
+            {
+              "label": "See Apple's preowned-iPhone inspection guidance",
+              "href": "https://support.apple.com/en-us/104999"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not give a third party your Apple Account password, device passcode, one-time verification code, or SIM PIN for a carrier-unlock request. Those credentials do not authorize Carrier Lock removal."
+        },
+        {
+          "kind": "h2",
+          "id": "right-owner",
+          "text": "Which organization handles each kind of lock?"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see or need",
+            "What it controls",
+            "Correct owner or next step"
+          ],
+          "rows": [
+            [
+              "Carrier Lock shows a carrier",
+              "Whether the iPhone can be activated with another carrier",
+              "The current carrier; Apple says only it can unlock"
+            ],
+            [
+              "Carrier Lock: No SIM restrictions",
+              "Carrier restriction status",
+              "Apple says the iPhone is unlocked; the destination carrier handles activation"
+            ],
+            [
+              "Forgotten passcode or iPhone Unavailable",
+              "Access to local device data",
+              "Apple's documented passcode-reset process; a reset erases current data"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate owner or Apple's documented Activation Lock route"
+            ],
+            [
+              "Locked SIM or PUK prompt",
+              "Access to one SIM or eSIM line",
+              "The carrier that issued that line"
+            ],
+            [
+              "MDM or supervision notice",
+              "Organization-managed settings, restrictions, or commands",
+              "The owning organization or its device-management administrator"
+            ],
+            [
+              "Reported lost, stolen, or blocked status",
+              "A separate provider or resale-network status",
+              "The provider or account holder that manages the report; policies vary"
+            ],
+            [
+              "Unpaid balance or installment issue",
+              "A separate account or financing term",
+              "Check the relevant carrier or finance-provider terms; it does not prove an unlock outcome"
+            ]
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "passcode",
+          "text": "Forgotten passcode"
+        },
+        {
+          "kind": "p",
+          "text": "A passcode problem is not a carrier lock. Apple's current recovery instructions say that regaining access after a forgotten passcode requires resetting the iPhone, which erases the data currently on it. If you cannot use a computer, Apple says an Apple Store or Apple Authorized Service Provider can help with that reset route; this does not reveal the old passcode or grant a network unlock.",
+          "links": [
+            {
+              "label": "Review Apple's current passcode-reset instructions",
+              "href": "https://support.apple.com/en-us/118430"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock",
+          "text": "Activation Lock"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock protects Apple Account ownership and appears as iPhone Locked to Owner. Apple's current guidance points to the Apple Account and passcode used to set up the device, removing the device through Find My when applicable, or an Activation Lock support request with proof-of-purchase documentation. A carrier unlock does not remove Activation Lock.",
+          "links": [
+            {
+              "label": "See Apple's legitimate Activation Lock routes",
+              "href": "https://support.apple.com/en-us/108934"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "sim-pin",
+          "text": "SIM PIN or PUK"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN protects calls and cellular data on a particular SIM or eSIM. Apple warns not to guess it because repeated wrong entries can permanently lock the line credential. Contact the carrier that issued the SIM or eSIM for its default PIN or PUK and for a replacement line if the credential is exhausted—not Apple and not necessarily the carrier that sold the phone.",
+          "links": [
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "mdm-and-supervision",
+          "text": "MDM and device supervision"
+        },
+        {
+          "kind": "p",
+          "text": "Mobile device management (MDM) is separate from Carrier Lock, Activation Lock, and a SIM PIN. Apple says a device-management service can let an IT team send configurations, profiles, and commands, including organizational restrictions or a remote wipe or lock. Supervision generally indicates organization ownership and additional configuration control. If an iPhone shows a supervision or management notice, use the organization’s documented release or unenrollment process; do not treat a carrier unlock request as an MDM solution.",
+          "links": [
+            {
+              "label": "Read Apple's device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            },
+            {
+              "label": "Read Apple's device-supervision guidance",
+              "href": "https://support.apple.com/guide/deployment/about-device-supervision-dep1d89f0bff/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "safe-carrier-route",
+          "text": "Use the safe carrier-unlock route"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and read the exact wording beside Carrier Lock. If it says No SIM restrictions, do not buy another unlock.",
+            "Record the IMEI or IMEI2 for the line or SIM slot you will use. Keep it private except when submitting to the responsible carrier or a service you have independently verified.",
+            "Identify the carrier that controls the restriction rather than assuming the carrier name shown for an active SIM is the locking carrier.",
+            "Read that carrier's current official eligibility policy for the account type and device source. Do not rely on an old waiting-period figure copied from a forum.",
+            "Submit through the carrier's official portal or support channel and keep the case number, exact denial reason, and confirmation message.",
+            "After the carrier confirms the unlock, follow its completion instructions. Apple documents using another SIM or eSIM, or backing up, erasing, and restoring when no other SIM is available; do not assume one timing or method applies to every carrier.",
+            "Activate a compatible destination SIM or eSIM and test calls, messages, and cellular data before closing the old account or deleting an eSIM."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If you do not know which carrier controls the restriction, start with the device history and purchase record, then use the responsible carrier's official support or eligibility check. Do not send the same device identifier to unrelated portals simply because they promise a result.",
+          "links": [
+            {
+              "label": "Find the locking carrier before you request an unlock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            },
+            {
+              "label": "Check carrier-unlock eligibility before paying",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-completion",
+          "text": "How to verify completion without relying on a promise"
+        },
+        {
+          "kind": "p",
+          "text": "Go to Settings, General, About. Apple says No SIM restrictions beside Carrier Lock means the iPhone is unlocked. Then activate and test an active, compatible SIM or eSIM from the destination carrier. That check is stronger than a screenshot of a submitted request, but it does not guarantee coverage, compatibility with every network, or service provisioning.",
+          "links": [
+            {
+              "label": "Confirm the Carrier Lock status with Apple",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Review the FCC's compatibility warning",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result",
+            "What it means",
+            "Next step"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions",
+              "Apple says the iPhone is unlocked",
+              "Complete destination-carrier activation and test service"
+            ],
+            [
+              "Carrier Lock shows a carrier",
+              "The carrier restriction is still shown",
+              "Return to that carrier with the case number"
+            ],
+            [
+              "SIM Not Supported",
+              "Activation still rejects the SIM or eSIM",
+              "Confirm the carrier's response, device identifier, carrier, and compatibility"
+            ],
+            [
+              "No Service or SOS after unlock",
+              "The lock may be gone, but service may not be provisioned or compatible",
+              "Check line activation, compatibility, coverage, and any separate provider status"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock is blocking setup",
+              "Use the legitimate Apple Account route or Apple's documented support process"
+            ],
+            [
+              "Supervision or management notice",
+              "An organization may still control settings or enrollment",
+              "Contact the owning organization or its administrator; this is not a carrier unlock"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If Carrier Lock says No SIM restrictions but cellular service still fails, treat it as an activation, compatibility, coverage, or provider-status problem instead of repeatedly requesting another unlock.",
+          "links": [
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "What a third-party iPhone unlock service can actually do"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help organize device information or explain a carrier's published steps, but it has no authority to make Apple or a carrier approve an unlock. It should not be presented as a way to bypass eligibility, remove Activation Lock or MDM, reveal a passcode, clear a valid lost-or-stolen report, or make every destination network accept the device.",
+          "links": [
+            {
+              "label": "Review Apple's carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before sharing data or paying any third party, ask what information it needs, how it will verify completion, and what happens if the responsible carrier refuses the request. Treat promises of a guaranteed result, blacklist removal, fixed completion time, or universal carrier availability as unsupported unless the responsible provider documents them. Never provide Apple Account credentials, device passcodes, verification codes, or SIM PINs.",
+          "links": [
+            {
+              "label": "Use the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Not sure whether Apple, the carrier, the seller, or an organization owns your next step? Share only the exact screen wording, current Carrier Lock result, and known carrier or ownership history—never passwords, passcodes, verification codes, or SIM PINs.",
+          "href": "/contact",
+          "label": "Identify the correct unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can an Apple Store carrier-unlock my iPhone?",
+          "answer": "No. Apple says only the current carrier can unlock an iPhone for use with a different carrier. An Apple Store or Authorized Service Provider may help with a documented passcode-reset route when you cannot use a computer, but that does not authorize Carrier Lock removal."
+        },
+        {
+          "question": "Can Apple unlock my iPhone if I show proof of purchase?",
+          "answer": "Proof of purchase may be relevant to Apple's Activation Lock support request, which is a separate ownership protection. It does not replace the locking carrier's eligibility review for a carrier unlock, and it does not guarantee either outcome."
+        },
+        {
+          "question": "Can Apple unlock a forgotten iPhone passcode without erasing data?",
+          "answer": "Apple's current recovery instructions say that the reset used after a forgotten passcode erases the data currently on the iPhone. Restoring content later depends on a usable backup and the credentials required to restore it."
+        },
+        {
+          "question": "Why does Apple tell me to contact my carrier?",
+          "answer": "The current carrier controls the network restriction and its eligibility process. Apple can document the Carrier Lock check and activation steps, but it does not authorize the carrier-side change."
+        },
+        {
+          "question": "How do I know the carrier unlock is complete?",
+          "answer": "Open Settings, General, About and confirm Carrier Lock says No SIM restrictions. Then activate and test a compatible SIM or eSIM from the destination carrier; this still does not guarantee every network will work."
+        },
+        {
+          "question": "Does removing MDM or Activation Lock unlock an iPhone for another carrier?",
+          "answer": "No. MDM or supervision concerns organization management, and Activation Lock concerns Apple Account ownership. Neither is the same as Carrier Lock; use the responsible organization's or Apple's documented route for that separate issue."
+        }
+      ]
+    },
+  {
+      "slug": "does-changing-sim-card-unlock-iphone",
+      "title": "Can a SIM Card Unlock an iPhone?",
+      "heading": "Does Changing a SIM Card Unlock an iPhone?",
+      "description": "Learn whether changing a SIM can unlock an iPhone, how to check Carrier Lock, and how to distinguish activation, SIM PIN, Activation Lock, and MDM issues.",
+      "standfirst": "Changing a SIM can test an iPhone or complete activation after an authorized carrier unlock, but the SIM itself does not create that authorization.",
+      "published": "2026-10-11",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "SIM change and iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Does changing a SIM card unlock an iPhone? No. Swapping a physical SIM—or adding another carrier's eSIM—can test an iPhone that is already unlocked. A new SIM can also complete activation after the current carrier confirms an unlock. It does not remove Carrier Lock by itself. Apple says only the current carrier can authorize the unlock, then describes the new SIM as a completion step after confirmation.",
+          "links": [
+            {
+              "label": "Read Apple’s current unlock and SIM steps",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "A SIM swap tests carrier permission; it does not create that permission.",
+            "Insert another carrier’s SIM only after checking Carrier Lock and confirming that the SIM, plan and iPhone are compatible.",
+            "SIM Not Supported can reflect a carrier restriction, activation or compatibility issue, while Locked SIM concerns the PIN or PUK protecting one SIM or eSIM.",
+            "No SIM restrictions is the on-device carrier-unlock status to look for in Settings, General, About.",
+            "Do not delete an active eSIM or cancel the old line merely to test whether an iPhone is unlocked."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "what-sim-swap-does",
+          "text": "What a SIM swap actually does"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM or eSIM supplies or represents a cellular plan for activation. The iPhone separately reports its Carrier Lock status. When you insert another carrier's active SIM, the device attempts to activate that line. The result can provide evidence about whether the restriction is gone, but the SIM is part of the test—not the unlock authority. Activation still depends on the carrier and device being compatible.",
+          "links": [
+            {
+              "label": "See Apple's guidance on invalid or missing SIM alerts",
+              "href": "https://support.apple.com/en-us/108914"
+            },
+            {
+              "label": "Read the FCC guide to unlocking and compatibility",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Action",
+            "What it can do",
+            "What it cannot do"
+          ],
+          "rows": [
+            [
+              "Insert another carrier’s active SIM",
+              "Test activation and finish an already approved unlock",
+              "Force the locking carrier to approve the device"
+            ],
+            [
+              "Remove the current SIM",
+              "Disconnect that physical line from the iPhone",
+              "Change Carrier Lock or cancel the account"
+            ],
+            [
+              "Replace a damaged SIM",
+              "Restore access to the same carrier line",
+              "Open the iPhone to other carriers"
+            ],
+            [
+              "Add an eSIM",
+              "Install a supported digital cellular plan",
+              "Bypass Carrier Lock for a different carrier"
+            ],
+            [
+              "Transfer an eSIM to another iPhone",
+              "Move an eligible line between devices",
+              "Transfer the old device’s unlock status"
+            ],
+            [
+              "Enter a SIM PIN or PUK",
+              "Unlock that SIM or eSIM credential",
+              "Remove the iPhone’s carrier restriction"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A physical SIM from the same locking carrier may work even while the iPhone remains carrier-locked. That test does not prove the device can use a different carrier."
+        },
+        {
+          "kind": "h2",
+          "id": "before-changing-sim",
+          "text": "Before changing the SIM, check these four things"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and read Carrier Lock. No SIM restrictions means the iPhone reports itself as carrier-unlocked.",
+            "Confirm the test SIM or eSIM is active and comes from the intended destination carrier; a brand that uses the same parent network or provisioning path may not be a distinct test.",
+            "Ask the destination carrier to check model, bands, IMEI, eSIM and plan compatibility. An unlocked phone can still be incompatible with a particular network.",
+            "Keep the old SIM, eSIM details and account active until the new line works. A test should not risk losing access to the existing number."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If you need a status check without another SIM, the Carrier Lock field is a useful starting point. Carrier confirmation and a fresh activation attempt can provide additional evidence, but neither changes the carrier record by itself.",
+          "links": [
+            {
+              "label": "Use four reliable iPhone unlock checks",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            },
+            {
+              "label": "Learn how to finish an unlock without another SIM",
+              "href": "/articles/unlock-iphone-without-sim-card-after-approval"
+            },
+            {
+              "label": "Check Apple's Carrier Lock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "safe-test",
+          "text": "How to test with another SIM safely"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Connect the iPhone to Wi-Fi. If Apple or the carrier offers a carrier-settings update, install it, and follow the carrier's activation instructions. An iOS update is not presented here as a prerequisite for unlocking.",
+            "Power down if the device or carrier instructions require it, then insert the active nano-SIM. For eSIM, use the destination carrier’s supported activation method.",
+            "Allow activation to finish. Do not repeatedly erase the iPhone or enter random PINs while the result is unclear.",
+            "Open Settings, General, About and recheck Carrier Lock.",
+            "Test an outgoing call, incoming call, message and cellular data. Confirm the correct line is selected on a Dual SIM iPhone.",
+            "Record the exact alert if activation fails. The wording determines whether you need the locking carrier, destination carrier, SIM issuer or Apple recovery route."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "physical-sim",
+          "text": "Physical SIM result"
+        },
+        {
+          "kind": "p",
+          "text": "After the carrier confirms the unlock, Apple's instructions say that a user with another carrier's SIM can remove the old SIM and insert the new one; the device then activates. The order matters: carrier confirmation comes before the SIM completion step.",
+          "links": [
+            {
+              "label": "Read Apple's current carrier-unlock steps",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "esim",
+          "text": "eSIM result"
+        },
+        {
+          "kind": "p",
+          "text": "An eSIM is a digital SIM, so there may be no card to swap. Apple lists carrier activation, Quick Transfer, a QR code, a carrier link, an app and manual entry as possible setup methods, depending on carrier support. These methods install or transfer a cellular plan; they do not override Carrier Lock.",
+          "links": [
+            {
+              "label": "See Apple’s current eSIM setup methods",
+              "href": "https://support.apple.com/en-us/118669"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "read-result",
+          "text": "Read the result before choosing the fix"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Result or message",
+            "Likely meaning",
+            "Correct next step"
+          ],
+          "rows": [
+            [
+              "Carrier Lock shows No SIM restrictions and service works",
+              "Carrier unlock and destination activation succeeded",
+              "Keep the carrier confirmation and finish account setup"
+            ],
+            [
+              "Carrier Lock does not show No SIM restrictions",
+              "The iPhone remains restricted",
+              "Contact the locking carrier with the IMEI and request record"
+            ],
+            [
+              "SIM Not Supported",
+              "The activation does not accept that SIM or eSIM",
+              "Confirm unlock approval, carrier identity and compatibility"
+            ],
+            [
+              "Locked SIM or PUK prompt",
+              "The line credential is protected or blocked",
+              "Contact the carrier that issued the SIM or eSIM; do not guess"
+            ],
+            [
+              "No SIM or Invalid SIM",
+              "The SIM may be damaged, seated incorrectly, inactive or not detected",
+              "Reseat or replace the SIM and verify line activation"
+            ],
+            [
+              "No Service or SOS",
+              "Does not by itself prove a carrier lock; plan activation, coverage, compatibility or another carrier/device issue may be involved",
+              "Check the destination carrier's plan, coverage and compatibility guidance, and ask that carrier to investigate"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock is blocking setup",
+              "Use the legitimate owner’s Apple Account or Apple’s documented route"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "SIM Not Supported is not the same as Locked SIM. SIM Not Supported can be caused by a carrier restriction, activation or compatibility issue, or another carrier/device condition; check Carrier Lock and ask the relevant carrier rather than treating the message as proof of one cause. Locked SIM can refer to the PIN protecting one SIM or eSIM. Matching the exact message to the correct owner avoids unnecessary unlock purchases.",
+          "links": [
+            {
+              "label": "Troubleshoot SIM Not Supported after switching carriers",
+              "href": "/articles/iphone-sim-not-supported-after-switching-carriers"
+            },
+            {
+              "label": "Separate Carrier Lock from SIM PIN and PUK",
+              "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+            },
+            {
+              "label": "Read Apple's SIM-alert troubleshooting",
+              "href": "https://support.apple.com/en-us/108914"
+            },
+            {
+              "label": "Check Apple's SIM PIN and PUK safety steps",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "other-device-locks",
+          "text": "Carrier Lock is not the only kind of lock"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock controls whether the iPhone can activate on another carrier. Activation Lock is different: it links the device to the owner’s Apple Account through Find My, and an “iPhone Locked to Owner” screen requires the legitimate owner to remove that link. A SIM change cannot remove Activation Lock. SIM PIN or PUK protection applies to one SIM or eSIM, not to the iPhone’s carrier status. MDM or supervision is organizational device management: a supervised iPhone can show a Supervision message and a profile under Settings, General, VPN & Device Management. Only the legitimate owner or managing organization can resolve those account or management issues.",
+          "links": [
+            {
+              "label": "Read Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple's supervised-device guidance",
+              "href": "https://support.apple.com/en-us/102291"
+            },
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "what-not-to-do",
+          "text": "What not to do after a failed SIM test"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Do not assume a new SIM will eventually unlock the iPhone if you leave it inserted.",
+            "Do not guess a SIM PIN or PUK; Apple warns that repeated wrong entries can permanently lock the SIM or eSIM.",
+            "Do not erase the iPhone before the carrier confirms approval and you have a verified backup.",
+            "Do not delete the old eSIM or cancel the old line until the destination service and any number transfer are complete.",
+            "Do not treat a same-network SIM test as proof that every other carrier will work.",
+            "Do not pay for software or a jailbreak that claims to rewrite a carrier-controlled unlock record."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple tells users with a forgotten SIM PIN to contact the carrier that issued the SIM or eSIM and specifically warns against guessing. That safety rule applies whether the iPhone itself is carrier-locked or already unlocked.",
+          "links": [
+            {
+              "label": "Check Apple’s SIM PIN and PUK safety steps",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "Where an unlock service fits"
+        },
+        {
+          "kind": "p",
+          "text": "A third party should not be presented as able to authorize a carrier unlock. If someone uses a service, describe it only as possible administrative assistance; the user must verify the carrier’s own eligibility rules, authorization and final No SIM restrictions status directly. Provider availability, financing or account requirements, fees and processing time vary by carrier and jurisdiction, so this article does not promise any of them.",
+          "links": [
+            {
+              "label": "Review the FCC explanation of provider-specific unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "See T-Mobile's current unlock-status guidance",
+              "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+            },
+            {
+              "label": "See AT&T's current unlock requirements",
+              "href": "https://www.att.com/deviceunlock/"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "The relevant evidence is carrier confirmation and, after activation, No SIM restrictions plus working service on a compatible destination carrier. That result does not guarantee compatibility with every network or country, and it is not a promise that a third party can change the status.",
+          "links": [
+            {
+              "label": "Review what an IMEI unlock service should deliver",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            },
+            {
+              "label": "Check Apple's Carrier Lock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC guide to unlocking and compatibility",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have a failed SIM or eSIM test? Send the exact Carrier Lock wording, alert message, device model and carrier names—without sharing passwords, PINs or verification codes.",
+          "href": "/contact",
+          "label": "Review the SIM test result"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Will inserting a new SIM card unlock my iPhone?",
+          "answer": "No. A new SIM can activate after the locking carrier has approved the unlock, or it can test an iPhone that is already unlocked. It cannot create the carrier authorization."
+        },
+        {
+          "question": "Does removing the SIM card remove Carrier Lock?",
+          "answer": "No. Removing the SIM disconnects that physical line from the phone. Carrier Lock is a separate device status controlled by the locking carrier."
+        },
+        {
+          "question": "Can an eSIM unlock a carrier-locked iPhone?",
+          "answer": "No. An eSIM provisions a cellular plan through a supported carrier method. A different carrier’s eSIM still requires the iPhone to be unlocked and compatible with that carrier."
+        },
+        {
+          "question": "Why does the new SIM say SIM Not Supported?",
+          "answer": "The iPhone may still be carrier-locked, the activation may not accept that SIM or eSIM, the device or plan may be incompatible, or another carrier/device issue may be involved. Recheck Carrier Lock and ask the relevant carrier to investigate before retrying."
+        },
+        {
+          "question": "Is Locked SIM the same as Carrier Lock?",
+          "answer": "Not always. Locked SIM can refer to the PIN protecting one SIM or eSIM, while Carrier Lock controls whether the iPhone may use other carriers. Do not guess a SIM PIN or PUK."
+        }
+      ]
+    },
+  {
+      "slug": "does-unlocking-iphone-erase-data",
+      "title": "iPhone Unlock: Does It Erase Data?",
+      "heading": "Does Unlocking an iPhone Erase Data?",
+      "description": "Does unlocking an iPhone erase data? Learn what carrier approval changes, when Apple’s backup-and-erase route applies, and how to protect your data.",
+      "standfirst": "A carrier-approved unlock changes network eligibility, not the content on the iPhone. Erasing is a separate Apple-documented completion route for one activation scenario, so back up before choosing it.",
+      "published": "2026-10-10",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "iPhone carrier unlock and data safety",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Does unlocking an iPhone erase data? A carrier-authorized unlock changes whether the iPhone can be activated with another compatible carrier; it does not itself select Erase All Content and Settings. Apple says only the current carrier can authorize the change. If the carrier confirms the unlock, Apple documents either inserting another carrier’s SIM to activate or, when no other SIM is available, backing up, erasing, and restoring the iPhone. The latter route does erase the device before restoration.",
+          "links": [
+            {
+              "label": "Read Apple’s current iPhone unlock steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "See Apple’s Erase iPhone guide",
+              "href": "https://support.apple.com/guide/iphone/erase-iphone-iph7a2a9399b/ios"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Carrier unlocking and erasing an iPhone are separate actions with different purposes.",
+            "If another compatible SIM is available, Apple’s documented completion route is to replace the SIM and let the iPhone activate; it does not include an erase.",
+            "If no other SIM is available, Apple documents a backup, erase and restore route after the carrier confirms approval.",
+            "A backup can help restore content included in that copy, but it does not create carrier approval or remove Carrier Lock.",
+            "Passcode recovery, Activation Lock, SIM PIN or PUK, MDM, and lost-or-stolen network blocking are separate issues from Carrier Lock."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "short-answer",
+          "text": "The short answer: approval does not equal deletion"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says an unlocked iPhone shows “No SIM restrictions” next to Carrier Lock and can be used with different carriers. Only the current carrier can authorize that change. The authorization is distinct from erasing the phone. The FCC also explains that unlocking disables software that prevents activation on another network; it does not guarantee technological compatibility with every network.",
+          "links": [
+            {
+              "label": "Check Apple’s Carrier Lock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC consumer guide to cell phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "The practical exception is a completion method, not the unlock decision. After the carrier confirms approval, Apple tells users without another SIM to back up the iPhone, erase it and restore the backup. The erase step removes local content and settings, so verify the backup first. Users with another compatible carrier’s SIM can instead insert it and activate."
+        },
+        {
+          "kind": "note",
+          "text": "Do not erase an iPhone merely because an unlock request is pending. Wait for the current carrier to confirm the unlock for this device, then choose the Apple completion route that matches the SIM or eSIM you actually have."
+        },
+        {
+          "kind": "h2",
+          "id": "compare-actions",
+          "text": "Carrier unlock, erase and security recovery compared"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Action",
+            "What it changes",
+            "Effect on data"
+          ],
+          "rows": [
+            [
+              "Carrier-authorized unlock",
+              "Allows activation attempts with another compatible carrier",
+              "Does not itself erase local content"
+            ],
+            [
+              "Insert another carrier’s SIM",
+              "Starts activation on the new line when the carrier and device support it",
+              "Apple’s route does not include an erase"
+            ],
+            [
+              "Erase All Content and Settings",
+              "Returns the iPhone to factory settings",
+              "Removes personal information, content and settings; an eSIM can be kept or erased"
+            ],
+            [
+              "Restore from backup",
+              "Uses a selected iCloud or computer backup during setup",
+              "Recovery depends on the backup, credentials and content that can be downloaded or restored"
+            ],
+            [
+              "Passcode recovery reset",
+              "Regains access after a forgotten passcode through Apple’s reset route",
+              "Can erase current device data; this is not carrier unlocking"
+            ],
+            [
+              "Activation Lock removal",
+              "Releases Apple Account ownership protection",
+              "Requires the legitimate owner’s credentials or Apple’s documented support process"
+            ],
+            [
+              "SIM PIN or PUK recovery",
+              "Protects or restores access to one SIM or eSIM line",
+              "Use the carrier that issued the line; wrong guesses can permanently lock the SIM or eSIM"
+            ],
+            [
+              "MDM or configuration profile",
+              "Applies organization-managed settings, apps or restrictions",
+              "Carrier unlocking does not remove management; follow the organization’s administrator route"
+            ],
+            [
+              "Lost-or-stolen network block",
+              "Controls whether participating networks may block cellular access",
+              "It is a separate device-status issue; ask the carrier about its status rather than treating an unlock as clearance"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "before-request",
+          "text": "Before the unlock request: protect the right things"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and record the exact Carrier Lock result. No SIM restrictions means the iPhone is already carrier-unlocked.",
+            "Keep the correct IMEI or IMEI2 private if the carrier needs it to match the request to the device. Do not publish it or send it to an unverified service.",
+            "Run a fresh backup even if you expect a no-erase route. A routine precaution protects against unrelated activation, update or hardware problems.",
+            "Open Settings, your name, iCloud, iCloud Backup and choose Back Up Now if you use iCloud. Stay on Wi-Fi until it finishes and verify the displayed date and time.",
+            "Confirm you know the Apple Account credentials needed to restore the backup and sign back in to apps; obtain any separate activation credentials from the destination carrier when required.",
+            "Save the carrier’s case number and confirmation before changing SIMs, deleting an eSIM or erasing anything."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says an iCloud backup gives you a copy of information to use if a device is replaced, lost or damaged. Its current instructions also show where to verify the last backup time. Treat that timestamp—not the presence of the iCloud toggle alone—as evidence that the backup completed. Apple separately recommends backing up before erasing, and an erased eSIM may require carrier reactivation.",
+          "links": [
+            {
+              "label": "Follow Apple’s iCloud backup instructions",
+              "href": "https://support.apple.com/en-us/108366"
+            },
+            {
+              "label": "Review Apple’s erase and eSIM guidance",
+              "href": "https://support.apple.com/guide/iphone/erase-iphone-iph7a2a9399b/ios"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "after-approval",
+          "text": "After approval: choose the least disruptive completion route"
+        },
+        {
+          "kind": "h3",
+          "id": "new-sim",
+          "text": "If you have another carrier’s SIM or eSIM"
+        },
+        {
+          "kind": "p",
+          "text": "For a physical SIM, Apple’s documented route is to remove the current SIM, insert the new one and allow the device to activate. For eSIM, setup depends on the destination carrier’s supported activation method, such as carrier activation or a QR code. Keep the current line available until the destination carrier confirms the new setup; deleting an eSIM can require carrier reactivation.",
+          "links": [
+            {
+              "label": "See Apple’s eSIM setup options",
+              "href": "https://support.apple.com/en-us/118669"
+            },
+            {
+              "label": "Follow Apple’s carrier-unlock steps",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "no-new-sim",
+          "text": "If you do not have another SIM"
+        },
+        {
+          "kind": "p",
+          "text": "Use Apple’s backup, erase and restore route only after the responsible carrier confirms the unlock. Check that the backup completed, erase through Apple’s documented settings, then restore from the backup during setup. Erase All Content and Settings removes personal information, content and settings; if you choose to erase an eSIM, the carrier may need to reactivate the cellular plan. This workflow temporarily wipes the device, but the wipe is a chosen activation route—not an automatic effect of carrier approval.",
+          "links": [
+            {
+              "label": "Read Apple’s Erase iPhone instructions",
+              "href": "https://support.apple.com/guide/iphone/erase-iphone-iph7a2a9399b/ios"
+            },
+            {
+              "label": "Read Apple’s restore-from-backup instructions",
+              "href": "https://support.apple.com/en-us/118105"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Carrier eligibility and workflow are provider-specific. T-Mobile and AT&T publish separate device-unlock policies, so use the current policy for the carrier controlling the lock. Do not infer eligibility, timing, financing status or destination-carrier availability from another provider’s page.",
+          "links": [
+            {
+              "label": "Read T-Mobile’s device unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Read AT&T’s device unlock guidance",
+              "href": "https://www.att.com/support/article/wireless/KM1008728/"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-data-and-unlock",
+          "text": "Verify both the unlock and your data"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and confirm Carrier Lock says No SIM restrictions.",
+            "Test calls, messages and mobile data with an active, compatible destination SIM or eSIM; a destination carrier’s plan and network support still matter.",
+            "Check recent photos, contacts, messages, authenticator access and any locally stored files that matter to you.",
+            "Re-enable banking, work or security apps that require device registration after a restore.",
+            "Keep the carrier confirmation and backup record until the new line has worked reliably."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If Carrier Lock already says No SIM restrictions but the new line fails, stop repeating erase-and-restore cycles. The FCC notes that an unlocked phone may still be technologically incompatible with another network. Ask the destination carrier to check provisioning, plan status, compatibility, coverage and any device-status issue it can verify. The CTIA Stolen Phone Checker can show whether a device is reported lost or stolen, but that status check is not a carrier-unlock result.",
+          "links": [
+            {
+              "label": "Read the FCC compatibility guidance",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Read the CTIA Stolen Phone Checker FAQ",
+              "href": "https://stolenphonechecker.org/spc/faqs.jsp"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            },
+            {
+              "label": "See the safe route to unlock without another SIM",
+              "href": "/articles/unlock-iphone-without-sim-card-after-approval"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "other-locks",
+          "text": "A data warning may point to a different lock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Prompt or problem",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "SIM Locked or Carrier Lock",
+              "Use of another carrier",
+              "The current carrier that controls the device restriction"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security on one SIM or eSIM line",
+              "The carrier that issued that line; do not guess the code"
+            ],
+            [
+              "iPhone Unavailable or forgotten passcode",
+              "Access to the device and local data",
+              "Apple’s passcode recovery process, which can erase current data"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate owner or Apple’s documented support route"
+            ],
+            [
+              "MDM or configuration profile",
+              "Organization-managed settings and restrictions",
+              "The school, business or other organization that installed or manages it"
+            ],
+            [
+              "Lost-or-stolen network status",
+              "Whether participating networks may block cellular access",
+              "The reporting carrier or the carrier checking the device status"
+            ],
+            [
+              "Erase confirmation",
+              "Deletion of local content and settings",
+              "Pause and verify the backup and purpose before continuing"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "These messages are not interchangeable. Carrier Lock concerns network activation permission; Activation Lock concerns Apple Account ownership; SIM PIN or PUK protects a particular line; and MDM or a configuration profile reflects organization management. Use the Apple or carrier route named for the specific message rather than assuming an unlock or erase will fix every lock.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108934"
+            },
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple’s configuration-profile guidance",
+              "href": "https://support.apple.com/guide/personal-safety/review-and-delete-configuration-profiles-ips327569a75/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "service-role",
+          "text": "How to assess third-party help safely"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service is not the authority that grants a carrier unlock. Only the current carrier can authorize it. Treat a provider’s IMEI check, promise or status email as information—not proof of an unlock. Verify that the iPhone itself shows No SIM restrictions and follow the carrier’s confirmed route. The following is a safety checklist, not a statement that an unlock service can perform these actions.",
+          "links": [
+            {
+              "label": "Confirm the authority and verification steps with Apple",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Review what the CTIA device-status check means",
+              "href": "https://stolenphonechecker.org/spc/faqs.jsp"
+            },
+            {
+              "label": "Review an IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Unsure whether your case requires a SIM activation or Apple’s backup-and-restore route? Send the current Carrier Lock wording, the carrier’s response and whether you have another SIM—never your Apple Account password.",
+          "href": "/contact",
+          "label": "Review the safest next step"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Does unlocking an iPhone erase photos and messages?",
+          "answer": "Carrier authorization does not inherently erase them. Apple’s route with another carrier’s SIM has no erase step. If you use Apple’s no-other-SIM completion route, back up first because that route deliberately erases the device and then restores the selected backup; restoration depends on what the backup contains and what can be downloaded again."
+        },
+        {
+          "question": "Why does Apple sometimes say to erase an iPhone after unlocking?",
+          "answer": "Apple documents backup, erase and restore as a way to finish activation after the carrier confirms the unlock when another SIM is unavailable. The erase is a completion method, not what grants the unlock."
+        },
+        {
+          "question": "Should I back up before a carrier unlock?",
+          "answer": "Yes. A backup is a sensible precaution before activation changes even when an erase is not expected. Verify the backup’s date and time, and keep the credentials needed to restore it. A backup is not a guarantee that every app or item will return."
+        },
+        {
+          "question": "Will a factory reset unlock a carrier-locked iPhone?",
+          "answer": "No. Only the current carrier can authorize the unlock. A reset may help finish an already approved unlock in Apple’s documented no-other-SIM scenario, but it does not create approval."
+        },
+        {
+          "question": "Can an unlock service recover data or a forgotten passcode?",
+          "answer": "Do not rely on an unlock service for that. Apple’s passcode-reset process erases current device data, while restoration depends on an available backup and its credentials. Carrier unlocking and data recovery are separate processes."
+        },
+        {
+          "question": "Does “No SIM restrictions” guarantee that every carrier will work?",
+          "answer": "No. It verifies the iPhone’s Carrier Lock status, but the FCC says unlocking does not guarantee technological compatibility with every network. Confirm the destination carrier’s supported device, plan and activation requirements."
+        }
+      ]
+    },
+  {
+      "slug": "does-unlocking-iphone-cancel-service",
+      "title": "iPhone Unlock: Does It Cancel Service?",
+      "heading": "Does Unlocking an iPhone Cancel Service?",
+      "description": "Does unlocking an iPhone cancel service? Separate Carrier Lock from your plan, phone number and SIM or eSIM before switching networks.",
+      "standfirst": "Carrier unlocking lets an iPhone use other compatible networks. It does not, by itself, cancel a line, port a number or settle the account.",
+      "published": "2026-10-10",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "iPhone unlock and active carrier service",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Does unlocking an iPhone cancel service? Not by itself. Apple defines carrier unlocking as allowing the iPhone to use different carriers and says only the current carrier can unlock it. Apple’s instructions check the Carrier Lock status and explain how to activate with another SIM or eSIM; they do not treat unlocking as a request to cancel the existing plan. Cancellation, number transfer and line activation remain separate actions governed by the carrier that owns the account.",
+          "links": [
+            {
+              "label": "Read Apple’s current carrier-unlock process",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "A carrier unlock changes the iPhone’s network restriction; it does not, by itself, close an account or line.",
+            "Your phone number stays with its line unless you request a number change or port, or the carrier disconnects the line under its terms.",
+            "Adding another SIM or eSIM may activate another line without cancelling the original line, depending on the provider and the setup.",
+            "An unlock confirmation is not a bill, device-finance, promotion or other account-obligation settlement.",
+            "When porting a number, start with the destination carrier and keep the old line active until the transfer is complete under the providers’ instructions."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "four-separate-actions",
+          "text": "Unlock, activate, port and cancel are four separate actions"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Action",
+            "What it changes",
+            "What it does not automatically do"
+          ],
+          "rows": [
+            [
+              "Carrier unlock",
+              "Whether the iPhone may be used with another compatible carrier",
+              "Cancel service, move a number or settle account obligations"
+            ],
+            [
+              "Activate a SIM or eSIM",
+              "Provisions a specific line and plan on the device",
+              "Port an existing number or confirm that the old account was cancelled"
+            ],
+            [
+              "Port a phone number",
+              "Moves the number after the destination carrier starts the transfer",
+              "Remove a carrier restriction from the iPhone"
+            ],
+            [
+              "Cancel a line",
+              "Ends service under that provider’s account rules",
+              "Remove Carrier Lock or erase remaining financial obligations"
+            ],
+            [
+              "Remove a SIM or delete an eSIM",
+              "Removes that line profile from the device",
+              "Prove that the carrier account or billing has ended"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Removing a SIM, deleting an eSIM or turning off a cellular line in Settings is not proof that billing stopped. Confirm any cancellation or port status with the carrier that owns the account."
+        },
+        {
+          "kind": "h2",
+          "id": "after-approval",
+          "text": "What happens to your current line after unlock approval?"
+        },
+        {
+          "kind": "p",
+          "text": "If the original SIM or eSIM remains active and the carrier still provisions the line, that service may continue under the plan’s terms. Unlocking adds the option to use another compatible carrier; it does not automatically activate destination service or transfer your number. Check the account with the original provider before assuming that any billing or add-on has changed."
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Calls, texts and data can continue through the active line while it remains provisioned and in good standing; the carrier controls the service status.",
+            "The original number generally remains attached to that line until a successful port, a number change or a disconnection under the account terms.",
+            "AutoPay, device installments, promotional credits, insurance and add-ons may continue unless the provider changes or ends them.",
+            "A supported Dual SIM iPhone can keep two active cellular plans. Mixed-carrier use requires the iPhone to be unlocked, while same-carrier combinations may follow different rules.",
+            "Ask the destination carrier to verify that its service can be activated on your exact iPhone model and plan; an unlocked status is not an activation or coverage guarantee."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "keep-number",
+          "text": "If you want to switch carriers and keep your number"
+        },
+        {
+          "kind": "p",
+          "text": "Number portability is handled by the new and old carriers, not by the Carrier Lock field. The Federal Communications Commission advises starting new service with the destination company before terminating the existing service. Give the new provider only the account information it requests, and keep the original line active until the destination carrier confirms the transfer is complete. Requirements, eligibility and timing vary by country, provider and account type.",
+          "links": [
+            {
+              "label": "Read the FCC guide to porting and keeping your number",
+              "href": "https://www.fcc.gov/consumers/guides/porting-keeping-your-phone-number-when-you-change-providers"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "T-Mobile’s current US transfer guide illustrates this separation: it says the previous account must remain active while the number transfer is in progress and that lines you do not want may need separate cancellation after the transfer. This is a T-Mobile US example, not a worldwide timetable or rule, so readers elsewhere should follow both providers’ current local instructions.",
+          "links": [
+            {
+              "label": "See T-Mobile’s current number-transfer guidance",
+              "href": "https://www.t-mobile.com/support/account/transfer-your-phone-number"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that Settings > General > About shows No SIM restrictions if you plan to use another carrier on the same iPhone.",
+            "Ask the destination carrier to confirm model, IMEI and eSIM or physical-SIM compatibility before activating a plan.",
+            "Decide whether to keep the old number, receive a new number or run both lines.",
+            "Collect only the account number, transfer PIN and billing details that the destination carrier specifically requests.",
+            "Keep the old line active and do not delete its eSIM until the destination carrier confirms the transfer is complete.",
+            "Test incoming calls, outgoing calls, messages, data and voicemail on the transferred number.",
+            "Review the old account for remaining lines, final charges, device payments, promotions and paired watches."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "temporary-number",
+          "text": "A temporary number does not by itself show that a port failed"
+        },
+        {
+          "kind": "p",
+          "text": "A destination provider may activate a temporary number while a requested port is pending. T-Mobile documents this as one possible part of its own transfer flow. A temporary number is part of line provisioning, not proof that the iPhone is unlocked; track the port with the destination carrier and avoid cancelling the old line while the transfer remains pending.",
+          "links": [
+            {
+              "label": "Check T-Mobile’s transfer steps and status guidance",
+              "href": "https://www.t-mobile.com/support/account/transfer-your-phone-number"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "use-two-services",
+          "text": "If you want to keep both services"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says Dual SIM can keep two active phone numbers or cellular plans on supported iPhones. To use two carriers, the carrier must unlock the iPhone; two plans from the same carrier can follow different requirements. You choose default voice and data lines in Settings, and adding the second plan does not itself cancel the first.",
+          "links": [
+            {
+              "label": "Read Apple’s current Dual SIM guidance",
+              "href": "https://support.apple.com/en-us/109317"
+            },
+            {
+              "label": "Review the iUnlockMobile Dual SIM guide",
+              "href": "/articles/iphone-dual-sim-two-carriers-unlock-guide"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Goal",
+            "Unlock needed?",
+            "Account action"
+          ],
+          "rows": [
+            [
+              "Keep the current carrier and add its second line",
+              "Not necessarily; same-carrier rules apply",
+              "Activate the eligible second SIM or eSIM"
+            ],
+            [
+              "Keep the current line and add another carrier",
+              "Yes, when using two different carriers",
+              "Activate the second carrier without cancelling the first"
+            ],
+            [
+              "Move the current number to a new carrier",
+              "Often needed to reuse a locked iPhone elsewhere",
+              "Complete the number port with the destination carrier"
+            ],
+            [
+              "Get a new number on another carrier",
+              "Needed if the iPhone is locked to the original carrier",
+              "Activate the new line; cancel the old line only if you want to"
+            ],
+            [
+              "Use a travel eSIM temporarily",
+              "Check whether the travel provider is a different carrier",
+              "Add the travel plan and manage data or roaming settings"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "billing-obligations",
+          "text": "Unlocking does not settle billing or finance obligations"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock status and an account ledger are different records. An iPhone can show an unlocked status while installments, a final bill, a promotion or another account obligation remains. It can also be paid off while the carrier’s unlock decision is still pending. Before cancelling, ask the account provider how the change affects device payments, promotional credits, multi-line discounts, insurance and paired-device lines."
+        },
+        {
+          "kind": "p",
+          "text": "T-Mobile’s current US cancellation guidance says cancellation can affect billing, promotions and equipment financing. It also distinguishes cancelling one line while other lines remain from cancelling the entire account, and it explains that service and charges may continue through the billing cycle. This is a provider-specific example; check the current terms for your carrier and country.",
+          "links": [
+            {
+              "label": "Review T-Mobile’s current cancellation disclosures",
+              "href": "https://www.t-mobile.com/support/account/cancel-service"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "avoid-outage",
+          "text": "A careful switching sequence that reduces avoidable interruption"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Verify No SIM restrictions and save the original carrier’s unlock confirmation.",
+            "Confirm destination-carrier compatibility and activation requirements before buying or transferring a plan.",
+            "Decide whether to keep the old number, receive a new number or run both lines.",
+            "Back up contacts, messages and important voicemail before any number transfer.",
+            "Activate or port through the destination carrier while the old line remains available.",
+            "Test the new service fully, then request cancellation only for lines you no longer want.",
+            "Obtain written cancellation or port confirmation and review the final bill instead of assuming that SIM removal ended service."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-locks",
+          "text": "Carrier Lock, Activation Lock, SIM PIN and MDM are different"
+        },
+        {
+          "kind": "h3",
+          "id": "carrier-lock",
+          "text": "Carrier Lock"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock controls whether the iPhone may be activated with another carrier. In Settings > General > About, No SIM restrictions means Apple considers the iPhone unlocked for this purpose. Only the current carrier can authorize the unlock; a third party cannot turn an account request into carrier approval.",
+          "links": [
+            {
+              "label": "Verify the Carrier Lock status with Apple’s instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock",
+          "text": "Activation Lock"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is tied to Find My and the previous owner’s Apple Account. An iPhone Locked to Owner screen means the device is still linked to that account; the legitimate owner must remove it before another person can set up the device. Activation Lock is not Carrier Lock and an unlock request does not remove it.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "sim-pin",
+          "text": "SIM PIN or PUK"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN protects a particular SIM card or eSIM and can be required for calls or cellular data after a restart or SIM removal. A PUK is a carrier-issued recovery code for a locked SIM or eSIM. This security code does not change the iPhone’s Carrier Lock status; contact the carrier that issued the line and do not guess the code.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "mdm",
+          "text": "Mobile Device Management (MDM)"
+        },
+        {
+          "kind": "p",
+          "text": "MDM is an organization’s device-management service. Apple says it can send configurations and commands, monitor compliance and remotely lock or wipe managed devices. MDM does not unlock a carrier restriction, remove Activation Lock or cancel a cellular account; contact the organization’s administrator for management issues.",
+          "links": [
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "Likely category",
+            "Who should fix it"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions but no service",
+              "Plan, coverage, compatibility or provisioning",
+              "The carrier for the affected line"
+            ],
+            [
+              "SIM Not Supported",
+              "Carrier restriction or activation mismatch",
+              "The locking carrier and destination carrier"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "Security on one SIM or eSIM",
+              "The carrier that issued the line"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock",
+              "The legitimate Apple Account owner"
+            ],
+            [
+              "Remote management or organization policy",
+              "Mobile Device Management (MDM)",
+              "The organization or its administrator"
+            ],
+            [
+              "Old number stops during a port",
+              "Number-transfer status",
+              "The destination carrier coordinating the port"
+            ],
+            [
+              "Bill continues after SIM removal",
+              "Account still active",
+              "The carrier that owns the billed line"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "service-role",
+          "text": "What an unlock service can and cannot establish"
+        },
+        {
+          "kind": "p",
+          "text": "Treat an unlock-service result as information about the device or a request path, not as proof that the carrier approved an unlock. Only the current carrier can authorize the carrier unlock, and the reliable device check is the Carrier Lock status showing No SIM restrictions. An unlock-service result does not itself cancel your carrier account, authorize a number port, erase legitimate balances, restore voicemail or guarantee destination-carrier provisioning. Keep account credentials and transfer PINs with the carriers that require them.",
+          "links": [
+            {
+              "label": "Check Apple’s definition of a completed carrier unlock",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Review the iUnlockMobile eligibility guide",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Planning to unlock, port or add a second line? Contact us to discuss the sequence. Share the current Carrier Lock result, original carrier and destination carrier, but never post account PINs or the full IMEI.",
+          "href": "/contact",
+          "label": "Review my switching plan"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Does unlocking an iPhone cancel the current plan?",
+          "answer": "Not by itself. Carrier unlocking changes whether another compatible carrier may activate the iPhone. The current plan continues only while the account and line remain active under the provider’s terms; cancellation, porting and other changes require separate account actions."
+        },
+        {
+          "question": "Will unlocking change my phone number?",
+          "answer": "Not by itself. A number changes through a number-change request, a successful port, a new line with a different number or disconnection under the carrier’s terms."
+        },
+        {
+          "question": "Can I use the old service after my iPhone is unlocked?",
+          "answer": "Usually, if the existing line remains active and provisioned. Unlocking adds the option to use another compatible carrier; it does not require you to leave the original carrier."
+        },
+        {
+          "question": "Should I cancel service before porting my number?",
+          "answer": "Do not cancel before starting the new service. Keep the old line active until the destination carrier confirms completion, following both providers’ current local instructions."
+        },
+        {
+          "question": "Does removing a SIM or deleting an eSIM cancel billing?",
+          "answer": "Not necessarily. It removes or disables a line profile on the phone, but the carrier account may remain active. Obtain cancellation or port confirmation from the account provider and review the final bill."
+        },
+        {
+          "question": "Is iPhone Locked to Owner the same as a carrier lock?",
+          "answer": "No. iPhone Locked to Owner indicates Activation Lock linked to a previous Apple Account. The legitimate owner must remove that link; a carrier unlock does not remove Activation Lock."
+        }
+      ]
+    },
+  {
+      "slug": "does-unlocking-iphone-void-warranty",
+      "title": "iPhone Unlock and Warranty: What Changes?",
+      "heading": "Does Unlocking an iPhone Void Its Warranty?",
+      "description": "Does an iPhone carrier unlock void its warranty? Learn how carrier authorization differs from jailbreaking, repairs, Activation Lock and SIM security.",
+      "standfirst": "An authorized carrier unlock changes network permission, not ownership or hardware. Warranty decisions still depend on the written terms, region, service history and reported fault.",
+      "published": "2026-10-09",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "iPhone carrier unlock and warranty",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Does unlocking an iPhone void its warranty? The careful answer is that the method and the reported fault both matter. Apple describes carrier unlocking as a carrier-controlled process for using an iPhone with another carrier. That is different from opening the phone, changing its hardware, jailbreaking iOS or bypassing an ownership control. It is not a blanket promise that every future repair will be covered: the applicable warranty terms, consumer-law rights, region, service history and cause of the fault still matter.",
+          "links": [
+            {
+              "label": "Apple's current iPhone carrier-unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Apple's current US iPhone warranty terms",
+              "href": "https://www.apple.com/legal/warranty/products/ios-warranty-document-us.html"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "A carrier-authorized unlock changes the network permission checked by the carrier. It is not the same action as a jailbreak, hardware repair or ownership bypass.",
+            "Apple says only the current carrier can unlock an iPhone. Carrier eligibility rules differ, so one carrier's policy must not be presented as a universal result.",
+            "Warranty coverage is decided under the applicable written terms and law for the claim. An unlock service cannot promise Apple's decision or rewrite those terms.",
+            "Carrier Lock, Activation Lock, a SIM PIN, MDM supervision and a lost-or-stolen network block are different controls with different responsible parties.",
+            "Keep any carrier confirmation, proof of purchase and service records available, but do not publish a full device identifier or give an unlock service your Apple Account credentials."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "short-answer",
+          "text": "The short answer: method and claim both matter"
+        },
+        {
+          "kind": "p",
+          "text": "When the current carrier approves an unlock, the change concerns the carrier restriction. Apple's documented route sends the customer to that carrier and uses Settings > General > About to verify the result. The Federal Communications Commission also explains that unlocking only removes software that prevents activation on another provider; it does not make every iPhone technologically compatible with every network.",
+          "links": [
+            {
+              "label": "Apple: how to unlock an iPhone for another carrier",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "FCC consumer guide to cell-phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple's US limited-warranty document is a regional example, not worldwide law. It says rights can vary by state, country or province, and lists exclusions including damage caused by non-Apple or non-authorized service and products modified to alter functionality without Apple's written permission. It also notes that iPhone service may be restricted to the country where Apple or an authorized distributor originally sold the device. Readers should use the terms and consumer-law route for the purchase country rather than treating the US document as universal.",
+          "links": [
+            {
+              "label": "Read the current Apple US warranty document",
+              "href": "https://www.apple.com/legal/warranty/products/ios-warranty-document-us.html"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "The safe statement is not “an unlock preserves every warranty claim” or “an unlock voids every warranty.” A carrier-authorized unlock is a different event from an unauthorized modification, while the actual service decision follows the applicable written terms, law and cause of the reported problem."
+        },
+        {
+          "kind": "h2",
+          "id": "compare-methods",
+          "text": "Carrier unlock, jailbreak, repair and device controls are not the same action"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Action or status",
+            "What it controls",
+            "Warranty or service relevance"
+          ],
+          "rows": [
+            [
+              "Carrier-authorized unlock",
+              "Carrier permission to activate with another compatible network",
+              "Not itself a physical repair; the claim still follows the applicable terms and the cause of the fault"
+            ],
+            [
+              "Jailbreak or unauthorized iOS modification",
+              "Software restrictions or system behavior",
+              "May fall within written exclusions for modification or leave an unsupported software state; do not equate it with a carrier unlock"
+            ],
+            [
+              "Hardware tampering or independent repair",
+              "Physical components or board-level behavior",
+              "Resulting damage and service history may affect a claim under the relevant terms; there is no universal outcome"
+            ],
+            [
+              "Activation Lock",
+              "Find My and Apple Account ownership protection",
+              "Not a carrier lock; the legitimate owner or Apple's documented ownership route is required"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security for one SIM or eSIM line",
+              "Not a carrier unlock; the carrier that issued the line handles an unknown PIN or PUK"
+            ],
+            [
+              "MDM or supervision",
+              "Organization profiles, restrictions and management controls",
+              "Not a carrier unlock; the owning school, employer or its administrator controls the managed device"
+            ],
+            [
+              "Lost, stolen or blocked status",
+              "Network access after a loss, theft or other report",
+              "Separate from Carrier Lock; follow the reporting party and relevant carrier, not an unlock workaround"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple describes Activation Lock as Find My and Apple Account ownership protection, while a SIM PIN protects one particular SIM or eSIM line. Neither control is the Carrier Lock status checked for a network unlock. Use the legitimate owner or Apple route for Activation Lock, and the carrier that issued the line for an unknown SIM PIN or PUK.",
+          "links": [
+            {
+              "label": "Apple guidance on Activation Lock",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Apple guidance on SIM PIN and PUK",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "official-carrier-route",
+          "text": "What counts as a carrier-authorized route?"
+        },
+        {
+          "kind": "p",
+          "text": "Apple states that Apple cannot unlock an iPhone for another carrier: only the current carrier can do that. Start with that carrier's current eligibility route and ask what status or confirmation it will provide. For example, T-Mobile's support page tells eligible iPhone customers to contact T-Mobile and points them to the Carrier Lock screen; that is a carrier-specific process, not a rule for every provider. After the carrier says the change is complete, check Settings > General > About. “No SIM restrictions” is the iPhone status Apple identifies as unlocked.",
+          "links": [
+            {
+              "label": "Apple's carrier-unlock support page",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "T-Mobile's current device-unlock instructions",
+              "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A carrier unlock should be described as a network-authorization result, not as a repair, ownership transfer or guarantee of service on another network. The FCC cautions that network compatibility remains a separate question. A status shown in an IMEI report or an order dashboard is not, by itself, the same as the carrier's authorization recorded for the device.",
+          "links": [
+            {
+              "label": "FCC guidance on unlocking and network compatibility",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "unsupported-methods",
+          "text": "What should raise a warranty or security concern?"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Instructions to jailbreak, install an unknown profile or disable iOS security to obtain a carrier result.",
+            "A request to open the iPhone, solder components or replace a board for a routine carrier restriction.",
+            "A promise to change, repair or clean the device identifier instead of requesting carrier authorization.",
+            "A claim that one procedure also removes Activation Lock, a passcode, a SIM PIN, MDM supervision or a lost/stolen network block.",
+            "A request for your Apple Account password, two-factor code or device passcode."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-before-unlock",
+          "text": "Checks to make before you unlock an iPhone under coverage"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and read Carrier Lock. If it says “No SIM restrictions,” Apple identifies the iPhone as unlocked.",
+            "Identify the current carrier that controls the restriction and use its current eligibility route first. Do not infer another carrier's rules from a different provider.",
+            "Read the warranty, AppleCare plan, carrier protection terms and consumer-law information that apply to the country where the iPhone was purchased.",
+            "If the iPhone already has a hardware or software fault, document the symptoms and prior service before making an unlock request. An unlock is not a repair diagnosis.",
+            "Ask for the method and deliverable in writing. Keep any proof of purchase, carrier case number or completion notice privately, without posting a full device identifier.",
+            "If you plan to use another carrier, check that carrier's device and network compatibility separately. An unlocked status alone is not a compatibility guarantee."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A lost-or-stolen or blocked status is a separate check. CTIA's consumer guidance says a rightful owner may ask for a device to be blocked from wireless networks and warns that law enforcement may repossess a stolen device. Treat that status as a reporting and ownership issue, not as a carrier-lock problem. Do not present an unlock as blacklist removal, and do not rely on a third-party promise when the reporting carrier or owner must address the record.",
+          "links": [
+            {
+              "label": "CTIA Stolen Phone Checker consumer guidance",
+              "href": "https://stolenphonechecker.org/spc/consumer"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "For a supervised iPhone, check Settings > General > VPN & Device Management. Apple says a school or business that owns a supervised device can install profiles and control additional features. That organization-managed state is different from Carrier Lock; an unlock request does not authorize removal of an MDM profile or an organization-linked Activation Lock.",
+          "links": [
+            {
+              "label": "Apple: supervised iPhone and organization controls",
+              "href": "https://support.apple.com/en-us/102291"
+            },
+            {
+              "label": "Apple Platform Deployment: Activation Lock management",
+              "href": "https://support.apple.com/guide/deployment/activation-lock-depf4ab94ef1/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "warranty-claim",
+          "text": "If you need warranty service after an unlock"
+        },
+        {
+          "kind": "p",
+          "text": "Describe the fault accurately and keep the carrier authorization separate from the repair symptoms. Apple may ask for proof of purchase, diagnostic information and security steps before service. If the device has had non-authorized repair or modification, disclose it and ask which written term applies to the specific issue; Apple’s service terms warn that unauthorized changes or repairs can affect how service is handled. That is a decision about the service request, not proof that every carrier unlock has the same result.",
+          "links": [
+            {
+              "label": "Apple service terms on unauthorized modifications and repairs",
+              "href": "https://www.apple.com/legal/sales-support/terms/repair/generalservice/servicetermsen/"
+            },
+            {
+              "label": "Apple's current warranty terms",
+              "href": "https://www.apple.com/legal/warranty/products/ios-warranty-document-us.html"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Describe what failed, when it failed and whether the symptom appeared before or after the carrier request.",
+            "Provide the proof of purchase and coverage information requested by Apple or the authorized service organization.",
+            "If service is questioned, ask which written warranty or service term applies to the reported fault and decision.",
+            "Keep any diagnostic result or refusal in writing and review the consumer-law or appeal route available in the purchase country.",
+            "If a replacement is issued, follow Apple's instructions for the replacement device and check its Carrier Lock status separately rather than assuming the original status carries over."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "other-locks",
+          "text": "Do not confuse Carrier Lock with other iPhone controls"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or issue",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock or “SIM not supported”",
+              "Whether the iPhone can activate with another carrier",
+              "The current carrier that controls the restriction; verify the result in Carrier Lock"
+            ],
+            [
+              "“iPhone Locked to Owner”",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate owner or Apple's documented Activation Lock route"
+            ],
+            [
+              "“Locked SIM” or a SIM PIN/PUK prompt",
+              "Security on one SIM or eSIM line",
+              "The carrier that issued that SIM or eSIM; do not guess the code"
+            ],
+            [
+              "Supervision or an MDM profile",
+              "Organization restrictions, profiles and management commands",
+              "The school, employer or organization administrator that owns or manages the device"
+            ],
+            [
+              "Lost, stolen or blocked network status",
+              "Network acceptance after a report",
+              "The reporting party and relevant carrier; a carrier unlock is not blacklist removal"
+            ],
+            [
+              "Hardware fault",
+              "A component or physical function",
+              "Apple or an appropriate authorized repair route, with the applicable terms"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "service-role",
+          "text": "What an iPhone unlock service can promise responsibly"
+        },
+        {
+          "kind": "p",
+          "text": "A responsible service can explain which carrier route it supports, what information is needed, what status the customer should verify and what happens if the carrier declines. It should not promise Apple's warranty decision, Activation Lock or MDM removal, blacklist removal, financing-record changes, universal carrier compatibility, a price or a completion time without current evidence for that exact case. The useful, verifiable result is the carrier status shown on the correct device—not a vague claim that every lock has been removed.",
+          "links": [
+            {
+              "label": "Apple's official carrier-unlock verification steps",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need to distinguish Carrier Lock from Activation Lock, SIM PIN, MDM supervision or a network block? Share the carrier name, model and visible status without posting the full device identifier.",
+          "href": "/contact",
+          "label": "Review the lock type"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Does an official carrier unlock void an iPhone warranty?",
+          "answer": "An official carrier unlock is a carrier authorization, not the same action as an unauthorized modification or repair. That distinction does not guarantee a warranty result: Apple or the applicable service organization assesses the reported fault under the written terms and law for the purchase region."
+        },
+        {
+          "question": "Is jailbreaking the same as carrier unlocking?",
+          "answer": "No. Jailbreaking changes iOS restrictions or system behavior. Carrier unlocking is handled by the current carrier and is checked separately through Carrier Lock."
+        },
+        {
+          "question": "Can an unlock provider guarantee Apple warranty service?",
+          "answer": "No. A provider can describe its route and the status a customer should verify, but it cannot guarantee Apple's decision on a repair claim or override the applicable warranty and consumer-law terms."
+        },
+        {
+          "question": "Does a carrier unlock remove Activation Lock, a SIM PIN or MDM?",
+          "answer": "No. Activation Lock belongs to Apple Account ownership, a SIM PIN protects a particular SIM or eSIM line, and MDM or supervision is controlled by the managing organization. Each has a separate legitimate route."
+        },
+        {
+          "question": "Does an unlocked iPhone work on every carrier?",
+          "answer": "Not necessarily. The FCC says unlocking does not make a phone technologically compatible with every network. Check the destination carrier's compatibility requirements separately."
+        },
+        {
+          "question": "Does an authorized carrier unlock change the device identifier?",
+          "answer": "A carrier unlock should be described as a network-permission change, not an identifier change or repair. Keep device identifiers private and verify the carrier status on the device rather than accepting a claim that an identifier was changed."
+        }
+      ]
+    },
+  {
+      "slug": "carrier-lock-not-showing-on-iphone",
+      "title": "Carrier Lock Missing on iPhone: Next Steps",
+      "heading": "Carrier Lock Not Showing on iPhone: What to Check",
+      "description": "Carrier Lock not showing on iPhone? Follow a safe diagnostic path, verify the device record and avoid assuming a missing field means unlocked.",
+      "standfirst": "A missing Carrier Lock field is not proof that the iPhone is unlocked. Check the exact screen, software and carrier record before switching SIM or eSIM.",
+      "published": "2026-10-09",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "Missing iPhone Carrier Lock status",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "If Carrier Lock is not showing on an iPhone, treat the result as unresolved rather than calling the phone unlocked. Apple’s documented unlocked result is the exact message “No SIM restrictions” beside Carrier Lock in Settings > General > About. If that message is not present, Apple directs you to contact the carrier.",
+          "links": [
+            {
+              "label": "Read Apple’s current Carrier Lock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Use Settings > General > About—not the cellular plan name or status bar—to look for Carrier Lock and the exact “No SIM restrictions” message.",
+            "A missing row or missing message is an unknown result, not proof that the iPhone is unlocked.",
+            "Record the iOS version, model, exact alert and relevant device identifier privately. Apple documents several places to find identifiers, including About and the setup screen.",
+            "A carrier-settings update can update network settings and may be needed for a new SIM or eSIM; it is not the same as the carrier confirming an unlock.",
+            "Carrier Lock, Activation Lock, SIM PIN, device-management (MDM) enrollment and a separate lost/stolen or device-status record are different checks with different owners."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "read-result",
+          "text": "First, read the exact result you have"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "What it tells you",
+            "Next step"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions beside Carrier Lock",
+              "Apple’s documented on-device indication that the iPhone is unlocked",
+              "Check the destination provider’s compatibility and activation separately; an unlocked phone is not guaranteed to work on every network."
+            ],
+            [
+              "Carrier Lock is shown, but the message is not No SIM restrictions",
+              "The screen does not confirm Apple’s documented unlocked result",
+              "Ask the carrier that controls the restriction to check the device record and the applicable request route."
+            ],
+            [
+              "Carrier Lock row is missing",
+              "The on-device result is not available from that screen, so the state is unknown",
+              "Verify the screen and software version, then contact the responsible carrier."
+            ],
+            [
+              "Invalid SIM, No SIM or SIM Not Supported alert",
+              "The problem may involve the plan, SIM/eSIM, carrier settings or Carrier Lock",
+              "Follow Apple’s SIM troubleshooting and ask the relevant carrier to check the service and device record."
+            ],
+            [
+              "Settings is unavailable during setup",
+              "The About-screen result cannot be inspected yet",
+              "Preserve the exact activation alert and use Apple’s documented identifier locations and carrier records."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "The active carrier or network label describes a line or network setting. It does not replace the Carrier Lock result. Do not infer the lock state from a plan name, status-bar signal or a provider compatibility result."
+        },
+        {
+          "kind": "h2",
+          "id": "check-screen",
+          "text": "Check the About screen carefully"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Connect the iPhone to Wi-Fi or working cellular data where possible.",
+            "Open Settings, choose General, then About.",
+            "If a carrier-settings update prompt appears, read it and follow the on-screen instruction if you want to install it.",
+            "Scroll through the full page and look specifically for Carrier Lock. Do not substitute a carrier or network label for this result.",
+            "Record the exact wording, iOS version and model. Keep IMEI, IMEI2, EID and other identifiers private unless an official carrier support channel asks for the relevant one.",
+            "Restart once and recheck after any carrier-settings update. Do not erase the iPhone merely because the row is missing; Apple’s erase-and-restore instructions are tied to specific post-confirmation paths."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says carrier-settings updates let a carrier update network settings and may add support for features such as 5G or Wi-Fi Calling. Apple also says a new SIM or eSIM may need the new carrier’s settings. Installing that update is not the same as an unlock confirmation: Apple assigns the unlock decision to the carrier.",
+          "links": [
+            {
+              "label": "Follow Apple’s carrier-settings update steps",
+              "href": "https://support.apple.com/en-us/109324"
+            },
+            {
+              "label": "Compare Apple’s unlock and carrier-contact instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "identify-carrier",
+          "text": "Identify the carrier that can answer the lock question"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the carrier can unlock an iPhone. The carrier that controls the restriction may not be the provider currently supplying your SIM or eSIM, especially after a resale, import, replacement or account change. Use the purchase or carrier record to identify the likely provider, then ask that provider to verify the device record. The FCC also notes that unlocking processes vary by phone and provider.",
+          "links": [
+            {
+              "label": "Review Apple’s carrier-contact guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC’s consumer guide to unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "See the related iUnlockMobile checklist",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Original purchase receipt or carrier order that identifies the device",
+            "Carrier account record or prior unlock case, if one exists",
+            "Replacement or repair paperwork that identifies the current device",
+            "The exact SIM, eSIM or activation message from the destination provider",
+            "The relevant identifier copied privately from Settings, the Hello screen, Finder, Apple Devices or the original packaging"
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "ask-carrier",
+          "text": "Ask the carrier a device-specific question"
+        },
+        {
+          "kind": "p",
+          "text": "Do not ask only whether the model is unlocked. Ask whether the provider recognizes the relevant device identifier, whether its system shows an unlock status or request, and what exact next step applies. If the device has more than one identifier, ask the carrier which identifier it needs rather than guessing. Carrier policies and handling differ; a carrier’s own policy page is the controlling source for its eligibility and process.",
+          "links": [
+            {
+              "label": "Check an example of carrier-specific unlock handling at T-Mobile",
+              "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+            },
+            {
+              "label": "Compare the FCC’s provider-specific guidance",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "setup-blocked",
+          "text": "If setup blocks access to Settings"
+        },
+        {
+          "kind": "p",
+          "text": "When the iPhone cannot reach the About screen, preserve the exact activation alert. Apple documents an Info button on the Hello screen and other ways to find identifiers before setup. Give the provider that controls the Carrier Lock the device record, and ask the destination provider separately about line or eSIM activation. A model-compatibility result, seller statement or separate device-status report is not Apple’s Carrier Lock result. Compatibility and network functionality still need a separate check.",
+          "links": [
+            {
+              "label": "Find identifiers before iPhone setup with Apple’s instructions",
+              "href": "https://support.apple.com/en-us/108037"
+            },
+            {
+              "label": "Read Apple’s Invalid SIM and No SIM troubleshooting",
+              "href": "https://support.apple.com/en-us/108914"
+            },
+            {
+              "label": "See the FCC’s compatibility warning",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Evidence available",
+            "Who should check it",
+            "Question to ask"
+          ],
+          "rows": [
+            [
+              "SIM Not Supported message",
+              "The provider that controls the restriction",
+              "Does your system show the Carrier Lock status for this device, and what eligibility or next step applies?"
+            ],
+            [
+              "eSIM will not download",
+              "Destination provider first",
+              "Is the line active and provisioned for the correct device record, and is another activation step required?"
+            ],
+            [
+              "Replacement-device paperwork",
+              "The provider that handled the replacement or prior unlock",
+              "Does your record identify the current device, and what evidence is needed to review the request?"
+            ],
+            [
+              "No SIM or Invalid SIM",
+              "The line provider, plus Apple’s troubleshooting steps",
+              "Is the plan active, is the SIM/eSIM detected, and is a Carrier Lock or carrier-settings issue also present?"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "The legitimate previous Apple Account owner",
+              "Can the owner remove the device from the account using Apple’s documented Activation Lock route?"
+            ],
+            [
+              "A profile or remote-management message",
+              "The organization or device-management administrator",
+              "Is the iPhone enrolled or supervised, and what official release process applies?"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "separate-problems",
+          "text": "Keep separate locks and records separate"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock controls whether the iPhone can be activated with another provider. Activation Lock is linked to Find My and the previous Apple Account; Apple says the account password is required to turn off Find My, erase or reactivate a protected device. A SIM PIN protects a SIM or eSIM and can produce a Locked SIM message. MDM is an organization’s device-management enrollment that can send configurations, commands, compliance controls and remote lock or wipe instructions. None of these is the same as the Carrier Lock message, and none should be treated as proof that a carrier unlock is complete.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock explanation",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple’s SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "not-proof",
+          "text": "What does not prove the iPhone is unlocked"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The Carrier Lock row is absent or blank.",
+            "A carrier compatibility checker accepts the model or device identifier; FCC says technical compatibility is separate from unlocking.",
+            "The current carrier name appears under a SIM or eSIM line.",
+            "The iPhone connects to Wi-Fi or reaches the Home Screen.",
+            "A separate lost/stolen, blacklist or device-status result is described as clean. Such a result is not the Carrier Lock message in Settings and does not establish that a provider will change its record.",
+            "A seller says factory unlocked without showing the documented Settings result or a confirmation from the provider that controls the restriction.",
+            "A carrier-settings update installs successfully. It updates carrier network settings; it is not itself an unlock decision."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple’s documented on-device indication is “No SIM restrictions” beside Carrier Lock. A separate device-status, financing, warranty, account or compatibility check may matter to a provider, but it does not replace that indication or guarantee eligibility, completion, timing, price, network availability or removal of a lost/stolen or blacklist record. This article does not promise any of those outcomes.",
+          "links": [
+            {
+              "label": "Check Apple’s documented unlock status",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC’s limits on compatibility and provider policies",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Compare reliable iPhone unlock checks",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            },
+            {
+              "label": "Separate Invalid SIM from a carrier restriction",
+              "href": "/articles/invalid-sim-iphone-carrier-lock-or-sim-failure"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "service-role",
+          "text": "What to do with an unresolved status"
+        },
+        {
+          "kind": "p",
+          "text": "Treat a missing Settings row as an unresolved diagnostic result, not as an approved unlock. Confirm the Carrier Lock status with the provider that controls the restriction. Ask the destination provider about compatibility and line or eSIM provisioning. For Activation Lock, contact the legitimate Apple Account owner; for MDM, contact the organization’s administrator; for a SIM PIN or PUK, contact the carrier that issued the SIM or eSIM. Do not send an Apple Account password, device passcode, SIM PIN, PUK or verification code to a general service or seller.",
+          "links": [
+            {
+              "label": "Use Apple’s carrier and SIM troubleshooting routes",
+              "href": "https://support.apple.com/en-us/108914"
+            },
+            {
+              "label": "Review Apple’s Activation Lock buyer guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Review Apple’s device-management explanation",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Carrier Lock still missing after the documented checks? Send the model, iOS version and exact activation message with all device identifiers redacted. A missing field remains unconfirmed until the responsible carrier verifies it.",
+          "href": "/contact",
+          "label": "Review the missing status"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Why is Carrier Lock not showing on my iPhone?",
+          "answer": "The missing row does not reveal the lock state. Verify Settings > General > About, note the exact software and wording, install an offered carrier-settings update if appropriate, and contact the provider that controls the device record. Apple’s documented unlocked result is No SIM restrictions beside Carrier Lock."
+        },
+        {
+          "question": "Does no Carrier Lock field mean the iPhone is unlocked?",
+          "answer": "No. Treat an absent field or absent message as unknown. Apple identifies No SIM restrictions beside Carrier Lock as the unlocked indication and directs you to contact the carrier when that message is not present."
+        },
+        {
+          "question": "Can a carrier-settings update unlock an iPhone?",
+          "answer": "It can update carrier network settings and may be needed for a new SIM or eSIM, but it is not the carrier’s unlock confirmation. Apple says only the carrier can unlock the iPhone."
+        },
+        {
+          "question": "What if I cannot open Settings during activation?",
+          "answer": "Keep the exact activation alert. Apple documents an Info button on the Hello screen and other identifier locations before setup. Ask the provider that controls the Carrier Lock to check the device record, and ask the destination provider separately about line or eSIM activation."
+        },
+        {
+          "question": "Should I factory reset to make Carrier Lock appear?",
+          "answer": "Do not erase the iPhone solely to make a missing field appear. Apple documents erase and restore in specific post-confirmation paths, including a case where another SIM is unavailable; follow the carrier’s and Apple’s instructions for your situation."
+        },
+        {
+          "question": "Does No SIM restrictions guarantee service on every carrier?",
+          "answer": "No. It is Apple’s unlocked indication, but the FCC warns that an unlocked phone may still be technologically incompatible with another provider’s network. Check the destination provider’s compatibility, plan and activation requirements separately."
+        }
+      ]
+    },
+  {
+      "slug": "iphone-dual-sim-two-carriers-unlock-guide",
+      "title": "iPhone Dual SIM: Carrier Lock Guide",
+      "heading": "iPhone Dual SIM: Can You Use Two Carriers?",
+      "description": "Learn when an iPhone can use two carriers, how to check Carrier Lock, SIM options, eSIM support, and separate carrier, Activation Lock, SIM PIN, and MDM issues.",
+      "standfirst": "Dual SIM adds a second line, but it does not bypass Carrier Lock. Check the phone, both carriers, and the exact SIM combination before activating another line.",
+      "published": "2026-10-08",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "iPhone Dual SIM and carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "iPhone Dual SIM can keep two mobile plans active, but a two-carrier setup has an extra requirement: the iPhone must be carrier unlocked. Apple says a locked iPhone can use two plans only when both plans are from the same carrier. Adding a second eSIM does not bypass that restriction. Carrier support, model support, and the intended SIM combination still need to be checked.",
+          "links": [
+            {
+              "label": "Read Apple's current Dual SIM requirements",
+              "href": "https://support.apple.com/en-us/109317"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Two plans from different carriers require an unlocked iPhone; two plans from the same carrier may work while the phone remains locked to that carrier, if the model and plans support Dual SIM.",
+            "Verify No SIM restrictions under Settings, General, About, Carrier Lock before buying or transferring a second plan.",
+            "Dual SIM can mean a physical SIM plus eSIM or, on supported models, two eSIMs. The available combination varies by iPhone model, region, and carrier.",
+            "Both lines can handle calls and messages, but the iPhone uses one cellular data network at a time, subject to Apple's Dual SIM behavior and carrier support.",
+            "An eSIM setup error, billing block, coverage issue, or unsupported carrier is not by itself proof of Carrier Lock."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "two-carriers-answer",
+          "text": "Can an iPhone use two different carriers?"
+        },
+        {
+          "kind": "p",
+          "text": "Yes, when the exact iPhone supports the intended Dual SIM combination, both carriers support the intended SIM or eSIM route, and Carrier Lock says No SIM restrictions. If the iPhone is locked, both plans must be from the carrier that controls the lock. A plan from a second carrier may fail during eSIM download or activation even though the iPhone can store more than one plan.",
+          "links": [
+            {
+              "label": "Check Apple's instructions for unlocking an iPhone",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Phone state",
+            "Plan combination",
+            "Expected result"
+          ],
+          "rows": [
+            [
+              "No SIM restrictions",
+              "Carrier A plus Carrier B",
+              "Possible when both carriers support the model and intended SIM or eSIM route"
+            ],
+            [
+              "Locked to Carrier A",
+              "Two plans from Carrier A",
+              "May be possible if Carrier A, the model, and both plans support Dual SIM"
+            ],
+            [
+              "Locked to Carrier A",
+              "Carrier A plus Carrier B",
+              "Carrier B generally cannot activate while the Carrier A lock remains; only the current carrier can authorize an unlock"
+            ],
+            [
+              "Unknown lock state",
+              "Any mixed-carrier setup",
+              "Check Carrier Lock before transferring or buying the second plan"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "“Supports two eSIMs” describes an iPhone capability. “Unlocked” describes whether another carrier may activate service. A two-carrier eSIM setup needs both capabilities, plus compatible carrier service."
+        },
+        {
+          "kind": "h2",
+          "id": "check-before-setup",
+          "text": "Check these four things before setup"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and confirm that Carrier Lock says No SIM restrictions if the plans will come from different carriers.",
+            "Identify the exact iPhone model and region. SIM trays and supported physical SIM or eSIM combinations differ between regional versions.",
+            "Confirm that each carrier supports the eSIM or physical SIM route you intend to use and that it accepts the phone's relevant device information for activation.",
+            "Ask each carrier whether the plan is eligible for Dual SIM. For enterprise or corporate service, also check with the company administrator."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple's current guide lists iPhone XS, iPhone XS Max, iPhone XR, or later as the general Dual SIM requirement. It also says iPhone 13 models and later support Dual SIM with two eSIMs, in addition to the physical-SIM-plus-eSIM arrangement. Regional hardware and carrier support still matter, so check the current Apple information for the exact model rather than assuming every version has the same SIM tray or eSIM behavior.",
+          "links": [
+            {
+              "label": "See Apple's current eSIM setup requirements",
+              "href": "https://support.apple.com/en-us/118669"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "choose-sim-combination",
+          "text": "Choose the right SIM combination"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Combination",
+            "Best use",
+            "Check first"
+          ],
+          "rows": [
+            [
+              "Physical SIM plus eSIM",
+              "Keep an existing physical line and add a digital second line",
+              "SIM tray availability, eSIM support, carrier support, and Carrier Lock"
+            ],
+            [
+              "Two eSIMs",
+              "Run two digital lines on a supported iPhone",
+              "Model support, regional rules, available eSIM capacity, and both carrier activation routes"
+            ],
+            [
+              "Two physical SIMs",
+              "Use a regional iPhone model designed for two nano-SIMs",
+              "Exact regional model and carrier compatibility; Apple lists this only for certain regional configurations"
+            ],
+            [
+              "Home line plus travel eSIM",
+              "Keep the home number while using a local or travel data plan",
+              "Unlocked state, roaming settings, regional compatibility, and the travel provider's support"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "tell-restrictions-apart",
+          "text": "Tell these iPhone restrictions apart"
+        },
+        {
+          "kind": "p",
+          "text": "A carrier lock, Activation Lock, SIM PIN, and a management profile are different controls. One problem can look like another during setup, so identify the message or setting before requesting an unlock.",
+          "links": [
+            {
+              "label": "Read Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple's SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple's device management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Restriction",
+            "What it controls",
+            "Who should address it",
+            "Does it establish a two-carrier unlock?"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "Whether the iPhone may be activated on another carrier",
+              "The current carrier that controls the lock",
+              "Yes; different carriers require No SIM restrictions"
+            ],
+            [
+              "Activation Lock",
+              "Whether a device linked to an Apple Account can be reactivated after erase or recovery",
+              "The legitimate owner, who must remove the device from the account",
+              "No; a carrier unlock does not remove it"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security for a particular physical SIM or eSIM",
+              "The carrier that issued that SIM or eSIM; do not guess the code",
+              "No; it protects access to the line"
+            ],
+            [
+              "MDM or device management",
+              "Organization settings, profiles, compliance controls, or remote device actions",
+              "The owning organization or its device management administrator",
+              "No; carrier unlocking does not remove an organization profile"
+            ]
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "imei-and-imei2",
+          "text": "IMEI and IMEI2 can matter"
+        },
+        {
+          "kind": "p",
+          "text": "A Dual SIM iPhone can show more than one device identifier. If a carrier asks for an IMEI or IMEI2, copy the requested field directly from Settings, General, About and keep it private. If the carrier says the record does not match, ask that carrier to verify the identifier and provisioning status rather than assuming the cause is a carrier lock. Apple explains where to find IMEI, EID, and other identifiers.",
+          "links": [
+            {
+              "label": "Find IMEI, EID, and other iPhone identifiers in Apple's guide",
+              "href": "https://support.apple.com/en-us/108037"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "setup-two-lines",
+          "text": "Set up and label the two lines"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Keep the existing line available while the second carrier prepares its SIM or eSIM.",
+            "For an eSIM, open Settings, Cellular or Mobile Data, then choose Add eSIM and follow the carrier's supported transfer, carrier activation, QR code, link, app, or manual route.",
+            "Label the plans clearly, such as Personal and Travel or Work and Home.",
+            "Choose the default voice line and the line used for cellular data.",
+            "Turn on Allow Cellular Data Switching only if you understand when the iPhone may move data during a call and your carrier supports the feature.",
+            "Test outgoing and incoming calls, messages, and data on each line before relying on the setup."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple explains that both numbers can make and receive calls and messages, while only one cellular data network is used at a time. The other line may show No Service during a call when Wi-Fi Calling or cellular data switching is unavailable. That behavior is different from a carrier lock.",
+          "links": [
+            {
+              "label": "See Apple's Dual SIM calling and data behavior",
+              "href": "https://support.apple.com/en-us/109317"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "second-line-fails",
+          "text": "If the second carrier will not activate"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "Likely category",
+            "Next check"
+          ],
+          "rows": [
+            [
+              "Carrier Lock does not say No SIM restrictions",
+              "Carrier restriction",
+              "Ask the current carrier for its eligibility and official unlock route"
+            ],
+            [
+              "Add eSIM is missing or activation will not start",
+              "Model, region, carrier, or provisioning issue",
+              "Confirm model support and ask the carrier to verify the relevant device information and activation route"
+            ],
+            [
+              "Plan appears but has no service",
+              "Coverage, outage, billing, or provisioning issue",
+              "Check the line status, coverage, and account with that carrier"
+            ],
+            [
+              "One line shows No Service during a call",
+              "Dual SIM call and data behavior",
+              "Check Wi-Fi Calling and Allow Cellular Data Switching"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "Security on that specific SIM or eSIM",
+              "Contact the line's carrier; do not guess the code repeatedly"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock",
+              "Have the legitimate owner remove the device from the Apple Account"
+            ],
+            [
+              "A management profile or organization restriction appears",
+              "MDM or device management",
+              "Ask the owning organization or its administrator about the profile and removal path"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple's current troubleshooting guide says the plans must be ready, the carrier or carriers must support Dual SIM with eSIM, coverage and outages should be checked, and billing-related blocks can prevent setup. If those checks are satisfied but activation still fails, contact the carrier responsible for the line that will not activate. No general article can confirm a specific carrier's availability or eligibility without checking that carrier's current records.",
+          "links": [
+            {
+              "label": "Follow Apple's Dual SIM troubleshooting checks",
+              "href": "https://support.apple.com/en-us/109322"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "unlock-service-role",
+          "text": "What an iPhone unlock service can and cannot do"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help you collect the model, Carrier Lock result, and carrier contact details or point you to the official carrier route. It cannot authorize an unlock on the carrier's behalf: Apple says only the current carrier can unlock an iPhone. Do not treat an outside service as authorized to override account, financing, lost-or-stolen, blocked, or other eligibility records. The carrier or relevant record holder must review those matters under its own policy.",
+          "links": [
+            {
+              "label": "Review the iPhone carrier-unlock eligibility guide",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            },
+            {
+              "label": "Learn how to unlock an eSIM on iPhone",
+              "href": "/articles/how-to-unlock-esim-on-iphone"
+            },
+            {
+              "label": "Read the FCC consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Check T-Mobile's current device unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Check Verizon's current device unlock policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "The FCC notes that unlocking only disables software that prevents activation on another provider; it does not guarantee technical compatibility, coverage, or service features on that network. Carrier policies also differ by device source, plan type, account status, payment or usage requirements, and lost-or-stolen or blocked records. Use the policy of the carrier that sold or controls the device instead of applying another provider's terms.",
+          "links": [
+            {
+              "label": "Read the FCC explanation of compatibility and unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Planning a two-carrier iPhone setup? Contact us with the model, current Carrier Lock result, and the two carriers—without posting the full IMEI—to discuss which official check applies. No carrier outcome is promised.",
+          "href": "/contact",
+          "label": "Review my Dual SIM plan"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can I use two different carriers on one iPhone?",
+          "answer": "Yes, if the iPhone supports the intended Dual SIM combination, both carriers support it, and Carrier Lock says No SIM restrictions. A locked iPhone can use two plans only from the carrier that controls the lock."
+        },
+        {
+          "question": "Does adding an eSIM unlock an iPhone?",
+          "answer": "No. An eSIM is a digital cellular plan, not an unlock method. Only the current carrier can authorize a carrier unlock, and the carrier must also support the intended activation route."
+        },
+        {
+          "question": "Can a carrier-locked iPhone use Dual SIM?",
+          "answer": "It may use two eligible plans from the same locking carrier when that carrier and the model support Dual SIM. Mixed-carrier service requires No SIM restrictions."
+        },
+        {
+          "question": "Can both iPhone lines use cellular data at the same time?",
+          "answer": "The iPhone uses one cellular data network at a time. You can choose the data line and, where supported, enable Allow Cellular Data Switching."
+        },
+        {
+          "question": "Why does my second line show No Service?",
+          "answer": "Possible causes include carrier lock, unsupported eSIM provisioning, an inactive or blocked plan, coverage, billing, or normal Dual SIM behavior during a call. Check Carrier Lock and the status of that specific line before requesting an unlock."
+        },
+        {
+          "question": "Is Activation Lock or MDM the same as Carrier Lock?",
+          "answer": "No. Activation Lock links the device to an Apple Account, while MDM or device management applies organization controls. Neither is removed by a carrier unlock; ask the legitimate owner or managing organization about those issues."
+        },
+        {
+          "question": "What should I do if I see a SIM PIN or PUK prompt?",
+          "answer": "Treat it as security for that particular SIM or eSIM, not as proof of Carrier Lock. Contact the carrier that issued the line and do not guess the PIN or PUK repeatedly."
+        }
+      ]
+    },
+  {
+      "slug": "can-unlocked-iphone-be-locked-again",
+      "title": "Can an iPhone Be Locked After Unlocking?",
+      "heading": "Can an Unlocked iPhone Be Locked Again?",
+      "description": "Can an unlocked iPhone be locked again? Learn how to check Carrier Lock and separate SIM, Activation Lock, MDM, blacklist and activation issues.",
+      "standfirst": "No SIM restrictions is the key on-device signal, but a failed SIM or activation does not by itself prove a relock. Check the exact device and the carrier record.",
+      "published": "2026-10-08",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "iPhone appears carrier locked again",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "An iPhone that shows No SIM restrictions next to Carrier Lock is reporting that it is unlocked at the time of the check. Apple says only the current carrier can unlock an iPhone; Apple cannot do it for a different carrier. A different message or a failed activation needs diagnosis, but it does not by itself prove that the phone was deliberately re-locked.",
+          "links": [
+            {
+              "label": "Check Apple's current Carrier Lock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read Apple's Invalid SIM and No SIM troubleshooting",
+              "href": "https://support.apple.com/en-us/108914"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Check Settings > General > About on the exact iPhone in your hand; No SIM restrictions is Apple's current on-device unlock result.",
+            "SIM Not Supported, Invalid SIM and No Service can have causes other than Carrier Lock, so do not treat one message as proof of a relock.",
+            "A replacement iPhone is a different device. Approval for the original phone does not establish that the replacement has the same carrier status.",
+            "Carrier Lock, Activation Lock, SIM PIN or PUK, MDM, an IMEI bar, finance eligibility and network compatibility are separate checks.",
+            "Only the carrier controlling the carrier restriction can process an unlock under its own current policy; policies differ by carrier, country and date."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-current-state",
+          "text": "First, verify whether the iPhone is actually carrier locked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings > General > About on the current phone.",
+            "Find Carrier Lock and record the exact wording. No SIM restrictions means Apple considers the iPhone unlocked for carrier-lock purposes.",
+            "Record the device identifier shown in About privately. Do not post a full IMEI or other identifier publicly.",
+            "Compare that identifier with the carrier case, receipt or replacement paperwork so the carrier checks the phone you are actually using.",
+            "Test only with an active line and a SIM or eSIM that the destination carrier says is compatible and provisioned for the device."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not diagnose a relock from SIM Not Supported, Invalid SIM or No Service alone. Apple also points to an active plan, a restart, carrier-settings updates, SIM or eSIM checks and carrier support when these alerts continue."
+        },
+        {
+          "kind": "h2",
+          "id": "what-changed",
+          "text": "What changed before it appeared locked?"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Recent event",
+            "What may have changed",
+            "Best evidence"
+          ],
+          "rows": [
+            [
+              "SIM or eSIM switch",
+              "The line may not be active, compatible or correctly provisioned for this device.",
+              "The Carrier Lock field plus the destination carrier's activation status"
+            ],
+            [
+              "iOS update or restart",
+              "A carrier-settings or activation issue may become visible; the timing alone does not prove a lock change.",
+              "The Carrier Lock field and Apple's carrier-settings troubleshooting"
+            ],
+            [
+              "Erase or factory reset",
+              "The iPhone must activate again. Erasing does not itself grant carrier authorization.",
+              "The current Carrier Lock result after activation plus the carrier's record"
+            ],
+            [
+              "Warranty, repair or insurance replacement",
+              "The physical device and its identifier changed; the original phone's approval is not proof for the replacement.",
+              "The replacement paperwork, current device identifier and Carrier Lock field"
+            ],
+            [
+              "Loss, theft, account or finance issue",
+              "A provider's network block or unlock-eligibility rule may be separate from the Carrier Lock field; the applicable policy controls.",
+              "The carrier's current policy and its account or device review"
+            ],
+            [
+              "Used-phone purchase",
+              "The seller's unlocked description may have been wrong or may refer to another device.",
+              "The live Carrier Lock screen and Activation Lock setup check"
+            ]
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "reset-does-not-authorize",
+          "text": "A reset does not create or cancel carrier authorization"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the carrier can unlock an iPhone. Apple documents removing the old SIM and inserting a new one after the carrier confirms the unlock; if another SIM is unavailable, Apple lists backup, erase and restore as ways to finish the process. That makes a reset a possible activation step, not the source of the carrier's decision. If a reset exposes a carrier restriction, ask the carrier to inspect the current device record instead of assuming the reset caused a relock.",
+          "links": [
+            {
+              "label": "See Apple's unlock completion steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the factory-reset carrier-lock guide",
+              "href": "/articles/will-factory-reset-unlock-iphone-carrier"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "replacement-iphone",
+          "text": "Replacement iPhone: treat it as a new device check"
+        },
+        {
+          "kind": "p",
+          "text": "A replacement iPhone has its own device identifiers. The fact that an original phone was approved or unlocked does not establish that the replacement has the same Carrier Lock state. Give the carrier the identifier for the phone now in your hand and the replacement paperwork, then ask what its current policy requires. Do not assume a warranty, repair or insurance exchange carries over an unlock record automatically.",
+          "links": [
+            {
+              "label": "See Apple's identifier lookup guidance",
+              "href": "https://support.apple.com/en-us/108037"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The original phone's carrier case or unlock confirmation, if available",
+            "The current replacement phone's identifier, shared privately with the carrier",
+            "Repair, warranty or insurance paperwork, if relevant",
+            "The date the replacement was activated",
+            "The exact text shown beside Carrier Lock on the replacement",
+            "The destination carrier and the exact activation or SIM alert"
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "separate-restrictions",
+          "text": "Problems commonly mistaken for a carrier relock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Problem",
+            "What it controls",
+            "Who can investigate or change it"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "Software restriction that affects activation on another carrier's compatible network.",
+              "The carrier that controls the restriction"
+            ],
+            [
+              "Activation Lock",
+              "Apple Account ownership during activation after Find My is enabled.",
+              "The legitimate owner, the organization's IT administrator or Apple's documented support route"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security for one SIM or eSIM line and its calls or cellular data.",
+              "The carrier that issued that SIM or eSIM"
+            ],
+            [
+              "Device passcode",
+              "Access to the iPhone and its data.",
+              "Apple's passcode recovery process"
+            ],
+            [
+              "MDM or a management profile",
+              "Organization settings, restrictions, commands and sometimes remote lock or wipe.",
+              "The enrolling organization or its device-management administrator"
+            ],
+            [
+              "Lost or stolen IMEI bar",
+              "Whether a provider blocks a reported device from its network.",
+              "The reporting provider and the legitimate account or device owner under applicable policy"
+            ],
+            [
+              "Finance or account eligibility",
+              "Whether a carrier's payment, usage or good-standing rules allow an unlock request or continued service.",
+              "The relevant carrier or account holder under the current agreement"
+            ],
+            [
+              "Network compatibility and provisioning",
+              "Bands, network technology, plan, line activation and feature support on the destination network.",
+              "The destination carrier"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "These checks can overlap without being the same. Apple describes Activation Lock as an Apple Account and Find My protection, SIM PIN as a code for a SIM or eSIM, and device management as organization-controlled profiles and commands. A provider may also block a lost or stolen device's IMEI, while a carrier's payment or good-standing policy can affect unlock eligibility. None of those facts changes what the Carrier Lock field says.",
+          "links": [
+            {
+              "label": "Read Apple's Activation Lock explanation",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple's device-management profile guidance",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-profiles-depc0aadd3fe/web"
+            },
+            {
+              "label": "Read Ofcom's lost or stolen phone guidance",
+              "href": "https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/lost-or-stolen-phone"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "An iPhone can show No SIM restrictions and still fail to connect to a destination network. Apple lists active-plan, SIM or eSIM, carrier-settings and service checks for SIM alerts. The FCC also explains that unlocking does not make a device fully interoperable with every network or guarantee every feature. Do not order another unlock when the evidence points to activation, compatibility, provisioning or an IMEI-bar issue.",
+          "links": [
+            {
+              "label": "Read the FCC's current cell-phone-unlocking guidance",
+              "href": "https://www.fcc.gov/general/cell-phone-unlocking"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            },
+            {
+              "label": "Compare blacklist and carrier-lock problems",
+              "href": "/articles/blacklisted-iphone-unlock-carrier-lock-difference"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-policy-differences",
+          "text": "Carrier policies are not interchangeable"
+        },
+        {
+          "kind": "p",
+          "text": "The carrier, country and date determine eligibility. The FCC describes general participating-provider standards, but Apple still directs customers to the carrier that controls the lock. Current carrier pages show why a universal promise is unsafe: T-Mobile lists device, account, payment and lost-or-stolen conditions, while Verizon states that its policy will not re-lock a device once unlocked and separately warns that compatibility can remain limited. Those examples are not proof of what another carrier will do.",
+          "links": [
+            {
+              "label": "Check T-Mobile's current device unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Check Verizon's current device unlocking policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            },
+            {
+              "label": "Read the FCC consumer standards",
+              "href": "https://www.fcc.gov/general/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-escalation",
+          "text": "Build a useful carrier escalation"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "State whether the current Carrier Lock field says No SIM restrictions or something else.",
+            "Give the current carrier the identifier for the phone in your hand privately, not an old phone's identifier or a public post.",
+            "Ask whether the carrier completed the unlock on that device and which current policy or eligibility condition applies; do not assume that an approval email proves the device record is correct.",
+            "If the device was replaced, provide the replacement paperwork and ask how the carrier handles the current device under its policy.",
+            "If Carrier Lock already says No SIM restrictions, move the case to active-plan, SIM or eSIM, carrier-settings, compatibility, provisioning or account support instead of requesting the same unlock again.",
+            "Keep the case number and written response before trying another SIM or erasing the phone."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "What a third-party service can and cannot establish"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may explain terminology or help organize information for a carrier conversation, but the sources reviewed here do not support a promise that it can change carrier authorization, remove an IMEI bar, clear a debt or finance condition, remove Activation Lock, remove MDM, or make an incompatible SIM work. Apple says the carrier controls carrier unlocking. Treat claims of guaranteed unlocks, guaranteed blacklist removal, instant completion or universal carrier support as unsupported unless the relevant carrier's current policy expressly says otherwise.",
+          "links": [
+            {
+              "label": "Review an informational IMEI-unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            },
+            {
+              "label": "Confirm Apple's carrier-unlock authority statement",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Does an iPhone appear locked again? For an informational review, share the current Carrier Lock wording, the carrier response and whether the device was replaced—without posting the full IMEI. No review can guarantee carrier action or change a carrier, Apple Account, SIM, MDM or network restriction.",
+          "href": "/contact",
+          "label": "Request an informational review"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can a carrier lock an unlocked iPhone again?",
+          "answer": "The official sources reviewed for this article do not establish a universal, user-facing relock mechanism. Verizon's current policy says it will not re-lock a device once unlocked, but that is Verizon's policy and cannot be generalized. If the exact iPhone no longer shows No SIM restrictions, ask the current carrier to inspect the device record instead of assuming the cause."
+        },
+        {
+          "question": "Can an iOS update carrier-lock an iPhone?",
+          "answer": "The timing of an update does not prove a carrier-lock change. Check Carrier Lock, restart the iPhone, check for a carrier-settings update and contact the carrier if the alert continues. Apple lists those checks for SIM-related problems."
+        },
+        {
+          "question": "Can a factory reset make an unlocked iPhone locked?",
+          "answer": "A reset does not grant or revoke the carrier's authorization. Apple lists erase and restore as a way to finish an unlock after the carrier confirms it, especially when another SIM is unavailable. If the result changes, verify the current device record and Carrier Lock field."
+        },
+        {
+          "question": "Why is my replacement iPhone SIM locked?",
+          "answer": "The replacement is a different device with its own identifiers, so the original phone's approval is not proof that the replacement is unlocked. Give the carrier the current device identifier and replacement paperwork and ask what its policy requires."
+        },
+        {
+          "question": "Does a blacklisted iPhone mean it was carrier-locked again?",
+          "answer": "No conclusion about Carrier Lock follows from an IMEI bar. A provider can block a reported lost or stolen device under its process, and a carrier can apply separate account or eligibility rules. Ask the relevant provider to explain its current record and policy; do not assume blacklist removal is available."
+        },
+        {
+          "question": "Is Activation Lock the same as Carrier Lock?",
+          "answer": "No. Carrier Lock concerns a carrier restriction, while Activation Lock is linked to Find My and the prior Apple Account during activation. The legitimate owner, an organization administrator or Apple's documented support route handles Activation Lock; changing carriers does not prove that it has been removed."
+        }
+      ]
+    },
+  {
+      "slug": "factory-unlocked-iphone-meaning-buyer-checklist",
+      "title": "Factory Unlocked iPhone: Buyer Guide",
+      "heading": "Factory Unlocked iPhone: What It Means Before You Buy",
+      "description": "A factory-unlocked label does not prove carrier, ownership, finance, or blacklist status. Learn what to verify before buying a used iPhone.",
+      "standfirst": "“Factory unlocked” is a seller label, not a complete device report. Treat the iPhone’s Carrier Lock result and carrier checks as evidence.",
+      "published": "2026-10-07",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "Factory unlocked iPhone",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A listing described as factory unlocked may be intended to indicate that the iPhone is not tied to a carrier. The label alone does not establish how the device was supplied or whether its records are clear. Apple’s on-device check is Settings, General, About: “No SIM restrictions” beside Carrier Lock means the iPhone is unlocked. This checks carrier-lock state, not ownership or every network’s acceptance.",
+          "links": [
+            {
+              "label": "Apple’s current Carrier Lock check",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Factory unlocked is a marketplace description, not a complete inspection report for an iPhone.",
+            "No SIM restrictions under Carrier Lock is Apple’s on-device indication that the current carrier restriction is absent.",
+            "Factory unlocked and carrier unlocked may describe different claimed histories, but neither label verifies that history.",
+            "A no-SIM-restrictions result does not clear Activation Lock, SIM PIN or PUK, organization MDM, blocked-device records, financing terms, or network compatibility.",
+            "Before paying, match the exact phone to the destination carrier’s checks, ownership requirements, seller evidence, and return process."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "what-factory-unlocked-means",
+          "text": "What “factory unlocked” should mean"
+        },
+        {
+          "kind": "p",
+          "text": "“Factory unlocked” is a marketplace description rather than the result Apple tells buyers to use when checking an iPhone. In listing copy, it usually signals the seller’s belief that the device was supplied without a carrier restriction. The phrase cannot verify that history. Ask to inspect the exact iPhone, check Carrier Lock, and ask the destination carrier whether that model and device can be activated.",
+          "links": [
+            {
+              "label": "Apple’s preowned iPhone inspection guidance",
+              "href": "https://support.apple.com/en-us/104999"
+            },
+            {
+              "label": "FCC explanation of carrier unlocking",
+              "href": "https://www.fcc.gov/general/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Listing phrase",
+            "Safer interpretation",
+            "What it does not prove"
+          ],
+          "rows": [
+            [
+              "Factory unlocked",
+              "The seller says the device was supplied without a carrier restriction",
+              "How it reached that state, ownership, financing, blocked status, or compatibility"
+            ],
+            [
+              "Carrier unlocked",
+              "The seller says a carrier restriction was removed or is no longer present",
+              "Which carrier acted, whether the claim is current, or whether other records are clear"
+            ],
+            [
+              "Worldwide or global unlocked",
+              "A marketing claim that more than one carrier may be usable",
+              "Every band, feature, regional approval, or carrier acceptance"
+            ],
+            [
+              "SIM-free or carrier-free",
+              "The sale may not include a carrier service plan or bundled service",
+              "The current Carrier Lock state of a used or returned unit"
+            ],
+            [
+              "No SIM restrictions",
+              "The iPhone currently reports no carrier restriction in Carrier Lock",
+              "Blacklist or blocked status, financing, Activation Lock, MDM, condition, or compatibility"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not treat “factory unlocked,” “GSM unlocked,” “worldwide unlocked,” or “fully unlocked” as stronger evidence than the exact Carrier Lock result. A listing label is not a carrier decision."
+        },
+        {
+          "kind": "h2",
+          "id": "factory-vs-carrier-unlocked",
+          "text": "Factory unlocked vs. carrier unlocked iPhone"
+        },
+        {
+          "kind": "p",
+          "text": "Both labels can point to the same current usable state if the exact iPhone reports No SIM restrictions. The difference is the history the seller is claiming, not a separate Apple status that proves that history. The FCC explains that unlocking removes a carrier software restriction; it does not make the phone technologically compatible with every network or guarantee every feature. Check destination-carrier compatibility separately.",
+          "links": [
+            {
+              "label": "Apple’s definition of No SIM restrictions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "FCC guidance on compatibility after unlocking",
+              "href": "https://www.fcc.gov/general/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "which-is-better",
+          "text": "Is one type better?"
+        },
+        {
+          "kind": "p",
+          "text": "Neither label wins automatically. Prefer a phone whose current Carrier Lock result can be inspected, whose exact model and IMEI can be checked with the intended carrier, whose previous owner can complete setup removal, and whose seller offers a usable return process. A label cannot substitute for those checks."
+        },
+        {
+          "kind": "h2",
+          "id": "buyer-verification",
+          "text": "Verify the phone before paying"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Ask the seller to open Settings, General, About and show Carrier Lock on the same phone as the model information. Redact private identifiers from any photo or message.",
+            "Look for No SIM restrictions. Treat a screenshot, receipt, reset screen, or another phone’s result as supporting evidence only; inspect the exact device before payment or during the return period.",
+            "Match the exact model and regional configuration to the destination carrier’s supported bands, features, and physical-SIM or eSIM requirements.",
+            "Use the destination carrier’s official IMEI or bring-your-own-device checker when available. Do not publish a full IMEI in a listing, message, or public support request.",
+            "Start setup and confirm that the phone does not show iPhone Locked to Owner or ask for the previous owner’s Apple Account. The legitimate owner must remove Find My and the account link before you take ownership.",
+            "Ask the seller about proof of purchase, any remaining finance or account obligation, loss or theft reports, and return restrictions. A seller statement is not carrier clearance.",
+            "Inspect condition, battery information, and parts or service history. Test a compatible SIM or eSIM, calls, mobile data, and messaging during the return period; this tests the selected carrier, not every network."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple places the IMEI, EID, and related identifiers in the About screen and other device locations. A carrier’s IMEI or BYOD result can be useful for that carrier’s compatibility or blocked-device decision, but it is not a universal report for every country, carrier, finance arrangement, or future status. Keep the result dated and compare it with the live Carrier Lock screen.",
+          "links": [
+            {
+              "label": "Apple’s identifier locations",
+              "href": "https://support.apple.com/en-us/108037"
+            },
+            {
+              "label": "T-Mobile’s official IMEI compatibility checker",
+              "href": "https://www.t-mobile.com/resources/bring-your-own-phone"
+            },
+            {
+              "label": "Verizon’s current device-unlocking policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-problems",
+          "text": "Unlocked does not mean problem-free"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Issue",
+            "What it controls",
+            "Correct next step"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "A software restriction that can stop activation with a different carrier",
+              "Read Carrier Lock and contact the current carrier; Apple cannot unlock it for you"
+            ],
+            [
+              "Activation Lock",
+              "Whether the iPhone remains linked to a previous Apple Account through Find My",
+              "Have the legitimate owner remove the link and proceed only when setup reaches the Hello screen"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security for one physical SIM or eSIM line",
+              "Contact the carrier that issued that line; do not guess repeatedly"
+            ],
+            [
+              "MDM or organization enrollment",
+              "Management settings and enrollment controls on an organization-managed device",
+              "Ask the organization or seller to release the device; a carrier unlock does not remove MDM"
+            ],
+            [
+              "Device passcode",
+              "Access to the iPhone and its local data",
+              "Ask the seller to erase it through Apple’s normal sale or transfer process"
+            ],
+            [
+              "Blocked, lost, stolen, or finance record",
+              "A carrier or account decision about network eligibility, loss, fraud, or payment status",
+              "Check with the destination carrier and seller; there is no single check that proves every record is clear"
+            ],
+            [
+              "Network compatibility",
+              "Model support, bands, provisioning, and available features on a chosen carrier",
+              "Use that carrier’s current compatibility and activation checks"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "These checks answer different questions. Apple says Activation Lock follows Find My and the previous Apple Account, while a SIM PIN or PUK belongs to the SIM or eSIM line. Apple’s device-management guidance also describes organization-owned devices that can be configured by Automated Device Enrollment and, in some configurations, prevented from unenrolling. None of these states is the same as Carrier Lock.",
+          "links": [
+            {
+              "label": "Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Apple’s MDM enrollment guidance",
+              "href": "https://support.apple.com/guide/deployment/automated-device-enrollment-management-dep73069dd57/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "seller-red-flags",
+          "text": "Red flags in a factory-unlocked listing"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The seller will not show Carrier Lock on the exact device, or says a reset is required to reveal a result that should be visible in Settings.",
+            "The listing promises every carrier worldwide without naming the model, supported bands, or limits of the claim.",
+            "The phone is called unlocked but shows a carrier restriction, “SIM Not Supported,” or “iPhone Locked to Owner.” Identify which separate issue is present before paying.",
+            "The IMEI, model, storage, or region differs between the listing, receipt, box, and device.",
+            "The seller demands payment before a compatibility check and provides no usable return process.",
+            "A paid “factory unlock” is offered without naming the carrier decision, eligibility basis, evidence supplied, or refusal and refund terms."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "What an unlock service can actually help with"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help organize records or explain a report in some cases, but Apple says only the current carrier can unlock an iPhone. A third party cannot replace the carrier’s eligibility decision, remove Activation Lock, release organization MDM, promise blacklist or finance-record removal, or guarantee compatibility with every network. Before paying, identify the provider, exact scope, refusal or refund policy, and evidence it will supply; treat the carrier’s response and the phone’s current screen as the authoritative checks.",
+          "links": [
+            {
+              "label": "Apple’s guidance on who can unlock an iPhone",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "FCC guidance on carrier-specific unlocking",
+              "href": "https://www.fcc.gov/general/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have the Carrier Lock result, IMEI or carrier-check result, and seller’s description? Keep them together when contacting the seller or carrier. Use the contact route for an informational question, not as a substitute for the carrier’s decision or a guarantee of unlocking.",
+          "href": "/contact",
+          "label": "Ask about the factory-unlocked claim"
+        }
+      ],
+      "faq": [
+        {
+          "question": "What is a factory unlocked iPhone?",
+          "answer": "It is a seller term for an iPhone described as supplied without a carrier restriction. It does not verify the phone’s history. Check Settings, General, About and look for No SIM restrictions beside Carrier Lock."
+        },
+        {
+          "question": "Is factory unlocked better than carrier unlocked?",
+          "answer": "Not automatically. The labels may describe different claimed histories, but current Carrier Lock, destination-carrier compatibility, ownership evidence, condition, and the return path matter more than the label."
+        },
+        {
+          "question": "Can a factory unlocked iPhone still be blocked or have a finance issue?",
+          "answer": "Yes. Carrier Lock is a different check from a carrier’s blocked-device, loss, fraud, or account-payment records. Check with the destination carrier and seller; an IMEI result is not a universal guarantee about every record or future status."
+        },
+        {
+          "question": "Does factory unlocked mean the iPhone works with every carrier?",
+          "answer": "No. The destination carrier must still accept the exact model and device and support its bands, features, SIM or eSIM configuration, and provisioning. Unlocking does not make every network compatible."
+        },
+        {
+          "question": "Can an unlocked iPhone still have Activation Lock?",
+          "answer": "Yes. Activation Lock is linked to Find My and the previous Apple Account, not Carrier Lock. Do not take a used phone that shows iPhone Locked to Owner or asks for the previous owner’s account."
+        },
+        {
+          "question": "Can an unlocked iPhone still be managed by an organization?",
+          "answer": "Yes. A device can report No SIM restrictions and still be subject to organization enrollment or management. Ask the seller or organization to release it before buying; Carrier Lock and MDM are separate."
+        },
+        {
+          "question": "Does a SIM PIN mean the iPhone is carrier locked?",
+          "answer": "No. A SIM PIN or PUK protects a particular SIM or eSIM line. Contact the carrier that issued the line and do not guess the code. Check Carrier Lock separately."
+        }
+      ]
+    },
+  {
+      "slug": "how-long-does-iphone-carrier-unlock-take",
+      "title": "How Long Does iPhone Unlock Take?",
+      "heading": "How Long Does It Take to Unlock an iPhone?",
+      "description": "How long does an iPhone carrier unlock take? Learn which clock applies, what carriers publish, and how to verify the result without guessing.",
+      "standfirst": "There is no universal unlock timer. Separate eligibility, carrier review, and device activation before deciding that a request is late.",
+      "published": "2026-10-07",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "iPhone carrier unlock timing",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "How long it takes to unlock an iPhone depends on the carrier that controls the lock, the device and account eligibility rules, and the stage being measured. Apple says a carrier might take a few days to complete an unlock request, but Apple does not set a worldwide deadline or unlock the phone itself. A device that is not eligible, a request under review, and an approved change that has not yet appeared on the iPhone are different situations.",
+          "links": [
+            {
+              "label": "Read Apple’s current iPhone unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Measure a carrier request from the relevant eligibility event or from a complete request submitted to the carrier that controls the lock; do not treat a preliminary inquiry as approval.",
+            "An eligibility waiting period is not the same as processing time for an eligible request.",
+            "Published timing is carrier- and device-specific: T-Mobile describes automatic remote unlocking within two business days after eligibility for supported devices, while the AT&T pages reviewed here do not state a universal minutes-or-hours turnaround.",
+            "The useful on-device finish line is No SIM restrictions under Carrier Lock, not an email that merely says received, approved, or completed.",
+            "An outside service cannot guarantee a carrier decision, bypass eligibility, or change a carrier’s account, loss, theft, or payment records."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "three-clocks",
+          "text": "The Three Clocks People Often Combine"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Clock",
+            "When it starts",
+            "What ends it"
+          ],
+          "rows": [
+            [
+              "Eligibility wait",
+              "The purchase, activation, service, account, or payoff event defined by the carrier",
+              "The carrier’s stated requirements are met"
+            ],
+            [
+              "Carrier review",
+              "A complete request reaches the correct carrier",
+              "Approval, denial, or a request for more information"
+            ],
+            [
+              "Device completion",
+              "The carrier applies an approved unlock to the device record",
+              "Carrier Lock shows No SIM restrictions"
+            ],
+            [
+              "New-carrier activation",
+              "The destination carrier accepts a compatible SIM or eSIM",
+              "The destination carrier completes activation; network compatibility remains a separate check"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not turn one carrier’s published turnaround into a universal promise. Business-day wording, plan type, device support, eligibility records, document review, and exceptions can change the actual path."
+        },
+        {
+          "kind": "h2",
+          "id": "published-examples",
+          "text": "Current Carrier Examples Show Why Timing Varies"
+        },
+        {
+          "kind": "p",
+          "text": "The examples below are current U.S. carrier policies checked for this review. They illustrate scope rather than a worldwide iPhone timetable. Eligibility must be satisfied before a carrier’s completion window can be relevant.",
+          "links": [
+            {
+              "label": "Check the FCC’s current consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Source",
+            "Published timing or process",
+            "Important scope"
+          ],
+          "rows": [
+            [
+              "Apple",
+              "A carrier might take a few days",
+              "General iPhone guidance; Apple says only the current carrier can unlock"
+            ],
+            [
+              "AT&T",
+              "No universal processing time is stated on the AT&T pages reviewed",
+              "Eligibility and request routes vary for wireless, prepaid, and business devices"
+            ],
+            [
+              "T-Mobile",
+              "Within two business days after eligibility when the device supports remote unlock",
+              "Unsupported remote unlocks receive a notification with next steps; postpaid and prepaid requirements differ"
+            ],
+            [
+              "FCC description of participating-provider standards",
+              "Eligible requests receive an unlock, an explanation, or notice that more time is reasonably needed within two business days",
+              "This describes CTIA participating-provider standards and eligible requests, not a universal deadline for every carrier or device"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "AT&T’s current support pages list conditions such as device age, a zero installment balance, no lost or stolen report, and a current account, and they provide an unlock-request route. The pages reviewed do not support the older minutes-or-48-hours wording. T-Mobile ties its two-business-day statement to an eligible device and remote-unlock support. Check the carrier’s current policy instead of assuming that another carrier’s timer applies.",
+          "links": [
+            {
+              "label": "Read AT&T’s current unlock requirements",
+              "href": "https://www.att.com/support/article/wireless/KM1008728/"
+            },
+            {
+              "label": "Open AT&T’s device-unlock request route",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Review T-Mobile’s current Device Unlock Policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "status-timeline",
+          "text": "Read the Status Before Chasing the Timer"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Status or evidence",
+            "What it usually means",
+            "Best next action"
+          ],
+          "rows": [
+            [
+              "Submitted or received",
+              "The carrier has a request, but the decision or device change is not yet verified",
+              "Keep the request details and follow the carrier’s stated process; ask the carrier when no applicable window is shown"
+            ],
+            [
+              "More information needed",
+              "The carrier says a record or eligibility detail is missing",
+              "Provide only the requested evidence through the official carrier route"
+            ],
+            [
+              "Denied or not eligible",
+              "A stated policy requirement or account/device record did not qualify",
+              "Ask the carrier for the reason and resolve that reason before resubmitting"
+            ],
+            [
+              "Approved",
+              "The carrier accepted the request, but the iPhone may not yet show the change",
+              "Ask whether the change was applied to the correct device record, then check Carrier Lock"
+            ],
+            [
+              "Completed",
+              "The carrier says the unlock was applied",
+              "Verify the iPhone’s Carrier Lock result and test activation only after the carrier confirms completion"
+            ],
+            [
+              "No SIM restrictions",
+              "The iPhone reports no carrier restriction",
+              "Move to destination-carrier compatibility and activation checks"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "before-contacting-carrier",
+          "text": "Before Contacting the Carrier About a Delay"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and record the exact Carrier Lock result and the device identifier used for the request. Keep that identifier private outside official channels.",
+            "Confirm that the request went to the carrier that controls the lock, not merely the carrier currently shown in the status bar.",
+            "Find the submission time, request number if one was issued, and every carrier message, including spam or junk folders.",
+            "Compare the elapsed business time with the current page for that carrier, plan type, and device type; do not substitute another carrier’s policy.",
+            "Check whether a payoff, account status, active-line, fraud, loss, purchase-date, or ownership record still needs to update under the carrier’s policy.",
+            "After the carrier confirms the unlock, follow Apple’s SIM or eSIM activation steps. If Carrier Lock still does not change, ask the carrier to verify that it used the correct device record.",
+            "Test a supported destination SIM or eSIM only after No SIM restrictions appears. Unlocking alone does not prove that every destination network is technically compatible."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If the carrier controlling the lock is unclear, identify it before resubmitting. A request sent to the wrong network does not shorten the process and can make the case history harder to follow.",
+          "links": [
+            {
+              "label": "Find the carrier on an iPhone before requesting an unlock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "approved-but-still-locked",
+          "text": "Approved but Still SIM Locked"
+        },
+        {
+          "kind": "p",
+          "text": "Approval is not the final on-device verification. Ask the carrier whether the unlock was approved only or applied to the correct device record. After the carrier confirms the change, Apple documents using another carrier’s SIM or eSIM to activate the iPhone. If no other SIM is available, Apple documents a backup, erase, and restore route; back up first, and do not erase merely to force an undecided request.",
+          "links": [
+            {
+              "label": "Read Apple’s completion steps for an approved unlock",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "See the iUnlockMobile guide for an approved unlock without another SIM",
+              "href": "/articles/unlock-iphone-without-sim-card-after-approval"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "escalation-record",
+          "text": "Build a Clean Escalation Record"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Carrier name and the exact policy page reviewed",
+            "Request number, submission time, and any stated service window",
+            "Device identifier used for the request, kept private outside official channels",
+            "Exact approval, denial, or completion wording",
+            "Current Carrier Lock result and when it was last checked",
+            "Any replacement-device, payoff, or account change that could have created a record mismatch"
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-locks",
+          "text": "Make Sure You Are Timing the Right Process"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Problem",
+            "Why the carrier-unlock timer does not apply",
+            "Correct owner or route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "It is the carrier restriction checked under Settings, General, About; only the carrier that controls it can authorize an unlock",
+              "The carrier that applied the lock"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "It protects one SIM or eSIM and is separate from the iPhone’s Carrier Lock status",
+              "The carrier that issued the SIM or eSIM"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "It is Activation Lock linked to Find My and an Apple Account, not Carrier Lock",
+              "The legitimate Apple Account owner or Apple’s documented support route"
+            ],
+            [
+              "Remote Management or MDM",
+              "It is an organization’s device-management enrollment or configuration, not a carrier unlock",
+              "The organization’s IT or device-management administrator"
+            ],
+            [
+              "Blacklisted or finance-blocked device record",
+              "It is a separate loss, theft, fraud, payment, or account record; changing Carrier Lock does not establish that the record was cleared",
+              "The carrier, seller, or account holder responsible for that record"
+            ],
+            [
+              "No service after No SIM restrictions",
+              "The Carrier Lock check is complete; activation, account compatibility, coverage, or network technology may still fail",
+              "The destination carrier and compatibility checks"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple describes Activation Lock as a Find My security feature, SIM PIN as protection for a SIM or eSIM, and device management as an IT-controlled way to configure or lock managed devices. None of those processes should be represented as a carrier-unlock request or bypassed by an outside service.",
+          "links": [
+            {
+              "label": "Apple’s Activation Lock explanation",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "Can a Third Party Make It Faster?"
+        },
+        {
+          "kind": "p",
+          "text": "An outside service may help organize public information or a customer’s case history, but it cannot set the carrier’s eligibility rules or force a carrier decision. It cannot legitimately promise a universal delivery time, bypass Activation Lock or device management, or claim that a loss, theft, blacklist, or payment record has been cleared without evidence from the responsible organization. Before paying for any service, ask whether its quoted time covers eligibility, carrier review, or device completion, and treat the carrier’s own status and the iPhone’s Carrier Lock result as separate checks.",
+          "links": [
+            {
+              "label": "Review an iPhone unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have the request number, carrier, submission time, and current Carrier Lock result? Use a redacted timeline when contacting the carrier or requesting an informational review of which stage appears stalled.",
+          "href": "/contact",
+          "label": "Review the unlock timeline"
+        }
+      ],
+      "faq": [
+        {
+          "question": "How long does it take to unlock an iPhone?",
+          "answer": "There is no universal deadline. Apple says a carrier might need a few days, while some carriers publish their own eligibility or completion terms. Measure from the relevant eligibility event or complete request, check the current policy of the carrier that controls the lock, and verify the result under Carrier Lock."
+        },
+        {
+          "question": "Does paying off an iPhone start the unlock immediately?",
+          "answer": "Not necessarily. The carrier’s payment and account records may need to update, and other requirements can still apply. AT&T and T-Mobile publish different eligibility conditions, so check the current policy for the carrier and plan before assuming that a payment starts a review clock."
+        },
+        {
+          "question": "Is an approval email proof that the iPhone is unlocked?",
+          "answer": "Not by itself. Approval can come before the carrier applies the change to the device record. Apple’s useful on-device check is Settings, General, About, where Carrier Lock should show No SIM restrictions."
+        },
+        {
+          "question": "Why is my iPhone still SIM locked after the carrier says completed?",
+          "answer": "Ask the carrier to confirm that the change was applied to the correct device record, then follow Apple’s activation steps and recheck Carrier Lock. If it still does not show No SIM restrictions, return to the carrier rather than treating an approval message as proof of completion."
+        },
+        {
+          "question": "Can an unlock service guarantee a faster result?",
+          "answer": "No outside service can guarantee a carrier decision or override eligibility. It may help organize evidence, but the carrier controls authorization and its own current policy controls the timeline."
+        }
+      ]
+    },
+  {
+      "slug": "t-mobile-temporary-unlock-iphone-travel-guide",
+      "title": "T-Mobile Temporary iPhone Unlock",
+      "heading": "T-Mobile Temporary Unlock for iPhone: Is It Available?",
+      "description": "Can T-Mobile temporarily unlock an iPhone for travel? Compare the official iPhone route with roaming, eSIM checks, and eligibility.",
+      "standfirst": "T-Mobile’s iPhone instructions do not publish a standard temporary-unlock control. Use the Carrier Lock check, verify eligibility, and separate unlocking from roaming, eSIM compatibility, and other device locks.",
+      "published": "2026-10-06",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "T-Mobile temporary iPhone unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "If you are searching for a T-Mobile temporary unlock for an iPhone, start with the iPhone-specific route rather than an Android tutorial. T-Mobile’s current device-unlock page tells iPhone owners to check Settings > General > About > Carrier Lock and, for a locked iPhone that is eligible, contact T-Mobile so it can submit the unlock. The page does not publish a temporary-unlock control for iPhone, so treat any account-specific travel exception as something T-Mobile must confirm, not as a standard feature.",
+          "links": [
+            {
+              "label": "Read T-Mobile’s current device-unlock instructions",
+              "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "T-Mobile’s published iPhone route is Carrier Lock plus a contact request for a locked, eligible device; it does not establish a standard temporary travel unlock.",
+            "No SIM restrictions means Apple reports no carrier restriction. It does not promise service, coverage, activation, or compatibility on a destination network.",
+            "A travel eSIM from another carrier requires an unlocked iPhone and still needs a supported model, carrier, plan, and destination network.",
+            "T-Mobile international roaming uses the existing T-Mobile SIM or eSIM and is separate from a carrier unlock.",
+            "Activation Lock, SIM PIN or PUK, a forgotten passcode, and MDM are separate controls with different owners and remedies."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "why-results-conflict",
+          "text": "Why Temporary-Unlock Search Results Conflict"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you found",
+            "What it usually describes",
+            "What to verify for iPhone"
+          ],
+          "rows": [
+            [
+              "Temporary-unlock wording",
+              "A device-specific Android page or an older or third-party explanation",
+              "Whether T-Mobile gives a current, device-and-account-specific iPhone decision; do not assume a 30-day term"
+            ],
+            [
+              "Permanent Unlock menu",
+              "An Android on-device flow",
+              "The iPhone result under Settings > General > About > Carrier Lock"
+            ],
+            [
+              "International roaming or a pass",
+              "Using the existing T-Mobile line abroad",
+              "Qualifying plan, capable device, destination coverage, limits, and current charges"
+            ],
+            [
+              "Travel eSIM",
+              "A second carrier profile for the destination",
+              "No SIM restrictions plus eSIM, model, band, plan, and destination compatibility"
+            ],
+            [
+              "Carrier unlock approval",
+              "Authorization to use another carrier’s SIM or eSIM",
+              "A carrier-side change that can be checked under Carrier Lock"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Search results often combine Android device tutorials, iPhone carrier-unlock guidance, and travel-plan pages. T-Mobile’s current page gives iPhone a Carrier Lock check and contact route, while showing different on-device unlock steps for Android. A screenshot or instruction for another phone is not evidence that the same control exists on an iPhone.",
+          "links": [
+            {
+              "label": "Compare T-Mobile’s device-specific unlock routes",
+              "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Evidence limit: the current public T-Mobile iPhone instructions and device-unlock policy reviewed here do not confirm a temporary iPhone unlock or a 30-day term. That does not prove that no account-specific exception can exist. Do not infer one, and do not promise a price or completion time beyond T-Mobile’s written response."
+        },
+        {
+          "kind": "h2",
+          "id": "official-iphone-route",
+          "text": "Use the published iPhone route first"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About, and read the exact Carrier Lock result.",
+            "If it says No SIM restrictions, Apple reports that the iPhone is unlocked at the carrier layer. Continue with eSIM, model, coverage, activation, and plan checks before travel.",
+            "If a carrier restriction is shown, review the current T-Mobile account status and eligibility policy. Use an account status tool or support channel rather than publishing or sending a full device identifier.",
+            "Contact T-Mobile and ask for the current decision for the exact iPhone, line, and account. Ask whether the proposed result is a permanent carrier unlock, international roaming, or another documented feature.",
+            "Keep the support reference and the wording of the response, but treat it as a case update rather than a guarantee that the unlock will be approved.",
+            "Recheck Carrier Lock before buying a third-party travel eSIM or leaving the country."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says that only the current carrier can unlock an iPhone. Apple also uses No SIM restrictions next to Carrier Lock as the on-device result and says a carrier may take a few days to complete a request. A support promise, an Android menu, or a successful Wi-Fi connection does not replace that check.",
+          "links": [
+            {
+              "label": "Follow Apple’s current carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Use the full unlocked-iPhone verification guide",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "t-mobile-policy",
+          "text": "What T-Mobile currently documents"
+        },
+        {
+          "kind": "p",
+          "text": "T-Mobile’s current Device Unlock Policy is eligibility-based. It says an eligible device that supports remote unlocking is automatically and remotely unlocked within two business days; devices that cannot be remotely unlocked should receive a notification with next steps within two business days. This is policy language, not an individual approval or a promise that every iPhone request will complete on that timetable.",
+          "links": [
+            {
+              "label": "Read T-Mobile’s current Device Unlock Policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The device must be sold by T-Mobile, must not be reported as lost, stolen, or blocked, and must be associated with an account in good standing.",
+            "For postpaid service, T-Mobile states that the device must have been active on the requesting line for at least 40 days. A T-Mobile-financed or leased device must be paid in full, and a canceled account must have a zero balance.",
+            "Prepaid devices have separate requirements, including a longer activation period or qualifying refill and purchase conditions, plus a limit on completed unlocks per line during a rolling period.",
+            "T-Mobile may request proof of purchase or additional information, and its policy says that other exceptions may apply. Confirm the current rule with T-Mobile rather than assuming that travel alone creates eligibility."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "ask-support",
+          "text": "Questions to ask T-Mobile before travel"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Does the published policy show this exact device and line as eligible today, and if not, which condition is missing?",
+            "Is the proposed carrier-side result a permanent unlock, or is the suggestion actually international roaming or a pass?",
+            "If a documented exception is being considered, what current policy or account condition governs it?",
+            "When should Carrier Lock be checked again, and which support reference should be used if the status does not change?",
+            "If a destination eSIM is planned, which compatibility, coverage, and activation checks still apply after an unlock?"
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "travel-alternatives",
+          "text": "If T-Mobile does not authorize an iPhone unlock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Option",
+            "What it solves",
+            "What it does not solve"
+          ],
+          "rows": [
+            [
+              "T-Mobile international roaming",
+              "Keeps the existing T-Mobile line available abroad where the plan, device, destination, and coverage support it",
+              "Does not remove Carrier Lock or activate another carrier’s SIM or eSIM"
+            ],
+            [
+              "International data pass",
+              "May add travel data or calling benefits under the applicable T-Mobile terms",
+              "Does not change the iPhone’s Carrier Lock status"
+            ],
+            [
+              "Travel eSIM from another carrier",
+              "Provides a separate destination plan when the iPhone is unlocked and the model, carrier, and plan are compatible",
+              "Cannot be assumed to activate on a carrier-locked iPhone"
+            ],
+            [
+              "Wi-Fi or Wi-Fi Calling",
+              "May provide connectivity where the feature, network, and plan support it",
+              "Does not make another carrier’s SIM activate"
+            ],
+            [
+              "Unlocked secondary device",
+              "Can accept a local or travel SIM independently",
+              "Does not change the locked T-Mobile iPhone"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "T-Mobile says international roaming depends on a qualifying plan and capable device, with coverage and other limits that vary by destination. Apple says a travel eSIM from another carrier requires an unlocked iPhone, shown as No SIM Restrictions, as well as compatible carrier and device conditions. Check current plan terms, destination coverage, activation requirements, and charges directly before relying on a travel option.",
+          "links": [
+            {
+              "label": "Check T-Mobile’s current international-roaming terms",
+              "href": "https://www.t-mobile.com/support/coverage/international-roaming-services"
+            },
+            {
+              "label": "Read Apple’s current international eSIM guidance",
+              "href": "https://support.apple.com/en-us/118227"
+            },
+            {
+              "label": "Plan an international iPhone unlock before departure",
+              "href": "/articles/unlock-iphone-for-international-use-travel-checklist"
+            },
+            {
+              "label": "Separate eSIM setup from carrier unlocking",
+              "href": "/articles/how-to-unlock-esim-on-iphone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-locks",
+          "text": "Make sure the problem is really Carrier Lock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or issue",
+            "What it controls",
+            "Correct owner"
+          ],
+          "rows": [
+            [
+              "Carrier Lock restriction",
+              "Use with another mobile carrier",
+              "Carrier that placed or controls the lock"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "Security of one SIM or eSIM line",
+              "Carrier that issued that line"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to the device and local data",
+              "Apple’s passcode recovery process"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and ownership",
+              "Legitimate Apple Account ownership route"
+            ],
+            [
+              "Lost, stolen or finance issue",
+              "Carrier account or device eligibility",
+              "Carrier, seller or finance provider holding that record"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A carrier unlock concerns whether the mobile network will accept another provider’s SIM or eSIM. It is not the same as Apple Activation Lock, a SIM security code, a forgotten iPhone passcode, or organization-controlled device management. Apple’s documentation describes these controls separately, so use the message on the phone to choose the correct owner and remedy.",
+          "links": [
+            {
+              "label": "Understand Apple Activation Lock",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Understand SIM PIN and PUK prompts",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "What a third-party unlock service can do"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or control",
+            "What it concerns",
+            "Responsible route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock restriction",
+              "Whether the iPhone can use another mobile carrier",
+              "The carrier that controls the lock, such as T-Mobile"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and Apple Account ownership",
+              "The legitimate previous owner’s Apple Account route; do not treat it as a carrier-unlock problem"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "Security of one SIM or eSIM line",
+              "The carrier that issued that SIM or eSIM; do not guess the code"
+            ],
+            [
+              "Remote Management or another MDM message",
+              "Organization-managed settings, profiles, commands, or restrictions",
+              "The owning organization or its device-management administrator"
+            ],
+            [
+              "Forgotten iPhone passcode",
+              "Access to the device and local data",
+              "Apple’s passcode recovery and erase or restore process"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "An independent service may help explain public steps or organize a redacted checklist. It cannot authorize T-Mobile’s carrier-side decision, turn an unapproved carrier lock into an approved unlock, remove Activation Lock without the legitimate Apple Account route, or remove organization management without the organization’s process. Do not share an Apple Account password, device passcode, SIM PIN or PUK, one-time code, or full device identifier. Ask for a carrier-side result that you can verify under Carrier Lock instead of an uncheckable promise.",
+          "links": [
+            {
+              "label": "Review an IMEI-unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            },
+            {
+              "label": "Read Apple’s carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Know the Carrier Lock result, departure date, and T-Mobile account status? Send a redacted summary—never passwords, passcodes, SIM PINs, one-time codes, or full device identifiers—so we can help separate unlock eligibility from roaming and eSIM setup.",
+          "href": "/contact",
+          "label": "Check the travel unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can T-Mobile temporarily unlock an iPhone for travel?",
+          "answer": "T-Mobile’s current public iPhone instructions do not publish a temporary-unlock control. They say that a locked iPhone that is eligible should be handled through Contact us. Ask T-Mobile for the current device-and-account-specific outcome and verify any completed carrier unlock under Carrier Lock; this is not a promise that a temporary exception is available."
+        },
+        {
+          "question": "Why do T-Mobile tutorials mention a 30-day temporary unlock?",
+          "answer": "That wording can come from device-specific Android material or older or third-party explanations. The current sources reviewed here do not establish a 30-day iPhone option. Do not copy Android steps to an iPhone; ask T-Mobile to state the current result for the exact device and account."
+        },
+        {
+          "question": "Does an international pass unlock an iPhone?",
+          "answer": "No. An international pass or roaming feature uses the existing T-Mobile service abroad under its current terms. It does not change Carrier Lock or guarantee that another carrier’s SIM or eSIM can activate."
+        },
+        {
+          "question": "Can Apple provide a temporary carrier unlock?",
+          "answer": "No. Apple says it cannot unlock an iPhone for another carrier; only the current carrier can do that."
+        },
+        {
+          "question": "Can a third party guarantee a temporary iPhone unlock?",
+          "answer": "No legitimate service can guarantee an exception the locking carrier has not authorized. It may help identify the carrier, evidence and official route."
+        },
+        {
+          "question": "What does No SIM restrictions prove?",
+          "answer": "It is Apple’s on-device result that the iPhone is not carrier-restricted. It does not by itself prove destination coverage, network bands, eSIM support, activation, plan eligibility, or service quality."
+        },
+        {
+          "question": "What if the iPhone says iPhone Locked to Owner?",
+          "answer": "That indicates Activation Lock, which is tied to the previous owner’s Apple Account rather than T-Mobile’s Carrier Lock. Follow Apple’s legitimate ownership route and do not accept a used device that remains linked to someone else’s account."
+        }
+      ]
+    },
+  {
+      "slug": "unlock-iphone-without-sim-card-after-approval",
+      "title": "Unlock iPhone Without a SIM Card",
+      "heading": "Unlock iPhone Without a SIM Card: The Safe Route",
+      "description": "Learn how to request an iPhone carrier unlock without a spare SIM, verify Carrier Lock, and separate carrier, eSIM, Activation Lock, and SIM PIN steps.",
+      "standfirst": "You can contact the locking carrier without another SIM in hand. Carrier approval comes first; only then should you use Apple’s backup, erase, and restore route if no other SIM is available.",
+      "published": "2026-10-06",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "Unlock iPhone without SIM card",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "To use an iPhone with another carrier without having a spare SIM, start with the carrier that currently controls the carrier lock. Apple says only that carrier can authorize the unlock. After the carrier confirms completion, Apple documents a backup, erase, and restore route for cases where you do not have another SIM. Erasing first does not create eligibility or carrier authorization.",
+          "links": [
+            {
+              "label": "Read Apple’s current no-SIM unlock steps",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "A spare SIM is not required to contact the carrier that controls the lock, but the carrier’s eligibility rules still apply.",
+            "Only the current carrier can authorize a carrier unlock; Apple cannot approve it for the carrier.",
+            "After the carrier confirms completion, Apple documents backup, erase, and restore when another SIM is unavailable.",
+            "Settings > General > About > Carrier Lock > No SIM restrictions is Apple’s check that the carrier lock is removed.",
+            "Carrier unlock does not reset a SIM PIN or PUK, forgotten device passcode, Activation Lock, or organization-managed device enrollment, and it does not decide financing, lost/stolen, or blacklist consequences."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "three-separate-stages",
+          "text": "Separate eligibility, completion, and activation"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Stage",
+            "What happens",
+            "What you need"
+          ],
+          "rows": [
+            [
+              "Carrier request and eligibility",
+              "The carrier reviews whether the device and account meet its current unlock policy.",
+              "The carrier’s official route and whatever account, purchase, device, or ownership evidence it requests."
+            ],
+            [
+              "Completion on iPhone",
+              "After the carrier confirms the unlock, Apple provides a no-SIM backup, erase, and restore route when no other SIM is available.",
+              "A verified backup, the credentials needed to erase and set up the iPhone, and time to restore your data."
+            ],
+            [
+              "Verification",
+              "The iPhone reports the carrier-lock state in Settings.",
+              "Settings > General > About, where No SIM restrictions indicates the unlocked carrier-lock state."
+            ],
+            [
+              "New-carrier activation",
+              "The destination carrier provisions a compatible physical SIM or eSIM plan.",
+              "A supported iPhone, compatible network and plan, and the destination carrier’s activation process."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not erase the iPhone because a website promises that a reset will unlock it. Back up and erase only after the carrier has confirmed the unlock and you are ready to restore your data."
+        },
+        {
+          "kind": "h2",
+          "id": "before-request",
+          "text": "Before requesting the unlock"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings > General > About and record the current Carrier Lock message.",
+            "Record the IMEI and IMEI2 privately as shown on the iPhone. Ask the locking or destination carrier which identifier it needs for the relevant SIM or eSIM activation; do not assume IMEI2 maps to the active line.",
+            "Identify the carrier that controls the lock. Do not infer it from the current line alone; confirm through the carrier’s official support route.",
+            "Review that carrier’s current eligibility requirements for the applicable plan, country, and purchase circumstances.",
+            "Submit the request through the carrier’s official route and keep its reference or confirmation before using the no-SIM completion steps."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Eligibility requirements, required evidence, fees if any, processing time, financing or installment conditions, and lost or stolen device rules vary by carrier and country. The FCC also notes that an unlocked phone may still lack technical compatibility with another network. Check the current official policy of the carrier that controls the lock; no universal price or completion time can be stated here.",
+          "links": [
+            {
+              "label": "Read the FCC consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Find the carrier before requesting an unlock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            },
+            {
+              "label": "Check carrier-unlock eligibility concepts",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "after-approval",
+          "text": "After approval: finish without another SIM card"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that the carrier says the unlock is complete, not merely submitted or under review.",
+            "Connect the iPhone to reliable Wi-Fi and check Settings > General > About > Carrier Lock.",
+            "If No SIM restrictions already appears, use that status as Apple’s unlock check; do not erase only to look for the same message again.",
+            "If the carrier confirms completion but Carrier Lock is still restricted and no other SIM is available, contact that carrier to verify that it applied the unlock to the correct device record.",
+            "Only after carrier confirmation, create and verify a current backup if you need the no-SIM completion route.",
+            "Use Apple’s Erase All Content and Settings process when you are ready to restore the device. Decide whether to keep or delete the eSIM; deleting it requires the carrier to reactivate that cellular plan.",
+            "Restore from the backup, complete setup, and check Carrier Lock again."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "backup-checklist",
+          "text": "Backup checklist before you erase"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Know the Apple Account password and device passcode needed during the erase and setup process.",
+            "Choose an iCloud, Mac, or PC backup method and confirm that the backup completed before erasing.",
+            "Decide whether to keep the current eSIM. If you delete it, be prepared to contact the carrier to reactivate the plan.",
+            "Keep access to trusted phone numbers and other recovery or two-factor authentication methods.",
+            "Save the carrier’s unlock reference privately outside the iPhone."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple’s no-SIM route is a completion step after carrier confirmation, not a workaround for eligibility. AT&T’s official instructions describe the same backup, erase, and restore sequence for an AT&T iPhone when no new SIM is available. That AT&T instruction is carrier-specific and is not a universal policy for every provider.",
+          "links": [
+            {
+              "label": "Review Apple’s backup and erase guidance",
+              "href": "https://support.apple.com/en-us/118426"
+            },
+            {
+              "label": "Review Apple’s current factory-reset guidance",
+              "href": "https://support.apple.com/en-us/108931"
+            },
+            {
+              "label": "Review AT&T’s official device unlock instructions",
+              "href": "https://www.att.com/idpassets/support/pdf/ATTDeviceUnlockCodeInstructions.pdf"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "esim-route",
+          "text": "If the next carrier uses eSIM"
+        },
+        {
+          "kind": "p",
+          "text": "An eSIM is a digital SIM built into the iPhone, so a physical card is not required when the iPhone model and destination carrier support eSIM. After Carrier Lock says No SIM restrictions, follow the destination carrier’s activation process. Keep unlock and activation separate: the unlock removes the carrier-lock restriction, while the destination carrier must still support the device and provision the plan, SIM or eSIM, and requested identifier correctly.",
+          "links": [
+            {
+              "label": "Read Apple’s eSIM setup requirements",
+              "href": "https://support.apple.com/en-us/118669"
+            },
+            {
+              "label": "Use the iPhone eSIM unlock and setup guide",
+              "href": "/articles/how-to-unlock-esim-on-iphone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "if-still-locked",
+          "text": "If the iPhone still shows a restriction"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "Likely next check",
+            "Who controls that issue"
+          ],
+          "rows": [
+            [
+              "Carrier says the request is pending",
+              "Follow that carrier’s status instructions and keep the request reference.",
+              "Locking carrier"
+            ],
+            [
+              "Carrier says complete, but Carrier Lock is restricted",
+              "Ask the carrier to verify the exact device identifier and carrier-side unlock status.",
+              "Locking carrier"
+            ],
+            [
+              "No SIM restrictions, but eSIM activation fails",
+              "Check model and network compatibility, plan activation, and the identifier requested by the destination carrier.",
+              "Destination carrier"
+            ],
+            [
+              "SIM PIN or PUK prompt",
+              "Do not guess the code; request help from the carrier that issued the SIM or eSIM.",
+              "SIM or eSIM issuer"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Use the legitimate Apple Account ownership route; a carrier unlock does not remove Activation Lock.",
+              "Previous owner and Apple’s documented process"
+            ],
+            [
+              "Remote Management or another organization-management screen",
+              "Ask the owning organization or its device-management administrator what enrollment or removal process applies; carrier unlock is a separate system.",
+              "Owning organization or its MDM administrator"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says to contact the carrier if No SIM restrictions does not appear after the carrier says the unlock was applied. A factory reset, passcode reset, SIM PIN/PUK action, Activation Lock action, or MDM enrollment action follows a different process and should not be presented as carrier authorization.",
+          "links": [
+            {
+              "label": "See Apple’s carrier-unlock troubleshooting steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple’s device-management guidance",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "What a third-party service can and cannot do"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service may help organize device information or explain the official sequence, but it cannot replace the locking carrier’s eligibility decision or promise a completed unlock. Financing or installment status, lost or stolen records, blacklist handling, Activation Lock, SIM PIN or PUK recovery, and organization management are controlled by the relevant carrier, account holder, Apple Account owner, SIM issuer, or MDM administrator. The useful verification points are No SIM restrictions for the carrier-lock state and successful activation by the destination carrier; neither is guaranteed by this article."
+        },
+        {
+          "kind": "cta",
+          "text": "Have the Carrier Lock message and the carrier’s completion notice but no spare SIM? Send only a redacted summary if you want an informational review of the safest next step; this does not replace the carrier’s decision or activation process.",
+          "href": "/contact",
+          "label": "Check the no-SIM unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can you unlock an iPhone without a SIM card?",
+          "answer": "You can contact the carrier that controls the lock without a spare SIM. If that carrier confirms the unlock, Apple documents a backup, erase, and restore route when another SIM is unavailable. Carrier eligibility still depends on the carrier’s current policy."
+        },
+        {
+          "question": "Will erasing an iPhone remove Carrier Lock?",
+          "answer": "No. Erasing is an Apple-documented completion route after the carrier confirms the unlock when no other SIM is available; it cannot create carrier authorization."
+        },
+        {
+          "question": "Do I need the original carrier SIM to request an unlock?",
+          "answer": "A spare or destination-carrier SIM is not required to contact the locking carrier. The carrier may require the IMEI, account information, purchase evidence, or other records under its current policy."
+        },
+        {
+          "question": "Can I use eSIM instead of a physical SIM after unlocking?",
+          "answer": "Possibly, when the iPhone model and destination carrier support eSIM. Carrier Lock should show No SIM restrictions, and the destination carrier must still activate and provision the plan."
+        },
+        {
+          "question": "Does the no-SIM process remove Activation Lock, a passcode, a SIM PIN, or MDM?",
+          "answer": "No. Carrier Lock, Activation Lock, the device passcode, SIM PIN or PUK, and organization device management are separate systems with different recovery or administrator routes."
+        }
+      ]
+    },
+  {
+      "slug": "can-you-unlock-financed-iphone-before-payoff",
+      "title": "Financed iPhone Unlock: Payoff Rules",
+      "heading": "Can You Unlock a Financed iPhone Before Payoff?",
+      "description": "Can you unlock a financed iPhone? Learn how carrier lock, payoff status, account rules and purchase records affect eligibility.",
+      "standfirst": "Financing and Carrier Lock are separate records. The carrier, seller, lender and Apple Account owner may control different questions.",
+      "published": "2026-10-05",
+      "updated": "2026-10-20",
+      "minutes": 10,
+      "topic": "Financed iPhone unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Can you unlock a financed iPhone? Eligibility depends on the policy of the carrier that controls Carrier Lock. Paying the hardware balance may meet one requirement, but it does not by itself prove that service-time, account-standing, fraud, loss or theft, purchase-record or other policy conditions are met.",
+          "links": [
+            {
+              "label": "Start with Apple’s carrier-unlock process",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC’s consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Check Carrier Lock in Settings, General, About before assuming that financing is blocking the iPhone.",
+            "A device balance, promotional bill credits, Carrier Lock and wireless-account status are separate records; changing one does not prove that the others changed.",
+            "Current unlock rules vary by carrier, plan, country and purchase record, so a US carrier example is not a worldwide rule.",
+            "Paying off the iPhone may satisfy a financing condition without removing the lock automatically or replacing other eligibility requirements.",
+            "Apple says only the carrier can unlock an iPhone for use with another carrier; a lender, Apple or a third-party service cannot override that carrier decision."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "lock-types-and-records",
+          "text": "Separate Carrier Lock from other locks and records"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock is the network restriction checked under Settings, General, About. Activation Lock is tied to Find My and the previous owner’s Apple Account. A SIM PIN protects the SIM or eSIM with a PIN or PUK process. Mobile Device Management (MDM) lets an organization configure, monitor or lock a managed device. None of these is the same as a financing balance, and paying off financing does not by itself remove Activation Lock, a SIM PIN or organization management.",
+          "links": [
+            {
+              "label": "See Apple’s Carrier Lock verification steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Learn what Apple Activation Lock protects",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple’s SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple’s device-management explanation",
+              "href": "https://support.apple.com/en-ca/guide/deployment/depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Record or lock",
+            "What it answers",
+            "Who normally controls it"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "Whether the iPhone has a carrier restriction that prevents activation with another carrier",
+              "Carrier that controls the lock"
+            ],
+            [
+              "Activation Lock",
+              "Whether Find My links the device to an Apple Account and prevents reactivation by another person",
+              "Previous Apple Account owner, with Apple’s support process where applicable"
+            ],
+            [
+              "SIM PIN",
+              "Whether the SIM or eSIM requires a PIN or PUK-related process for cellular use",
+              "Carrier that issued the SIM or eSIM"
+            ],
+            [
+              "MDM",
+              "Whether an organization can apply device configurations, commands or restrictions",
+              "Organization and its device-management service"
+            ],
+            [
+              "Device financing",
+              "Whether money is still owed on the hardware",
+              "Carrier, retailer, lender or financing provider"
+            ],
+            [
+              "Wireless account",
+              "Whether service, bills and account status meet the carrier’s policy",
+              "Carrier providing the account"
+            ],
+            [
+              "Promotion or bill credits",
+              "Whether future discounts continue after payoff or cancellation",
+              "Seller or carrier running the promotion"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not pay a third party merely because an installment balance exists. First confirm that Carrier Lock shows a restriction and identify the carrier that controls it. If the device shows Activation Lock or an organization-management message, use the Apple Account owner or the organization’s authorized process instead."
+        },
+        {
+          "kind": "h2",
+          "id": "check-status",
+          "text": "Check the iPhone and account in the right order"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and record the exact Carrier Lock result.",
+            "Find the original purchase receipt, financing agreement and current payoff status.",
+            "Identify the carrier or seller tied to the original purchase or activation; the current SIM or eSIM carrier may be different.",
+            "Read that carrier’s current unlock policy for the correct plan type, country and purchase record.",
+            "Ask whether paying early changes promotional credits, cancellation charges or return rights before making the payment.",
+            "After payoff posts, ask the carrier to confirm every remaining eligibility item and whether its process is automatic or request-based.",
+            "Verify completion in Settings rather than relying only on a payoff receipt or confirmation message."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says No SIM restrictions next to Carrier Lock means the iPhone is unlocked. Apple also says only the current carrier can unlock the iPhone, and a carrier request may take a few days. A zero balance is evidence about financing only; the on-device Carrier Lock result is the status to verify.",
+          "links": [
+            {
+              "label": "Follow Apple’s current verification steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Use the four-method unlocked iPhone check",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "policy-examples",
+          "text": "Current US carrier examples show why payoff is not a universal rule"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Carrier example",
+            "Financing requirement",
+            "Other policy items to check"
+          ],
+          "rows": [
+            [
+              "AT&T postpaid",
+              "The installment balance must be zero before unlocking.",
+              "Device purchased more than 60 days ago; not lost, stolen or involved in fraud; account current; not active on another AT&T account"
+            ],
+            [
+              "T-Mobile postpaid",
+              "If financed or leased through T-Mobile, all payments must be satisfied and the device must be paid in full.",
+              "Sold by T-Mobile; not lost, stolen or blocked; account in good standing; active on the requesting line for at least 40 days; canceled-account balance zero"
+            ],
+            [
+              "Verizon postpay",
+              "Automatic unlock after full retail purchase or when the device financing agreement balance is paid in full.",
+              "Clear any lost or stolen report; use the required secure payment method; a Verizon Gift Card used to buy or pay off a smartphone delays the process by 35 days"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "These are US examples, not a worldwide timetable. AT&T currently requires a zero installment balance for its published route. T-Mobile requires financed or leased devices to be paid in full and also lists service, account and device-status criteria. Verizon’s policy says postpay devices unlock automatically after full retail purchase or payoff, while a Verizon Gift Card used to buy or pay off a smartphone creates a 35-day verification delay. The FCC also notes that an unlocked phone may still be technologically incompatible with another network. Use the policy for the carrier, country and purchase record attached to the device.",
+          "links": [
+            {
+              "label": "Review AT&T’s current unlock requirements",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Review T-Mobile’s current unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Review Verizon’s current device policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            },
+            {
+              "label": "Check the FCC’s compatibility warning",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "after-payoff",
+          "text": "If the iPhone is paid off but still locked"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Confirm that the payoff is posted, not merely scheduled or pending.",
+            "Check whether the carrier still requires active service time, an account in good standing or a separate request.",
+            "Verify that the device identifier on the payoff record matches the iPhone, especially after a warranty or insurance replacement.",
+            "If the carrier’s policy mentions payment verification or another review, ask the carrier what remains before sending another request.",
+            "Keep the payoff receipt and support case number, then recheck Carrier Lock after the carrier confirms completion."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "still-financed",
+          "text": "If the iPhone is still financed"
+        },
+        {
+          "kind": "p",
+          "text": "Ask the locking carrier whether a documented exception applies before paying anyone else. AT&T, T-Mobile and Verizon publish military or deployment-related routes with their own conditions; those routes require carrier verification and should not be generalized to every financed device. Do not treat a third party’s promise as proof that the carrier has approved an exception.",
+          "links": [
+            {
+              "label": "Check eligibility before paying for assistance",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            },
+            {
+              "label": "Read AT&T’s deployment route",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Read T-Mobile’s military exception",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Read Verizon’s military policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "used-financed-iphone",
+          "text": "If you bought the financed iPhone from another person"
+        },
+        {
+          "kind": "p",
+          "text": "Do not assume that paying the seller also paid the carrier or lender. Ask the seller to resolve the balance through the original account and provide a redacted payoff receipt. Avoid taking over an informal payment arrangement or sending money to a supposed unlocker who cannot name the locking carrier and the applicable policy. A private sale does not change the carrier’s eligibility requirements.",
+          "links": [
+            {
+              "label": "Use the locked-iPhone sale checklist",
+              "href": "/articles/sell-locked-iphone-carrier-lock-checklist"
+            },
+            {
+              "label": "Review used-phone checks before purchase",
+              "href": "/articles/checks-before-buying-a-used-phone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "What an iPhone unlock service can and cannot do"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service cannot approve a carrier unlock, erase a valid financing debt, remove Activation Lock or force a carrier to accept an ineligible request. If you seek assistance, use only an authorized carrier route and verify any result with the carrier and in Settings. Do not send account passwords, one-time codes or unredacted device identifiers.",
+          "links": [
+            {
+              "label": "See Apple’s rule that only the carrier can unlock",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "See Apple’s official Activation Lock removal routes",
+              "href": "https://support.apple.com/en-us/108934"
+            },
+            {
+              "label": "Review the evidence checklist for an unlock service",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have the Carrier Lock result, locking carrier and payoff status ready? If you contact a service, share only a redacted summary and never share account passwords or one-time codes.",
+          "href": "/contact",
+          "label": "Contact"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can you unlock a financed iPhone before it is paid off?",
+          "answer": "There is no universal yes or no. Eligibility depends on the locking carrier’s current policy and any exception that carrier confirms. In the US examples here, AT&T and T-Mobile require payoff for their normal postpaid routes, while Verizon’s postpay policy says it automatically unlocks after full retail purchase or payoff. Check the policy for the carrier and country involved."
+        },
+        {
+          "question": "Does paying off an iPhone automatically unlock it?",
+          "answer": "Not in every case. Payoff may satisfy the financing condition, but service-time, account-standing, device-status or request-processing rules may still apply. Verify No SIM restrictions in Settings."
+        },
+        {
+          "question": "Will I lose promotional bill credits if I pay off the iPhone early?",
+          "answer": "That depends on the promotion and carrier. Ask for the current written promotion terms before paying because the financing balance and future credits are separate records."
+        },
+        {
+          "question": "Can Apple unlock a financed iPhone?",
+          "answer": "No. Apple states that only the carrier can unlock an iPhone for use with another carrier. Apple can explain how to verify the result after carrier approval."
+        },
+        {
+          "question": "Can a third-party service remove the financing balance or Activation Lock?",
+          "answer": "No legitimate carrier-unlock service can erase a valid debt, force a carrier exception or remove another person’s Activation Lock. Use the carrier, Apple Account owner or organization’s authorized process that controls the specific issue."
+        }
+      ]
+    },
+  {
+      "slug": "net10-iphone-unlock-policy-records-guide",
+      "title": "Net10 iPhone Unlock: Policy Guide",
+      "heading": "Net10 iPhone Unlock: Which Policy and Record Apply?",
+      "description": "Understand Net10 iPhone unlock routes, current Verizon Value rules, BYOD limits, device records, and how to separate carrier locks from Apple account locks.",
+      "standfirst": "A Net10 label does not prove that Net10 placed the carrier lock. The device’s sale, activation, and replacement records determine which official route to check.",
+      "published": "2026-10-05",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "Net10 iPhone unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "For a Net10 iPhone unlock, first determine whether Verizon Value sold and activated the iPhone, whether you brought a phone from another carrier, or whether a replacement has a different device identifier. Net10’s support page and Terms link to Verizon Value, Inc.’s current Unlocking Policy. That policy is the starting point for eligible Verizon Value-branded devices; an old forum timeline or unlock-code offer is not a substitute for the current policy and device record.",
+          "links": [
+            {
+              "label": "Read the current Verizon Value Unlocking Policy",
+              "href": "https://www.tfwunlockpolicy.com/wps/portal/home"
+            },
+            {
+              "label": "Open Net10 Technical Support",
+              "href": "https://www.net10wireless.com/techsupport"
+            },
+            {
+              "label": "Review Net10 Terms and Conditions",
+              "href": "https://www.net10wireless.com/termsandconditions"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Check Carrier Lock before opening a request. If Settings shows “No SIM restrictions,” Apple treats the iPhone as unlocked for carrier use.",
+            "Use the current Verizon Value policy linked by Net10. The applicable rule depends on the brand, network, activation date, paid active service, and device status.",
+            "A bring-your-own iPhone is not automatically owned or unlocked by Net10. Net10’s Terms require a BYOP phone to be unlocked and compatible, while the centralized policy says it does not apply to BYOD devices.",
+            "If a replacement has a different IMEI or other device identifier, keep the old and current records together and ask official support how it will review the case. This is documentation guidance, not a universal eligibility rule.",
+            "A carrier unlock is separate from a SIM PIN or PUK, an iPhone passcode, Activation Lock, and organization MDM. Each has a different control point."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "identify-device-path",
+          "text": "Identify which Net10 device path applies"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device path",
+            "Best first evidence",
+            "Likely official route"
+          ],
+          "rows": [
+            [
+              "Verizon Value-branded iPhone activated with Net10 service",
+              "Purchase, activation, service history, and the current IMEI/IMEI2 kept privately",
+              "Check the current Verizon Value policy and eligibility tool; contact Net10 if the record needs review"
+            ],
+            [
+              "Bring-your-own iPhone",
+              "Original seller or carrier record and the phone’s Carrier Lock result",
+              "The carrier that placed the lock; Net10’s BYOP terms require an unlocked, compatible phone"
+            ],
+            [
+              "Second-hand iPhone used on Net10",
+              "Seller documentation and the original carrier or brand that sold the phone",
+              "The original locking carrier or brand, not automatically Net10"
+            ],
+            [
+              "Replacement iPhone",
+              "Old and current device identifiers plus the replacement or support case record",
+              "Ask the carrier or official support route whether the records can be linked for review"
+            ],
+            [
+              "Already-unlocked iPhone",
+              "“No SIM restrictions” in Settings > General > About",
+              "Investigate compatibility, provisioning, account setup, or service problems rather than requesting a carrier unlock"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not post a full IMEI, account PIN, password, or one-time code in a public forum. Share device identifiers only through the official support or authorized service route that needs them."
+        },
+        {
+          "kind": "h2",
+          "id": "check-before-request",
+          "text": "Run these checks before requesting a Net10 unlock"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings > General > About and record the exact Carrier Lock result.",
+            "Record the current IMEI and IMEI2 privately; Apple lists these identifiers in Settings > General > About. Do not publish them.",
+            "Find the purchase source, activation date, paid active-service history, and any replacement or support documents that you can verify.",
+            "Decide whether the iPhone was a Verizon Value-branded phone activated with Net10, a BYOD phone, a second-hand phone, or a replacement.",
+            "Read the live policy linked from Net10 and use its eligibility/status tool or official support route. Do not infer eligibility from the Net10 name alone.",
+            "If support cannot find the device, ask which current identifier and brand record it searched, then explain any replacement history without posting the identifier publicly.",
+            "After the carrier confirms an unlock, check Carrier Lock again. If you have another SIM or eSIM, follow Apple’s activation steps; an unlocked phone can still lack compatibility or service on another network."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple states that only the current carrier can unlock an iPhone. Apple’s verification result is “No SIM restrictions” next to Carrier Lock in Settings > General > About. Apple also notes that a carrier may take a few days to complete a request, so an email, SMS, or support promise is not the same as the completed status on the device.",
+          "links": [
+            {
+              "label": "Follow Apple’s current iPhone unlock steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Check whether an iPhone is already unlocked",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "current-policy",
+          "text": "Use the policy version attached to the device record"
+        },
+        {
+          "kind": "p",
+          "text": "Net10’s current Terms and Technical Support page link to Verizon Value, Inc.’s Unlocking Policy, effective January 20, 2026. The policy says Verizon Value can remotely unlock eligible Verizon Value-branded phones, or provide an unlocking code for a phone that cannot be remotely unlocked. It requires the phone to be working and turned on, not reported lost or stolen, and free of fraud indicators. The policy is subject to change, so check the live page on the day you submit a request.",
+          "links": [
+            {
+              "label": "Read the current Verizon Value Unlocking Policy",
+              "href": "https://www.tfwunlockpolicy.com/wps/portal/home"
+            },
+            {
+              "label": "See Net10’s policy link in Technical Support",
+              "href": "https://www.net10wireless.com/techsupport"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "items": [
+            "For phones activated on the T-Mobile or AT&T networks on or before January 19, 2026, the policy states that unlocking is available on request after 365 days of paid and active service.",
+            "For phones activated on the Verizon network on or before January 19, 2026, the policy states that remote unlocking occurs automatically after 60 days from paid activation and 60 days of paid active service.",
+            "For phones activated on or after January 20, 2026, the policy states that unlocking is available on request after 365 days of paid and active service. A suspension pauses that active-service timer according to the current device-unlock FAQ.",
+            "The policy includes a deployed-military route for eligible Verizon Value customers with relocation orders outside the coverage area. Ask official support for the current document requirements rather than assuming an exception applies.",
+            "An unlock does not promise that another carrier will accept the phone, provide every feature, or provide coverage. Network technology and service compatibility still need to be checked."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "byop-device",
+          "text": "If the iPhone was brought to Net10"
+        },
+        {
+          "kind": "p",
+          "text": "Using a locked iPhone with a compatible Net10 line does not necessarily transfer the carrier lock to Net10. Net10’s Terms say that a customer activating a BYOP phone is responsible for ensuring that it is unlocked and compatible, and the centralized policy says it does not apply to BYOD devices. Identify the carrier or brand that originally sold and locked the iPhone, then use that party’s official route. If Carrier Lock already says “No SIM restrictions,” investigate activation, provisioning, network compatibility, or account setup instead of treating it as a Net10 unlock case.",
+          "links": [
+            {
+              "label": "Read Net10’s BYOP and unlocking terms",
+              "href": "https://www.net10wireless.com/termsandconditions"
+            },
+            {
+              "label": "Find the carrier that controls an iPhone lock",
+              "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "replacement-device",
+          "text": "If the iPhone was replaced or repaired"
+        },
+        {
+          "kind": "p",
+          "text": "A replacement can have a different device identifier. Keep the old and current IMEI or other identifiers private, along with the replacement or support case record. Ask Net10 or the carrier whether it needs those records to review the current phone. This is a support-documentation step, not a stated universal requirement that makes the replacement eligible.",
+          "links": [
+            {
+              "label": "See where Apple lists an iPhone’s IMEI and IMEI2",
+              "href": "https://support.apple.com/en-us/108037"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "code-confusion",
+          "text": "Keep carrier lock, Activation Lock, SIM PIN, and MDM separate"
+        },
+        {
+          "kind": "p",
+          "text": "These restrictions can appear in the same support conversation but they are not interchangeable. Carrier Lock controls whether the iPhone can be activated with another carrier. Activation Lock is tied to Find My and the previous Apple Account. A SIM PIN or PUK protects one SIM or eSIM line. Mobile Device Management (MDM) lets an organization send profiles, settings, and commands to a managed device. Use the owner that controls the relevant system; a carrier unlock does not remove Apple Account ownership or an organization’s management.",
+          "links": [
+            {
+              "label": "Apple: understand Activation Lock",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Apple: understand SIM PIN and PUK",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Apple Platform Deployment: understand device management",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or credential",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock restriction",
+              "Whether the iPhone can be activated with another carrier",
+              "The carrier or brand that applied the lock and its current policy"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security of one SIM or eSIM line",
+              "The carrier that issued that SIM or eSIM; do not guess the code"
+            ],
+            [
+              "iPhone passcode",
+              "Access to the device and its data",
+              "Apple’s passcode recovery process, not a carrier unlock"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock, Find My, and Apple Account ownership",
+              "The previous owner’s legitimate Apple Account route; do not buy a device that remains linked"
+            ],
+            [
+              "MDM or supervised-device restriction",
+              "Organization-managed profiles, settings, apps, or remote actions",
+              "The owning organization or its device-management administrator"
+            ],
+            [
+              "No Service or SOS",
+              "Account, provisioning, coverage, compatibility, or device connection",
+              "The line carrier’s troubleshooting route after checking Carrier Lock"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A carrier-side iPhone unlock is not a generic SMS code. The current Verizon Value policy allows remote unlocking or a code for phones that cannot be remotely unlocked, while Net10’s FAQ says it has no SMS delivery method for direct unlocking codes and uses email when a direct code is delivered. For an iPhone, verify the result in Carrier Lock rather than assuming a code, SIM PIN, PUK, passcode, Activation Lock credential, or MDM change will remove a carrier restriction.",
+          "links": [
+            {
+              "label": "Read the current Verizon Value Unlocking Policy",
+              "href": "https://www.tfwunlockpolicy.com/wps/portal/home"
+            },
+            {
+              "label": "Read Net10’s current code-delivery FAQ",
+              "href": "https://support.net10wireless.com/en/brands/General/NTaccounthelp/faq/3091635/"
+            },
+            {
+              "label": "Separate carrier unlock from SIM PIN",
+              "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+            },
+            {
+              "label": "See why an iPhone carrier unlock is not a generic code",
+              "href": "/articles/iphone-carrier-unlock-code-authorization-guide"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "support-package",
+          "text": "Prepare one complete support package"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The current Carrier Lock result and the exact activation error, if any.",
+            "The current IMEI or IMEI2, shared privately through the official route.",
+            "The Net10 purchase or activation record when the phone was supplied as a Verizon Value-branded device.",
+            "The original carrier or seller record for a BYOD or second-hand phone.",
+            "Old and current device identifiers plus the replacement or support case record, if the phone was replaced.",
+            "The date, channel, and reference number for each prior official request."
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have the Carrier Lock result and know whether the iPhone was Verizon Value-branded, brought to Net10, second-hand, or replaced? Send a redacted summary so we can help route the record correctly. We cannot promise an unlock, eligibility, timing, compatibility, or a provider outcome.",
+          "href": "/contact",
+          "label": "Check the Net10 unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "How do I request a Net10 iPhone unlock?",
+          "answer": "Check Carrier Lock, identify whether the iPhone is a Verizon Value-branded device activated with Net10 or a BYOD phone, gather the relevant purchase and activation records, then use the current Verizon Value policy and its official eligibility or support route."
+        },
+        {
+          "question": "How long does a Net10 iPhone unlock take?",
+          "answer": "The eligibility wait depends on the current policy, activation date, network, and paid active service. Net10’s current FAQ says a submitted request may take up to two business days depending on device type and qualifications; that is an estimate, not a guarantee. Check the live policy and ask official support for the case status."
+        },
+        {
+          "question": "Can Net10 unlock an iPhone I brought from another carrier?",
+          "answer": "Do not assume it can. Net10’s Terms require a BYOP phone to be unlocked and compatible, and the centralized policy says it does not apply to BYOD devices. Identify the carrier or brand that placed the lock and start with that party’s official route."
+        },
+        {
+          "question": "What if Net10 cannot find a replacement iPhone?",
+          "answer": "Provide the current device identifier through official support and explain the old-device and replacement history with the case record. Ask whether the records can be linked for review; this documentation step does not establish eligibility by itself."
+        },
+        {
+          "question": "Does Net10 send an iPhone unlock code?",
+          "answer": "The current policy allows remote unlocking or a code for a phone that cannot be remotely unlocked. Net10’s FAQ says direct codes are not sent by SMS and are delivered by email when applicable. For an iPhone, verify the actual result with “No SIM restrictions” in Settings > General > About."
+        },
+        {
+          "question": "Is Activation Lock the same as a Net10 carrier lock?",
+          "answer": "No. Carrier Lock concerns activation with another carrier. Activation Lock is tied to Find My and the previous Apple Account, so only the legitimate owner or authorized organization route can resolve it. A carrier unlock does not remove Activation Lock."
+        }
+      ]
+    },
+  {
+      "slug": "invalid-sim-iphone-carrier-lock-or-sim-failure",
+      "title": "Invalid SIM on iPhone: Unlock or SIM Fix?",
+      "heading": "Invalid SIM on iPhone: Carrier Lock or SIM Failure?",
+      "description": "Learn what an Invalid SIM alert means on iPhone: check Carrier Lock, plan, eSIM, physical SIM, SIM PIN, Activation Lock and MDM before seeking help.",
+      "standfirst": "An Invalid SIM or SIM Failure alert does not by itself prove a carrier lock. Check Apple’s Carrier Lock field, then separate line, SIM, eSIM, ownership and management issues.",
+      "published": "2026-10-04",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "Invalid SIM on iPhone",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "An Invalid SIM or No SIM alert on iPhone does not identify one cause by itself. Apple’s current checklist starts with an active plan and the Carrier Lock field, then moves through a restart, carrier-settings update, eSIM or physical-SIM checks, and service if the alert remains. Do not pay for an unlock based on the alert alone.",
+          "links": [
+            {
+              "label": "Follow Apple’s Invalid SIM and No SIM checklist",
+              "href": "https://support.apple.com/en-us/108914"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Open Settings, General, About first. If Carrier Lock says No SIM restrictions, Apple treats the iPhone as unlocked; the line or device can still need troubleshooting.",
+            "Confirm that the affected line has an active plan before changing device settings or seeking an unlock.",
+            "For eSIM, ask the line carrier to verify the plan, line and activation details for this iPhone; keep the IMEI, IMEI2 or EID private.",
+            "For a physical SIM, follow Apple’s reseat and tray checks, then ask the carrier about testing another known-working SIM or replacing the SIM.",
+            "Invalid SIM, SIM Failure, SIM Not Supported, Locked SIM, iPhone Locked to Owner and Remote Management are different messages or states with different owners."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "identify-message",
+          "text": "Identify the exact message before choosing a fix"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or status",
+            "Check first",
+            "Does a carrier unlock address it?"
+          ],
+          "rows": [
+            [
+              "Invalid SIM or No SIM",
+              "Active plan, Carrier Lock, restart and carrier settings; then eSIM or physical-SIM checks",
+              "Only when Carrier Lock shows a restriction and the current carrier approves the unlock"
+            ],
+            [
+              "SIM Failure",
+              "This is not a separate heading in Apple’s cited checklist; use the relevant plan, Carrier Lock, settings and SIM/eSIM checks, then contact the carrier or Apple as appropriate",
+              "Only if the carrier confirms that Carrier Lock is the cause"
+            ],
+            [
+              "SIM Not Supported during activation",
+              "Carrier Lock and the carrier that controls the device record; the message alone does not prove the cause",
+              "Only when an actual carrier restriction is confirmed and approved"
+            ],
+            [
+              "Locked SIM, SIM PIN or PUK prompt",
+              "The carrier that issued the SIM or eSIM",
+              "No; SIM security is separate from Carrier Lock"
+            ],
+            [
+              "SOS or No Service",
+              "The carrier’s plan and service checks, plus compatibility; No SIM restrictions does not guarantee service",
+              "Not when Carrier Lock already says No SIM restrictions"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "The legitimate Apple Account ownership process and the previous owner when applicable",
+              "No; this is Activation Lock"
+            ],
+            [
+              "Remote Management or managed by an organization",
+              "The organization’s IT or device-management administrator",
+              "No; MDM is separate from Carrier Lock"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Record the exact alert and the Carrier Lock field before resetting anything. Redact the phone number, full IMEI, EID and account details before sharing them. Never send an Apple Account password, device passcode, one-time code or SIM PIN to a support service."
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-lock-fork",
+          "text": "Use Carrier Lock as the first decision point"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings.",
+            "Tap General, then About.",
+            "Find Carrier Lock.",
+            "If it says No SIM restrictions, do not treat the Invalid SIM alert as proof that an unlock is needed. Continue with the plan, carrier-settings, SIM, eSIM and device checks.",
+            "If it does not show No SIM restrictions, contact the current or locking carrier through its official support route and ask whether the device is eligible. Do not infer eligibility from the alert alone."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says that No SIM restrictions means the iPhone is unlocked, and that only the current carrier can unlock an iPhone for another carrier. The FCC explains that unlocking disables a carrier restriction but does not make every device compatible with every network. Carrier rules and eligibility can differ, so check the responsible carrier’s current policy rather than relying on a third-party promise. For example, T-Mobile’s official policy applies to devices it sold or authorized and lists its own eligibility requirements; that policy is not a universal rule for other carriers.",
+          "links": [
+            {
+              "label": "Read Apple’s carrier-unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Review T-Mobile’s current device unlock policy as a carrier-specific example",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Learn how to check whether an iPhone is unlocked",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "official-triage",
+          "text": "Run the official triage in a safe order"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that the wireless plan for the affected line is active.",
+            "Check Carrier Lock in Settings, General, About.",
+            "Restart the iPhone.",
+            "Return to Settings, General, About and install a carrier-settings update if prompted.",
+            "For eSIM, contact the carrier that issued the line and ask it to verify the plan and activation.",
+            "For a physical SIM, follow the carrier or Apple instructions to remove and reseat it in the correct tray; make sure the tray closes completely.",
+            "Ask the carrier to test another SIM or replace the SIM if the alert continues.",
+            "If the alert remains after the carrier and SIM checks, use Apple’s service route for device diagnosis."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "esim-branch",
+          "text": "If the affected line uses eSIM"
+        },
+        {
+          "kind": "p",
+          "text": "Before deleting an eSIM, record the exact error and ask the issuing carrier what it needs to reissue or verify the line. Apple’s current eSIM guidance calls for an active plan and eSIM from a carrier that supports eSIM, a compatible software version and a Wi-Fi or hotspot connection in the relevant setup context. Check whether the line appears in Settings, Cellular, try the listed restart and carrier-settings steps, and give the carrier the IMEI or EID privately if requested. This confirms the activation path without assuming that a profile is defective or attached to a particular identifier.",
+          "links": [
+            {
+              "label": "Read Apple’s eSIM setup troubleshooting",
+              "href": "https://support.apple.com/en-us/102478"
+            },
+            {
+              "label": "Use the iPhone eSIM decision guide",
+              "href": "/articles/how-to-unlock-esim-on-iphone"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "physical-sim-branch",
+          "text": "If the affected line uses a physical SIM"
+        },
+        {
+          "kind": "p",
+          "text": "Inspect the physical SIM and tray without forcing either part. Apple notes that a tray from another iPhone model or manufacturer might not fit properly. A carrier-supported test with another SIM can help separate a SIM or line issue from a device issue, but the carrier must handle activation or replacement details.",
+          "links": [
+            {
+              "label": "Review Apple’s physical-SIM checks",
+              "href": "https://support.apple.com/en-us/108914"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "avoid-wrong-fixes",
+          "text": "Avoid fixes that target the wrong lock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Action",
+            "Why it can be the wrong move"
+          ],
+          "rows": [
+            [
+              "Buying an IMEI unlock immediately",
+              "The alert may need a plan, carrier-settings, SIM, eSIM or device check rather than a carrier unlock"
+            ],
+            [
+              "Guessing a SIM PIN or PUK",
+              "Apple warns that a wrong guess can permanently lock the SIM or eSIM; the issuing carrier may then need to provide a replacement"
+            ],
+            [
+              "Factory-resetting before diagnosis",
+              "A reset does not create carrier eligibility and can erase useful setup evidence; use Apple’s unlock steps only when they fit the confirmed situation"
+            ],
+            [
+              "Deleting the eSIM without a replacement plan",
+              "The issuing carrier may need to verify or reissue the line before service returns"
+            ],
+            [
+              "Assuming No SIM restrictions means the line must work",
+              "Unlock status does not guarantee an active plan, successful provisioning, coverage or network compatibility"
+            ],
+            [
+              "Trying to bypass iPhone Locked to Owner or Remote Management",
+              "Activation Lock and organization management require the legitimate Apple Account owner or authorized administrator, not a carrier unlock"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says a SIM PIN protects cellular use on one SIM or eSIM and warns not to guess a PIN or PUK. If the status bar says Locked SIM or a PUK prompt appears, contact the carrier that issued that line. This security is separate from Carrier Lock, and no carrier-unlock request should be presented as a way around it.",
+          "links": [
+            {
+              "label": "See Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Compare Carrier Lock with SIM PIN",
+              "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "activation-lock-and-mdm",
+          "text": "Keep Activation Lock and MDM separate"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is tied to Find My and the owner’s Apple Account. If setup shows iPhone Locked to Owner or asks for a previous owner’s Apple Account, the legitimate owner must remove the device from that account; a carrier unlock cannot remove Activation Lock. Do not take ownership of a used iPhone while it remains linked to someone else’s account.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Mobile Device Management (MDM) lets an organization send configurations, profiles and commands to managed Apple devices. If the iPhone shows Remote Management or is managed by an organization, contact that organization’s IT or authorized administrator. MDM is not a carrier lock, and this article does not recommend bypass tools or claim that an unlock service can remove an organization’s management.",
+          "links": [
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "prepare-escalation",
+          "text": "Prepare a useful carrier or service case"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Exact alert text and when it appears: startup, activation, after an update or after changing carriers.",
+            "Carrier Lock result from Settings, General, About.",
+            "Physical SIM or eSIM, plus the carrier that issued the affected line.",
+            "Whether the plan is active and whether another SIM or line works in the iPhone.",
+            "IMEI, IMEI2 or EID used for activation, shared privately only with a verified carrier or support channel rather than posted publicly.",
+            "Recent carrier-settings update, eSIM transfer, SIM replacement, repair or device replacement history.",
+            "Never include an Apple Account password, device passcode, one-time code or SIM PIN in a support message."
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have an Invalid SIM alert and the Carrier Lock result? Send a redacted summary if you want help identifying which official carrier, Apple, ownership or organization-management route to check. This is informational guidance only and does not guarantee an unlock, blacklist or lost-device status change, carrier approval, service availability or a particular outcome.",
+          "href": "/contact",
+          "label": "Check the correct support route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Does Invalid SIM mean my iPhone is carrier-locked?",
+          "answer": "Not by itself. Check Settings, General, About. If Carrier Lock says No SIM restrictions, use Apple’s plan, carrier-settings, SIM or eSIM and device checks instead of treating the alert as proof that an unlock is needed."
+        },
+        {
+          "question": "What is the difference between Invalid SIM and SIM Not Supported?",
+          "answer": "They are not interchangeable diagnoses. For either message, check the exact wording and Carrier Lock. If the iPhone does not show No SIM restrictions, contact the responsible carrier; the message alone does not confirm eligibility or the cause."
+        },
+        {
+          "question": "Can an eSIM cause an Invalid SIM or SIM Failure alert?",
+          "answer": "An eSIM line can fail to activate or appear correctly, but the alert does not identify the cause. Check the active plan, the line in Settings, the Apple troubleshooting steps and carrier settings, then ask the issuing carrier to verify the activation."
+        },
+        {
+          "question": "Will a factory reset fix Invalid SIM on iPhone?",
+          "answer": "Do not reset first. Confirm the plan, Carrier Lock, carrier-settings update and SIM or eSIM path. A reset cannot create carrier approval and may remove useful setup evidence; follow Apple’s reset instructions only when they apply to a confirmed unlock situation."
+        },
+        {
+          "question": "Is a SIM PIN the same as a carrier lock?",
+          "answer": "No. A SIM PIN or PUK protects the SIM or eSIM and is handled by the issuing carrier. Do not guess it: Apple warns that a wrong guess can permanently lock the SIM or eSIM."
+        },
+        {
+          "question": "Who should I contact if the alert remains?",
+          "answer": "Contact the line carrier for the plan, SIM and eSIM checks; contact the current or locking carrier about a confirmed Carrier Lock; contact Apple for device service when the carrier and SIM checks do not resolve it. For iPhone Locked to Owner or Remote Management, use the legitimate owner or organization administrator route."
+        }
+      ]
+    },
+  {
+      "slug": "iphone-carrier-unlock-code-authorization-guide",
+      "title": "iPhone Carrier Unlock Code: Is There One?",
+      "heading": "iPhone Carrier Unlock Code: Does an iPhone Use One?",
+      "description": "Learn why Apple’s process uses carrier authorization rather than a generic code, how to check Carrier Lock, and which PIN or lock you see.",
+      "standfirst": "Apple’s documented carrier-unlock process does not ask you to enter a generic network-unlock code. The correct route depends on whether the prompt concerns Carrier Lock, a passcode, SIM PIN, PUK, Activation Lock, or device management.",
+      "published": "2026-10-04",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "iPhone carrier unlock code",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "If you are searching for an iPhone carrier unlock code, first check the exact restriction. For a carrier-locked iPhone, Apple directs you to the carrier rather than to a generic code-entry screen. After the carrier applies an unlock, Settings can confirm the result with No SIM restrictions.",
+          "links": [
+            {
+              "label": "Read Apple’s current carrier-unlock process",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Apple’s documented process treats an iPhone carrier unlock as carrier authorization tied to the device record, not a universal number that the user enters.",
+            "Only the current carrier can unlock the iPhone for use with another carrier; Apple cannot approve that change for the carrier.",
+            "No SIM restrictions in Settings, General, About is Apple’s on-device check for an unlocked Carrier Lock status.",
+            "A screen passcode, SIM PIN, PUK, Apple Account credential, or management-profile credential is not a carrier-unlock code.",
+            "Be cautious with any service that promises a secret code, guaranteed approval, blacklist removal, or a result without identifying the restriction and the responsible carrier."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "identify-code",
+          "text": "Identify which code or lock the iPhone is asking about"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "What you see",
+            "What it controls",
+            "Correct owner or route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock shows a restriction",
+              "Use with another mobile carrier",
+              "The carrier that controls the device record"
+            ],
+            [
+              "Enter iPhone Passcode or iPhone Unavailable",
+              "Access to data and the device",
+              "Apple’s documented passcode-reset process"
+            ],
+            [
+              "Locked SIM or Enter SIM PIN",
+              "Use of one physical SIM or eSIM line",
+              "The carrier that issued that line"
+            ],
+            [
+              "Enter PUK or PUK exhausted",
+              "Recovery after failed SIM PIN attempts",
+              "The SIM or eSIM issuer; replacement may be required"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and ownership",
+              "The legitimate Apple Account owner or Apple’s documented support process"
+            ],
+            [
+              "Supervised device or VPN & Device Management profile",
+              "Organization settings, restrictions, or device management",
+              "The owning organization or its device-management administrator"
+            ],
+            [
+              "SIM Not Supported, Invalid SIM, or No SIM",
+              "A carrier restriction or another activation or SIM issue may be involved",
+              "Check Carrier Lock, follow Apple’s SIM troubleshooting, then contact the relevant carrier"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Never enter a code supplied by a stranger into an unfamiliar prompt. Save the exact wording and verify the official recovery owner before sharing account or device information."
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-authorization",
+          "text": "How iPhone carrier-unlock authorization works"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, About and record the Carrier Lock status.",
+            "Identify the carrier that controls the lock using the purchase, account, financing, or replacement record.",
+            "Read that carrier’s current eligibility rules for the device, plan, and account. Do not assume that another carrier’s rule applies.",
+            "Submit the request through the carrier or an authorized route, and keep the case reference without sharing passwords or one-time codes.",
+            "Wait for the carrier to confirm whether its request is complete; approval and timing depend on the carrier’s current policy.",
+            "Reconnect or activate the new SIM or eSIM if needed, then verify that Carrier Lock says No SIM restrictions."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Carrier eligibility is not universal. The FCC explains that unlocking disables software that prevents activation on another provider, but it does not guarantee technical compatibility or every network feature. Provider rules can differ by plan and account circumstances, so check the current policy of the carrier that sold or authorized the device. Official examples from AT&T, T-Mobile, and Verizon show why one carrier’s requirements should not be generalized to another.",
+          "links": [
+            {
+              "label": "Read the FCC consumer guide to cell-phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Check AT&T’s current device-unlock requirements",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Check T-Mobile’s current device-unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Check Verizon’s current device-unlocking policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the carrier can unlock the iPhone and that a request may take time to complete. After the carrier confirms the unlock, inserting a compatible SIM or activating an eSIM can finish setup. If no other SIM is available, Apple describes backup, erase, and restore as a follow-up option after carrier confirmation—not as a way to create the approval.",
+          "links": [
+            {
+              "label": "Check Apple’s approved completion steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "See why a factory reset does not replace carrier approval",
+              "href": "/articles/will-factory-reset-unlock-iphone-carrier"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "no-code-field",
+          "text": "Why Apple’s process does not use a generic iPhone network-unlock code"
+        },
+        {
+          "kind": "p",
+          "text": "For Apple’s documented user check, the relevant status is Carrier Lock in Settings, General, About. A number sent by a seller or service is not, by itself, evidence that the carrier changed the device record. Confirm the status on the iPhone and, when relevant, test activation with a compatible line from another carrier."
+        },
+        {
+          "kind": "h3",
+          "id": "dual-sim-esim",
+          "text": "Dual SIM and eSIM do not create a second unlock code"
+        },
+        {
+          "kind": "p",
+          "text": "Using Dual SIM or eSIM does not change who controls a carrier unlock. If the carrier asks for a device identifier, provide the identifier it requests and keep the other device records available for clarification. Do not treat an IMEI, IMEI2, or EID shown in Settings as an unlock code. An eSIM still requires a carrier-compatible plan and an iPhone that is not locked to a carrier for use with another provider.",
+          "links": [
+            {
+              "label": "Read Apple’s current eSIM and travel requirements",
+              "href": "https://support.apple.com/en-us/118227"
+            },
+            {
+              "label": "Follow the eSIM carrier-lock guide",
+              "href": "/articles/how-to-unlock-esim-on-iphone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "nearby-credentials",
+          "text": "Use the right recovery route for nearby credentials"
+        },
+        {
+          "kind": "h3",
+          "id": "passcode-route",
+          "text": "If you forgot the iPhone passcode"
+        },
+        {
+          "kind": "p",
+          "text": "A forgotten screen passcode is a device-access issue, not a carrier lock. Apple’s current recovery can require resetting the iPhone, which erases the data currently on the device. Completing that process does not change the carrier’s unlock decision.",
+          "links": [
+            {
+              "label": "Use Apple’s passcode-reset instructions",
+              "href": "https://support.apple.com/en-us/118430"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "sim-pin-puk-route",
+          "text": "If the prompt asks for SIM PIN or PUK"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN protects cellular use on one SIM or eSIM. Apple warns not to guess the SIM PIN or PUK because wrong attempts can permanently lock the line credential and require a replacement SIM or eSIM. Contact the carrier that issued that line. Unlocking the line credential will not remove Carrier Lock from the iPhone.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN and PUK warning",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock-route",
+          "text": "If the screen says iPhone Locked to Owner"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is different from Carrier Lock. Apple links Activation Lock to Find My and the owner’s Apple Account, and an erased device can remain protected against reactivation. The legitimate owner must remove the device from the account or use Apple’s documented support route when eligible; a carrier-unlock code cannot remove Activation Lock.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "See Apple’s support route for removing Activation Lock",
+              "href": "https://support.apple.com/en-us/108934"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "mdm-route",
+          "text": "If the iPhone is supervised or managed by an organization"
+        },
+        {
+          "kind": "p",
+          "text": "Mobile device management (MDM) is an organization’s configuration and control system, not a carrier lock. Apple says a supervised iPhone can have organization-applied restrictions and profiles, which you can inspect under Settings, General, VPN & Device Management. Contact the organization that owns or manages the device for a legitimate release or configuration change; do not treat an MDM profile as a code to bypass.",
+          "links": [
+            {
+              "label": "Learn how Apple describes a supervised iPhone",
+              "href": "https://support.apple.com/en-us/102291"
+            },
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "evaluate-offer",
+          "text": "Evaluate an iPhone unlock-code offer before paying"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Ask the service",
+            "A responsible answer should identify",
+            "Warning sign"
+          ],
+          "rows": [
+            [
+              "Which restriction are you addressing?",
+              "Carrier Lock, a named carrier, and the relevant device record",
+              "“All locks” or no diagnosis"
+            ],
+            [
+              "What is the deliverable?",
+              "A clearly described status check or authorized request, without promising carrier approval",
+              "A secret universal code"
+            ],
+            [
+              "How is completion verified?",
+              "Carrier Lock showing No SIM restrictions and compatible activation when relevant",
+              "A completion email alone"
+            ],
+            [
+              "What information is required?",
+              "Only the minimum device and carrier details needed for the stated task",
+              "An Apple Account password, one-time code, or unrelated identity data"
+            ],
+            [
+              "What happens if the carrier refuses?",
+              "The service’s written terms explain the status result and any refund conditions before payment",
+              "Guaranteed approval regardless of policy"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service cannot create carrier approval, bypass Activation Lock or MDM, reset a forgotten passcode outside Apple’s process, or turn a SIM PIN into a carrier unlock. Availability, carrier coverage, price, timing, warranty, refund terms, and outcome must be checked in the service’s current terms; this article does not promise any of them.",
+          "links": [
+            {
+              "label": "Review the IMEI unlock service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            },
+            {
+              "label": "Compare software claims with carrier authorization",
+              "href": "/articles/iphone-carrier-unlock-software-jailbreak-guide"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Know the exact prompt and Carrier Lock result? Send only a redacted summary so the correct authorization or recovery route can be identified without sharing passwords, one-time codes, or full device identifiers.",
+          "href": "/contact",
+          "label": "Ask about the correct unlock route"
+        }
+      ],
+      "faq": [
+        {
+          "question": "What is the iPhone carrier unlock code?",
+          "answer": "Apple’s current public instructions do not ask the user to enter a generic carrier-unlock code. The current carrier authorizes the change, and Settings can confirm completion with No SIM restrictions next to Carrier Lock."
+        },
+        {
+          "question": "Can Apple give me a network-unlock code?",
+          "answer": "No. Apple states that only the current carrier can unlock an iPhone for use with another carrier. Contact the carrier controlling the device record."
+        },
+        {
+          "question": "Is my iPhone passcode the same as a carrier-unlock code?",
+          "answer": "No. The passcode controls access to the iPhone. Carrier Lock controls activation with another carrier, and resetting the passcode does not approve a carrier unlock."
+        },
+        {
+          "question": "Is a PUK an iPhone carrier-unlock code?",
+          "answer": "No. A PUK helps recover a SIM or eSIM after failed SIM PIN attempts. It comes from the line issuer and does not change the iPhone’s Carrier Lock status."
+        },
+        {
+          "question": "Is Activation Lock the same as Carrier Lock?",
+          "answer": "No. Activation Lock is linked to Find My and the owner’s Apple Account. Carrier Lock is the carrier restriction checked under Settings, General, About. A carrier-unlock request cannot remove Activation Lock."
+        },
+        {
+          "question": "Is an MDM profile the same as a carrier lock?",
+          "answer": "No. MDM or supervision applies organization settings and restrictions. The owning organization or its administrator must handle a legitimate management change; a carrier unlock does not remove MDM."
+        },
+        {
+          "question": "How do I confirm that the carrier unlock is complete?",
+          "answer": "Open Settings, General, About. No SIM restrictions next to Carrier Lock is Apple’s on-device confirmation. Then activate a compatible SIM or eSIM if needed."
+        }
+      ]
+    },
+  {
+      "slug": "how-to-find-carrier-on-iphone-before-unlock",
+      "title": "How to Find the Carrier on an iPhone",
+      "heading": "How to Find the Carrier on an iPhone Before Unlocking",
+      "description": "Learn how to identify the carrier record on an iPhone using Settings, purchase records, and IMEI evidence before contacting a carrier about unlocking.",
+      "standfirst": "Carrier Lock shows whether an iPhone is restricted, but Settings alone usually cannot prove which carrier controls the restriction.",
+      "published": "2026-10-03",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "How to find carrier on iPhone",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Start in Settings > General > About. Apple says this screen can show Carrier Lock, network and carrier information, IMS status, available SIMs, IMEI and EID. Those fields are useful clues, but a carrier name attached to an active line or carrier-connection context does not by itself prove which provider controls a Carrier Lock. Match the device to purchase or account records, then ask the suspected carrier to review it through an official route.",
+          "links": [
+            {
+              "label": "See Apple's About-screen fields",
+              "href": "https://support.apple.com/guide/iphone/get-information-about-your-iphone-iph3dd5fc7e/ios"
+            },
+            {
+              "label": "Read Apple's carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Check Carrier Lock first. If it says No SIM restrictions, Apple considers the iPhone unlocked, so there is no carrier lock to identify.",
+            "The carrier or network shown for an active SIM or eSIM may describe the current line or carrier connection, not the provider record that controls a lock.",
+            "A receipt, order, account record, or financing document may connect the device to a seller or account, but matching evidence and the carrier's own records determine how much it proves.",
+            "Treat any third-party IMEI report as a lead rather than proof of the locking carrier or unlock eligibility. Do not pay for an unlock request solely because a lookup displays a carrier name.",
+            "If the iPhone shows more than one IMEI or other cellular identifier, keep the available identifiers private and ask the carrier which one it needs for the affected activation or record."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-carrier-lock-first",
+          "text": "Check whether the iPhone is actually carrier-locked"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings.",
+            "Tap General, then About.",
+            "Find Carrier Lock.",
+            "If it says No SIM restrictions, Apple considers the iPhone unlocked.",
+            "If that wording is not shown, contact the carrier for the status and eligibility that apply to the device. The status field does not name the carrier that must handle the request."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says it cannot unlock an iPhone for use with a different carrier; only the carrier that controls the device's lock can do so. Apple documents the status check, not a universal reverse lookup that names the controlling carrier. This is why the purchase trail and a carrier's own IMEI review matter more than a status-bar name.",
+          "links": [
+            {
+              "label": "Read Apple's current unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Check an iPhone's unlock status",
+              "href": "/articles/how-to-check-if-iphone-is-unlocked"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "rank-evidence",
+          "text": "Rank the evidence from strongest to weakest"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Evidence",
+            "What it may establish",
+            "Limits"
+          ],
+          "rows": [
+            [
+              "Original receipt or carrier order",
+              "May connect the device to a seller, account, purchase, or financing record",
+              "Its strength depends on matching the IMEI or serial and the carrier's records"
+            ],
+            [
+              "Carrier account or payoff statement",
+              "May show an account, payment, or device-obligation history",
+              "Unlock authority and eligibility remain carrier- and program-specific"
+            ],
+            [
+              "Replacement or insurance record",
+              "May document a replacement or claim path and associated identifiers",
+              "It does not by itself prove which carrier currently controls the lock"
+            ],
+            [
+              "Settings carrier or network information",
+              "The active line, carrier connection, and related settings context",
+              "Useful clue, not proof of the locking carrier"
+            ],
+            [
+              "Third-party IMEI report",
+              "A possible lead to investigate when the paper trail is missing",
+              "Coverage and data quality vary; the named carrier must confirm the record"
+            ],
+            [
+              "Logo, startup screen, or old SIM card",
+              "A previous service relationship",
+              "Weak evidence because the device or SIM can change hands"
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Do not pay an unlock provider merely because a lookup names a carrier. First compare the result with the device history, keep identifiers out of public posts, and ask the named carrier to confirm the record through its official support or unlock route."
+        },
+        {
+          "kind": "h2",
+          "id": "use-settings-correctly",
+          "text": "Use Settings without mistaking the active line for the lock owner"
+        },
+        {
+          "kind": "h3",
+          "id": "about-screen",
+          "text": "Carrier and network information in About"
+        },
+        {
+          "kind": "p",
+          "text": "Settings > General > About can display network and carrier information for installed service. Apple says that tapping Carrier can show IMS status, which describes the carrier connection status. Read that information alongside Carrier Lock and the device records; it is not, by itself, proof of which company originally sold or locked a second-hand iPhone.",
+          "links": [
+            {
+              "label": "Review Apple's About-screen documentation",
+              "href": "https://support.apple.com/guide/iphone/get-information-about-your-iphone-iph3dd5fc7e/ios"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "dual-sim-identifiers",
+          "text": "IMEI and other cellular identifiers"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says identifiers such as IMEI, EID, and ICCID can be found in About and, depending on the device, in other places such as the Hello screen, Finder or Apple Devices, the Apple Account, original packaging, or the SIM tray. If a dual-SIM iPhone shows more than one identifier, keep each one available for the carrier and ask which identifier it needs. Apple's public guidance does not establish a universal identifier-to-line rule.",
+          "links": [
+            {
+              "label": "Find an iPhone's IMEI, EID, or other identifiers",
+              "href": "https://support.apple.com/en-us/108037"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "confirm-with-carrier",
+          "text": "Turn the clues into carrier confirmation"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Copy the relevant identifier from Settings > General > About without posting it publicly.",
+            "Match it to the receipt, original order, account record, financing statement, or replacement document.",
+            "Ask the seller which account or carrier originally held the device and request supporting documentation when the history is unclear.",
+            "Use a third-party IMEI report only as a lead. It is not a carrier decision or proof that the device qualifies for an unlock.",
+            "Contact the suspected carrier through its official support or unlock route, provide identifiers only through an authenticated channel, and ask whether it controls the record and which eligibility rule applies.",
+            "If the carrier cannot find the record, ask which identifier or purchase evidence it needs before drawing a conclusion."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Some third-party services may help organize identifiers or explain published policies, but capability, data accuracy, authority, and refund terms vary. A lookup result is not the same as a carrier unlock, a blacklist decision, a financing transfer, Activation Lock removal, or a promise that another provider will support every feature. See the difference between an informational IMEI check and a completed carrier decision before sharing sensitive data.",
+          "links": [
+            {
+              "label": "See what an IMEI check can and cannot tell you",
+              "href": "/articles/what-an-imei-check-tells-you"
+            },
+            {
+              "label": "Review carrier-unlock eligibility questions",
+              "href": "/articles/iphone-carrier-unlock-eligibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "separate-lock-types",
+          "text": "Separate Carrier Lock, Activation Lock, SIM PIN, and MDM"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Name or status",
+            "What it concerns",
+            "What it does not prove"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "A carrier restriction on activating the iPhone with another network; Apple exposes its status in About",
+              "The About status does not name the controlling carrier or establish eligibility"
+            ],
+            [
+              "Activation Lock",
+              "Find My and the previous owner's Apple Account linkage; the previous owner must remove it before a used device is ready",
+              "It is not a carrier unlock and does not identify the network lock owner"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Security for one physical SIM or eSIM profile, handled with the carrier that issued that profile",
+              "It does not change the iPhone's Carrier Lock status"
+            ],
+            [
+              "MDM or device management",
+              "An organization's configurations, compliance controls, and possible remote lock or wipe for a managed device",
+              "It is not Carrier Lock or Activation Lock and does not identify the carrier that can unlock the phone"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Before buying or troubleshooting a used iPhone, check these controls separately. Apple says Activation Lock is tied to Find My and the previous owner's Apple Account; a SIM PIN protects a particular SIM or eSIM; and device management can let an organization configure, monitor, lock, or wipe a managed device. None of those checks replaces the Carrier Lock check.",
+          "links": [
+            {
+              "label": "Check Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple's SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Review Apple's device-management guide",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-rules-vary",
+          "text": "Do not assume one carrier's eligibility rules apply to another"
+        },
+        {
+          "kind": "p",
+          "text": "Unlock eligibility is carrier-, country-, account-, and program-specific. The FCC explains that unlocking disables network software but does not guarantee technical compatibility with another network, and that provider processes vary. AT&T and Verizon publish different requirements for payment status, plan type, lost or stolen reports, and service history. Check the suspected carrier's current policy instead of applying a number or exception from a different provider.",
+          "links": [
+            {
+              "label": "Read the FCC consumer guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Check AT&T's unlock requirements",
+              "href": "https://www.att.com/support/article/wireless/KM1008728/"
+            },
+            {
+              "label": "Check Verizon's device-unlocking policy",
+              "href": "https://www.verizon.com/about/consumer-safety/device-unlocking-policy"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have the Carrier Lock wording, purchase path, and non-sensitive findings? Contact us with those details, but do not send a full IMEI in a public message.",
+          "href": "/contact",
+          "label": "Ask about the carrier record"
+        }
+      ],
+      "faq": [
+        {
+          "question": "How do I find what carrier my iPhone is locked to?",
+          "answer": "Check Settings > General > About for Carrier Lock. If it says No SIM restrictions, Apple considers the iPhone unlocked. Otherwise, use the purchase or account trail to identify a suspected carrier and ask that carrier to confirm whether it controls the device record and what eligibility rule applies."
+        },
+        {
+          "question": "Does the carrier name in Settings prove who locked the iPhone?",
+          "answer": "No. It can describe an active SIM or eSIM line, carrier connection, or related settings context. A second-hand iPhone may have a different purchase or lock record, so the carrier must confirm it."
+        },
+        {
+          "question": "Can Apple tell me which carrier will unlock the iPhone?",
+          "answer": "Apple documents how to check Carrier Lock and where to find device identifiers, but Apple says it cannot unlock the iPhone. The carrier that controls the lock must confirm the record and handle any eligible request."
+        },
+        {
+          "question": "Can an IMEI check identify the original carrier?",
+          "answer": "A third-party report may give you a lead, but treat the result as unverified. Data coverage and accuracy vary, and the named carrier should confirm the device record before you pay for any service or make an unlock request."
+        },
+        {
+          "question": "Which identifier should I give the carrier on a dual-SIM iPhone?",
+          "answer": "Keep every relevant identifier shown in Settings > General > About, including any additional IMEI or EID, and ask the carrier which one it needs for the affected activation or record. Apple's public guidance does not establish one universal identifier-to-line rule."
+        },
+        {
+          "question": "Is Activation Lock the same as a carrier lock?",
+          "answer": "No. Activation Lock links the device to Find My and the previous owner's Apple Account, while Carrier Lock concerns activation with another network. A carrier unlock does not remove Activation Lock."
+        },
+        {
+          "question": "Is a SIM PIN or MDM profile a carrier lock?",
+          "answer": "No. A SIM PIN or PUK protects a particular SIM or eSIM profile, and MDM lets an organization manage a device through configurations and commands. Check those issues separately from Carrier Lock."
+        }
+      ]
+    },
+  {
+      "slug": "will-factory-reset-unlock-iphone-carrier",
+      "title": "Will a Factory Reset Unlock an iPhone?",
+      "heading": "Will a Factory Reset Unlock an iPhone From Its Carrier?",
+      "description": "Learn why a factory reset cannot create a carrier unlock, when Apple says erase and restore may finish an approved unlock, and how to separate other locks.",
+      "standfirst": "Erasing an iPhone can be part of setup after carrier approval, but it cannot create that approval or change the carrier’s eligibility decision.",
+      "published": "2026-10-03",
+      "updated": "2026-10-20",
+      "minutes": 7,
+      "topic": "Factory reset and iPhone carrier unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A factory reset does not unlock an iPhone from its carrier. An erase removes the iPhone’s content and settings; a computer restore also installs the latest iOS. Neither action creates the carrier’s approval. Apple says only the current carrier can unlock an iPhone.",
+          "links": [
+            {
+              "label": "Read Apple’s current carrier-unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "See Apple’s factory-restore instructions",
+              "href": "https://support.apple.com/en-us/118107"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "A reset does not itself change the carrier’s eligibility decision or account status. Any payoff, waiting-period, or activity requirement depends on the responsible carrier’s current policy.",
+            "Erase and restore can be a completion step only after the carrier confirms that the unlock was approved.",
+            "Apple’s current instructions say to open Settings, General, About and check Carrier Lock. No SIM restrictions means the iPhone is unlocked.",
+            "Resetting does not turn Carrier Lock, Activation Lock, SIM PIN or PUK, passcode, MDM, and lost-or-stolen reports into the same problem.",
+            "Back up before erasing. If a carrier request is still pending, check its status before deciding whether an erase is necessary."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "what-reset-changes",
+          "text": "What a factory reset changes—and what it does not"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Item",
+            "Effect of factory reset"
+          ],
+          "rows": [
+            [
+              "Photos, apps, and local settings",
+              "Removed unless restored from a backup"
+            ],
+            [
+              "iOS installation and setup",
+              "Erase from Settings removes content and settings; a computer restore reinstalls the latest iOS and shows the Hello screen"
+            ],
+            [
+              "Carrier unlock approval",
+              "Unchanged; the current carrier must approve the unlock"
+            ],
+            [
+              "Device financing or unpaid balance",
+              "A reset does not itself change carrier eligibility or account status; ask the carrier about its current requirements"
+            ],
+            [
+              "Lost, stolen, or fraud report",
+              "A reset does not itself change the provider’s report or eligibility decision"
+            ],
+            [
+              "Activation Lock",
+              "Not bypassed; Apple Account credentials may still be required"
+            ],
+            [
+              "SIM PIN or PUK",
+              "A reset is not a documented way to recover it; contact the carrier that issued the SIM or eSIM"
+            ],
+            [
+              "Organization MDM or supervision",
+              "Not a carrier-unlock route; organization enrollment and management follow the organization’s deployment process"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple describes a computer factory restore as erasing the device’s information and settings and installing the latest software. An erase from Settings has its own eSIM choice. These are device-reset actions, not a change to a carrier’s unlocking decision.",
+          "links": [
+            {
+              "label": "Review Apple’s computer factory-restore process",
+              "href": "https://support.apple.com/en-us/118107"
+            },
+            {
+              "label": "Review Apple’s erase-and-reset process",
+              "href": "https://support.apple.com/en-us/108931"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-policies-vary",
+          "text": "Carrier eligibility is separate from the reset"
+        },
+        {
+          "kind": "p",
+          "text": "The FCC explains that unlocking disables software that prevents activation on another provider, but network compatibility can still differ. Carrier policies also vary. Current official examples from T-Mobile, AT&T, and Verizon refer to combinations of device source, account status, payment or service requirements, and lost, stolen, or fraud reports. Check the responsible carrier’s current policy instead of assuming that a reset, price, financing status, or elapsed time guarantees approval.",
+          "links": [
+            {
+              "label": "Read the FCC consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Check T-Mobile’s current device unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Check AT&T’s current unlock requirements",
+              "href": "https://www.att.com/support/article/wireless/KM1008728/"
+            },
+            {
+              "label": "Check Verizon’s current device unlocking policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "when-restore-helps",
+          "text": "When erase and restore can help after approval"
+        },
+        {
+          "kind": "h3",
+          "id": "carrier-approved-first",
+          "text": "Carrier approval comes first"
+        },
+        {
+          "kind": "p",
+          "text": "After the carrier confirms the unlock, Apple’s documented steps are to use a SIM from another carrier so the iPhone can activate. If another SIM is not available, Apple provides a backup, erase, and restore route. Apple presents that as a post-approval completion path, not as a way to create eligibility or approval.",
+          "links": [
+            {
+              "label": "Follow Apple’s post-approval steps",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "check-status-first",
+          "text": "Check Carrier Lock before erasing"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Connect the iPhone to Wi-Fi or mobile data.",
+            "Open Settings, General, and About.",
+            "Find Carrier Lock.",
+            "If it says No SIM restrictions, the carrier lock is not the reason for a failed connection. Check the new SIM or eSIM, account, provisioning, and network compatibility instead of erasing for an unlock.",
+            "If a restriction remains, confirm carrier approval and request status with the current carrier before considering a restore."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "An iPhone that already shows No SIM restrictions but has no service has a different problem. The destination carrier may need to check provisioning, eSIM setup, account status, or network compatibility. An unlocked device is not automatically compatible with every network or service plan.",
+          "links": [
+            {
+              "label": "Read the FCC guidance on compatibility",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "See the iUnlockMobile no-service troubleshooting guide",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "reset-before-approval",
+          "text": "If you already reset the iPhone before carrier approval"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Complete setup using the legitimate Apple Account credentials associated with the device if setup requests them.",
+            "Open Settings, General, and About and note the Carrier Lock result without publishing sensitive device or account information.",
+            "Check the carrier request or case status through the carrier’s official channel.",
+            "If the carrier identifies an eligibility issue, resolve it with that carrier. It may relate to account standing, payment, service or activity requirements, or a lost, stolen, or fraud report, depending on the carrier’s policy.",
+            "After the carrier confirms completion, restart and recheck Carrier Lock before choosing whether to erase again."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A reset can remove the local evidence you need, including messages, app records, and account details. Save receipts, carrier correspondence, case references, and screenshots before erasing. Use secure carrier channels for any device identifier they request; do not publish a full IMEI."
+        },
+        {
+          "kind": "h2",
+          "id": "separate-locks",
+          "text": "Identify the lock before choosing a reset"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Symptom",
+            "Restriction",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock shows a restriction",
+              "Carrier activation policy",
+              "Check the current carrier’s eligibility and approval status"
+            ],
+            [
+              "SIM Not Supported with another carrier",
+              "May be Carrier Lock, a SIM or eSIM issue, or network incompatibility",
+              "Check Carrier Lock, then contact the relevant carrier based on the result"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock",
+              "Previous owner or Apple’s documented ownership process"
+            ],
+            [
+              "Forgotten screen passcode",
+              "Device access",
+              "Apple’s passcode recovery and erase process"
+            ],
+            [
+              "Locked SIM or PUK request",
+              "SIM or eSIM security",
+              "Carrier that issued the SIM or eSIM"
+            ],
+            [
+              "Managed, supervised, or organization-enrollment message",
+              "Mobile device management (MDM)",
+              "The organization or administrator; this is separate from Carrier Lock"
+            ],
+            [
+              "Lost, stolen, or fraud report",
+              "Provider report or eligibility restriction",
+              "Ask the reporting provider about its documented process; a reset is not removal"
+            ],
+            [
+              "No SIM restrictions but no service",
+              "Account, compatibility, provisioning, or network condition",
+              "Destination carrier"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is tied to Find My and can remain after a remote erase. Apple says the Apple Account password may be required to turn off Find My, erase, or reactivate the device. A factory reset is therefore not a legitimate shortcut around ownership controls.",
+          "links": [
+            {
+              "label": "Read how Apple Activation Lock behaves after erase",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Use legitimate iPhone Locked to Owner routes",
+              "href": "/articles/iphone-locked-to-owner-legitimate-fixes"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN or PUK protects the SIM or eSIM, not the iPhone’s carrier-lock status. Apple says not to guess these codes; contact the carrier that issued the SIM or eSIM for help. A reset does not substitute for that carrier’s SIM-security process.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "MDM is an organization’s device-management system, not a carrier unlock. Apple’s Automated Device Enrollment documentation says an organization can configure and manage devices during setup and can prevent a user from removing the enrollment profile. If a managed-device message appears, contact the organization or administrator rather than treating the reset as an unlock method.",
+          "links": [
+            {
+              "label": "Read Apple’s Automated Device Enrollment documentation",
+              "href": "https://support.apple.com/guide/deployment/automated-device-enrollment-management-dep73069dd57/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-role",
+          "text": "What a third-party unlock service can actually verify"
+        },
+        {
+          "kind": "p",
+          "text": "A third-party service’s claim is not proof of carrier approval. Verify eligibility and request status through the current carrier’s official channel. Apple’s instructions do not describe a factory reset, software, or an outside service as a way to create carrier approval or bypass Activation Lock; SIM security, MDM, and provider reports also belong to their responsible carrier, organization, or reporting process.",
+          "links": [
+            {
+              "label": "Compare carrier authorization with software claims",
+              "href": "/articles/iphone-carrier-unlock-software-jailbreak-guide"
+            },
+            {
+              "label": "Read Apple’s carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Before erasing again, keep a non-sensitive note of the Carrier Lock result and the carrier’s response. Use the official carrier channel for eligibility or unlock status, and share only non-sensitive symptoms if you ask for a lock-category review.",
+          "href": "/contact",
+          "label": "Review the correct lock category"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Will a factory reset unlock an iPhone from its carrier?",
+          "answer": "No. A reset erases local data and settings, but Apple says only the current carrier can approve and apply a carrier unlock."
+        },
+        {
+          "question": "Why does Apple mention erase and restore in its unlock instructions?",
+          "answer": "Apple documents erase and restore as a completion path after the carrier confirms approval, including when another carrier’s SIM is not available. A computer restore also reinstalls iOS; an erase from Settings does not create eligibility or approval."
+        },
+        {
+          "question": "Can a factory reset remove Activation Lock?",
+          "answer": "No. Apple says Activation Lock can remain after a remote erase and that the Apple Account password may be required to turn off Find My, erase, or reactivate the device."
+        },
+        {
+          "question": "Should I reset an iPhone that says SIM Not Supported?",
+          "answer": "Check Settings, General, About first. If Carrier Lock still shows a restriction, contact the current carrier. If it shows No SIM restrictions, investigate the SIM or eSIM, account, provisioning, and network compatibility instead."
+        },
+        {
+          "question": "How do I confirm the carrier unlock after a reset?",
+          "answer": "Connect to the internet, open Settings, General, About, and check Carrier Lock. Apple says No SIM restrictions confirms that the iPhone is unlocked from its carrier."
+        }
+      ]
+    },
+  {
+      "slug": "us-mobile-unlock-policy-iphone-guide",
+      "title": "US Mobile iPhone Unlock Policy Guide",
+      "heading": "US Mobile iPhone Unlock Policy: What to Verify",
+      "description": "Learn how to verify a US Mobile iPhone’s carrier lock, distinguish Apple security locks, and check current terms before using another SIM or eSIM.",
+      "standfirst": "US Mobile’s public materials and Apple’s guidance point to a record-first check: identify who sold or locked the iPhone, then verify the current eligibility terms with that provider.",
+      "published": "2026-10-02",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "US Mobile unlock policy",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "The public US Mobile pages reviewed for this update do not establish one universal unlock clock for every iPhone. The current US Mobile unlock page presents a separate “Free Your Phone” advance program, while its device-compatibility guidance says a phone bought from a previous carrier may remain locked and should be unlocked through the carrier that sold it. Treat the listing, transaction materials, account record, and current carrier policy as controlling—not this guide.",
+          "links": [
+            {
+              "label": "Read US Mobile’s current unlock page",
+              "href": "https://www.usmobile.com/unlock"
+            },
+            {
+              "label": "Check US Mobile device-compatibility guidance",
+              "href": "https://www.usmobile.com/help/docs/getting-started/device-compatibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Start with the phone’s listing, receipt, confirmation, and any device-specific terms. Do not infer an unlock date from a general advertisement or an older review.",
+            "A phone sold by US Mobile, a BYOD iPhone, and a used iPhone can have different records. Identify the provider that placed the Carrier Lock before asking for an unlock.",
+            "Apple says only the current carrier can unlock an iPhone. A status check or third-party review is not the same as carrier authorization.",
+            "An unlocked iPhone is not guaranteed to work on every network. The target provider still needs to support the model, bands, features, and account provisioning.",
+            "Existing-carrier roaming and a travel eSIM from another provider are different options. The latter requires an iPhone that is not carrier-locked."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "identify-device-record",
+          "text": "Identify the Device Record That Controls the Lock"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "How the iPhone was obtained",
+            "Record to verify",
+            "First question to ask"
+          ],
+          "rows": [
+            [
+              "Sold by US Mobile under device terms",
+              "US Mobile listing, confirmation, and applicable device terms",
+              "Does this specific sale record state a Carrier Lock and an eligibility route?"
+            ],
+            [
+              "Brought to US Mobile from another carrier",
+              "The carrier that originally sold or financed the iPhone",
+              "Has that original carrier confirmed the current lock status and requirements?"
+            ],
+            [
+              "Purchased second-hand",
+              "The prior sale record, original carrier, and Apple ownership status",
+              "Has the seller removed Activation Lock, and does Settings show the expected Carrier Lock status?"
+            ],
+            [
+              "Purchased as unlocked from Apple or a retailer",
+              "Seller documentation plus the iPhone’s current status",
+              "Does Settings > General > About show “No SIM restrictions,” and is the model compatible with the target network?"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If a US Mobile SIM shows “SIM Not Supported” or “Invalid SIM,” US Mobile says the iPhone may be carrier-locked and directs customers to the previous carrier’s unlocking process. That guidance helps identify the next record to check; it does not prove that US Mobile placed the lock or that an unlock request will be approved.",
+          "links": [
+            {
+              "label": "Read US Mobile’s device-troubleshooting guidance",
+              "href": "https://www.usmobile.com/help/docs/troubleshooting-and-setup/device-issues"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-lock-vs-other-locks",
+          "text": "Separate Carrier Lock from Other Restrictions"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Issue",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "Whether the iPhone can activate with another wireless provider",
+              "Check Carrier Lock, then contact the carrier that controls the sale or account record"
+            ],
+            [
+              "Activation Lock",
+              "Apple Account ownership and reactivation after Find My is enabled",
+              "The previous owner must remove the device from the Apple Account; do not buy a device that shows “iPhone Locked to Owner”"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to one physical SIM or eSIM profile",
+              "Contact the SIM issuer; do not guess the PIN or PUK"
+            ],
+            [
+              "Mobile device management (MDM)",
+              "Organization enrollment, configuration, and administrative controls",
+              "Contact the school, employer, or other organization that enrolled the iPhone"
+            ],
+            [
+              "No service after an unlock",
+              "Network compatibility, account status, provisioning, or plan support",
+              "Ask the target provider to check compatibility and provisioning; an unlock alone is not a service guarantee"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "These restrictions are not interchangeable. Apple describes Activation Lock as an Apple Account and Find My protection, SIM PIN as protection for the SIM or eSIM profile, and MDM as organization device management. None is removed merely because a carrier changes the Carrier Lock status.",
+          "links": [
+            {
+              "label": "Review Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Review Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Review Apple’s device-management guidance",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A carrier unlock is not a promise of blacklist removal, financing approval, warranty coverage, a specific price, a completion time, or acceptance on another network. Ask the provider that controls the relevant record and keep its written response."
+        },
+        {
+          "kind": "h2",
+          "id": "verify-current-route",
+          "text": "Verify the Current Route Without Guessing a Date"
+        },
+        {
+          "kind": "h3",
+          "id": "before-contacting-provider",
+          "text": "Before contacting the provider"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, and About. Apple says “No SIM restrictions” next to Carrier Lock means the iPhone is unlocked.",
+            "Save the listing, receipt, confirmation, and device-specific terms that identify how the iPhone was sold. Keep the full IMEI and account credentials out of public messages.",
+            "If the iPhone was brought from another carrier, contact the carrier that sold or financed it. If it was sold by US Mobile, ask US Mobile to identify the current terms and status for that sale record.",
+            "Ask the target provider to confirm model compatibility, supported bands and features, and any account or provisioning requirement. Unlocking does not make an incompatible device compatible.",
+            "Ask for the applicable eligibility conditions and any exception in writing. Do not substitute a number copied from an old article for the current order or account terms."
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "after-carrier-confirms",
+          "text": "After the carrier confirms an unlock"
+        },
+        {
+          "kind": "p",
+          "text": "Follow the carrier’s activation instructions, then check Settings > General > About again. Apple says that a carrier may take time to complete an unlock; if the status does not change, keep the case with the carrier. If you have no other SIM to use, Apple documents a backup, erase, and restore route for completing some unlocks, so make a backup first and do not erase the phone merely to test a claim.",
+          "links": [
+            {
+              "label": "Follow Apple’s carrier-unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "international-use",
+          "text": "Plan International Use Separately"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Travel option",
+            "What the official guidance supports",
+            "What to confirm"
+          ],
+          "rows": [
+            [
+              "Roaming with the existing carrier",
+              "It can be a separate option from installing another carrier’s SIM or eSIM",
+              "Plan inclusion, destination, coverage, rates, and current availability"
+            ],
+            [
+              "Travel eSIM from another provider",
+              "Apple says the iPhone cannot be carrier-locked when using another carrier while traveling",
+              "Carrier Lock status, eSIM support, destination plan, and model compatibility"
+            ],
+            [
+              "Another carrier’s physical SIM",
+              "It also requires an unlocked iPhone and a compatible network",
+              "Carrier approval, compatibility, and local service terms"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple distinguishes roaming with an existing carrier from purchasing a travel eSIM. FCC guidance also warns that unlocking removes a software restriction but does not guarantee technical compatibility or every feature on another network. Check the current plan and destination rather than assuming that an unlocked iPhone will have service everywhere.",
+          "links": [
+            {
+              "label": "Read Apple’s international eSIM guidance",
+              "href": "https://support.apple.com/en-us/118227"
+            },
+            {
+              "label": "Read the FCC consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "terms-and-limitations",
+          "text": "Read the Terms Before Treating a Route as Available"
+        },
+        {
+          "kind": "p",
+          "text": "US Mobile’s current Terms say the agreement can include transaction materials and supplemental terms for devices or plans. The same Terms list device unlocking among possible charges and reserve the ability to change terms, but they do not establish that a charge applies to every device or that every unlock request will be approved. Check the current sale record and ask the relevant provider about the exact case.",
+          "links": [
+            {
+              "label": "Read US Mobile’s current Terms and Conditions",
+              "href": "https://www.usmobile.com/terms"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "This is an informational guide, not an unlock authorization. Eligibility, timing, fees, financing, warranty treatment, roaming, target-provider availability, and the final outcome depend on current provider records and terms."
+        },
+        {
+          "kind": "h2",
+          "id": "faq",
+          "text": "Frequently Asked Questions"
+        },
+        {
+          "kind": "p",
+          "text": "The answers below use the official pages linked in this article. They intentionally avoid turning an unverified historical period or a general industry rule into a US Mobile guarantee."
+        },
+        {
+          "kind": "cta",
+          "text": "Need an informational review of an iPhone record? Share only non-sensitive details. Provider eligibility, timing, availability, and outcome are not guaranteed.",
+          "href": "/contact",
+          "label": "Ask about an informational review"
+        }
+      ],
+      "faq": [
+        {
+          "question": "What is the current US Mobile iPhone unlock period?",
+          "answer": "The public US Mobile pages reviewed for this update do not state one universal period for every iPhone. Check the specific listing, transaction materials, supplemental device terms, account record, and current US Mobile support response instead of relying on a fixed number."
+        },
+        {
+          "question": "Who should unlock a BYOD iPhone used with US Mobile?",
+          "answer": "If the iPhone was bought from another carrier and remains locked, US Mobile’s troubleshooting guidance points to the previous carrier’s unlocking process. US Mobile cannot be assumed to control a lock it did not place."
+        },
+        {
+          "question": "How can I confirm that an iPhone is carrier-unlocked?",
+          "answer": "Open Settings > General > About and check Carrier Lock. Apple says “No SIM restrictions” means the iPhone is unlocked. The target provider must still confirm compatibility and service provisioning."
+        },
+        {
+          "question": "Can I use a travel eSIM before an iPhone unlocks?",
+          "answer": "Apple says an iPhone must not be carrier-locked to use another carrier while traveling. Roaming with the existing carrier is a separate option and depends on the plan, destination, coverage, and current terms."
+        },
+        {
+          "question": "Can a carrier unlock remove Activation Lock, a SIM PIN, or MDM?",
+          "answer": "No. Carrier unlocking addresses the Carrier Lock only. Activation Lock requires the previous owner’s Apple Account action, a SIM PIN or PUK issue goes to the SIM issuer, and MDM is controlled by the organization that enrolled the device."
+        },
+        {
+          "question": "Will an unlocked iPhone work on every network?",
+          "answer": "No guarantee follows from the unlock alone. FCC guidance says technological compatibility and feature support still depend on the device and target provider. Confirm compatibility, bands, features, and provisioning before switching."
+        }
+      ]
+    },
+  {
+      "slug": "c-spire-iphone-unlock-policy-guide",
+      "title": "C Spire iPhone Unlock Policy",
+      "heading": "C Spire iPhone Unlock: Postpaid or No-Contract?",
+      "description": "Learn C Spire iPhone unlock eligibility for postpaid and no-contract devices, request steps, records to check, and limits after approval.",
+      "standfirst": "C Spire's published policy sets different conditions for postpaid, no-contract, and deployed-personnel devices; another carrier must unlock its own device.",
+      "published": "2026-10-02",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "C Spire iPhone unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A C Spire iPhone unlock is a carrier-level request, not a way to remove every iPhone restriction. C Spire's published Device Locking Policy applies to devices that C Spire sold and requires a valid request plus the applicable conditions; an iPhone sold and locked by another carrier must be handled by that carrier.",
+          "links": [
+            {
+              "label": "Read C Spire's published Device Locking Policy",
+              "href": "https://www.cspire.com/web/legal/terms-of-use.html"
+            },
+            {
+              "label": "See Apple's carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "C Spire's postpaid route requires at least 30 days of activation, including at least 15 days on the line requesting the unlock.",
+            "The no-contract route requires at least nine paid service cycles and at least 15 days on the number requesting the unlock.",
+            "The ordinary routes require a C Spire-sold device that is not reported lost, stolen, or associated with fraud.",
+            "A postpaid device must have no outstanding Retail Installment Sales Agreement or Promotional Offer Contract obligation, and the account must be in good standing with no past-due balance.",
+            "Unlocking does not cancel financial obligations or guarantee interoperability with another carrier's network."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "choose-policy-route",
+          "text": "Choose the C Spire policy route before requesting"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device category",
+            "Published activity requirement",
+            "Other central conditions"
+          ],
+          "rows": [
+            [
+              "Postpaid C Spire device",
+              "At least 30 days activated; at least 15 days on the requesting line",
+              "Good standing, no past-due balance, and no outstanding device or promotional-contract obligation"
+            ],
+            [
+              "No-contract C Spire device",
+              "At least nine paid service cycles; at least 15 days on the requesting number",
+              "C Spire-sold and not reported lost, stolen, or associated with fraud"
+            ],
+            [
+              "Deployed-personnel C Spire device",
+              "Separate policy category; the ordinary activity clock is not stated as its requirement",
+              "Good standing with no past-due balance; deployment papers upon request; deployment outside C Spire's operational footprint"
+            ],
+            [
+              "Device sold or locked by another carrier",
+              "C Spire's policy does not control it",
+              "Request the unlock from the carrier that applied the lock"
+            ],
+            [
+              "Replacement or swapped device",
+              "No separate replacement rule is stated in the policy",
+              "Ask C Spire which device and account record it will assess; do not assume prior activity transfers"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "C Spire reserves the right to request proof of purchase. For a consumer account, the request must come from the account holder or an authorized user on the same account. Business and government requests must come from an individual authorized on the same account. The policy lists a self-service method and a local C Spire retail location as request routes.",
+          "links": [
+            {
+              "label": "Verify C Spire's requester and request-route clauses",
+              "href": "https://www.cspire.com/web/legal/terms-of-use.html"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "postpaid-route",
+          "text": "Check postpaid eligibility condition by condition"
+        },
+        {
+          "kind": "h3",
+          "id": "activity-and-line",
+          "text": "Activation and requesting-line history"
+        },
+        {
+          "kind": "p",
+          "text": "C Spire's published postpaid requirement is at least 30 days of activation, with at least 15 of those days on the line requesting the unlock. The policy does not explain how a transferred line, replacement, or device swap affects that clock, so confirm the record for the specific device instead of treating the purchase date as proof of eligibility.",
+          "links": [
+            {
+              "label": "Review the postpaid requirements in C Spire's policy",
+              "href": "https://www.cspire.com/web/legal/terms-of-use.html"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "financial-record",
+          "text": "Account and device obligations"
+        },
+        {
+          "kind": "p",
+          "text": "The postpaid route requires good standing with no past-due balance and no outstanding Retail Installment Sales Agreement or Promotional Offer Contract obligation associated with the device. Paying a bill and completing a device obligation are separate checks in the policy, so confirm both before submitting a request.",
+          "links": [
+            {
+              "label": "Check the live financial conditions",
+              "href": "https://www.cspire.com/web/legal/terms-of-use.html"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "no-contract-route",
+          "text": "Use paid service cycles for a no-contract device"
+        },
+        {
+          "kind": "p",
+          "text": "For a no-contract device, C Spire's published requirement is at least nine paid service cycles on a line and at least 15 days on the number requesting the unlock. Count the paid service record rather than estimating from the receipt date. The device must also have been sold by C Spire and not be reported lost, stolen, or associated with fraud.",
+          "links": [
+            {
+              "label": "Review the no-contract policy language",
+              "href": "https://www.cspire.com/web/legal/terms-of-use.html"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Nine paid service cycles is not interchangeable with nine calendar months. Ask C Spire which completed cycles and requesting-number days are recorded for the specific device."
+        },
+        {
+          "kind": "h2",
+          "id": "deployed-personnel-route",
+          "text": "Check the deployed-personnel route separately"
+        },
+        {
+          "kind": "p",
+          "text": "C Spire lists a separate deployed-personnel category. Its stated conditions include a C Spire-sold device that is not reported lost, stolen, or associated with fraud, an account in good standing with no past-due balance, deployment papers upon request, and deployment outside C Spire's operational footprint. The policy does not make this a general waiver of the other policy categories.",
+          "links": [
+            {
+              "label": "Read the deployed-personnel conditions",
+              "href": "https://www.cspire.com/web/legal/terms-of-use.html"
+            },
+            {
+              "label": "Compare the FCC's provider-policy overview",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "submit-and-verify",
+          "text": "Submit the request and verify completion"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings, General, and About; record the IMEI and current Carrier Lock result without posting the full IMEI publicly.",
+            "Confirm whether C Spire classifies the device as postpaid, no-contract, or deployed-personnel under its published policy.",
+            "Collect any purchase proof C Spire requests, the relevant activity history, account-standing information, and evidence about device obligations or deployment papers when applicable.",
+            "Use C Spire's self-service request route or a local C Spire retail location as an authorized requester.",
+            "After C Spire confirms completion, restart the iPhone if needed and check Carrier Lock again."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "C Spire's help article directs owners of C Spire devices to its policy and online request route, which asks for the device IMEI. Apple says only the carrier can unlock an iPhone and notes that carrier processing may take a few days, so this article does not promise a completion time. An unlocked iPhone may still not work on another network because compatibility, the receiving carrier's policies, and device-management capabilities can differ.",
+          "links": [
+            {
+              "label": "Follow C Spire's current unlock instructions",
+              "href": "https://www.cspire.com/web/help/wireless/everything-you-need-to-know-about-unlocking-your-phone"
+            },
+            {
+              "label": "Open C Spire's device-unlock status route",
+              "href": "https://www.cspire.com/wireless/apps/device-unlock"
+            },
+            {
+              "label": "Check Apple's completion guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Troubleshoot an unlocked iPhone with no service",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-locks",
+          "text": "Do not route every iPhone restriction to C Spire"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or issue",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock restriction",
+              "Which carrier networks may activate the iPhone",
+              "The carrier that applied the lock"
+            ],
+            [
+              "Activation Lock or iPhone Locked to Owner",
+              "Apple Account/Find My ownership and activation",
+              "The previous owner, the owning organization, or Apple's documented support process"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to one SIM or eSIM profile for calls and cellular data",
+              "The carrier that issued the SIM or eSIM"
+            ],
+            [
+              "Forgotten passcode",
+              "Local access to the iPhone",
+              "Apple's passcode-reset process; resetting the device can erase its data"
+            ],
+            [
+              "MDM or organization management",
+              "Organization-imposed device settings, restrictions, or management actions",
+              "The owning organization's IT/admin team or its device-management service"
+            ],
+            [
+              "Carrier lost, stolen, or fraud record",
+              "Whether the carrier's policy will accept an unlock request",
+              "The carrier or reporting organization; do not assume a report can be removed"
+            ],
+            [
+              "No SIM restrictions but activation fails",
+              "Compatibility or destination-carrier provisioning",
+              "The new carrier's support team"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock, Activation Lock, SIM security, and MDM are different controls. Apple says Activation Lock is tied to an Apple Account and Find My, while organization-owned devices can be managed through Apple Business or Apple School Manager and a device-management service. A carrier unlock is not an Activation Lock, SIM-PIN, passcode, or MDM bypass; the responsible owner, carrier, or organization must use its own documented process.",
+          "links": [
+            {
+              "label": "Read Apple's Activation Lock removal steps",
+              "href": "https://support.apple.com/en-us/108934"
+            },
+            {
+              "label": "Read Apple's organization-management guidance",
+              "href": "https://support.apple.com/guide/deployment/activation-lock-depf4ab94ef1/web"
+            },
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/HT201529"
+            },
+            {
+              "label": "Read Apple's device-management restrictions guidance",
+              "href": "https://support.apple.com/guide/deployment/restrictions-for-iphone-and-ipad-dep0f7dd3d/web"
+            },
+            {
+              "label": "Read Apple's passcode-reset guidance",
+              "href": "https://support.apple.com/en-us/118430"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Have the C Spire account type, activity record, and Carrier Lock result? Send non-sensitive details so we can explain which policy route to verify. No unlock approval or Provider availability is promised.",
+          "href": "/contact",
+          "label": "Ask about C Spire policy checks"
+        }
+      ],
+      "faq": [
+        {
+          "question": "How long must a postpaid C Spire iPhone be active?",
+          "answer": "C Spire's published policy requires at least 30 days of activation, including at least 15 days on the line requesting the unlock, plus the account, device, and financial conditions that apply."
+        },
+        {
+          "question": "When is a no-contract C Spire device eligible?",
+          "answer": "C Spire publishes a requirement of at least nine paid service cycles and at least 15 days on the number requesting the unlock. The device must also meet the policy's C Spire-sale and lost, stolen, and fraud-record conditions."
+        },
+        {
+          "question": "Who can submit a C Spire unlock request?",
+          "answer": "For a consumer account, the account holder or an authorized user on the same account may request it. Business and government requests require an individual authorized on the same account."
+        },
+        {
+          "question": "Does a C Spire unlock cancel the remaining device balance?",
+          "answer": "No. C Spire's policy says unlocking does not release the end user from financial obligations associated with the device or account."
+        },
+        {
+          "question": "How do I confirm that the C Spire iPhone is unlocked?",
+          "answer": "Open Settings, General, About, and find Carrier Lock. Apple's documented result is No SIM restrictions. That result confirms the carrier-lock state, not compatibility with every network or removal of another restriction."
+        },
+        {
+          "question": "Can a C Spire unlock remove Activation Lock or MDM?",
+          "answer": "No. Carrier unlocking addresses Carrier Lock. Activation Lock and organization-managed controls require the previous owner, owning organization, IT/admin team, or the applicable Apple-supported process."
+        }
+      ]
+    },
+  {
+      "slug": "assurance-wireless-iphone-unlock-policy",
+      "title": "Assurance Wireless iPhone Unlock",
+      "heading": "Assurance Wireless iPhone Unlock: Eligibility and BYOD Guide",
+      "description": "Check Assurance Wireless iPhone unlock eligibility, BYOD compatibility, Carrier Lock status, and the limits of switching networks.",
+      "standfirst": "Assurance Wireless publishes one route for devices it supplied and another for phones brought from a previous carrier. This guide separates carrier eligibility from Apple account, SIM, and device-management locks.",
+      "published": "2026-10-01",
+      "updated": "2026-10-20",
+      "minutes": 9,
+      "topic": "Assurance Wireless iPhone unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "An Assurance Wireless iPhone unlock depends first on who supplied the device. Assurance Wireless says a phone locked by a different carrier must be handled by the original carrier. For a device Assurance Wireless provided, its published policy describes eligibility as requiring at least 12 months of activity, no lost-or-stolen or other ineligible flag, and no abuse or fraud. The policy is not a promise that a particular iPhone qualifies or that another carrier will accept it.",
+          "links": [
+            {
+              "label": "Read Assurance Wireless's current unlocking policy",
+              "href": "https://www.assurancewireless.com/help-center/our-plans-and-phones/our-phones/how-do-i-unlock-my-phone"
+            },
+            {
+              "label": "Read the FCC's explanation of unlocking and compatibility",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The 12-month requirement is Assurance Wireless's stated rule for an eligible device it provided, not a universal iPhone rule.",
+            "A BYOD iPhone locked by another carrier must be handled by the carrier that controls the lock.",
+            "Assurance Wireless says an eligible supported device may be unlocked remotely; if remote unlocking is not supported, it sends a notification with next steps.",
+            "Lifeline eligibility, BYOD compatibility, Carrier Lock, Activation Lock, SIM PIN or PUK, and MDM are separate checks.",
+            "On an iPhone, No SIM restrictions beside Carrier Lock is Apple's status check for carrier unlocking; it does not promise compatibility or activation on a particular destination network."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "choose-device-route",
+          "text": "Choose the route that matches the iPhone record"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "How you obtained the iPhone",
+            "Who controls the carrier-unlock route",
+            "Useful evidence to check first"
+          ],
+          "rows": [
+            [
+              "Provided by Assurance Wireless",
+              "Assurance Wireless policy and device record",
+              "Supply record, activation history, and current device status"
+            ],
+            [
+              "Brought from another carrier",
+              "The original carrier that locked it",
+              "Carrier Lock status, account eligibility, and purchase or service records"
+            ],
+            [
+              "Purchased second-hand",
+              "The original carrier for Carrier Lock; the seller for ownership records",
+              "Carrier Lock status, proof of purchase, and Activation Lock readiness"
+            ],
+            [
+              "Received as a replacement",
+              "The carrier that supplied or controls the replacement record",
+              "Replacement documentation and the current device status"
+            ],
+            [
+              "Already described as unlocked",
+              "No carrier-unlock request is established by the description alone",
+              "Settings > General > About and the destination carrier's compatibility check"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Assurance Wireless's BYOD page says its compatibility check does not show whether a phone is locked. It requires an unlocked, compatible device and a new SIM or eSIM, and it warns that some services or features may not work. Passing the IMEI compatibility check therefore does not prove that an iPhone has been carrier-unlocked or will activate with every feature.",
+          "links": [
+            {
+              "label": "Review Assurance Wireless BYOD requirements",
+              "href": "https://www.assurancewireless.com/byod"
+            },
+            {
+              "label": "Review Assurance Wireless phone options",
+              "href": "https://www.assurancewireless.com/help-center/our-plans-and-phones/our-phones/what-are-my-phone-options"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "eligibility-rule",
+          "text": "Check the current Assurance Wireless eligibility rule"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "The device must have been provided by Assurance Wireless.",
+            "The device must not have been reported lost or stolen or otherwise flagged as ineligible to be unlocked.",
+            "The device must have been active for at least 12 months.",
+            "Assurance Wireless may refuse a request connected with abuse of the policy or an effort to defraud the company or its customers.",
+            "The linked policy describes eligible Assurance Wireless unlocks as free of charge; it does not set the price or terms of unrelated services."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "These are the criteria Assurance Wireless publishes for its supplied devices. The carrier also says its policies may change without advance notice, so check the live policy and the exact device record before relying on a waiting period or eligibility conclusion.",
+          "links": [
+            {
+              "label": "Verify the live Assurance Wireless eligibility wording",
+              "href": "https://www.assurancewireless.com/help-center/our-plans-and-phones/our-phones/how-do-i-unlock-my-phone"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Twelve months of activity is not a universal iPhone rule. It is the current Assurance Wireless policy for an eligible device that Assurance Wireless provided, subject to the policy's other conditions and later changes."
+        },
+        {
+          "kind": "h3",
+          "id": "military-exception",
+          "text": "Military exception"
+        },
+        {
+          "kind": "p",
+          "text": "Assurance Wireless's policy says deployed military personnel who are customers in good standing can request an unlock after providing deployment papers. The policy directs customers to the carrier for the required details; this article does not assume that an individual request will be approved.",
+          "links": [
+            {
+              "label": "Read the policy's military-exception section",
+              "href": "https://www.assurancewireless.com/help-center/our-plans-and-phones/our-phones/how-do-i-unlock-my-phone"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "automatic-process",
+          "text": "Understand the automatic and notification paths"
+        },
+        {
+          "kind": "p",
+          "text": "Assurance Wireless states that, once a device becomes eligible, it will automatically and remotely unlock a device that supports remote unlocking within two business days. If remote unlocking is not supported, the carrier says it sends a notification within two business days with steps to complete the process. Those are the carrier's published process timings, not a guarantee of eligibility, completion, or service on another network. Do not download an Android unlock app or guess an unlock code for an iPhone; follow the carrier's instructions instead.",
+          "links": [
+            {
+              "label": "Check Assurance Wireless's published completion process",
+              "href": "https://www.assurancewireless.com/help-center/our-plans-and-phones/our-phones/how-do-i-unlock-my-phone"
+            },
+            {
+              "label": "Compare software claims with carrier authorization",
+              "href": "/articles/iphone-carrier-unlock-software-jailbreak-guide"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "prepare-records",
+          "text": "Prepare the record before contacting support"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Record",
+            "Why it helps"
+          ],
+          "rows": [
+            [
+              "Current IMEI or IMEI2",
+              "Identifies the specific device record without publishing the identifier"
+            ],
+            [
+              "Assurance order or issue record",
+              "Helps show whether Assurance Wireless supplied the device"
+            ],
+            [
+              "Activation and service history",
+              "Helps compare the device record with the published activity requirement"
+            ],
+            [
+              "Replacement documentation",
+              "Helps connect the current device to the relevant carrier record"
+            ],
+            [
+              "Eligibility notification or denial",
+              "Preserves the carrier's stated next step or reason for ineligibility"
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-iphone",
+          "text": "Verify the result on the iPhone"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Wait for the carrier to confirm eligibility or completion through its published support route.",
+            "On the iPhone, open Settings, then General, then About.",
+            "Find Carrier Lock.",
+            "Apple says No SIM restrictions means the iPhone is carrier-unlocked.",
+            "If the restriction remains, contact the carrier that controls the device record rather than treating a compatibility result as an unlock confirmation.",
+            "If the iPhone is unlocked but the destination carrier will not activate it, ask that destination carrier about compatibility, provisioning, and supported features."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the carrier can unlock an iPhone. After the carrier confirms the unlock, a different carrier's SIM can be inserted to activate the device. If no other SIM is available, Apple describes a backup, erase, and restore path. Erasing the iPhone does not create carrier eligibility, remove a carrier's lost-or-stolen flag, or make an incompatible network accept the device.",
+          "links": [
+            {
+              "label": "Follow Apple's current carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC's current consumer guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-locks",
+          "text": "Do not confuse Carrier Lock with other restrictions"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or issue",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock restriction",
+              "Whether the iPhone can attempt activation with another carrier",
+              "The carrier that controls the device's network-lock record"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to the SIM card or eSIM profile after a SIM security lock",
+              "The carrier that issued the SIM or eSIM; do not guess the code"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock and the previous owner's Apple Account relationship",
+              "The previous owner or Apple's documented Activation Lock process"
+            ],
+            [
+              "MDM or supervised-device profile",
+              "Organization-controlled settings, restrictions, configurations, or remote management",
+              "The owning school, employer, or other administrator"
+            ],
+            [
+              "Lost, stolen, or other ineligible device flag",
+              "Carrier eligibility or network-service decisions separate from Carrier Lock",
+              "The organization or carrier that placed the flag; this article does not promise removal"
+            ],
+            [
+              "No SIM restrictions but no service",
+              "Destination compatibility, account, provisioning, coverage, or feature support",
+              "The destination carrier's support and compatibility process"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple explains that a SIM PIN protects the SIM or eSIM and that the issuing carrier handles an unknown PIN or PUK. Apple separately describes Activation Lock as an Apple Account ownership control, while device management can apply organization profiles, restrictions, and commands. None of those routes is a substitute for the carrier that controls Carrier Lock.",
+          "links": [
+            {
+              "label": "Read Apple's SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Read Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple's device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "third-party-limits",
+          "text": "What a third party cannot promise"
+        },
+        {
+          "kind": "p",
+          "text": "A third party may help organize evidence such as a device identifier and purchase records, but it has no demonstrated authority in the cited policies to approve an Assurance Wireless unlock, remove Activation Lock, release an organization-managed device, or erase a lost-or-stolen flag. Do not treat a guaranteed-unlock, guaranteed-blacklist-removal, or guaranteed-destination-service claim as established by these sources.",
+          "links": [
+            {
+              "label": "Use the iPhone unlock-service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            },
+            {
+              "label": "Compare Carrier Lock with SIM PIN and PUK",
+              "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+            },
+            {
+              "label": "Review Apple's supervised-device guidance",
+              "href": "https://support.apple.com/en-us/102291"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help identifying whether Assurance Wireless or a previous carrier controls the iPhone record?",
+          "href": "/contact",
+          "label": "Contact iUnlockMobile"
+        }
+      ],
+      "faq": [
+        {
+          "question": "How long must an Assurance Wireless phone be active before unlocking?",
+          "answer": "Assurance Wireless's current published policy says an eligible device it provided must have been active for at least 12 months. The carrier says its policies can change, so this is not a universal iPhone rule or a conclusion that a particular device qualifies."
+        },
+        {
+          "question": "Can Assurance Wireless unlock an iPhone from another carrier?",
+          "answer": "Assurance Wireless directs a phone locked by another carrier back to the original carrier. Assurance Wireless's own supplied-device criteria do not turn a BYOD phone into an Assurance Wireless unlock request."
+        },
+        {
+          "question": "Does passing the Assurance Wireless compatibility check mean an iPhone is unlocked?",
+          "answer": "No. Assurance Wireless says its compatibility check does not indicate whether a phone is locked. A BYOD phone must be unlocked and compatible, and some services or features may still not work."
+        },
+        {
+          "question": "Will an unlocked Assurance Wireless iPhone definitely work on another carrier?",
+          "answer": "No. Assurance Wireless makes no guarantee that an unlocked device will work on another carrier. The destination carrier decides whether it will accept and activate the device, and compatibility or feature support may be incomplete."
+        },
+        {
+          "question": "Will an eligible Assurance Wireless iPhone unlock automatically?",
+          "answer": "Assurance Wireless says a supported eligible device is remotely unlocked within two business days, while a device that cannot be remotely unlocked receives a notification with next steps within two business days. That is the carrier's stated process, not a guarantee of eligibility or outcome."
+        },
+        {
+          "question": "How do I confirm that the iPhone carrier unlock is complete?",
+          "answer": "Open Settings, General, About, and check Carrier Lock. Apple says No SIM restrictions means the iPhone is carrier-unlocked. A separate destination-carrier compatibility or activation problem can still remain."
+        },
+        {
+          "question": "What if the iPhone says iPhone Locked to Owner?",
+          "answer": "That is Activation Lock, not Carrier Lock. Apple says the previous owner must remove the device from their Apple Account or follow Apple's documented process; a carrier unlock does not transfer ownership."
+        }
+      ]
+    },
+  {
+      "slug": "airtalk-wireless-iphone-unlock-policy",
+      "title": "AirTalk Wireless iPhone Unlock",
+      "heading": "AirTalk Wireless iPhone Unlock: What the Current Terms Allow",
+      "description": "Understand AirTalk Wireless iPhone unlock terms, the 180-day MDM distinction, BYOD checks, and how to separate carrier lock from other iPhone locks.",
+      "standfirst": "AirTalk’s general Terms & Conditions say it does not provide unlocking services for Devices obtained through its Service. Separate Device Terms describe 180 consecutive days for ownership and MDM controls, not a guaranteed carrier unlock.",
+      "published": "2026-10-01",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "AirTalk Wireless iPhone unlock",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "AirTalk’s current general Terms & Conditions say Devices provided through its Service are locked to operate exclusively on the AirTalk Wireless network and that AirTalk does not provide unlocking services for Devices obtained through its Service. Separate Device Terms may apply to a subsidized or Managed Device: they describe ownership and device-management rules, but they do not promise a carrier unlock. Check the terms tied to the exact order before relying on any eligibility assumption.",
+          "links": [
+            {
+              "label": "Read AirTalk’s current Terms & Conditions",
+              "href": "https://airtalkwireless.com/terms-conditions"
+            },
+            {
+              "label": "Read AirTalk’s separate Device Terms",
+              "href": "https://airtalkwireless.com/device-terms"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "AirTalk’s general Terms & Conditions say AirTalk-supplied Devices are restricted to the AirTalk Wireless network and that AirTalk does not provide an unlocking service for those Devices.",
+            "The separate Device Terms describe 180 consecutive days for ownership and applicable MDM removal on certain Devices; they do not turn that period into a guaranteed carrier unlock.",
+            "AirTalk’s BYOD route requires a customer-owned phone to be unlocked and compatible, and its checker does not assure every feature or service will work.",
+            "Carrier Lock, MDM, Activation Lock, SIM PIN or PUK, and a forgotten passcode are different controls with different owners and remedies.",
+            "Do not pay a third party that promises a guaranteed bypass, blacklist removal, or network result that the current terms do not support."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "identify-device-source",
+          "text": "Identify Where the iPhone Came From"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device source",
+            "Published starting point",
+            "What to verify"
+          ],
+          "rows": [
+            [
+              "Obtained through an AirTalk service offer",
+              "AirTalk Terms & Conditions and any order-specific Device Terms",
+              "Whether the order identifies a Managed Device and which restrictions apply"
+            ],
+            [
+              "Brought to AirTalk from another carrier",
+              "The original carrier’s policy",
+              "Purchase or payment records and the iPhone’s Carrier Lock status"
+            ],
+            [
+              "Purchased unlocked from Apple or a retailer",
+              "The seller’s sale terms and Apple’s status check",
+              "Invoice, return deadline, and No SIM restrictions"
+            ],
+            [
+              "Bought second-hand",
+              "The seller and the original carrier",
+              "Carrier Lock, Activation Lock, proof of sale, and the return deadline"
+            ],
+            [
+              "Received as a replacement",
+              "The issuer of the replacement and its case record",
+              "The replacement device’s status rather than assuming the old device’s status"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "The AirTalk SIM or eSIM currently in an iPhone does not replace the device-source and status checks. Start with the purchase or replacement record, then read Settings > General > About. Use AirTalk’s BYOD page only for the compatibility question; it is not evidence that AirTalk has authorized an unlock.",
+          "links": [
+            {
+              "label": "Review AirTalk’s BYOD requirements",
+              "href": "https://airtalkwireless.com/products/byod"
+            },
+            {
+              "label": "Follow Apple’s carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "read-current-policy",
+          "text": "Read the AirTalk Policy Literally"
+        },
+        {
+          "kind": "p",
+          "text": "AirTalk’s general Terms & Conditions state that AirTalk Wireless Devices provided with Service plans are locked to operate exclusively on the AirTalk Wireless network. The same section says AirTalk does not provide unlocking services for Devices obtained through its Service, treats resale, unlocking, or reflashing as unauthorized uses, and does not guarantee functionality on another network even if a device is unlocked by a third party.",
+          "links": [
+            {
+              "label": "Verify AirTalk’s device and unlocking clauses",
+              "href": "https://airtalkwireless.com/terms-conditions"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "AirTalk’s separate Device Terms say that eligible subsidized Devices require 180 consecutive days of active AirTalk service for ownership to transfer. For a Managed Device, completing that requirement can remove device-management controls subject to technical feasibility and applicable law. The terms also say that a settlement payment covers only MDM removal and does not guarantee another network or remove a Carrier Lock.",
+          "links": [
+            {
+              "label": "Check the current AirTalk Device Terms",
+              "href": "https://airtalkwireless.com/device-terms"
+            }
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Policy scope: AirTalk’s 180-day rule concerns ownership, subsidy, and—where applicable—MDM controls. It is not an AirTalk promise to carrier-unlock an iPhone. An exact order may have terms that control the device, so do not substitute a general waiting-period claim for those terms."
+        },
+        {
+          "kind": "h3",
+          "id": "when-seller-promised-unlocked",
+          "text": "If a Listing or Seller Promised an Unlocked iPhone"
+        },
+        {
+          "kind": "p",
+          "text": "Keep the listing, receipt, order confirmation, device-source record, and return deadline. Ask the seller or original carrier to address any mismatch in writing. A report or compatibility result can help organize the question, but it is not carrier authorization and does not promise blacklist removal.",
+          "links": [
+            {
+              "label": "See the locked-iPhone sale checklist",
+              "href": "/articles/sell-locked-iphone-carrier-lock-checklist"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "byod-path",
+          "text": "Use BYOD as a Separate Path"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Confirm that the iPhone was purchased independently rather than obtained through an AirTalk device offer.",
+            "Open Settings, choose General, then About, and find Carrier Lock.",
+            "If a Carrier Lock restriction remains, contact the current carrier that controls the device record; Apple says Apple cannot unlock an iPhone for another carrier.",
+            "After that carrier confirms an unlock, check that Carrier Lock shows No SIM restrictions.",
+            "Run AirTalk’s BYOD compatibility check before activation, while remembering that the result does not assure all Voice, SMS, MMS, Data, or other features and services."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "AirTalk’s BYOD requirement and Apple’s Carrier Lock field answer different questions. BYOD asks whether AirTalk’s network can support the submitted device; No SIM restrictions indicates that the iPhone is not carrier-locked. Neither check is a promise that every AirTalk feature, service, coverage area, or activation outcome will be available.",
+          "links": [
+            {
+              "label": "Open AirTalk’s official BYOD checker",
+              "href": "https://airtalkwireless.com/products/byod"
+            },
+            {
+              "label": "Read Apple’s current unlock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "already-unlocked-no-service",
+          "text": "Already Unlocked but Unable to Use AirTalk Service?"
+        },
+        {
+          "kind": "p",
+          "text": "If Carrier Lock shows No SIM restrictions but AirTalk service does not work as expected, treat that as a compatibility, activation, provisioning, or service-support question rather than proof of a Carrier Lock. AirTalk expressly warns that its compatibility verification does not assure all features and services. Use the BYOD result and AirTalk support, and do not infer a guaranteed service outcome from the unlocked label.",
+          "links": [
+            {
+              "label": "Review AirTalk’s compatibility limitation",
+              "href": "https://airtalkwireless.com/products/byod"
+            },
+            {
+              "label": "Contact AirTalk support",
+              "href": "/contact"
+            },
+            {
+              "label": "Read the unlocked-but-no-service troubleshooting guide",
+              "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-status",
+          "text": "Verify Status Before Paying Anyone"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings on the iPhone.",
+            "Select General, then About.",
+            "Find Carrier Lock.",
+            "No SIM restrictions means the iPhone is carrier-unlocked according to Apple’s status check.",
+            "If a restriction remains, identify the current carrier and ask that carrier about the device record and its own eligibility rules.",
+            "Keep any screenshot or record free of personal data and do not publish an unmasked device identifier."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the current carrier can unlock an iPhone. If that carrier confirms the unlock and there is no other SIM to use, Apple documents backup, erase, and restore as a post-approval activation path in the circumstances it describes. A factory reset, jailbreak, downloaded app, or SIM adapter is not a substitute for carrier authorization.",
+          "links": [
+            {
+              "label": "Read Apple’s official carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Review the iPhone software and jailbreak guide",
+              "href": "/articles/iphone-carrier-unlock-software-jailbreak-guide"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "The FCC explains that unlocking removes software that prevents an attempt to activate a phone on another provider, but unlocking alone does not make networks technologically compatible. Its consumer guide also summarizes CTIA standards for participating providers; that general information is not proof that AirTalk will unlock a particular Device. Apply AirTalk’s current terms and the original carrier’s own policy to the exact device.",
+          "links": [
+            {
+              "label": "Read the FCC consumer guide to cell-phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Read the CTIA Consumer Code",
+              "href": "https://www.ctia.org/the-wireless-industry/industry-commitments/consumer-code-for-wireless-service"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-locks",
+          "text": "Separate the Different iPhone Locks"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Message or issue",
+            "What it controls",
+            "Correct route"
+          ],
+          "rows": [
+            [
+              "Carrier Lock",
+              "Whether the iPhone may be activated with another carrier’s SIM or eSIM",
+              "The current carrier controlling the device record"
+            ],
+            [
+              "SIM PIN or PUK",
+              "Access to the specific SIM card or eSIM profile",
+              "The carrier that issued that SIM or eSIM"
+            ],
+            [
+              "Forgotten passcode",
+              "Local access to the iPhone",
+              "Apple’s documented reset process, which erases device data"
+            ],
+            [
+              "iPhone Locked to Owner",
+              "Activation Lock linked to the previous owner’s Apple Account and Find My",
+              "The previous owner’s account or Apple’s documented ownership process"
+            ],
+            [
+              "MDM or device-management restriction",
+              "Administrator controls such as configuration, reset, or other managed-device restrictions",
+              "The organization or authorized MDM administrator under the applicable Device Terms"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN or PUK request does not unlock the iPhone from a carrier. Apple says the carrier that supplied the SIM or eSIM handles the SIM PIN or PUK, while its Carrier Lock check is in Settings > General > About. These are separate paths even when both produce a message containing the word “lock.”",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN and PUK guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            },
+            {
+              "label": "Compare carrier lock with SIM PIN and PUK",
+              "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is also different: Apple says Find My links the device to an Apple Account and the previous account password is required to turn off Find My, erase, or reactivate it. MDM is different again: Apple describes device-management restrictions for enrolled and, in some cases, supervised devices, while AirTalk’s Device Terms describe MDM controls for identified Managed Devices. None of these controls is a carrier unlock.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple’s device-management restrictions",
+              "href": "https://support.apple.com/guide/deployment/restrictions-for-iphone-and-ipad-dep0f7dd3d8/web"
+            },
+            {
+              "label": "Review AirTalk’s MDM terms",
+              "href": "https://airtalkwireless.com/device-terms"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "third-party-limits",
+          "text": "What a Third Party Can and Cannot Do"
+        },
+        {
+          "kind": "p",
+          "text": "A third party may help organize purchase records or explain what a report says. This review found no official AirTalk source granting a third party authority to change Carrier Lock, remove Activation Lock, remove an AirTalk blacklist, or make another network accept the device. Verify any promised capability against the carrier’s written response, and treat an IMEI or compatibility report as information rather than an unlock.",
+          "links": [
+            {
+              "label": "Use the complete unlock-service checklist",
+              "href": "/articles/imei-unlock-iphone-service-checklist"
+            },
+            {
+              "label": "Read AirTalk’s no-unlocking terms",
+              "href": "https://airtalkwireless.com/terms-conditions"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "practical-next-steps",
+          "text": "Practical Next Steps"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Identify whether the iPhone was AirTalk-supplied, customer-owned BYOD, replacement hardware, or second-hand.",
+            "Read the current AirTalk terms and the terms tied to the exact order, including whether the device is identified as Managed.",
+            "Check Settings > General > About > Carrier Lock and record only the result, not an unmasked personal device identifier.",
+            "For a remaining Carrier Lock, contact the carrier controlling the record; for Activation Lock, involve the previous Apple Account owner; for SIM PIN or PUK, contact the SIM or eSIM issuer.",
+            "For an independently owned phone, use AirTalk’s BYOD checker and keep its feature and service limitations in mind.",
+            "Do not treat payment, a reset, or a third-party promise as a guaranteed unlock or blacklist removal."
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help checking whether an iPhone is AirTalk-supplied, BYOD, or controlled by another carrier?",
+          "href": "/contact",
+          "label": "Contact iUnlockMobile"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Does AirTalk Wireless unlock iPhones obtained through its Service?",
+          "answer": "AirTalk’s general Terms & Conditions say it does not provide unlocking services for Devices obtained through its Service and that those Devices are intended for AirTalk service. Separate Device Terms do not change that into a guaranteed carrier-unlock promise."
+        },
+        {
+          "question": "Is there an AirTalk Wireless waiting period for an iPhone carrier unlock?",
+          "answer": "The general Terms & Conditions do not state a waiting period that guarantees an AirTalk carrier unlock. The separate Device Terms describe 180 consecutive days for ownership and applicable MDM controls on certain Devices, while stating that settlement or MDM removal does not guarantee another network or remove a Carrier Lock."
+        },
+        {
+          "question": "Can I bring an unlocked iPhone to AirTalk Wireless?",
+          "answer": "AirTalk’s BYOD page says your own phone needs to be unlocked and asks you to check compatibility. AirTalk also says the check does not assure all Voice, SMS, MMS, Data, or other features and services."
+        },
+        {
+          "question": "Does paying the remaining device subsidy unlock an AirTalk iPhone?",
+          "answer": "Not according to the current Device Terms. The settlement language says payment covers only MDM restrictions and does not guarantee compatibility with another network or remove a Carrier Lock."
+        },
+        {
+          "question": "How do I check whether an iPhone is carrier-unlocked?",
+          "answer": "Open Settings, tap General, then About, and look at Carrier Lock. Apple says No SIM restrictions means the iPhone is unlocked. That result does not guarantee AirTalk compatibility or every service feature."
+        },
+        {
+          "question": "Is Activation Lock the same as Carrier Lock?",
+          "answer": "No. Carrier Lock concerns carrier activation. Activation Lock links the iPhone to an Apple Account through Find My and requires the previous owner’s account action or Apple’s documented process. A SIM PIN or PUK and an MDM restriction are separate as well."
+        },
+        {
+          "question": "Can a third-party service guarantee an AirTalk bypass or blacklist removal?",
+          "answer": "No official AirTalk source reviewed here grants third parties authority to change Carrier Lock, remove Activation Lock, remove a blacklist, or guarantee another network will accept the device. Do not treat an IMEI report, reset, jailbreak, or payment as carrier authorization."
+        }
+      ]
+    },
+  {
+      "slug": "puretalk-unlock-policy-iphone-guide",
+      "title": "PureTalk Unlock Policy for iPhone",
+      "heading": "PureTalk Unlock Policy for iPhone: Is a Request Needed?",
+      "description": "Check PureTalk’s current iPhone unlock guidance, verify Carrier Lock, and use the right carrier route without confusing compatibility with an unlock.",
+      "standfirst": "PureTalk says phones it sells are unlocked, but Apple says only the current carrier can authorize a carrier unlock; compatibility and lock status are separate checks.",
+      "published": "2026-09-30",
+      "updated": "2026-10-20",
+      "minutes": 6,
+      "topic": "PureTalk unlock policy",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "PureTalk’s current network and compatibility FAQ says phones purchased from PureTalk are unlocked, that PureTalk does not lock an already unlocked phone brought to its service, and that it cannot unlock a device locked by another carrier. Apple’s guidance adds an important boundary: only the current carrier can authorize an iPhone carrier unlock.",
+          "links": [
+            {
+              "label": "Read PureTalk’s current network and compatibility FAQ",
+              "href": "https://www.puretalk.com/faq/network-coverage-compatibility"
+            },
+            {
+              "label": "Read Apple’s current iPhone unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "PureTalk’s network Compatibility Checker is not proof that an iPhone is unlocked.",
+            "On an iPhone, Carrier Lock is the device-side status to check; No SIM restrictions means Apple identifies the iPhone as unlocked.",
+            "If another carrier’s restriction remains, contact the carrier that controls the restriction. PureTalk does not claim to remove another carrier’s lock.",
+            "An Activation Lock, SIM PIN, or Mobile Device Management (MDM) profile is a different control and needs a different remedy.",
+            "An unlocked iPhone still needs to be technically compatible with the destination network; unlock status alone is not a service guarantee."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "puretalk-policy",
+          "text": "What PureTalk’s Current Policy Says"
+        },
+        {
+          "kind": "p",
+          "text": "PureTalk says all phones purchased from PureTalk are unlocked. It also says that PureTalk does not lock an unlocked phone after activation on its service. Those statements describe PureTalk’s own device policy; they do not authorize PureTalk to change a lock applied by another carrier.",
+          "links": [
+            {
+              "label": "Review PureTalk’s device and compatibility statements",
+              "href": "https://www.puretalk.com/faq/network-coverage-compatibility"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "PureTalk says most unlocked phones are compatible with its network, but it does not guarantee compatibility with other networks and directs customers to use its Compatibility Checker for network compatibility. The same FAQ says that the checker cannot verify whether a phone is unlocked. The FCC likewise explains that disabling a carrier lock does not by itself make a phone technically compatible with every provider, so treat compatibility and unlock status as separate checks.",
+          "links": [
+            {
+              "label": "Check PureTalk’s compatibility guidance",
+              "href": "https://www.puretalk.com/faq/network-coverage-compatibility"
+            },
+            {
+              "label": "Read the FCC consumer guide to phone unlocking",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-carrier-lock",
+          "text": "Check Carrier Lock on the iPhone"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings on the iPhone.",
+            "Select General, then About.",
+            "Find Carrier Lock.",
+            "If it says No SIM restrictions, Apple identifies the iPhone as carrier-unlocked.",
+            "If a carrier restriction appears, contact the carrier responsible for the restriction rather than asking PureTalk to change another carrier’s status."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "PureTalk’s FAQ points to the same iPhone settings path, but it expressly says its Compatibility Checker cannot confirm unlock status. Apple says only the current carrier can unlock the iPhone. A compatibility result therefore should not be presented as an approved unlock or as a promise that PureTalk service will be available.",
+          "links": [
+            {
+              "label": "Follow Apple’s Carrier Lock check",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Review PureTalk’s checker limitation",
+              "href": "https://www.puretalk.com/faq/network-coverage-compatibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-device-controls",
+          "text": "Carrier Lock Is Not the Same as Other iPhone Controls"
+        },
+        {
+          "kind": "h3",
+          "id": "carrier-lock",
+          "text": "Carrier Lock"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier Lock is the network restriction checked next to Carrier Lock in Settings > General > About. Apple says the current carrier, not Apple, authorizes this type of unlock. Unlocking this restriction does not promise compatibility with every network."
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock",
+          "text": "Activation Lock"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is tied to Find My and the previous owner’s Apple Account. Apple says it is designed to prevent someone else from using a lost or stolen device and that the Apple Account password is required to turn off Find My, erase, or reactivate a protected device. It is not a carrier-unlock result; a used iPhone showing iPhone Locked to Owner needs the previous owner or the appropriate Apple account process, not a carrier unlock request.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "sim-pin",
+          "text": "SIM PIN"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN protects the SIM card or eSIM by requiring a code for calls and cellular data. Apple says a wrong guess can permanently block the SIM or eSIM and may require a new one. A Locked SIM or PUK problem is therefore not evidence that the iPhone has a carrier lock; contact the carrier that issued the SIM or eSIM instead of guessing codes.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "mdm",
+          "text": "Mobile Device Management (MDM)"
+        },
+        {
+          "kind": "p",
+          "text": "MDM is an organization’s device-management layer. Apple says a device-management service can send configurations, profiles, and commands, monitor compliance, and remotely wipe or lock devices. A managed or supervised iPhone therefore may have organization controls even when Carrier Lock says No SIM restrictions; resolve an MDM or enrollment issue with the organization or its administrator, not through a carrier-unlock request.",
+          "links": [
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "after-approval",
+          "text": "What to Do After the Carrier Approves an Unlock"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says to wait for the carrier to confirm that the unlock was applied. If you have another carrier’s physical SIM, remove the current SIM and insert the new one so the iPhone can activate. For another carrier’s eSIM, follow Apple’s eSIM setup instructions. If no alternate SIM is available, Apple describes backing up the iPhone, erasing it, and restoring from the backup as an after-approval path. Apple does not describe erase and restore as a way to obtain carrier authorization.",
+          "links": [
+            {
+              "label": "Review Apple’s post-approval steps",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Review Apple’s eSIM setup guidance",
+              "href": "https://support.apple.com/en-us/118669"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "correct-support-route",
+          "text": "Use the Correct Support Route"
+        },
+        {
+          "kind": "p",
+          "text": "Use PureTalk for questions about its service, its compatibility checker, and devices it sells. For an iPhone locked to another carrier, use that carrier’s official support route; Apple says only the current carrier can unlock the iPhone, and PureTalk says it cannot unlock a device locked by another carrier. If the issue is Activation Lock, SIM PIN/PUK, or MDM, use the owner-account, SIM-issuer, or organization-admin route that matches that control. Do not treat an iUnlockMobile informational check as carrier authorization or as a guarantee of completion, availability, timing, price, financing, warranty coverage, or blacklist removal.",
+          "links": [
+            {
+              "label": "Read PureTalk’s current FAQ",
+              "href": "https://www.puretalk.com/faq/network-coverage-compatibility"
+            },
+            {
+              "label": "Read Apple’s carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC’s consumer explanation",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "read-the-pages-together",
+          "text": "Read the PureTalk and Apple Pages Together"
+        },
+        {
+          "kind": "p",
+          "text": "PureTalk’s FAQ supplies PureTalk’s own policy statements and the compatibility-checker limitation. Apple’s guide supplies the authoritative device-side check and the rule that the current carrier authorizes the unlock. The FCC adds the compatibility caveat: an unlocked device may still be incompatible with another provider’s technology or network. Taken together, these sources support a careful sequence: check Carrier Lock, check network compatibility separately, and contact the party that controls the specific restriction.",
+          "links": [
+            {
+              "label": "Read PureTalk’s FAQ",
+              "href": "https://www.puretalk.com/faq/network-coverage-compatibility"
+            },
+            {
+              "label": "Read Apple’s unlock guide",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help understanding the Carrier Lock status shown on your iPhone?",
+          "href": "/contact",
+          "label": "Contact iUnlockMobile"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are iPhones sold by PureTalk carrier-unlocked?",
+          "answer": "PureTalk’s current FAQ says all phones purchased from PureTalk are unlocked. Check the individual iPhone in Settings > General > About; No SIM restrictions is Apple’s device-side indicator of carrier-unlocked status."
+        },
+        {
+          "question": "Will every unlocked iPhone work with PureTalk?",
+          "answer": "No. PureTalk says most unlocked phones are compatible and directs customers to its Compatibility Checker. It also says the checker cannot confirm unlock status, so compatibility and carrier-lock checks remain separate."
+        },
+        {
+          "question": "Can PureTalk unlock an iPhone locked by another carrier?",
+          "answer": "PureTalk says it cannot unlock a device locked by another carrier. Contact the carrier responsible for the restriction; Apple also says only the current carrier can authorize an iPhone carrier unlock."
+        },
+        {
+          "question": "How do I verify an iPhone carrier unlock?",
+          "answer": "Open Settings, select General, then About, and read Carrier Lock. If it says No SIM restrictions, Apple identifies the iPhone as unlocked."
+        },
+        {
+          "question": "Can a factory reset create a carrier unlock?",
+          "answer": "No. Apple describes backup, erase, and restore only as an after-approval path when another SIM is unavailable. A reset is not described as a way to obtain carrier authorization."
+        },
+        {
+          "question": "Are Activation Lock, SIM PIN, and MDM the same as Carrier Lock?",
+          "answer": "No. Activation Lock is tied to Find My and an Apple Account, a SIM PIN protects the SIM or eSIM, and MDM applies organization management controls. Each requires the party that controls that specific feature."
+        }
+      ]
+    },
+  {
+      "slug": "safelink-iphone-unlock-policy-guide",
+      "title": "SafeLink Unlock Policy for iPhone",
+      "heading": "SafeLink Unlock Policy for iPhone: Which Route Applies?",
+      "description": "A practical SafeLink guide to BYOP, personal T-Mobile devices, Line Lock, Carrier Lock, and separate iPhone checks using current official sources.",
+      "standfirst": "SafeLink’s support pages cover different service and device paths; Apple explains the iPhone-side Carrier Lock check. These checks do not promise eligibility or service.",
+      "published": "2026-09-30",
+      "updated": "2026-10-20",
+      "minutes": 8,
+      "topic": "SafeLink unlock policy",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "SafeLink’s BYOP guidance says a phone brought to Keep Your Own Smartphone must be compatible and unlocked. SafeLink also says BYOP can be activated only where the service is available, offered, and supported, and it cannot guarantee every phone function. Start with the current BYOP page, then use the route that matches the phone’s provider and history.",
+          "links": [
+            {
+              "label": "Read SafeLink’s BYOP requirements",
+              "href": "https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/3087441/"
+            },
+            {
+              "label": "Check SafeLink’s current service and availability notes",
+              "href": "https://www.safelinkwireless.com/en/#!/newHome"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "For BYOP, verify compatibility, an unlocked phone, and local service availability before activation; SafeLink does not say that every device function will work.",
+            "A personal T-Mobile device has a separate SafeLink support path for checking the device lock status and following T-Mobile’s current instructions when eligible.",
+            "Line Lock protects a service line from unauthorized changes; it is not the iPhone’s Carrier Lock status.",
+            "On an iPhone, Settings > General > About > Carrier Lock is the Apple check. “No SIM restrictions” means Apple identifies the iPhone as unlocked.",
+            "Carrier Lock does not establish whether Activation Lock, a SIM PIN, or an organization’s MDM enrollment is present. Check each state separately."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "choose-route",
+          "text": "Choose the route that matches the device"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Situation",
+            "Official starting point",
+            "What to verify"
+          ],
+          "rows": [
+            [
+              "BYOP iPhone",
+              "SafeLink BYOP support and service pages",
+              "Compatibility, unlocked status, and whether service is available and supported"
+            ],
+            [
+              "Personal T-Mobile device",
+              "SafeLink’s personal-device support page and T-Mobile’s unlock guide",
+              "Device lock status, eligibility, and the current device-specific instructions"
+            ],
+            [
+              "SafeLink Line Lock question",
+              "SafeLink’s Line Lock guidance",
+              "The line-security setting, not the iPhone’s Carrier Lock"
+            ],
+            [
+              "iPhone Carrier Lock question",
+              "Apple’s iPhone unlock guide",
+              "Whether Carrier Lock says No SIM restrictions"
+            ],
+            [
+              "Activation Lock or organization-management question",
+              "Apple’s Activation Lock and device-management guidance",
+              "The Apple Account or organization/IT route, separately from carrier status"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "The current Verizon Value brands unlocking policy has its own eligibility conditions. For a device governed by that policy, read the live wording rather than copying an old waiting period: the page refers to a working, powered-on device, activation with Verizon Value service, no lost-or-stolen or fraud indicators, and paid active service. It also says Verizon Value cannot unlock non-Verizon Value branded phones brought through BYOP. Those conditions do not turn an arbitrary BYOP iPhone into an eligible unlock.",
+          "links": [
+            {
+              "label": "Read the current Verizon Value brands unlocking policy",
+              "href": "https://www.tfwunlockpolicy.com/wps/portal/home"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "line-lock",
+          "text": "Line Lock is not Carrier Lock"
+        },
+        {
+          "kind": "p",
+          "text": "SafeLink describes Line Lock as protection for a phone line against scams that try to take control of a phone number. Its separate action page gives the current line-unlock instructions through 611611. This is an account or line-security feature, not a change to the iPhone’s carrier restriction. Follow the instructions shown on SafeLink’s live page instead of treating a Line Lock result as proof that the phone is unlocked.",
+          "links": [
+            {
+              "label": "Read why SafeLink uses Line Lock",
+              "href": "https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/2120822/"
+            },
+            {
+              "label": "Open SafeLink’s current Line Lock instructions",
+              "href": "https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/2120832/"
+            },
+            {
+              "label": "See Apple’s Carrier Lock check",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-lock",
+          "text": "Check the iPhone’s Carrier Lock"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says only the current carrier can unlock an iPhone for use with another carrier. Apple’s device-side check does not approve a carrier request; it shows the status that is currently recorded on the iPhone. An unlocked phone may still need to be technologically compatible with the other network, and a Carrier Lock result does not confirm account eligibility or a lost-or-stolen or fraud status.",
+          "links": [
+            {
+              "label": "Follow Apple’s official iPhone unlock verification",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC’s compatibility and unlocking guidance",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings on the iPhone.",
+            "Tap General, then About.",
+            "Find Carrier Lock.",
+            "If it says No SIM restrictions, Apple identifies the iPhone as unlocked.",
+            "If that wording does not appear, contact the carrier that controls the device’s unlock request and ask it to confirm the current status."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "different-locks",
+          "text": "Separate Carrier Lock from other iPhone states"
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock",
+          "text": "Activation Lock"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is Apple’s ownership-security state, not a carrier restriction. If the device shows an Activation Lock screen, Apple directs the owner to enter the Apple Account and password used to set it up, or the device passcode. For a business- or school-owned iPhone, Apple says to contact the organization’s IT department or manager. A clean Carrier Lock result does not remove Activation Lock.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock removal guidance",
+              "href": "https://support.apple.com/en-us/108934"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "sim-pin",
+          "text": "SIM PIN"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN protects the SIM card or eSIM and can prompt for a code after a restart or SIM removal. Apple warns not to guess the code because repeated wrong entries can permanently lock the SIM or eSIM; the carrier that issued it should provide the appropriate help. A SIM PIN is not the iPhone’s Carrier Lock and changing it does not unlock the phone for another carrier.",
+          "links": [
+            {
+              "label": "Read Apple’s SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "mdm",
+          "text": "Mobile Device Management (MDM)"
+        },
+        {
+          "kind": "p",
+          "text": "Apple says a device-management service lets an IT team securely configure devices, send profiles and commands, monitor compliance, and in some cases remotely wipe or lock devices. Organization-owned devices can be automatically enrolled. MDM is an organization-management state, so check it with the business or school that owns or manages the iPhone; do not use the Carrier Lock screen as an MDM check.",
+          "links": [
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "personal-tmobile-route",
+          "text": "Use the personal T-Mobile route when it applies"
+        },
+        {
+          "kind": "p",
+          "text": "SafeLink has a separate support page for a personal T-Mobile device. It directs the customer to check the device unlock status and, after an eligibility notice, follow the current T-Mobile instructions. The page is not a blanket approval for every device: status, eligibility, model, account history, and network compatibility still belong to the applicable provider’s current process.",
+          "links": [
+            {
+              "label": "Read SafeLink’s personal T-Mobile device route",
+              "href": "https://support.safelinkwireless.com/en/brands/General/SLaccounthelp/faq/3099344/"
+            },
+            {
+              "label": "Read T-Mobile’s current device-unlock instructions",
+              "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-in-order",
+          "text": "Verify the information in order"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Identify the device path: BYOP, a device activated with a Verizon Value brand, a personal T-Mobile device, or an organization-managed phone.",
+            "Open the matching SafeLink, carrier, or organization page and read the current eligibility language. Do not substitute a forum post or a historical waiting period.",
+            "On the iPhone, check Settings > General > About > Carrier Lock and record the exact wording privately. Do not publish an IMEI, account number, or other identifier.",
+            "Check Activation Lock, SIM PIN, and MDM separately because none of them is reported by the Carrier Lock field.",
+            "If the result is unclear, contact the provider or organization that controls that specific state. Do not infer unlock approval, service availability, or a clean device record from one screen."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "The FCC explains that unlocking only disables software that prevents an attempted activation on another provider’s network; it does not make every network technologically compatible. CTIA’s consumer code likewise distinguishes unlocking from interoperability and says carriers may decline requests with a reasonable basis to believe they are fraudulent or involve a stolen device. Treat an unlocked status as one verification result, not as a promise of service on every network.",
+          "links": [
+            {
+              "label": "Read the FCC consumer guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Read the CTIA Consumer Code",
+              "href": "https://www.ctia.org/the-wireless-industry/industry-commitments/consumer-code-for-wireless-service"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help reading the applicable SafeLink route or separating Carrier Lock from another iPhone state?",
+          "href": "/contact",
+          "label": "Contact iUnlockMobile"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Does SafeLink guarantee that an unlocked BYOP iPhone will work?",
+          "answer": "No. SafeLink requires a compatible and unlocked phone, limits BYOP activation to places where the service is available and supported, and says it cannot guarantee every phone function. Confirm the current compatibility and service information for the device and location."
+        },
+        {
+          "question": "What is the personal T-Mobile route on SafeLink’s support site?",
+          "answer": "It is a separate support path that tells customers to check a personal T-Mobile device’s unlock status and follow T-Mobile’s current instructions after eligibility is shown. It is not a blanket approval for every device."
+        },
+        {
+          "question": "Is SafeLink Line Lock the same as iPhone Carrier Lock?",
+          "answer": "No. Line Lock is a phone-line security feature. Carrier Lock is the iPhone status shown in Settings > General > About, where No SIM restrictions means Apple identifies the iPhone as unlocked."
+        },
+        {
+          "question": "How do I check whether an iPhone is carrier-unlocked?",
+          "answer": "Open Settings, tap General, tap About, and read Carrier Lock. Apple says No SIM restrictions means the iPhone is unlocked. Only the current carrier can apply the carrier unlock."
+        },
+        {
+          "question": "Does a Carrier Lock result remove Activation Lock?",
+          "answer": "No. Activation Lock is an Apple ownership-security state. Follow Apple’s owner, Apple Account, or organization-support route separately; a Carrier Lock result does not remove it."
+        },
+        {
+          "question": "Is a SIM PIN or MDM profile a carrier unlock result?",
+          "answer": "No. A SIM PIN protects the SIM or eSIM, while MDM is organization device management. Check those states separately from Carrier Lock and contact the relevant carrier or organization when needed."
+        },
+        {
+          "question": "Where should I find the current SafeLink or Verizon Value policy terms?",
+          "answer": "Use the live SafeLink support pages and the current Verizon Value brands unlocking policy when it governs the device. This article does not copy a fixed waiting period because eligibility conditions and policy wording can change."
+        }
+      ]
+    },
   {
     slug: 'red-pocket-iphone-unlock-policy-guide',
     title: 'Red Pocket iPhone Unlock Policy',
@@ -247,63 +13576,282 @@ const ARTICLES: Article[] = [
     ],
   },
   {
-    slug: 'google-fi-unlock-policy-iphone-guide',
-    title: 'Google Fi Unlock Policy for iPhone',
-    heading: 'Google Fi Unlock Policy for iPhone: Fi-Bought or BYOD?',
-    description: 'Use Google Fi and Apple’s current guidance to check Fi-bought devices, BYOD requirements, financing and Number Lock.',
-    standfirst: 'Google Fi says devices purchased through Fi or the Google Store are unlocked, while a BYOD iPhone must already be unlocked before activation.',
-    published: '2026-09-28',
-    updated: '2026-09-30',
-    minutes: 6,
-    topic: 'Google Fi unlock policy',
-    blocks: [
-      { kind: 'p', text: 'Google Fi’s current device guidance says phones purchased through Google Fi or the Google Store are unlocked. It also says only unlocked devices can be brought to Fi. Check the exact device and current compatibility guidance before changing service.', links: [{ label: 'Read Google Fi’s current device guidance', href: 'https://support.google.com/fi/answer/6224695?hl=en' }] },
-      { kind: 'h2', id: 'key-takeaways', text: 'Key Takeaways' },
-      { kind: 'list', items: [
-        'Google Fi and Google Store devices are described as unlocked in Google Fi’s current guidance.',
-        'A BYOD iPhone must already be unlocked before it can be brought to Fi.',
-        'Financing and promotional terms are separate topics covered by Google Fi’s device-financing guidance.',
-        'Number Lock concerns number-transfer security, not the iPhone Carrier Lock screen.',
-        'Apple’s device-side check is No SIM restrictions in Settings.',
-      ] },
-      { kind: 'h2', id: 'which-device', text: 'Check how the iPhone was obtained' },
-      { kind: 'table', head: ['Device path', 'Current official starting point', 'What to check'], rows: [
-        ['Purchased through Google Fi', 'Google Fi device guidance', 'The device status and current Fi instructions'],
-        ['Purchased through the Google Store', 'Google Fi compatibility and device guidance', 'The device status and model compatibility'],
-        ['Brought from another carrier', 'The original carrier’s official route', 'Carrier Lock before Fi activation'],
-      ] },
-      { kind: 'p', text: 'Google Fi’s compatibility guidance is the source for BYOD requirements. Apple’s carrier-unlock guidance is the source for the iPhone’s Carrier Lock status and explains that the carrier authorizes the unlock.', links: [{ label: 'Check Google Fi compatibility', href: 'https://support.google.com/fi/answer/6224695?hl=en' }, { label: 'Follow Apple’s iPhone unlock guidance', href: 'https://support.apple.com/en-us/109316' }] },
-      { kind: 'h2', id: 'financing', text: 'Keep financing questions separate' },
-      { kind: 'p', text: 'Google Fi’s financing guidance explains what can happen to a remaining device balance or promotional value when service ends. Read those terms separately from the Carrier Lock status shown in iPhone Settings.', links: [{ label: 'Review Google Fi device-financing rules', href: 'https://support.google.com/fi/answer/6181978?hl=en' }] },
-      { kind: 'h2', id: 'number-lock', text: 'Number Lock is a separate account setting' },
-      { kind: 'p', text: 'Google Fi documents Number Lock in its account-security guidance and provides separate steps for transferring a number away from Fi. Use those pages for a number-transfer issue; use Apple’s Carrier Lock screen for the iPhone unlock question.', links: [{ label: 'Read Google Fi Number Lock guidance', href: 'https://support.google.com/fi/answer/15147412?hl=en' }, { label: 'Use Google Fi’s number-transfer steps', href: 'https://support.google.com/fi/answer/10888419?hl=en' }] },
-      { kind: 'h2', id: 'verify', text: 'Verify the iPhone result' },
-      { kind: 'list', ordered: true, items: [
-        'Open Settings on the iPhone.',
-        'Select General, then About.',
-        'Find Carrier Lock.',
-        'No SIM restrictions means the iPhone is carrier-unlocked.',
-        'If a restriction appears, use the carrier’s official route before trying to activate Fi.',
-      ] },
-      { kind: 'h2', id: 'fi-reading-order', text: 'Read Google Fi’s pages in the right order' },
-      { kind: 'list', items: [
-        'Use Google Fi’s device guidance for phones purchased through Google Fi or the Google Store.',
-        'Use the compatibility page before bringing a device from another carrier.',
-        'Use the financing page for remaining balances or promotional terms.',
-        'Use Number Lock and transfer guidance for a number-transfer issue.',
-        'Use Apple’s Carrier Lock field for the iPhone’s carrier-unlock status.',
-      ] },
-      { kind: 'p', text: 'Google Fi’s pages cover service eligibility, financing and account-security topics. Apple’s page covers the iPhone carrier-unlock status. Keeping those sources separate prevents a Fi compatibility result, financing answer or Number Lock setting from being treated as the Carrier Lock result.', links: [{ label: 'Review Google Fi compatibility', href: 'https://support.google.com/fi/answer/6224695?hl=en' }, { label: 'Review Google Fi financing guidance', href: 'https://support.google.com/fi/answer/6181978?hl=en' }, { label: 'Follow Apple’s Carrier Lock check', href: 'https://support.apple.com/en-us/109316' }] },
-      { kind: 'cta', text: 'Need help separating Google Fi activation from the iPhone Carrier Lock status?', href: '/contact', label: 'Contact iUnlockMobile' },
-    ],
-    faq: [
-      { question: 'Are iPhones bought through Google Fi carrier-unlocked?', answer: 'Google Fi’s current device guidance says phones purchased through Google Fi or the Google Store are unlocked. Verify the individual iPhone in Settings.' },
-      { question: 'Can Google Fi unlock an iPhone bought from another carrier?', answer: 'Google Fi requires a BYOD phone to be unlocked before activation. Use the original carrier’s official route for the restriction.' },
-      { question: 'Does paying off a Google Fi device change the Carrier Lock screen?', answer: 'Financing and promotional consequences are covered by Google Fi’s financing terms. Verify Carrier Lock separately in iPhone Settings.' },
-      { question: 'Is Google Fi Number Lock the same as iPhone Carrier Lock?', answer: 'No. Use Google Fi’s Number Lock and transfer guidance for a phone-number issue, and use Apple’s Carrier Lock screen for the device status.' },
-      { question: 'How do I confirm that an iPhone is unlocked?', answer: 'Open Settings, General, About. The iPhone is carrier-unlocked when Carrier Lock shows No SIM restrictions.' },
-    ],
-  },
+      "slug": "google-fi-unlock-policy-iphone-guide",
+      "title": "Google Fi Unlock Policy for iPhone",
+      "heading": "Google Fi Unlock Policy for iPhone: Fi-Bought or BYOD?",
+      "description": "Learn what Google Fi and Apple say about unlocked iPhones, BYOD checks, Carrier Lock, financing, Number Lock, Activation Lock, SIM PIN, and MDM.",
+      "standfirst": "Google Fi says devices purchased through Fi or the Google Store are unlocked, while a BYOD iPhone must already be unlocked by its previous carrier. Compatibility and device-security checks are separate.",
+      "published": "2026-09-28",
+      "updated": "2026-10-20",
+      "minutes": 7,
+      "topic": "Google Fi unlock policy",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Google Fi's current activation guidance says to use an unlocked device. If you bring your own iPhone, it must be unlocked by the previous carrier. The same guidance says phones purchased through Google Fi or the Google Store are already unlocked. That policy statement does not replace a device-specific compatibility check, so review the official checker before activation.",
+          "links": [
+            {
+              "label": "Read Google Fi's current activation guidance",
+              "href": "https://support.google.com/fi/answer/6078618?hl=en&co=GENIE.Platform%3DiOS"
+            },
+            {
+              "label": "Check Google Fi compatibility",
+              "href": "https://fi.google.com/compatibility"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Google Fi's current help pages state that phones purchased through Google Fi or the Google Store are unlocked.",
+            "A BYOD iPhone must be unlocked by its previous carrier before you try to activate Google Fi; compatibility is a separate check.",
+            "Apple's Carrier Lock field reports the network-lock status. Apple says only the current carrier can unlock an iPhone.",
+            "Activation Lock is linked to Find My and the previous owner's Apple Account, not to the cellular carrier status.",
+            "A SIM PIN protects the SIM or eSIM with a code; it is not a Carrier Lock.",
+            "MDM can apply organization-managed configurations and commands; it is not a Carrier Lock or a SIM PIN.",
+            "Financing, promotional terms, and Google Fi Number Lock address separate account or payment issues."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "which-device",
+          "text": "Check how the iPhone was obtained"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Device path",
+            "Current official starting point",
+            "What to check"
+          ],
+          "rows": [
+            [
+              "Purchased through Google Fi",
+              "Google Fi device guidance",
+              "The device's Carrier Lock status and current Fi compatibility guidance"
+            ],
+            [
+              "Purchased through the Google Store",
+              "Google Fi device guidance and compatibility checker",
+              "The device's Carrier Lock status and model compatibility"
+            ],
+            [
+              "Brought from another carrier",
+              "The previous carrier's official unlock route and Google Fi compatibility checker",
+              "Carrier Lock before attempting Fi activation"
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Google Fi's compatibility page distinguishes Fully compatible, Compatible, and Not compatible results. An unlocked iPhone may still have feature or network limitations, so treat the checker as an eligibility tool rather than an assurance that every Fi feature will work on every model. Apple's guidance identifies the carrier as the party that can unlock an iPhone.",
+          "links": [
+            {
+              "label": "Review Google Fi's compatibility categories",
+              "href": "https://support.google.com/fi/answer/6224695?hl=en"
+            },
+            {
+              "label": "Follow Apple's iPhone unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC's compatibility and unlocking guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "separate-device-checks",
+          "text": "Keep the four device checks separate"
+        },
+        {
+          "kind": "h3",
+          "id": "carrier-lock",
+          "text": "Carrier Lock: the cellular-network restriction"
+        },
+        {
+          "kind": "p",
+          "text": "On the iPhone, open Settings, tap General, then About, and find Carrier Lock. Apple says No SIM restrictions means the iPhone is unlocked. If a carrier name or restriction appears, contact the current carrier; Apple says it cannot unlock the iPhone itself. This field answers the carrier-unlock question, not whether the phone is compatible with every network.",
+          "links": [
+            {
+              "label": "Check Apple's Carrier Lock instructions",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "activation-lock",
+          "text": "Activation Lock: the Apple Account ownership check"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is part of Find My. Apple says the Apple Account password is required to turn off Find My, erase the device, or reactivate it when Activation Lock is enabled. A used iPhone showing iPhone Locked to Owner remains linked to the previous owner. Resolve that ownership issue with the owner before purchase; changing a Carrier Lock does not remove Activation Lock.",
+          "links": [
+            {
+              "label": "Read Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "sim-pin",
+          "text": "SIM PIN: the SIM or eSIM access code"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN protects the SIM card or eSIM and can prompt for a code after a restart or SIM removal. Apple warns not to guess an unknown PIN or PUK; contact the carrier that issued the SIM or eSIM instead. A SIM PIN alert is not evidence that the iPhone has a Carrier Lock.",
+          "links": [
+            {
+              "label": "Use Apple's SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h3",
+          "id": "mdm",
+          "text": "MDM: organization device management"
+        },
+        {
+          "kind": "p",
+          "text": "Apple's device-management guide says an organization can send configurations, profiles, and commands to an enrolled device, including settings, compliance actions, and remote lock or wipe actions. MDM status is an organization-management question. It is separate from Carrier Lock, Activation Lock, and the SIM PIN, so an iPhone can be unlocked for a carrier and still have management restrictions that need to be addressed by the organization.",
+          "links": [
+            {
+              "label": "Read Apple's device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "financing",
+          "text": "Keep financing questions separate"
+        },
+        {
+          "kind": "p",
+          "text": "Google Fi's financing page describes monthly installments, payoff, and promotion terms. It says canceling service before a device is fully paid can make the remaining balance due, and a promotion can have separate activation or service requirements. Those payment terms do not establish the iPhone's Carrier Lock status. Check the applicable promotion terms and verify Carrier Lock in Settings rather than assuming that a payoff changes it.",
+          "links": [
+            {
+              "label": "Review Google Fi device-financing rules",
+              "href": "https://support.google.com/fi/answer/6181978?hl=en"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "number-lock",
+          "text": "Number Lock is a separate account setting"
+        },
+        {
+          "kind": "p",
+          "text": "Google Fi describes Number Lock as an optional protection against unauthorized SIM swaps. When it is on, you cannot transfer the number to another phone or port it to another carrier. Use Number Lock and transfer guidance for a phone-number issue; use Apple's Carrier Lock field for the iPhone's network status.",
+          "links": [
+            {
+              "label": "Read Google Fi Number Lock guidance",
+              "href": "https://support.google.com/fi/answer/15147412?hl=en"
+            },
+            {
+              "label": "Use Google Fi's number-transfer steps",
+              "href": "https://support.google.com/fi/answer/10888419?hl=en"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify",
+          "text": "Verify the iPhone before trying Fi"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Run the device through Google Fi's official compatibility checker. Record whether the result is Fully compatible, Compatible, or Not compatible.",
+            "Open Settings, then General, then About, and read the Carrier Lock field. No SIM restrictions is Apple's stated unlocked result.",
+            "If the iPhone is tied to another carrier, use that carrier's official unlock route. Apple says only the current carrier can unlock it.",
+            "If a used phone shows iPhone Locked to Owner or asks for the previous owner's Apple Account, stop and have the owner remove Activation Lock before purchase.",
+            "If you see a SIM PIN or PUK prompt, contact the SIM or eSIM issuer. Do not guess the code.",
+            "If the iPhone is organization-managed, ask the organization to address its MDM enrollment or restrictions; do not treat MDM as a carrier-unlock result."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "fi-reading-order",
+          "text": "Read Google Fi's pages in the right order"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "Use Google Fi's device guidance for phones purchased through Google Fi or the Google Store.",
+            "Use the compatibility checker before bringing an iPhone from another carrier, and read any limitations in the result.",
+            "Use Apple's Carrier Lock field and the previous carrier's official process for the network-unlock question.",
+            "Use Apple's Activation Lock, SIM PIN, and MDM guidance for their respective device-security or management issues.",
+            "Use Google Fi's financing page for balances and promotions, and Number Lock or transfer guidance for a phone-number issue."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Google Fi's pages cover activation eligibility, compatibility, financing, and account security. Apple's pages cover the iPhone's Carrier Lock check and separate device protections. Keeping those sources apart prevents a compatibility result, payment term, Number Lock setting, Activation Lock prompt, SIM PIN, or MDM profile from being treated as proof of a carrier unlock.",
+          "links": [
+            {
+              "label": "Review Google Fi compatibility",
+              "href": "https://support.google.com/fi/answer/6224695?hl=en"
+            },
+            {
+              "label": "Review Google Fi financing guidance",
+              "href": "https://support.google.com/fi/answer/6181978?hl=en"
+            },
+            {
+              "label": "Follow Apple's Carrier Lock check",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Review Apple's Activation Lock guidance",
+              "href": "https://support.apple.com/en-us/108794"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help separating Google Fi activation from the iPhone Carrier Lock status?",
+          "href": "/contact",
+          "label": "Contact iUnlockMobile"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Are iPhones bought through Google Fi carrier-unlocked?",
+          "answer": "Google Fi's current help pages state that phones purchased through Google Fi or the Google Store are unlocked. Treat that as the provider's general device guidance, then verify the individual iPhone's Carrier Lock field and Fi compatibility."
+        },
+        {
+          "question": "Can Google Fi unlock an iPhone bought from another carrier?",
+          "answer": "Google Fi requires a BYOD phone to be unlocked by its previous carrier. Apple also says only the current carrier can unlock an iPhone, so use the original carrier's official route rather than treating Fi activation as an unlock request."
+        },
+        {
+          "question": "Does paying off a Google Fi device change the Carrier Lock screen?",
+          "answer": "Google Fi's financing page explains payoff and promotion consequences, but it does not establish that payoff alone changes Carrier Lock. Check the applicable terms and verify Carrier Lock separately in Settings."
+        },
+        {
+          "question": "Is Google Fi Number Lock the same as iPhone Carrier Lock?",
+          "answer": "No. Number Lock protects a Google Fi number from unauthorized transfers or porting. Carrier Lock is the iPhone's network restriction and is checked under Settings, General, About."
+        },
+        {
+          "question": "Is Activation Lock the same as Carrier Lock?",
+          "answer": "No. Activation Lock links an iPhone to a previous owner's Apple Account through Find My. Carrier Lock concerns the cellular network, so an iPhone needs both an appropriate ownership state and a suitable carrier status."
+        },
+        {
+          "question": "How do I confirm that an iPhone is carrier-unlocked?",
+          "answer": "Open Settings, General, About. Apple says the iPhone is unlocked when Carrier Lock shows No SIM restrictions. That check does not confirm compatibility, remove Activation Lock, unlock a SIM PIN, or remove MDM management."
+        }
+      ]
+    },
   {
     slug: 'iphone-carrier-unlock-near-me-shop-checklist',
     title: 'iPhone Carrier Unlock Near Me',
@@ -471,64 +14019,345 @@ const ARTICLES: Article[] = [
     ],
   },
   {
-    slug: 'how-to-unlock-iphone-without-carrier-access',
-    title: 'Unlock iPhone Without Carrier Access',
-    heading: 'How to Unlock iPhone Without Carrier Access',
-    description: 'Learn how to use current official carrier policies when you lack a carrier login, then verify the iPhone result safely.',
-    standfirst: 'You may lack account access, but Apple’s guidance still requires the carrier to authorize the iPhone carrier unlock.',
-    published: '2026-09-27',
-    updated: '2026-09-30',
-    minutes: 5,
-    topic: 'Unlock iPhone without carrier access',
-    blocks: [
-      { kind: 'p', text: 'If you do not have access to a carrier account, do not replace the carrier’s official process with software or a reset. Apple says only the carrier can authorize an iPhone carrier unlock. AT&T, T-Mobile and Verizon publish separate current device-unlocking policies, so read the policy for the carrier involved.', links: [{ label: 'Read Apple’s carrier-unlock guidance', href: 'https://support.apple.com/en-us/109316' }, { label: 'Check AT&T’s device-unlock policy', href: 'https://www.att.com/deviceunlock/' }, { label: 'Check T-Mobile’s device-unlock policy', href: 'https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy' }, { label: 'Check Verizon’s device-unlocking policy', href: 'https://www.verizon.com/support/device-unlocking-policy/' }] },
-      { kind: 'h2', id: 'key-takeaways', text: 'Key Takeaways' },
-      { kind: 'list', items: [
-        'No active account access is not permission to bypass the carrier’s process.',
-        'Carrier policies differ, so use the current policy for the carrier involved.',
-        'A new SIM or software action cannot replace carrier authorization.',
-        'Apple provides the iPhone-side Carrier Lock check.',
-        'The completion status is No SIM restrictions.',
-      ] },
-      { kind: 'h2', id: 'check-status', text: 'Check whether an unlock is actually needed' },
-      { kind: 'list', ordered: true, items: [
-        'Open Settings on the iPhone.',
-        'Select General, then About.',
-        'Find Carrier Lock.',
-        'No SIM restrictions means the iPhone is carrier-unlocked.',
-        'If a restriction appears, read the responsible carrier’s current official policy.',
-      ] },
-      { kind: 'p', text: 'Apple’s device-side status check tells you whether a Carrier Lock remains, but it does not grant the unlock. If you lack a login, use the carrier’s published support route and provide information honestly.', links: [{ label: 'Use Apple’s official status check', href: 'https://support.apple.com/en-us/109316' }, { label: 'Read the FCC consumer guide to phone unlocking', href: 'https://www.fcc.gov/consumers/guides/cell-phone-unlocking' }] },
-      { kind: 'h2', id: 'carrier-policies', text: 'Read the current carrier policy' },
-      { kind: 'p', text: 'AT&T, T-Mobile and Verizon publish different device-unlocking policies. Use the policy page for the carrier involved and follow the instructions shown there. Do not apply one carrier’s conditions to another carrier.', links: [{ label: 'AT&T device unlock', href: 'https://www.att.com/deviceunlock/' }, { label: 'T-Mobile device-unlock policy', href: 'https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy' }, { label: 'Verizon device-unlocking policy', href: 'https://www.verizon.com/support/device-unlocking-policy/' }] },
-      { kind: 'h2', id: 'not-a-bypass', text: 'What does not replace carrier authorization' },
-      { kind: 'table', head: ['Action', 'Official guidance'], rows: [
-        ['Software or a reset', 'Cannot replace the carrier authorization described by Apple'],
-        ['New physical SIM or eSIM', 'Use Apple’s activation and setup guidance after the carrier confirms the unlock'],
-        ['Apple carrier-unlock page', 'States that the carrier authorizes the carrier unlock'],
-      ] },
-      { kind: 'p', text: 'Apple also documents Activation Lock separately from carrier unlocking. Erasing an iPhone does not remove Activation Lock without the required Apple Account credentials.', links: [{ label: 'Review Apple’s Activation Lock guidance', href: 'https://support.apple.com/en-us/108794' }] },
-      { kind: 'h2', id: 'verify', text: 'Verify completion' },
-      { kind: 'p', text: 'After the carrier confirms the change, check Settings, General, About again. Only treat the carrier unlock as complete when Carrier Lock shows No SIM restrictions. For a physical SIM, Apple says to remove the old SIM and insert the new carrier’s SIM. For eSIM, follow Apple’s eSIM setup guidance.', links: [{ label: 'Follow Apple’s current unlock guidance', href: 'https://support.apple.com/en-us/109316' }] },
-      { kind: 'h2', id: 'official-route-checklist', text: 'A practical official-route checklist' },
-      { kind: 'list', ordered: true, items: [
-        'Check Carrier Lock in Settings, General, About.',
-        'If the status is already No SIM restrictions, use Apple’s setup guidance for the new SIM or eSIM.',
-        'If a restriction remains, identify the carrier involved and read that carrier’s current policy.',
-        'Follow the carrier’s stated request or automatic-unlock process without substituting a reset or software tool.',
-        'Check Carrier Lock again after the carrier confirms the change.',
-      ] },
-      { kind: 'p', text: 'Apple’s guide says the carrier authorizes the unlock and explains the No SIM restrictions result. AT&T, T-Mobile and Verizon publish separate policy pages, while the FCC consumer guide provides broader consumer information. These sources should be read as policy pages for the responsible carrier, not combined into one universal eligibility rule.', links: [{ label: 'Read Apple’s carrier-unlock guidance', href: 'https://support.apple.com/en-us/109316' }, { label: 'Read the FCC consumer guide', href: 'https://www.fcc.gov/consumers/guides/cell-phone-unlocking' }] },
-      { kind: 'cta', text: 'Need help finding the correct official carrier policy?', href: '/contact', label: 'Contact iUnlockMobile' },
-    ],
-    faq: [
-      { question: 'Can I unlock an iPhone without using the carrier’s process?', answer: 'No. Apple says only the carrier can authorize a carrier unlock.' },
-      { question: 'What if I do not have the carrier login?', answer: 'Use the carrier’s current published support or device-unlock policy and follow its stated instructions. Do not replace the process with software or a reset.' },
-      { question: 'Will a factory reset remove the carrier lock?', answer: 'No. Apple describes erase and restore after carrier approval when needed for activation; a reset does not create carrier approval.' },
-      { question: 'Can Apple unlock an iPhone without the carrier?', answer: 'No. Apple’s guidance says the carrier authorizes a carrier unlock.' },
-      { question: 'How do I verify the unlock?', answer: 'Open Settings, General, About. The iPhone is carrier-unlocked when Carrier Lock shows No SIM restrictions.' },
-    ],
-  },
+      "slug": "how-to-unlock-iphone-without-carrier-access",
+      "title": "Unlock an iPhone Without Carrier Access",
+      "heading": "How to Unlock an iPhone Without Carrier Access",
+      "description": "Learn what to do when you cannot reach a carrier account, how Apple’s Carrier Lock check works, and which locks or codes it does not remove.",
+      "standfirst": "Without carrier account access, you can check the phone and use the carrier’s published support route, but only the carrier can authorize a carrier unlock.",
+      "published": "2026-09-27",
+      "updated": "2026-10-20",
+      "minutes": 7,
+      "topic": "Unlock iPhone without carrier access",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "If you cannot access a carrier account, do not treat a reset, new SIM, software tool, or device report as a substitute for authorization. Apple says only the current carrier can unlock an iPhone for use with another carrier. Start by checking the iPhone’s Carrier Lock status, then use the responsible carrier’s official support or device-unlock route. Eligibility and the request path depend on the carrier and device, so this guide does not promise approval.",
+          "links": [
+            {
+              "label": "Read Apple’s carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC consumer unlocking guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "key-takeaways",
+          "text": "Key Takeaways"
+        },
+        {
+          "kind": "list",
+          "items": [
+            "No carrier login does not authorize a bypass; use the carrier’s published support route.",
+            "Carrier Lock is separate from Activation Lock, a SIM PIN, and organization-managed device restrictions (MDM).",
+            "Settings > General > About > Carrier Lock > No SIM restrictions is Apple’s device-side indicator that the iPhone is unlocked.",
+            "An unlocked status does not guarantee compatibility or service on every provider’s network."
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "check-carrier-lock",
+          "text": "Check Whether a Carrier Unlock Is Needed"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Open Settings on the iPhone.",
+            "Select General, then About.",
+            "Find Carrier Lock.",
+            "If it says No SIM restrictions, Apple identifies the iPhone as unlocked.",
+            "If another status appears, do not infer that a request was approved; read the responsible carrier’s current policy or contact its official support route."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple’s status check reports the device-side Carrier Lock state; it does not submit an unlock request. The FCC explains that unlocking only removes software that prevents an attempted activation on another provider. Network technology, coverage, eSIM or SIM support, and the receiving provider’s activation rules can still affect whether service works.",
+          "links": [
+            {
+              "label": "Use Apple’s official Carrier Lock check",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC explanation of compatibility",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Review T-Mobile’s compatibility and unlock guidance",
+              "href": "https://www.t-mobile.com/support/devices/unlock-your-mobile-wireless-device"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "when-you-lack-account-access",
+          "text": "When You Lack Carrier Account Access"
+        },
+        {
+          "kind": "p",
+          "text": "If you are unsure which carrier controls the restriction, check your purchase or service records and the line details on the device. For an eSIM, Apple says the carrier is listed in Settings > Cellular above Turn On This Line. For a physical SIM, the card may show the carrier name or logo. Use the carrier’s own secure support or request form; do not publish a full device identifier in a public request or article.",
+          "links": [
+            {
+              "label": "See Apple’s guidance on identifying the SIM carrier",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Once the responsible carrier is identified, open its current policy rather than relying on a third-party promise. AT&T publishes a route for people who are not AT&T customers, T-Mobile says a device not sold or authorized by T-Mobile should be handled by the carrier or manufacturer that sold it, and Verizon publishes separate postpay and prepaid rules. These are carrier-specific examples, not one universal eligibility rule.",
+          "links": [
+            {
+              "label": "Check AT&T’s current device-unlock policy",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Check T-Mobile’s current SIM-unlock policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Check Verizon’s current device-unlocking policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "carrier-policy-differences",
+          "text": "Read the Current Carrier Policy"
+        },
+        {
+          "kind": "p",
+          "text": "Carrier policies can consider factors such as when the device was purchased, whether it is paid in full, account standing, plan type, and whether it was reported lost, stolen, or involved in fraud. Use the exact policy for the carrier and plan involved. Do not transfer a condition from one carrier to another, and do not assume that financing status alone guarantees an unlock.",
+          "links": [
+            {
+              "label": "Read AT&T’s listed requirements",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Read T-Mobile’s postpaid and prepaid requirements",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Read Verizon’s separate policy sections",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Carrier policy page",
+            "What the page establishes"
+          ],
+          "rows": [
+            [
+              "AT&T",
+              "Lists device, payment, account, and lost/stolen or fraud conditions, and publishes a request route for non-customers."
+            ],
+            [
+              "T-Mobile",
+              "Lists separate postpaid and prepaid requirements and describes automatic or notification-based steps for eligible devices."
+            ],
+            [
+              "Verizon",
+              "Publishes separate postpay and prepaid rules and warns that an unlocked device may have limited or no functionality on another network."
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "what-does-not-bypass-carrier-authorization",
+          "text": "What Does Not Replace Carrier Authorization"
+        },
+        {
+          "kind": "table",
+          "head": [
+            "Action or status",
+            "What it can and cannot do"
+          ],
+          "rows": [
+            [
+              "Software, jailbreak, or factory reset",
+              "Cannot create carrier authorization. Apple describes erase and restore as a possible setup step after the carrier confirms an unlock."
+            ],
+            [
+              "A new physical SIM or eSIM",
+              "Can be used to activate service after approval, but inserting it does not itself change Carrier Lock."
+            ],
+            [
+              "Apple’s Carrier Lock screen",
+              "Reports the iPhone’s status; it does not submit a request or promise that another provider will accept the device."
+            ]
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "activation-lock-is-different",
+          "text": "Activation Lock Is Different"
+        },
+        {
+          "kind": "p",
+          "text": "Activation Lock is an Apple Account and Find My protection, not a carrier restriction. Apple says it can continue after a remote erase and that the Apple Account password is required to turn off Find My, erase, or reactivate a protected device. A carrier unlock does not remove Activation Lock. If a used iPhone asks for the previous owner’s Apple Account, stop and ask the owner to remove it through Apple’s legitimate process.",
+          "links": [
+            {
+              "label": "Read Apple’s Activation Lock explanation",
+              "href": "https://support.apple.com/en-us/108794"
+            },
+            {
+              "label": "Read Apple’s legitimate removal options",
+              "href": "https://support.apple.com/en-us/108934"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "sim-pin-is-different",
+          "text": "A SIM PIN Is Different"
+        },
+        {
+          "kind": "p",
+          "text": "A SIM PIN protects a physical SIM or eSIM by requiring a code for calls and cellular data. Apple says a locked SIM can show Locked SIM, and repeated wrong guesses can permanently lock the SIM or eSIM. A SIM PIN or PUK issue is not the same as Carrier Lock; do not guess the code, and contact the carrier that issued the SIM or eSIM for help.",
+          "links": [
+            {
+              "label": "Follow Apple’s SIM PIN guidance",
+              "href": "https://support.apple.com/en-us/118228"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "mdm-is-different",
+          "text": "MDM and Organization Controls Are Different"
+        },
+        {
+          "kind": "p",
+          "text": "Mobile device management (MDM) is an organization’s device-management service. Apple says it can send configurations, profiles, and commands, monitor compliance, and remotely wipe or lock managed devices. MDM is not carrier authorization. If the iPhone belongs to a business or school and an account or management screen appears, use the organization’s IT or administrator process rather than trying to bypass it.",
+          "links": [
+            {
+              "label": "Read Apple’s device-management overview",
+              "href": "https://support.apple.com/guide/deployment/intro-to-device-management-depc0aadd3fe/web"
+            },
+            {
+              "label": "See Apple’s guidance for organization-owned Activation Lock cases",
+              "href": "https://support.apple.com/en-us/108934"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "verify-after-carrier-confirmation",
+          "text": "Verify After the Carrier Confirms a Change"
+        },
+        {
+          "kind": "p",
+          "text": "After the carrier confirms that it applied the change, open Settings > General > About again. Treat the carrier unlock as complete only when Carrier Lock shows No SIM restrictions. If you need to finish setup with a different physical SIM, Apple says to remove the old SIM and insert the new one. For eSIM, follow the receiving carrier’s setup instructions. If the status has not changed, return to the carrier’s official support route rather than claiming the phone is unlocked.",
+          "links": [
+            {
+              "label": "Follow Apple’s current post-approval steps",
+              "href": "https://support.apple.com/en-us/109316"
+            }
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "If you do not have another SIM to test, Apple documents backup, erase, and restore as a way to finish activation after approval. That process does not authorize the unlock. Even when Carrier Lock shows No SIM restrictions, check the receiving provider’s compatibility and activation requirements because an unlocked device may not work fully on every network.",
+          "links": [
+            {
+              "label": "Read Apple’s unlock and restore guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC’s compatibility warning",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "id": "official-route-checklist",
+          "text": "A Practical Official-Route Checklist"
+        },
+        {
+          "kind": "list",
+          "ordered": true,
+          "items": [
+            "Check Settings > General > About > Carrier Lock.",
+            "Separate a Carrier Lock result from Activation Lock, a SIM PIN or PUK prompt, and an MDM or organization screen.",
+            "Identify the responsible carrier and the country or plan policy that applies.",
+            "Read that carrier’s current official eligibility and request instructions; if you lack a login, use an official non-customer or support route only when the carrier provides one.",
+            "Submit only accurate information through the carrier’s secure process. Do not use a reset, software tool, or third-party promise as a substitute for authorization.",
+            "After the carrier confirms the change, check Carrier Lock again and then follow the receiving provider’s compatible SIM or eSIM activation steps.",
+            "If service still does not work, check network compatibility and activation with the receiving provider rather than assuming the Carrier Lock result was wrong."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Apple’s guidance identifies the carrier as the party that authorizes an iPhone carrier unlock and identifies No SIM restrictions as the device-side completion status. The FCC explains that unlocking does not guarantee technical compatibility. AT&T, T-Mobile, and Verizon publish separate policies, so their pages should be read as carrier-specific instructions, not combined into a universal promise of eligibility, timing, cost, or outcome.",
+          "links": [
+            {
+              "label": "Read Apple’s carrier-unlock guidance",
+              "href": "https://support.apple.com/en-us/109316"
+            },
+            {
+              "label": "Read the FCC consumer guide",
+              "href": "https://www.fcc.gov/consumers/guides/cell-phone-unlocking"
+            },
+            {
+              "label": "Review AT&T’s policy",
+              "href": "https://www.att.com/deviceunlock/"
+            },
+            {
+              "label": "Review T-Mobile’s policy",
+              "href": "https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy"
+            },
+            {
+              "label": "Review Verizon’s policy",
+              "href": "https://www.verizon.com/support/device-unlocking-policy/"
+            }
+          ]
+        },
+        {
+          "kind": "cta",
+          "text": "Need help locating the responsible carrier’s official policy?",
+          "href": "/contact",
+          "label": "Contact iUnlockMobile"
+        }
+      ],
+      "faq": [
+        {
+          "question": "Can I unlock an iPhone without using the carrier’s process?",
+          "answer": "No. Apple says only the current carrier can authorize an iPhone carrier unlock. A reset, software tool, or new SIM does not replace that authorization."
+        },
+        {
+          "question": "What if I do not have the carrier login?",
+          "answer": "Check the iPhone’s Carrier Lock status, identify the responsible carrier, and use that carrier’s published support or non-customer route if one is provided. The policy may require information or conditions that only the carrier can verify, and this article does not promise approval."
+        },
+        {
+          "question": "Will a factory reset remove the carrier lock?",
+          "answer": "No. Apple describes erase and restore as a possible step to finish activation after the carrier confirms an unlock. A reset does not create carrier authorization."
+        },
+        {
+          "question": "Can Apple unlock an iPhone without the carrier?",
+          "answer": "No. Apple’s current guidance says the carrier, not Apple, authorizes an iPhone carrier unlock."
+        },
+        {
+          "question": "How do I verify that the carrier unlock is complete?",
+          "answer": "Open Settings, General, About. Apple identifies the iPhone as unlocked when Carrier Lock shows No SIM restrictions. This does not guarantee compatibility with every network."
+        },
+        {
+          "question": "Is a SIM PIN the same as a carrier lock?",
+          "answer": "No. A SIM PIN protects the SIM or eSIM with a code for calls and cellular data. Carrier Lock is the separate status shown under Settings, General, About."
+        },
+        {
+          "question": "Is Activation Lock or MDM the same as Carrier Lock?",
+          "answer": "No. Activation Lock is tied to Find My and an Apple Account, while MDM is organization device management. Neither is removed by a carrier-unlock request; use the Apple Account owner or organization administrator’s legitimate process."
+        }
+      ]
+    },
   {
     slug: 'walmart-family-mobile-iphone-unlock-guide',
     title: 'Walmart Family Mobile iPhone Unlock',
