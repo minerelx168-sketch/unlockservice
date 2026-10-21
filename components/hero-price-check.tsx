@@ -41,14 +41,7 @@ function orderedCategories(products: PriceCheckProduct[]) {
     return a.localeCompare(b, 'en')
   })
 }
-function priceRange(products: PriceCheckProduct[]) {
-  const prices = products.filter((product) => product.available).map((product) => product.priceCents)
-  if (!prices.length) return 'Unavailable'
-  const low = Math.min(...prices), high = Math.max(...prices)
-  return low === high ? formatUsd(low) : `${formatUsd(low)}–${formatUsd(high)}`
-}
-
-/** Price first, details once, then a truthful preview before secure payment. */
+/** Select a service, add details once, then review before secure payment. */
 export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialImei = '', initialProductCode, initialEmail = '' }: Props) {
   const initialDomain = fixedDomain ?? (ordering && unlock.length ? 'unlock' : 'imei_check')
   const initialProduct = (initialDomain === 'unlock' ? unlock : check).find((product) => product.code === initialProductCode)
@@ -96,7 +89,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
   function validate(event: FormEvent<HTMLFormElement>) {
     setError(null)
     if (!activeCategory) {
-      event.preventDefault(); setError({ field: 'category', message: domain === 'unlock' ? 'Choose a country or service category to see prices.' : 'Choose a report category to see prices.' }); categoryInput.current?.focus(); return
+      event.preventDefault(); setError({ field: 'category', message: domain === 'unlock' ? 'Choose a country or service category to continue.' : 'Choose a report category to continue.' }); categoryInput.current?.focus(); return
     }
     if (!selected || !selected.available) {
       event.preventDefault(); setError({ field: 'service', message: 'Choose an available service to continue.' }); serviceInput.current?.focus(); return
@@ -126,21 +119,20 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
 
   return <form ref={form} className="price-check" action={action} onSubmit={validate} noValidate aria-label={domain === 'unlock' ? 'Choose an unlock service' : 'Choose a phone report'} aria-busy={pending}>
     <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" />
-    <div className="price-check-head"><h2 className="price-check-title" id="price-check-heading">{domain === 'unlock' ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p className="price-check-sub">See the price first. Choose how to pay at the next step.</p></div>
+    <div className="price-check-head"><h2 className="price-check-title" id="price-check-heading">{domain === 'unlock' ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p className="price-check-sub">Choose a service to see its price and delivery time.</p></div>
     {fixedDomain ? <input type="hidden" name="domain" value={domain} /> : <fieldset className="device-browse-options" disabled={pending}><legend className="visually-hidden">What would you like to do?</legend>{(['unlock', 'imei_check'] as const).map((value) => <label key={value}><input type="radio" name="domain" value={value} checked={domain === value} onChange={() => { setDomain(value); clearError() }} /><span><Icon name={value === 'unlock' ? 'lock' : 'search'} />{value === 'unlock' ? 'Unlock Phone' : 'Phone Check'}</span></label>)}</fieldset>}
     <ol className="price-check-steps" aria-label="Order steps">{['Service & price', 'Your details', 'Review & pay'].map((label, index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-done={step > index || undefined}><span aria-hidden="true">{index + 1}</span>{label}</li>)}</ol>
     {products.length ? <>
       <div className="field"><div className="price-check-label-row"><label htmlFor="pc-category">{domain === 'unlock' ? (showOther ? 'Service category' : 'Original carrier country') : 'Report category'}</label>{domain === 'unlock' && countries.length > 0 && other.length > 0 ? <button type="button" className="price-check-text-button" disabled={pending} onClick={() => { setOtherServices(!showOther); setCategory({ ...category, unlock: '' }); setService({ ...service, unlock: '' }); clearError() }}>{showOther ? 'By country' : 'Other services'}<Icon name="arrowRight" /></button> : null}</div>
-        <select id="pc-category" ref={categoryInput} value={activeCategory} disabled={pending} aria-invalid={error?.field === 'category'} aria-describedby={error?.field === 'category' ? 'pc-error' : 'pc-category-help'} onChange={(event) => { setCategory({ ...category, [domain]: event.currentTarget.value }); setService({ ...service, [domain]: '' }); clearError() }}><option value="">{domain === 'unlock' && !showOther ? 'Select original carrier country' : 'Select a category'}</option>{visibleCategories.map((name) => <option key={name} value={name}>{name} · {priceRange(products.filter((product) => product.category === name))}</option>)}</select>
+        <select id="pc-category" ref={categoryInput} value={activeCategory} disabled={pending} aria-invalid={error?.field === 'category'} aria-describedby={error?.field === 'category' ? 'pc-error' : 'pc-category-help'} onChange={(event) => { setCategory({ ...category, [domain]: event.currentTarget.value }); setService({ ...service, [domain]: '' }); clearError() }}><option value="">{domain === 'unlock' && !showOther ? 'Select original carrier country' : 'Select a category'}</option>{visibleCategories.map((name) => <option key={name} value={name}>{name}</option>)}</select>
         <p className="field-note" id="pc-category-help">{domain === 'unlock' && !showOther ? 'Where the phone’s original carrier is based.' : 'Choose the type of information or service you need.'}</p>
       </div>
-      {activeCategory ? <p className="price-check-range"><strong>{priceRange(inCategory)} USD</strong><span>{[...new Set(inCategory.filter((product) => product.available).map((product) => product.etaLabel))].join(' · ')}</span></p> : null}
       <div className="field"><label htmlFor="pc-service">{domain === 'unlock' ? 'Carrier / service' : 'Report'}</label>
         <select id="pc-service" ref={serviceInput} value={selected?.code ?? ''} disabled={pending || !activeCategory} aria-invalid={error?.field === 'service'} aria-describedby={error?.field === 'service' ? 'pc-error' : undefined} onChange={(event) => {
           const code = event.currentTarget.value, product = inCategory.find((entry) => entry.code === code)
           setService({ ...service, [domain]: code }); clearError()
           if (product) { trackFunnelEvent('service_selection', { service_category: domain }); if (domain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: domain }) }
-        }}><option value="">{activeCategory ? 'Choose a service and price' : 'Choose a category first'}</option>{inCategory.map((product) => <option key={product.code} value={product.code} disabled={!product.available}>{product.name} · {formatUsd(product.priceCents)} · {product.etaLabel}{product.available ? '' : ' — unavailable'}</option>)}</select>
+        }}><option value="">{activeCategory ? 'Choose a service' : 'Choose a category first'}</option>{inCategory.map((product) => <option key={product.code} value={product.code} disabled={!product.available}>{product.name} · {formatUsd(product.priceCents)} · {product.etaLabel}{product.available ? '' : ' — unavailable'}</option>)}</select>
         {activeCategory && !inCategory.some((product) => product.available) ? <p className="field-note">No online services are available here right now. <Link href="/contact">Ask support</Link></p> : null}
       </div>
       {selected ? <div className="price-check-result" aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl><p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p>{cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}</div> : null}

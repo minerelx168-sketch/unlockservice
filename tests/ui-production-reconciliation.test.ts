@@ -18,14 +18,17 @@ test('new hero entry points use consented allowlisted funnel transport without r
   assert.match(transport, /iunlockmobileAnalyticsConsent !== 'granted'/)
   assert.match(transport, /allowlistedFunnelParams/)
 })
-test('homepage and FAQ qualify unlock compatibility and advertise only new BEP20 top-ups', () => {
+test('homepage and FAQ qualify unlock compatibility and describe direct card and crypto orders', () => {
   const home = read('app/(marketing)/page.tsx')
   assert.doesNotMatch(home, /Use any SIM|title: 'Permanent'|Financed\? Often still fine|Every other brand receives a code/)
   assert.match(home, /radio bands/)
   const text = FAQ.map((item) => item.answer).join(' ')
-  assert.doesNotMatch(text, /Yes to both|TRC20 or BEP20/)
+  assert.doesNotMatch(text, /Yes to both|TRC20 or BEP20|New top-ups|not a refund to the original payment method/)
   assert.match(text, /USDT or USDC on BNB Smart Chain \(BEP20\)/)
-  assert.match(text, /not a refund to the original payment method/)
+  assert.match(text, /original payment method/)
+  assert.match(text, /card service below \$1/)
+  assert.match(text, /same checkout/)
+  assert.match(text, /account credit after payment/)
 })
 test('hero and trust icons have explicit constrained dimensions', () => {
   const css = read('styles/home.css')
@@ -48,9 +51,8 @@ test('hero price-check CSS is actually imported so assurance icons and quote lay
   assert.match(read('styles/hero-price-check.css'), /\.price-check-assurance svg\s*\{[^}]*width:\s*15px[^}]*height:\s*15px/s)
 })
 
-test('footer privacy copy matches owner-visible identifiers and Unlock history uses orders', () => {
+test('footer avoids misleading privacy and refund claims and Unlock history uses orders', () => {
   const chrome = read('components/site-chrome.tsx')
-  assert.match(chrome, /Full IMEIs visible only to the owner/)
   assert.doesNotMatch(chrome, /Full IMEIs never shown in lists|Refused orders refund in full/)
   const unlock = read('components/unlock-device-entry.tsx')
   assert.match(unlock, /href="\/user\/orders"/)

@@ -35,13 +35,9 @@ test('responsive logo grids match reference column counts and remain scoped to l
   assert.match(css, /\.logo-card:focus-visible/)
 })
 
-test('homepage preserves public price entry points and reviews remain explicitly illustrative', () => {
+test('homepage preserves public service entry points without publishing placeholder reviews', () => {
   const home = read('app/(marketing)/page.tsx')
   assert.match(home, /<HeroPriceCheck unlock=/)
   assert.match(home, /listPublicProviderProducts\('unlock'\)/)
-  assert.match(home, /<Testimonials items=\{SAMPLE_TESTIMONIALS\}/)
-  assert.doesNotMatch(home, /AggregateRating|ratingValue|reviewCount/)
-  const reviews = read('components/testimonials.tsx')
-  assert.match(reviews, /Illustrative examples while verified customer reviews are collected/)
-  assert.doesNotMatch(reviews, /from ['"][^'"]*(?:db|auth|users)['"]|\/api\/admin|AggregateRating|ratingValue|reviewCount/)
+  assert.doesNotMatch(home, /Testimonials|SAMPLE_TESTIMONIALS|AggregateRating|ratingValue|reviewCount/)
 })

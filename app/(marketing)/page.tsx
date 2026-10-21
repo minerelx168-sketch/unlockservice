@@ -3,13 +3,11 @@ import Link from 'next/link'
 import { BrandLogo } from '@/components/brand-logo'
 import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-check'
 import { Icon, type IconName } from '@/components/icons'
-import { Testimonials } from '@/components/testimonials'
 import { BRANDS, CARRIERS } from '@/lib/catalog'
 import { FAQ } from '@/lib/faq'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 import { quickPicks } from '@/lib/quick-picks'
-import { SAMPLE_TESTIMONIALS } from '@/lib/testimonials'
 import { unlockCategory } from '@/lib/unlock-catalog-view'
 import { StructuredData } from './structured-data'
 
@@ -39,7 +37,7 @@ const STEPS: Array<{ title: string; body: string; art: 'imei' | 'review' | 'done
   },
   {
     title: 'Add your IMEI and review',
-    body: 'Dial *#06# to find the 15 digits. Review the requirements before ordering; pay for the selected service by card without creating an account.',
+    body: 'Dial *#06# to find the 15 digits. Add your result email, review the requirements, then choose card or crypto. Card orders below $1 need an account.',
     art: 'review',
   },
   {
@@ -174,7 +172,7 @@ export default function HomePage() {
 
   const heroTiles: Array<{ icon: IconName; title: string; caption: string }> = [
     { icon: 'bolt', title: 'Remote', caption: 'Nothing installed, no shop visit' },
-    { icon: 'shieldCheck', title: 'Held, not charged', caption: 'Credit returns if the network refuses' },
+    { icon: 'shieldCheck', title: 'Pay per order', caption: 'Card or crypto, with the total shown before payment' },
     { icon: 'lock', title: 'Carrier-approved', caption: 'Eligibility and method depend on the selected service' },
     { icon: 'globe', title: `${networks} networks`, caption: `Across ${countries.length} countries, more on request` },
   ]
@@ -212,7 +210,7 @@ export default function HomePage() {
             <p className="t-lead">
               {ordering
                 ? 'Compare prices and delivery times for your original network. Review the service before you pay.'
-                : 'Explore device reports and unlock services. Compare prices and availability, then pay per order without an account.'}
+                : 'Explore device reports and unlock services. Compare prices and availability, then choose card or crypto at checkout.'}
             </p>
 
 
@@ -381,10 +379,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 04 · Reviews — sample content, labelled as such */}
-      <Testimonials items={SAMPLE_TESTIMONIALS} />
-
-      {/* 05 · FAQ */}
+      {/* 04 · FAQ */}
       <section className="section home-section" id="faq">
         <div className="shell faq">
           <div className="section-head">
@@ -420,7 +415,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 06 · Brands */}
+      {/* 05 · Brands */}
       <section className="section section--tint home-section logo-section" id="brands">
         <div className="shell">
           <div className="section-head section-head--center">
@@ -449,7 +444,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 07 · Service hub + help band */}
+      {/* 06 · Service hub + help band */}
       <section className="section home-section" id="services">
         <div className="shell">
           <div className="section-head section-head--center">

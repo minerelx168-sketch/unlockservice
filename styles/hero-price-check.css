@@ -138,10 +138,6 @@
   }
 }
 
-.price-check-range { display: grid; gap: 4px; padding: 12px 14px; margin: -3px 0 0; border-radius: 12px; background: var(--surface-strong); }
-.price-check-range strong { color: var(--ink-strong); font-size: 1rem; }
-.price-check-range span { color: var(--muted); font-size: .8125rem; line-height: 1.5; }
-.price-check-range small { color: var(--muted); font-size: .75rem; }
 .price-check-total { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin: 10px 0 0; color: var(--ink); font-size: .875rem; }
 .price-check-total strong { color: var(--ink-strong); }
 .price-check-total span { width: 100%; color: var(--muted); font-size: .75rem; line-height: 1.5; }
