@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { currentSession } from './auth'
 import { guestCheckoutEnabled } from './guest-checkout'
+import { guestCryptoEnabled } from './guest-crypto'
 import { clearDeviceIntent, readDeviceIntent, writeDeviceIntent } from './device-intent'
 import { deviceDomain, deviceImei, deviceEmail } from './device-intent-value'
 import { listPaidReportProducts } from './paid-reports'
@@ -66,9 +67,11 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   const rawEmail = form.get('email')
   const email = deviceEmail(rawEmail)
   if (rawEmail !== null && !email) return { error: 'Enter a valid email address so we can deliver your result.' }
+  const crypto = form.get('paymentMethod') === 'crypto'
+  if (crypto && !guestCryptoEnabled()) return { error: 'Crypto checkout is temporarily unavailable. Please try again shortly.' }
   await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
-  redirect(guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}` : target)
+  redirect(crypto || guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}${crypto ? '&method=crypto' : ''}` : target)
 }
 
 /** Save a changed IMEI before leaving checkout for trusted payment confirmation. */

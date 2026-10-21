@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS guest_checkouts (
   environment TEXT NOT NULL,
   checkout_id TEXT UNIQUE, plan_id TEXT, checkout_url TEXT,
   payment_id TEXT UNIQUE,
+  payment_method TEXT NOT NULL DEFAULT 'card',
+  crypto_invoice_reference TEXT REFERENCES invoices(reference),
   state TEXT NOT NULL DEFAULT 'pending',
   user_id INTEGER REFERENCES users(id),
   report_id INTEGER UNIQUE REFERENCES paid_report_orders(id),
@@ -36,7 +38,7 @@ CREATE TABLE IF NOT EXISTS guest_checkouts (
   review_reason TEXT,
   last_error TEXT,
   refund_requested_at TEXT,
-  receipt_sent_at TEXT, result_sent_at TEXT,
+  receipt_sent_at TEXT, result_sent_at TEXT, refund_notice_sent_at TEXT,
   email_attempts INTEGER NOT NULL DEFAULT 0,
   email_next_at INTEGER NOT NULL DEFAULT 0,
   lease_until INTEGER NOT NULL DEFAULT 0,
@@ -680,6 +682,10 @@ function migrationApplied(connection: Database.Database, version: string): boole
 /** Additive compatibility migrations. Existing tables and financial rows remain readable. */
 function migrate(connection: Database.Database) {
   connection.transaction(() => {
+    addColumn(connection, 'guest_checkouts', "payment_method TEXT NOT NULL DEFAULT 'card'")
+    addColumn(connection, 'guest_checkouts', 'crypto_invoice_reference TEXT REFERENCES invoices(reference)')
+    addColumn(connection, 'guest_checkouts', 'refund_notice_sent_at TEXT')
+    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')
     addColumn(connection, 'users', 'email_verified_at TEXT')
     addColumn(connection, 'users', 'banned_at TEXT')
     addColumn(connection, 'users', "avatar_style TEXT NOT NULL DEFAULT 'violet'")

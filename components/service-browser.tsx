@@ -37,6 +37,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
   const inputRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const approved = useRef(false)
+  const paymentMethod = useRef<HTMLInputElement>(null)
   const startedRef = useRef(false)
   const isUnlock = domain === 'unlock'
   const selected = products.find((product) => product.productCode === selectedCode)
@@ -77,7 +78,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
     <nav className="service-browser__tabs" aria-label={`${isUnlock ? 'Unlock' : 'Phone check'} workspace`}><span aria-current="page"><Icon name={isUnlock ? 'lock' : 'search'} />New order</span><Link href="/track"><Icon name="clock" />Track an order</Link></nav>
     <header className="service-browser__header"><span className="service-browser__heading-icon"><Icon name={isUnlock ? 'lock' : 'device'} /></span><div><h2 id={`${domain}-browse-heading`}>{isUnlock ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p>Compare prices first. Enter your details once and pay without an account.</p></div></header>
     <form ref={formRef} className="service-browser__form" action={action} onSubmit={handleSubmit} noValidate aria-busy={pending}>
-      <input type="hidden" name="domain" value={domain} /><input type="hidden" name="productCode" value={selectedCode} />
+      <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" /><input type="hidden" name="domain" value={domain} /><input type="hidden" name="productCode" value={selectedCode} />
       <ServicePicker options={options} value={selectedCode} onChange={(code) => {
         setSelectedCode(code); setFieldError(null); approved.current = false
         trackFunnelEvent('service_selection', { service_category: domain })
@@ -86,7 +87,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
       {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><p>{serviceDisplayText(selected.summary)}</p></div><div className="service-selected-price"><strong>{formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
       {selected && available ? <>
         <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong><span>Includes {formatUsd(fee)} card fee (5%). Any applicable tax is shown before payment.</span></p>
-        {total < 100 ? <p className="price-check-minimum">This price is below the $1.00 card minimum. Existing account credit remains available. <Link href="/contact">Ask about payment options</Link></p> : null}
+        {total < 100 ? <p className="price-check-minimum">Card payments start at $1.00. Choose crypto at the next step for no minimum and no processing fee.</p> : null}
         <div className="service-browser__field"><div className="service-browser__label-row"><label htmlFor={inputId}>IMEI number</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls={`${inputId}-guide`} onClick={() => setHelpOpen(!helpOpen)}>Find my IMEI<Icon name="question" /></button></div>
           {helpOpen ? <p className="price-check-imei-guide" id={`${inputId}-guide`}>Dial <kbd>*#06#</kbd> on the phone, or open Settings → General → About. Paste the 15-digit IMEI here. Spaces and dashes are accepted.</p> : null}
           <div className="service-browser__imei" data-invalid={fieldError === 'imei' || undefined}><Icon name="device" /><input ref={inputRef} id={inputId} name="imei" type="text" inputMode="numeric" autoComplete="off" spellCheck={false} enterKeyHint="next" value={imei} onChange={(event) => { if (event.currentTarget.value && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: domain }) } setImei(event.currentTarget.value); setFieldError(null); approved.current = false }} placeholder="Paste or enter 15-digit IMEI" disabled={pending} aria-invalid={fieldError === 'imei'} aria-describedby={`${inputId}-hint`} />{imei ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setFieldError(null); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}</div>
@@ -97,7 +98,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
       {fieldError === 'service' ? <p className="service-browser__error" role="alert">Choose an available service to continue.</p> : null}
       {state.error ? <p className="service-browser__error" role="alert">{state.error}</p> : null}
       <div className="service-browser__actions"><button type="submit" className="button button--primary" disabled={pending || !available}>{pending ? 'Opening secure checkout…' : isUnlock ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></button><p className="service-browser__hint">{!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service.' : isUnlock ? 'Review your order before paying. Unlock processing starts after payment.' : 'View your report preview before paying. The real check starts after payment.'}</p><ul className="service-assurance" aria-label="Assurances"><li><Icon name="shieldCheck" />Clear total</li><li><Icon name="lock" />Private result link</li><li><Icon name="clock" />Live status</li></ul></div>
-      {selected ? <OrderPreviewDialog open={previewOpen} product={{ ...selected, code: selected.productCode }} domain={domain} imei={digits} email={email.trim()} pending={pending} error={state.error} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={() => { approved.current = true; trackFunnelEvent('order_preview_continue', { service_category: domain, currency: 'USD', value: total / 100 }); formRef.current?.requestSubmit() }} /> : null}
+      {selected ? <OrderPreviewDialog open={previewOpen} product={{ ...selected, code: selected.productCode }} domain={domain} imei={digits} email={email.trim()} pending={pending} error={state.error} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={(method) => { if (paymentMethod.current) paymentMethod.current.value = method; approved.current = true; trackFunnelEvent('order_preview_continue', { service_category: domain, currency: 'USD', value: (method === 'crypto' ? selected.priceCents : total) / 100, payment_method: method }); formRef.current?.requestSubmit() }} /> : null}
     </form>
   </section>
 }

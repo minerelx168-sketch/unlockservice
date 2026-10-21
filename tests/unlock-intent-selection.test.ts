@@ -7,7 +7,7 @@ import ts from 'typescript'
 import { deviceDomain, deviceImei, deviceEmail } from '../lib/device-intent-value'
 
 // Execute the server action with boundary adapters; never call a provider or real cookies.
-function actionHarness(guestEnabled = false) {
+function actionHarness(guestEnabled = false, cryptoEnabled = false) {
   const writes: unknown[][] = []
   const products = [{ productCode: 'UNLOCK_ACTIVE', status: 'available' }, { productCode: 'UNLOCK_PAUSED', status: 'coming_soon' }]
   const moduleRecord = { exports: {} as { showUnlockServicesAction: (state: object, form: FormData) => Promise<{ error?: string }>; continueDeviceServiceAction: (state: object, form: FormData) => Promise<{ error?: string }> } }
@@ -16,6 +16,7 @@ function actionHarness(guestEnabled = false) {
     'next/navigation': { redirect: (url: string) => { throw new Error(`REDIRECT:${url}`) } },
     './auth': { currentSession: async () => null },
     './guest-checkout': { guestCheckoutEnabled: () => guestEnabled },
+    './guest-crypto': { guestCryptoEnabled: () => cryptoEnabled },
     './continuation': { withContinuation: () => '' },
     './device-intent': { writeDeviceIntent: async (...args: unknown[]) => { writes.push(args) } },
     './device-intent-value': { deviceDomain, deviceImei, deviceEmail },
@@ -72,5 +73,21 @@ test('invalid delivery email cannot overwrite the existing checkout draft', asyn
   const data=form('490154203237518','UNLOCK_ACTIVE')
   data.set('domain','unlock');data.set('email','bad email')
   assert.ok((await continueAction({},data)).error)
+  assert.equal(writes.length,0)
+})
+
+test('crypto navigation preserves the draft and payment choice even when card checkout is disabled', async () => {
+  const {continueAction,writes}=actionHarness(false,true)
+  const data=form('490154203237518','UNLOCK_ACTIVE')
+  data.set('domain','unlock');data.set('email','buyer@example.com');data.set('paymentMethod','crypto')
+  await assert.rejects(continueAction({},data),/REDIRECT:\/checkout\?product=UNLOCK_ACTIVE&method=crypto$/)
+  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com'])
+})
+
+test('unavailable crypto does not silently switch the payment method or overwrite the draft', async () => {
+  const {continueAction,writes}=actionHarness(true,false)
+  const data=form('490154203237518','UNLOCK_ACTIVE')
+  data.set('domain','unlock');data.set('email','buyer@example.com');data.set('paymentMethod','crypto')
+  assert.match((await continueAction({},data)).error??'',/temporarily unavailable/)
   assert.equal(writes.length,0)
 })

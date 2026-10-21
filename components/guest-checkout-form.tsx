@@ -6,22 +6,27 @@ import { isValidImei, normalizeImei } from '@/lib/imei'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { deviceEmail } from '@/lib/device-intent-value'
-export function GuestCheckoutForm({product,feeCents,initialImei,initialEmail='',enabled,belowCardMinimum}:{product:{code:string;name:string;priceCents:number;domain?:'unlock'|'imei_check'};feeCents:number;initialImei:string;initialEmail?:string;enabled:boolean;belowCardMinimum:boolean}) {
+import { Icon } from './icons'
+export function GuestCheckoutForm({product,feeCents,initialImei,initialEmail='',enabled,belowCardMinimum,method,onMethodChange,cryptoEnabled,cryptoRoutes}:{product:{code:string;name:string;priceCents:number;domain?:'unlock'|'imei_check'};feeCents:number;initialImei:string;initialEmail?:string;enabled:boolean;belowCardMinimum:boolean;method:'card'|'crypto';onMethodChange:(method:'card'|'crypto')=>void;cryptoEnabled:boolean;cryptoRoutes:{id:string;label:string;asset:string}[]}) {
   const [imei,setImei]=useState(initialImei),[email,setEmail]=useState(initialEmail),[busy,setBusy]=useState(false),[error,setError]=useState('')
   const [editing,setEditing]=useState(!isValidImei(normalizeImei(initialImei)) || !deviceEmail(initialEmail))
   const key=useRef(''),lock=useRef(false)
+  const [routeId,setRouteId]=useState(cryptoRoutes[0]?.id??'')
+  const isCrypto=method==='crypto'
+  function changeMethod() { key.current='';setError('');onMethodChange(isCrypto?'card':'crypto') }
   async function submit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if(lock.current) return
+    if(isCrypto ? !cryptoEnabled || !routeId : !enabled || belowCardMinimum) return
     if(!isValidImei(normalizeImei(imei))) {setError('Check your 15-digit IMEI. Dial *#06# to find it.');return}
     if(!deviceEmail(email)) {setEditing(true);setError('Enter a valid email address for your result.');return}
     lock.current=true;setBusy(true);setError('')
     if(!key.current) key.current=crypto.randomUUID()
     try {
-      trackFunnelEvent('begin_checkout',{service_category:product.domain??'guest_service',value:product.priceCents/100,currency:'USD'})
+      trackFunnelEvent('begin_checkout',{service_category:product.domain??'guest_service',value:product.priceCents/100,currency:'USD',payment_method:method})
       const analyticsContext=await paymentAnalyticsContext()
-      const response=await fetch('/api/checkout/guest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productCode:product.code,
-        imei,email,expectedPriceCents:product.priceCents,requestKey:key.current,acceptedTerms:true,analyticsContext})})
+      const response=await fetch(isCrypto?'/api/checkout/crypto':'/api/checkout/guest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productCode:product.code,
+        imei,email,expectedPriceCents:product.priceCents,requestKey:key.current,acceptedTerms:true,analyticsContext,...(isCrypto?{routeId}:{})})})
       const data=await response.json()
       if(!response.ok || typeof data.url!=='string') throw new Error(data.error || 'Unable to open checkout.')
       const target=new URL(data.url,window.location.origin)
@@ -40,11 +45,13 @@ export function GuestCheckoutForm({product,feeCents,initialImei,initialEmail='',
       onChange={e=>{setEmail(e.target.value);key.current=''}} placeholder="you@example.com" aria-describedby="guest-email-hint" />
     <small id="guest-email-hint">Your confirmation, private tracking link and result go here. No account or password needed.</small>
     </>}
+    {isCrypto ? <div className="guest-crypto-choice"><strong>Crypto · No fee · No minimum</strong><label htmlFor="guest-crypto-asset">Pay with</label><select id="guest-crypto-asset" value={routeId} disabled={busy || !cryptoEnabled} onChange={event=>{setRouteId(event.target.value);key.current=''}}>{cryptoRoutes.map(route=><option key={route.id} value={route.id}>{route.label}</option>)}</select><small>BNB Smart Chain (BEP-20) only. Network or exchange fees may apply.</small></div> : null}
     <label className="guest-agreement"><input type="checkbox" required disabled={busy} /><span>I own this device or am authorized to service it. I have checked the IMEI and service requirements and agree to the <Link href="/terms" target="_blank">Terms</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link>.</span></label>
     {error ? <p role="alert" className="guest-error">{error}</p>:null}
-    <button className="button button--primary" type="submit" disabled={busy || !enabled || belowCardMinimum}>{belowCardMinimum ? 'Card checkout minimum: $1.00' : busy ? 'Opening secure payment…' : `Pay ${formatUsd(product.priceCents+feeCents)} by card`}</button>
-    <p className="guest-note">One order. No wallet top-up. Any tax required by the payment provider is shown before you confirm payment.</p>
-    {belowCardMinimum ? <p role="status" className="guest-error">This service costs less than Whop’s $1.00 card minimum, including the card fee. We have kept the original price. You can <Link href={`/user/reports/new?product=${encodeURIComponent(product.code)}`}>use an existing account balance</Link> or <Link href="/support">contact support</Link>.</p>:null}
-    {!enabled ? <p role="status">Direct card checkout is temporarily unavailable. Please contact support or <Link href={`/user/reports/new?product=${encodeURIComponent(product.code)}`}>use your existing account balance</Link>.</p>:null}
+    <button className="button button--primary" type="submit" disabled={busy || (isCrypto ? !cryptoEnabled || !routeId : !enabled || belowCardMinimum)}>{busy ? 'Opening secure payment…' : isCrypto ? `Continue with crypto · ${formatUsd(product.priceCents)}` : belowCardMinimum ? 'Card checkout minimum: $1.00' : `Pay ${formatUsd(product.priceCents+feeCents)} by card`}</button>
+    <button type="button" className="guest-payment-alternative" disabled={busy} onClick={changeMethod}><Icon name="wallet" /><span>{isCrypto?'Pay by card instead (+5%)':'Pay with crypto'}</span>{!isCrypto?<span className="guest-no-fee">No fee · No minimum</span>:null}</button>
+    <p className="guest-note">{isCrypto?'Your QR code and exact transfer amount appear next. The service starts after your transfer is confirmed.':'One order. No wallet top-up. Any tax required by the payment provider is shown before you confirm payment.'}</p>
+    {!isCrypto && belowCardMinimum ? <p role="status" className="guest-note">Card payments start at $1.00. You can pay this service’s price with crypto, with no minimum or processing fee.</p>:null}
+    {(isCrypto ? !cryptoEnabled : !enabled) ? <p role="status">{isCrypto?'Crypto':'Card'} checkout is temporarily unavailable. Please choose another payment method or <Link href="/support">contact support</Link>.</p>:null}
   </form>
 }

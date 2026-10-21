@@ -69,6 +69,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
   const serviceInput = useRef<HTMLSelectElement>(null)
   const started = useRef<Record<string, boolean>>({})
   const approved = useRef(false)
+  const paymentMethod = useRef<HTMLInputElement>(null)
   const products = domain === 'unlock' ? unlock : check
   const categories = useMemo(() => orderedCategories(products), [products])
   const countries = categories.filter((name) => COUNTRIES.includes(name))
@@ -116,13 +117,15 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
     trackFunnelEvent('order_preview_viewed', { service_category: domain, currency: 'USD', value: total / 100 })
     setPreviewOpen(true)
   }
-  function continueToPayment() {
+  function continueToPayment(method: 'card' | 'crypto') {
+    if (paymentMethod.current) paymentMethod.current.value = method
     approved.current = true
-    trackFunnelEvent('order_preview_continue', { service_category: domain, currency: 'USD', value: total / 100 })
+    trackFunnelEvent('order_preview_continue', { service_category: domain, currency: 'USD', value: (method === 'crypto' ? selected!.priceCents : total) / 100, payment_method: method })
     form.current?.requestSubmit()
   }
 
   return <form ref={form} className="price-check" action={action} onSubmit={validate} noValidate aria-label={domain === 'unlock' ? 'Choose an unlock service' : 'Choose a phone report'} aria-busy={pending}>
+    <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" />
     <div className="price-check-head"><h2 className="price-check-title" id="price-check-heading">{domain === 'unlock' ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p className="price-check-sub">See the price first. No account or wallet top-up needed.</p></div>
     {fixedDomain ? <input type="hidden" name="domain" value={domain} /> : <fieldset className="device-browse-options" disabled={pending}><legend className="visually-hidden">What would you like to do?</legend>{(['unlock', 'imei_check'] as const).map((value) => <label key={value}><input type="radio" name="domain" value={value} checked={domain === value} onChange={() => { setDomain(value); clearError() }} /><span><Icon name={value === 'unlock' ? 'lock' : 'search'} />{value === 'unlock' ? 'Unlock Phone' : 'Phone Check'}</span></label>)}</fieldset>}
     <ol className="price-check-steps" aria-label="Order steps">{['Service & price', 'Your details', 'Review & pay'].map((label, index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-done={step > index || undefined}><span aria-hidden="true">{index + 1}</span>{label}</li>)}</ol>
@@ -140,7 +143,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         }}><option value="">{activeCategory ? 'Choose a service and price' : 'Choose a category first'}</option>{inCategory.map((product) => <option key={product.code} value={product.code} disabled={!product.available}>{product.name} · {formatUsd(product.priceCents)} · {product.etaLabel}{product.available ? '' : ' — unavailable'}</option>)}</select>
         {activeCategory && !inCategory.some((product) => product.available) ? <p className="field-note">No online services are available here right now. <Link href="/contact">Ask support</Link></p> : null}
       </div>
-      {selected ? <div className="price-check-result" aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl><p className="price-check-total">Card total <strong>{formatUsd(total)}</strong><span>Includes {formatUsd(fee)} card fee (5%). Any applicable tax is shown before payment.</span></p>{total < 100 ? <p className="price-check-minimum">This price is below the $1.00 card minimum. Existing account credit remains available. <Link href="/contact">Ask about payment options</Link></p> : null}</div> : null}
+      {selected ? <div className="price-check-result" aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl><p className="price-check-total">Card total <strong>{formatUsd(total)}</strong><span>Includes {formatUsd(fee)} card fee (5%). Any applicable tax is shown before payment.</span></p>{total < 100 ? <p className="price-check-minimum">Card payments start at $1.00. Choose crypto at the next step for no minimum and no processing fee.</p> : null}</div> : null}
       {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><p>{selected.summary}</p><p>Review eligibility before ordering. IMEI format validation does not confirm eligibility.</p></details> : null}
     </> : <p className="alert" role="status"><Icon name="info" /><span>No services are listed right now. <Link href="/contact">Contact support</Link> for availability.</span></p>}
     {selected?.available ? <div className="price-check-details">

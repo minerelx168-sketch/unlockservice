@@ -154,9 +154,22 @@ function invoiceRow(reference: string, userId?: number): InvoiceRow | undefined 
 }
 
 export function createInvoice(userId: number, gatewayId: string, creditCents: number): Invoice {
+  return createInvoiceForPurpose(userId, gatewayId, creditCents, false)
+}
+
+/** Server-only per-order invoice. It never changes account top-up limits. */
+export function createGuestOrderInvoice(userId: number, gatewayId: string, serviceCents: number): Invoice {
+  const owner = db().prepare("SELECT 1 FROM users WHERE id=? AND status='guest' AND account_type='guest' AND password_hash='!guest-no-login'").get(userId)
+  if (!owner) throw new PaymentError('Guest payment owner is invalid.')
+  return createInvoiceForPurpose(userId, gatewayId, serviceCents, true)
+}
+
+function createInvoiceForPurpose(userId: number, gatewayId: string, creditCents: number, guestOrder: boolean): Invoice {
   const gateway = gatewayById(gatewayId)
   if (!gateway) throw new PaymentError('No payment method is configured. Contact support before sending funds.')
-  if (!Number.isSafeInteger(creditCents) || creditCents < MIN_TOPUP_CENTS || creditCents > MAX_TOPUP_CENTS) {
+  if (guestOrder && (gateway.chainId !== 56 || gateway.chainKind !== 'evm' || gateway.feeBasisPoints !== 0)) throw new PaymentError('Fee-free BNB Smart Chain payment is unavailable.')
+  if (!Number.isSafeInteger(creditCents) || creditCents < (guestOrder ? 1 : MIN_TOPUP_CENTS) || creditCents > (guestOrder ? 100_000 : MAX_TOPUP_CENTS)) {
+    if (guestOrder) throw new PaymentError('The service amount is invalid.')
     throw new PaymentError(
       `Enter an amount from $${(MIN_TOPUP_CENTS / 100).toFixed(2)} to $${(MAX_TOPUP_CENTS / 100).toFixed(2)}, with no more than 2 decimal places.`,
     )
@@ -196,6 +209,7 @@ export function createInvoice(userId: number, gatewayId: string, creditCents: nu
        uncoded request. The customer must paste a transaction ID; it cannot
        auto-credit and ownership remains subject to human review. */
     const paymentAmountE4 = allocatePaymentAmount(gateway.id, creditCents + fee)
+    if (guestOrder && paymentAmountE4 === null) throw new PaymentError('Crypto checkout is temporarily unavailable for this amount. Choose another available token or contact support; do not send funds.')
     const reference = randomBytes(16).toString('hex')
     db()
       .prepare(

@@ -18,7 +18,7 @@ export function GuestOrderResult({initial,accessKey}:{initial:Result;accessKey:s
     } catch {if(!stopped)setError('Unable to refresh right now. Your order is safe; try reloading this page.')}},10000)
     return()=>{stopped=true;clearInterval(timer)}
   },[initial.reference,accessKey,result.state])
-  const message=copy[result.state]??copy.review
+  const message=result.paymentMethod==='crypto' && result.state==='refund_pending' ? ['Crypto refund needs review','We could not deliver this service. Contact support with your order reference so our team can confirm a safe receiving wallet and arrange your crypto refund. Do not send another payment.'] : result.paymentMethod==='crypto' && result.state==='refunded' ? ['Payment refunded','Your crypto refund has been recorded. Contact support with your order reference if you need the transfer details.'] : copy[result.state]??copy.review
   const isUnlock=result.domain==='unlock'
   const terminal=result.state==='completed'||result.refused||['refund_pending','refunded'].includes(result.state)
   const outcome=result.refused?'Refused':result.state==='refunded'?'Refunded':result.state==='refund_pending'?'Refund pending':'Completed'
@@ -27,6 +27,7 @@ export function GuestOrderResult({initial,accessKey}:{initial:Result;accessKey:s
   return <section className="guest-shell guest-result"><span className="eyebrow">{isUnlock?'UNLOCK ORDER':'PHONE CHECK ORDER'}</span><h1 aria-live="polite">{title}</h1><p>{message[1]}</p>
     <ol className="guest-progress" aria-label="Order progress">{steps.map((step,index)=><li key={index} data-done={step.done?'true':'false'} aria-current={!terminal&&index===(result.submitted?1:0)?'step':undefined}><span aria-hidden="true">{step.done?'✓':index+1}</span><strong>{step.name}</strong>{!step.done?<small>Pending</small>:null}</li>)}</ol>
     <article className="guest-card"><h2>{result.productName}</h2><p className="guest-reference">Order reference: {result.reference}</p><p>Order total before tax: <strong>{formatUsd(result.priceCents+result.feeCents)}</strong></p>
+      {result.cryptoReceivedCents!==null && result.cryptoReceivedCents>result.priceCents ? <p className="guest-note">We received {formatUsd(result.cryptoReceivedCents)} for this {formatUsd(result.priceCents)} service. Contact support with your order reference to arrange the return of the extra {formatUsd(result.cryptoReceivedCents-result.priceCents)}.</p>:null}
       {!terminal&&result.paymentReceived?<p className="guest-note">{isUnlock?'We submit your paid order to the service provider and update this page when they respond.':'Your paid check starts automatically. The full report appears here as soon as the provider returns it.'} No need to keep this page open.</p>:null}
       {result.report ? <div className="guest-report"><p>IMEI: {result.report.imei??result.report.maskedImei}</p>{result.report.providerCode ? <pre>{result.report.providerCode}</pre> : result.report.report?.sections.map((section,index)=><section key={index}><h3>{section.title}</h3><dl>{section.items.map((item,i)=><div key={i}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl></section>)}</div>:null}
       {error?<p role="status">{error}</p>:null}<p className="guest-note">Keep this link private. Anyone with it can view this order and its result.</p>

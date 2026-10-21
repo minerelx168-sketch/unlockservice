@@ -12,6 +12,7 @@ import { client, whopCheckoutEnabled, whopConfiguration, safeWhopCheckoutUrl, Wh
 import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
 import { prepareGuestAccount } from './guest-account'
+import { settleGuestCryptoPayment } from './guest-crypto'
 
 // Verified against the live Whop create-checkout API: minimum plan total is USD 1.00.
 export const GUEST_CARD_MIN_TOTAL_CENTS = 100
@@ -20,16 +21,18 @@ export type GuestCheckout = {
   reference: string; request_key: string; email: string; product_code: string; product_name: string
   imei_encrypted: string; price_cents: number; fee_cents: number; account_id: string; product_id: string
   environment: string; checkout_id: string | null; plan_id: string | null; checkout_url: string | null
+  payment_method: 'card' | 'crypto'; crypto_invoice_reference: string | null
   payment_id: string | null; state: string; user_id: number | null; report_id: number | null
   paid_at: string | null; processor_updated_at: string | null; review_reason: string | null; last_error: string | null
-  refund_requested_at: string | null; receipt_sent_at: string | null; result_sent_at: string | null
+  refund_requested_at: string | null; refund_notice_sent_at: string | null; receipt_sent_at: string | null; result_sent_at: string | null
   email_attempts: number; email_next_at: number; client_id: string | null; session_id: string | null
   analytics_state: string; created_at: string
 }
-export function guestCheckoutEnabled() {
-  return process.env.IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED === '1' && whopCheckoutEnabled()
-    && emailDeliveryConfigured() && (process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET?.trim().length ?? 0) >= 32
+export function guestCheckoutCoreEnabled() {
+  return process.env.IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED === '1' && emailDeliveryConfigured()
+    && (process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET?.trim().length ?? 0) >= 32
 }
+export function guestCheckoutEnabled() { return guestCheckoutCoreEnabled() && whopCheckoutEnabled() }
 function linkKey(reference: string) {
   const secret = process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET?.trim()
   if (!secret || secret.length < 32) throw new Error('Guest order links unavailable.')
@@ -61,7 +64,7 @@ export async function createGuestCheckout(input: {
     const existing = db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as GuestCheckout | undefined
     if (existing) {
       if (existing.email !== email || existing.product_code !== input.productCode || decryptPaidReportImei(existing.imei_encrypted) !== imei
-        || existing.price_cents !== input.expectedPriceCents || existing.account_id !== config.accountId || existing.environment !== config.mode) {
+        || existing.price_cents !== input.expectedPriceCents || existing.payment_method !== 'card' || existing.account_id !== config.accountId || existing.environment !== config.mode) {
         throw new WhopPaymentError('This checkout belongs to a different selection. Reload to start a new order.', 409)
       }
       return existing
@@ -119,6 +122,7 @@ export function settleGuestPayment(payment: Whop.Payment): string {
   return db().transaction(()=>{
     const row=getGuestCheckout(ref)
     if (!row) return 'unmatched'
+    if (row.payment_method !== 'card') throw new Error('Guest payment method mismatch.')
     if (!row.checkout_id) throw new Error('Checkout is still being saved.')
     if (row.account_id!==payment.account_id || row.environment!==config.mode || row.product_id!==payment.product_id
       || row.plan_id!==payment.plan_id || row.checkout_id!==payment.checkout_configuration_id
@@ -157,8 +161,10 @@ export function settleGuestPayment(payment: Whop.Payment): string {
 function guestReport(row: GuestCheckout) { return row.user_id && row.report_id ? getPaidReport(row.user_id,row.report_id) : undefined }
 export function guestResult(row: GuestCheckout) {
   const report=guestReport(row)
+  const received=row.payment_method==='crypto' && row.crypto_invoice_reference && row.user_id
+    ? db().prepare("SELECT credit_amount_cents FROM invoices WHERE reference=? AND user_id=? AND status='success'").get(row.crypto_invoice_reference,row.user_id) as {credit_amount_cents:number}|undefined : undefined
   const progress=row.report_id && row.user_id ? db().prepare('SELECT provider_order_id FROM paid_report_orders WHERE id=? AND user_id=?').get(row.report_id,row.user_id) as {provider_order_id:string|null}|undefined : undefined
-  return { reference:row.reference, productName:row.product_name, priceCents:row.price_cents, feeCents:row.fee_cents,
+  return { reference:row.reference, paymentMethod:row.payment_method, cryptoReceivedCents:received?.credit_amount_cents??null, productName:row.product_name, priceCents:row.price_cents, feeCents:row.fee_cents,
     domain:getPaidReportProduct(row.product_code)?.domain??'imei_check',
     paymentReceived:Boolean(row.paid_at && row.state!=='pending'),
     submitted:Boolean(progress?.provider_order_id || report?.status==='completed'),
@@ -200,8 +206,10 @@ function resultText(row:GuestCheckout) {
 }
 async function notifyGuest(row:GuestCheckout) {
   const result=guestResult(row), final=['completed','refunded'].includes(result.state)
+  const refundNotice=row.payment_method==='crypto' && row.state==='refund_pending'
+  const sentColumn=refundNotice?'refund_notice_sent_at':final?'result_sent_at':'receipt_sent_at'
   if (!row.paid_at || !row.payment_id || !['paid','processing','completed','refund_pending','refunded'].includes(row.state)
-    || (final ? row.result_sent_at : row.receipt_sent_at) || row.email_next_at>Date.now()) return
+    || row[sentColumn] || row.email_next_at>Date.now()) return
   const lock=db().prepare('UPDATE guest_checkouts SET lease_until=? WHERE reference=? AND lease_until<=?').run(Date.now()+30000,row.reference,Date.now())
   if (!lock.changes) return
   try {
@@ -211,10 +219,10 @@ async function notifyGuest(row:GuestCheckout) {
     catch { console.error('[guest-checkout] optional account activation unavailable') }
     const accountUrl=accountPath?publicOrigin()+accountPath:null
     const accountText=accountUrl?`\n\nOptional: save this order to your customer account. Private tracking works without a password. Saving to an existing account may require sign-in. This account link expires 7 days after issue.\n${accountUrl}`:''
-    const subject=final ? result.state==='completed' ? 'Your device service result is ready' : 'Your order payment has been refunded' : 'Payment received — track your device service'
-    const body=`${row.product_name}\nOrder: ${row.reference}\n\n`+(final ? result.state==='completed' ? resultText(row) : 'Your payment was refunded to the original payment method. Bank processing time may vary.' : 'We have received your payment. Keep this private link to check progress without signing in.')
-    await sendTransactionalEmail(row.email,subject,`<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escape(body)}</pre><p><a href="${escape(url)}">View your order and result</a></p>${accountUrl?`<p><a href="${escape(accountUrl)}">Save this order to my account</a> (optional, expires 7 days after issue). Private tracking works without a password. Saving to an existing account may require sign-in.</p>`:''}`,`${body}\n\n${url}${accountText}`,{idempotencyKey:`guest/${row.reference}/${final?result.state:'receipt'}`})
-    db().prepare(`UPDATE guest_checkouts SET ${final?'result_sent_at':'receipt_sent_at'}=datetime('now'),email_attempts=0,email_next_at=0 WHERE reference=?`).run(row.reference)
+    const subject=final ? result.state==='completed' ? 'Your device service result is ready' : 'Your order payment has been refunded' : row.state==='refund_pending' && row.payment_method==='crypto' ? 'Your crypto order needs refund assistance' : 'Payment received — track your device service'
+    const body=`${row.product_name}\nOrder: ${row.reference}\n\n`+(final ? result.state==='completed' ? resultText(row) : (row.payment_method==='crypto' ? 'Your crypto refund has been recorded. Contact support if you need help confirming receipt.' : 'Your payment was refunded to the original payment method. Bank processing time may vary.') : row.state==='refund_pending' && row.payment_method==='crypto' ? 'We could not deliver this service. Contact support with your order reference to arrange your crypto refund. Do not send another payment.' : 'We have received your payment. Keep this private link to check progress without signing in.')
+    await sendTransactionalEmail(row.email,subject,`<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escape(body)}</pre><p><a href="${escape(url)}">View your order and result</a></p>${accountUrl?`<p><a href="${escape(accountUrl)}">Save this order to my account</a> (optional, expires 7 days after issue). Private tracking works without a password. Saving to an existing account may require sign-in.</p>`:''}`,`${body}\n\n${url}${accountText}`,{idempotencyKey:`guest/${row.reference}/${refundNotice?'crypto-refund-assistance':final?result.state:'receipt'}`})
+    db().prepare(`UPDATE guest_checkouts SET ${sentColumn}=datetime('now'),email_attempts=0,email_next_at=0 WHERE reference=?`).run(row.reference)
   } catch {
     db().prepare('UPDATE guest_checkouts SET email_attempts=email_attempts+1,email_next_at=? WHERE reference=?')
       .run(Date.now()+Math.min(3600000,30000*2**Math.min(row.email_attempts,7)),row.reference)
@@ -240,18 +248,20 @@ async function guestAnalytics(row:GuestCheckout) {
 /** Existing signed webhook is primary; bounded API reconciliation recovers missed webhooks. */
 export async function processGuestCheckouts(limit=5) {
   const config=whopConfiguration(),stats={checked:0,errors:0}
-  if(!config) return stats
-  const rows=db().prepare(`SELECT * FROM guest_checkouts WHERE environment=? AND account_id=? AND checkout_id IS NOT NULL
+  const rows=db().prepare(`SELECT * FROM guest_checkouts WHERE ((payment_method='card' AND environment=? AND account_id=? AND checkout_id IS NOT NULL) OR (payment_method='crypto' AND environment='live' AND crypto_invoice_reference IS NOT NULL))
     AND (checked_at IS NULL OR checked_at<=datetime('now','-1 minute'))
-    AND (created_at>=datetime('now','-7 days') OR state IN ('paid','processing','refund_pending'))
-    ORDER BY COALESCE(checked_at,created_at) LIMIT ?`).all(config.mode,config.accountId,Math.max(1,Math.min(limit,10))) as GuestCheckout[]
+    AND (created_at>=datetime('now','-7 days') OR state IN ('paid','processing','refund_pending')
+      OR (payment_method='crypto' AND state='pending' AND review_reason IS NULL
+        AND EXISTS(SELECT 1 FROM invoices i WHERE i.reference=guest_checkouts.crypto_invoice_reference AND i.status='success')))
+    ORDER BY COALESCE(checked_at,created_at) LIMIT ?`).all(config?.mode??'',config?.accountId??'',Math.max(1,Math.min(limit,10))) as GuestCheckout[]
   const deadline=Date.now()+45000
   for(let row of rows) {
     if(Date.now()>deadline) break
     db().prepare("UPDATE guest_checkouts SET checked_at=datetime('now') WHERE reference=?").run(row.reference)
     try {
-      if(row.payment_id) settleGuestPayment(await client(config).payments.retrieve({id:row.payment_id}))
-      else if(row.plan_id) {
+      if(row.payment_method==='crypto') settleGuestCryptoPayment(row.reference)
+      else if(config && row.payment_id) settleGuestPayment(await client(config).payments.retrieve({id:row.payment_id}))
+      else if(config && row.payment_method==='card' && row.plan_id) {
         const page=await client(config).payments.list({plan_id:row.plan_id,first:10})
         for(const payment of page.data) if(payment.metadata?.guest_reference===row.reference) settleGuestPayment(await client(config).payments.retrieve({id:payment.id}))
       }
@@ -262,7 +272,7 @@ export async function processGuestCheckouts(limit=5) {
         db().prepare("UPDATE guest_checkouts SET state='refund_pending' WHERE reference=?").run(row.reference)
         row=getGuestCheckout(row.reference)!
       }
-      if(row.state==='refund_pending' && row.payment_id && !row.review_reason) {
+      if(config && row.payment_method==='card' && row.state==='refund_pending' && row.payment_id && !row.review_reason) {
         // Full original-method refund (service and fee); a stable key protects ambiguous retries.
         const refunded=await client(config).payments.refund({id:row.payment_id},{idempotencyKey:`guest-refund-${row.reference}`})
         db().prepare("UPDATE guest_checkouts SET refund_requested_at=COALESCE(refund_requested_at,datetime('now')) WHERE reference=?").run(row.reference)

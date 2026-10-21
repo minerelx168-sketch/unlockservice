@@ -29,4 +29,10 @@
 .order-preview__footnote { margin: -4px 0 0; text-align: center; color: var(--muted); font-size: .75rem; line-height: 1.5; }
 .order-preview__edit { min-height: 44px; width: 100%; color: var(--primary); font-size: .875rem; font-weight: 650; background: transparent; border: 0; }
 .order-preview__error { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; font-size: .875rem; color: var(--danger, #b42318); background: var(--surface-strong); }
+.order-preview__crypto { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink-strong); font: inherit; font-size: .8125rem; cursor: pointer; }
+.order-preview__crypto svg { width: 17px; height: 17px; flex-shrink: 0; }
+.order-preview__crypto strong { margin-left: 3px; }
+.order-preview__no-fee { padding: 3px 7px; border-radius: 6px; background: color-mix(in srgb, #178460 10%, var(--surface)); color: #147052; font-size: .7rem; font-weight: 700; }
+.order-preview__crypto:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.order-preview__crypto:disabled { opacity: .6; cursor: wait; }
 @media (max-width: 480px) { .order-preview { border-radius: 20px; } .order-preview__body { padding: 18px; gap: 14px; } }
