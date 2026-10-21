@@ -9,7 +9,7 @@ import '@/styles/order-preview.css'
 type PreviewProduct = { code: string; name: string; priceCents: number; etaLabel: string }
 
 /** A live order quote only. Locked bars contain no result or provider data. */
-export function OrderPreviewDialog({ open, product, domain, imei, email, pending, error, onClose, onContinue, liveLabel = 'Live order preview' }: {
+export function OrderPreviewDialog({ open, product, domain, imei, email, pending, error, onClose, onContinue }: {
   open: boolean
   product: PreviewProduct
   domain: 'unlock' | 'imei_check'
@@ -19,7 +19,6 @@ export function OrderPreviewDialog({ open, product, domain, imei, email, pending
   error?: string
   onClose: () => void
   onContinue: (method: 'card' | 'crypto') => void
-  liveLabel?: 'Live order preview' | 'Live Data'
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const titleId = useId()
@@ -39,7 +38,7 @@ export function OrderPreviewDialog({ open, product, domain, imei, email, pending
     onCancel={(event) => { event.preventDefault(); if (!pending) onClose() }}
     onClick={(event) => { if (event.target === event.currentTarget && !pending) onClose() }}>
     <div className="order-preview__body">
-      <div className="order-preview__top"><span className="order-preview__live"><span aria-hidden="true" />{liveLabel}</span><button type="button" className="order-preview__close" aria-label="Close order preview" disabled={pending} onClick={onClose}><Icon name="cross" /></button></div>
+      <div className="order-preview__top"><span className="order-preview__live"><span aria-hidden="true" />Live order preview</span><button type="button" className="order-preview__close" aria-label="Close order preview" disabled={pending} onClick={onClose}><Icon name="cross" /></button></div>
       <h2 id={titleId}>{isUnlock ? 'Ready to unlock your phone?' : 'Your full report starts here.'}</h2>
       <p className="order-preview__service">{product.name}</p>
       <dl className="order-preview__device"><div><dt>IMEI</dt><dd>{imei}</dd></div><div><dt>Result email</dt><dd>{email}</dd></div></dl>
