@@ -19,7 +19,7 @@ export const FAQ: FaqEntry[] = [
   {
     question: 'What if my device cannot be unlocked?',
     answer:
-      'Your account credit is reserved while the order is with the carrier and charged only when the unlock is delivered. If the carrier refuses the order, the full reserved amount returns to your account balance. This releases account credit; it is not a refund to your original payment method.',
+      'For a direct card order that we cannot deliver, we request a full refund to the original payment method, including the card fee. Bank processing time may vary. For orders paid using an existing account balance, the reserved credit is released back to that balance.',
   },
   {
     question: 'Where do I find my IMEI?',
@@ -34,12 +34,12 @@ export const FAQ: FaqEntry[] = [
   {
     question: 'Can you unlock a phone that is still on contract?',
     answer:
-      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, the full reserved credit returns to your account balance.',
+      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, direct card payments are refunded to the original payment method; balance-paid orders release the reserved credit.',
   },
   {
-    question: 'How do I pay, and what is "credit"?',
+    question: 'Can I pay without creating an account?',
     answer:
-      'New top-ups use USDT or USDC on BNB Smart Chain (BEP20), and orders are paid from your account balance. Follow the amount and network shown on your invoice. Credit is held while an order runs and charged only when the result is delivered. If a service cannot be delivered, the reserved account credit is released; this is not a refund to the original payment method.',
+      'Yes. Choose an available service, enter your IMEI and delivery email, then pay for that order by card. A 5% card fee is shown before payment. No iUnlockMobile login or wallet top-up is required. Track your order using its private link and receive the result by email. Existing customers can still pay with account credit and add credit by card or the supported crypto networks.',
   },
   {
     question: 'Will any SIM work after the unlock?',

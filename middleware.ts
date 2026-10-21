@@ -79,6 +79,11 @@ export function middleware(request: NextRequest) {
      the workspace is past the hand-off, and clearing it there means the
      order form starts clean the next time it is opened. */
   const path = request.nextUrl.pathname
+  if (path.startsWith('/checkout')) {
+    response.headers.set('Referrer-Policy', 'no-referrer')
+    response.headers.set('Cache-Control', 'private, no-store')
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
   if (path !== '/user/unlock' && path.startsWith('/user/') && request.cookies.has(QUOTE_COOKIE)) {
     response.cookies.set(QUOTE_COOKIE, '', { path: '/', maxAge: 0, httpOnly: true, secure })
   }

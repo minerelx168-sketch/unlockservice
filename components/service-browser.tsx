@@ -138,7 +138,7 @@ export function ServiceBrowser({
             </div>
             <div className="service-selected-price">
               <strong>{formatUsd(selected.priceCents)}</strong>
-              <span>{available ? 'One-time · paid from credit' : 'Listed price · currently unavailable'}</span>
+              <span>{available ? 'One-time service payment' : 'Listed price · currently unavailable'}</span>
               <em>{serviceDisplayText(selected.etaLabel)}</em>
             </div>
           </div>
@@ -151,12 +151,12 @@ export function ServiceBrowser({
             {pending ? 'Opening review…' : selected && available ? `Continue to review — ${formatUsd(selected.priceCents)}` : 'Continue to review'} <Icon name="arrowRight" />
           </button>
           <p id={`${domain}-browse-next`} className="service-browser__hint">
-            {!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service to continue.' : isAuthenticated ? 'No credit is charged until you confirm on the next page.' : 'Sign in next to review your order. Nothing is charged here.'}
+            {!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service to continue.' : 'Review the total, enter your email and pay. No account needed for card checkout.'}
           </p>
           {selected && !available && isUnlock ? <Link className="service-browser__waitlist" href="/unlock-waitlist">Notify me when unlock ordering opens <Icon name="arrowRight" /></Link> : null}
           <ul className="service-assurance" aria-label="Assurances">
-            <li><Icon name="shieldCheck" strokeWidth={2.2} />Held, not charged</li>
-            <li><Icon name="lock" strokeWidth={2.2} />Private to your account</li>
+            <li><Icon name="shieldCheck" strokeWidth={2.2} />Clear order total</li>
+            <li><Icon name="lock" strokeWidth={2.2} />Private result link</li>
             <li><Icon name="clock" strokeWidth={2.2} />Live status</li>
           </ul>
         </div>

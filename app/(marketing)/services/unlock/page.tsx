@@ -40,7 +40,7 @@ export default async function UnlockServicesPage() {
             <p className="t-lead">Choose the network your phone is locked to. See the price and delivery estimate, then review the requirements before ordering.</p>
             <ul className="service-micro" aria-label="Unlock facts">
               <li><Icon name="bolt" />Remote service</li>
-              <li><Icon name="wallet" />Credit held until delivery</li>
+              <li><Icon name="wallet" />Pay per order</li>
               <li><Icon name="globe" />{networks} networks listed</li>
             </ul>
           </div>
@@ -55,7 +55,7 @@ export default async function UnlockServicesPage() {
               <li><Icon name="checkSmall" />Financing and account rules depend on the carrier.</li>
             </ul>
             <Link className="link-arrow" href="/services/imei-check">Not sure which carrier? Check your phone<Icon name="arrowRight" /></Link>
-            <p className="t-small">If a service is refused, reserved credit returns to your account balance. This is not a refund to the original payment method.</p>
+            <p className="t-small">If we cannot deliver a direct card order, we request a full refund to the original payment method. Orders paid with existing account credit release that credit back to the balance.</p>
           </div>
         </div>
         <div className="expect expect--wide">
@@ -63,7 +63,7 @@ export default async function UnlockServicesPage() {
           <ol>
             <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="search" /></span><b>1. Choose a service</b>Compare its price, delivery time and device requirements.</li>
             <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="keypad" /></span><b>2. Add your IMEI</b>Dial *#06#, enter the 15 digits and review your selection.</li>
-            <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="clock" /></span><b>3. Order and track</b>Confirm from your account and follow progress on the order page.</li>
+            <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="clock" /></span><b>3. Order and track</b>Pay by card without an account. Track your order using its private link and receive the result by email.</li>
           </ol>
         </div>
         <details className="service-catalog-details">

@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { currentSession } from './auth'
-import { withContinuation } from './continuation'
+import { guestCheckoutEnabled } from './guest-checkout'
 import { clearDeviceIntent, readDeviceIntent, writeDeviceIntent } from './device-intent'
 import { deviceDomain, deviceImei } from './device-intent-value'
 import { listPaidReportProducts } from './paid-reports'
@@ -52,6 +52,7 @@ export async function showUnlockServicesAction(_: IntentState, form: FormData): 
     return { error: 'This service is no longer available. Choose another service or refresh the page.' }
   }
   await writeDeviceIntent(imei, 'unlock', product?.productCode)
+  if (product && guestCheckoutEnabled()) redirect(`/checkout?product=${encodeURIComponent(product.productCode)}`)
   redirect('/services/unlock/catalog')
 }
 
@@ -64,7 +65,7 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   if (!product) return { error: 'Choose an available service. Availability may have changed; refresh to see current options.' }
   await writeDeviceIntent(imei, product.domain, product.code)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
-  redirect(await currentSession() ? target : withContinuation('/login', target))
+  redirect(guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}` : target)
 }
 
 /** Save a changed IMEI before leaving checkout for trusted payment confirmation. */

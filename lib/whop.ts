@@ -36,7 +36,7 @@ export function whopCheckoutEnabled(): boolean {
   return process.env.IUNLOCKMOBILE_WHOP_ENABLED === '1' && config !== null
     && !(process.env.NODE_ENV === 'production' && config.mode === 'sandbox')
 }
-function client(config: Configuration): WhopClient {
+export function client(config: Configuration): WhopClient {
   return new WhopClient({ token: config.apiKey, apiVersionDate: WHOP_API_VERSION,
     environment: config.mode === 'live' ? WhopEnvironment.Production : WhopEnvironment.Sandbox,
     timeoutInSeconds: 10, maxRetries: 0 })
@@ -267,7 +267,9 @@ export async function processWhopEvents(limit = 10): Promise<{ processed: number
     try {
       const payment = await client(config).payments.retrieve({ id: job.payment_id })
       if (payment.id !== job.payment_id) throw new WhopPaymentError('Payment identity mismatch.')
-      const outcome = settlePayment(payment, config)
+      const outcome = payment.metadata?.integration === 'iunlockmobile-guest-v1'
+        ? (await import('./guest-checkout')).settleGuestPayment(payment)
+        : settlePayment(payment, config)
       db().prepare(`UPDATE whop_webhook_events SET state = ?, processed_at = datetime('now'), locked_until = NULL, last_error = NULL
         WHERE event_id = ?`).run(outcome === 'unmatched' ? 'unmatched' : 'processed', job.event_id)
       stats.processed++

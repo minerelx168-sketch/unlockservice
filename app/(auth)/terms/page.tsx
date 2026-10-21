@@ -11,7 +11,7 @@ export default function TermsPage() {
     <article className="auth-card legal-card">
       <Brand />
       <h1>Terms of Service</h1>
-      <p className="legal-meta">Last updated: August 28, 2026</p>
+      <p className="legal-meta">Last updated: October 21, 2026</p>
 
       <section>
         <h2>Agreement and eligibility</h2>
@@ -44,7 +44,8 @@ export default function TermsPage() {
       </section>
 
       <section>
-        <h2>Credits, payments, and refunds</h2>
+        <h2>Direct orders, credits, payments, and refunds</h2>
+        <p>Guest checkout lets you pay for one service without an iUnlockMobile account. You must provide an accurate IMEI and delivery email and keep your private order link secure. The order total includes the service price and a 5% card fee; any applicable tax is disclosed by the payment provider before confirmation. If we cannot deliver a direct card order, we request a full refund to the original payment method, including the card fee. Bank processing time may vary. Completed services are not automatically refundable. This does not restrict any rights available under applicable law.</p>
         <p>
           Account credits are a closed-loop balance for purchasing services on iUnlockMobile and are not a
           bank deposit or transferable currency. Prices and payment instructions shown at checkout control
@@ -82,10 +83,6 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <p className="legal-note">
-        These terms are an operational draft and should be reviewed by qualified counsel before being relied on
-        as formal legal advice.
-      </p>
       <p className="auth-foot">
         <Link href="/">Return to iUnlockMobile</Link> · <Link href="/privacy">Privacy Policy</Link>
       </p>

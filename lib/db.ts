@@ -15,6 +15,38 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
 
 const SCHEMA = `
+CREATE TABLE IF NOT EXISTS guest_checkouts (
+  reference TEXT PRIMARY KEY,
+  request_key TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL,
+  product_code TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  imei_encrypted TEXT NOT NULL,
+  price_cents INTEGER NOT NULL CHECK(price_cents>0),
+  fee_cents INTEGER NOT NULL CHECK(fee_cents>=0),
+  account_id TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  environment TEXT NOT NULL,
+  checkout_id TEXT UNIQUE, plan_id TEXT, checkout_url TEXT,
+  payment_id TEXT UNIQUE,
+  state TEXT NOT NULL DEFAULT 'pending',
+  user_id INTEGER REFERENCES users(id),
+  report_id INTEGER UNIQUE REFERENCES paid_report_orders(id),
+  paid_at TEXT, processor_updated_at TEXT,
+  review_reason TEXT,
+  last_error TEXT,
+  refund_requested_at TEXT,
+  receipt_sent_at TEXT, result_sent_at TEXT,
+  email_attempts INTEGER NOT NULL DEFAULT 0,
+  email_next_at INTEGER NOT NULL DEFAULT 0,
+  lease_until INTEGER NOT NULL DEFAULT 0,
+  checked_at TEXT,
+  client_id TEXT, session_id TEXT,
+  analytics_state TEXT NOT NULL DEFAULT 'pending',
+  analytics_attempted_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS guest_checkouts_work ON guest_checkouts(state,checked_at);
 CREATE TABLE IF NOT EXISTS payment_analytics (
   invoice_reference TEXT PRIMARY KEY REFERENCES invoices(reference),
   user_id INTEGER NOT NULL REFERENCES users(id),

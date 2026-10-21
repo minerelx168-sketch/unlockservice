@@ -77,7 +77,7 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
       {product.hasExample ? <ServiceOutputExample productCode={product.productCode} productName={productName} className="product-card-example" /> : null}
 
       {available ? (
-        <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
+        <Link className="button button--primary product-card-action" href={`/checkout?product=${encodeURIComponent(product.productCode)}`}>
           {product.domain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
         </Link>
       ) : product.domain === 'unlock' ? (

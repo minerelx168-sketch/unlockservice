@@ -130,6 +130,7 @@ export type CreatePaidReportInput = {
   productCode: string
   imei: string
   idempotencyKey: string
+  expectedPriceCents?: number
 }
 
 export class PaidReportError extends Error {
@@ -562,7 +563,7 @@ export function listPaidReports(userId: number, limit = 50): PaidReportView[] {
 export async function createPaidReport(
   userId: number,
   input: CreatePaidReportInput,
-  source: 'website' | 'api' = 'website',
+  source: 'website' | 'api' | 'guest' = 'website',
 ): Promise<PaidReportPayload> {
   const productCode = cleanProductCode(input.productCode)
   const imei = normalizeImei(input.imei)
@@ -585,6 +586,9 @@ export async function createPaidReport(
   const product = getProductRow(productCode)
   if (!product) throw new PaidReportError('Choose a valid paid report.', 'product_unknown')
   if (product.is_active !== 1) throw new PaidReportError('This paid report is not active.', 'product_inactive')
+  if (input.expectedPriceCents !== undefined && input.expectedPriceCents !== product.price_cents) {
+    throw new PaidReportError('The service price has changed.', 'product_inactive')
+  }
   const { config, service } = providerReadyFor(product)
 
   if (!consumeAttempt('paid-imei-report-user', String(userId), REPORT_RATE_LIMIT, REPORT_WINDOW_SECONDS)) {

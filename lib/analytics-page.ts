@@ -20,7 +20,7 @@ export function safeAnalyticsPage(href: string, referrer: string): AnalyticsPage
     const current = new URL(href)
     const host = current.hostname.toLowerCase().replace(/\.$/, '')
     if (!['http:', 'https:'].includes(current.protocol) || !['iunlockmobile.com', 'www.iunlockmobile.com'].includes(host)) return result
-    const privatePath = ['user', 'admin', 'api'].includes(current.pathname.split('/')[1])
+    const privatePath = ['user', 'admin', 'api', 'checkout'].includes(current.pathname.split('/')[1])
     const path = privatePath ? '/account'
       : /^\/[a-z0-9/_-]*$/i.test(current.pathname) && !/\d{13,}|[a-f0-9]{32,}/i.test(current.pathname) ? current.pathname : '/'
     result.page_location = current.origin + path
