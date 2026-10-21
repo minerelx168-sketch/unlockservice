@@ -24,7 +24,7 @@ export async function POST(request:Request) {
     const found=await currentSession()
     const context=body.analyticsContext as {clientId:string;sessionId:string}|undefined
     const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
-      requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),
+      requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
       analytics: consent && found?.user.account_type!=='admin' ? context : undefined})
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {

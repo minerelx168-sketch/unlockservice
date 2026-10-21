@@ -20,7 +20,8 @@ before(async()=>{
       if(url.pathname.endsWith('/checkout_configurations')) {
         checkoutCalls++
         const body=JSON.parse(String(init?.body)),ref=body.metadata.guest_reference
-        assert.equal(body.plan.initial_price,10.5);assert.equal(body.plan.plan_type,'one_time')
+        const quote=db.db().prepare('SELECT price_cents+wallet_credit_cents+fee_cents AS total FROM guest_checkouts WHERE reference=?').get(ref) as {total:number}
+        assert.equal(body.plan.initial_price,quote.total/100);assert.equal(body.plan.plan_type,'one_time')
         assert.equal(JSON.stringify(body).includes('490154203237518'),false)
         return Response.json({id:`ch_${ref}`,account_id:'biz_test',purchase_url:`https://whop.com/checkout/ch_${ref}`,plan:{...body.plan,id:`plan_${ref}`}})
       }
@@ -53,7 +54,7 @@ async function checkout(extra:Record<string,unknown>={}) {
 function payment(row:import('../lib/guest-checkout').GuestCheckout,overrides:Record<string,unknown>={}) {
   const money=(amount:string)=>({amount,currency:'usd',decimals:2})
   const p={id:`pay_${row.reference}`,account_id:'biz_test',product_id:'prod_test',plan_id:row.plan_id,checkout_configuration_id:row.checkout_id,
-    metadata:{integration:'iunlockmobile-guest-v1',guest_reference:row.reference},status:'paid',substatus:'succeeded',currency:'usd',subtotal:money('10.50'),total:money('10.50'),tax_amount:null,refunded_amount:money('0.00'),payment_method_type:'card',billing_reason:'one_time',paid_at:new Date().toISOString(),updated_at:new Date().toISOString(),...overrides} as unknown as Whop.Payment
+    metadata:{integration:'iunlockmobile-guest-v1',guest_reference:row.reference},status:'paid',substatus:'succeeded',currency:'usd',subtotal:money(((row.price_cents+row.wallet_credit_cents+row.fee_cents)/100).toFixed(2)),total:money(((row.price_cents+row.wallet_credit_cents+row.fee_cents)/100).toFixed(2)),tax_amount:null,refunded_amount:money('0.00'),payment_method_type:'card',billing_reason:'one_time',paid_at:new Date().toISOString(),updated_at:new Date().toISOString(),...overrides} as unknown as Whop.Payment
   payments.set(p.id,p);return p
 }
 function due(ref:string) {db.db().prepare("UPDATE guest_checkouts SET checked_at=datetime('now','-2 minutes'),email_next_at=0 WHERE reference=?").run(ref)}
@@ -125,11 +126,102 @@ test('uncertain provider response is not retried or refunded blindly; failed ema
   assert.equal(refunds.filter(id=>id===saved.payment_id).length,0)
 })
 
-test('sub-dollar services are rejected before creating a gateway plan or changing the service price',async()=>{
-  db.db().prepare("UPDATE paid_report_products SET price_cents=15 WHERE code='APPLE_BASIC'").run()
+function customer(email=`${randomUUID()}@example.test`,extra:Record<string,string|null>={}) {
+  const id=Number(db.db().prepare("INSERT INTO users(username,email,password_hash,email_verified_at) VALUES (?,?,?,?)").run(`small-${randomUUID()}`,email,'!test-only',new Date().toISOString()).lastInsertRowid)
+  for(const [key,value] of Object.entries(extra)) { assert.ok(['account_type','status','banned_at','email_verified_at'].includes(key));db.db().prepare(`UPDATE users SET ${key}=? WHERE id=?`).run(value,id) }
+  return {id,email}
+}
+async function smallCheckout(extra:Record<string,unknown>={}) {
+  const account=customer()
+  db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_BASIC'").run()
+  return {...await checkout({email:account.email,authenticatedUserId:account.id,expectedPriceCents:75,...extra}),account}
+}
+test('sub-dollar card quote requires a verified active customer and preserves the service price',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_BASIC'").run()
   const calls=checkoutCalls
-  await assert.rejects(checkout({expectedPriceCents:15}),/at least \$1.00/)
+  await assert.rejects(checkout({expectedPriceCents:75}),/Create an account/)
+  for (const extra of [{account_type:'admin'},{status:'paused'},{banned_at:new Date().toISOString()},{email_verified_at:null}] as Array<Record<string,string|null>>) {
+    const account=customer(undefined,extra)
+    await assert.rejects(checkout({email:account.email,authenticatedUserId:account.id,expectedPriceCents:75}),/Create an account/)
+  }
   assert.equal(checkoutCalls,calls)
-  assert.deepEqual(db.db().prepare("SELECT price_cents FROM paid_report_products WHERE code='APPLE_BASIC'").get(),{price_cents:15})
-  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_BASIC'").run()
+  const account=customer()
+  await assert.rejects(checkout({email:'other@example.test',authenticatedUserId:account.id,expectedPriceCents:75}),/account email/)
+  const {row,input}=await smallCheckout()
+  assert.equal(row.price_cents,75);assert.equal(row.wallet_credit_cents,25);assert.equal(row.fee_cents,5)
+  assert.equal(row.price_cents+row.wallet_credit_cents+row.fee_cents,105)
+  await assert.rejects(guest.createGuestCheckout({...input,authenticatedUserId:account.id}),/different selection/)
+  await assert.rejects(guest.createGuestCheckout({...input,authenticatedUserId:undefined}),(error:unknown)=>!!error && typeof error==='object' && 'status' in error && error.status===401)
+  assert.equal(credits.getBalance(row.customer_user_id!).availableCents,0)
+})
+test('verified small card payment grants the difference once then orders only the service amount',async()=>{
+  const {row,account}=await smallCheckout(),before=providerCalls
+  const p=payment(row)
+  assert.throws(()=>guest.settleGuestPayment({...p,subtotal:{amount:'0.80',currency:'usd',decimals:2,display_decimals:2},total:{amount:'0.80',currency:'usd',decimals:2,display_decimals:2}}),/amount mismatch/)
+  assert.equal(credits.getBalance(account.id).availableCents,0)
+  guest.settleGuestPayment(p);guest.settleGuestPayment(p)
+  assert.equal(credits.getBalance(account.id).availableCents,25)
+  await cycle(row.reference);await cycle(row.reference)
+  const saved=guest.getGuestCheckout(row.reference)!
+  assert.equal(providerCalls,before+1);assert.equal(guest.guestResult(saved).state,'completed')
+  assert.equal(credits.getBalance(account.id).availableCents,25)
+  assert.equal(credits.getBalance(saved.user_id!).availableCents,0)
+  assert.notEqual(saved.user_id,account.id)
+  assert.equal(guest.guestResult(saved).walletCreditApplied,true)
+  assert.equal((db.db().prepare("SELECT COUNT(*) AS n FROM credit_ledger WHERE ref_type='guest_card_difference' AND ref_id=?").get(row.reference) as {n:number}).n,1)
+})
+test('a refused small order refunds and reverses only its untouched difference',async()=>{
+  const {row,account}=await smallCheckout()
+  credits.credit(account.id,300,'topup','test-prefund',row.reference)
+  providerFailure=true;const p=payment(row);guest.settleGuestPayment(p)
+  await cycle(row.reference);providerFailure=false;await cycle(row.reference)
+  assert.equal(guest.getGuestCheckout(row.reference)?.state,'refunded')
+  assert.equal(credits.getBalance(account.id).availableCents,300)
+  assert.equal(guest.guestResult(guest.getGuestCheckout(row.reference)!).walletCreditApplied,false)
+  assert.equal(refunds.filter(id=>id===p.id).length,1)
+})
+test('spent or reserved difference stops automatic refund and blocks new wallet spending for review',async()=>{
+  const {row,account}=await smallCheckout()
+  credits.credit(account.id,300,'topup','test-prefund',row.reference)
+  const p=payment(row);guest.settleGuestPayment(p)
+  credits.hold(account.id,10,'test-spend',row.reference)
+  credits.charge(account.id,10,'test-spend',row.reference)
+  db.db().prepare("UPDATE guest_checkouts SET receipt_sent_at=datetime('now') WHERE reference=?").run(row.reference)
+  providerFailure=true;await cycle(row.reference);providerFailure=false
+  const saved=guest.getGuestCheckout(row.reference)!
+  assert.equal(saved.state,'refund_pending');assert.equal(saved.wallet_review_reason,'refund_credit_used')
+  assert.equal(credits.getBalance(account.id).availableCents,315)
+  assert.equal(refunds.filter(id=>id===p.id).length,0)
+  assert.throws(()=>credits.hold(account.id,1,'test-blocked',row.reference),/payment.*review/)
+  assert.ok(emails.some(e=>String(e.text).includes(row.reference)&&String(e.text).includes('reconcile the remaining credit')))
+})
+test('external refund after wallet use never takes unrelated credit and installs a spend blocker',async()=>{
+  const {row,account}=await smallCheckout(),p=payment(row)
+  credits.credit(account.id,300,'topup','test-prefund',row.reference)
+  guest.settleGuestPayment(p);credits.hold(account.id,10,'test-spend',row.reference);credits.charge(account.id,10,'test-spend',row.reference)
+  const refunded={...p,substatus:'refunded',refunded_amount:p.total,updated_at:new Date().toISOString()} as Whop.Payment
+  guest.settleGuestPayment(refunded);guest.settleGuestPayment(refunded)
+  assert.equal(guest.getGuestCheckout(row.reference)?.state,'refunded')
+  assert.equal(guest.getGuestCheckout(row.reference)?.wallet_review_reason,'refunded_credit_used')
+  assert.equal(credits.getBalance(account.id).availableCents,315)
+  assert.throws(()=>credits.hold(account.id,1,'test-blocked',row.reference),/payment.*review/)
+})
+test('disputes on small orders block wallet spending without creating duplicate credit',async()=>{
+  const {row,account}=await smallCheckout(),p=payment(row)
+  guest.settleGuestPayment(p)
+  guest.settleGuestPayment(payment(row,{substatus:'dispute_opened',updated_at:new Date().toISOString()}))
+  assert.equal(credits.getBalance(account.id).availableCents,25)
+  assert.equal(guest.getGuestCheckout(row.reference)?.wallet_review_reason,'dispute')
+  assert.throws(()=>credits.hold(account.id,1,'test-blocked',row.reference),/payment.*review/)
+})
+
+test('reopening a small pending checkout revalidates account state and payment review',async()=>{
+  const {row,account,input}=await smallCheckout()
+  db.db().prepare("UPDATE users SET account_type='admin' WHERE id=?").run(account.id)
+  await assert.rejects(guest.createGuestCheckout(input),/Sign in to the customer account/)
+  db.db().prepare("UPDATE users SET account_type='customer',email=? WHERE id=?").run('changed@example.test',account.id)
+  await assert.rejects(guest.createGuestCheckout(input),/Sign in to the customer account/)
+  db.db().prepare('UPDATE users SET email=? WHERE id=?').run(account.email,account.id)
+  db.db().prepare("UPDATE guest_checkouts SET wallet_review_reason='dispute' WHERE reference=?").run(row.reference)
+  await assert.rejects(guest.createGuestCheckout(input),/payment.*review/)
 })

@@ -34,3 +34,16 @@ test('check and unlock workspaces survive sign-in without exposing device query 
     assert.equal(safeContinuation(`${path}/unexpected`), null)
   }
 })
+
+test('guest checkout auth preserves only catalog product and payment choice', () => {
+  const checkout = '/checkout?product=APPLE_BASIC&method=card'
+  assert.equal(safeContinuation(checkout), checkout)
+  assert.equal(safeContinuation('/checkout?product=APPLE_BASIC'), checkout)
+  assert.equal(safeContinuation('/checkout?product=APPLE_BASIC&method=crypto&email=buyer%40example.test&imei=490154203237518&key=secret'), '/checkout?product=APPLE_BASIC&method=crypto')
+  assert.equal(safeContinuation('/checkout?product=APPLE_BASIC&method=https%3A%2F%2Fevil.test'), checkout)
+  for (const path of ['/checkout', '/checkout?product=bad%2Fcode', '/checkout/result/private', '/checkout?product=', '/checkout/account/private']) {
+    assert.equal(safeContinuation(path), null)
+  }
+  assert.equal(withContinuation('/register', checkout), '/register?next=%2Fcheckout%3Fproduct%3DAPPLE_BASIC%26method%3Dcard')
+  assert.equal(withContinuation('/verify-email?email=buyer%40example.test', checkout), '/verify-email?email=buyer%40example.test&next=%2Fcheckout%3Fproduct%3DAPPLE_BASIC%26method%3Dcard')
+})

@@ -107,9 +107,13 @@ export function activateGuestAccount(reference: string, token: string, password?
 export function listClaimedGuestOrders(userId: number) {
   const user = getUser(userId)
   if (!user || !user.email_verified_at || user.account_type !== 'customer' || user.status !== 'active' || user.banned_at) return []
-  return db().prepare(`SELECT g.reference,g.product_name,g.price_cents,g.fee_cents,g.state,g.created_at
-    FROM guest_account_access a JOIN guest_checkouts g ON g.reference=a.reference
-    WHERE a.verified_user_id=? AND a.consumed_at IS NOT NULL ORDER BY g.created_at DESC LIMIT 100`).all(userId) as Array<{
-      reference: string; product_name: string; price_cents: number; fee_cents: number; state: string; created_at: string
+  return db().prepare(`SELECT g.reference,g.product_name,g.price_cents,g.fee_cents,g.wallet_credit_cents,g.state,g.created_at
+    FROM guest_checkouts g
+    WHERE EXISTS (SELECT 1 FROM guest_account_access a WHERE a.reference=g.reference
+      AND a.verified_user_id=? AND a.consumed_at IS NOT NULL)
+      OR (g.customer_user_id=? AND g.paid_at IS NOT NULL AND g.payment_id IS NOT NULL
+        AND g.state IN ('paid','processing','completed','refund_pending','refunded'))
+    ORDER BY g.created_at DESC LIMIT 100`).all(userId,userId) as Array<{
+      reference: string; product_name: string; price_cents: number; fee_cents: number; wallet_credit_cents: number; state: string; created_at: string
     }>
 }

@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { currentSession } from './auth'
+import { withContinuation } from './continuation'
 import { guestCheckoutEnabled } from './guest-checkout'
 import { guestCryptoEnabled } from './guest-crypto'
 import { clearDeviceIntent, readDeviceIntent, writeDeviceIntent } from './device-intent'
@@ -69,9 +70,35 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   if (rawEmail !== null && !email) return { error: 'Enter a valid email address so we can deliver your result.' }
   const crypto = form.get('paymentMethod') === 'crypto'
   if (crypto && !guestCryptoEnabled()) return { error: 'Crypto checkout is temporarily unavailable. Please try again shortly.' }
+  const smallCardOrder = !crypto && guestCheckoutEnabled() && product.priceCents < 100
+  const customer = smallCardOrder ? await currentSession() : null
+  if (smallCardOrder && customer && customer.user.account_type !== 'customer') {
+    return { error: 'Use a customer account for card orders below $1.00, or choose crypto.' }
+  }
   await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
+  if (smallCardOrder && !customer) {
+    redirect(withContinuation('/register', `/checkout?product=${encodeURIComponent(product.code)}&method=card`))
+  }
   redirect(crypto || guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}${crypto ? '&method=crypto' : ''}` : target)
+}
+
+/** Explicit URL result for client checkout handlers; registration is not payment. */
+export async function prepareSmallCardAccountAction(value: {
+  productCode: string; imei: string; email: string; domain: 'imei_check' | 'unlock'
+}): Promise<IntentState & { url?: string }> {
+  if (!value || typeof value !== 'object') return { error: 'Unable to save your selection.' }
+  const domain = deviceDomain(value.domain), imei = deviceImei(value.imei), email = deviceEmail(value.email)
+  if (!imei) return { error: 'Enter a valid 15-digit IMEI before continuing.' }
+  if (!email) return { error: 'Enter a valid email address so we can deliver your result.' }
+  const product = listPaidReportProducts().find(entry => entry.code === value.productCode && entry.domain === domain && entry.providerReady)
+  if (!product || product.priceCents <= 0 || product.priceCents >= 100) return { error: 'This service is no longer eligible for small card checkout. Refresh to review the current price.' }
+  if (!guestCheckoutEnabled()) return { error: 'Card checkout is temporarily unavailable. Please try again shortly.' }
+  const customer = await currentSession()
+  if (customer && customer.user.account_type !== 'customer') return { error: 'Use a customer account for card orders below $1.00, or choose crypto.' }
+  await writeDeviceIntent(imei, product.domain, product.code, email)
+  const checkout = `/checkout?product=${encodeURIComponent(product.code)}&method=card`
+  return { url: customer ? checkout : withContinuation('/register', checkout) }
 }
 
 /** Save a changed IMEI before leaving checkout for trusted payment confirmation. */

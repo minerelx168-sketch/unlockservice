@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef } from 'react'
-import { cardFeeCents } from '@/lib/card-fee'
+import { guestCardQuote } from '@/lib/guest-card-quote'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
 import '@/styles/order-preview.css'
@@ -24,9 +24,8 @@ export function OrderPreviewDialog({ open, product, domain, imei, email, pending
   const titleId = useId()
   const descriptionId = useId()
   const isUnlock = domain === 'unlock'
-  const fee = cardFeeCents(product.priceCents)
-  const total = product.priceCents + fee
-  const belowMinimum = total < 100
+  const cardQuote = guestCardQuote(product.priceCents)
+  const total = cardQuote.totalCents
 
   useEffect(() => {
     const element = dialog.current
@@ -48,12 +47,12 @@ export function OrderPreviewDialog({ open, product, domain, imei, email, pending
         <div className="order-preview__lock-message"><Icon name="lock" /><strong>{isUnlock ? 'Unlock result' : 'Full report'}</strong></div>
       </div>
       <p className="order-preview__timing" id={descriptionId}>Results will be available after payment and processing.</p>
-      <dl className="order-preview__quote"><div><dt>Estimated delivery</dt><dd>{product.etaLabel}</dd></div><div><dt>Service</dt><dd>{formatUsd(product.priceCents)}</dd></div><div><dt>Card fee (5%)</dt><dd>{formatUsd(fee)}</dd></div><div className="order-preview__total"><dt>Total before tax</dt><dd>{formatUsd(total)}</dd></div></dl>
+      <dl className="order-preview__quote"><div><dt>Estimated delivery</dt><dd>{product.etaLabel}</dd></div><div><dt>Service</dt><dd>{formatUsd(product.priceCents)}</dd></div>{cardQuote.requiresAccount ? <div><dt>Saved as account credit</dt><dd>{formatUsd(cardQuote.walletCreditCents)}</dd></div> : null}<div><dt>Card fee (5%)</dt><dd>{formatUsd(cardQuote.feeCents)}</dd></div><div className="order-preview__total"><dt>Total before tax</dt><dd>{formatUsd(total)}</dd></div></dl>
       {error ? <p className="order-preview__error" role="alert">{error}</p> : null}
-      {belowMinimum ? <p className="order-preview__timing">Card payments start at $1.00. Crypto has no minimum and no processing fee.</p> : null}
-      <button type="button" className="button button--primary button--wide" disabled={pending || belowMinimum} onClick={() => onContinue('card')}>{pending ? 'Opening secure checkout…' : belowMinimum ? 'Card minimum $1.00' : `${isUnlock ? 'Order unlock' : 'Unlock full report'} ${formatUsd(total)}`} {!pending && !belowMinimum ? <Icon name="arrowRight" /> : null}</button>
+      {cardQuote.requiresAccount ? <p className="order-preview__timing"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}
+      <button type="button" className="button button--primary button--wide" disabled={pending} onClick={() => onContinue('card')}>{pending ? 'Opening secure checkout…' : cardQuote.requiresAccount ? `Continue with card · ${formatUsd(total)}` : `${isUnlock ? 'Order unlock' : 'Unlock full report'} ${formatUsd(total)}`} {!pending ? <Icon name="arrowRight" /> : null}</button>
       <button type="button" className="order-preview__crypto" disabled={pending} onClick={() => onContinue('crypto')}><Icon name="wallet" /><span>Pay with crypto <strong>{formatUsd(product.priceCents)}</strong></span><span className="order-preview__no-fee">No fee</span></button>
-      <p className="order-preview__footnote">No crypto minimum · Network or exchange fees may apply.<br />No account or wallet top-up needed.</p>
+      <p className="order-preview__footnote">No crypto minimum · Network or exchange fees may apply.<br />Crypto needs no account or wallet top-up.</p>
       <button className="order-preview__edit" type="button" disabled={pending} onClick={onClose}>Edit my details</button>
     </div>
   </dialog>

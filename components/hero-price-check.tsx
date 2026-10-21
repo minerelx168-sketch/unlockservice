@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useActionState, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
 import { deviceImei } from '@/lib/device-intent-value'
-import { cardFeeCents } from '@/lib/card-fee'
+import { guestCardQuote } from '@/lib/guest-card-quote'
 import { formatUsd } from '@/lib/money'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
@@ -82,8 +82,8 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
   const [state, action, pending] = useActionState(continueDeviceServiceAction, {})
   const digits = imei.replace(/[\s-]/g, '')
   const validImei = deviceImei(imei) !== null
-  const fee = selected ? cardFeeCents(selected.priceCents) : 0
-  const total = selected ? selected.priceCents + fee : 0
+  const cardQuote = selected && selected.priceCents > 0 ? guestCardQuote(selected.priceCents) : null
+  const total = cardQuote?.totalCents ?? 0
   const actionError = showActionError ? state.error : undefined
   const step = previewOpen ? 2 : selected ? 1 : 0
   const lastQuote = useRef('')
@@ -126,7 +126,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
 
   return <form ref={form} className="price-check" action={action} onSubmit={validate} noValidate aria-label={domain === 'unlock' ? 'Choose an unlock service' : 'Choose a phone report'} aria-busy={pending}>
     <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" />
-    <div className="price-check-head"><h2 className="price-check-title" id="price-check-heading">{domain === 'unlock' ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p className="price-check-sub">See the price first. No account or wallet top-up needed.</p></div>
+    <div className="price-check-head"><h2 className="price-check-title" id="price-check-heading">{domain === 'unlock' ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p className="price-check-sub">See the price first. Choose how to pay at the next step.</p></div>
     {fixedDomain ? <input type="hidden" name="domain" value={domain} /> : <fieldset className="device-browse-options" disabled={pending}><legend className="visually-hidden">What would you like to do?</legend>{(['unlock', 'imei_check'] as const).map((value) => <label key={value}><input type="radio" name="domain" value={value} checked={domain === value} onChange={() => { setDomain(value); clearError() }} /><span><Icon name={value === 'unlock' ? 'lock' : 'search'} />{value === 'unlock' ? 'Unlock Phone' : 'Phone Check'}</span></label>)}</fieldset>}
     <ol className="price-check-steps" aria-label="Order steps">{['Service & price', 'Your details', 'Review & pay'].map((label, index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-done={step > index || undefined}><span aria-hidden="true">{index + 1}</span>{label}</li>)}</ol>
     {products.length ? <>
@@ -134,7 +134,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         <select id="pc-category" ref={categoryInput} value={activeCategory} disabled={pending} aria-invalid={error?.field === 'category'} aria-describedby={error?.field === 'category' ? 'pc-error' : 'pc-category-help'} onChange={(event) => { setCategory({ ...category, [domain]: event.currentTarget.value }); setService({ ...service, [domain]: '' }); clearError() }}><option value="">{domain === 'unlock' && !showOther ? 'Select original carrier country' : 'Select a category'}</option>{visibleCategories.map((name) => <option key={name} value={name}>{name} · {priceRange(products.filter((product) => product.category === name))}</option>)}</select>
         <p className="field-note" id="pc-category-help">{domain === 'unlock' && !showOther ? 'Where the phone’s original carrier is based.' : 'Choose the type of information or service you need.'}</p>
       </div>
-      {activeCategory ? <p className="price-check-range"><strong>{priceRange(inCategory)} USD</strong><span>{[...new Set(inCategory.filter((product) => product.available).map((product) => product.etaLabel))].join(' · ')}</span><small>Service prices. Card fee: +5%.</small></p> : null}
+      {activeCategory ? <p className="price-check-range"><strong>{priceRange(inCategory)} USD</strong><span>{[...new Set(inCategory.filter((product) => product.available).map((product) => product.etaLabel))].join(' · ')}</span></p> : null}
       <div className="field"><label htmlFor="pc-service">{domain === 'unlock' ? 'Carrier / service' : 'Report'}</label>
         <select id="pc-service" ref={serviceInput} value={selected?.code ?? ''} disabled={pending || !activeCategory} aria-invalid={error?.field === 'service'} aria-describedby={error?.field === 'service' ? 'pc-error' : undefined} onChange={(event) => {
           const code = event.currentTarget.value, product = inCategory.find((entry) => entry.code === code)
@@ -143,7 +143,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         }}><option value="">{activeCategory ? 'Choose a service and price' : 'Choose a category first'}</option>{inCategory.map((product) => <option key={product.code} value={product.code} disabled={!product.available}>{product.name} · {formatUsd(product.priceCents)} · {product.etaLabel}{product.available ? '' : ' — unavailable'}</option>)}</select>
         {activeCategory && !inCategory.some((product) => product.available) ? <p className="field-note">No online services are available here right now. <Link href="/contact">Ask support</Link></p> : null}
       </div>
-      {selected ? <div className="price-check-result" aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl><p className="price-check-total">Card total <strong>{formatUsd(total)}</strong><span>Includes {formatUsd(fee)} card fee (5%). Any applicable tax is shown before payment.</span></p>{total < 100 ? <p className="price-check-minimum">Card payments start at $1.00. Choose crypto at the next step for no minimum and no processing fee.</p> : null}</div> : null}
+      {selected ? <div className="price-check-result" aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl><p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p>{cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}</div> : null}
       {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><p>{selected.summary}</p><p>Review eligibility before ordering. IMEI format validation does not confirm eligibility.</p></details> : null}
     </> : <p className="alert" role="status"><Icon name="info" /><span>No services are listed right now. <Link href="/contact">Contact support</Link> for availability.</span></p>}
     {selected?.available ? <div className="price-check-details">
@@ -159,6 +159,6 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
     <button className="button button--primary button--wide price-check-submit" type="submit" disabled={pending || products.length === 0}>{pending ? <><Icon name="clock" />Opening…</> : <>{domain === 'unlock' ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></>}</button>
     <p className="price-check-next">{domain === 'unlock' ? 'Review your order before paying. Unlock processing starts after payment.' : 'View the report preview before paying. The real check starts after payment.'}</p>
     <p className="price-check-assurance"><span><Icon name="shieldCheck" />Clear total</span><span><Icon name="clock" />Private tracking link</span></p>
-    {selected ? <OrderPreviewDialog open={previewOpen} product={selected} domain={domain} imei={digits} email={email.trim()} pending={pending} error={actionError} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={continueToPayment} /> : null}
+    {selected && selected.priceCents > 0 ? <OrderPreviewDialog open={previewOpen} product={selected} domain={domain} imei={digits} email={email.trim()} pending={pending} error={actionError} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={continueToPayment} /> : null}
   </form>
 }

@@ -104,7 +104,7 @@ export function LoginForm({
   )
 }
 
-export function RegisterForm({ returnTo, googleEnabled = false }: { returnTo?: string | null; googleEnabled?: boolean }) {
+export function RegisterForm({ returnTo, googleEnabled = false, defaultEmail = '' }: { returnTo?: string | null; googleEnabled?: boolean; defaultEmail?: string }) {
   const [state, action, pending] = useActionState(registerAction, EMPTY)
 
   return (
@@ -130,7 +130,7 @@ export function RegisterForm({ returnTo, googleEnabled = false }: { returnTo?: s
       </div>
       <div className="field">
         <label htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" autoComplete="email" required />
+        <input id="email" name="email" type="email" autoComplete="email" defaultValue={defaultEmail} required />
       </div>
       <div className="field">
         <label htmlFor="password">Password</label>
@@ -145,7 +145,7 @@ export function RegisterForm({ returnTo, googleEnabled = false }: { returnTo?: s
         />
       </div>
       <button className="button button--primary button--wide" type="submit" disabled={pending}>
-        {pending ? 'Creating account…' : 'Create account'}
+        {pending ? 'Creating account…' : returnTo?.startsWith('/checkout?') ? 'Create account & continue' : 'Create account'}
       </button>
       <p className="auth-foot">
         Already registered? <Link href={withContinuation('/login', returnTo)}>Sign in</Link>

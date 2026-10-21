@@ -1,12 +1,12 @@
 # Direct service checkout
 
-Customers can select a catalog service, enter an IMEI and delivery email, and pay a one-time Whop card checkout without an iUnlockMobile login or a wallet deposit. The server quotes the catalog price plus the existing 5% card fee. Whop discloses any tax before the customer confirms.
+Customers can select a catalog service, enter an IMEI and delivery email, and pay a one-time Whop card checkout. Services priced at least $1 do not require an iUnlockMobile login or a wallet deposit; smaller card orders use the account-credit flow below. The server quotes the catalog price plus the existing 5% card fee. Whop discloses any tax before the customer confirms.
 
 Enable new checkouts with IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED=1. Existing Whop live configuration, Resend delivery, and a >=32-character IMEI encryption secret are required. Disabling new checkout does not stop processing existing payments or refunds.
 
 ## Payment provider minimum
 
-A live, uncharged checkout validation returned HTTP 400: "The plan must be at least $1.00" for a $0.16 total. Direct card checkout is therefore disabled below a $1.00 order total (service plus 5% fee), with a clear explanation and existing-balance/support links. Prices are not increased. These small services still need a merchant pricing decision or another payment solution to provide the same no-login flow.
+A live, uncharged checkout validation returned HTTP 400: "The plan must be at least $1.00" for a $0.16 total. For services priced below $1, card checkout now requires an active verified customer account. The customer pays $1.00 funding plus the existing $0.05 card fee. The service keeps its catalog price, and the remaining funding becomes account credit only after authoritative paid settlement. For example, a $0.75 service costs $1.05 by card, with $0.25 credited to the account. Crypto remains available without an account, fee or minimum.
 
 ## Settlement and access
 
@@ -44,7 +44,7 @@ The UI exposes the Whop $1 minimum before asking for personal details, preserves
 
 New consent-gated funnel events: `service_quote_viewed`, `guest_details_completed`, `order_preview_viewed`, `order_preview_continue`. Retain `imei_input_started`, `validation_result`, and verified server-side purchase. No IMEI, email, order token or other personal identifier is an event parameter. Compare unique-user progression by `service_category` (unlock vs imei_check); the reported 43% historical loss is a baseline supplied by the owner, not a newly verified measurement.
 
-After verified payment, a new delivery email can receive a pending, password-disabled customer profile. The same transactional message includes a private order link plus optional inbox-only account activation. Activation is distinct from the checkout return key, expires, and requires an explicit POST; email scanners cannot activate it. Existing accounts require the inbox token plus a matching authenticated customer session before history attachment. Order viewing and payment remain available without login. Optional account/password setup must never block fulfilment.
+After verified payment, a new delivery email can receive a pending, password-disabled customer profile. The same transactional message includes a private order link plus optional inbox-only account activation. Activation is distinct from the checkout return key, expires, and requires an explicit POST; email scanners cannot activate it. Existing accounts require the inbox token plus a matching authenticated customer session before history attachment. Order viewing and ordinary guest payment remain available without login; the below-$1 card route requires the account before payment. Optional post-payment account/password setup must never block fulfilment.
 
 
 ## Guest crypto checkout (21 October 2026)
@@ -57,3 +57,13 @@ After verified payment, a new delivery email can receive a pending, password-dis
 - Crypto invoices fund only the isolated order owner. Dispatch does not add card-style guest credit again. No wallet-top-up analytics are created; the existing verified completed-service `purchase` event remains the conversion.
 - Refused crypto services enter `refund_pending` for support-assisted refund handling. The system never calls Whop for them, never automatically sends funds to an exchange sender address, and never labels an unsent refund as completed. A separate `refund_notice_sent_at` phase sends refund assistance once even when the initial receipt was sent earlier.
 - Tests use mocked chain, provider and email transports. No real transfer, provider charge or customer email is created during verification.
+
+
+## Below-$1 card continuation (21 October 2026)
+
+- Removing early fee helper sentences does not remove the 5% fee. The preview, checkout and gateway show the actual card amount and its service/credit/fee breakdown before payment.
+- Registration, email verification and Google sign-in preserve a same-origin allowlisted checkout continuation. IMEI/email remain in the short-lived browser draft; public product and method are the only URL fields. Signup does not create a charge or provider request.
+- The authenticated customer is bound on the server before creating a small-order checkout; a body user ID or unverified delivery email cannot claim the remainder. Provider spending still uses a separate isolated guest accounting owner.
+- A verified payment atomically creates exactly one remainder credit tied to the order. Duplicate payment notifications and result-page refreshes cannot add more credit. Paid small orders appear in the customer’s direct-order history.
+- Full refunds reverse only that order’s unused remainder. If account credit has been spent, the refund requires review; unrelated account funds are not swept. Payment disputes or unresolved remainder reversals block new credit spending until reviewed.
+- Browser return means return to the pending order screen, not payment success. Only the signed gateway notification or authoritative reconciliation can mark paid and allow provider execution.

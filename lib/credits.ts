@@ -158,7 +158,8 @@ export function hold(userId: number, amountCents: number, refType: string, refId
   if (!Number.isSafeInteger(amountCents) || amountCents <= 0) throw new Error('hold amount must be positive cents')
   return db().transaction(() => {
     refuseReplay(refType, refId, 'hold')
-    if (db().prepare('SELECT 1 FROM whop_topups WHERE user_id = ? AND review_reason IS NOT NULL LIMIT 1').get(userId)) {
+    if (db().prepare('SELECT 1 FROM whop_topups WHERE user_id = ? AND review_reason IS NOT NULL LIMIT 1').get(userId)
+      || db().prepare('SELECT 1 FROM guest_checkouts WHERE customer_user_id = ? AND wallet_review_reason IS NOT NULL LIMIT 1').get(userId)) {
       throw new CreditPaymentReview()
     }
     const before = getBalance(userId)

@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS guest_checkouts (
   imei_encrypted TEXT NOT NULL,
   price_cents INTEGER NOT NULL CHECK(price_cents>0),
   fee_cents INTEGER NOT NULL CHECK(fee_cents>=0),
+  wallet_credit_cents INTEGER NOT NULL DEFAULT 0 CHECK(wallet_credit_cents>=0),
+  customer_user_id INTEGER REFERENCES users(id),
+  wallet_review_reason TEXT,
   account_id TEXT NOT NULL,
   product_id TEXT NOT NULL,
   environment TEXT NOT NULL,
@@ -685,6 +688,9 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'guest_checkouts', "payment_method TEXT NOT NULL DEFAULT 'card'")
     addColumn(connection, 'guest_checkouts', 'crypto_invoice_reference TEXT REFERENCES invoices(reference)')
     addColumn(connection, 'guest_checkouts', 'refund_notice_sent_at TEXT')
+    addColumn(connection, 'guest_checkouts', 'wallet_credit_cents INTEGER NOT NULL DEFAULT 0')
+    addColumn(connection, 'guest_checkouts', 'customer_user_id INTEGER REFERENCES users(id)')
+    addColumn(connection, 'guest_checkouts', 'wallet_review_reason TEXT')
     connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')
     addColumn(connection, 'users', 'email_verified_at TEXT')
     addColumn(connection, 'users', 'banned_at TEXT')

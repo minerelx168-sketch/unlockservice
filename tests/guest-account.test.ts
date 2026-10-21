@@ -109,3 +109,18 @@ test('admin, banned, email changes, pending disputes, expired and cross-order to
   database.db().prepare("UPDATE guest_checkouts SET paid_at=datetime('now'),payment_id=?,review_reason='dispute' WHERE reference=?").run(`pay_${pending.reference}`,pending.reference)
   assert.equal(identity.prepareGuestAccount(pending.reference),null)
 })
+
+test('verified checkout owner sees paid small-card orders without an email claim, never another account or pending order',()=>{
+  const email=`bound-${randomBytes(8).toString('hex')}@example.test`
+  const userId=Number(database.db().prepare("INSERT INTO users(username,email,password_hash,email_verified_at) VALUES (?,?,'disabled',datetime('now'))")
+    .run(`bound-${randomBytes(8).toString('hex')}`,email).lastInsertRowid)
+  const paid=order(email),pending=order(email,'pending'),sameEmailOnly=order(email)
+  database.db().prepare('UPDATE guest_checkouts SET customer_user_id=?,wallet_credit_cents=25 WHERE reference IN (?,?)')
+    .run(userId,paid.reference,pending.reference)
+  assert.deepEqual(identity.listClaimedGuestOrders(userId).map(row=>row.reference),[paid.reference])
+  assert.equal(identity.listClaimedGuestOrders(userId)[0].wallet_credit_cents,25)
+  assert.ok(!identity.listClaimedGuestOrders(userId).some(row=>row.reference===sameEmailOnly.reference))
+  assert.deepEqual(identity.listClaimedGuestOrders(userId+10000),[])
+  database.db().prepare('UPDATE users SET email_verified_at=NULL WHERE id=?').run(userId)
+  assert.deepEqual(identity.listClaimedGuestOrders(userId),[])
+})

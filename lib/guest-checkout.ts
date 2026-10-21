@@ -1,7 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Whop } from '@whop/sdk'
 import { db } from './db'
-import { cardFeeCents } from './card-fee'
+import { guestCardQuote } from './guest-card-quote'
 import { parseUsd } from './money'
 import { isValidImei, normalizeImei } from './imei'
 import { decryptPaidReportImei, encryptPaidReportImei } from './paid-report-imei'
@@ -19,7 +19,7 @@ export const GUEST_CARD_MIN_TOTAL_CENTS = 100
 
 export type GuestCheckout = {
   reference: string; request_key: string; email: string; product_code: string; product_name: string
-  imei_encrypted: string; price_cents: number; fee_cents: number; account_id: string; product_id: string
+  imei_encrypted: string; price_cents: number; fee_cents: number; wallet_credit_cents: number; customer_user_id: number | null; wallet_review_reason: string | null; account_id: string; product_id: string
   environment: string; checkout_id: string | null; plan_id: string | null; checkout_url: string | null
   payment_method: 'card' | 'crypto'; crypto_invoice_reference: string | null
   payment_id: string | null; state: string; user_id: number | null; report_id: number | null
@@ -51,7 +51,7 @@ export function authorizedGuestCheckout(reference: string, key: string) {
 }
 
 export async function createGuestCheckout(input: {
-  productCode: string; imei: string; email: string; requestKey: string; expectedPriceCents: number
+  productCode: string; imei: string; email: string; requestKey: string; expectedPriceCents: number; authenticatedUserId?: number
   analytics?: { clientId: string; sessionId: string }
 }) {
   const config = whopConfiguration()
@@ -63,34 +63,52 @@ export async function createGuestCheckout(input: {
   const row = db().transaction(() => {
     const existing = db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as GuestCheckout | undefined
     if (existing) {
+      if (existing.customer_user_id !== null && !input.authenticatedUserId) throw new WhopPaymentError('Sign in to continue this card checkout.',401)
       if (existing.email !== email || existing.product_code !== input.productCode || decryptPaidReportImei(existing.imei_encrypted) !== imei
-        || existing.price_cents !== input.expectedPriceCents || existing.payment_method !== 'card' || existing.account_id !== config.accountId || existing.environment !== config.mode) {
+        || existing.price_cents !== input.expectedPriceCents || (existing.customer_user_id !== null && existing.customer_user_id !== input.authenticatedUserId) || existing.payment_method !== 'card' || existing.account_id !== config.accountId || existing.environment !== config.mode) {
         throw new WhopPaymentError('This checkout belongs to a different selection. Reload to start a new order.', 409)
+      }
+      if (existing.customer_user_id !== null) {
+        const valid=db().prepare("SELECT 1 FROM users WHERE id=? AND account_type='customer' AND status='active' AND banned_at IS NULL AND email_verified_at IS NOT NULL AND lower(email)=?").get(input.authenticatedUserId,email)
+        if (!valid) throw new WhopPaymentError('Sign in to the customer account for this order.',401)
+        if (existing.state==='pending' && (db().prepare('SELECT 1 FROM guest_checkouts WHERE customer_user_id=? AND wallet_review_reason IS NOT NULL LIMIT 1').get(existing.customer_user_id)
+          || db().prepare('SELECT 1 FROM whop_topups WHERE user_id=? AND review_reason IS NOT NULL LIMIT 1').get(existing.customer_user_id))) throw new WhopPaymentError('A payment on this account needs review. Contact support before paying again.',409)
       }
       return existing
     }
     const product = getPaidReportProduct(input.productCode)
     if (!product?.providerReady || product.priceCents <= 0 || product.priceCents > 100000) throw new WhopPaymentError('This service is not available for online payment.', 409)
-    if (product.priceCents + cardFeeCents(product.priceCents) < GUEST_CARD_MIN_TOTAL_CENTS) throw new WhopPaymentError('Whop requires a card order total of at least $1.00. This service price has not been increased; use an existing account balance or contact support.', 400)
+    const quote = guestCardQuote(product.priceCents)
+    let customerUserId: number | null = null
+    if (quote.requiresAccount) {
+      const customer = Number.isSafeInteger(input.authenticatedUserId) ? db().prepare('SELECT id,email,account_type,status,banned_at,email_verified_at FROM users WHERE id=?').get(input.authenticatedUserId) as {id:number;email:string;account_type:string;status:string;banned_at:string|null;email_verified_at:string|null}|undefined : undefined
+      if (!customer || customer.account_type !== 'customer' || customer.status !== 'active' || customer.banned_at || !customer.email_verified_at) {
+        throw new WhopPaymentError('Create an account or sign in to pay by card and save the difference as credit.', 401)
+      }
+      if (customer.email.toLowerCase() !== email) throw new WhopPaymentError('Use your signed-in account email for this card order, or sign in to the matching account.', 409)
+      if (db().prepare('SELECT 1 FROM guest_checkouts WHERE customer_user_id=? AND wallet_review_reason IS NOT NULL LIMIT 1').get(customer.id)
+        || db().prepare('SELECT 1 FROM whop_topups WHERE user_id=? AND review_reason IS NOT NULL LIMIT 1').get(customer.id)) throw new WhopPaymentError('A payment on this account needs review. Contact support before paying again.', 409)
+      customerUserId = customer.id
+    }
     if (product.priceCents !== input.expectedPriceCents) throw new WhopPaymentError('The price changed. Reload to review the current price.', 409)
     if (!consumeAttempt('guest-checkout-email', email, 6, 3600)) throw new WhopPaymentError('Too many requests. Please try again later.', 429)
     const reference = randomBytes(16).toString('hex')
     const a = input.analytics
     const validAnalytics = a && /^\d{1,20}\.\d{1,20}$/.test(a.clientId) && /^\d{1,12}$/.test(a.sessionId) && Number(a.sessionId)>0
     db().prepare(`INSERT INTO guest_checkouts (reference,request_key,email,product_code,product_name,imei_encrypted,price_cents,fee_cents,
-      account_id,product_id,environment,client_id,session_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
-      reference,input.requestKey,email,product.code,product.name,encryptPaidReportImei(imei),product.priceCents,cardFeeCents(product.priceCents),
-      config.accountId,config.productId,config.mode,validAnalytics ? a.clientId : null, validAnalytics ? a.sessionId : null)
+      account_id,product_id,environment,client_id,session_id,wallet_credit_cents,customer_user_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
+      reference,input.requestKey,email,product.code,product.name,encryptPaidReportImei(imei),product.priceCents,quote.feeCents,
+      config.accountId,config.productId,config.mode,validAnalytics ? a.clientId : null, validAnalytics ? a.sessionId : null,quote.walletCreditCents,customerUserId)
     return getGuestCheckout(reference)!
   }).immediate()
   if (row.state !== 'pending') return { url: guestOrderPath(row.reference) }
   if (row.checkout_url) return { url: row.checkout_url }
-  const total = row.price_cents + row.fee_cents
+  const total = row.price_cents + row.wallet_credit_cents + row.fee_cents
   const checkout = await client(config).checkoutConfigurations.create({
     account_id: config.accountId, mode: 'payment',
     plan: { account_id: config.accountId, product_id: config.productId, currency: 'usd',
       initial_price: total / 100, plan_type: 'one_time', renewal_price: 0,
-      title: row.product_name.slice(0,120), description: `One device service order on iunlockmobile.com. Service $${(row.price_cents/100).toFixed(2)} + 5% card fee $${(row.fee_cents/100).toFixed(2)}. No wallet top-up or subscription.`,
+      title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `One device service order on iunlockmobile.com. Service $${(row.price_cents/100).toFixed(2)} + 5% card fee $${(row.fee_cents/100).toFixed(2)}. No wallet top-up or subscription.`,
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
     metadata: { guest_reference: row.reference, integration: 'iunlockmobile-guest-v1' },
@@ -113,6 +131,21 @@ function money(value: Whop.Money | null | undefined, optional=false) {
   if (result===null || !Number.isSafeInteger(result) || result<0) throw new Error('Unexpected payment amount.')
   return result
 }
+/** Revoke only this checkout's untouched difference, never unrelated wallet funds.
+ * Any outgoing use since the credit is conservatively reviewed because wallet money is fungible.
+ * Caller holds an IMMEDIATE transaction so a new hold cannot race the proof and reversal.
+ */
+function reverseWalletDifference(row: GuestCheckout): boolean {
+  if (!row.wallet_credit_cents) return true
+  if (!row.customer_user_id) throw new Error('Small card order is missing its customer.')
+  const grant=db().prepare("SELECT id,user_id,amount_cents FROM credit_ledger WHERE ref_type='guest_card_difference' AND ref_id=? AND type='topup'").get(row.reference) as {id:number;user_id:number;amount_cents:number}|undefined
+  if (!grant || hasCreditTransition('guest_card_difference_refund',row.reference,'adjustment')) return true
+  if (grant.user_id!==row.customer_user_id || grant.amount_cents!==row.wallet_credit_cents) throw new Error('Wallet difference identity mismatch.')
+  if (db().prepare("SELECT 1 FROM credit_ledger WHERE user_id=? AND id>? AND amount_cents<0 LIMIT 1").get(grant.user_id,grant.id)
+    || getBalance(grant.user_id).availableCents<grant.amount_cents) return false
+  credit(grant.user_id,-grant.amount_cents,'adjustment','guest_card_difference_refund',row.reference)
+  return true
+}
 /** Only called with a payment retrieved from Whop by the signed webhook worker or reconciliation. */
 export function settleGuestPayment(payment: Whop.Payment): string {
   const config=whopConfiguration()
@@ -133,28 +166,38 @@ export function settleGuestPayment(payment: Whop.Payment): string {
     if (row.payment_id===payment.id && row.processor_updated_at && updated<Date.parse(row.processor_updated_at)) return 'stale'
     if (payment.status!=='paid' && !payment.paid_at && !['refunded','auto_refunded'].includes(payment.substatus)) return 'pending'
     if (row.payment_id && row.payment_id!==payment.id) {
-      db().prepare("UPDATE guest_checkouts SET review_reason='multiple_payments' WHERE reference=?").run(ref)
+      db().prepare("UPDATE guest_checkouts SET review_reason='multiple_payments',wallet_review_reason=CASE WHEN wallet_credit_cents>0 THEN 'multiple_payments' ELSE wallet_review_reason END WHERE reference=?").run(ref)
       return 'review'
     }
     const total=money(payment.total), subtotal=money(payment.subtotal), tax=money(payment.tax_amount,true), refunded=money(payment.refunded_amount,true)
-    if (payment.currency!=='usd' || subtotal!==row.price_cents+row.fee_cents || total-tax!==subtotal || total<subtotal
+    if (payment.currency!=='usd' || subtotal!==row.price_cents+row.wallet_credit_cents+row.fee_cents || total-tax!==subtotal || total<subtotal
       || (tax>0 && payment.tax_behavior!=='exclusive') || refunded>total || payment.payment_method_type!=='card'
       || payment.promo_code_id || !['one_time','subscription_create'].includes(payment.billing_reason??'')) throw new Error('Guest payment amount mismatch.')
     const disputed=(/dispute|resolution/.test(payment.substatus) || !!payment.dispute_alerted_at)
       && !['dispute_won','dispute_warning_closed','resolution_won'].includes(payment.substatus)
     const fullyRefunded=refunded===total || ['refunded','auto_refunded'].includes(payment.substatus)
     let state=row.state, review=row.review_reason
+    let walletReview=row.wallet_review_reason
     if (fullyRefunded) {
       state='refunded'
+      if (!reverseWalletDifference(row)) walletReview='refunded_credit_used'
+      else walletReview=null
       // Isolated guest ledger: never debit money reserved by an in-flight provider request.
       if (row.user_id && !hasCreditTransition('guest_refund',ref,'adjustment')) {
         const available=getBalance(row.user_id).availableCents
         if (available>0) credit(row.user_id,-available,'adjustment','guest_refund',ref)
       }
-    } else if (disputed || refunded>0) { review=disputed?'dispute':'partial_refund' }
+    } else if (disputed || refunded>0) {
+      review=disputed?'dispute':'partial_refund'
+      if (row.wallet_credit_cents > 0) walletReview=review
+    }
     else if (payment.status==='paid' && ['succeeded','dispute_won','dispute_warning_closed','resolution_won'].includes(payment.substatus) && row.state==='pending') state='paid'
-    db().prepare(`UPDATE guest_checkouts SET payment_id=?,state=?,review_reason=?,processor_updated_at=?,
-      paid_at=COALESCE(paid_at,?),checked_at=datetime('now') WHERE reference=?`).run(payment.id,state,review,payment.updated_at,payment.paid_at,ref)
+    if (state==='paid' && !review && row.wallet_credit_cents > 0) {
+      if (!row.customer_user_id) throw new Error('Small card order is missing its customer.')
+      credit(row.customer_user_id,row.wallet_credit_cents,'topup','guest_card_difference',ref)
+    }
+    db().prepare(`UPDATE guest_checkouts SET payment_id=?,state=?,review_reason=?,wallet_review_reason=?,processor_updated_at=?,
+      paid_at=COALESCE(paid_at,?),checked_at=datetime('now') WHERE reference=?`).run(payment.id,state,review,walletReview,payment.updated_at,payment.paid_at,ref)
     return review ? 'review' : state
   }).immediate()
 }
@@ -164,7 +207,9 @@ export function guestResult(row: GuestCheckout) {
   const received=row.payment_method==='crypto' && row.crypto_invoice_reference && row.user_id
     ? db().prepare("SELECT credit_amount_cents FROM invoices WHERE reference=? AND user_id=? AND status='success'").get(row.crypto_invoice_reference,row.user_id) as {credit_amount_cents:number}|undefined : undefined
   const progress=row.report_id && row.user_id ? db().prepare('SELECT provider_order_id FROM paid_report_orders WHERE id=? AND user_id=?').get(row.report_id,row.user_id) as {provider_order_id:string|null}|undefined : undefined
-  return { reference:row.reference, paymentMethod:row.payment_method, cryptoReceivedCents:received?.credit_amount_cents??null, productName:row.product_name, priceCents:row.price_cents, feeCents:row.fee_cents,
+  return { reference:row.reference, paymentMethod:row.payment_method, walletCreditCents:row.wallet_credit_cents,
+    walletCreditApplied:row.wallet_credit_cents>0 && hasCreditTransition('guest_card_difference',row.reference,'topup') && !hasCreditTransition('guest_card_difference_refund',row.reference,'adjustment'),
+    walletCreditReview:Boolean(row.wallet_review_reason), cryptoReceivedCents:received?.credit_amount_cents??null, productName:row.product_name, priceCents:row.price_cents, feeCents:row.fee_cents,
     domain:getPaidReportProduct(row.product_code)?.domain??'imei_check',
     paymentReceived:Boolean(row.paid_at && row.state!=='pending'),
     submitted:Boolean(progress?.provider_order_id || report?.status==='completed'),
@@ -206,7 +251,7 @@ function resultText(row:GuestCheckout) {
 }
 async function notifyGuest(row:GuestCheckout) {
   const result=guestResult(row), final=['completed','refunded'].includes(result.state)
-  const refundNotice=row.payment_method==='crypto' && row.state==='refund_pending'
+  const refundNotice=row.state==='refund_pending' && (row.payment_method==='crypto' || row.wallet_review_reason==='refund_credit_used')
   const sentColumn=refundNotice?'refund_notice_sent_at':final?'result_sent_at':'receipt_sent_at'
   if (!row.paid_at || !row.payment_id || !['paid','processing','completed','refund_pending','refunded'].includes(row.state)
     || row[sentColumn] || row.email_next_at>Date.now()) return
@@ -215,13 +260,14 @@ async function notifyGuest(row:GuestCheckout) {
   try {
     const url=publicOrigin()+guestOrderPath(row.reference)
     let accountPath:string|null=null
-    try { accountPath=prepareGuestAccount(row.reference) }
+    try { if (!row.customer_user_id) accountPath=prepareGuestAccount(row.reference) }
     catch { console.error('[guest-checkout] optional account activation unavailable') }
     const accountUrl=accountPath?publicOrigin()+accountPath:null
     const accountText=accountUrl?`\n\nOptional: save this order to your customer account. Private tracking works without a password. Saving to an existing account may require sign-in. This account link expires 7 days after issue.\n${accountUrl}`:''
-    const subject=final ? result.state==='completed' ? 'Your device service result is ready' : 'Your order payment has been refunded' : row.state==='refund_pending' && row.payment_method==='crypto' ? 'Your crypto order needs refund assistance' : 'Payment received — track your device service'
-    const body=`${row.product_name}\nOrder: ${row.reference}\n\n`+(final ? result.state==='completed' ? resultText(row) : (row.payment_method==='crypto' ? 'Your crypto refund has been recorded. Contact support if you need help confirming receipt.' : 'Your payment was refunded to the original payment method. Bank processing time may vary.') : row.state==='refund_pending' && row.payment_method==='crypto' ? 'We could not deliver this service. Contact support with your order reference to arrange your crypto refund. Do not send another payment.' : 'We have received your payment. Keep this private link to check progress without signing in.')
-    await sendTransactionalEmail(row.email,subject,`<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escape(body)}</pre><p><a href="${escape(url)}">View your order and result</a></p>${accountUrl?`<p><a href="${escape(accountUrl)}">Save this order to my account</a> (optional, expires 7 days after issue). Private tracking works without a password. Saving to an existing account may require sign-in.</p>`:''}`,`${body}\n\n${url}${accountText}`,{idempotencyKey:`guest/${row.reference}/${refundNotice?'crypto-refund-assistance':final?result.state:'receipt'}`})
+    const subject=final ? result.state==='completed' ? 'Your device service result is ready' : 'Your order payment has been refunded' : refundNotice ? 'Your order needs refund assistance' : 'Payment received — track your device service'
+    const walletText=row.wallet_credit_cents>0 && result.walletCreditApplied ? `\n\n$${(row.wallet_credit_cents/100).toFixed(2)} was added to your account credit. ${result.walletCreditReview?'A payment review currently restricts spending.':''}` : ''
+    const body=`${row.product_name}\nOrder: ${row.reference}\n\n`+(final ? result.state==='completed' ? resultText(row) : (row.payment_method==='crypto' ? 'Your crypto refund has been recorded. Contact support if you need help confirming receipt.' : 'Your payment was refunded to the original payment method. Bank processing time may vary.') : refundNotice ? (row.payment_method==='crypto' ? 'We could not deliver this service. Contact support with your order reference to arrange your crypto refund. Do not send another payment.' : 'We could not deliver this service. Part of this payment was added to your account credit and has been used or reserved. Contact support with your order reference so we can reconcile the remaining credit and arrange your refund. Do not send another payment.') : 'We have received your payment. Keep this private link to check progress without signing in.')+walletText
+    await sendTransactionalEmail(row.email,subject,`<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escape(body)}</pre><p><a href="${escape(url)}">View your order and result</a></p>${accountUrl?`<p><a href="${escape(accountUrl)}">Save this order to my account</a> (optional, expires 7 days after issue). Private tracking works without a password. Saving to an existing account may require sign-in.</p>`:''}`,`${body}\n\n${url}${accountText}`,{idempotencyKey:`guest/${row.reference}/${refundNotice?row.payment_method==='crypto'?'crypto-refund-assistance':'card-credit-refund-assistance':final?result.state:'receipt'}`})
     db().prepare(`UPDATE guest_checkouts SET ${sentColumn}=datetime('now'),email_attempts=0,email_next_at=0 WHERE reference=?`).run(row.reference)
   } catch {
     db().prepare('UPDATE guest_checkouts SET email_attempts=email_attempts+1,email_next_at=? WHERE reference=?')
@@ -273,6 +319,15 @@ export async function processGuestCheckouts(limit=5) {
         row=getGuestCheckout(row.reference)!
       }
       if(config && row.payment_method==='card' && row.state==='refund_pending' && row.payment_id && !row.review_reason) {
+        // Revoke only this checkout's unspent wallet difference before an automatic full refund.
+        // If credit has been used, review the allocation instead of refunding twice or taking unrelated funds.
+        const canRefund=db().transaction(()=>{
+          const current=getGuestCheckout(row.reference)!
+          if (reverseWalletDifference(current)) return true
+          db().prepare("UPDATE guest_checkouts SET review_reason='wallet_credit_refund_review',wallet_review_reason='refund_credit_used' WHERE reference=?").run(current.reference)
+          return false
+        }).immediate()
+        if (!canRefund) { await notifyGuest(getGuestCheckout(row.reference)!); stats.checked++; continue }
         // Full original-method refund (service and fee); a stable key protects ambiguous retries.
         const refunded=await client(config).payments.refund({id:row.payment_id},{idempotencyKey:`guest-refund-${row.reference}`})
         db().prepare("UPDATE guest_checkouts SET refund_requested_at=COALESCE(refund_requested_at,datetime('now')) WHERE reference=?").run(row.reference)

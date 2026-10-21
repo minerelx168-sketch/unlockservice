@@ -5,7 +5,7 @@ import { useActionState, useEffect, useRef, useState, type FormEvent } from 'rea
 import type { FormState } from '@/lib/actions'
 import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
 import { deviceImei } from '@/lib/device-intent-value'
-import { cardFeeCents } from '@/lib/card-fee'
+import { guestCardQuote } from '@/lib/guest-card-quote'
 import { formatUsd } from '@/lib/money'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
@@ -45,8 +45,8 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
   const validImei = deviceImei(imei) !== null
   const digits = imei.replace(/[\s-]/g, '')
   const inputId = `${domain}-browse-imei`
-  const fee = selected ? cardFeeCents(selected.priceCents) : 0
-  const total = selected ? selected.priceCents + fee : 0
+  const cardQuote = selected && selected.priceCents > 0 ? guestCardQuote(selected.priceCents) : null
+  const total = cardQuote?.totalCents ?? 0
   const lastQuote = useRef('')
   useEffect(() => {
     const key = selected ? `${domain}:${selected.productCode}:${selected.priceCents}` : ''
@@ -76,7 +76,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
 
   return <section className="service-browser" aria-labelledby={`${domain}-browse-heading`}>
     <nav className="service-browser__tabs" aria-label={`${isUnlock ? 'Unlock' : 'Phone check'} workspace`}><span aria-current="page"><Icon name={isUnlock ? 'lock' : 'search'} />New order</span><Link href="/track"><Icon name="clock" />Track an order</Link></nav>
-    <header className="service-browser__header"><span className="service-browser__heading-icon"><Icon name={isUnlock ? 'lock' : 'device'} /></span><div><h2 id={`${domain}-browse-heading`}>{isUnlock ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p>Compare prices first. Enter your details once and pay without an account.</p></div></header>
+    <header className="service-browser__header"><span className="service-browser__heading-icon"><Icon name={isUnlock ? 'lock' : 'device'} /></span><div><h2 id={`${domain}-browse-heading`}>{isUnlock ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p>Compare prices first. Enter your details once, then choose how to pay.</p></div></header>
     <form ref={formRef} className="service-browser__form" action={action} onSubmit={handleSubmit} noValidate aria-busy={pending}>
       <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" /><input type="hidden" name="domain" value={domain} /><input type="hidden" name="productCode" value={selectedCode} />
       <ServicePicker options={options} value={selectedCode} onChange={(code) => {
@@ -86,8 +86,8 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
       }} disabled={pending} label={isUnlock ? 'Unlock service and price' : 'Report and price'} id={`${domain}-browse-service`} />
       {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><p>{serviceDisplayText(selected.summary)}</p></div><div className="service-selected-price"><strong>{formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
       {selected && available ? <>
-        <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong><span>Includes {formatUsd(fee)} card fee (5%). Any applicable tax is shown before payment.</span></p>
-        {total < 100 ? <p className="price-check-minimum">Card payments start at $1.00. Choose crypto at the next step for no minimum and no processing fee.</p> : null}
+        <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p>
+        {cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}
         <div className="service-browser__field"><div className="service-browser__label-row"><label htmlFor={inputId}>IMEI number</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls={`${inputId}-guide`} onClick={() => setHelpOpen(!helpOpen)}>Find my IMEI<Icon name="question" /></button></div>
           {helpOpen ? <p className="price-check-imei-guide" id={`${inputId}-guide`}>Dial <kbd>*#06#</kbd> on the phone, or open Settings → General → About. Paste the 15-digit IMEI here. Spaces and dashes are accepted.</p> : null}
           <div className="service-browser__imei" data-invalid={fieldError === 'imei' || undefined}><Icon name="device" /><input ref={inputRef} id={inputId} name="imei" type="text" inputMode="numeric" autoComplete="off" spellCheck={false} enterKeyHint="next" value={imei} onChange={(event) => { if (event.currentTarget.value && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: domain }) } setImei(event.currentTarget.value); setFieldError(null); approved.current = false }} placeholder="Paste or enter 15-digit IMEI" disabled={pending} aria-invalid={fieldError === 'imei'} aria-describedby={`${inputId}-hint`} />{imei ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setFieldError(null); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}</div>
@@ -98,7 +98,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
       {fieldError === 'service' ? <p className="service-browser__error" role="alert">Choose an available service to continue.</p> : null}
       {state.error ? <p className="service-browser__error" role="alert">{state.error}</p> : null}
       <div className="service-browser__actions"><button type="submit" className="button button--primary" disabled={pending || !available}>{pending ? 'Opening secure checkout…' : isUnlock ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></button><p className="service-browser__hint">{!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service.' : isUnlock ? 'Review your order before paying. Unlock processing starts after payment.' : 'View your report preview before paying. The real check starts after payment.'}</p><ul className="service-assurance" aria-label="Assurances"><li><Icon name="shieldCheck" />Clear total</li><li><Icon name="lock" />Private result link</li><li><Icon name="clock" />Live status</li></ul></div>
-      {selected ? <OrderPreviewDialog open={previewOpen} product={{ ...selected, code: selected.productCode }} domain={domain} imei={digits} email={email.trim()} pending={pending} error={state.error} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={(method) => { if (paymentMethod.current) paymentMethod.current.value = method; approved.current = true; trackFunnelEvent('order_preview_continue', { service_category: domain, currency: 'USD', value: (method === 'crypto' ? selected.priceCents : total) / 100, payment_method: method }); formRef.current?.requestSubmit() }} /> : null}
+      {selected && selected.priceCents > 0 ? <OrderPreviewDialog open={previewOpen} product={{ ...selected, code: selected.productCode }} domain={domain} imei={digits} email={email.trim()} pending={pending} error={state.error} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={(method) => { if (paymentMethod.current) paymentMethod.current.value = method; approved.current = true; trackFunnelEvent('order_preview_continue', { service_category: domain, currency: 'USD', value: (method === 'crypto' ? selected.priceCents : total) / 100, payment_method: method }); formRef.current?.requestSubmit() }} /> : null}
     </form>
   </section>
 }
