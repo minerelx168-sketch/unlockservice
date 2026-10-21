@@ -27,7 +27,7 @@ const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   {
     icon: 'wallet',
     title: 'Check financing requirements',
-    body: 'Financing and account requirements depend on the original carrier. Check its current policy before ordering; if the service is refused, the held credit returns to your account balance.',
+    body: 'Financing and account requirements depend on the original carrier. Check its current policy before ordering; if the service is refused, direct card payments are refunded to the original payment method.',
   },
 ]
 
@@ -39,12 +39,12 @@ const STEPS: Array<{ title: string; body: string; art: 'imei' | 'review' | 'done
   },
   {
     title: 'Add your IMEI and review',
-    body: 'Dial *#06# to find the 15 digits. Review the requirements before ordering; credit is held while the service is processed.',
+    body: 'Dial *#06# to find the 15 digits. Review the requirements before ordering; pay for the selected service by card without creating an account.',
     art: 'review',
   },
   {
     title: 'Use a supported SIM',
-    body: 'When the service is delivered, follow its device-specific instructions. Use a SIM from a network whose bands your phone supports. A refused order releases the reserved account credit.',
+    body: 'When the service is delivered, follow its device-specific instructions. Use a SIM from a network whose bands your phone supports. A refused direct card order is refunded to the original payment method.',
     art: 'done',
   },
 ]
@@ -212,7 +212,7 @@ export default function HomePage() {
             <p className="t-lead">
               {ordering
                 ? 'Compare prices and delivery times for your original network. Review the service before you pay.'
-                : 'Explore device reports and unlock services. Compare prices and availability before creating an account.'}
+                : 'Explore device reports and unlock services. Compare prices and availability, then pay per order without an account.'}
             </p>
 
 
@@ -341,7 +341,7 @@ export default function HomePage() {
               <Icon name="info" strokeWidth={1.9} />
               <span>
                 Not sure? Order with the best information you have. If the network turns the device down,
-                the held credit returns to your balance — nothing is charged for a refusal.
+                direct card orders receive an original-method refund; balance-paid orders release the reserved credit.
               </span>
             </p>
           </div>

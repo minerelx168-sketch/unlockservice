@@ -184,7 +184,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         {pending ? <><Icon name="clock" />Opening…</> : <>Continue to service details<Icon name="arrowRight" /></>}
       </button>
       <p className="price-check-next">Review the requirements next. Nothing is ordered here.</p>
-      <p className="price-check-assurance"><span><Icon name="shieldCheck" />Credit returned if refused</span><span><Icon name="clock" />Order tracking</span></p>
+      <p className="price-check-assurance"><span><Icon name="shieldCheck" />Refund if not delivered</span><span><Icon name="clock" />Order tracking</span></p>
     </form>
   )
 }

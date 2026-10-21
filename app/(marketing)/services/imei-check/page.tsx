@@ -23,7 +23,7 @@ export const metadata = pageMetadata("/services/imei-check", "IMEI Check Reports
 const STEPS: Array<{ icon: IconName; title: string; body: string }> = [
   { icon: 'keypad', title: 'Enter the IMEI', body: 'Dial *#06# on the phone, or read it from Settings or the SIM tray.' },
   { icon: 'search', title: 'Choose a report', body: 'Blacklist, carrier, warranty, activation lock — each priced on its own.' },
-  { icon: 'wallet', title: 'Pay from credit', body: 'Credit is held while the report runs and charged only when it is delivered.' },
+  { icon: 'wallet', title: 'Pay for your report', body: 'Pay by card without an account, or use your existing credit. Receive the result online and by email.' },
   { icon: 'file', title: 'Read the result', body: 'On the order page and by email, kept on the order for as long as you need it.' },
 ]
 
