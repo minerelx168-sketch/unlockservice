@@ -4,6 +4,10 @@ Customers can select a catalog service, enter an IMEI and delivery email, and pa
 
 Enable new checkouts with IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED=1. Existing Whop live configuration, Resend delivery, and a >=32-character IMEI encryption secret are required. Disabling new checkout does not stop processing existing payments or refunds.
 
+## Payment provider minimum
+
+A live, uncharged checkout validation returned HTTP 400: "The plan must be at least $1.00" for a $0.16 total. Direct card checkout is therefore disabled below a $1.00 order total (service plus 5% fee), with a clear explanation and existing-balance/support links. Prices are not increased. These small services still need a merchant pricing decision or another payment solution to provide the same no-login flow.
+
 ## Settlement and access
 
 The existing signature-verified Whop inbox retrieves the authoritative payment and routes guest metadata to its separate settlement path. It validates the receiving account, environment, product, plan, checkout, payment ID, USD amount, card method, refunds, and dispute state. A browser return is never settlement proof. The polling worker reconciles missed callbacks by the exact plan and re-retrieves payments.

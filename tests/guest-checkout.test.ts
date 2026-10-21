@@ -124,3 +124,12 @@ test('uncertain provider response is not retried or refunded blindly; failed ema
   assert.equal(credits.getBalance(saved.user_id!).heldCents,1000)
   assert.equal(refunds.filter(id=>id===saved.payment_id).length,0)
 })
+
+test('sub-dollar services are rejected before creating a gateway plan or changing the service price',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=15 WHERE code='APPLE_BASIC'").run()
+  const calls=checkoutCalls
+  await assert.rejects(checkout({expectedPriceCents:15}),/at least \$1.00/)
+  assert.equal(checkoutCalls,calls)
+  assert.deepEqual(db.db().prepare("SELECT price_cents FROM paid_report_products WHERE code='APPLE_BASIC'").get(),{price_cents:15})
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_BASIC'").run()
+})

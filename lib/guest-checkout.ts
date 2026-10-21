@@ -12,6 +12,9 @@ import { client, whopCheckoutEnabled, whopConfiguration, safeWhopCheckoutUrl, Wh
 import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
 
+// Verified against the live Whop create-checkout API: minimum plan total is USD 1.00.
+export const GUEST_CARD_MIN_TOTAL_CENTS = 100
+
 export type GuestCheckout = {
   reference: string; request_key: string; email: string; product_code: string; product_name: string
   imei_encrypted: string; price_cents: number; fee_cents: number; account_id: string; product_id: string
@@ -64,6 +67,7 @@ export async function createGuestCheckout(input: {
     }
     const product = getPaidReportProduct(input.productCode)
     if (!product?.providerReady || product.priceCents <= 0 || product.priceCents > 100000) throw new WhopPaymentError('This service is not available for online payment.', 409)
+    if (product.priceCents + cardFeeCents(product.priceCents) < GUEST_CARD_MIN_TOTAL_CENTS) throw new WhopPaymentError('Whop requires a card order total of at least $1.00. This service price has not been increased; use an existing account balance or contact support.', 400)
     if (product.priceCents !== input.expectedPriceCents) throw new WhopPaymentError('The price changed. Reload to review the current price.', 409)
     if (!consumeAttempt('guest-checkout-email', email, 6, 3600)) throw new WhopPaymentError('Too many requests. Please try again later.', 429)
     const reference = randomBytes(16).toString('hex')

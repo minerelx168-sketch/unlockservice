@@ -5,7 +5,7 @@ import { formatUsd } from '@/lib/money'
 import { isValidImei, normalizeImei } from '@/lib/imei'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
-export function GuestCheckoutForm({product,feeCents,initialImei,enabled}:{product:{code:string;name:string;priceCents:number};feeCents:number;initialImei:string;enabled:boolean}) {
+export function GuestCheckoutForm({product,feeCents,initialImei,enabled,belowCardMinimum}:{product:{code:string;name:string;priceCents:number};feeCents:number;initialImei:string;enabled:boolean;belowCardMinimum:boolean}) {
   const [imei,setImei]=useState(initialImei),[email,setEmail]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('')
   const key=useRef(''),lock=useRef(false)
   async function submit(event:FormEvent<HTMLFormElement>) {
@@ -37,8 +37,9 @@ export function GuestCheckoutForm({product,feeCents,initialImei,enabled}:{produc
     <small id="guest-email-hint">Your confirmation, private tracking link and result go here. No account or password needed.</small>
     <label className="guest-agreement"><input type="checkbox" required disabled={busy} /><span>I own this device or am authorized to service it. I have checked the IMEI and service requirements and agree to the <Link href="/terms" target="_blank">Terms</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link>.</span></label>
     {error ? <p role="alert" className="guest-error">{error}</p>:null}
-    <button className="button button--primary" type="submit" disabled={busy || !enabled}>{busy ? 'Opening secure payment…' : `Pay ${formatUsd(product.priceCents+feeCents)} by card`}</button>
+    <button className="button button--primary" type="submit" disabled={busy || !enabled || belowCardMinimum}>{belowCardMinimum ? 'Card checkout minimum: $1.00' : busy ? 'Opening secure payment…' : `Pay ${formatUsd(product.priceCents+feeCents)} by card`}</button>
     <p className="guest-note">One order. No wallet top-up. Any tax required by the payment provider is shown before you confirm payment.</p>
+    {belowCardMinimum ? <p role="status" className="guest-error">This service costs less than Whop’s $1.00 card minimum, including the card fee. We have kept the original price. You can <Link href={`/user/reports/new?product=${encodeURIComponent(product.code)}`}>use an existing account balance</Link> or <Link href="/support">contact support</Link>.</p>:null}
     {!enabled ? <p role="status">Direct card checkout is temporarily unavailable. Please contact support or <Link href={`/user/reports/new?product=${encodeURIComponent(product.code)}`}>use your existing account balance</Link>.</p>:null}
   </form>
 }
