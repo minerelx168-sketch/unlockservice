@@ -19,10 +19,18 @@ export function GuestOrderResult({initial,accessKey}:{initial:Result;accessKey:s
     return()=>{stopped=true;clearInterval(timer)}
   },[initial.reference,accessKey,result.state])
   const message=copy[result.state]??copy.review
-  return <section className="guest-shell guest-result"><span className="eyebrow">YOUR PRIVATE ORDER PAGE</span><h1 aria-live="polite">{message[0]}</h1><p>{message[1]}</p>
+  const isUnlock=result.domain==='unlock'
+  const terminal=result.state==='completed'||result.refused||['refund_pending','refunded'].includes(result.state)
+  const outcome=result.refused?'Refused':result.state==='refunded'?'Refunded':result.state==='refund_pending'?'Refund pending':'Completed'
+  const steps=[{name:'Received',done:result.paymentReceived},{name:isUnlock?'Submitted':'Checking',done:result.submitted},{name:outcome,done:terminal}]
+  const title=result.state==='completed'?(isUnlock?'Your unlock result is ready':'Your full report is ready'):['paid','processing'].includes(result.state)?'Order received':message[0]
+  return <section className="guest-shell guest-result"><span className="eyebrow">{isUnlock?'UNLOCK ORDER':'PHONE CHECK ORDER'}</span><h1 aria-live="polite">{title}</h1><p>{message[1]}</p>
+    <ol className="guest-progress" aria-label="Order progress">{steps.map((step,index)=><li key={index} data-done={step.done?'true':'false'} aria-current={!terminal&&index===(result.submitted?1:0)?'step':undefined}><span aria-hidden="true">{step.done?'✓':index+1}</span><strong>{step.name}</strong>{!step.done?<small>Pending</small>:null}</li>)}</ol>
     <article className="guest-card"><h2>{result.productName}</h2><p className="guest-reference">Order reference: {result.reference}</p><p>Order total before tax: <strong>{formatUsd(result.priceCents+result.feeCents)}</strong></p>
+      {!terminal&&result.paymentReceived?<p className="guest-note">{isUnlock?'We submit your paid order to the service provider and update this page when they respond.':'Your paid check starts automatically. The full report appears here as soon as the provider returns it.'} No need to keep this page open.</p>:null}
       {result.report ? <div className="guest-report"><p>IMEI: {result.report.imei??result.report.maskedImei}</p>{result.report.providerCode ? <pre>{result.report.providerCode}</pre> : result.report.report?.sections.map((section,index)=><section key={index}><h3>{section.title}</h3><dl>{section.items.map((item,i)=><div key={i}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl></section>)}</div>:null}
       {error?<p role="status">{error}</p>:null}<p className="guest-note">Keep this link private. Anyone with it can view this order and its result.</p>
+      {result.paymentReceived?<p className="guest-note">Your email contains your private order link. You can view this result without a password; account activation and setting a password are optional.</p>:null}
       <Link className="button button--secondary" href="/support">Contact support</Link>
     </article></section>
 }

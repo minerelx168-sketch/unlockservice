@@ -11,6 +11,7 @@ import { emailDeliveryConfigured, sendTransactionalEmail } from './account-secur
 import { client, whopCheckoutEnabled, whopConfiguration, safeWhopCheckoutUrl, WhopPaymentError } from './whop'
 import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
+import { prepareGuestAccount } from './guest-account'
 
 // Verified against the live Whop create-checkout API: minimum plan total is USD 1.00.
 export const GUEST_CARD_MIN_TOTAL_CENTS = 100
@@ -156,7 +157,12 @@ export function settleGuestPayment(payment: Whop.Payment): string {
 function guestReport(row: GuestCheckout) { return row.user_id && row.report_id ? getPaidReport(row.user_id,row.report_id) : undefined }
 export function guestResult(row: GuestCheckout) {
   const report=guestReport(row)
+  const progress=row.report_id && row.user_id ? db().prepare('SELECT provider_order_id FROM paid_report_orders WHERE id=? AND user_id=?').get(row.report_id,row.user_id) as {provider_order_id:string|null}|undefined : undefined
   return { reference:row.reference, productName:row.product_name, priceCents:row.price_cents, feeCents:row.fee_cents,
+    domain:getPaidReportProduct(row.product_code)?.domain??'imei_check',
+    paymentReceived:Boolean(row.paid_at && row.state!=='pending'),
+    submitted:Boolean(progress?.provider_order_id || report?.status==='completed'),
+    refused:report?.status==='refunded',
     state: row.review_reason ? 'review' : row.state==='refunded' ? 'refunded' : row.state==='refund_pending' ? 'refund_pending' : report?.status==='completed' ? 'completed' : report?.status==='manual_review' ? 'review' : row.state,
     report: row.state!=='refunded' && !row.review_reason && report?.status==='completed' ? report : null }
 }
@@ -194,14 +200,20 @@ function resultText(row:GuestCheckout) {
 }
 async function notifyGuest(row:GuestCheckout) {
   const result=guestResult(row), final=['completed','refunded'].includes(result.state)
-  if (!row.paid_at || (final ? row.result_sent_at : row.receipt_sent_at) || row.email_next_at>Date.now()) return
+  if (!row.paid_at || !row.payment_id || !['paid','processing','completed','refund_pending','refunded'].includes(row.state)
+    || (final ? row.result_sent_at : row.receipt_sent_at) || row.email_next_at>Date.now()) return
   const lock=db().prepare('UPDATE guest_checkouts SET lease_until=? WHERE reference=? AND lease_until<=?').run(Date.now()+30000,row.reference,Date.now())
   if (!lock.changes) return
   try {
     const url=publicOrigin()+guestOrderPath(row.reference)
+    let accountPath:string|null=null
+    try { accountPath=prepareGuestAccount(row.reference) }
+    catch { console.error('[guest-checkout] optional account activation unavailable') }
+    const accountUrl=accountPath?publicOrigin()+accountPath:null
+    const accountText=accountUrl?`\n\nOptional: save this order to your customer account. Private tracking works without a password. Saving to an existing account may require sign-in. This account link expires 7 days after issue.\n${accountUrl}`:''
     const subject=final ? result.state==='completed' ? 'Your device service result is ready' : 'Your order payment has been refunded' : 'Payment received — track your device service'
     const body=`${row.product_name}\nOrder: ${row.reference}\n\n`+(final ? result.state==='completed' ? resultText(row) : 'Your payment was refunded to the original payment method. Bank processing time may vary.' : 'We have received your payment. Keep this private link to check progress without signing in.')
-    await sendTransactionalEmail(row.email,subject,`<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escape(body)}</pre><p><a href="${escape(url)}">View your order and result</a></p>`,`${body}\n\n${url}`,{idempotencyKey:`guest/${row.reference}/${final?result.state:'receipt'}`})
+    await sendTransactionalEmail(row.email,subject,`<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escape(body)}</pre><p><a href="${escape(url)}">View your order and result</a></p>${accountUrl?`<p><a href="${escape(accountUrl)}">Save this order to my account</a> (optional, expires 7 days after issue). Private tracking works without a password. Saving to an existing account may require sign-in.</p>`:''}`,`${body}\n\n${url}${accountText}`,{idempotencyKey:`guest/${row.reference}/${final?result.state:'receipt'}`})
     db().prepare(`UPDATE guest_checkouts SET ${final?'result_sent_at':'receipt_sent_at'}=datetime('now'),email_attempts=0,email_next_at=0 WHERE reference=?`).run(row.reference)
   } catch {
     db().prepare('UPDATE guest_checkouts SET email_attempts=email_attempts+1,email_next_at=? WHERE reference=?')

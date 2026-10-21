@@ -4,26 +4,27 @@ import { createRequire } from 'node:module'
 import vm from 'node:vm'
 import test from 'node:test'
 import ts from 'typescript'
-import { deviceDomain, deviceImei } from '../lib/device-intent-value'
+import { deviceDomain, deviceImei, deviceEmail } from '../lib/device-intent-value'
 
 // Execute the server action with boundary adapters; never call a provider or real cookies.
-function actionHarness() {
+function actionHarness(guestEnabled = false) {
   const writes: unknown[][] = []
   const products = [{ productCode: 'UNLOCK_ACTIVE', status: 'available' }, { productCode: 'UNLOCK_PAUSED', status: 'coming_soon' }]
-  const moduleRecord = { exports: {} as { showUnlockServicesAction: (state: object, form: FormData) => Promise<{ error?: string }> } }
+  const moduleRecord = { exports: {} as { showUnlockServicesAction: (state: object, form: FormData) => Promise<{ error?: string }>; continueDeviceServiceAction: (state: object, form: FormData) => Promise<{ error?: string }> } }
   const realRequire = createRequire(import.meta.url)
   const mocks: Record<string, unknown> = {
     'next/navigation': { redirect: (url: string) => { throw new Error(`REDIRECT:${url}`) } },
     './auth': { currentSession: async () => null },
+    './guest-checkout': { guestCheckoutEnabled: () => guestEnabled },
     './continuation': { withContinuation: () => '' },
     './device-intent': { writeDeviceIntent: async (...args: unknown[]) => { writes.push(args) } },
-    './device-intent-value': { deviceDomain, deviceImei },
-    './paid-reports': { listPaidReportProducts: () => [] },
+    './device-intent-value': { deviceDomain, deviceImei, deviceEmail },
+    './paid-reports': { listPaidReportProducts: () => [{code:'UNLOCK_ACTIVE',domain:'unlock',providerReady:true}] },
     './public-provider-catalog': { listPublicProviderProducts: (domain: string) => domain === 'unlock' ? products : [] },
   }
   const code = ts.transpileModule(readFileSync('lib/device-intent-actions.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
   vm.runInNewContext(code, { module: moduleRecord, exports: moduleRecord.exports, require: (name: string) => mocks[name] ?? realRequire(name) })
-  return { action: moduleRecord.exports.showUnlockServicesAction, writes }
+  return { action: moduleRecord.exports.showUnlockServicesAction, continueAction:moduleRecord.exports.continueDeviceServiceAction, writes }
 }
 function form(imei: string, code?: string) {
   const data = new FormData()
@@ -55,4 +56,21 @@ test('the existing IMEI-only entry continues to open the catalog', async () => {
   await assert.rejects(action({}, form('490154203237518')), /REDIRECT:\/services\/unlock\/catalog/)
   assert.equal(writes.length, 1)
   assert.equal(writes[0][2], undefined)
+})
+
+test('guest service navigation preserves IMEI and email once, without creating an order', async () => {
+  const {continueAction,writes}=actionHarness(true)
+  const data=form('49 015420 323751 8','UNLOCK_ACTIVE')
+  data.set('domain','unlock');data.set('email',' Buyer@Example.com ')
+  await assert.rejects(continueAction({},data),/REDIRECT:\/checkout\?product=UNLOCK_ACTIVE/)
+  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com'])
+  assert.equal(writes.length,1)
+})
+
+test('invalid delivery email cannot overwrite the existing checkout draft', async () => {
+  const {continueAction,writes}=actionHarness(true)
+  const data=form('490154203237518','UNLOCK_ACTIVE')
+  data.set('domain','unlock');data.set('email','bad email')
+  assert.ok((await continueAction({},data)).error)
+  assert.equal(writes.length,0)
 })

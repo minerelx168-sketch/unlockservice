@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { currentSession } from './auth'
 import { guestCheckoutEnabled } from './guest-checkout'
 import { clearDeviceIntent, readDeviceIntent, writeDeviceIntent } from './device-intent'
-import { deviceDomain, deviceImei } from './device-intent-value'
+import { deviceDomain, deviceImei, deviceEmail } from './device-intent-value'
 import { listPaidReportProducts } from './paid-reports'
 import { listPublicProviderProducts } from './public-provider-catalog'
 
@@ -63,7 +63,10 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   const productCode = form.get('productCode')
   const product = listPaidReportProducts().find((entry) => entry.code === productCode && entry.domain === domain && entry.providerReady)
   if (!product) return { error: 'Choose an available service. Availability may have changed; refresh to see current options.' }
-  await writeDeviceIntent(imei, product.domain, product.code)
+  const rawEmail = form.get('email')
+  const email = deviceEmail(rawEmail)
+  if (rawEmail !== null && !email) return { error: 'Enter a valid email address so we can deliver your result.' }
+  await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
   redirect(guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}` : target)
 }

@@ -16,9 +16,11 @@ export const metadata = pageMetadata(
   'Compare phone unlock service prices and delivery estimates. Choose your service, enter the IMEI and review requirements before ordering.',
 )
 
-export default async function UnlockServicesPage() {
-  const intent = await readDeviceIntent()
+export default async function UnlockServicesPage({ searchParams }: { searchParams: Promise<{ product?: string | string[] }> }) {
+  const [intent, query] = await Promise.all([readDeviceIntent(), searchParams])
   const products = listPublicProviderProducts('unlock')
+  const requested = typeof query.product === 'string' ? query.product : undefined
+  const initialProductCode = products.find((product) => product.productCode === requested)?.productCode ?? (intent?.domain === 'unlock' ? intent.productCode : undefined)
   const ordering = unlockOrderingEnabled() || products.some((product) => product.status === 'available')
   const quoteProducts: PriceCheckProduct[] = products.map((product) => ({
     code: product.productCode, name: product.name, category: unlockCategory(product),
@@ -37,7 +39,7 @@ export default async function UnlockServicesPage() {
           <div className="service-hero-copy unlock-landing-intro">
             <span className="hero-chip"><Icon name="lock" />Network unlock services</span>
             <h1 className="service-entry-title">Keep your phone.<br /><span className="accent">Explore your options.</span></h1>
-            <p className="t-lead">Choose the network your phone is locked to. See the price and delivery estimate, then review the requirements before ordering.</p>
+            <p className="t-lead">Choose the network your phone is locked to. See the price and delivery time first, then enter your IMEI and email to preview your order. No account or wallet top-up needed.</p>
             <ul className="service-micro" aria-label="Unlock facts">
               <li><Icon name="bolt" />Remote service</li>
               <li><Icon name="wallet" />Pay per order</li>
@@ -45,7 +47,7 @@ export default async function UnlockServicesPage() {
             </ul>
           </div>
           <div className="hero-panel unlock-landing-form" id="unlock-entry-heading">
-            <HeroPriceCheck unlock={quoteProducts} check={[]} ordering={ordering} fixedDomain="unlock" initialImei={intentImeiFor(intent, 'unlock')} initialProductCode={intent?.domain === 'unlock' ? intent.productCode : undefined} />
+            <HeroPriceCheck key={initialProductCode ?? 'unselected'} unlock={quoteProducts} check={[]} ordering={ordering} fixedDomain="unlock" initialImei={intentImeiFor(intent, 'unlock')} initialProductCode={initialProductCode} initialEmail={intent?.domain === 'unlock' ? intent.email : undefined} />
           </div>
           <div className="requirements-card unlock-landing-requirements">
             <h2><Icon name="shieldCheck" />Before you order</h2>
@@ -62,7 +64,7 @@ export default async function UnlockServicesPage() {
           <h2>Three clear steps</h2>
           <ol>
             <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="search" /></span><b>1. Choose a service</b>Compare its price, delivery time and device requirements.</li>
-            <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="keypad" /></span><b>2. Add your IMEI</b>Dial *#06#, enter the 15 digits and review your selection.</li>
+            <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="keypad" /></span><b>2. Add IMEI and email</b>Dial *#06#, enter the 15 digits and preview your order before paying.</li>
             <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="clock" /></span><b>3. Order and track</b>Pay by card without an account. Track your order using its private link and receive the result by email.</li>
           </ol>
         </div>

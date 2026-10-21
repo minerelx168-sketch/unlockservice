@@ -22,7 +22,7 @@ export default async function CheckoutPage({searchParams}:{searchParams:Promise<
       <dl><div><dt>Estimated delivery</dt><dd>{deliveryLabel}</dd></div><div><dt>Service</dt><dd>{formatUsd(product.priceCents)}</dd></div><div><dt>Card fee (5%)</dt><dd>{formatUsd(fee)}</dd></div><div className="guest-total"><dt>Total before tax</dt><dd>{formatUsd(product.priceCents+fee)}</dd></div></dl>
       <div className="guest-assurance"><strong>If we cannot deliver</strong><p>For this direct card order, we request a full refund to your original payment method, including the card fee. It is not returned as wallet credit. Bank processing time may vary.</p></div>
       <p className="guest-note">Delivery times are estimates. Device eligibility and the selected service’s requirements apply.</p>
-    </article><article className="guest-card"><h2>Where should we send your result?</h2><GuestCheckoutForm product={product} feeCents={fee} initialImei={intent?.productCode===product.code?intent.imei:''} enabled={guestCheckoutEnabled()} belowCardMinimum={product.priceCents+fee<GUEST_CARD_MIN_TOTAL_CENTS}/>
+    </article><article className="guest-card"><h2>{intent?.productCode===product.code && intent.email ? 'Review your details and pay' : 'Where should we send your result?'}</h2><GuestCheckoutForm product={product} feeCents={fee} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email:''} enabled={guestCheckoutEnabled()} belowCardMinimum={product.priceCents+fee<GUEST_CARD_MIN_TOTAL_CENTS}/>
       <p className="guest-existing">Already have credit? <Link href={`/user/reports/new?product=${encodeURIComponent(product.code)}`}>Pay with your account balance</Link></p>
     </article></div>
   </section>

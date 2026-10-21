@@ -47,6 +47,19 @@ CREATE TABLE IF NOT EXISTS guest_checkouts (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS guest_checkouts_work ON guest_checkouts(state,checked_at);
+-- A paid guest order stays financially isolated from a customer wallet. Inbox
+-- verification links its history to a customer; the checkout return key cannot.
+CREATE TABLE IF NOT EXISTS guest_account_access (
+  reference TEXT PRIMARY KEY REFERENCES guest_checkouts(reference),
+  email TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_user_id INTEGER REFERENCES users(id),
+  verified_user_id INTEGER REFERENCES users(id),
+  consumed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS guest_account_access_customer ON guest_account_access(verified_user_id,created_at);
 CREATE TABLE IF NOT EXISTS payment_analytics (
   invoice_reference TEXT PRIMARY KEY REFERENCES invoices(reference),
   user_id INTEGER NOT NULL REFERENCES users(id),

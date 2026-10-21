@@ -5,17 +5,20 @@ import { formatUsd } from '@/lib/money'
 import { isValidImei, normalizeImei } from '@/lib/imei'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
-export function GuestCheckoutForm({product,feeCents,initialImei,enabled,belowCardMinimum}:{product:{code:string;name:string;priceCents:number};feeCents:number;initialImei:string;enabled:boolean;belowCardMinimum:boolean}) {
-  const [imei,setImei]=useState(initialImei),[email,setEmail]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('')
+import { deviceEmail } from '@/lib/device-intent-value'
+export function GuestCheckoutForm({product,feeCents,initialImei,initialEmail='',enabled,belowCardMinimum}:{product:{code:string;name:string;priceCents:number;domain?:'unlock'|'imei_check'};feeCents:number;initialImei:string;initialEmail?:string;enabled:boolean;belowCardMinimum:boolean}) {
+  const [imei,setImei]=useState(initialImei),[email,setEmail]=useState(initialEmail),[busy,setBusy]=useState(false),[error,setError]=useState('')
+  const [editing,setEditing]=useState(!isValidImei(normalizeImei(initialImei)) || !deviceEmail(initialEmail))
   const key=useRef(''),lock=useRef(false)
   async function submit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if(lock.current) return
     if(!isValidImei(normalizeImei(imei))) {setError('Check your 15-digit IMEI. Dial *#06# to find it.');return}
+    if(!deviceEmail(email)) {setEditing(true);setError('Enter a valid email address for your result.');return}
     lock.current=true;setBusy(true);setError('')
     if(!key.current) key.current=crypto.randomUUID()
     try {
-      trackFunnelEvent('begin_checkout',{service_category:'guest_service',value:product.priceCents/100,currency:'USD'})
+      trackFunnelEvent('begin_checkout',{service_category:product.domain??'guest_service',value:product.priceCents/100,currency:'USD'})
       const analyticsContext=await paymentAnalyticsContext()
       const response=await fetch('/api/checkout/guest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productCode:product.code,
         imei,email,expectedPriceCents:product.priceCents,requestKey:key.current,acceptedTerms:true,analyticsContext})})
@@ -27,6 +30,7 @@ export function GuestCheckoutForm({product,feeCents,initialImei,enabled,belowCar
     } catch(e) {setError(e instanceof Error ? e.message : 'Unable to open checkout. Please retry.');setBusy(false);lock.current=false}
   }
   return <form onSubmit={submit} className="guest-form" aria-busy={busy}>
+    {!editing ? <div className="guest-details-review"><dl><div><dt>Device IMEI</dt><dd>{normalizeImei(imei)}</dd></div><div><dt>Result email</dt><dd>{email}</dd></div></dl><button className="guest-edit" type="button" onClick={()=>setEditing(true)} disabled={busy}>Edit details</button><p className="guest-note">Your details are saved for this order. No account or password needed to pay.</p></div> : <>
     <label htmlFor="guest-imei">Device IMEI</label>
     <input id="guest-imei" name="imei" type="text" inputMode="numeric" autoComplete="off" maxLength={30} required value={imei} disabled={busy}
       onChange={e=>{setImei(e.target.value);key.current=''}} placeholder="15-digit IMEI" aria-describedby="guest-imei-hint" />
@@ -35,6 +39,7 @@ export function GuestCheckoutForm({product,feeCents,initialImei,enabled,belowCar
     <input id="guest-email" name="email" type="email" autoComplete="email" maxLength={254} required value={email} disabled={busy}
       onChange={e=>{setEmail(e.target.value);key.current=''}} placeholder="you@example.com" aria-describedby="guest-email-hint" />
     <small id="guest-email-hint">Your confirmation, private tracking link and result go here. No account or password needed.</small>
+    </>}
     <label className="guest-agreement"><input type="checkbox" required disabled={busy} /><span>I own this device or am authorized to service it. I have checked the IMEI and service requirements and agree to the <Link href="/terms" target="_blank">Terms</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link>.</span></label>
     {error ? <p role="alert" className="guest-error">{error}</p>:null}
     <button className="button button--primary" type="submit" disabled={busy || !enabled || belowCardMinimum}>{belowCardMinimum ? 'Card checkout minimum: $1.00' : busy ? 'Opening secure payment…' : `Pay ${formatUsd(product.priceCents+feeCents)} by card`}</button>

@@ -59,6 +59,7 @@ export default async function OrdersPage({
           </p>
         </div>
         <div className="app-head-actions" aria-label="Order history view">
+          <Link className="button button--quiet" href="/user/guest-orders">Direct card orders</Link>
           <a className={`button ${tab === 'orders' ? 'button--primary' : 'button--quiet'}`} href="?tab=orders&page=1">
             Orders
           </a>

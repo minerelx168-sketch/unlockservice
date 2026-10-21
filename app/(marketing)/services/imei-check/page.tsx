@@ -1,173 +1,37 @@
-import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
+import { pageMetadata } from '@/lib/seo'
 import { ProductCatalog } from '@/components/product-catalog'
-import { Icon, type IconName } from '@/components/icons'
-import { ImeiQuickForm } from '@/components/imei-quick-form'
-import { PhoneArt, SampleReportCard } from '@/components/sample-report-card'
+import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-check'
+import { Icon } from '@/components/icons'
 import { ScrollTo } from '@/components/scroll-to'
-import { ServiceBrowser } from '@/components/service-browser'
-import { ServiceOutputExample } from '@/components/service-output-example'
-import { currentSession } from '@/lib/auth'
 import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor } from '@/lib/device-intent-value'
 import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
-import { preferredSample, quickPicks } from '@/lib/quick-picks'
-import { sampleRows } from '@/lib/sample-report'
-import { getServiceOutputExample } from '@/lib/service-output-examples'
-import { serviceText } from '@/lib/unlock-catalog-view'
 
 export const dynamic = 'force-dynamic'
+export const metadata = pageMetadata('/services/imei-check', 'IMEI Check Reports: Carrier, Blacklist & Warranty', 'Compare paid IMEI reports for carrier, blacklist, warranty and lock-status information. See the price and delivery time, preview your order and pay without an account.')
 
-export const metadata = pageMetadata("/services/imei-check", "IMEI Check Reports: Carrier, Blacklist & Warranty", "Compare paid IMEI reports for carrier, blacklist, warranty and lock-status information. Check what each report includes, its price and availability.")
-
-const STEPS: Array<{ icon: IconName; title: string; body: string }> = [
-  { icon: 'keypad', title: 'Enter the IMEI', body: 'Dial *#06# on the phone, or read it from Settings or the SIM tray.' },
-  { icon: 'search', title: 'Choose a report', body: 'Blacklist, carrier, warranty, activation lock — each priced on its own.' },
-  { icon: 'wallet', title: 'Pay for your report', body: 'Pay by card without an account, or use your existing credit. Receive the result online and by email.' },
-  { icon: 'file', title: 'Read the result', body: 'On the order page and by email, kept on the order for as long as you need it.' },
-]
-
-export default async function ImeiCheckServicesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ product?: string | string[]; start?: string | string[] }>
-}) {
-  const [found, intent, query] = await Promise.all([currentSession(), readDeviceIntent(), searchParams])
+export default async function ImeiCheckServicesPage({ searchParams }: { searchParams: Promise<{ product?: string | string[]; start?: string | string[] }> }) {
+  const [intent, query] = await Promise.all([readDeviceIntent(), searchParams])
   const products = listPublicProviderProducts('imei_check')
   const available = products.some((product) => product.status === 'available')
-  /* A code in the address (from the hero widget or the drawer) preselects
-     the report, but only if it is one we list — anything else is ignored. */
   const requested = typeof query.product === 'string' ? query.product : undefined
-  const initialProductCode =
-    (intent?.domain === 'imei_check' ? intent.productCode : undefined)
-    ?? products.find((product) => product.productCode === requested)?.productCode
+  const initialProductCode = products.find((product) => product.productCode === requested)?.productCode ?? (intent?.domain === 'imei_check' ? intent.productCode : undefined)
+  const quoteProducts: PriceCheckProduct[] = products.map((product) => ({ code: product.productCode, name: product.name, category: product.group, summary: product.summary, available: product.status === 'available', priceCents: product.priceCents, etaLabel: product.etaLabel }))
 
-  /* The sample card shows a reviewed example from the catalog itself, so
-     what the visitor sees is the shape of what they would buy. */
-  const sample = preferredSample(
-    products
-      .map((product) => {
-        const example = getServiceOutputExample(product.productCode)
-        const table = example ? sampleRows(example.variants[0].output, 6) : null
-        return { product, example, table }
-      })
-      /* A one-line verdict makes no card; only a report with rows is shown. */
-      .filter((entry) => entry.example !== null && entry.table !== null && entry.table.rows.length >= 4),
-  )
-  const sampleTable = sample?.table ?? null
-  const picks = quickPicks(products)
-  const start = query.start === '1'
-  const instant = products.filter((product) => /^instant/i.test(product.etaLabel)).length
-
-  return (
-    <section className="section section--tint service-entry-section">
-      <div className="shell">
-        <nav className="service-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/services">Services</Link>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">Phone Check</span>
-        </nav>
-
-        <div className="service-hero">
-          <div className="service-hero-copy">
-            <span className="hero-chip">
-              <Icon name="shieldCheck" strokeWidth={2} />
-              {products.length} reports · read from carrier and manufacturer records
-            </span>
-            <h1 className="service-entry-title">IMEI check reports</h1>
-            <p className="service-hero-tagline">Know the phone before you pay for it.</p>
-            <p className="t-lead">
-              Blacklist, lost-or-stolen, carrier lock, warranty and activation status from the IMEI
-              alone. Works on any brand, with the price shown before anything is ordered.
-            </p>
-
-            <ImeiQuickForm
-              picks={picks.map((pick) => ({ code: pick.product.productCode, short: pick.short, kicker: pick.kicker, icon: pick.icon }))}
-              initialCode={initialProductCode}
-              allHref="#phone-check-catalog"
-              allLabel={`See all ${products.length} reports ↓`}
-            />
-
-            <ul className="service-micro" aria-label="How reports are delivered">
-              <li><Icon name="bolt" strokeWidth={2} />{instant} of {products.length} reports are instant</li>
-              <li><Icon name="shieldCheck" strokeWidth={2} />Credit held, not charged</li>
-              <li><Icon name="lock" strokeWidth={2} />IMEI masked in every list</li>
-            </ul>
-          </div>
-
-          {sample?.example && sampleTable ? (
-            <div className="sample-stage">
-              <PhoneArt />
-              <SampleReportCard
-                eyebrow="Sample report"
-                title={serviceText(sample.product.name)}
-                pill="Example data"
-                icon="shield"
-                meta={['Format · as delivered', `${sampleTable.rows.length} of ${sampleTable.total} fields shown`]}
-                imei="35•• •••• ••80"
-                rows={sampleTable.rows}
-                facts={[
-                  { icon: 'clock', text: `Typical delivery: ${serviceText(sample.product.etaLabel)}` },
-                  { icon: 'checkSmall', text: 'Example data from a reviewed sample, not a real device' },
-                ]}
-                action={
-                  <ServiceOutputExample
-                    productCode={sample.product.productCode}
-                    productName={serviceText(sample.product.name)}
-                    label={`See the full ${sample.product.name.match(/black ?list/i) ? 'blacklist' : 'report'} sample`}
-                  />
-                }
-              />
-            </div>
-          ) : null}
-        </div>
-
-        <ol className="step-strip" aria-label="How a report works">
-          {STEPS.map((step, index) => (
-            <li key={step.title}>
-              <em aria-hidden="true">{String(index + 1).padStart(2, '0')}</em>
-              <span className="icon-tile icon-tile--sm" aria-hidden="true">
-                <Icon name={step.icon} />
-              </span>
-              <b>{step.title}</b>
-              <span>{step.body}</span>
-            </li>
-          ))}
-        </ol>
-
-        <div id="imei-check-browse">
-          {start ? <ScrollTo targetId="imei-check-browse" /> : null}
-          <ServiceBrowser
-            products={products}
-            domain="imei_check"
-            initialImei={intentImeiFor(intent, 'imei_check')}
-            initialProductCode={initialProductCode}
-            isAuthenticated={found !== null}
-            availableCents={found ? found.user.credit_cents - found.user.held_cents : undefined}
-          />
-        </div>
-
-        {!available ? <p className="alert" role="status"><Icon name="info" /><span>Paid reports are temporarily unavailable. You can <Link href="/check">validate an IMEI for free</Link> or <Link href="/contact">contact support</Link>.</span></p> : null}
-
-        <div className="service-entry-links">
-          <Link href="/services/unlock">Looking for an unlock service?</Link>
-          <Link href="/check">Validate an IMEI for free</Link>
-        </div>
-
-        <details className="service-catalog-details" id="phone-check-catalog">
-          <summary>Browse the full Phone Check catalog · {products.length} services</summary>
-          <ProductCatalog products={products} domain="imei_check" />
-          <p className="t-small service-catalog-version">
-            A report describes the phone at the moment it is run, and does not prove who owns it.
-          </p>
-        </details>
-
-        <p className="service-guides">
-          New to this? <Link href="/articles/what-an-imei-check-tells-you">What an IMEI check
-          actually tells you</Link> · <Link href="/articles/checks-before-buying-a-used-phone">Checks
-          to run before buying a used phone</Link>
-        </p>
+  return <section className="section section--tint service-entry-section unlock-landing">
+    <div className="shell">
+      <nav className="service-breadcrumb" aria-label="Breadcrumb"><Link href="/services">Services</Link><span aria-hidden="true">/</span><span aria-current="page">Phone Check</span></nav>
+      <div className="unlock-landing-grid">
+        <div className="service-hero-copy unlock-landing-intro"><span className="hero-chip"><Icon name="search" />Phone Check reports</span><h1 className="service-entry-title">Know more about<br /><span className="accent">your phone.</span></h1><p className="t-lead">Choose the report you need, with its price and delivery time shown upfront. Preview your order, pay once, and receive the full result online and by email.</p><ul className="service-micro" aria-label="Report facts"><li><Icon name="wallet" />Pay per report</li><li><Icon name="lock" />No account needed</li><li><Icon name="file" />Private results</li></ul></div>
+        <div className="hero-panel unlock-landing-form" id="imei-check-browse">{query.start === '1' ? <ScrollTo targetId="imei-check-browse" /> : null}<HeroPriceCheck key={initialProductCode ?? 'unselected'} unlock={[]} check={quoteProducts} ordering={false} fixedDomain="imei_check" initialImei={intentImeiFor(intent, 'imei_check')} initialProductCode={initialProductCode} initialEmail={intent?.domain === 'imei_check' ? intent.email : undefined} /></div>
+        <div className="requirements-card unlock-landing-requirements"><h2><Icon name="shieldCheck" />Choose the right report</h2><ul><li><Icon name="checkSmall" />Each report covers the information in its service description.</li><li><Icon name="checkSmall" />A Phone Check report provides information; it does not unlock your phone.</li><li><Icon name="checkSmall" />The real check starts after payment. Delivery time depends on the report.</li></ul><Link className="link-arrow" href="/services/unlock">Need to unlock your network instead?<Icon name="arrowRight" /></Link><p className="t-small">If we cannot deliver a direct card order, we request a full refund to the original payment method. A completed report describes the device at the time it was checked.</p></div>
       </div>
-    </section>
-  )
+      <div className="expect expect--wide"><h2>From price to report in three steps</h2><ol><li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="search" /></span><b>1. Choose your report</b>See the service price, delivery estimate and included information.</li><li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="keypad" /></span><b>2. Add IMEI and email</b>Preview your order and pay its exact total. No account or top-up needed.</li><li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="file" /></span><b>3. Open your result</b>Follow the private order link. Your full report appears as soon as it is ready and is also sent by email.</li></ol></div>
+      {!available ? <p className="alert" role="status"><Icon name="info" /><span>Paid reports are temporarily unavailable. <Link href="/check">Validate an IMEI for free</Link> or <Link href="/contact">contact support</Link>.</span></p> : null}
+      <div className="service-entry-links"><Link href="/track">Track an existing order</Link><Link href="/check">Validate an IMEI format for free</Link></div>
+      <details className="service-catalog-details" id="phone-check-catalog"><summary>Browse the full Phone Check catalog · {products.length} services</summary><ProductCatalog products={products} domain="imei_check" /><p className="t-small service-catalog-version">A report describes the phone at the moment it is run and does not prove who owns it.</p></details>
+      <p className="service-guides">New to this? <Link href="/articles/what-an-imei-check-tells-you">What an IMEI check actually tells you</Link> · <Link href="/articles/checks-before-buying-a-used-phone">Checks to run before buying a used phone</Link></p>
+    </div>
+  </section>
 }

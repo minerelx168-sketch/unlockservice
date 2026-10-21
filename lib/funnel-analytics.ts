@@ -1,6 +1,10 @@
 'use client'
 
 export const FUNNEL_EVENTS = [
+  'service_quote_viewed',
+  'guest_details_completed',
+  'order_preview_viewed',
+  'order_preview_continue',
   'imei_input_started',
   'unlock_imei_submitted',
   'validation_result',

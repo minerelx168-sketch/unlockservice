@@ -41,6 +41,7 @@ export default async function UnlockServicesPage() {
             domain="unlock"
             initialImei={intent.imei}
             initialProductCode={intent.productCode}
+            initialEmail={intent.email}
             imeiReadOnly
             isAuthenticated={found !== null}
             availableCents={found ? found.user.credit_cents - found.user.held_cents : undefined}
