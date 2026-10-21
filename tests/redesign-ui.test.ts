@@ -50,15 +50,15 @@ test('footer shows the requested payment labels and catalog counts remain derive
   assert.match(home, /BRANDS\.map/)
 })
 
-test('the hero widget carries the chosen report through, and only demands an IMEI when it is about to use one', () => {
+test('the hero widget carries the chosen report and preserves public report deep links', () => {
   const widget = read('components/hero-price-check.tsx')
-  assert.match(widget, /const imeiRequired = unlockReady/)
   assert.match(widget, /\{selected \? <input type="hidden" name="productCode" value=\{selected\.code\} \/> : null\}/)
   assert.doesNotMatch(widget, /Check Price &amp; Unlock Time|Live prices are loading/)
+  // Guest checkout validation is exercised by unlock-intent-selection.test.ts.
   const action = read('lib/device-intent-actions.ts')
   assert.match(action, /`product=\$\{encodeURIComponent\(product\.productCode\)\}`/)
   assert.match(action, /`\/services\/imei-check\?\$\{query\}`/)
-  // An IMEI in hand lands the visitor on the order form, by flag: a hash would be dropped by the redirect.
+  // The public browse action carries its selection to the entry form.
   assert.match(action, /start=1/)
   const landing = read('app/(marketing)/services/imei-check/page.tsx')
   assert.match(landing, /query\.start === '1'/)
