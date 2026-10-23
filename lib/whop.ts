@@ -1,3 +1,4 @@
+import { logPaymentFailure } from './payment-diagnostics'
 import { randomBytes } from 'node:crypto'
 import { WhopClient, WhopEnvironment, type Whop } from '@whop/sdk'
 import { unwrapWebhook } from '@whop/sdk/helpers'
@@ -273,7 +274,8 @@ export async function processWhopEvents(limit = 10): Promise<{ processed: number
       db().prepare(`UPDATE whop_webhook_events SET state = ?, processed_at = datetime('now'), locked_until = NULL, last_error = NULL
         WHERE event_id = ?`).run(outcome === 'unmatched' ? 'unmatched' : 'processed', job.event_id)
       stats.processed++
-    } catch {
+    } catch (error) {
+      logPaymentFailure('whop.webhook.verify', error)
       // Never persist provider bodies, cardholder data, API keys or raw request headers.
       db().prepare(`UPDATE whop_webhook_events SET locked_until = NULL, next_attempt_at = datetime('now', '+1 minute'),
         last_error = 'Verification pending; check provider configuration and invoice identity.' WHERE event_id = ?`).run(job.event_id)
@@ -301,7 +303,7 @@ export async function reconcileWhopPayments(limit = 5): Promise<{ checked: numbe
       if (payment.id !== row.payment_id) throw new WhopPaymentError('Payment identity mismatch.')
       settlePayment(payment, config)
       stats.checked++
-    } catch { stats.errors++ }
+    } catch (error) { logPaymentFailure('whop.reconcile.verify', error); stats.errors++ }
   }
   return stats
 }

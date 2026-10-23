@@ -1,3 +1,4 @@
+import { logPaymentFailure } from './payment-diagnostics'
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Whop } from '@whop/sdk'
 import { db } from './db'
@@ -304,20 +305,25 @@ export async function processGuestCheckouts(limit=5) {
   for(let row of rows) {
     if(Date.now()>deadline) break
     db().prepare("UPDATE guest_checkouts SET checked_at=datetime('now') WHERE reference=?").run(row.reference)
+    let diagnosticStage = 'guest.payment.verify'
     try {
       if(row.payment_method==='crypto') settleGuestCryptoPayment(row.reference)
       else if(config && row.payment_id) settleGuestPayment(await client(config).payments.retrieve({id:row.payment_id}))
       else if(config && row.payment_method==='card' && row.plan_id) {
+        diagnosticStage = 'guest.whop.list'
         const page=await client(config).payments.list({plan_id:row.plan_id,first:10})
+        diagnosticStage = 'guest.whop.settle'
         for(const payment of page.data) if(payment.metadata?.guest_reference===row.reference) settleGuestPayment(await client(config).payments.retrieve({id:payment.id}))
       }
       row=getGuestCheckout(row.reference)!
+      diagnosticStage = 'guest.service.dispatch'
       if(row.state==='paid' && !row.review_reason) await dispatchGuest(row)
       row=getGuestCheckout(row.reference)!
       if(guestReport(row)?.status==='refunded' && row.state!=='refunded') {
         db().prepare("UPDATE guest_checkouts SET state='refund_pending' WHERE reference=?").run(row.reference)
         row=getGuestCheckout(row.reference)!
       }
+      diagnosticStage = 'guest.refund'
       if(config && row.payment_method==='card' && row.state==='refund_pending' && row.payment_id && !row.review_reason) {
         // Revoke only this checkout's unspent wallet difference before an automatic full refund.
         // If credit has been used, review the allocation instead of refunding twice or taking unrelated funds.
@@ -338,11 +344,14 @@ export async function processGuestCheckouts(limit=5) {
         db().prepare("UPDATE guest_checkouts SET state='completed' WHERE reference=? AND state='processing'").run(row.reference)
         row=getGuestCheckout(row.reference)!
       }
+      diagnosticStage = 'guest.email'
       await notifyGuest(row)
+      diagnosticStage = 'guest.analytics'
       await guestAnalytics(row)
       db().prepare('UPDATE guest_checkouts SET last_error=NULL WHERE reference=?').run(row.reference)
       stats.checked++
-    } catch {
+    } catch (error) {
+      logPaymentFailure(diagnosticStage, error)
       db().prepare("UPDATE guest_checkouts SET last_error='Payment or refund verification needs retry; check gateway permissions and identity.' WHERE reference=?").run(row.reference)
       stats.errors++
     }
