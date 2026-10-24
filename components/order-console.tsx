@@ -1,4 +1,5 @@
 'use client'
+import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -134,7 +135,7 @@ export function OrderConsole({
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'same-origin',
-      body: JSON.stringify({ ...body, csrfToken }),
+      body: JSON.stringify({ ...body, csrfToken, analytics: await paymentAnalyticsContext() }),
       signal,
     })
     let data: (OrderPayload & { error?: string }) | null = null

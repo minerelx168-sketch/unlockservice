@@ -1,3 +1,4 @@
+import { snapshotPurchaseAnalytics } from '@/lib/purchase-analytics-request'
 import { NextResponse } from 'next/server'
 import { guard } from '@/lib/api'
 import { OrderError, submitOrder } from '@/lib/orders'
@@ -19,6 +20,7 @@ export async function POST(request: Request) {
 
   const kind = body.kind === 'device_service' ? 'device_service' : 'carrier_unlock'
 
+  await snapshotPurchaseAnalytics(found.user.id, 'order', body.idempotencyKey, body.analytics)
   try {
     const payload = await submitOrder(found.user.id, {
       kind,

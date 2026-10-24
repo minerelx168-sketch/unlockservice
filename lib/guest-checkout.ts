@@ -289,7 +289,8 @@ async function guestAnalytics(row:GuestCheckout) {
         events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:row.price_cents/100,currency:'USD',session_id:Number(row.session_id),
           items:[{item_id:row.product_code,item_name:row.product_name,price:row.price_cents/100,quantity:1}]}}]})})
     if(response.ok) state='submitted'
-  } catch { /* Never replay an ambiguously accepted event. */ }
+    else logPaymentFailure('guest.analytics', { name: 'Error', status: response.status })
+  } catch (error) { logPaymentFailure('guest.analytics', error) /* Never replay an ambiguously accepted event. */ }
   db().prepare('UPDATE guest_checkouts SET analytics_state=? WHERE reference=?').run(state,row.reference)
 }
 /** Existing signed webhook is primary; bounded API reconciliation recovers missed webhooks. */

@@ -1,3 +1,4 @@
+import { currentSession } from '@/lib/auth'
 import { headers } from 'next/headers'
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
@@ -53,14 +54,16 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const requestHeaders = await headers()
   const nonce = requestHeaders.get('x-nonce') ?? undefined
   const requestHost = requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim() ?? requestHeaders.get('host') ?? ''
-  const analyticsEnabled = analyticsHostAllowed(requestHost)
+  const session = await currentSession()
+  const requestPath = requestHeaders.get('x-continuation-path')?.split('?')[0] ?? '/'
+  const analyticsEnabled = analyticsHostAllowed(requestHost) && session?.user.account_type !== 'admin' && !requestPath.startsWith('/admin')
   const googleAdsTag = 'AW-18465855968'
   const googleAnalyticsTag = 'G-9WCELVR3V3'
   // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
-  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); var safeAnalyticsContext = (${safeAnalyticsPage.toString()})(location.href, document.referrer); gtag('set', safeAnalyticsContext); gtag('js', new Date()); gtag('config', '${googleAdsTag}', safeAnalyticsContext); gtag('config', '${googleAnalyticsTag}', safeAnalyticsContext);`
+  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); var safeAnalyticsContext = (${safeAnalyticsPage.toString()})(location.href, document.referrer); gtag('set', safeAnalyticsContext); gtag('js', new Date()); gtag('config', '${googleAdsTag}', {...safeAnalyticsContext, send_page_view:false}); gtag('config', '${googleAnalyticsTag}', {...safeAnalyticsContext, send_page_view:false});`
 
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="en" data-analytics-disabled={!analyticsEnabled ? 'true' : undefined} data-theme="light" suppressHydrationWarning>
       <head>
         {PRELOADED_FONTS.map((href) => (
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />

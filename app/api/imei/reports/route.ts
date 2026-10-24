@@ -1,3 +1,4 @@
+import { snapshotPurchaseAnalytics } from '@/lib/purchase-analytics-request'
 import { NextResponse } from 'next/server'
 import { currentSession } from '@/lib/auth'
 import { guard } from '@/lib/api'
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
   if ('error' in guarded) return guarded.error
   const { found, body } = guarded
 
+  await snapshotPurchaseAnalytics(found.user.id, 'paid_imei_report', body.idempotencyKey, body.analytics)
   try {
     const payload = await createPaidReport(found.user.id, {
       productCode: String(body.productCode ?? ''),

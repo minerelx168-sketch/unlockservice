@@ -38,7 +38,7 @@ export function GoogleAdsPurchaseConversion({ purchase }: { purchase: PurchaseCo
         })
         try { window.sessionStorage.setItem(adsKey, 'sent') } catch { /* Storage is optional. */ }
       }
-      if (!ga4Sent) {
+      if (!ga4Sent && !purchase.ga4ServerManaged) {
         const event: Record<string, unknown> = {
           send_to: GA4_SEND_TO,
           transaction_id: purchase.transactionId,

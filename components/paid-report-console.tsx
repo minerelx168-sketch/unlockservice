@@ -1,4 +1,5 @@
 'use client'
+import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -188,7 +189,7 @@ export function PaidReportConsole({
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
         credentials: 'same-origin',
-        body: JSON.stringify({ ...body, csrfToken }),
+        body: JSON.stringify({ ...body, csrfToken, analytics: await paymentAnalyticsContext() }),
       })
       let data: PaidReportPayload | { success: false; error?: string } | null = null
       try {

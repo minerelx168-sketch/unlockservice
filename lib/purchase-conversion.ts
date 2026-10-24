@@ -9,6 +9,7 @@ export type PurchaseItem = {
 export type PurchaseConversion = {
   transactionId: string
   value: number
+  ga4ServerManaged?: boolean
   currency: 'USD'
   newCustomer: boolean
   items?: PurchaseItem[]
@@ -67,7 +68,11 @@ export function purchaseConversion(
       WHERE user_id = ? AND type = 'charge' AND ref_type IN ('order', 'paid_imei_report')
         AND id < ? LIMIT 1`,
   ).get(userId, charge.id)
+  const table = kind === 'order' ? 'orders' : 'paid_report_orders'
+  const managed = db().prepare(`SELECT 1 FROM purchase_analytics a JOIN ${table} o
+    ON o.user_id=a.user_id AND o.idempotency_key=a.request_key WHERE a.kind=? AND o.id=? AND o.user_id=?`).get(kind,orderId,userId)
   return {
+    ...(managed ? { ga4ServerManaged: true } : {}),
     transactionId: `${kind === 'order' ? 'unlock' : 'report'}-${orderId}`,
     value: priceCents / 100,
     currency: 'USD',

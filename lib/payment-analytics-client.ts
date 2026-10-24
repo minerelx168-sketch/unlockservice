@@ -8,9 +8,9 @@ export async function paymentAnalyticsContext(): Promise<{ clientId: string; ses
   if (browser.iunlockmobileAnalyticsConsent !== 'granted' || !browser.gtag) return
   const get = (field: string) => new Promise<string>((resolve) => {
     const timer = setTimeout(() => resolve(''), 700)
-    browser.gtag!('get', 'G-9WCELVR3V3', field, (value: unknown) => {
+    try { browser.gtag!('get', 'G-9WCELVR3V3', field, (value: unknown) => {
       clearTimeout(timer); resolve(typeof value === 'string' || typeof value === 'number' ? String(value) : '')
-    })
+    }) } catch { clearTimeout(timer); resolve('') }
   })
   const [clientId, sessionId] = await Promise.all([get('client_id'), get('session_id')])
   if (browser.iunlockmobileAnalyticsConsent === 'granted' && /^\d{1,20}\.\d{1,20}$/.test(clientId) && /^\d{1,12}$/.test(sessionId)) return { clientId, sessionId }

@@ -65,6 +65,13 @@ CREATE TABLE IF NOT EXISTS guest_account_access (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS guest_account_access_customer ON guest_account_access(verified_user_id,created_at);
+CREATE TABLE IF NOT EXISTS purchase_analytics (
+ user_id INTEGER NOT NULL REFERENCES users(id), kind TEXT NOT NULL CHECK(kind IN ('order','paid_imei_report')),
+ request_key TEXT NOT NULL, client_id TEXT NOT NULL, session_id TEXT NOT NULL,
+ state TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL DEFAULT (datetime('now')), attempted_at TEXT,
+ PRIMARY KEY(user_id,kind,request_key)
+);
+CREATE INDEX IF NOT EXISTS purchase_analytics_pending ON purchase_analytics(state,created_at);
 CREATE TABLE IF NOT EXISTS payment_analytics (
   invoice_reference TEXT PRIMARY KEY REFERENCES invoices(reference),
   user_id INTEGER NOT NULL REFERENCES users(id),

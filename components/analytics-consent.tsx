@@ -1,8 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { PENDING_ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateClickId, type ClickIdField } from '@/lib/attribution'
-import { analyticsHostAllowed } from '@/lib/site'
-import { safeAnalyticsPage } from '@/lib/analytics-page'
+import { updateGoogleConsent } from '@/lib/google-consent-tracking'
 export function AnalyticsConsent() {
   const [consent, setConsent] = useState<'unknown' | 'granted' | 'denied'>('unknown')
   const [open, setOpen] = useState(false)
@@ -35,10 +34,10 @@ export function AnalyticsConsent() {
         if (Object.keys(clicks.current).length && Date.now() - capturedAt.current <= PENDING_ATTRIBUTION_MAX_AGE_SECONDS * 1000) {
           const response = await fetch('/api/consent', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ consent: state, ...clicks.current }) })
           if (!response.ok || !active) return
-          const saved = await response.json() as { clickIds?: unknown }
-          updateGoogleConsent('granted', { ...readClickIds(data.clickIds), ...readClickIds(saved.clickIds), ...clicks.current })
+          await response.json()
+          updateGoogleConsent('granted', clicks.current)
         } else {
-          updateGoogleConsent('granted', readClickIds(data.clickIds))
+          updateGoogleConsent('granted', clicks.current)
         }
       }
     }).catch(() => { if (active) setOpen(true) })
@@ -51,8 +50,8 @@ export function AnalyticsConsent() {
     try {
       const response = await fetch('/api/consent', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ consent: state, ...(state === 'granted' ? clicks.current : {}) }) })
       if (!response.ok) throw new Error('Unable to save your choice. Optional tracking remains disabled.')
-      const saved = await response.json().catch(() => ({})) as { clickIds?: unknown }
-      updateGoogleConsent(state, state === 'granted' ? { ...readClickIds(saved.clickIds), ...clicks.current } : {})
+      await response.json().catch(() => ({}))
+      updateGoogleConsent(state, state === 'granted' ? clicks.current : {})
       setConsent(state); setOpen(false)
       if (state === 'denied') clicks.current = {}
     } catch (error) { setError(error instanceof Error ? error.message : 'Unable to save your choice.') } finally { setBusy(false) }
@@ -68,41 +67,4 @@ export function AnalyticsConsent() {
     </div> : <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>Privacy choices{consent === 'denied' ? ' · optional tracking off' : ''}</button>}
   </aside>
   </>
-}
-function readClickIds(input: unknown): Partial<Record<ClickIdField, string>> {
-  if (!input || typeof input !== 'object') return {}
-  const result: Partial<Record<ClickIdField, string>> = {}
-  for (const field of CLICK_ID_FIELDS) {
-    const value = validateClickId((input as Record<string, unknown>)[field])
-    if (value) result[field] = value
-  }
-  return result
-}
-
-function updateGoogleConsent(state: 'granted' | 'denied', clickIds: Partial<Record<ClickIdField, string>> = {}) {
-  const browser = window as Window & { iunlockmobileAnalyticsConsent?: string; gtag?: (...args: unknown[]) => void }
-  browser.iunlockmobileAnalyticsConsent = state
-  if (!analyticsHostAllowed(window.location.hostname)) {
-    window.dispatchEvent(new Event('iunlockmobile-consent'))
-    return
-  }
-  browser.gtag?.('consent', 'update', { analytics_storage: state, ad_storage: state, ad_user_data: state, ad_personalization: state })
-  if (state === 'granted') {
-    const safeIds = readClickIds(clickIds)
-    if (typeof browser.gtag === 'function') {
-      if (Object.keys(safeIds).length) browser.gtag('set', safeIds)
-      const page = safeAnalyticsPage(window.location.href, document.referrer)
-      const safeLocation = new URL(page.page_location)
-      for (const field of CLICK_ID_FIELDS) if (safeIds[field]) safeLocation.searchParams.set(field, safeIds[field]!)
-      for (const tag of ['AW-18465855968', 'G-9WCELVR3V3']) {
-        browser.gtag('config', tag, {
-          ...safeIds,
-          ...page,
-          send_page_view: false,
-          page_location: safeLocation.href,
-        })
-      }
-    }
-  }
-  window.dispatchEvent(new Event('iunlockmobile-consent'))
 }

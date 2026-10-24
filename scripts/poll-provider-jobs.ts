@@ -1,3 +1,4 @@
+import { deliverPurchaseAnalytics } from '../lib/purchase-analytics'
 import { processGuestCheckouts } from '../lib/guest-checkout'
 import { deliverPaymentAnalytics } from '../lib/payment-analytics'
 import { deliverOrderNotifications } from '../lib/order-notifications'
@@ -18,8 +19,9 @@ async function main() {
   const whopReconciliation = await reconcileWhopPayments(Math.min(boundedLimit, 5))
   const guestCheckouts = await processGuestCheckouts(5).catch(() => ({ checked: 0, errors: 1 }))
   const paymentAnalytics = await deliverPaymentAnalytics(boundedLimit).catch(() => ({ failed: true }))
+  const purchaseAnalytics = await deliverPurchaseAnalytics(boundedLimit).catch(() => ({ failed: true }))
   const notifications = await deliverOrderNotifications(boundedLimit)
-  process.stdout.write(`${JSON.stringify({ provider, watcher, payments, whop, whopReconciliation, guestCheckouts, paymentAnalytics, notifications })}\n`)
+  process.stdout.write(`${JSON.stringify({ provider, watcher, payments, whop, whopReconciliation, guestCheckouts, paymentAnalytics, purchaseAnalytics, notifications })}\n`)
   if (
     guestCheckouts.errors > 0
     || provider.errors > 0
