@@ -28,6 +28,8 @@ function policy(nonce: string, secure: boolean): string {
     "'strict-dynamic'",
     'https://www.googletagmanager.com',
     'https://www.googleadservices.com',
+    // CSP2 fallback for Google's conversion script; nonce/strict-dynamic stay enforced.
+    'https://googleads.g.doubleclick.net',
     'https://www.google.com',
     // The development bundler compiles with eval; production never does.
     process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : '',
@@ -35,6 +37,7 @@ function policy(nonce: string, secure: boolean): string {
 
   return [
     "default-src 'self'",
+    "report-uri /api/diagnostics/csp",
     `script-src ${scriptSrc.join(' ')}`,
     // Server-rendered style attributes are inline by definition, and every
     // colour in them resolves to a token rather than arriving from a request.
