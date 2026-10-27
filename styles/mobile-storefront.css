@@ -61,8 +61,22 @@
 .price-check-assurance { gap: 8px 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: .6875rem; }
 .price-check .alert { margin: 0; font-size: .8125rem; }
 
-.unlock-landing-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr); grid-template-areas: 'intro form' 'requirements form'; align-items: start; gap: 28px 48px; margin-block: 28px 40px; }
-.unlock-landing-intro { grid-area: intro; padding: 0; }
+/* Restore the 10 October single-column service workspace without changing
+   the current catalog, copy, form behavior or checkout. */
+.unlock-landing > .shell { max-width: 920px; }
+.unlock-landing-grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'intro' 'form' 'requirements'; align-items: start; gap: 24px; margin-block: 24px 32px; }
+.unlock-landing-intro { grid-area: intro; padding: 0; gap: 12px; text-align: left; justify-items: start; }
+.unlock-landing-intro .service-entry-title { font-size: clamp(1.75rem, 3.6vw, 2.5rem); line-height: 1.12; }
+.unlock-landing-intro .t-lead { max-width: none; font-size: 1rem; line-height: 1.6; }
+.unlock-landing-intro .service-micro { justify-content: flex-start; }
+.unlock-landing-form { width: 100%; min-width: 0; }
+.unlock-landing .price-check { min-width: 0; }
+.unlock-landing .price-check-steps { justify-content: flex-start; gap: clamp(12px, 4vw, 48px); }
+.unlock-landing .price-check-steps li { min-width: 0; }
+.unlock-landing .price-check-steps li > span { flex-shrink: 0; }
+.unlock-landing .price-check-label-row { flex-wrap: wrap; }
+.unlock-landing .price-check-assurance { flex-wrap: wrap; }
+.unlock-landing .expect--wide { margin-top: 0; }
 .unlock-landing-intro .accent { color: var(--primary); }
 .unlock-landing-form { grid-area: form; order: 0; scroll-margin-top: 90px; }
 .unlock-landing-requirements { grid-area: requirements; margin: 0; }
@@ -76,9 +90,6 @@
   .home-hero .hero-copy { text-align: center; justify-items: center; }
   .home-hero .hero-panel { width: 100%; }
   .hero-extras .hero-tiles { max-width: none; }
-  .unlock-landing-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'intro' 'form' 'requirements'; gap: 24px; max-width: 660px; margin-inline: auto; }
-  .unlock-landing-intro { text-align: center; justify-items: center; }
-  .unlock-landing-intro .service-micro { justify-content: center; }
 }
 
 @media (max-width: 767px) {
@@ -134,8 +145,8 @@
   .unlock-landing { padding-top: 20px; }
   .unlock-landing .service-breadcrumb { font-size: .75rem; }
   .unlock-landing-grid { margin-top: 20px; }
-  .unlock-landing-intro .service-entry-title { font-size: clamp(2rem, 8.4vw, 2.6rem); line-height: 1.12; }
-  .unlock-landing-intro { gap: 14px; }
+  .unlock-landing-intro .service-entry-title { font-size: clamp(1.75rem, 7.5vw, 2.25rem); line-height: 1.12; }
+  .unlock-landing-intro { gap: 12px; }
   .unlock-landing-intro .service-micro { gap: 8px 12px; font-size: .6875rem; }
   .unlock-landing-requirements { padding: 20px 16px; border-radius: 20px; }
   .unlock-landing .expect--wide { margin-top: 28px; }
