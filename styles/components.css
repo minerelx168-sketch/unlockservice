@@ -1187,9 +1187,9 @@
 /* ==== footer ======================================================== */
 
 .site-footer {
-  margin-top: 100px;
-  padding-top: 65px;
-  padding-bottom: 26px;
+  margin-top: 90px;
+  padding-top: 54px;
+  padding-bottom: 24px;
   background: var(--footer-ground);
   color: var(--footer-muted);
 }
@@ -1205,80 +1205,42 @@
   gap: 40px;
 }
 
-/* Three facts about how the service works — not follower counts. Each is
-   derived from data on the server, so it cannot drift from the catalog. */
-.footer-facts {
-  display: grid;
-  gap: 8px;
-  margin-top: 22px;
-  max-width: 360px;
-}
-
-.footer-fact {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 12px;
-  border: 1px solid var(--footer-line);
-  border-radius: var(--radius-control);
-  background: rgb(255 255 255 / 4%);
-  color: var(--footer-ink);
-  font-size: 0.8125rem;
-  font-weight: 620;
-  line-height: 1.35;
-}
-
-.footer-fact svg {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
-  color: var(--primary-glow);
-}
-
-.footer-fact span {
-  display: block;
-  font-weight: 450;
-  color: var(--footer-muted);
-}
-
-/* "We accept": only what we actually take. */
+/* "We accept": only what we actually take, as real marks on quiet white
+   badges — the reference's payment row, without the sales line. */
 .footer-accept {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px 14px;
-  margin-top: 44px;
-  padding-top: 22px;
+  gap: 10px 12px;
+  margin-top: 40px;
+  padding-top: 20px;
   border-top: 1px solid var(--footer-line);
   font-size: 0.8125rem;
 }
 
-.pay-badge {
+.pay-mark {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 12px;
+  min-height: 28px;
+  padding: 5px 12px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--footer-line);
-  background: rgb(255 255 255 / 6%);
-  color: var(--footer-ink);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  background: #fff;
+  border: 1px solid rgb(255 255 255 / 16%);
 }
 
-.pay-badge i {
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #26a17b;
-  color: #fff;
-  font-style: normal;
-  font-size: 11px;
-  font-weight: 800;
+.pay-mark svg {
+  display: block;
+  height: 15px;
+  width: auto;
+}
+
+.pay-mark b {
+  font-size: 0.6875rem;
+  font-weight: 740;
+  letter-spacing: 0.05em;
+  color: #1a1130;
 }
 
 .site-footer h4 {

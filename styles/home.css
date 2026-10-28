@@ -26,16 +26,23 @@
   max-width: 540px;
 }
 
+/* Soft stat tiles, the reference way: a quiet lavender field and no
+   border, so four of them read as one strip rather than four boxes. */
 .hero-tile {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
   gap: 4px 12px;
   align-items: center;
   padding: 14px 16px;
-  border: 1px solid var(--line);
   border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  background: color-mix(in srgb, var(--page-soft) 80%, transparent);
   backdrop-filter: blur(6px);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.hero-tile:hover {
+  background: var(--primary-soft);
+  transform: translateY(-2px);
 }
 
 .hero-tile .trust-bar-icon {
