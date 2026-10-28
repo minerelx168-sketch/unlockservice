@@ -8,6 +8,7 @@ import directory from '../catalog/storefront-service-directory.json'
 const path = process.env.IUNLOCKMOBILE_DB
 if (!path) throw new Error('Set IUNLOCKMOBILE_DB explicitly.')
 const products = PROVIDER_PRODUCTS.filter(product => product.status === 'available')
+const requiresOwnerNotes = new Set(['25', '926'])
 const prices = new Map(approved.prices.map(row => [row.serviceId, row.sellingPriceCents]))
 const ids = new Set(directory.services.map(row => row.serviceId))
 if (products.length !== 128 || prices.size !== 129 || ids.size !== 129) throw new Error('Catalog count mismatch.')
@@ -35,11 +36,11 @@ if (process.argv.includes('--apply')) {
     connection.prepare('UPDATE paid_report_products SET is_active=0, updated_at=datetime(\'now\')').run()
     const upsert = connection.prepare(`INSERT INTO paid_report_products
       (code,slug,name,summary,input_type,price_cents,provider_cost_micros,eta_minutes,is_active,sort_order)
-      VALUES (@code,@slug,@name,@summary,@inputType,@priceCents,@providerCostMicros,@etaMinutes,1,@sortOrder)
+      VALUES (@code,@slug,@name,@summary,@inputType,@priceCents,@providerCostMicros,@etaMinutes,@isActive,@sortOrder)
       ON CONFLICT(code) DO UPDATE SET slug=excluded.slug,name=excluded.name,summary=excluded.summary,
         input_type=excluded.input_type,price_cents=excluded.price_cents,provider_cost_micros=excluded.provider_cost_micros,
-        eta_minutes=excluded.eta_minutes,is_active=1,sort_order=excluded.sort_order,updated_at=datetime('now')`)
-    for (const p of products) upsert.run({ ...p, code: p.productCode, etaMinutes: etaMinutesFromLabel(p.etaLabel) })
+        eta_minutes=excluded.eta_minutes,is_active=excluded.is_active,sort_order=excluded.sort_order,updated_at=datetime('now')`)
+    for (const p of products) upsert.run({ ...p, code: p.productCode, isActive: requiresOwnerNotes.has(p.serviceId) ? 0 : 1, etaMinutes: etaMinutesFromLabel(p.etaLabel) })
     connection.prepare('INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)').run('2026-10-28-owner-selling-prices-v1')
   }).immediate()
 }
