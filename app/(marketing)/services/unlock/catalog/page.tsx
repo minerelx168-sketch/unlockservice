@@ -5,7 +5,7 @@ import { ProductCatalog } from '@/components/product-catalog'
 import { ServiceBrowser } from '@/components/service-browser'
 import { currentSession } from '@/lib/auth'
 import { readDeviceIntent } from '@/lib/device-intent'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 
 
 
@@ -22,7 +22,7 @@ export default async function UnlockServicesPage() {
   // This browsing step is shared by all visitors; it does not verify device ownership.
   if (!intent || intent.domain !== 'unlock') redirect('/services/unlock')
   const found = await currentSession()
-  const products = listPublicProviderProducts('unlock')
+  const products = listStorefrontProviderProducts('unlock')
   const available = products.some((product) => product.status === 'available')
 
   return (

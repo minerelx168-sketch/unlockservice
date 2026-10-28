@@ -1,4 +1,5 @@
 'use client'
+import { storefrontDomain } from '@/lib/service-groups'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import Link from 'next/link'
@@ -23,6 +24,7 @@ type Product = {
   domain: 'imei_check' | 'unlock'
   priceCents: number
   etaMinutes: number
+  etaLabel?: string
   providerReady: boolean
   hasExample: boolean
 }
@@ -83,8 +85,9 @@ export function PaidReportConsole({
     : ''
   const [productCode, setProductCode] = useState(initialCode)
   const [imei, setImei] = useState(initialImei ?? '')
+  const initialProduct = products.find((entry) => entry.code === initialCode)
   const [domain, setDomain] = useState<'imei_check' | 'unlock'>(
-    products.find((entry) => entry.code === initialCode)?.domain ?? initialDomain ?? 'imei_check',
+    initialProduct ? storefrontDomain(initialProduct) : initialDomain ?? 'imei_check',
   )
   const [savingDraft, setSavingDraft] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -102,7 +105,7 @@ export function PaidReportConsole({
   const idempotencyRef = useRef<string | null>(null)
 
   const product = products.find((entry) => entry.code === productCode) ?? null
-  const visibleProducts = useMemo(() => products.filter((entry) => entry.domain === domain), [products, domain])
+  const visibleProducts = useMemo(() => products.filter((entry) => storefrontDomain(entry) === domain), [products, domain])
   const affordable = !product || product.priceCents <= balanceCents
   // Validate the original input: never truncate a longer identifier or discard letters.
   const digits = deviceImei(imei)
@@ -385,7 +388,7 @@ export function PaidReportConsole({
                 summary: entry.summary,
                 group: entry.group,
                 priceCents: entry.priceCents,
-                etaLabel: deliveryLabel(entry.etaMinutes),
+                etaLabel: entry.etaLabel ?? deliveryLabel(entry.etaMinutes),
                 available: entry.providerReady,
                 hasExample: entry.hasExample,
               }))}
@@ -409,7 +412,7 @@ export function PaidReportConsole({
               </div>
               <dl className="service-workbench-quote">
                 <div><dt>Price</dt><dd>{formatUsd(product.priceCents)}</dd></div>
-                <div><dt>Estimated delivery</dt><dd>{deliveryLabel(product.etaMinutes)}</dd></div>
+                <div><dt>Estimated delivery</dt><dd>{product.etaLabel ?? deliveryLabel(product.etaMinutes)}</dd></div>
               </dl>
             </section>
           ) : null}
@@ -426,7 +429,7 @@ export function PaidReportConsole({
               <p className="t-small">IMEI {digits ?? ''}</p>
               <div className="quote">
                 <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
-                <div><span className="label">Estimated delivery</span><span className="value">{deliveryLabel(product.etaMinutes)}</span></div>
+                <div><span className="label">Estimated delivery</span><span className="value">{product.etaLabel ?? deliveryLabel(product.etaMinutes)}</span></div>
                 <div><span className="label">Billing</span><span className="value">Charge on delivery</span></div>
               </div>
               <p className="t-small">Your credit is held, not spent. You are charged only when the report is delivered; if it cannot be, the hold is released.</p>

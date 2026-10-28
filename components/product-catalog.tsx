@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { groupServices, storefrontDomain } from '@/lib/service-groups'
 import { formatUsd } from '@/lib/money'
 import type { ProviderProductDomain } from '@/lib/provider-products'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
@@ -47,6 +48,7 @@ function customerText(value: string) {
 }
 
 function ProductCard({ product }: { product: PublicProviderProduct }) {
+  const browseDomain = storefrontDomain(product)
   const available = product.status === 'available'
   const productName = customerText(product.name)
   const productGroup = customerText(product.group)
@@ -55,7 +57,7 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
     <article className="card product-card">
       <div className="card-topline product-card-topline">
         <span className="kicker">
-          <Icon name={product.domain === 'unlock' ? 'lock' : 'search'} />
+          <Icon name={browseDomain === 'unlock' ? 'lock' : 'search'} />
           {productGroup}
         </span>
         <span className={available ? 'badge badge--success' : 'badge badge--muted'}>
@@ -77,10 +79,10 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
       {product.hasExample ? <ServiceOutputExample productCode={product.productCode} productName={productName} className="product-card-example" /> : null}
 
       {available ? (
-        <Link className="button button--primary product-card-action" href={`/services/${product.domain === 'unlock' ? 'unlock' : 'imei-check'}?product=${encodeURIComponent(product.productCode)}&start=1#${product.domain === 'unlock' ? 'unlock-entry-heading' : 'imei-check-browse'}`}>
-          {product.domain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
+        <Link className="button button--primary product-card-action" href={`/services/${browseDomain === 'unlock' ? 'unlock' : 'imei-check'}?product=${encodeURIComponent(product.productCode)}&start=1#${browseDomain === 'unlock' ? 'unlock-entry-heading' : 'imei-check-browse'}`}>
+          {browseDomain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
         </Link>
-      ) : product.domain === 'unlock' ? (
+      ) : browseDomain === 'unlock' ? (
         /* A dead grey label was the whole of the offer on every unlock
            card. The service is coming; the card can say so and take an
            address instead of ending the visit. */
@@ -104,14 +106,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   const copy = DOMAIN_COPY[domain]
 
   const groups = useMemo(() => {
-    return Array.from(new Set(products.map((product) => customerText(product.group))))
-      .filter(Boolean)
-      .sort((left, right) => {
-        if (left.toLowerCase() === 'featured') return -1
-        if (right.toLowerCase() === 'featured') return 1
-        // Use the same collation during SSR and hydration, regardless of host locale.
-        return left.localeCompare(right, 'en')
-      })
+    return groupServices(products).map(({ group }) => group)
   }, [products])
 
   const visible = useMemo(() => {

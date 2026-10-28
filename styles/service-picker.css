@@ -121,3 +121,30 @@
 .service-picker__selected-example { margin-top: 8px; }
 .product-card-example { align-self: flex-start; margin-block: 0 12px; }
 .service-browser__change-imei { display: inline-flex; align-items: center; min-height: 44px; font-weight: 650; text-decoration: underline; }
+
+
+/* Provider-style category bars, shared by public and account service lists. */
+.service-picker__group-options { margin: 0; padding: 0; list-style: none; }
+.service-picker__group-heading {
+  position: sticky; top: 0; z-index: 1; display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; margin: 0; padding: 11px 16px;
+  background: var(--primary-soft); color: var(--primary-dark);
+  border-block: 1px solid var(--line); font-size: .875rem; font-weight: 750; line-height: 1.45;
+}
+.service-picker__group-heading > span { min-width: 0; overflow-wrap: anywhere; }
+.service-picker__group-heading > small { flex: none; font-size: .75rem; font-weight: 600; }
+.service-picker__group:first-child > .service-picker__group-heading { border-top: 0; }
+.service-picker__results > .service-picker__group + .service-picker__group { border-top: 0; }
+.service-picker__option { min-height: 64px; padding-block: 12px; }
+.service-picker__option:disabled { opacity: .75; }
+.price-check .service-picker { margin-block: 4px; }
+.price-check .service-picker__trigger { min-height: 76px; }
+@media (max-width: 480px) {
+  .service-picker__option { flex-wrap: nowrap; gap: 12px; padding: 12px; }
+  .service-picker__option-copy { width: auto; flex: 1; }
+  .service-picker__option-copy > strong { font-size: .875rem; }
+  .service-picker__option-price { width: auto; flex-direction: column; align-items: flex-end; }
+  .service-picker__option-price > strong { font-size: .9375rem; }
+  .service-picker__group-heading { padding-inline: 12px; }
+  .service-picker__label-row { flex-wrap: wrap; gap: 4px 10px; }
+}

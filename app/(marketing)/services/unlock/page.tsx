@@ -4,9 +4,8 @@ import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-
 import { CARRIERS } from '@/lib/catalog'
 import { readDeviceIntent } from '@/lib/device-intent'
 import { intentImeiFor } from '@/lib/device-intent-value'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 import { unlockOrderingEnabled } from '@/lib/provider'
-import { unlockCategory } from '@/lib/unlock-catalog-view'
 import { pageMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
@@ -18,12 +17,12 @@ export const metadata = pageMetadata(
 
 export default async function UnlockServicesPage({ searchParams }: { searchParams: Promise<{ product?: string | string[] }> }) {
   const [intent, query] = await Promise.all([readDeviceIntent(), searchParams])
-  const products = listPublicProviderProducts('unlock')
+  const products = listStorefrontProviderProducts('unlock')
   const requested = typeof query.product === 'string' ? query.product : undefined
-  const initialProductCode = products.find((product) => product.productCode === requested)?.productCode ?? (intent?.domain === 'unlock' ? intent.productCode : undefined)
+  const initialProductCode = products.find((product) => product.productCode === requested)?.productCode ?? products.find((product) => product.productCode === intent?.productCode)?.productCode
   const ordering = unlockOrderingEnabled() || products.some((product) => product.status === 'available')
   const quoteProducts: PriceCheckProduct[] = products.map((product) => ({
-    code: product.productCode, name: product.name, category: unlockCategory(product),
+    code: product.productCode, domain: product.domain, name: product.name, category: product.group,
     summary: product.summary, available: product.status === 'available',
     priceCents: product.priceCents, etaLabel: product.etaLabel,
   }))
@@ -47,7 +46,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
             </ul>
           </div>
           <div className="hero-panel unlock-landing-form" id="unlock-entry-heading">
-            <HeroPriceCheck key={initialProductCode ?? 'unselected'} unlock={quoteProducts} check={[]} ordering={ordering} fixedDomain="unlock" initialImei={intentImeiFor(intent, 'unlock')} initialProductCode={initialProductCode} initialEmail={intent?.domain === 'unlock' ? intent.email : undefined} />
+            <HeroPriceCheck key={initialProductCode ?? 'unselected'} unlock={quoteProducts} check={[]} ordering={ordering} fixedDomain="unlock" initialImei={intentImeiFor(intent, products.find((product) => product.productCode === initialProductCode)?.domain ?? 'unlock')} initialProductCode={initialProductCode} initialEmail={intent?.productCode === initialProductCode ? intent?.email : undefined} />
           </div>
           <div className="requirements-card unlock-landing-requirements">
             <h2><Icon name="shieldCheck" />Before you order</h2>

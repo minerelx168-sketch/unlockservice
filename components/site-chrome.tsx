@@ -6,7 +6,7 @@ import { logoutAction } from '@/lib/actions'
 import { listArticles } from '@/lib/articles'
 import { currentSession } from '@/lib/auth'
 import { CARRIERS } from '@/lib/catalog'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 
 /**
  * The public chrome, built on the server from the same catalog the
@@ -18,7 +18,7 @@ import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 async function chromeData() {
   const session = await currentSession()
   const isAuthenticated = session !== null
-  const reports = listPublicProviderProducts('imei_check')
+  const reports = listStorefrontProviderProducts('imei_check')
   const articles = listArticles()
   const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size
   return { isAuthenticated, reports, articles, networks }

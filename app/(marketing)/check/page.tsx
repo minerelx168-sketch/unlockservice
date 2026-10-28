@@ -4,7 +4,7 @@ import { ImeiCheckForm } from '@/components/imei-check-form'
 import { currentSession } from '@/lib/auth'
 import { storefrontAvailability } from '@/lib/storefront-availability'
 import { ServiceBrowser } from '@/components/service-browser'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 import { Icon } from '@/components/icons'
 
 
@@ -15,7 +15,7 @@ export const metadata = pageMetadata("/check", "IMEI Number Validation: Format &
 export default async function CheckPage() {
   const found = await currentSession()
   const unlock = storefrontAvailability('unlock')
-  const products = listPublicProviderProducts('imei_check')
+  const products = listStorefrontProviderProducts('imei_check')
 
   return (
     <section className="section free-check-page">

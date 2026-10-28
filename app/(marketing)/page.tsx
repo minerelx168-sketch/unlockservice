@@ -6,9 +6,8 @@ import { Icon, type IconName } from '@/components/icons'
 import { BRANDS, CARRIERS } from '@/lib/catalog'
 import { FAQ } from '@/lib/faq'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 import { quickPicks } from '@/lib/quick-picks'
-import { unlockCategory } from '@/lib/unlock-catalog-view'
 import { StructuredData } from './structured-data'
 
 const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
@@ -140,24 +139,24 @@ function StepArt({ kind }: { kind: 'imei' | 'review' | 'done' }) {
 }
 
 export default function HomePage() {
-  const unlockProducts = listPublicProviderProducts('unlock')
-  const checkProducts = listPublicProviderProducts('imei_check')
+  const unlockProducts = listStorefrontProviderProducts('unlock')
+  const checkProducts = listStorefrontProviderProducts('imei_check')
   const ordering = unlockOrderingEnabled() || unlockProducts.some((product) => product.status === 'available')
   const status = !ordering && serviceStatus()
   const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size
   const countries = [...new Set(CARRIERS.map((carrier) => carrier.country))]
 
   const unlockWidget: PriceCheckProduct[] = unlockProducts.map((product) => ({
-    code: product.productCode,
+    code: product.productCode, domain: product.domain,
     name: product.name,
-    category: unlockCategory(product),
+    category: product.group,
     summary: product.summary,
     available: product.status === 'available',
     priceCents: product.priceCents,
     etaLabel: product.etaLabel,
   }))
   const checkWidget: PriceCheckProduct[] = checkProducts.map((product) => ({
-    code: product.productCode,
+    code: product.productCode, domain: product.domain,
     name: product.name,
     category: product.group,
     summary: product.summary,

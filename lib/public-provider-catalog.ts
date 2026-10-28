@@ -1,3 +1,4 @@
+import { groupServices, storefrontDomain } from './service-groups'
 import { CUSTOMER_IMEI_CHECK_PRODUCTS, CUSTOMER_UNLOCK_PRODUCTS } from './customer-provider-products'
 import { listPaidReportProducts } from './paid-reports'
 import { hasServiceOutputExample } from './service-output-examples'
@@ -32,4 +33,13 @@ export function listPublicProviderProducts(domain: ProviderProductDomain): Publi
       hasExample: hasServiceOutputExample(product.productCode),
     }
   })
+}
+
+/** Match the storefront sections to the supplier's group order without changing checkout identity. */
+export function listStorefrontProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
+  const products = [
+    ...listPublicProviderProducts('imei_check'),
+    ...listPublicProviderProducts('unlock'),
+  ].filter((product) => storefrontDomain(product) === domain)
+  return groupServices(products).flatMap((group) => group.products)
 }
