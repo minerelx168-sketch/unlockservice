@@ -37,7 +37,7 @@ export default async function CheckPage() {
             {found ? <Link className="link-arrow apple-check-history" href="/user/checks">History <Icon name="arrowRight" /></Link> : <span className="apple-check-free-label">FREE</span>}
           </div>
           <h2 className="apple-check-form-title">Check your Apple device</h2>
-          <ImeiCheckForm csrfToken={found?.session.csrfToken} initialQuota={eligible && found ? freeAppleQuota(found.user.id) : undefined} disabledReason={found && !eligible ? 'Apple Free Check is for verified customer accounts. Admin accounts do not use the free allowance.' : undefined} />
+          <ImeiCheckForm csrfToken={found?.session.csrfToken} initialQuota={eligible && found ? freeAppleQuota(found.user.id) : undefined} disabledReason={found && !eligible ? found.user.account_type !== 'customer' ? 'Apple Free Check is for customer accounts. Admin accounts do not use the free allowance.' : 'Verify your account email before using Apple Free Check.' : undefined} />
         </div>
 
         <div className="free-check-extras apple-check-extras">
@@ -64,7 +64,7 @@ export default async function CheckPage() {
       <section className="shell apple-check-paid" aria-labelledby="paid-check-heading">
         <div className="apple-check-paid-heading">
           <div><span className="kicker">WHEN YOU NEED MORE DETAIL</span><h2 id="paid-check-heading">Paid Phone Check services and prices</h2></div>
-          <p>Compare reports and prices first. Pay per report without an account, then receive the full result online and by email.</p>
+          <p>Compare reports and prices first. Pay per report, then receive the full result online and by email.</p>
         </div>
         <ServiceBrowser products={products} domain="imei_check" isAuthenticated={Boolean(found)} />
       </section>
