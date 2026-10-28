@@ -246,6 +246,26 @@
   font-weight: 680;
 }
 
+/* An eyebrow pill labels the heading under it; on Payments and the admin
+   heads nothing separated them and the pill sat on the heading's letters. */
+.app-head .eyebrow + :is(h1, h2),
+.admin-growth-head .eyebrow + h2,
+.admin-invoice-card .eyebrow + h3 {
+  margin-top: 10px;
+}
+
+/* Empty states had no styles at all, so the icon tile sat directly on the
+   heading. Icon, heading, sentence and link now read as spaced steps. */
+.empty-state {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.empty-state > .icon-tile {
+  margin-bottom: 8px;
+}
+
 .app-head p {
   margin: 8px 0 0;
   font-size: 1rem;
@@ -757,10 +777,13 @@ table.account-table td {
 
 /* The way back out. Small, below the card, and never competing with the
    one thing the page is asking for. */
+/* align-items keeps the separators on the text line: on phones the links
+   grow to 44px tap targets and the dots were left at the top of the row. */
 .auth-aside {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 10px;
   font-size: 13.5px;
   color: var(--muted);
@@ -792,7 +815,7 @@ table.account-table td {
   margin-top: 18px;
   font-size: 1.6875rem;
   line-height: 1.15;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.025em;
   font-weight: 680;
 }
 
@@ -829,6 +852,15 @@ table.account-table td {
   border-top: 1px solid var(--line);
   font-size: 0.9375rem;
   color: var(--muted);
+}
+
+/* A row of links spaced by gap, not by a typed "·": a literal separator
+   was left dangling at the end of the line when the row wrapped. */
+.auth-foot--links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
 }
 
 .legal-card {
@@ -1038,14 +1070,20 @@ table.account-table td {
 }
 
 @media (max-width: 940px) {
+  /* The bar row is sized by its content and the page takes the rest.
+     Without the explicit rows, a short page left the shell's min-height
+     to be shared between both auto rows, and the bar grew with it: the
+     Menu button reached 94px and the credit card floated in empty space. */
   .app-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
     background: var(--page-soft);
   }
 
   .app-sidebar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
     gap: 14px;
     padding: 16px 22px;
     position: static;
@@ -2347,11 +2385,11 @@ table.account-table td {
 
 .funding-hero h1,
 .payment-request-head h1 {
-  margin: 5px 0 10px;
+  margin: 10px 0 10px;
   font-family: var(--font-display);
   font-size: clamp(1.85rem, 4vw, 3rem);
-  line-height: 1.03;
-  letter-spacing: -0.045em;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
   color: var(--ink-strong);
 }
 

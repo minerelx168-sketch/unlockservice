@@ -11,7 +11,6 @@ import { formatUsd } from '@/lib/money'
 import { listOrders, orderStats, recentOrderCounts } from '@/lib/orders'
 import { listPaidReports, type PaidReportView } from '@/lib/paid-reports'
 import { getAccountProfile } from '@/lib/profile'
-import { unlockOrderingEnabled } from '@/lib/provider'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 export const dynamic = 'force-dynamic'
@@ -29,7 +28,6 @@ function reportBadge(status: PaidReportView['status']) {
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const [{ user }, query] = await Promise.all([requireSession(), searchParams])
   const tab: Tab = query.tab === 'unlocks' || query.tab === 'reports' ? query.tab : 'all'
-  const ordering = unlockOrderingEnabled()
   const available = user.credit_cents - user.held_cents
   const stats = orderStats(user.id)
   const money = creditSummary(user.id)
@@ -69,7 +67,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const starts: Array<{ icon: IconName; tint: string; title: string; caption: string; href: string; disabled?: boolean }> = [
     { icon: 'search', tint: ' icon-tile--accent', title: 'Phone Check', caption: 'Reports from the IMEI', href: '/user/reports/new' },
-    { icon: 'lock', tint: '', title: 'Unlock', caption: ordering ? 'Network unlock by IMEI' : 'Ordering paused — browse prices', href: ordering ? '/user/services/unlock' : '/services/unlock' },
+    { icon: 'lock', tint: '', title: 'Unlock', caption: 'Network unlock by IMEI', href: '/user/services/unlock' },
     { icon: 'wallet', tint: ' icon-tile--moss', title: 'Add credit', caption: 'USDT on TRC20 or BEP20', href: '/user/add-funds' },
     { icon: 'keypad', tint: '', title: 'Apple Free Check', caption: 'Apple Basic Info · 3 free checks daily', href: '/check' },
   ]
@@ -194,9 +192,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         ) : (
           <p className="empty">
             Nothing here yet.{' '}
-            <Link href={ordering ? '/user/services/unlock' : '/user/reports/new'}>
-              {ordering ? 'Unlock your first device' : 'Run your first phone check'}
-            </Link>
+            <Link href="/user/services/unlock">Unlock your first device</Link>
             .
           </p>
         )}

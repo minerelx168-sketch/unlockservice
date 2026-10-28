@@ -83,8 +83,9 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <p className="auth-foot">
-        <Link href="/">Return to iUnlockMobile</Link> · <Link href="/terms">Terms of Service</Link>
+      <p className="auth-foot auth-foot--links">
+        <Link href="/">Return to iUnlockMobile</Link>
+        <Link href="/terms">Terms of Service</Link>
       </p>
     </article>
   )

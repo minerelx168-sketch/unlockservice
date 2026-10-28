@@ -10,7 +10,8 @@
 .home-hero .hero-copy { grid-area: intro; align-content: start; gap: 16px; }
 .home-hero .hero-panel { grid-area: form; order: 0; }
 .hero-extras { grid-area: extras; display: grid; gap: 24px; min-width: 0; }
-.home-hero .t-hero { font-size: clamp(2.5rem, 4.1vw, 3.6rem); line-height: 1.08; letter-spacing: -.045em; }
+/* -.045em packed the letters of the headline until they touched; -.03em keeps it tight but legible. */
+.home-hero .t-hero { font-size: clamp(2.5rem, 4.1vw, 3.6rem); line-height: 1.08; letter-spacing: -.03em; }
 .home-hero .t-lead { max-width: 36em; }
 .home-hero .hero-panel, .unlock-landing-form { padding: clamp(20px, 2.5vw, 30px); border-radius: 24px; box-shadow: var(--shadow-soft); }
 

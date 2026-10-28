@@ -29,11 +29,6 @@
   color: var(--primary);
 }
 
-.site-nav .nav-link--article {
-  background: var(--primary-soft);
-  color: var(--primary-dark);
-}
-
 .site-nav .nav-link:hover,
 .site-nav .nav-link:focus-visible {
   background: var(--primary-soft);
