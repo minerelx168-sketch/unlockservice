@@ -37,10 +37,13 @@ test('sample reviews are labelled as samples and never aggregated', () => {
 
 test('footer shows the requested payment labels and catalog counts remain derived', () => {
   const footer = read('components/site-footer.tsx')
-  for (const method of ['Visa', 'Mastercard', 'Google Pay', 'Apple Pay', 'Bitcoin', 'USDT']) {
-    assert.ok(footer.includes(method))
+  for (const method of ['visa', 'mastercard', 'googlepay', 'applepay', 'bitcoin', 'usdt']) {
+    assert.ok(footer.includes(`'${method}'`))
   }
-  assert.doesNotMatch(footer, /Stripe|PayPal/)
+  assert.doesNotMatch(footer, /Stripe|PayPal/i)
+  // The marks render as real acceptance badges, not hand-written text pills.
+  const badges = read('components/payment-badges.tsx')
+  assert.match(badges, /simple-icons/)
   const chrome = read('components/site-chrome.tsx')
   assert.match(chrome, /CARRIERS\.map/)
   assert.match(chrome, /listArticles\(\)/)
