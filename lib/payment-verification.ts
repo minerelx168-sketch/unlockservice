@@ -19,11 +19,11 @@ import {
   inspectPaymentTransaction,
   PaymentProviderError,
 } from './payment-chain-provider'
-import { carriesInvoiceCode, creditForCodedTransfer, INVOICE_TTL_DAYS, rawToE4 } from './payment-codes'
+import { carriesInvoiceCode, creditForCodedTransfer, INVOICE_TTL_DAYS, rawToE4, reservedCodeOwners } from './payment-codes'
 
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ADMIN_KEY_PATTERN = /^[A-Za-z0-9._:-]{8,100}$/
-const INVOICE_TIME_SKEW_MS = 5 * 60_000
+export const INVOICE_TIME_SKEW_MS = 5 * 60_000
 
 type VerificationStatus = 'submitted' | 'confirming' | 'verified' | 'manual_review' | 'rejected'
 
@@ -55,6 +55,7 @@ type InvoiceVerificationRow = {
   invoice_created_at: string
   /** The invoice's coded amount; null on invoices from before codes existed. */
   payment_amount_e4: number | null
+  payment_credit_policy: 'legacy_allowance' | 'actual_received'
   status: VerificationStatus
   confirmations: number
   attempt_count: number
@@ -117,7 +118,7 @@ class UpstreamVerificationError extends Error {
 
 const VERIFICATION_SELECT = `
   SELECT v.*, i.user_id, i.status AS invoice_status,
-         i.created_at AS invoice_created_at, i.payment_amount_e4,
+         i.created_at AS invoice_created_at, i.payment_amount_e4, i.payment_credit_policy,
          i.credit_amount_cents, i.total_due_cents, i.fee_cents, i.tax_cents
     FROM invoice_verifications v
     JOIN invoices i ON i.reference = v.invoice_reference`
@@ -275,6 +276,17 @@ function attachTransaction(
         throw new PaymentVerificationError(guidance, 'invalid_transaction')
       }
 
+      // An administrator dismissed this on-chain transfer. Reject the hash
+      // under the same transaction as the invoice/ledger attach so a watcher,
+      // handover or later customer paste cannot resurrect a dismissed payment.
+      const dismissed = db().prepare(
+        `SELECT 1 FROM chain_transfers WHERE route_id = ? AND tx_hash = ? COLLATE NOCASE
+           AND status = 'dismissed' LIMIT 1`,
+      ).get(routeId, txHash)
+      if (dismissed) {
+        throw new PaymentVerificationError('This transfer was dismissed by an administrator.', 'invalid_state')
+      }
+
       const used = db()
         .prepare('SELECT invoice_reference FROM invoice_verifications WHERE tx_hash = ? COLLATE NOCASE LIMIT 1')
         .get(txHash) as { invoice_reference: string } | undefined
@@ -399,13 +411,13 @@ function recordObservedAmount(
   row: InvoiceVerificationRow,
   candidate: { logIndex: number; rawAmount: bigint },
   observedCreditCents: number,
-  receipt: { blockNumber: number; blockTimestamp: string },
+  receipt: { blockNumber: number; blockTimestamp: string; latestFinalBlock: number },
 ) {
   db()
     .prepare(
       `UPDATE invoice_verifications
           SET matched_log_index = ?, matched_amount_raw = ?, verified_credit_cents = ?,
-              receipt_block_number = ?, receipt_block_timestamp = ?, updated_at = ?
+              receipt_block_number = ?, receipt_block_timestamp = ?, confirmations = ?, updated_at = ?
         WHERE invoice_reference = ? AND status IN ('submitted', 'confirming')`,
     )
     .run(
@@ -414,6 +426,7 @@ function recordObservedAmount(
       observedCreditCents,
       receipt.blockNumber,
       receipt.blockTimestamp,
+      Math.max(0, receipt.latestFinalBlock - receipt.blockNumber + 1),
       new Date().toISOString(),
       row.invoice_reference,
     )
@@ -461,7 +474,7 @@ async function handOver(
   owner: { reference: string; user_id: number },
   entry: { logIndex: number; rawAmount: bigint },
   receivedE4: number,
-  receipt: { blockNumber: number; blockTimestamp: string },
+  receipt: { blockNumber: number; blockTimestamp: string; latestFinalBlock: number },
 ): Promise<VerificationAttempt> {
   try {
     releaseToCodeOwner(row, owner, entry.logIndex)
@@ -635,6 +648,17 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
     }
 
     const candidates: Array<{ logIndex: number; rawAmount: bigint }> = []
+    const incomingWalletEvents = receipt.logs.filter((log) =>
+      log.topics[0] === TRANSFER_TOPIC && topicAddress(log.topics[2]) === destination,
+    )
+    if (incomingWalletEvents.length > 1) {
+      // A verification row still reserves the entire tx hash. Never credit
+      // only the first event when other customers' deposits share the hash.
+      markManualReview(row, 'multi_event_transaction_needs_reconciliation', {
+        matchingLogs: incomingWalletEvents.length,
+      })
+      return 'manual_review'
+    }
     for (const log of receipt.logs) {
       if (log.contractAddress !== snapshottedContract) continue
       if (log.topics[0] !== TRANSFER_TOPIC) continue
@@ -652,24 +676,7 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
       throw new PaymentProviderError('provider_invalid_block')
     }
 
-    /* Several transfers into the wallet in one transaction (an exchange
-       batching withdrawals): a coded invoice takes the one carrying its code. */
-    let candidate = candidates.length === 1 ? candidates[0] : undefined
-    if (!candidate && coded && candidates.length > 1) {
-      const own = candidates.filter((entry) => {
-        const e4 = rawToE4(entry.rawAmount, row.token_decimals)
-        return e4 !== null && carriesInvoiceCode({ payment_amount_e4: row.payment_amount_e4! }, e4)
-      })
-      if (own.length === 1) candidate = own[0]
-      else if (own.length === 0) {
-        // None of them is this request's; if one is another open request's, it goes there.
-        for (const entry of [...candidates].sort((a, b) => a.logIndex - b.logIndex)) {
-          const e4 = rawToE4(entry.rawAmount, row.token_decimals)
-          const owner = e4 === null ? undefined : codeOwner(row, e4, receipt.blockTimestamp)
-          if (owner) return await handOver(row, owner, entry, e4!, receipt)
-        }
-      }
-    }
+    const candidate = candidates.length === 1 ? candidates[0] : undefined
     if (!candidate) {
       markManualReview(row, candidates.length === 0 ? 'transfer_not_found' : 'ambiguous_transfer_logs', {
         matchingLogs: candidates.length,
@@ -685,6 +692,12 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
         return 'manual_review'
       }
       if (!carriesInvoiceCode({ payment_amount_e4: row.payment_amount_e4! }, receivedE4)) {
+        const reserved = reservedCodeOwners(row.payment_route_id!, receivedE4, receipt.blockTimestamp, row.invoice_reference)
+        if (reserved.some((owner) => owner.status !== 'pending' || owner.payment_reference !== null) || reserved.length > 1) {
+          recordObservedAmount(row, candidate, Math.floor(receivedE4 / 100), receipt)
+          markManualReview(row, 'transfer_carries_another_request_code', { receivedE4 })
+          return 'manual_review'
+        }
         /* The transfer carries another open request's code: it is that
            customer's payment, pasted here first. Hand it to them rather
            than freezing it on this request. */
@@ -707,6 +720,7 @@ export async function verifyInvoiceTransaction(reference: string): Promise<Verif
           credit_amount_cents: row.credit_amount_cents,
           total_due_cents: row.total_due_cents,
           payment_amount_e4: row.payment_amount_e4!,
+          payment_credit_policy: row.payment_credit_policy,
         },
         receivedE4,
       )
@@ -868,10 +882,56 @@ function existingAdminEvent(adminUserId: number, idempotencyKey: string) {
       | undefined
 }
 
-export function decideInvoiceVerification(
+async function rereadApprovalReceipt(row: InvoiceVerificationRow): Promise<void> {
+  const route = row.payment_route_id ? paymentRouteConfiguration(row.payment_route_id) : undefined
+  if (!route?.enabled || !route.providerReady || route.chainId !== row.chain_id || route.chainKind !== row.chain_kind
+    || route.providerMode !== row.provider_mode) {
+    throw new PaymentVerificationError('The selected payment network is not ready.', 'unavailable')
+  }
+  const contract = route.chainKind === 'tron' ? tronAddressToHex20(route.tokenContract) : normalizeEvmAddress(route.tokenContract)
+  const destination = route.chainKind === 'tron' ? tronAddressToHex20(route.destinationAddress) : normalizeEvmAddress(route.destinationAddress)
+  const snapshotContract = route.chainKind === 'tron' ? tronAddressToHex20(row.token_contract) : normalizeEvmAddress(row.token_contract)
+  const snapshotDestination = route.chainKind === 'tron' ? tronAddressToHex20(row.destination_address) : normalizeEvmAddress(row.destination_address)
+  if (!contract || !destination || contract !== snapshotContract || destination !== snapshotDestination) {
+    throw new PaymentVerificationError('The original payment policy no longer matches this route.', 'invalid_state')
+  }
+  let receipt
+  try {
+    receipt = await inspectPaymentTransaction({ chainId: route.chainId, chainKind: route.chainKind, providerMode: route.providerMode }, row.tx_hash)
+  } catch (error) {
+    if (error instanceof PaymentProviderError) throw new PaymentVerificationError('The chain cannot confirm this transfer now. Keep it in review.', 'unavailable')
+    throw error
+  }
+  const entry = receipt?.logs.find((log) => log.logIndex === row.matched_log_index)
+  const walletEventCount = receipt?.logs.filter((log) =>
+    log.topics[0] === TRANSFER_TOPIC && topicAddress(log.topics[2]) === destination,
+  ).length ?? 0
+  const created = Date.parse(row.invoice_created_at.includes('T') ? row.invoice_created_at : `${row.invoice_created_at.replace(' ', 'T')}Z`)
+  const sent = receipt ? Date.parse(receipt.blockTimestamp) : NaN
+  if (!receipt?.succeeded || receipt.transactionId !== row.tx_hash || receipt.blockNumber !== row.receipt_block_number
+    || receipt.blockTimestamp !== row.receipt_block_timestamp || receipt.latestFinalBlock < receipt.blockNumber
+    || receipt.latestFinalBlock - receipt.blockNumber + 1 < (row.confirmations_required ?? 15)
+    || !Number.isFinite(created) || !Number.isFinite(sent)
+    || sent <= created || sent > created + INVOICE_TTL_DAYS * 86_400_000
+    || sent > Date.now() + INVOICE_TIME_SKEW_MS
+    || walletEventCount !== 1
+    || !entry || entry.contractAddress !== contract || entry.topics[0] !== TRANSFER_TOPIC
+    || topicAddress(entry.topics[2]) !== destination || !/^0x[0-9a-f]+$/i.test(entry.data)
+    || !row.matched_amount_raw || BigInt(entry.data) !== BigInt(row.matched_amount_raw)) {
+    throw new PaymentVerificationError('Receipt, recipient, amount or confirmations changed; keep the request in review.', 'invalid_state')
+  }
+  const receivedE4 = rawToE4(BigInt(entry.data), route.tokenDecimals)
+  if (receivedE4 === null || (row.payment_amount_e4 !== null
+    && !carriesInvoiceCode({ payment_amount_e4: row.payment_amount_e4 }, receivedE4)
+    && reservedCodeOwners(route.id, receivedE4, receipt.blockTimestamp, row.invoice_reference).length)) {
+    throw new PaymentVerificationError('This transfer code belongs to another payment request.', 'invalid_state')
+  }
+}
+
+export async function decideInvoiceVerification(
   adminUserId: number,
   input: { invoiceReference: string; decision: 'approve' | 'reject'; reason: string; idempotencyKey: string },
-): { balance: Balance; replayed: boolean } {
+): Promise<{ balance: Balance; replayed: boolean }> {
   const admin = getUser(adminUserId)
   if (!admin || !hasAdminRole(admin)) {
     throw new PaymentVerificationError('Administrator access is required.', 'forbidden')
@@ -898,6 +958,21 @@ export function decideInvoiceVerification(
     throw new PaymentVerificationError('Too many invoice decisions. Wait and try again.', 'rate_limited')
   }
 
+  const observed = input.decision === 'approve' ? verificationRow(input.invoiceReference) : undefined
+  if (input.decision === 'approve') {
+    if (!observed) throw new PaymentVerificationError('No such invoice verification.', 'not_found')
+    if (observed.error_code === 'transfer_carries_another_request_code') {
+      throw new PaymentVerificationError('This transfer belongs to another payment request.', 'invalid_state')
+    }
+    if (observed.status !== 'manual_review' || observed.matched_log_index === null
+      || !observed.matched_amount_raw || observed.receipt_block_number === null
+      || !observed.receipt_block_timestamp || observed.verified_credit_cents === null
+      || observed.confirmations < (observed.confirmations_required ?? 15)) {
+      throw new PaymentVerificationError('Wait for an observed on-chain transfer with enough confirmations inside the payment window.', 'invalid_state')
+    }
+    await rereadApprovalReceipt(observed)
+  }
+
   return db().transaction(() => {
     const freshReplay = existingAdminEvent(adminUserId, idempotencyKey)
     if (freshReplay) {
@@ -915,6 +990,12 @@ export function decideInvoiceVerification(
 
     const row = verificationRow(input.invoiceReference)
     if (!row) throw new PaymentVerificationError('No such invoice verification.', 'not_found')
+    if (observed && (row.status !== observed.status || row.tx_hash !== observed.tx_hash
+      || row.matched_log_index !== observed.matched_log_index || row.matched_amount_raw !== observed.matched_amount_raw
+      || row.receipt_block_number !== observed.receipt_block_number || row.receipt_block_timestamp !== observed.receipt_block_timestamp
+      || row.verified_credit_cents !== observed.verified_credit_cents)) {
+      throw new PaymentVerificationError('This request changed while the receipt was checked. Try again.', 'invalid_state')
+    }
     if (row.invoice_status === 'success') {
       if (input.decision === 'approve') {
         addEvent(row.invoice_reference, 'approve_manual', eventKey, { adminUserId, reason })
@@ -931,6 +1012,15 @@ export function decideInvoiceVerification(
       // Never for a transfer that carries another open request's code.
       if (row.error_code === 'transfer_carries_another_request_code') {
         throw new PaymentVerificationError('This transfer belongs to another payment request. Reject it here.', 'invalid_state')
+      }
+      const created = Date.parse(row.invoice_created_at.includes('T') ? row.invoice_created_at : `${row.invoice_created_at.replace(' ', 'T')}Z`)
+      const sent = row.receipt_block_timestamp ? Date.parse(row.receipt_block_timestamp) : NaN
+      if (row.status !== 'manual_review' || row.matched_log_index === null || !row.matched_amount_raw
+        || row.verified_credit_cents === null || row.receipt_block_number === null
+        || row.confirmations < (row.confirmations_required ?? 15)
+        || !Number.isFinite(created) || !Number.isFinite(sent)
+        || sent <= created || sent > created + INVOICE_TTL_DAYS * 86_400_000) {
+        throw new PaymentVerificationError('Wait for an observed on-chain transfer with enough confirmations inside the payment window.', 'invalid_state')
       }
       const approvedCreditCents = row.verified_credit_cents ?? row.credit_amount_cents
       const balance = credit(row.user_id, approvedCreditCents, 'topup', 'invoice', row.invoice_reference)

@@ -21,6 +21,9 @@ export type InvoiceReviewItem = {
   explorer_url: string | null
   status: string
   confirmations: number
+  confirmations_required: number | null
+  matched_log_index: number | null
+  receipt_block_timestamp: string | null
   error_code: string | null
   invoice_created_at: string
 }
@@ -41,6 +44,9 @@ function ReviewCard({ item, csrfToken }: { item: InvoiceReviewItem; csrfToken: s
   const validReason = reason.trim().length >= 8 && reason.trim().length <= 240
   const requestedCreditCents = item.requested_credit_cents ?? item.credit_amount_cents
   const approvalCreditCents = item.verified_credit_cents ?? item.credit_amount_cents
+  const canApprove = item.status === 'manual_review' && item.verified_credit_cents !== null
+    && item.matched_log_index !== null && item.receipt_block_timestamp !== null
+    && item.confirmations >= (item.confirmations_required ?? 15)
 
   function choose(next: Decision) {
     setDecision(next)
@@ -104,6 +110,7 @@ function ReviewCard({ item, csrfToken }: { item: InvoiceReviewItem; csrfToken: s
       </dl>
 
       <p className="admin-tx-hash mono" title={item.tx_hash}>{item.tx_hash}</p>
+      {!canApprove ? <p className="t-small">Approval requires a verified matching transfer and the configured confirmation threshold. Rejection is still available.</p> : null}
       {item.explorer_url ? (
         <a className="link-arrow" href={item.explorer_url} target="_blank" rel="noreferrer">
           Inspect transaction on explorer
@@ -137,30 +144,30 @@ function ReviewCard({ item, csrfToken }: { item: InvoiceReviewItem; csrfToken: s
           <p>
             <strong>
               {decision === 'approve'
-                ? `Approve ${formatUsd(approvalCreditCents)} credit for ${item.username}?`
+                ? `Confirm manual payment and add ${formatUsd(approvalCreditCents)} verified credit for ${item.username}?`
                 : `Reject payment request for ${item.username}?`}
             </strong>
           </p>
           <p className="t-small">
             {decision === 'approve'
-              ? 'Approval writes one top-up ledger effect using the verified amount when available. Confirm contract, recipient, amount and finality independently.'
+              ? 'After checking customer ownership, this server rereads the receipt and adds exactly one verified on-chain credit. A nearby amount alone is not proof of payment.'
               : 'Rejection closes this request without changing the customer balance.'}
           </p>
           <div className="admin-confirm-actions">
             <button
               className={decision === 'approve' ? 'button button--primary' : 'button button--danger'}
               type="button"
-              disabled={!validReason || busy}
+              disabled={!validReason || busy || (decision === 'approve' && !canApprove)}
               onClick={submit}
             >
-              {busy ? 'Recording…' : `Yes, ${decision} request`}
+              {busy ? 'Recording…' : decision === 'approve' ? 'Yes, confirm manual payment' : 'Yes, reject request'}
             </button>
             <button className="button button--quiet" type="button" disabled={busy} onClick={() => setDecision(null)}>Cancel</button>
           </div>
         </div>
       ) : (
         <div className="admin-invoice-actions">
-          <button className="button button--primary" type="button" disabled={!validReason || busy} onClick={() => choose('approve')}>Approve credit</button>
+          <button className="button button--primary" type="button" disabled={!validReason || !canApprove || busy} onClick={() => choose('approve')}>Confirm manual payment &amp; credit</button>
           <button className="button button--quiet" type="button" disabled={!validReason || busy} onClick={() => choose('reject')}>Reject request</button>
         </div>
       )}

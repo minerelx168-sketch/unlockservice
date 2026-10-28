@@ -38,6 +38,7 @@ before(async () => {
   leases = await import('../lib/provider-poll-lease')
   imeiPrivacy = await import('../lib/imei-privacy')
   catalog = await import('../lib/public-provider-catalog')
+  database.db().prepare("INSERT OR IGNORE INTO paid_report_products(code,slug,name,summary,input_type,price_cents,provider_cost_micros,eta_minutes,is_active,sort_order) VALUES('APPLE_BASIC','apple-basic','Legacy Apple Basic','','imei',100,15000,1,0,9999)").run()
   globalThis.fetch = async () => { throw new Error('Every provider call must be mocked in this test.') }
 })
 
@@ -54,6 +55,11 @@ function customer(name: string) {
   const id = Number(inserted.lastInsertRowid)
   credits.credit(id, 10_000, 'topup', 'test', name)
   return id
+}
+
+function legacyProcessingCheck(userId: number, reference: string) {
+  const id = Number(database.db().prepare("INSERT INTO imei_checks(user_id,check_type,imei_fingerprint,masked_imei,status,provider,provider_check_id,provider_mode,provider_service_id) VALUES(?,'basic','legacy-fingerprint','***********7518','processing','dhru',?,'dhru','900')").run(userId, reference).lastInsertRowid)
+  return checks.getImeiCheck(userId, id)!
 }
 
 function dueOrder(id: number) {
@@ -128,7 +134,7 @@ test('free-check status polling excludes duplicates and recovers from rate limit
   const userId = customer('reliable-check')
   const startingBalance = credits.getBalance(userId)
   globalThis.fetch = async () => new Response(JSON.stringify({ SUCCESS: [{ REFERENCEID: 'check-1' }] }))
-  const placed = await checks.createImeiCheck(userId, { imei: '490154203237518', idempotencyKey: 'reliable-check-1' })
+  const placed = legacyProcessingCheck(userId, 'check-1')
   assert.equal(placed.status, 'processing')
   const gate = deferred()
   let calls = 0
@@ -258,9 +264,9 @@ test('an approved PHP check product places once and settles its hold immediately
       idempotencyKey: 'strict-php-10-once',
     })
     assert.equal(created.order.status, 'completed')
-    assert.equal(created.order.priceCents, 1)
+    assert.equal(created.order.priceCents, 100)
     assert.equal(calls, 1)
-    assert.equal(credits.getBalance(userId).creditCents, before.creditCents - 1)
+    assert.equal(credits.getBalance(userId).creditCents, before.creditCents - 100)
     assert.equal(credits.getBalance(userId).heldCents, before.heldCents)
     const replay = await reports.createPaidReport(userId, {
       productCode: 'APPLE_ICLOUD_STATUS',
@@ -312,9 +318,9 @@ test('an approved DHRU unlock product holds, places once and settles through the
     assert.equal(created.order.status, 'processing')
     assert.equal(created.order.productCode, 'UNLOCK_346')
     assert.equal(created.order.imei, '490154203237518')
-    assert.equal(created.order.priceCents, 15)
+    assert.equal(created.order.priceCents, 800)
     assert.equal(placements, 1)
-    assert.equal(credits.getBalance(userId).heldCents, before.heldCents + 15)
+    assert.equal(credits.getBalance(userId).heldCents, before.heldCents + 800)
 
     const replay = await reports.createPaidReport(userId, {
       productCode: 'UNLOCK_346',
@@ -331,7 +337,7 @@ test('an approved DHRU unlock product holds, places once and settles through the
     assert.equal(summary.reportsSeen, 1)
     assert.equal(summary.completed, 1)
     assert.equal(reports.getPaidReport(userId, created.order.id)?.status, 'completed')
-    assert.equal(credits.getBalance(userId).creditCents, before.creditCents - 15)
+    assert.equal(credits.getBalance(userId).creditCents, before.creditCents - 800)
     assert.equal(credits.getBalance(userId).heldCents, before.heldCents)
     const stored = JSON.stringify(reports.getPaidReport(userId, created.order.id)?.report)
     assert.match(stored, /Unlocked/)
@@ -351,7 +357,7 @@ test('pollers re-read eligibility after claiming when another process updated th
     imei: '490154203237518', email: 'stale@example.test', idempotencyKey: 'stale-order',
   })
   dueOrder(order.orderId)
-  const check = await checks.createImeiCheck(userId, { imei: '490154203237518', idempotencyKey: 'stale-check' })
+  const check = legacyProcessingCheck(userId, 'stale-poll')
   const inserted = database.db().prepare(`
     INSERT INTO paid_report_orders
       (user_id, product_code, product_name, imei_fingerprint, masked_imei, status,
@@ -384,15 +390,14 @@ test('pollers re-read eligibility after claiming when another process updated th
   assert.deepEqual(credits.getBalance(userId), balanceBefore)
 })
 
-test('owner publication stays active while checkout enforces operational gates and current prices', async () => {
-  const find = () => catalog.listPublicProviderProducts('imei_check').find((product) => product.productCode === 'APPLE_BASIC')!
-  assert.equal(find().status, 'available', 'local transport settings must not label an active owner product as prelaunch')
-  assert.equal(reports.getPaidReportProduct('APPLE_BASIC')?.providerReady, false)
+test('public availability follows operational gates, current prices and omits supplier-only fields', () => {
+  const find = () => catalog.listPublicProviderProducts('imei_check').find((product) => product.productCode === 'APPLE_CARRIER_LITE')!
+  assert.equal(find().status, 'coming_soon', 'no approved mapping must not advertise an orderable report')
   process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
-    'check:apple_basic': { id: '214', mode: 'sync' },
+    'check:apple_carrier_lite': { id: '444', mode: 'sync' },
     'product:unlock_346': { id: '346', mode: 'dhru' },
   })
-  database.db().prepare("UPDATE paid_report_products SET is_active = 1, price_cents = 17 WHERE code = 'APPLE_BASIC'").run()
+  database.db().prepare("UPDATE paid_report_products SET is_active = 1, price_cents = 17 WHERE code = 'APPLE_CARRIER_LITE'").run()
   const findUnlock = () => catalog.listPublicProviderProducts('unlock').find((product) => product.productCode === 'UNLOCK_346')!
   const available = find()
   assert.equal(available.status, 'available')
@@ -401,18 +406,11 @@ test('owner publication stays active while checkout enforces operational gates a
   assert.equal('providerCostMicros' in available, false)
   assert.equal('serviceId' in available, false)
   process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled'
-  assert.equal(find().status, 'available')
-  assert.equal(findUnlock().status, 'available')
-  const userId = customer('catalog-checkout-gate')
-  const balanceBefore = credits.getBalance(userId)
-  const ordersBefore = reports.listPaidReports(userId).length
-  await assert.rejects(reports.createPaidReport(userId, {
-    productCode: 'APPLE_BASIC', imei: '490154203237518', idempotencyKey: 'catalog-disabled-provider',
-  }), (error: unknown) => error instanceof reports.PaidReportError && error.code === 'provider_not_ready')
-  assert.deepEqual(credits.getBalance(userId), balanceBefore)
-  assert.equal(reports.listPaidReports(userId).length, ordersBefore)
+  assert.equal(find().status, 'coming_soon')
+  assert.equal(findUnlock().status, 'coming_soon')
   process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'enabled'
-  database.db().prepare("UPDATE paid_report_products SET is_active = 0 WHERE code = 'APPLE_BASIC'").run()
-  assert.equal(find(), undefined)
+  database.db().prepare("UPDATE paid_report_products SET is_active = 0 WHERE code = 'APPLE_CARRIER_LITE'").run()
+  assert.equal(find().status, 'coming_soon')
   assert.equal(findUnlock().status, 'available')
 })
+

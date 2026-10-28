@@ -47,7 +47,7 @@ export async function changePasswordAction(_: FormState, form: FormData): Promis
 export async function startEmailChangeAction(_: FormState, form: FormData): Promise<FormState> {
   try {
     const found = await signedIn()
-    await startEmailChange(found.user.id, String(form.get('email') ?? ''))
+    await startEmailChange(found.user.id, String(form.get('email') ?? ''), String(form.get('current') ?? ''))
     revalidatePath('/user/profile')
     return { message: 'We sent a 6-digit code to the new address. Enter it below to finish.' }
   } catch (error) {
@@ -58,9 +58,9 @@ export async function startEmailChangeAction(_: FormState, form: FormData): Prom
 export async function confirmEmailChangeAction(_: FormState, form: FormData): Promise<FormState> {
   try {
     const found = await signedIn()
-    confirmEmailChange(found.user.id, String(form.get('code') ?? '').trim())
+    confirmEmailChange(found.user.id, String(form.get('code') ?? '').trim(), String(form.get('current') ?? ''), found.session.id)
     revalidatePath('/user', 'layout')
-    return { message: 'Email address updated.' }
+    return { message: 'Email address updated. Every other device has been signed out.' }
   } catch (error) {
     return failed(error)
   }

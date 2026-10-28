@@ -7,9 +7,9 @@ export type FaqEntry = { question: string; answer: string }
 
 export const FAQ: FaqEntry[] = [
   {
-    question: 'Is this permanent, and is my warranty safe?',
+    question: 'What does a network unlock change?',
     answer:
-      'Yes to both. The unlock is recorded against the IMEI in the carrier or manufacturer database, so it survives updates, resets and new SIMs. Nothing is installed on the device and no software is modified, which is what puts a warranty at risk.',
+      'A network unlock removes the carrier restriction for an eligible device. It does not remove Activation Lock, a finance agreement or a theft report. The method, eligibility and warranty terms depend on the device, carrier and selected service; review them before ordering.',
   },
   {
     question: 'How long does it take?',
@@ -19,7 +19,7 @@ export const FAQ: FaqEntry[] = [
   {
     question: 'What if my device cannot be unlocked?',
     answer:
-      'Your account credit is reserved while the order is with the carrier and charged only when the unlock is delivered. If the carrier refuses the order, the full reserved amount returns to your account balance. This releases account credit; it is not a refund to your original payment method.',
+      'For a direct card order that we cannot deliver, we request a full refund to the original payment method, including the card fee. If credit from a small card order has already been used or reserved, support reviews the refund first. Bank processing time may vary. Crypto refunds require manual review with support. For orders paid using an existing account balance, the reserved credit is released back to that balance.',
   },
   {
     question: 'Where do I find my IMEI?',
@@ -34,12 +34,17 @@ export const FAQ: FaqEntry[] = [
   {
     question: 'Can you unlock a phone that is still on contract?',
     answer:
-      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, the full reserved credit returns to your account balance.',
+      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, direct card payments are refunded to the original payment method; balance-paid orders release the reserved credit.',
   },
   {
-    question: 'How do I pay, and what is "credit"?',
+    question: 'How can I pay for an order?',
     answer:
-      'You add credit to your account with USDT on the TRC20 or BEP20 network, and orders are paid from that balance. Credit is held while an order runs and only becomes a charge when the result is delivered, which is what makes a refused order free.',
+      'Choose card or crypto at checkout and pay for your selected service. Card payments include a 5% fee. Crypto accepts USDT or USDC on BNB Smart Chain (BEP20), with no service minimum or platform processing fee; network or exchange fees may apply. Existing customers can also pay with their account credit. Processing starts only after payment is confirmed.',
+  },
+  {
+    question: 'Can I pay without creating an account?',
+    answer:
+      'Yes, for crypto payments and card services priced at $1 or more. Enter your IMEI and delivery email, then track the order through its private link and receive the result by email. For a card service below $1, create an account or sign in and return to the same checkout. You pay $1 plus the 5% card fee; the difference between $1 and the service price is saved as account credit after payment.',
   },
   {
     question: 'Will any SIM work after the unlock?',

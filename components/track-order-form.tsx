@@ -8,13 +8,11 @@ import { Icon } from './icons'
 const EMPTY: FormState = {}
 
 /**
- * Email and order number. Both fields are controlled: React resets a form
- * when its action returns, and a validation error that also emptied the
- * boxes would ask the customer to type everything twice.
+ * The order reference is controlled so validation errors do not empty it.
+ * Identity is established at sign-in, never carried in a continuation URL.
  */
 export function TrackOrderForm({ defaultEmail = '' }: { defaultEmail?: string }) {
   const [state, action, pending] = useActionState(findOrderAction, EMPTY)
-  const [email, setEmail] = useState(defaultEmail)
   const [reference, setReference] = useState('')
 
   return (
@@ -31,22 +29,7 @@ export function TrackOrderForm({ defaultEmail = '' }: { defaultEmail?: string })
           </p>
         ) : null}
 
-        <div className="field">
-          <label htmlFor="track-email">Account email</label>
-          <input
-            id="track-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(event) => setEmail(event.currentTarget.value)}
-          />
-          <p className="field-note" data-state="idle">
-            <Icon name="info" strokeWidth={1.9} />
-            <span>The address you ordered with. It only prefills the sign-in box.</span>
-          </p>
-        </div>
+        {defaultEmail ? <p className="t-small">Signed in as {defaultEmail}</p> : null}
 
         <div className="field">
           <label htmlFor="track-reference">Order number</label>

@@ -28,6 +28,8 @@ function policy(nonce: string, secure: boolean): string {
     "'strict-dynamic'",
     'https://www.googletagmanager.com',
     'https://www.googleadservices.com',
+    // CSP2 fallback for Google's conversion script; nonce/strict-dynamic stay enforced.
+    'https://googleads.g.doubleclick.net',
     'https://www.google.com',
     // The development bundler compiles with eval; production never does.
     process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : '',
@@ -35,13 +37,14 @@ function policy(nonce: string, secure: boolean): string {
 
   return [
     "default-src 'self'",
+    "report-uri /api/diagnostics/csp",
     `script-src ${scriptSrc.join(' ')}`,
     // Server-rendered style attributes are inline by definition, and every
     // colour in them resolves to a token rather than arriving from a request.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com",
+    "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com",
     "font-src 'self'",
-    "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://ad.doubleclick.net",
+    "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://ad.doubleclick.net",
     "frame-src 'self' https://www.googletagmanager.com",
     "form-action 'self'",
     "frame-ancestors 'none'",
@@ -79,6 +82,11 @@ export function middleware(request: NextRequest) {
      the workspace is past the hand-off, and clearing it there means the
      order form starts clean the next time it is opened. */
   const path = request.nextUrl.pathname
+  if (path.startsWith('/checkout')) {
+    response.headers.set('Referrer-Policy', 'no-referrer')
+    response.headers.set('Cache-Control', 'private, no-store')
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
   if (path !== '/user/unlock' && path.startsWith('/user/') && request.cookies.has(QUOTE_COOKIE)) {
     response.cookies.set(QUOTE_COOKIE, '', { path: '/', maxAge: 0, httpOnly: true, secure })
   }

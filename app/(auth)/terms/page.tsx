@@ -11,7 +11,7 @@ export default function TermsPage() {
     <article className="auth-card legal-card">
       <Brand />
       <h1>Terms of Service</h1>
-      <p className="legal-meta">Last updated: August 28, 2026</p>
+      <p className="legal-meta">Last updated: October 21, 2026</p>
 
       <section>
         <h2>Agreement and eligibility</h2>
@@ -43,8 +43,12 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <section>
-        <h2>Credits, payments, and refunds</h2>
+      <section id="refunds">
+        <h2>Direct orders, credits, payments, and refunds</h2>
+        <p>You can pay for a service directly by card or supported crypto. Provide an accurate IMEI and delivery email, review the service requirements, and keep your private order link secure. Processing starts after payment is confirmed.</p>
+        <p>Card orders with a service price of $1 or more support guest checkout without an iUnlockMobile account. Card orders below $1 require an account: the payment funds $1 plus a 5% card fee, and the difference between $1 and the service price is saved as account credit after payment. Registration returns you to the same checkout. The minimum card payment is $1.05 before any applicable tax. The service price, credit amount, fee and total are shown before payment.</p>
+        <p>Crypto checkout supports USDT or USDC on BNB Smart Chain (BEP-20), with no iUnlockMobile processing fee or minimum service amount. It does not require an account or wallet top-up. Send only the supported token on the network shown at checkout and use the exact transfer instructions. Network or exchange fees may apply.</p>
+        <p>If we cannot deliver a direct card order, we request a full refund to the original payment method, including the card fee. Any unused account credit created by that payment is reversed. If that credit has been used or reserved, our team reviews the allocation before arranging the refund. Bank processing time may vary. Crypto refunds require manual review and confirmation of a safe receiving wallet; contact support with your order reference. Completed services are not automatically refundable. This does not restrict any rights available under applicable law.</p>
         <p>
           Account credits are a closed-loop balance for purchasing services on iUnlockMobile and are not a
           bank deposit or transferable currency. Prices and payment instructions shown at checkout control
@@ -82,10 +86,6 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <p className="legal-note">
-        These terms are an operational draft and should be reviewed by qualified counsel before being relied on
-        as formal legal advice.
-      </p>
       <p className="auth-foot">
         <Link href="/">Return to iUnlockMobile</Link> · <Link href="/privacy">Privacy Policy</Link>
       </p>

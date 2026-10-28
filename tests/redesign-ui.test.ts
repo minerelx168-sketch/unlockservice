@@ -25,7 +25,9 @@ test('sample reviews are labelled as samples and never aggregated', () => {
   assert.ok(SAMPLE_TESTIMONIALS.length >= 3)
   assert.ok(SAMPLE_TESTIMONIALS.every((item) => item.sample === true))
   const component = read('components/testimonials.tsx')
-  assert.match(component, /Sample reviews/)
+  // One disclosure, under the heading, for as long as the rows are personas.
+  assert.match(component, /Illustrative examples while verified customer reviews are collected/)
+  assert.match(component, /allSample\s*\?/)
   assert.doesNotMatch(component, /AggregateRating|ratingValue|reviewCount/)
   const home = read('app/(marketing)/page.tsx')
   assert.doesNotMatch(home, /AggregateRating|ratingValue|reviewCount/)
@@ -33,11 +35,15 @@ test('sample reviews are labelled as samples and never aggregated', () => {
   assert.doesNotMatch(structured, /"Review"|AggregateRating/)
 })
 
-test('the footer and the homepage claim only what the catalog and the payment rails support', () => {
+test('footer shows the requested payment labels and catalog counts remain derived', () => {
   const footer = read('components/site-footer.tsx')
-  assert.doesNotMatch(footer, /Visa|Mastercard|Apple Pay|Google Pay|Stripe|Bitcoin|PayPal/i)
-  assert.match(footer, /USDT · TRC20/)
-  assert.match(footer, /USDT · BEP20/)
+  for (const method of ['visa', 'mastercard', 'googlepay', 'applepay', 'bitcoin', 'usdt']) {
+    assert.ok(footer.includes(`'${method}'`))
+  }
+  assert.doesNotMatch(footer, /Stripe|PayPal/i)
+  // The marks render as real acceptance badges, not hand-written text pills.
+  const badges = read('components/payment-badges.tsx')
+  assert.match(badges, /simple-icons/)
   const chrome = read('components/site-chrome.tsx')
   assert.match(chrome, /CARRIERS\.map/)
   assert.match(chrome, /listArticles\(\)/)
@@ -47,15 +53,15 @@ test('the footer and the homepage claim only what the catalog and the payment ra
   assert.match(home, /BRANDS\.map/)
 })
 
-test('the hero widget carries the chosen report through, and only demands an IMEI when it is about to use one', () => {
+test('the hero widget carries the chosen report and preserves public report deep links', () => {
   const widget = read('components/hero-price-check.tsx')
-  assert.match(widget, /const imeiRequired = unlockReady/)
   assert.match(widget, /\{selected \? <input type="hidden" name="productCode" value=\{selected\.code\} \/> : null\}/)
   assert.doesNotMatch(widget, /Check Price &amp; Unlock Time|Live prices are loading/)
+  // Guest checkout validation is exercised by unlock-intent-selection.test.ts.
   const action = read('lib/device-intent-actions.ts')
   assert.match(action, /`product=\$\{encodeURIComponent\(product\.productCode\)\}`/)
   assert.match(action, /`\/services\/imei-check\?\$\{query\}`/)
-  // An IMEI in hand lands the visitor on the order form, by flag: a hash would be dropped by the redirect.
+  // The public browse action carries its selection to the entry form.
   assert.match(action, /start=1/)
   const landing = read('app/(marketing)/services/imei-check/page.tsx')
   assert.match(landing, /query\.start === '1'/)

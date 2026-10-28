@@ -1,7 +1,8 @@
+import { serviceIdentifier, serviceInputType, type ServiceInputType } from './service-identifier'
 import { luhnValid } from './imei'
 
 export type DeviceDomain = 'imei_check' | 'unlock'
-export type DeviceIntent = { imei: string; domain: DeviceDomain; productCode?: string; expiresAt: number }
+export type DeviceIntent = { imei: string; domain: DeviceDomain; productCode?: string; inputType?: ServiceInputType; email?: string; expiresAt: number }
 export const DEVICE_INTENT_TTL_SECONDS = 15 * 60
 
 export function deviceDomain(value: unknown): DeviceDomain | null {
@@ -15,17 +16,27 @@ export function deviceImei(value: unknown): string | null {
   return /^\d{15}$/.test(digits) && luhnValid(digits) ? digits : null
 }
 
+/** Delivery information only. A draft email is never proof of account ownership. */
+export function deviceEmail(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const email = value.trim().toLowerCase()
+  return email.length <= 254 && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email) ? email : null
+}
+
 export function parseDeviceIntent(raw: string | undefined, now = Date.now()): DeviceIntent | null {
   if (!raw || raw.length > 512) return null
   try {
     const value = JSON.parse(raw)
     if (!value || typeof value !== 'object' || Array.isArray(value)) return null
-    const imei = deviceImei(value.imei)
+    const inputType = value.inputType === undefined ? 'imei' : serviceInputType(value.inputType)
+    if (!inputType) return null
+    const imei = serviceIdentifier(value.imei, inputType)
     const domain = deviceDomain(value.domain)
     if (!imei || !domain || !Number.isSafeInteger(value.expiresAt) || value.expiresAt <= now ||
       value.expiresAt > now + DEVICE_INTENT_TTL_SECONDS * 1000) return null
     if (value.productCode !== undefined && (typeof value.productCode !== 'string' || !/^[A-Z0-9_]{2,64}$/.test(value.productCode))) return null
-    return { imei, domain, productCode: value.productCode, expiresAt: value.expiresAt }
+    if (value.email !== undefined && !deviceEmail(value.email)) return null
+    return { imei, domain, productCode: value.productCode, ...(value.inputType ? { inputType } : {}), ...(value.email ? { email: deviceEmail(value.email)! } : {}), expiresAt: value.expiresAt }
   } catch {
     return null
   }
@@ -35,3 +46,4 @@ export function intentImeiFor(intent: DeviceIntent | null, domain: DeviceDomain,
   return intent?.domain === domain && (!intent.productCode || !productCode || intent.productCode === productCode)
     ? intent.imei : undefined
 }
+

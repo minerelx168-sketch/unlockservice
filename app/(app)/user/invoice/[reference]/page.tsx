@@ -1,3 +1,5 @@
+import { LocalTime } from '@/components/customer-time'
+import { PaymentFunnelEvents } from '@/components/payment-funnel-events'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -14,6 +16,11 @@ import { paymentAddressQrDataUrl } from '@/lib/payment-qr'
 import { paymentTransactionUrl } from '@/lib/payment-config'
 import { codedInvoiceExpired, formatE4, paymentCode, shortfallToleranceCents } from '@/lib/payment-codes'
 import { nudgeInvoicePayment, watchableRoute } from '@/lib/payment-watcher'
+import { getWhopTopup } from '@/lib/whop'
+import { WhopInvoice } from '@/components/whop-invoice'
+import { CryptoDepositFlow } from '@/components/crypto-deposit-flow'
+import { getCryptoDeposit } from '@/lib/crypto-deposit'
+import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from '@/lib/topup-limits'
 
 export const metadata: Metadata = { title: 'Payment request' }
 export const dynamic = 'force-dynamic'
@@ -43,7 +50,7 @@ function statusCopy(
       message: 'Send the exact amount below. We spot it on the network and add the credit by ourselves — no transaction ID to paste. You can close this page.',
     }
   }
-  return { label: 'Awaiting transfer', tone: 'neutral', message: 'Send supported USDT, then paste your transaction hash.' }
+  return { label: 'Manual verification required', tone: 'warning', message: 'This request cannot be detected automatically. If you already paid, provide the transaction ID below; otherwise, consider a new request.' }
 }
 
 export default async function InvoicePage({
@@ -53,11 +60,27 @@ export default async function InvoicePage({
   params: Promise<{ reference: string }>
   searchParams: Promise<{ next?: string }>
 }) {
-  const { user } = await requireSession()
+  const { user, session } = await requireSession()
   const { reference } = await params
   const returnTo = safeContinuation((await searchParams).next)
   const invoice = getInvoice(reference, user.id)
   if (!invoice) notFound()
+  if (invoice.gateway === 'whop_card') {
+    const topup = getWhopTopup(reference, user.id)
+    if (!topup) notFound()
+    return <>{topup.environment === 'live' ? <PaymentFunnelEvents reference={reference} settled={invoice.status === 'success' && Boolean(topup.credited)} paymentMethod="card" /> : null}<WhopInvoice topup={topup} /><p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p></>
+  }
+
+  if (invoice.payment_credit_policy === 'actual_received' && invoice.payment_chain_id === 56) {
+    const deposit = await getCryptoDeposit(reference, user.id)
+    return <>
+      <div className="crypto-page-top"><Link href="/user/add-funds">← Add funds</Link><Link href="/user/payments">Payment history</Link></div>
+      <p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p>
+      <section className="crypto-page-panel" aria-label="Crypto deposit">
+        <CryptoDepositFlow csrfToken={session.csrfToken} gateways={[]} minCents={MIN_TOPUP_CENTS} maxCents={MAX_TOPUP_CENTS} initialDeposit={deposit} returnTo={returnTo} />
+      </section>
+    </>
+  }
 
   /* While the customer has this page open, look for their transfer now
      rather than at the next timer tick. Deferred past this render and not
@@ -88,11 +111,13 @@ export default async function InvoicePage({
 
   return (
     <>
+      <PaymentFunnelEvents reference={invoice.reference} settled={settled} />
       <section className="payment-request-head">
         <div>
           <span className="eyebrow">Payment request {shortReference(invoice.reference)}</span>
           <h1>{status.label}</h1>
           <p>{status.message}</p>
+          <p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p>
         </div>
         <div className={`payment-status payment-status--${status.tone}`}>
           <span aria-hidden="true" />
@@ -102,7 +127,7 @@ export default async function InvoicePage({
 
       <ol className="invoice-progress" aria-label="Payment progress">
         <li className="is-complete"><span>1</span><strong>Request created</strong></li>
-        <li className={verification || settled ? 'is-complete' : 'is-current'}><span>2</span><strong>{watched || coded ? 'Transfer found' : 'Transfer submitted'}</strong></li>
+        <li className={verification || settled ? 'is-complete' : 'is-current'}><span>2</span><strong>{watched ? 'Transfer found' : 'Transfer submitted'}</strong></li>
         <li className={settled ? 'is-complete' : verification ? 'is-current' : ''}><span>3</span><strong>On-chain checks</strong></li>
         <li className={settled ? 'is-complete' : ''}><span>4</span><strong>Credit added</strong></li>
       </ol>
@@ -128,24 +153,36 @@ export default async function InvoicePage({
                         <small>{gateway.network}</small>
                         {gateway.riskClassification === 'third_party_pegged' ? <small>Binance-issued pegged representation</small> : null}
                       </div>
-                      <span className="badge badge--success">Auto verification</span>
+                      <span className={watched ? 'badge badge--success' : 'badge badge--warning'}>
+                        {watched ? 'Auto verification' : 'Manual verification'}
+                      </span>
                     </div>
                     {codedAmount && code ? (
                       <>
                         <CodedAmount amount={codedAmount} asset={gateway.asset} />
                         <p className="coded-amount-note">
-                          The last two digits, <strong>{code}</strong>, are this request&rsquo;s code — they are how we recognise
-                          your payment without a transaction ID. Send the amount exactly as shown.
+                          The last two digits, <strong>{code}</strong>, are this request&rsquo;s code. Check the amount the recipient will receive after any exchange withdrawal fee.
+                          {!watched ? ' Automatic detection is temporarily unavailable; after sending, paste your transaction ID below for manual verification.' : ' Automatic detection needs the on-chain amount to retain these two digits. If the fee changes them, paste your transaction ID below for administrator review; do not send twice.'}
                         </p>
                       </>
                     ) : (
-                      <CopyValue
-                        id="payment-total"
-                        label={`Requested amount (${gateway.asset})`}
-                        value={requestedTokenUnits}
-                        buttonLabel="Copy requested amount"
-                        copiedMessage="Requested amount copied."
-                      />
+                      <>
+                        <CopyValue
+                          id="payment-total"
+                          label={`Requested amount (${gateway.asset})`}
+                          value={requestedTokenUnits}
+                          buttonLabel="Copy requested amount"
+                          copiedMessage="Requested amount copied."
+                        />
+                        <div className="alert alert--warning">
+                          <span>
+                            This request has no unique payment code. It may have been created before automatic detection was enabled, or a code may be unavailable for this amount. It will not credit automatically.
+                            If you already paid, paste the transaction ID below for administrator review. If you have not paid,{' '}
+                            <Link href="/user/add-funds">choose a different amount or network to start a new request</Link>.
+                            Choosing the same amount and network reopens this pending request; do not pay both requests.
+                          </span>
+                        </div>
+                      </>
                     )}
                     <PaymentAddress address={gateway.address} />
                     <p className="alert alert--warning">
@@ -154,7 +191,7 @@ export default async function InvoicePage({
                         Send only {gateway.asset} on {gateway.network} to this address. The token contract and network must match this request.
                         {coded
                           ? tolerance > 0
-                            ? ` If your exchange takes its withdrawal fee out of the amount, up to ${formatUsd(tolerance)} short still counts in full.`
+                            ? ` If your exchange deducts a withdrawal fee, a shortfall of up to ${formatUsd(tolerance)} may credit the full request only when the on-chain amount keeps this request's code. Otherwise a person must verify the payment; manual credit uses the verified amount.`
                             : ''
                           : ' Credit is based on the verified on-chain amount; amounts that cannot be represented exactly in cents require manual review.'}
                         {' '}Blockchain transfers cannot be reversed.
@@ -279,7 +316,9 @@ export default async function InvoicePage({
             <div><dt>Tax</dt><dd>{formatUsd(invoice.tax_cents)}</dd></div>
             <div className="invoice-summary-total"><dt>Total due</dt><dd>{formatUsd(invoice.total_due_cents)}</dd></div>
           </dl>
-          <p>The request preserves the original amount for audit. After verification, the account receives the cent-exact amount proven by the on-chain transfer exactly once.</p>
+          <p>{coded
+            ? 'The request preserves the original amount for audit. A small exchange withdrawal shortfall within the shown allowance receives the full requested credit; beyond it, credit follows the verified on-chain amount. Every transfer settles at most once.'
+            : 'This request needs a transaction ID and administrator review; credit is not added automatically. Every transfer settles at most once.'}</p>
           <Link className="link-arrow" href="/user/payments">All payments</Link>
         </aside>
       </div>

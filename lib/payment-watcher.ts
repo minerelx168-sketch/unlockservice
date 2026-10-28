@@ -6,7 +6,7 @@ import {
   type PaymentRouteConfig,
 } from './payment-config'
 import {
-  evmLatestBlock,
+  evmFinalizedBlock,
   listEvmIncomingTransfers,
   listTronIncomingTransfers,
   PaymentProviderError,
@@ -21,6 +21,7 @@ import {
   MATCH_BAND_E4,
   paymentCode,
   rawToE4,
+  shortfallToleranceCents,
 } from './payment-codes'
 import {
   attachDetectedTransfer,
@@ -49,10 +50,16 @@ import {
  */
 
 const LEASE_MS = 90_000
-const MIN_SCAN_INTERVAL_MS = 10_000
+// Two enabled BSC routes share a 60 RU/min keyless RPC budget. Each log query
+// costs more than a simple chain-head read; never scan a route every refresh.
+const MIN_SCAN_INTERVAL_MS = 30_000
 const MAX_EVM_CHUNKS = 10
 const EVM_CHUNK_BLOCKS = 2_000
 const EVM_MIN_CHUNK_BLOCKS = 1
+// Blockmachine keyless has 60 RU/min/IP. Its published log-query costs are
+// 5 RU (<=100 blocks), 10 RU (<=1,000), 25 RU (<=10,000). Two BSC routes
+// may be enabled, so leave capacity for head/receipt reads and overlap scans.
+const MAX_EVM_LOG_RU_PER_SCAN = 25
 /** Stop starting new reads well inside the lease, so a long scan never outlives it. */
 const SCAN_BUDGET_MS = 45_000
 /** Re-read behind the cursor every scan, for a node that answered a little behind. */
@@ -78,7 +85,8 @@ export type ChainTransferRow = {
 }
 
 export function watchableRoute(route: Pick<PaymentRouteConfig, 'providerMode'>): boolean {
-  return route.providerMode === 'bnb_rpc' || route.providerMode === 'trongrid'
+  return process.env.IUNLOCKMOBILE_PAYMENT_WATCHER === '1'
+    && (route.providerMode === 'bnb_rpc' || route.providerMode === 'trongrid')
 }
 
 function snapshotOf(route: PaymentRouteConfig): PaymentProviderSnapshot {
@@ -91,17 +99,17 @@ type CursorRow = {
   last_block: number | null
   last_time_ms: number | null
   resume_from_ms: number | null
+  resume_fingerprint: string | null
   lease_until: string | null
   last_scan_at: string | null
   last_ok_at: string | null
   last_error: string | null
 }
-
 function cursorRow(routeId: string): CursorRow {
   db().prepare('INSERT INTO payment_watch_cursors (route_id) VALUES (?) ON CONFLICT(route_id) DO NOTHING').run(routeId)
   return db()
     .prepare(
-      `SELECT last_block, last_time_ms, resume_from_ms, lease_until, last_scan_at, last_ok_at, last_error
+      `SELECT last_block, last_time_ms, resume_from_ms, resume_fingerprint, lease_until, last_scan_at, last_ok_at, last_error
          FROM payment_watch_cursors WHERE route_id = ?`,
     )
     .get(routeId) as CursorRow
@@ -138,10 +146,12 @@ function releaseLease(routeId: string, token: string, error: string | null) {
 
 /* ---- recording and matching --------------------------------------------- */
 
-/** Stores a transfer once; dust is never stored. Returns the row id when new. */
+/** Stores a transfer once. Below-floor transfers need a plausible open request; a changed code never auto-credits. */
 function recordTransfer(route: PaymentRouteConfig, transfer: IncomingTransfer): number | null {
   const amountE4 = rawToE4(transfer.rawAmount, route.tokenDecimals)
-  if (amountE4 === null || amountE4 < DUST_FLOOR_E4) return null
+  if (amountE4 === null || amountE4 <= 0) return null
+  const candidate = { route_id: route.id, amount_e4: amountE4, block_time: transfer.blockTimestamp }
+  if (amountE4 < DUST_FLOOR_E4 && feeShortfallCandidates(candidate).length === 0) return null
   const result = db()
     .prepare(
       `INSERT INTO chain_transfers
@@ -167,12 +177,37 @@ function recordTransfer(route: PaymentRouteConfig, transfer: IncomingTransfer): 
  * code, inside the band, created strictly before its block and not so long
  * before that the invoice had stopped accepting payment.
  */
-function codeCandidates(transfer: ChainTransferRow): Array<{ reference: string; payment_amount_e4: number }> {
+type CodedCandidate = { reference: string; payment_amount_e4: number; total_due_cents: number }
+
+function withinLowValueShortfall(invoice: CodedCandidate, receivedE4: number): boolean {
+  return carriesInvoiceCode(invoice, receivedE4)
+    && receivedE4 >= invoice.payment_amount_e4 - shortfallToleranceCents(invoice.total_due_cents) * 100
+}
+
+/** A short on-chain amount may be due to an exchange withdrawal fee, not a chain gas deduction.
+ * This is a list for human review and ambiguity checks, NEVER an ownership proof. */
+function feeShortfallCandidates(transfer: Pick<ChainTransferRow, 'route_id' | 'amount_e4' | 'block_time'>): CodedCandidate[] {
+  return (
+    db().prepare(
+      `SELECT reference, payment_amount_e4, total_due_cents FROM invoices
+        WHERE payment_route_id = ? AND status = 'pending' AND payment_reference IS NULL
+          AND payment_amount_e4 IS NOT NULL
+          AND payment_amount_e4 BETWEEN ? AND ?
+          AND julianday(created_at) < julianday(?)
+          AND julianday(created_at) >= julianday(?) - ?`,
+    ).all(
+      transfer.route_id, transfer.amount_e4, transfer.amount_e4 + 10_000,
+      transfer.block_time, transfer.block_time, INVOICE_TTL_DAYS,
+    ) as CodedCandidate[]
+  ).filter((invoice) => transfer.amount_e4 >= invoice.payment_amount_e4 - shortfallToleranceCents(invoice.total_due_cents) * 100)
+}
+
+function codeCandidates(transfer: Pick<ChainTransferRow, 'route_id' | 'amount_e4' | 'block_time'>): CodedCandidate[] {
   if (paymentCode(transfer.amount_e4) === 0) return []
   return (
     db()
       .prepare(
-        `SELECT reference, payment_amount_e4 FROM invoices
+        `SELECT reference, payment_amount_e4, total_due_cents FROM invoices
           WHERE payment_route_id = ? AND status = 'pending' AND payment_reference IS NULL
             AND payment_amount_e4 IS NOT NULL
             AND payment_amount_e4 % 100 = ?
@@ -189,12 +224,14 @@ function codeCandidates(transfer: ChainTransferRow): Array<{ reference: string; 
         transfer.block_time,
         transfer.block_time,
         INVOICE_TTL_DAYS,
-      ) as Array<{ reference: string; payment_amount_e4: number }>
-  ).filter((invoice) => carriesInvoiceCode(invoice, transfer.amount_e4))
+      ) as CodedCandidate[]
+  ).filter((invoice) => transfer.amount_e4 < DUST_FLOOR_E4
+    ? withinLowValueShortfall(invoice, transfer.amount_e4)
+    : carriesInvoiceCode(invoice, transfer.amount_e4))
 }
 
 function noteTransfer(id: number, note: string) {
-  db().prepare('UPDATE chain_transfers SET note = ? WHERE id = ?').run(note.slice(0, 300), id)
+  db().prepare("UPDATE chain_transfers SET note = ? WHERE id = ? AND status = 'unmatched'").run(note.slice(0, 300), id)
 }
 
 /**
@@ -205,7 +242,7 @@ export function matchRecordedTransfers(routeId?: string): string[] {
   const rows = db()
     .prepare(
       `SELECT * FROM chain_transfers
-        WHERE status = 'unmatched' ${routeId ? 'AND route_id = ?' : ''}
+        WHERE status = 'unmatched' AND note IS NULL ${routeId ? 'AND route_id = ?' : ''}
           AND julianday(block_time) >= julianday('now') - ?
         ORDER BY id`,
     )
@@ -215,6 +252,17 @@ export function matchRecordedTransfers(routeId?: string): string[] {
   for (const transfer of rows) {
     // One bad row must not stop every payment behind it.
     try {
+      // Invoice verification currently reserves an entire tx hash. Do not
+      // auto-credit just its first log and strand a second customer's log.
+      // Leave all logs in the admin queue for reconciliation outside this
+      // single-hash settlement path until event-level claims are implemented.
+      const eventCount = db().prepare(
+        'SELECT COUNT(*) AS n FROM chain_transfers WHERE tx_hash = ? COLLATE NOCASE',
+      ).get(transfer.tx_hash) as { n: number }
+      if (eventCount.n > 1) {
+        noteTransfer(transfer.id, 'Multiple incoming token transfers in one transaction — manual reconciliation required.')
+        continue
+      }
       const alreadyAttached = db()
         .prepare(
           'SELECT invoice_reference, matched_log_index FROM invoice_verifications WHERE tx_hash = ? COLLATE NOCASE LIMIT 1',
@@ -231,17 +279,40 @@ export function matchRecordedTransfers(routeId?: string): string[] {
         continue
       }
       const candidates = codeCandidates(transfer)
-      if (candidates.length === 0) continue
+      if (candidates.length === 0) {
+        // A withdrawal fee can change the last two digits of a coded amount.
+        // A plausible nearby invoice is not proof of ownership: only an
+        // administrator with independent customer evidence may associate it.
+        noteTransfer(transfer.id, feeShortfallCandidates(transfer).length
+          ? 'Possible withdrawal-fee shortfall changed the code — verify customer ownership before manual confirmation.'
+          : 'No eligible open payment request — manual reconciliation required.')
+        continue
+      }
       if (candidates.length > 1) {
         noteTransfer(transfer.id, `Code matches ${candidates.length} open payment requests — needs a person.`)
         continue
       }
+      // For exceptional below-$1 deposits, another open request might have
+      // sent the same net amount after a fractional fee. Hold that ambiguous
+      // low-value exception for the admin; do not change the normal coded
+      // transfer path for standard-sized payments with many open invoices.
+      if (transfer.amount_e4 < DUST_FLOOR_E4
+        && feeShortfallCandidates(transfer).some((candidate) => candidate.reference !== candidates[0].reference)) {
+        noteTransfer(transfer.id, 'Net amount could belong to another request after withdrawal fees — manual owner check required.')
+        continue
+      }
       const reference = candidates[0].reference
-      attachDetectedTransfer(reference, transfer.tx_hash)
-      db()
-        .prepare(`UPDATE chain_transfers SET status = 'matched', invoice_reference = ?, note = NULL WHERE id = ? AND status = 'unmatched'`)
-        .run(reference, transfer.id)
-      attached.push(reference)
+      // The admin may dismiss a transfer after our read above. Claim the row
+      // and attach the hash atomically; if the row changed, attach nothing.
+      const claimed = db().transaction(() => {
+        const updated = db()
+          .prepare(`UPDATE chain_transfers SET status = 'matched', invoice_reference = ?, note = NULL WHERE id = ? AND status = 'unmatched'`)
+          .run(reference, transfer.id)
+        if (updated.changes !== 1) return false
+        attachDetectedTransfer(reference, transfer.tx_hash)
+        return true
+      }).immediate()
+      if (claimed) attached.push(reference)
     } catch (error) {
       if (!(error instanceof PaymentVerificationError)) console.error(`[payments] could not match transfer ${transfer.id}`, error)
       noteTransfer(transfer.id, error instanceof Error ? error.message : String(error))
@@ -259,13 +330,31 @@ function dustFloorRaw(decimals: number): bigint {
 async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promise<number> {
   const snapshot = snapshotOf(route)
   const startedAt = Date.now()
-  const safeHead = (await evmLatestBlock(snapshot)) - route.confirmationsRequired
+  const safeHead = await evmFinalizedBlock(snapshot)
+  // Only fetch a below-$1 block when its net amount could belong to an open
+  // request within the shortfall cap. A changed code goes to the admin queue;
+  // the later time check rejects unrelated dust before it is recorded.
+  const lowInvoices = db().prepare(
+    `SELECT reference, payment_amount_e4, total_due_cents FROM invoices
+      WHERE payment_route_id = ? AND status = 'pending' AND payment_reference IS NULL
+        AND payment_amount_e4 BETWEEN 1 AND ?`,
+  ).all(route.id, DUST_FLOOR_E4 + MATCH_BAND_E4) as CodedCandidate[]
+  const belowFloorCandidate = (rawAmount: bigint): boolean => {
+    const receivedE4 = rawToE4(rawAmount, route.tokenDecimals)
+    return receivedE4 !== null && receivedE4 > 0 && receivedE4 < DUST_FLOOR_E4
+      && lowInvoices.some((invoice) => receivedE4 <= invoice.payment_amount_e4
+        && receivedE4 >= invoice.payment_amount_e4 - shortfallToleranceCents(invoice.total_due_cents) * 100)
+  }
   let last = cursor.last_block ?? Math.max(0, safeHead - FIRST_SCAN_LOOKBACK_BLOCKS)
   let next = cursor.last_block === null ? last + 1 : Math.max(0, last + 1 - EVM_OVERLAP_BLOCKS)
   let found = 0
   let span = EVM_CHUNK_BLOCKS
+  let usedLogRu = 0
   for (let chunk = 0; chunk < MAX_EVM_CHUNKS * 4 && next <= safeHead && Date.now() - startedAt < SCAN_BUDGET_MS; chunk += 1) {
     const to = Math.min(safeHead, next + span - 1)
+    const width = to - next + 1
+    const logRu = width <= 100 ? 5 : width <= 1_000 ? 10 : 25
+    if (usedLogRu + logRu > MAX_EVM_LOG_RU_PER_SCAN) break
     let transfers: IncomingTransfer[]
     try {
       transfers = await listEvmIncomingTransfers(
@@ -275,6 +364,7 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
         next,
         to,
         dustFloorRaw(route.tokenDecimals),
+        belowFloorCandidate,
       )
     } catch (error) {
       /* Spam can make a range answer too large (or a node refuse it).
@@ -286,6 +376,7 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
       }
       throw error
     }
+    usedLogRu += logRu
     for (const transfer of transfers) {
       if (recordTransfer(route, transfer) !== null) found += 1
     }
@@ -302,31 +393,30 @@ async function readEvmRoute(route: PaymentRouteConfig, cursor: CursorRow): Promi
 
 async function readTronRoute(route: PaymentRouteConfig, cursor: CursorRow): Promise<number> {
   /* The overlap re-reads the last ten minutes in case TronGrid indexed a
-     transfer late. After a run that stopped at its page limit, resume
-     exactly where it stopped instead — overlapping a busy stretch would
-     re-read the same pages forever. (More than a thousand transfers in one
-     wallet at the same block time would still need a person; on TRON that
-     costs an attacker real fees for every one of them.) */
+     transfer late. If a run stopped at its page limit, resume with TronGrid's
+     pagination fingerprint and the ORIGINAL min_timestamp. Advancing by the
+     newest timestamp alone could skip transfers sharing that millisecond. */
   const since = cursor.last_time_ms === null
     ? Date.now() - FIRST_SCAN_LOOKBACK_MS
     : cursor.resume_from_ms !== null
       ? cursor.resume_from_ms
       : cursor.last_time_ms - TRON_OVERLAP_MS
-  const page = await listTronIncomingTransfers(snapshotOf(route), route.tokenContract, route.destinationAddress, since)
+  const page = await listTronIncomingTransfers(
+    snapshotOf(route), route.tokenContract, route.destinationAddress, since, 1, cursor.resume_fingerprint,
+  )
   let found = 0
   for (const transfer of page.transfers) if (recordTransfer(route, transfer) !== null) found += 1
-  /* Results come oldest first, so everything up to the newest transfer seen
-     has been read even when the page run stopped early; the rest is picked
-     up next time from there, overlap included. */
+  /* Results come oldest first. Persist fingerprint + the same starting time
+     together, or a partial run could skip records at a tied timestamp. */
   const reached = page.newestTimestampMs ?? (cursor.last_time_ms === null ? since : null)
-  if (reached !== null) {
-    db()
-      .prepare('UPDATE payment_watch_cursors SET last_time_ms = MAX(COALESCE(last_time_ms, 0), ?) WHERE route_id = ?')
-      .run(reached, route.id)
-  }
-  db()
-    .prepare('UPDATE payment_watch_cursors SET resume_from_ms = ? WHERE route_id = ?')
-    .run(page.complete ? null : page.newestTimestampMs, route.id)
+  db().transaction(() => {
+    if (reached !== null) {
+      db().prepare('UPDATE payment_watch_cursors SET last_time_ms = MAX(COALESCE(last_time_ms, 0), ?) WHERE route_id = ?')
+        .run(reached, route.id)
+    }
+    db().prepare('UPDATE payment_watch_cursors SET resume_from_ms = ?, resume_fingerprint = ? WHERE route_id = ?')
+      .run(page.complete ? null : since, page.complete ? null : page.nextFingerprint, route.id)
+  })()
   return found
 }
 
@@ -369,7 +459,7 @@ export type WatcherSummary = { enabled: boolean; routes: RouteScan[]; errors: nu
 
 /** Every watchable route, once. Called by the poll timer. */
 export async function scanPaymentWallets(): Promise<WatcherSummary> {
-  if (process.env.IUNLOCKMOBILE_PAYMENT_WATCHER === '0') return { enabled: false, routes: [], errors: 0 }
+  if (process.env.IUNLOCKMOBILE_PAYMENT_WATCHER !== '1') return { enabled: false, routes: [], errors: 0 }
   const routes = enabledPaymentRoutes().filter(watchableRoute)
   const results: RouteScan[] = []
   for (const route of routes) results.push(await scanPaymentRoute(route.id, { force: true }))
@@ -380,10 +470,10 @@ export async function scanPaymentWallets(): Promise<WatcherSummary> {
  * While a customer has their payment request open: look for their transfer
  * now rather than at the next timer tick, and re-check an attached one that
  * is waiting on confirmations. Throttled per route and per invoice, so a
- * page refreshing every few seconds costs a chain read every ten or so.
+ * page refreshing every few seconds costs a chain scan at most every thirty seconds.
  */
 export async function nudgeInvoicePayment(reference: string): Promise<void> {
-  if (process.env.IUNLOCKMOBILE_PAYMENT_WATCHER === '0') return
+  if (process.env.IUNLOCKMOBILE_PAYMENT_WATCHER !== '1') return
   const invoice = db()
     .prepare('SELECT status, payment_route_id, payment_amount_e4 FROM invoices WHERE reference = ?')
     .get(reference) as { status: string; payment_route_id: string | null; payment_amount_e4: number | null } | undefined

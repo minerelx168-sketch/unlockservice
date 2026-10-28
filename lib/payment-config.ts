@@ -278,6 +278,17 @@ export function enabledPaymentRoutes(): PaymentRouteConfig[] {
   return paymentRoutesConfiguration().filter((route) => route.enabled)
 }
 
+/**
+ * Routes available when creating a new invoice. Historical invoices and the
+ * watcher deliberately use enabledPaymentRoutes() so an existing TRON request
+ * remains verifiable after new-request availability is narrowed.
+ */
+export function newRequestPaymentRoutes(): PaymentRouteConfig[] {
+  const routes = enabledPaymentRoutes()
+  if (process.env.IUNLOCKMOBILE_TOPUP_NEW_REQUEST_BEP20_ONLY !== '1') return routes
+  return routes.filter((route) => route.chainKind === 'evm' && route.chainId === 56)
+}
+
 export function paymentRouteDefinition(routeId: string): PaymentRouteDefinition | undefined {
   return PAYMENT_ROUTE_DEFINITIONS.find((route) => route.id === routeId)
 }

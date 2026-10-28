@@ -1,3 +1,5 @@
+import { ProviderOutputText } from '@/components/provider-output-text'
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -42,7 +44,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         <div>
           <Link className="link-arrow" href="/user/checks"><span style={{ display: 'inline-flex', transform: 'rotate(180deg)' }}><Icon name="arrowRight" /></span> Back to checks</Link>
           <h1 style={{ marginTop: 16 }}>IMEI check report</h1>
-          <p>{check.imei ?? check.maskedImei} · {new Date(check.createdAt).toLocaleString()}</p>
+          <p>{check.imei ?? check.maskedImei} · <LocalTime value={check.createdAt} /></p>
         </div>
         <span className={check.status === 'completed' ? 'badge badge--success' : 'badge'}>{check.status}</span>
       </div>
@@ -51,7 +53,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         <section className="card">
           <div className="card-topline">
             <span className="kicker"><Icon name="check" /> Result</span>
-            <span className="t-micro">{check.provider}</span>
+
           </div>
           <h2 className="t-card">{String(report.title ?? 'IMEI check')}</h2>
           <p className="t-small">{String(report.summary ?? check.message ?? 'The report is not available yet.')}</p>
@@ -61,7 +63,8 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
               <span>The IMEI is shown only to the signed-in owner. Provider results are a point-in-time lookup, not proof of ownership or a guarantee of unlock eligibility.</span>
             </p>
           ) : null}
-          {items.length > 0 ? (
+          {check.providerCode ? <ProviderOutputText value={check.providerCode} /> : null}
+          {!check.providerCode && items.length > 0 ? (
             <dl className="report-details" style={{ marginTop: 20 }}>
               {items.map((item, index) => (
                 <div key={item.key ?? item.label ?? index}>
@@ -77,12 +80,12 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
           <div className="card-topline">
             <span className="kicker"><Icon name="info" /> Next step</span>
           </div>
-          <p className="t-small">{String(report.nextStep ?? 'You can run another check when you need a fresh result.')}</p>
+          <p className="t-small">{check.provider === 'local-validation' ? 'For carrier, blacklist, warranty or lock status, choose a paid Phone Check service.' : String(report.nextStep ?? 'You can run another check when you need a fresh result.')}</p>
           <Link className="button button--quiet" href="/check">Run another check</Link>
         </section>
       </div>
 
-      {sections.length > 0 ? (
+      {!check.providerCode && sections.length > 0 ? (
         <div className="grid-2" style={{ marginTop: 20 }}>
           {sections.map((section, sectionIndex) => {
             const sectionItems = Array.isArray(section.items) ? section.items : []
@@ -108,3 +111,4 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
     </>
   )
 }
+

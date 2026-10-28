@@ -1,157 +1,106 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useRef, useState, type FormEvent } from 'react'
+import { useActionState, useEffect, useRef, useState, type FormEvent } from 'react'
 import type { FormState } from '@/lib/actions'
 import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
-import { IMEI_LENGTH, luhnValid } from '@/lib/imei'
+import { deviceImei } from '@/lib/device-intent-value'
+import { guestCardQuote } from '@/lib/guest-card-quote'
 import { formatUsd } from '@/lib/money'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
+import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
-import { ImeiSegments } from './imei-segments'
 import { ServicePicker, serviceDisplayText } from './service-picker'
+import { OrderPreviewDialog } from './order-preview-dialog'
 
 const EMPTY: FormState = {}
 
-/** Browsing prepares an order for review; it never submits a provider request or deducts credit. */
-export function ServiceBrowser({
-  products,
-  domain,
-  initialImei = '',
-  initialProductCode = '',
-  imeiReadOnly = false,
-  isAuthenticated = false,
-  availableCents,
-}: {
+/** Price-first browsing and preview never submits a provider request or deducts credit. */
+export function ServiceBrowser({ products, domain, initialImei = '', initialProductCode = '', initialEmail = '' }: {
   products: PublicProviderProduct[]
   domain: 'imei_check' | 'unlock'
   initialImei?: string
   initialProductCode?: string
+  initialEmail?: string
   imeiReadOnly?: boolean
   isAuthenticated?: boolean
   availableCents?: number
 }) {
   const [imei, setImei] = useState(initialImei)
+  const [email, setEmail] = useState(initialEmail)
   const [selectedCode, setSelectedCode] = useState(initialProductCode)
-  const [touched, setTouched] = useState(false)
+  const [fieldError, setFieldError] = useState<'imei' | 'email' | 'service' | null>(null)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [state, action, pending] = useActionState(continueDeviceServiceAction, EMPTY)
+  const formRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const approved = useRef(false)
+  const paymentMethod = useRef<HTMLInputElement>(null)
+  const startedRef = useRef(false)
   const isUnlock = domain === 'unlock'
   const selected = products.find((product) => product.productCode === selectedCode)
+  const orderDomain = selected?.domain ?? domain
   const available = selected?.status === 'available'
-  /* The lowest sort order is the catalog's own first choice; the pill says
-     so only when there is more than one thing to choose between. */
-  const firstChoice = products.length > 1 ? products.reduce((best, product) => (product.sortOrder < best.sortOrder ? product : best), products[0]) : undefined
-  const validImei = imei.length === IMEI_LENGTH && luhnValid(imei)
-  const showInvalid = !validImei && (touched || imei.length >= IMEI_LENGTH)
+  const validImei = deviceImei(imei) !== null
+  const digits = imei.replace(/[\s-]/g, '')
   const inputId = `${domain}-browse-imei`
-  const options = products.map((product) => ({
-    code: product.productCode,
-    name: product.name,
-    summary: product.summary,
-    group: product.group,
-    priceCents: product.priceCents,
-    etaLabel: product.etaLabel,
-    available: product.status === 'available',
-    hasExample: product.hasExample,
-  }))
+  const cardQuote = selected && selected.priceCents > 0 ? guestCardQuote(selected.priceCents) : null
+  const total = cardQuote?.totalCents ?? 0
+  const lastQuote = useRef('')
+  useEffect(() => {
+    const key = selected ? `${orderDomain}:${selected.productCode}:${selected.priceCents}` : ''
+    if (selected && selected.status === 'available' && key !== lastQuote.current) { lastQuote.current = key; trackFunnelEvent('service_quote_viewed', { service_category: orderDomain, currency: 'USD', value: selected.priceCents / 100 }) }
+  }, [selected, orderDomain])
+  const options = products.map((product) => ({ code: product.productCode, name: product.name, summary: product.summary, group: product.group, priceCents: product.priceCents, priceAvailable: product.priceAvailable, etaLabel: product.etaLabel, available: product.status === 'available', hasExample: product.hasExample }))
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (!validImei || !available) {
-      event.preventDefault()
-      setTouched(true)
-      if (!validImei) inputRef.current?.focus()
+    setFieldError(null)
+    if (!available) { event.preventDefault(); setFieldError('service'); return }
+    if (!validImei) {
+      event.preventDefault(); setFieldError('imei'); inputRef.current?.focus()
+      trackFunnelEvent('validation_result', { service_category: orderDomain, validation_status: 'failed', status: 'imei' }); return
     }
+    if (!email.trim() || !emailRef.current?.validity.valid) {
+      event.preventDefault(); setFieldError('email'); emailRef.current?.focus()
+      trackFunnelEvent('validation_result', { service_category: orderDomain, validation_status: 'failed', status: 'email' }); return
+    }
+    if (approved.current) { approved.current = false; return }
+    event.preventDefault()
+    trackFunnelEvent('validation_result', { service_category: orderDomain, validation_status: 'passed' })
+    trackFunnelEvent('guest_details_completed', { service_category: orderDomain })
+    if (orderDomain === 'unlock') trackFunnelEvent('unlock_imei_submitted', { service_category: orderDomain })
+    trackFunnelEvent('order_preview_viewed', { service_category: orderDomain, currency: 'USD', value: total / 100 })
+    setPreviewOpen(true)
   }
 
-  return (
-    <section className="service-browser" aria-labelledby={`${domain}-browse-heading`}>
-      <nav className="service-browser__tabs" aria-label={`${isUnlock ? 'Unlock' : 'Phone check'} workspace`}>
-        <span aria-current="page"><Icon name={isUnlock ? 'lock' : 'search'} /> New order</span>
-        <Link href="/user/reports"><Icon name="clock" /> Order history</Link>
-      </nav>
-      <header className="service-browser__header">
-        <span className="service-browser__heading-icon"><Icon name={isUnlock ? 'lock' : 'device'} /></span>
-        <div>
-          <h2 id={`${domain}-browse-heading`}>{isUnlock ? 'Unlock your device' : 'Check your device'}</h2>
-          <p>Choose a service, see the price and review before you order.</p>
+  return <section className="service-browser" aria-labelledby={`${domain}-browse-heading`}>
+    <nav className="service-browser__tabs" aria-label={`${isUnlock ? 'Unlock' : 'Phone check'} workspace`}><span aria-current="page"><Icon name={isUnlock ? 'lock' : 'search'} />New order</span><Link href="/track"><Icon name="clock" />Track an order</Link></nav>
+    <header className="service-browser__header"><span className="service-browser__heading-icon"><Icon name={isUnlock ? 'lock' : 'device'} /></span><div><h2 id={`${domain}-browse-heading`}>{isUnlock ? 'Choose your unlock service' : 'Choose your phone report'}</h2><p>Compare prices first. Enter your details once, then choose how to pay.</p></div></header>
+    <form ref={formRef} className="service-browser__form" action={action} onSubmit={handleSubmit} noValidate aria-busy={pending}>
+      <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" /><input type="hidden" name="domain" value={orderDomain} /><input type="hidden" name="productCode" value={selectedCode} />
+      <ServicePicker options={options} value={selectedCode} onChange={(code) => {
+        setSelectedCode(code); setFieldError(null); approved.current = false
+        const selectedDomain = products.find((product) => product.productCode === code)?.domain ?? domain
+        trackFunnelEvent('service_selection', { service_category: selectedDomain })
+        if (selectedDomain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: selectedDomain })
+      }} disabled={pending} label={isUnlock ? 'Unlock service and price' : 'Report and price'} id={`${domain}-browse-service`} />
+      {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><p>{serviceDisplayText(selected.summary)}</p></div><div className="service-selected-price"><strong>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
+      {selected && available ? <>
+        <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p>
+        {cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}
+        <div className="service-browser__field"><div className="service-browser__label-row"><label htmlFor={inputId}>IMEI number</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls={`${inputId}-guide`} onClick={() => setHelpOpen(!helpOpen)}>Find my IMEI<Icon name="question" /></button></div>
+          {helpOpen ? <p className="price-check-imei-guide" id={`${inputId}-guide`}>Dial <kbd>*#06#</kbd> on the phone, or open Settings → General → About. Paste the 15-digit IMEI here. Spaces and dashes are accepted.</p> : null}
+          <div className="service-browser__imei" data-invalid={fieldError === 'imei' || undefined}><Icon name="device" /><input ref={inputRef} id={inputId} name="imei" type="text" inputMode="numeric" autoComplete="off" spellCheck={false} enterKeyHint="next" value={imei} onChange={(event) => { if (event.currentTarget.value && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: orderDomain }) } setImei(event.currentTarget.value); setFieldError(null); approved.current = false }} placeholder="Paste or enter 15-digit IMEI" disabled={pending} aria-invalid={fieldError === 'imei'} aria-describedby={`${inputId}-hint`} />{imei ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setFieldError(null); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}</div>
+          <p id={`${inputId}-hint`} className={fieldError === 'imei' ? 'service-browser__error' : 'service-browser__hint'} role={fieldError === 'imei' ? 'alert' : undefined}>{fieldError === 'imei' ? 'Check all 15 digits from *#06# or your phone settings.' : validImei ? 'IMEI format is valid. Device status is checked after payment.' : `${digits.length} / 15 digits · Find it by dialing *#06#`}</p>
         </div>
-        <div className="service-browser__credit">
-          {isAuthenticated && availableCents !== undefined ? <><span>Available credit</span><strong>{formatUsd(availableCents)}</strong></> : <><span>Browse first</span><strong>{isAuthenticated ? 'Review before paying' : 'No account needed'}</strong></>}
-        </div>
-      </header>
-
-      <form className="service-browser__form" action={action} onSubmit={handleSubmit} noValidate aria-busy={pending}>
-        <input type="hidden" name="domain" value={domain} />
-        <input type="hidden" name="productCode" value={selectedCode} />
-        <div className="service-browser__field">
-          <div className="service-browser__label-row">
-            <label htmlFor={inputId}><span className="step-no" aria-hidden="true">1</span>IMEI number</label>
-            <span className={validImei ? 'service-browser__valid' : ''}>{validImei ? <><Icon name="checkSmall" strokeWidth={2.6} /> Valid</> : `${imei.length} / ${IMEI_LENGTH}`}</span>
-          </div>
-          <div className="service-browser__imei" data-invalid={showInvalid || undefined}>
-            <Icon name="device" />
-            <input
-              ref={inputRef}
-              id={inputId}
-              name="imei"
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              spellCheck={false}
-              value={imei}
-              onChange={(event) => { setImei(event.currentTarget.value.replace(/[\s-]/g, '')); setTouched(false) }}
-              onBlur={() => { if (imei) setTouched(true) }}
-              placeholder="Enter your 15-digit IMEI"
-              disabled={pending}
-              readOnly={imeiReadOnly}
-              aria-invalid={showInvalid}
-              aria-describedby={`${inputId}-hint`}
-            />
-            {imei && !imeiReadOnly ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setTouched(false); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}
-          </div>
-          <ImeiSegments count={imei.replace(/\D/g, '').length} valid={validImei} />
-          <p id={`${inputId}-hint`} className={showInvalid ? 'service-browser__error' : 'service-browser__hint'} role={showInvalid ? 'alert' : undefined}>
-            {showInvalid ? 'Enter a valid 15-digit IMEI. Check the number in your phone settings.' : imeiReadOnly ? <>Check each service’s device and network requirements before choosing. <Link href="/services/unlock" className="service-browser__change-imei">Change IMEI</Link></> : 'Find it in Settings or dial *#06#. You can browse services before entering it.'}
-          </p>
-        </div>
-
-        <p className="service-browser__stepline"><span className="step-no" aria-hidden="true">2</span>{isUnlock ? 'Choose the unlock service' : 'Choose the report'}</p>
-        <ServicePicker options={options} value={selectedCode} onChange={setSelectedCode} disabled={pending} label={isUnlock ? 'Unlock service' : 'Lookup service'} id={`${domain}-browse-service`} />
-
-        {selected ? (
-          <div className="service-selected" aria-live="polite">
-            <span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span>
-            <div className="service-selected-copy">
-              {selected === firstChoice ? <span className="service-selected-pill">Most chosen</span> : null}
-              <h3>{serviceDisplayText(selected.name)}</h3>
-              <p>{serviceDisplayText(selected.summary)}</p>
-            </div>
-            <div className="service-selected-price">
-              <strong>{formatUsd(selected.priceCents)}</strong>
-              <span>{available ? 'One-time · paid from credit' : 'Listed price · currently unavailable'}</span>
-              <em>{serviceDisplayText(selected.etaLabel)}</em>
-            </div>
-          </div>
-        ) : null}
-
-        {state.error ? <p className="service-browser__error" role="alert">{state.error}</p> : null}
-
-        <div className="service-browser__actions">
-          <button type="submit" className="button button--primary" disabled={pending || !available} aria-describedby={`${domain}-browse-next`}>
-            {pending ? 'Opening review…' : selected && available ? `Continue to review — ${formatUsd(selected.priceCents)}` : 'Continue to review'} <Icon name="arrowRight" />
-          </button>
-          <p id={`${domain}-browse-next`} className="service-browser__hint">
-            {!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service to continue.' : isAuthenticated ? 'No credit is charged until you confirm on the next page.' : 'Sign in next to review your order. Nothing is charged here.'}
-          </p>
-          {selected && !available && isUnlock ? <Link className="service-browser__waitlist" href="/unlock-waitlist">Notify me when unlock ordering opens <Icon name="arrowRight" /></Link> : null}
-          <ul className="service-assurance" aria-label="Assurances">
-            <li><Icon name="shieldCheck" strokeWidth={2.2} />Held, not charged</li>
-            <li><Icon name="lock" strokeWidth={2.2} />IMEI masked</li>
-            <li><Icon name="clock" strokeWidth={2.2} />Live status</li>
-          </ul>
-        </div>
-      </form>
-    </section>
-  )
+        <div className="field service-browser__field"><label htmlFor={`${domain}-browse-email`}>Email for your result</label><input ref={emailRef} id={`${domain}-browse-email`} name="email" type="email" inputMode="email" autoComplete="email" spellCheck={false} enterKeyHint="go" required maxLength={254} value={email} onChange={(event) => { setEmail(event.currentTarget.value); setFieldError(null); approved.current = false }} placeholder="you@example.com" disabled={pending} aria-invalid={fieldError === 'email'} aria-describedby={`${domain}-email-hint`} /><p id={`${domain}-email-hint`} className={fieldError === 'email' ? 'service-browser__error' : 'service-browser__hint'} role={fieldError === 'email' ? 'alert' : undefined}>{fieldError === 'email' ? 'Enter a valid email for your result and private order link.' : 'Your private order link and result. No password needed.'}</p></div>
+      </> : null}
+      {fieldError === 'service' ? <p className="service-browser__error" role="alert">Choose an available service to continue.</p> : null}
+      {state.error ? <p className="service-browser__error" role="alert">{state.error}</p> : null}
+      <div className="service-browser__actions"><button type="submit" className="button button--primary" disabled={pending || !available}>{pending ? 'Opening secure checkout…' : isUnlock ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></button><p className="service-browser__hint">{!selected ? 'Choose a service to see its price and continue.' : !available ? 'This service is unavailable online. Choose another service.' : isUnlock ? 'Review your order before paying. Unlock processing starts after payment.' : 'View your report preview before paying. The real check starts after payment.'}</p><ul className="service-assurance" aria-label="Assurances"><li><Icon name="shieldCheck" />Clear total</li><li><Icon name="lock" />Private result link</li><li><Icon name="clock" />Live status</li></ul></div>
+      {selected && selected.priceCents > 0 ? <OrderPreviewDialog open={previewOpen} product={{ ...selected, code: selected.productCode }} domain={orderDomain} imei={digits} email={email.trim()} pending={pending} error={state.error} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={(method) => { if (paymentMethod.current) paymentMethod.current.value = method; approved.current = true; trackFunnelEvent('order_preview_continue', { service_category: orderDomain, currency: 'USD', value: (method === 'crypto' ? selected.priceCents : total) / 100, payment_method: method }); formRef.current?.requestSubmit() }} /> : null}
+    </form>
+  </section>
 }

@@ -36,6 +36,12 @@ export default async function TrackOrderPage() {
               and keeps its result on the order page for as long as you need it.
             </p>
 
+          </div>
+
+          <aside className="panel" style={{padding:20}}><h2>Paid without an account?</h2><p>Open the private tracking link in your payment confirmation email. No sign-in is needed. Check your spam folder, or contact support with your order reference if the email has not arrived.</p></aside>
+          <TrackOrderForm defaultEmail={found?.user.email ?? ''} />
+
+          <div className="track-details">
             <ul className="track-facts">
               <li>
                 <Icon name="pulse" strokeWidth={2} />
@@ -47,7 +53,7 @@ export default async function TrackOrderPage() {
               </li>
               <li>
                 <Icon name="shieldCheck" strokeWidth={2} />
-                <span><b>Refusals refund</b>A refused order returns its held credit to your balance.</span>
+                <span><b>Refusals refund</b>Direct card orders refund to the original payment method. Balance-paid orders release their reserved credit.</span>
               </li>
             </ul>
 
@@ -57,8 +63,6 @@ export default async function TrackOrderPage() {
               </p>
             ) : null}
           </div>
-
-          <TrackOrderForm defaultEmail={found?.user.email ?? ''} />
         </div>
       </div>
     </section>

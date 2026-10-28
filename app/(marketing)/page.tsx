@@ -1,22 +1,20 @@
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
+import { BrandLogo } from '@/components/brand-logo'
 import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-check'
 import { Icon, type IconName } from '@/components/icons'
-import { Testimonials } from '@/components/testimonials'
 import { BRANDS, CARRIERS } from '@/lib/catalog'
 import { FAQ } from '@/lib/faq'
 import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 import { quickPicks } from '@/lib/quick-picks'
-import { SAMPLE_TESTIMONIALS } from '@/lib/testimonials'
-import { unlockCategory } from '@/lib/unlock-catalog-view'
 import { StructuredData } from './structured-data'
 
 const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   {
     icon: 'shield',
     title: 'Not reported lost or stolen',
-    body: 'A theft or loss report blocks every network. A Phone Check report shows the status before you spend anything.',
+    body: 'A lost-or-stolen report may prevent unlocking or activation. Review the selected report’s coverage and the carrier’s eligibility policy before ordering.',
   },
   {
     icon: 'check',
@@ -25,25 +23,25 @@ const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   },
   {
     icon: 'wallet',
-    title: 'Financed? Often still fine',
-    body: 'Many networks release financed handsets once the account is current. If yours refuses, the held credit returns in full.',
+    title: 'Check financing requirements',
+    body: 'Financing and account requirements depend on the original carrier. Check its current policy before ordering; if the service is refused, direct card payments are refunded to the original payment method.',
   },
 ]
 
 const STEPS: Array<{ title: string; body: string; art: 'imei' | 'review' | 'done' }> = [
   {
-    title: 'Enter the IMEI',
-    body: 'Dial *#06# on the phone and type the 15 digits. We validate the number before anything becomes an order.',
+    title: 'Choose your service',
+    body: 'Select your original network or report. See the service price and estimated delivery before entering an IMEI.',
     art: 'imei',
   },
   {
-    title: 'Confirm the quote',
-    body: 'The price and the typical wait for your network are shown first. Credit is held, not charged, while the network checks the device.',
+    title: 'Add your IMEI and review',
+    body: 'Dial *#06# to find the 15 digits. Add your result email, review the requirements, then choose card or crypto. Card orders below $1 need an account.',
     art: 'review',
   },
   {
-    title: 'Use any SIM',
-    body: 'Apple devices release over the air; other brands receive a code to type once. Refused devices give the whole amount back.',
+    title: 'Use a supported SIM',
+    body: 'When the service is delivered, follow its device-specific instructions. Use a SIM from a network whose bands your phone supports. A refused direct card order is refunded to the original payment method.',
     art: 'done',
   },
 ]
@@ -73,8 +71,8 @@ const HUB: Array<{ icon: IconName; tint: string; title: string; body: string; hr
   {
     icon: 'keypad',
     tint: '',
-    title: 'Basic IMEI validation',
-    body: 'Confirms the number is a real, well-formed IMEI. Nothing is ordered.',
+    title: 'Apple Free Check',
+    body: 'Get Apple Basic Info with 3 free checks per verified account each day.',
     href: '/check',
     chip: 'Free',
   },
@@ -141,25 +139,29 @@ function StepArt({ kind }: { kind: 'imei' | 'review' | 'done' }) {
 }
 
 export default function HomePage() {
-  const unlockProducts = listPublicProviderProducts('unlock')
-  const checkProducts = listPublicProviderProducts('imei_check')
+  const unlockProducts = listStorefrontProviderProducts('unlock')
+  const checkProducts = listStorefrontProviderProducts('imei_check')
   const ordering = unlockOrderingEnabled() || unlockProducts.some((product) => product.status === 'available')
   const status = !ordering && serviceStatus()
   const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size
   const countries = [...new Set(CARRIERS.map((carrier) => carrier.country))]
 
   const unlockWidget: PriceCheckProduct[] = unlockProducts.map((product) => ({
-    code: product.productCode,
+    code: product.productCode, domain: product.domain,
     name: product.name,
-    category: unlockCategory(product),
-    priceCents: product.priceCents,
+    category: product.group,
+    summary: product.summary,
+    available: product.status === 'available',
+    inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
     etaLabel: product.etaLabel,
   }))
   const checkWidget: PriceCheckProduct[] = checkProducts.map((product) => ({
-    code: product.productCode,
+    code: product.productCode, domain: product.domain,
     name: product.name,
     category: product.group,
-    priceCents: product.priceCents,
+    summary: product.summary,
+    available: product.status === 'available',
+    inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
     etaLabel: product.etaLabel,
   }))
 
@@ -169,8 +171,8 @@ export default function HomePage() {
 
   const heroTiles: Array<{ icon: IconName; title: string; caption: string }> = [
     { icon: 'bolt', title: 'Remote', caption: 'Nothing installed, no shop visit' },
-    { icon: 'shieldCheck', title: 'Held, not charged', caption: 'Credit returns if the network refuses' },
-    { icon: 'lock', title: 'Permanent', caption: 'Recorded against the IMEI itself' },
+    { icon: 'shieldCheck', title: 'Pay per order', caption: 'Card or crypto, with the total shown before payment' },
+    { icon: 'lock', title: 'Carrier-approved', caption: 'Eligibility and method depend on the selected service' },
     { icon: 'globe', title: `${networks} networks`, caption: `Across ${countries.length} countries, more on request` },
   ]
 
@@ -193,23 +195,31 @@ export default function HomePage() {
 
             <span className="hero-chip">
               <Icon name="shieldCheck" strokeWidth={2} />
-              Filed with the network that holds the lock
+              Official carrier unlocks since 2016
             </span>
 
             <h1 className="t-hero">
-              {ordering ? 'Unlock your phone by IMEI.' : 'Find the right service for your phone.'}
+              {ordering ? 'Unlock your phone.' : 'Know your phone.'}
               <br />
               <span className="accent">
-                {ordering ? 'See the price and the wait before you pay.' : 'Browse prices and check availability.'}
+                See your options.
               </span>
             </h1>
 
             <p className="t-lead">
               {ordering
-                ? 'Pick the network your phone is locked to and the quote appears — then enter the IMEI. Credit is held while the network works and returned in full if it refuses.'
-                : 'Explore device reports and unlock services. Enter your IMEI to get started, or browse prices first. You can compare services before creating an account.'}
+                ? 'Compare prices and delivery times for your original network. Review the service before you pay.'
+                : 'Explore device reports and unlock services. Compare prices and availability, then choose card or crypto at checkout.'}
             </p>
 
+
+          </div>
+
+          <div className="hero-panel">
+            <HeroPriceCheck unlock={unlockWidget} check={checkWidget} ordering={ordering} />
+          </div>
+
+          <div className="hero-extras">
             <div className="quick-picks">
               <div className="quick-picks-label">
                 <span>Quick picks</span>
@@ -261,39 +271,32 @@ export default function HomePage() {
               <Link href="/track"><Icon name="clock" strokeWidth={2} />Track an order</Link>
             </p>
           </div>
-
-          <div className="hero-panel">
-            <HeroPriceCheck unlock={unlockWidget} check={checkWidget} ordering={ordering} />
-          </div>
         </div>
       </section>
 
       {/* 02 · Networks */}
-      <section className="section section--tint home-section" id="networks">
+      <section className="section section--tint home-section logo-section" id="networks">
         <div className="shell">
           <div className="section-head section-head--center">
             <span className="kicker">
               <Icon name="globe" strokeWidth={2} />
-              Networks
+              Global carriers
             </span>
             <h2 className="t-section">
-              Locked to one of these? <span className="accent">Start here.</span>
+              Carriers <span className="accent">We Unlock</span>
             </h2>
             <p className="t-lead">
-              The networks the catalog lists today. Each one shows its own price and typical turnaround
-              before you order.
+              Browse {networks} listed networks across {countries.length} countries. Check your carrier’s current
+              availability, price and typical turnaround before you order.
             </p>
           </div>
 
-          <ul className="tile-grid" aria-label="Networks">
+          <ul className="logo-grid" aria-label="Networks">
             {CARRIERS.map((carrier) => (
               <li key={carrier.id}>
-                <Link className="tile" href="/services/unlock">
-                  <i aria-hidden="true">{carrier.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 2)}</i>
-                  <span>
-                    {carrier.name}
-                    <small>{carrier.country}</small>
-                  </span>
+                <Link className="logo-card" href="/services/unlock">
+                  <BrandLogo name={carrier.name} />
+                  <h3>{carrier.name}</h3>
                 </Link>
               </li>
             ))}
@@ -335,7 +338,7 @@ export default function HomePage() {
               <Icon name="info" strokeWidth={1.9} />
               <span>
                 Not sure? Order with the best information you have. If the network turns the device down,
-                the held credit returns to your balance — nothing is charged for a refusal.
+                direct card orders receive an original-method refund; balance-paid orders release the reserved credit.
               </span>
             </p>
           </div>
@@ -375,10 +378,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 04 · Reviews — sample content, labelled as such */}
-      <Testimonials items={SAMPLE_TESTIMONIALS} />
-
-      {/* 05 · FAQ */}
+      {/* 04 · FAQ */}
       <section className="section home-section" id="faq">
         <div className="shell faq">
           <div className="section-head">
@@ -414,8 +414,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 06 · Brands */}
-      <section className="section section--tint home-section" id="brands">
+      {/* 05 · Brands */}
+      <section className="section section--tint home-section logo-section" id="brands">
         <div className="shell">
           <div className="section-head section-head--center">
             <span className="kicker">
@@ -423,22 +423,19 @@ export default function HomePage() {
               Supported devices
             </span>
             <h2 className="t-section">
-              Brands we <span className="accent">work with.</span>
+              Top Brands <span className="accent">We Support</span>
             </h2>
             <p className="t-lead">
-              Apple devices are released over the air. Every other brand receives a code to type in once.
+              Explore services for {BRANDS.length} leading phone brands. Review eligibility and compatible radio bands before ordering.
             </p>
           </div>
 
-          <ul className="tile-grid" aria-label="Brands">
+          <ul className="logo-grid" aria-label="Brands">
             {BRANDS.map((brand) => (
               <li key={brand.id}>
-                <Link className="tile" href="/services/unlock">
-                  <i aria-hidden="true">{brand.name.slice(0, 1)}</i>
-                  <span>
-                    {brand.name}
-                    <small>{brand.delivery === 'remote' ? 'Released remotely' : 'Unlock code'}</small>
-                  </span>
+                <Link className="logo-card" href="/services/unlock">
+                  <BrandLogo name={brand.name} />
+                  <h3>{brand.name}</h3>
                 </Link>
               </li>
             ))}
@@ -446,7 +443,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 07 · Service hub + help band */}
+      {/* 06 · Service hub + help band */}
       <section className="section home-section" id="services">
         <div className="shell">
           <div className="section-head section-head--center">
@@ -501,3 +498,4 @@ export default function HomePage() {
     </>
   )
 }
+

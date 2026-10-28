@@ -1,0 +1,780 @@
+{
+  "capturedAt": "2026-10-28",
+  "source": "https://unlock-service.net/placeimeiorder.php",
+  "services": [
+    {
+      "serviceId": "214",
+      "productCode": "APPLE_BASIC",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "444",
+      "productCode": "APPLE_CARRIER_LITE",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "445",
+      "productCode": "APPLE_CARRIER_PRO",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "448",
+      "productCode": "APPLE_CARRIER_PRO_PLUS",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "976",
+      "productCode": "APPLE_MAX_INFO",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "998",
+      "productCode": "CHECK_998",
+      "exampleVariants": 3,
+      "inputType": "case_id"
+    },
+    {
+      "serviceId": "991",
+      "productCode": "CHECK_991",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "985",
+      "productCode": "CHECK_985",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "996",
+      "productCode": "CHECK_996",
+      "exampleVariants": 0,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "696",
+      "productCode": "CHECK_696",
+      "exampleVariants": 3,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "806",
+      "productCode": "APPLE_WARRANTY",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "343",
+      "productCode": "CHECK_343",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "590",
+      "productCode": "CHECK_590",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "504",
+      "productCode": "APPLE_PART_NUMBER",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "503",
+      "productCode": "CHECK_503",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "574",
+      "productCode": "CHECK_574",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "10",
+      "productCode": "APPLE_ICLOUD_STATUS",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "11",
+      "productCode": "APPLE_ICLOUD_CLEAN",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "847",
+      "productCode": "CHECK_847",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "845",
+      "productCode": "APPLE_MDM",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "457",
+      "productCode": "CHECK_457",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "299",
+      "productCode": "APPLE_MDM_FMI",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "984",
+      "productCode": "CHECK_984",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "945",
+      "productCode": "APPLE_GSX_TETHER",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "201",
+      "productCode": "APPLE_CASE_REPAIR_HISTORY",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "928",
+      "productCode": "APPLE_SOLD_BY_INFO",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "623",
+      "productCode": "APPLE_SOLD_BY_COVERAGE",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "707",
+      "productCode": "CHECK_707",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "348",
+      "productCode": "APPLE_FULL_GSX",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "987",
+      "productCode": "CHECK_987",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "979",
+      "productCode": "APPLE_GSX_LIGHT",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "981",
+      "productCode": "APPLE_GSX_MAX",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "690",
+      "productCode": "CHECK_690",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "266",
+      "productCode": "CHECK_266",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "621",
+      "productCode": "CHECK_621",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "975",
+      "productCode": "CHECK_975",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "980",
+      "productCode": "CHECK_980",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "942",
+      "productCode": "CHECK_942",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "973",
+      "productCode": "CHECK_973",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "944",
+      "productCode": "CHECK_944",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "977",
+      "productCode": "CHECK_977",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "978",
+      "productCode": "CHECK_978",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "974",
+      "productCode": "CHECK_974",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "419",
+      "productCode": "BLACKLIST_SIMPLE",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "66",
+      "productCode": "BLACKLIST_FULL",
+      "exampleVariants": 3,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "988",
+      "productCode": "CHECK_988",
+      "exampleVariants": 3,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "346",
+      "productCode": "UNLOCK_346",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "688",
+      "productCode": "TMOBILE_USA",
+      "exampleVariants": 2,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "127",
+      "productCode": "TMOBILE_USA_PRO",
+      "exampleVariants": 3,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "423",
+      "productCode": "VERIZON_USA_PRO",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "584",
+      "productCode": "CHECK_584",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "267",
+      "productCode": "CHECK_267",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "439",
+      "productCode": "XIAOMI_STATUS",
+      "exampleVariants": 2,
+      "inputType": "unlock_number"
+    },
+    {
+      "serviceId": "856",
+      "productCode": "CHECK_856",
+      "exampleVariants": 2,
+      "inputType": "unlock_number"
+    },
+    {
+      "serviceId": "130",
+      "productCode": "HUAWEI_INFO",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "936",
+      "productCode": "HONOR_INFO",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "9",
+      "productCode": "SAMSUNG_INFO",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "500",
+      "productCode": "CHECK_500",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "851",
+      "productCode": "SAMSUNG_KNOX",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "132",
+      "productCode": "MOTOROLA_INFO",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "969",
+      "productCode": "LENOVO_INFO",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "932",
+      "productCode": "CHECK_932",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "616",
+      "productCode": "CHECK_616",
+      "exampleVariants": 1,
+      "inputType": "phone"
+    },
+    {
+      "serviceId": "617",
+      "productCode": "CHECK_617",
+      "exampleVariants": 1,
+      "inputType": "phone"
+    },
+    {
+      "serviceId": "618",
+      "productCode": "CHECK_618",
+      "exampleVariants": 1,
+      "inputType": "phone"
+    },
+    {
+      "serviceId": "619",
+      "productCode": "CHECK_619",
+      "exampleVariants": 1,
+      "inputType": "phone"
+    },
+    {
+      "serviceId": "664",
+      "productCode": "UNLOCK_664",
+      "exampleVariants": 0,
+      "inputType": "case_id"
+    },
+    {
+      "serviceId": "937",
+      "productCode": "UNLOCK_937",
+      "exampleVariants": 0,
+      "inputType": "case_id"
+    },
+    {
+      "serviceId": "938",
+      "productCode": "UNLOCK_938",
+      "exampleVariants": 0,
+      "inputType": "case_id"
+    },
+    {
+      "serviceId": "939",
+      "productCode": "UNLOCK_939",
+      "exampleVariants": 0,
+      "inputType": "case_id"
+    },
+    {
+      "serviceId": "940",
+      "productCode": "UNLOCK_940",
+      "exampleVariants": 0,
+      "inputType": "case_id"
+    },
+    {
+      "serviceId": "931",
+      "productCode": "UNLOCK_931",
+      "exampleVariants": 0,
+      "inputType": "udid"
+    },
+    {
+      "serviceId": "926",
+      "productCode": "UNLOCK_926",
+      "exampleVariants": 0,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "25",
+      "productCode": "UNLOCK_25",
+      "exampleVariants": 0,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "893",
+      "productCode": "UNLOCK_893",
+      "exampleVariants": 0,
+      "inputType": "ecid"
+    },
+    {
+      "serviceId": "967",
+      "productCode": "UNLOCK_967",
+      "exampleVariants": 0,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "966",
+      "productCode": "UNLOCK_966",
+      "exampleVariants": 0,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "212",
+      "productCode": "UNLOCK_212",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "609",
+      "productCode": "UNLOCK_609",
+      "exampleVariants": 0,
+      "inputType": "unlock_number"
+    },
+    {
+      "serviceId": "626",
+      "productCode": "UNLOCK_626",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "485",
+      "productCode": "UNLOCK_485",
+      "exampleVariants": 0,
+      "inputType": "unlock_number"
+    },
+    {
+      "serviceId": "452",
+      "productCode": "UNLOCK_452",
+      "exampleVariants": 0,
+      "inputType": "unlock_number"
+    },
+    {
+      "serviceId": "780",
+      "productCode": "UNLOCK_780",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "1001",
+      "productCode": "UNLOCK_1001",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "344",
+      "productCode": "UNLOCK_344",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "721",
+      "productCode": "UNLOCK_721",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "430",
+      "productCode": "UNLOCK_430",
+      "exampleVariants": 1,
+      "inputType": "serial"
+    },
+    {
+      "serviceId": "702",
+      "productCode": "CHECK_702",
+      "exampleVariants": 3,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "661",
+      "productCode": "CHECK_661",
+      "exampleVariants": 1,
+      "inputType": "serial_or_imei"
+    },
+    {
+      "serviceId": "904",
+      "productCode": "CHECK_904",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "718",
+      "productCode": "UNLOCK_718",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "1000",
+      "productCode": "UNLOCK_1000",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "999",
+      "productCode": "UNLOCK_999",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "340",
+      "productCode": "UNLOCK_340",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "989",
+      "productCode": "UNLOCK_989",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "649",
+      "productCode": "UNLOCK_649",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "710",
+      "productCode": "UNLOCK_710",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "719",
+      "productCode": "UNLOCK_719",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "48",
+      "productCode": "UNLOCK_48",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "49",
+      "productCode": "UNLOCK_49",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "461",
+      "productCode": "UNLOCK_461",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "410",
+      "productCode": "UNLOCK_410",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "36",
+      "productCode": "UNLOCK_36",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "329",
+      "productCode": "UNLOCK_329",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "39",
+      "productCode": "UNLOCK_39",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "289",
+      "productCode": "UNLOCK_289",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "711",
+      "productCode": "UNLOCK_711",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "384",
+      "productCode": "UNLOCK_384",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "385",
+      "productCode": "UNLOCK_385",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "733",
+      "productCode": "UNLOCK_733",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "84",
+      "productCode": "UNLOCK_84",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "87",
+      "productCode": "UNLOCK_87",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "453",
+      "productCode": "UNLOCK_453",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "294",
+      "productCode": "UNLOCK_294",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "589",
+      "productCode": "UNLOCK_589",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "935",
+      "productCode": "UNLOCK_935",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "252",
+      "productCode": "UNLOCK_252",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "65",
+      "productCode": "UNLOCK_65",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "64",
+      "productCode": "UNLOCK_64",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "420",
+      "productCode": "UNLOCK_420",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "139",
+      "productCode": "UNLOCK_139",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "277",
+      "productCode": "UNLOCK_277",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "140",
+      "productCode": "UNLOCK_140",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "272",
+      "productCode": "UNLOCK_272",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "273",
+      "productCode": "UNLOCK_273",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "352",
+      "productCode": "UNLOCK_352",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "342",
+      "productCode": "UNLOCK_342",
+      "exampleVariants": 0,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "265",
+      "productCode": "UNLOCK_265",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    },
+    {
+      "serviceId": "137",
+      "productCode": "UNLOCK_137",
+      "exampleVariants": 1,
+      "inputType": "imei"
+    }
+  ]
+}

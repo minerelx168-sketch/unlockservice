@@ -1,0 +1,69 @@
+# Direct service checkout
+
+Customers can select a catalog service, enter an IMEI and delivery email, and pay a one-time Whop card checkout. Services priced at least $1 do not require an iUnlockMobile login or a wallet deposit; smaller card orders use the account-credit flow below. The server quotes the catalog price plus the existing 5% card fee. Whop discloses any tax before the customer confirms.
+
+Enable new checkouts with IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED=1. Existing Whop live configuration, Resend delivery, and a >=32-character IMEI encryption secret are required. Disabling new checkout does not stop processing existing payments or refunds.
+
+## Payment provider minimum
+
+A live, uncharged checkout validation returned HTTP 400: "The plan must be at least $1.00" for a $0.16 total. For services priced below $1, card checkout now requires an active verified customer account. The customer pays $1.00 funding plus the existing $0.05 card fee. The service keeps its catalog price, and the remaining funding becomes account credit only after authoritative paid settlement. For example, a $0.75 service costs $1.05 by card, with $0.25 credited to the account. Crypto remains available without an account, fee or minimum.
+
+## Settlement and access
+
+The existing signature-verified Whop inbox retrieves the authoritative payment and routes guest metadata to its separate settlement path. It validates the receiving account, environment, product, plan, checkout, payment ID, USD amount, card method, refunds, and dispute state. A browser return is never settlement proof. The polling worker reconciles missed callbacks by the exact plan and re-retrieves payments.
+
+A paid order receives an isolated non-login accounting owner (status/account_type guest; non-password hash; synthetic .invalid email). It never attaches an order to an existing account based on an unverified email. This owner reuses the existing transactional hold/charge/provider engine, but funding is a guest_payment adjustment, not a wallet topup. It cannot be signed into or spent by a customer. Guest source prevents existing browser purchase emission.
+
+Private result links require a random 128-bit reference and an HMAC capability derived from the existing server secret. IMEIs are encrypted at rest. Result pages and APIs are no-store/noindex with no-referrer; analytics page sanitization removes checkout paths and parameters. Keep these links private. Rotating the root secret invalidates existing links/encrypted identifiers.
+
+## Failure, refunds and email
+
+Order submission uses a stable request key and the provider engine's durable claim. Uncertain supplier responses remain in review with their hold; they are never resubmitted blindly. Definite pre-submit unavailability/price change and definite supplier rejection request a full original-method refund, including the card fee, with a stable Whop idempotency key. A refund is only shown as confirmed after authoritative payment data confirms it. Gateway refund permission or network failures stay pending and are visible in Admin > Direct card orders and worker failures. Bank posting time is not guaranteed.
+
+The worker sends payment confirmation/private link and final result or refund notice using the existing transactional email sender. Retries have leases, backoff and stable provider idempotency keys. Duplicate email delivery is still possible beyond the email provider's idempotency retention. Guest check and unlock services both receive results; the existing account-paid check notification policy is unchanged.
+
+## Analytics
+
+Only signed-consent requests with actual GA client/session IDs are eligible; an administrator session is excluded. Guest paid-and-delivered orders emit one server purchase with the service value in USD and guest-prefixed transaction ID. They do not emit payment_completed (that event is reserved for wallet funding). Atomic claims prevent duplicate event submissions; ambiguous transport acceptance is not retried automatically. API acceptance is not proof of GA processing or Ads attribution. Long-running services may not retain the original session attribution; verify this with actual production data.
+
+## Verification and rollout
+
+Targeted tests use temporary databases and mocked Whop, supplier, email, and GA endpoints. They cover price tampering, missing login, access capabilities, replay, concurrent workers, payment identity/amount, duplicate/disputed payments, rejection/refunds, service price changes, supplier timeout and email retry, plus regression coverage for existing payment/report/analytics flows.
+
+Production rollout must verify current HEAD, clean tracked files, tests/build, backup database/env/build, preserve public Google verification files and existing static assets, restart both app and polling timer, and check /api/health ledger invariants. Do not restore a stale database during rollback after accepting payments.
+
+A real customer-sized card payment, delivered result/email and a controlled refund still require end-to-end verification with live provider permissions. No real charges, supplier purchases, marketing conversions or customer emails are generated by the automated tests.
+
+## Price-first flow update — 21 October 2026
+
+Unlock and Phone Check have separate public entry flows. Visitors see service prices and delivery estimates before entering a device identifier; IMEI and delivery email are handed to checkout in the existing short-lived HttpOnly, SameSite draft cookie (15 minutes, no identifiers in query strings). Checkout presents saved details with an Edit option.
+
+The prepayment dialog is labelled **Live order preview**. Only the customer's chosen IMEI, email, current catalog price and delivery estimate are real at that stage. Locked bars are empty placeholders, with explicit after-payment-and-processing copy. Opening the dialog or continuing to checkout must never submit a paid provider request. Phone reports appear when the provider returns a completed response; no instant-result guarantee is made.
+
+The UI exposes the Whop $1 minimum before asking for personal details, preserves existing catalog prices and 5% card fee, and distinguishes received payment, provider submission, and the final outcome on the private tracking page.
+
+New consent-gated funnel events: `service_quote_viewed`, `guest_details_completed`, `order_preview_viewed`, `order_preview_continue`. Retain `imei_input_started`, `validation_result`, and verified server-side purchase. No IMEI, email, order token or other personal identifier is an event parameter. Compare unique-user progression by `service_category` (unlock vs imei_check); the reported 43% historical loss is a baseline supplied by the owner, not a newly verified measurement.
+
+After verified payment, a new delivery email can receive a pending, password-disabled customer profile. The same transactional message includes a private order link plus optional inbox-only account activation. Activation is distinct from the checkout return key, expires, and requires an explicit POST; email scanners cannot activate it. Existing accounts require the inbox token plus a matching authenticated customer session before history attachment. Order viewing and ordinary guest payment remain available without login; the below-$1 card route requires the account before payment. Optional post-payment account/password setup must never block fulfilment.
+
+
+## Guest crypto checkout (21 October 2026)
+
+- The compact crypto option charges the catalog service price, with zero merchant surcharge and no minimum payment threshold. The existing account top-up minimum and maximum are unchanged. Guest services accept positive integer cents up to USD 1,000. Network or exchange fees remain the sender's responsibility.
+- Guest crypto uses configured fee-free USDT/USDC routes on BNB Smart Chain only. It works independently of Whop configuration. A guest-only accounting owner and a uniquely coded invoice are created atomically, without logging in or creating an enabled customer account. Email account activation stays paid-only.
+- `/api/checkout/crypto` creates a private payment URL after the same input, locked-price, terms, same-origin and rate-limit checks as card checkout. The private status/check endpoint verifies the order capability before accepting a transaction hash or requesting a chain check.
+- Amount codes use four token decimals. The invoice generator fails closed if no unique amount code is available; it does not issue an uncoded guest request. Send exactly the quoted amount. Never infer ownership from the closest amount or from whoever pastes a public transaction hash first.
+- Existing chain verification checks token, network, recipient, canonical finalized block, confirmations, invoice time, amount code and transfer uniqueness. The guest worker additionally requires the linked invoice, matching verified evidence and exactly-once ledger funding before starting the provider. Pending, confirming or underpaid requests cannot call the paid provider.
+- Crypto invoices fund only the isolated order owner. Dispatch does not add card-style guest credit again. No wallet-top-up analytics are created; the existing verified completed-service `purchase` event remains the conversion.
+- Refused crypto services enter `refund_pending` for support-assisted refund handling. The system never calls Whop for them, never automatically sends funds to an exchange sender address, and never labels an unsent refund as completed. A separate `refund_notice_sent_at` phase sends refund assistance once even when the initial receipt was sent earlier.
+- Tests use mocked chain, provider and email transports. No real transfer, provider charge or customer email is created during verification.
+
+
+## Below-$1 card continuation (21 October 2026)
+
+- Removing early fee helper sentences does not remove the 5% fee. The preview, checkout and gateway show the actual card amount and its service/credit/fee breakdown before payment.
+- Registration, email verification and Google sign-in preserve a same-origin allowlisted checkout continuation. IMEI/email remain in the short-lived browser draft; public product and method are the only URL fields. Signup does not create a charge or provider request.
+- The authenticated customer is bound on the server before creating a small-order checkout; a body user ID or unverified delivery email cannot claim the remainder. Provider spending still uses a separate isolated guest accounting owner.
+- A verified payment atomically creates exactly one remainder credit tied to the order. Duplicate payment notifications and result-page refreshes cannot add more credit. Paid small orders appear in the customer’s direct-order history.
+- Full refunds reverse only that order’s unused remainder. If account credit has been spent, the refund requires review; unrelated account funds are not swept. Payment disputes or unresolved remainder reversals block new credit spending until reviewed.
+- Browser return means return to the pending order screen, not payment success. Only the signed gateway notification or authoritative reconciliation can mark paid and allow provider execution.

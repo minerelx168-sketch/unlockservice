@@ -1,9 +1,8 @@
 import Link from 'next/link'
 import { Brand } from './brand'
-import { Icon, type IconName } from './icons'
+import { PaymentMark } from './payment-badges'
 
 export type FooterGuide = { href: string; label: string }
-export type FooterFact = { icon: IconName; title: string; caption: string }
 
 const COLUMNS = [
   {
@@ -12,7 +11,7 @@ const COLUMNS = [
       { href: '/services', label: 'Service categories' },
       { href: '/services/unlock', label: 'Unlock Service' },
       { href: '/services/imei-check', label: 'Phone Check' },
-      { href: '/check', label: 'Basic IMEI validation' },
+      { href: '/check', label: 'Apple Free Check' },
       { href: '/register', label: 'Create an account' },
     ],
   },
@@ -39,15 +38,13 @@ const COLUMNS = [
 type Props = {
   isAuthenticated?: boolean
   guides: FooterGuide[]
-  facts: FooterFact[]
 }
 
 /**
- * Brand and three facts, four link columns, then what we accept. The facts
- * come from the server so the footer can never claim more networks or
- * guides than the catalog actually holds.
+ * Brand and one line on what the service is, four link columns, then what
+ * we accept. Deliberately quiet: the selling happened above the footer.
  */
-export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
+export function SiteFooter({ isAuthenticated = false, guides }: Props) {
   return (
     <footer className="site-footer">
       <div className="shell">
@@ -55,21 +52,8 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
           <div>
             <Brand />
             <p className="blurb">
-              Permanent IMEI unlocking and device reports, filed with the network or manufacturer
-              that holds the record. For people selling a phone, switching network, or travelling
-              with one they already own.
+              Network-unlock services and device reports for phones you own.
             </p>
-            <div className="footer-facts">
-              {facts.map((fact) => (
-                <div className="footer-fact" key={fact.title}>
-                  <Icon name={fact.icon} strokeWidth={2} />
-                  <div>
-                    {fact.title}
-                    <span>{fact.caption}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {COLUMNS.map((column) => (
@@ -104,20 +88,17 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
 
         <div className="footer-accept">
           <span>We accept</span>
-          <span className="pay-badge">
-            <i aria-hidden="true">₮</i>USDT · TRC20
-          </span>
-          <span className="pay-badge">
-            <i aria-hidden="true">₮</i>USDT · BEP20
-          </span>
-          <span>Credit is held, then charged only when the result is delivered.</span>
+          {['visa', 'mastercard', 'googlepay', 'applepay', 'bitcoin', 'usdt'].map((method) => (
+            <PaymentMark method={method} key={method} />
+          ))}
         </div>
 
         <div className="footer-base">
-          <span>&copy; {new Date().getFullYear()} iUnlockMobile. All rights reserved.</span>
+          <span>&copy; 2016–{new Date().getFullYear()} iUnlockMobile. All rights reserved.</span>
           <span>Unlocking releases a device you own — it does not remove a finance agreement or a theft report.</span>
         </div>
       </div>
     </footer>
   )
 }
+

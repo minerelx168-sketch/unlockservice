@@ -3,6 +3,14 @@ export function safeContinuation(value: unknown): string | null {
   if (typeof value !== 'string' || value.length > 512 || !value.startsWith('/') || value.startsWith('//') || /[\\\s#]/.test(value)) return null
   const url = new URL(value, 'https://continuation.invalid')
   if (url.origin !== 'https://continuation.invalid') return null
+  // Checkout resumes a saved browser draft. Only public catalog identity and
+  // payment choice may travel through auth; never IMEI, email or private links.
+  if (url.pathname === '/checkout') {
+    const product = url.searchParams.get('product')
+    if (!product || !/^[A-Z0-9_]{2,64}$/.test(product)) return null
+    const method = url.searchParams.get('method') === 'crypto' ? 'crypto' : 'card'
+    return `/checkout?product=${encodeURIComponent(product)}&method=${method}`
+  }
   const allowed = /^\/(?:check|user\/(?:dashboard|check|services\/unlock|unlock|payments|add-funds|orders(?:\/[1-9]\d*)?|find\/[1-9]\d*|checks(?:\/[1-9]\d*)?|reports(?:\/new|\/[1-9]\d*)?|invoice\/[a-f0-9]{32}))$/
   if (!allowed.test(url.pathname)) return null
   const product = url.searchParams.get('product')

@@ -1,12 +1,14 @@
 import {
+  ETHERSCAN_V2_URL,
   normalizeTransactionId,
   paymentProviderConfiguration,
+  tronAddressToHex20,
   type PaymentChainKind,
   type PaymentProviderMode,
 } from './payment-config'
 
 const MAX_RESPONSE_BYTES = 1_000_000
-const REQUEST_INTERVAL_MS = 250
+const REQUEST_INTERVAL_MS = process.env.NODE_ENV === 'test' ? 0 : 250
 let nextRequestAt = 0
 
 export class PaymentProviderError extends Error {
@@ -160,6 +162,10 @@ async function inspectEvmTransaction(
   snapshot: PaymentProviderSnapshot,
   transactionId: string,
 ): Promise<NormalizedChainReceipt | null> {
+  // Etherscan V2 proxy's head depth is not a finalized-block proof in this
+  // adapter. Keep ERC-20 disabled for credit until a canonical/finalized RPC
+  // implementation is reviewed; never settle from head depth alone.
+  if (snapshot.providerMode !== 'bnb_rpc') throw new PaymentProviderError('provider_finality_unavailable')
   await ensureEvmChain(snapshot)
   const receiptPayload = await evmCall(
     snapshot,
@@ -191,14 +197,15 @@ async function inspectEvmTransaction(
   const timestampSeconds = parseHexInteger(block.timestamp)
   if (returnedBlock !== blockNumber || timestampSeconds === null) throw new PaymentProviderError('provider_invalid_block')
 
-  const latestPayload = await evmCall(
-    snapshot,
-    'eth_blockNumber',
-    [],
-    { module: 'proxy', action: 'eth_blockNumber' },
-  )
-  const latestFinalBlock = parseHexInteger(rpcResult(latestPayload))
-  if (latestFinalBlock === null || latestFinalBlock < blockNumber) {
+  // Head-depth alone cannot prove canonical finality. Require both hashes.
+  const validHash = (value: unknown): value is string =>
+    typeof value === 'string' && /^0x[0-9a-fA-F]{64}$/.test(value)
+  if (!validHash(receipt.blockHash) || !validHash(block.hash)
+    || receipt.blockHash.toLowerCase() !== block.hash.toLowerCase()) {
+    throw new PaymentProviderError('provider_noncanonical_receipt')
+  }
+  const latestFinalBlock = await evmFinalizedBlock(snapshot)
+  if (latestFinalBlock < blockNumber) {
     throw new PaymentProviderError('provider_block_inconsistent')
   }
 
@@ -362,6 +369,20 @@ export async function evmLatestBlock(snapshot: PaymentProviderSnapshot): Promise
   return latest
 }
 
+/** A chain-provided finalized block, not a reported unfinalized head. */
+export async function evmFinalizedBlock(snapshot: PaymentProviderSnapshot): Promise<number> {
+  if (snapshot.providerMode !== 'bnb_rpc') throw new PaymentProviderError('provider_finality_unavailable')
+  await ensureEvmChain(snapshot)
+  const result = rpcResult(await evmCall(snapshot, 'eth_getBlockByNumber', ['finalized', false], {}))
+  if (!result || typeof result !== 'object') throw new PaymentProviderError('provider_finality_unavailable')
+  const block = result as Record<string, unknown>
+  const number = parseHexInteger(block.number)
+  if (number === null || typeof block.hash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(block.hash)) {
+    throw new PaymentProviderError('provider_finality_unavailable')
+  }
+  return number
+}
+
 /** Token transfers into `destination` over an inclusive block range (bnb_rpc routes). */
 export async function listEvmIncomingTransfers(
   snapshot: PaymentProviderSnapshot,
@@ -371,9 +392,11 @@ export async function listEvmIncomingTransfers(
   toBlock: number,
   /** Smaller transfers are dropped before any block is fetched for them (spam). */
   minRawAmount = 1n,
+  /** Explicitly allow a below-floor coded invoice candidate; all other dust stays filtered. */
+  belowFloorCandidate?: (rawAmount: bigint) => boolean,
 ): Promise<IncomingTransfer[]> {
   if (snapshot.providerMode !== 'bnb_rpc') throw new PaymentProviderError('provider_scan_unsupported')
-  const result = rpcResult(
+  const rpcLogs = rpcResult(
     await evmCall(
       snapshot,
       'eth_getLogs',
@@ -394,7 +417,32 @@ export async function listEvmIncomingTransfers(
   )
   /* A node that answers null, or anything but a list, has not said "no
      transfers"; treating it so would move the cursor past blocks nobody read. */
-  if (!Array.isArray(result)) throw new PaymentProviderError('provider_invalid_logs')
+  if (!Array.isArray(rpcLogs)) throw new PaymentProviderError('provider_invalid_logs')
+  let result: unknown[] = rpcLogs
+
+  // Optional BscScan discovery via Etherscan V2 (chain 56). Keep the RPC
+  // range complete even if the explorer is delayed, paginated or unavailable.
+  // Explorer candidates still need a fresh canonical receipt before credit.
+  const explorerKey = process.env.IUNLOCKMOBILE_ETHERSCAN_API_KEY?.trim()
+  if (process.env.IUNLOCKMOBILE_BSCSCAN_DISCOVERY === '1' && explorerKey && snapshot.chainId === 56) {
+    try {
+      const url = new URL(ETHERSCAN_V2_URL)
+      const parameters = {
+        chainid: '56', module: 'logs', action: 'getLogs', address: tokenContract.toLowerCase(),
+        fromBlock: String(fromBlock), toBlock: String(toBlock), topic0: TRANSFER_EVENT_TOPIC,
+        topic2: addressTopic(destination), topic0_2_opr: 'and', page: '1', offset: '1000', apikey: explorerKey,
+      }
+      for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value)
+      const payload = await requestJson(url.toString(), { method: 'GET', headers: { accept: 'application/json' } }, LOG_RESPONSE_BYTES)
+      const extra = rpcResult(payload)
+      if (Array.isArray(extra)) {
+        const keys = new Set(result.map(log => JSON.stringify([(log as Record<string, unknown>)?.transactionHash, (log as Record<string, unknown>)?.logIndex]).toLowerCase()))
+        result = [...result, ...extra.filter(log => !keys.has(JSON.stringify([log?.transactionHash, log?.logIndex]).toLowerCase()))]
+      }
+    } catch {
+      // Never turn an explorer outage or plan limit into a missed deposit.
+    }
+  }
 
   const wantedContract = tokenContract.toLowerCase()
   const wantedTopic = addressTopic(destination)
@@ -408,15 +456,18 @@ export async function listEvmIncomingTransfers(
     const blockNumber = parseHexInteger(log.blockNumber)
     const logIndex = parseHexInteger(log.logIndex)
     const data = typeof log.data === 'string' && /^0x[0-9a-fA-F]+$/.test(log.data) ? log.data : null
+    const rawAmount = data ? BigInt(data) : null
     if (
       String(log.address ?? '').toLowerCase() !== wantedContract
       || topics[0] !== TRANSFER_EVENT_TOPIC
       || topics[2] !== wantedTopic
       || !transactionId
       || blockNumber === null
+      || blockNumber < fromBlock || blockNumber > toBlock
       || logIndex === null
-      || !data
-      || BigInt(data) < minRawAmount
+      || rawAmount === null
+      || rawAmount <= 0n
+      || (rawAmount < minRawAmount && !belowFloorCandidate?.(rawAmount))
     ) {
       continue
     }
@@ -425,7 +476,7 @@ export async function listEvmIncomingTransfers(
       logIndex,
       blockNumber,
       from: topics[1] ? `0x${topics[1].slice(-40)}` : null,
-      rawAmount: BigInt(data),
+      rawAmount,
     })
   }
 
@@ -451,11 +502,18 @@ export async function listTronIncomingTransfers(
   destination: string,
   minTimestampMs: number,
   maxPages = 5,
-): Promise<{ transfers: IncomingTransfer[]; newestTimestampMs: number | null; complete: boolean }> {
+  startFingerprint: string | null = null,
+): Promise<{ transfers: IncomingTransfer[]; newestTimestampMs: number | null; complete: boolean; nextFingerprint: string | null }> {
   const transfers: IncomingTransfer[] = []
-  const perTransaction = new Map<string, number>()
+  // TronGrid account history has no event index. Inspect each transaction's
+  // receipt exactly once; emit ALL wallet Transfer logs with their real
+  // receipt indices. This remains stable across pages, restarts and overlap.
+  const seenTransactions = new Set<string>()
+  const contractHex = tronAddressToHex20(tokenContract)?.toLowerCase()
+  const destinationHex = tronAddressToHex20(destination)?.toLowerCase()
+  if (!contractHex || !destinationHex) throw new PaymentProviderError('provider_invalid_route')
   let newestTimestampMs: number | null = null
-  let fingerprint: string | null = null
+  let fingerprint: string | null = startFingerprint
 
   for (let page = 0; page < maxPages; page += 1) {
     const query = new URLSearchParams({
@@ -464,7 +522,9 @@ export async function listTronIncomingTransfers(
       contract_address: tokenContract,
       min_timestamp: String(Math.max(0, Math.floor(minTimestampMs))),
       order_by: 'block_timestamp,asc',
-      limit: '200',
+      // At most 20 receipt lookups per poll. The fingerprint resumes at the
+      // exact next page; never advance it if any receipt lookup fails.
+      limit: '20',
     })
     if (fingerprint) query.set('fingerprint', fingerprint)
     const payload = await tronRequest(
@@ -492,20 +552,32 @@ export async function listTronIncomingTransfers(
       ) {
         continue
       }
-      const index = perTransaction.get(transactionId) ?? 0
-      perTransaction.set(transactionId, index + 1)
-      transfers.push({
-        transactionId,
-        logIndex: index,
-        blockNumber: null,
-        blockTimestamp: new Date(timestampMs).toISOString(),
-        from: typeof entry.from === 'string' ? entry.from : null,
-        rawAmount: amount,
-      })
+      if (seenTransactions.has(transactionId)) continue
+      seenTransactions.add(transactionId)
+      const receipt = await inspectTronTransaction(snapshot, transactionId)
+      if (!receipt) throw new PaymentProviderError('provider_missing_receipt')
+      if (receipt.succeeded) {
+        const matching = receipt.logs.filter((log) =>
+          log.contractAddress === contractHex
+          && log.topics[0] === TRANSFER_EVENT_TOPIC
+          && log.topics[2] === addressTopic(destinationHex),
+        )
+        if (!matching.length) throw new PaymentProviderError('provider_receipt_mismatch')
+        for (const log of matching) {
+          if (!/^0x[0-9a-f]+$/.test(log.data)) throw new PaymentProviderError('provider_invalid_receipt')
+          transfers.push({
+            transactionId, logIndex: log.logIndex, blockNumber: receipt.blockNumber,
+            blockTimestamp: receipt.blockTimestamp,
+            from: /^0x[0-9a-f]{64}$/.test(log.topics[1] ?? '') ? `0x${log.topics[1].slice(-40)}` : null,
+            rawAmount: BigInt(log.data),
+          })
+        }
+      }
       newestTimestampMs = Math.max(newestTimestampMs ?? 0, timestampMs)
     }
-    fingerprint = typeof record.meta?.fingerprint === 'string' ? record.meta.fingerprint : null
-    if (!fingerprint) return { transfers, newestTimestampMs, complete: true }
+    fingerprint = typeof record.meta?.fingerprint === 'string' && record.meta.fingerprint.length > 0
+      ? record.meta.fingerprint : null
+    if (!fingerprint) return { transfers, newestTimestampMs, complete: true, nextFingerprint: null }
   }
-  return { transfers, newestTimestampMs, complete: false }
+  return { transfers, newestTimestampMs, complete: false, nextFingerprint: fingerprint }
 }

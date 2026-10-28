@@ -3,8 +3,8 @@
     "title": "Apple Basic Info",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Clean\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nSim-Lock: Locked"
+        "label": "Example result",
+        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Clean\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States"
       }
     ]
   },
@@ -12,7 +12,7 @@
     "title": "Apple Carrier (Lite)",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
       }
     ]
@@ -21,8 +21,8 @@
     "title": "Apple Carrier (Pro)",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nModel Number: A3257\nModel Region: United States, Puerto Rico\nActivation Status: Activated\nTelephone Technical Support: Active\nTelephone Technical Support Expiration Date: April 17, 2026\nRepairs and Service Coverage: Active\nRepairs and Service Coverage Expiration Date: January 17, 2027\nAppleCare Eligible: Yes\nAppleCare Eligible Description: There are 49 days left to add coverage.\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Blacklisted\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
+        "label": "Example result",
+        "output": "Model: iPhone 16e\nModel Description: IPHONE 16E BLK 128GB-GEH\nModel Number: A3409\nModel Region: WorldWide\nSim Config: Nano-SIM + Dual eSIM\nActivation Status: Activated\nTelephone Technical Support: Expired\nRepairs and Service Coverage: Active (6 days remaining)\nRepairs and Service Expiration Date: October 10, 2026\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo: No\nAppleCare Eligible: No\nRepair Open: No\nReplacement Device: No\nReplaced Device: No\nLoaner: No\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Blacklisted\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: Israel/Czech. Republic\nNext Activation Policy: Unlock.\nSim-Lock: Unlocked"
       }
     ]
   },
@@ -30,8 +30,8 @@
     "title": "Apple Carrier (Pro Plus)",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nModel Number: A3257\nModel Region: United States, Puerto Rico\nActivation Status: Activated\nTelephone Technical Support: Active\nTelephone Technical Support Expiration Date: April 17, 2026\nRepairs and Service Coverage: Active\nRepairs and Service Coverage Expiration Date: January 17, 2027\nAppleCare Eligible: Yes\nAppleCare Eligible Description: There are 49 days left to add coverage.\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nOpen Repair Case: Yes\nFind My iPhone: ON\niCloud Status: Clean\nBlacklist Status: Blacklisted\nPart Number: MFXH4LL/A\nPart Number Type: Retail\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
+        "label": "Example result",
+        "output": "Model: iPhone 16e\nModel Description: IPHONE 16E BLK 128GB-GEH\nModel Configuration: iPhone 16e 128GB Black\nModel Number: A3409\nModel Region: WorldWide\nSim Config: Nano-SIM + Dual eSIM\nActivation Status: Activated\nTelephone Technical Support: Expired\nRepairs and Service Coverage: Active (6 days remaining)\nRepairs and Service Expiration Date: October 10, 2026\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo: No\nAppleCare Eligible: No\nRepair Open: No\nReplacement Device: No\nReplaced Device: No\nLoaner: No\nFind My iPhone: ON\niCloud Status: Clean\nChimaera Lock: No\nBlacklist Status: Blacklisted\nPart Number: MD1Q4HX/A\nPart Number Type: Retail\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: Hungary/Kazakhstan/Lithuania/Poland\nNext Activation Policy: Unlock.\nSim-Lock: Unlocked"
       }
     ]
   },
@@ -39,8 +39,51 @@
     "title": "Apple Max Info (Premium)",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nModel Number: A3257\nModel Region: United States, Puerto Rico\nActivation Status: Activated\nTelephone Technical Support: Active\nTelephone Technical Support Expiration Date: April 17, 2026\nRepairs and Service Coverage: Active\nRepairs and Service Coverage Expiration Date: January 17, 2027\nAppleCare Eligible: Yes\nAppleCare Eligible Description: There are 49 days left to add coverage.\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo Device: No\nReplacement Device: No\nReplaced Device: No\nOpen Repair Case: Yes\nFind My iPhone: ON\niCloud Status: Clean\nMDM Status: OFF\nBlacklist Status: Blacklisted\nBlacklisted By: VERIZON WIRELESS\nBlacklisted Country: United States\nBlacklisted On: 23/12/2025 13:11:00\nBlacklist Reason: Fraudulently Obtained (0026)\nBlacklist Description: Equipment identified as fraudulently obtained from Operator with sufficient evidence that a police complaint could be filed.\nPart Number: MFXH4LL/A\nPart Number Type: Retail\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy ID: 2397\nNext Activation Policy: US Verizon Locked Policy\nSim-Lock: Locked"
+        "label": "Example result",
+        "output": "Model: iPhone 17 Pro Max\nModel Description: IPHONE 17 PRO MAX CORANGE 256GB-USA\nModel Number: A3257\nModel Region: United States, Puerto Rico\nSim Config: Dual eSIM (no physical SIM)\nActivation Status: Activated\nTelephone Technical Support: Expired\nRepairs and Service Coverage: Active (6 days remaining)\nRepairs and Service Expiration Date: October 10, 2026\nValid Purchase Date: Yes\nRegistered: Yes\nRefurbished: No\nDemo: No\nAppleCare Eligible: No\nRepair Open: No\nReplacement Device: No\nReplaced Device: No\nLoaner: No\nFind My iPhone: ON\niCloud Status: Clean\nChimaera Lock: No\nMDM Status: OFF\nBlacklist Status: Blacklisted\nBlacklisted By: VERIZON WIRELESS\nBlacklisted Country: United States\nBlacklisted On: 23/12/2025 13:11:00\nBlacklist Reason: Fraudulently Obtained (0026)\nBlacklist Description: Equipment identified as fraudulently obtained from Operator with sufficient evidence that a police complaint could be filed.\nPart Number: MFXH4LL/A\nPart Number Type: Retail\nWarranty Status: Apple Limited Warranty\nEstimated Purchase Date: November 29, 2025\nPurchased In: United States\nNext Activation Policy: Unlock.\nSim-Lock: Unlocked"
+      }
+    ]
+  },
+  "CHECK_998": {
+    "title": "Apple Case ID Lookup",
+    "variants": [
+      {
+        "label": "Example result 1",
+        "output": "Case ID: [redacted]\nStatus: Found\nCaterogy Issue: Locate lost Apple devices, Support"
+      },
+      {
+        "label": "Example result 2",
+        "output": "Case ID: [redacted]\nStatus: Found\nCaterogy Issue: Support"
+      },
+      {
+        "label": "Example result 3",
+        "output": "Case ID: [redacted]\nStatus: Not Found"
+      }
+    ]
+  },
+  "CHECK_991": {
+    "title": "Apple iCloud ID Hint",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "[redacted]"
+      }
+    ]
+  },
+  "CHECK_696": {
+    "title": "Apple Owner ID Info - (Read Description)",
+    "variants": [
+      {
+        "label": "Example result 1",
+        "output": "90% of orders are done within 1-5 minutes\n10% of orders are done within 2-3 hours\n5% of orders are done within 1-5 days"
+      },
+      {
+        "label": "Example result 2",
+        "output": "- Full Name\n- Email (If available)\n- Phone (If available)"
+      },
+      {
+        "label": "Example result 3",
+        "output": "Model: iPhone 12 Pro\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial Number: [redacted]\nOwner Details: Not Found\nModel: iPhone 12 Pro\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial Number: [redacted]\nOwner Details:\nCathy DreXXXXs\n[redacted]\n+1707XXXXX97\nUnited States"
       }
     ]
   },
@@ -48,8 +91,8 @@
     "title": "Apple Warranty (Activation Info)",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model: IPHONE 11 PRO MAX 256GB MIDNIGHT GREEN [A2218]\nIMEI/SN: [redacted]\nActivation Status: Activated\nTelephone Technical Support: Expired\nCoverage Status: Apple Limited Warranty (2 days remaining)\nCoverage End Date: September 20, 2020\nAppleCare Eligible: No\nEstimated Purchase Date: September 21, 2019\nRegistered: Y\nLoaner: N"
+        "label": "Example result",
+        "output": "Model: IPHONE 11 PRO MAX 256GB MIDNIGHT GREEN [A2218]\nIMEI/SN: [redacted]\nActivation Status: Activated\nTelephone Technical Support: Expired\nCoverage Status: Apple Limited Warranty (2 days remaining)\nCoverage End Date: September 20, 2020\nAppleCare Eligible: No\nEstimated Purchase Date: September 21, 2019\nRegistered: Y\nLoaner: N"
       }
     ]
   },
@@ -57,8 +100,8 @@
     "title": "Apple Warranty (Activation Info) SN",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model: MacBook Pro (16-inch, 2023)\nSerial: [redacted]\nActivation Status: Activated\nAppleCare Eligible: No\nValid Purchase Date: Yes\nRegistered Device: Yes\nReplaced Device: No\nTelephone Technical Support: Active (251 days remaining)\nTelephone Technical Support Expiration Date: May 15, 2026\nRepairs and Service Coverage: Active (251 days remaining)\nRepairs and Service Expiration Date: May 15, 2026\nWarranty Status: AppleCare+ (251 days remaining)\nYour device is covered for: Accidental Damage Protection, Hardware Service, 24/7 Priority Access\nAgreement Code: [redacted]\nEstimated Purchase Date: May 16, 2023"
+        "label": "Example result",
+        "output": "Model: MacBook Pro (16-inch, 2023)\nSerial: [redacted]\nActivation Status: Activated\nAppleCare Eligible: No\nValid Purchase Date: Yes\nRegistered Device: Yes\nReplaced Device: No\nTelephone Technical Support: Active (251 days remaining)\nTelephone Technical Support Expiration Date: May 15, 2026\nRepairs and Service Coverage: Active (251 days remaining)\nRepairs and Service Expiration Date: May 15, 2026\nWarranty Status: AppleCare+ (251 days remaining)\nYour device is covered for: Accidental Damage Protection, Hardware Service, 24/7 Priority Access\nAgreement Code: 1002923437401\nEstimated Purchase Date: May 16, 2023"
       }
     ]
   },
@@ -66,8 +109,8 @@
     "title": "Apple IMEI ↔ SN ↔ IMEI2 CONVERT",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model:  IPHONE 8 PLUS 64GB SILVER\nIMEI: [redacted]\nMEID: [redacted]\nSerial Number: [redacted]"
+        "label": "Example result",
+        "output": "Model: IPHONE 8 PLUS 64GB SILVER\nIMEI: [redacted]\nMEID: [redacted]\nSerial Number: [redacted]"
       }
     ]
   },
@@ -75,7 +118,7 @@
     "title": "Apple Part Number / MPN",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model: iPhone XS\nIMEI Number: [redacted]\nPart Number: MT9K2RU/A\nPart Number Country: Russia\nPart Type: Retail"
       }
     ]
@@ -84,7 +127,7 @@
     "title": "Apple iCloud MACBOOK/iMAC (ON / OFF)",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model: MACBOOK PRO\nSerial Number: [redacted]\nFind My Mac: ON"
       }
     ]
@@ -93,7 +136,7 @@
     "title": "Apple iCloud MACBOOK/iMAC (Clean / Lost)",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model: MACBOOK PRO (14-INCH, 2021)\nModel Description: MBP 14.2 SL CTO\nSerial Number: [redacted]\nFind My Mac: ON\niCloud Status: LOST"
       }
     ]
@@ -102,12 +145,8 @@
     "title": "Apple iCloud (ON / OFF)",
     "variants": [
       {
-        "label": "Find My on",
-        "output": "[redacted] Find My iPhone: ON"
-      },
-      {
-        "label": "Find My off",
-        "output": "[redacted] Find My iPhone: OFF"
+        "label": "Example result",
+        "output": "35566907546XXXX Find My iPhone: ON\n35566907546XXXX Find My iPhone: OFF"
       }
     ]
   },
@@ -115,16 +154,8 @@
     "title": "Apple iCloud (Clean / Lost)",
     "variants": [
       {
-        "label": "Lost mode",
-        "output": "[redacted] FMI STATUS: LOST > Means iCloud Lock is ON and in LOST mode."
-      },
-      {
-        "label": "Clean mode",
-        "output": "[redacted] FMI STATUS: CLEAN > Means iCloud Lock is ON and in CLEAN mode."
-      },
-      {
-        "label": "Find My off",
-        "output": "[redacted] FMI STATUS: OFF > Means iCloud Lock is OFF."
+        "label": "Example result",
+        "output": "3592410641XXXXX FMI STATUS: LOST > Means iCloud Lock is ON and in LOST mode.\n3592410641XXXXX FMI STATUS: CLEAN > Means iCloud Lock is ON and in CLEAN mode.\n3592410641XXXXX FMI STATUS: OFF > Means iCloud Lock is OFF."
       }
     ]
   },
@@ -132,25 +163,8 @@
     "title": "Apple iCloud (Clean / Lost) SN",
     "variants": [
       {
-        "label": "Lost mode",
-        "output": "[redacted] FMI STATUS: LOST > Means iCloud Lock is ON and in LOST mode."
-      },
-      {
-        "label": "Clean mode",
-        "output": "[redacted] FMI STATUS: CLEAN > Means iCloud Lock is ON and in CLEAN mode."
-      },
-      {
-        "label": "Find My off",
-        "output": "[redacted] FMI STATUS: OFF > Means iCloud Lock is OFF."
-      }
-    ]
-  },
-  "APPLE_MDM": {
-    "title": "Apple MDM (ON / OFF)",
-    "variants": [
-      {
-        "label": "Report example",
-        "output": "Model: IPHONE 11\nIMEI: [redacted]\nMDM Enrollment Status: ON"
+        "label": "Example result",
+        "output": "3592410641XXXXX FMI STATUS: LOST > Means iCloud Lock is ON and in LOST mode.\n3592410641XXXXX FMI STATUS: CLEAN > Means iCloud Lock is ON and in CLEAN mode.\n3592410641XXXXX FMI STATUS: OFF > Means iCloud Lock is OFF."
       }
     ]
   },
@@ -158,8 +172,26 @@
     "title": "Apple MDM (ON / OFF) SN",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "MDM Enrollment Status: ON"
+      }
+    ]
+  },
+  "APPLE_MDM_FMI": {
+    "title": "Apple MDM + FMI (ON / OFF)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Model: MACBOOK PRO\nIMEI: [redacted]\nMDM Enrollment Status: ON\nFind My Mac: ON"
+      }
+    ]
+  },
+  "CHECK_984": {
+    "title": "Apple MDM + FMI (ON / OFF) S2",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Model: MACBOOK PRO\nIMEI: [redacted]\nMDM Enrollment Status: ON\nFind My Mac: ON"
       }
     ]
   },
@@ -167,7 +199,7 @@
     "title": "Apple GSX Next Tether Policy",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model: iPhone 12 Pro Max (A2342)\nIMEI/SN: [redacted]\nFind My: ON\nNext Tether Policy: S2388 US Loaner and Service Picker policy - iPhone 7 and newer\nSim-Lock: Locked"
       }
     ]
@@ -176,8 +208,8 @@
     "title": "Apple Case History, Replacement",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX DESERT 256GB-JPN\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\n\nCases History:\n[redacted] 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:14:59.673Z Summary: Apple account disabled\nReplacement Details: Not Found"
+        "label": "Example result",
+        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX DESERT 256GB-JPN\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nCases History:\n1028446XXXXX 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n1027139XXXXX 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n1027139XXXXX 2025-10-04T16:14:59.673Z Summary: Apple Account disabled\nReplacement Details: Not Found"
       }
     ]
   },
@@ -185,7 +217,7 @@
     "title": "Apple Sold By Info",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model Config: IPHONE 12 MINI,ROW,64GB,GREEN\nProduct Sold By: [redacted]\nEstimated Purchase Date: 16 Jun 2021\nPurchase Country: France"
       }
     ]
@@ -194,8 +226,17 @@
     "title": "Apple Sold By, Coverage (Max Info)",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Description: IPHONE 11 PRO MAX SG 64GB TMO-USA\nModel: IPHONE 11 PRO MAX,NA,64GB,SPACE GRAY\nIMEI Number: [redacted]\nIMEI2 Number: [redacted]\nMEID Number: [redacted]\nSerial Number: [redacted]\nProduct Version: 14.3\nSIM1 Carrier: RM (Roam Mobility)\nSIM2 Carrier: Boost Mobile\nMDM Lock: OFF\niCloud Lock: ON\niCloud Status: LOST\nGSX Case History: 0 records\nGSX Replacement History: 0 records\nCoverage Status: Out of warranty (no coverage)\nEstimated Purchase Date: 08 October 2020\nSold To Name: [redacted]\nPurchase Country: United States\nNext Tether Policy: US Sprint/T-Mobile Locked Policy\nSim-Lock: Locked"
+      }
+    ]
+  },
+  "CHECK_707": {
+    "title": "Apple Sold By, Case History, Activation Policy",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Applied Activation Details: Unlock.\nApplied Activation Policy Id: 10\nCSNCSN2E ID: [redacted]\nInitial Activation Policy Details: UK T-Mobile Orange Policy\nInitial Activation Policy Id: 302\nLast Restore Date: 2022-08-20T01:39:17Z\nLast Unbrick Os Build: 19G82\nNext Tether Policy Details: Unlock.\nNext Tether Policy Id: 10\nProduct Description: iPhone 11\nProduct Version: 15.6.1\nUnlock Date: 2021-11-20T18:48:21Z\nUnlocked: True\nCarrier Name: EE\nFirst Activation Date: 2020-11-01T10:28:55Z\nWireless Mac Address: [redacted]\nLabor Covered: False\nLimited Warranty: False\nOnsite Coverage: False\nPart Covered: False\nPersonalized: False\nPurchase Date: 2020-11-01T00:00:00Z\nRegistration Date: 2020-11-01T00:00:00Z\nWarranty Status Code: OO\nWarranty Status Description: Out of warranty (no coverage)\nConfig Code: N736\nConfig Description: IPHONE 11 ROW 64GB WHITE\nLoaner: False\nProduct Line: 507882\nSold To Name: [redacted]\nPurchase Country: United Kingdom\nMDM Lock: OFF\niCloud Lock: ON\niCloud Status: CLEAN\nCase Details\nCase Id: [redacted]\nCase Id: [redacted]\nCase Id: [redacted]\nCase Id: [redacted]"
       }
     ]
   },
@@ -203,26 +244,26 @@
     "title": "Apple Sold By, Case History, Replacement, Activation Policy [ICCID & MAC] (Full GSX)",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model Description: IPHONE 13 ROW 256GB MIDNIGHT\nProduct Description: IPHONE 13 MIDNIGHT 256GB-YPT\nConfig Code: 000DT6\nPart Number: MLQ63QL/A\nModel Number: A2633\nProduct Line: 300428\nProduct Version: 16.2\nLast Unbrick Os Build: 20C65\nWireless Mac Address: [redacted]\nCSN/CSN2/EID: [redacted]\nPurchase Date: 2023-01-14T00:00:00Z\nFirst Activation Date: 2023-01-14T17:19:49Z\nLast Restore Date: 2023-01-22T03:32:04Z\nUnlock Date: 2023-01-14T17:19:49Z\nWarranty Status Description: Out Of Warranty (No Coverage)\nLoaner: False\nUnlocked: True\nPersonalized: False\nPart Covered: False\nLabor Covered: False\nOnsite Coverage: False\nLimited Warranty: False\nInitial Activation Policy: 10 - Unlock.\nApplied Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nSold To Name: [redacted]\nPurchase Country: Spain\nMDM Lock: OFF\niCloud Lock: ON\niCloud Status: LOST\nSIM Lock: Unlocked\nCases: Not Found\nReplacement: Not Found"
       }
     ]
   },
   "CHECK_987": {
-    "title": "Apple Sold By, Case History, Replacement, GSX Activation Policy",
+    "title": "Apple Sold By, Case History, Replacement, GSX Activation Policy ⭐",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nConfig Code: 0050CJ\nProduct Line: 301048\nProduct Version: 26.3.1\nLast Unbrick Os Build: 23D8133\nCSN/CSN2/EID: [redacted]\nCarrier Name: Carrier\nFirst Activation Date: 2025-01-18T20:09:36Z\nPurchase Date: 2025-01-19T00:00:00Z\nRegistration Date: 2025-01-18T00:00:00Z\nLast Restore Date: 2026-03-14T13:20:51Z\nUnlock Date: 2025-04-18T20:16:59Z\nUnlocked: Yes\nApplied Activation Policy: 10 - Unlock.\nInitial Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nPersonalized: No\nPart Covered: No\nLabor Covered: No\nOnsite Coverage: No\nLimited Warranty: No\nWarranty Status: Out Of Warranty (No Coverage)\nSold To Name: [redacted]\nPurchase Country: Japan\nMDM Lock: OFF\niCloud Lock: OFF\n\nCases History:\n[redacted] 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:14:59.673Z Summary: Apple account disabled\nReplacement Details: Not Found"
+        "label": "Example result",
+        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nConfig Code: 0050CJ\nProduct Line: 301048\nProduct Version: 26.3.1\nLast Unbrick Os Build: 23D8133\nCSN/CSN2/EID: [redacted]\nCarrier Name: Carrier\nFirst Activation Date: 2025-01-18T20:09:36Z\nPurchase Date: 2025-01-19T00:00:00Z\nRegistration Date: 2025-01-18T00:00:00Z\nLast Restore Date: 2026-03-14T13:20:51Z\nUnlock Date: 2025-04-18T20:16:59Z\nUnlocked: Yes\nApplied Activation Policy: 10 - Unlock.\nInitial Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nPersonalized: No\nPart Covered: No\nLabor Covered: No\nOnsite Coverage: No\nLimited Warranty: No\nWarranty Status: Out Of Warranty (No Coverage)\nSold To Name: [redacted]\nPurchase Country: Japan\nMDM Lock: OFF\niCloud Lock: OFF\nCases History:\n1028446XXXXX 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n1027139XXXXX 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n1027139XXXXX 2025-10-04T16:14:59.673Z Summary: Apple Account disabled\nReplacement Details: Not Found"
       }
     ]
   },
   "APPLE_GSX_LIGHT": {
-    "title": "Apple Sold By, Case History, Replacement, GSX Activation Policy [ICCID & MAC]",
+    "title": "Apple Sold By, Case History, Replacement, GSX Activation Policy [ICCID & MAC] ⭐",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX DESERT 256GB-JPN\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nConfig Code: 0050CJ\nProduct Line: 301048\nProduct Version: 26.3.1\nLast Unbrick Os Build: 23D8133\nCSN/CSN2/EID: [redacted]\nWireless Mac Address: [redacted]\nCarrier Name: Carrier\nFirst Activation Date: 2025-01-18T20:09:36Z\nPurchase Date: 2025-01-19T00:00:00Z\nRegistration Date: 2025-01-18T00:00:00Z\nLast Restore Date: 2026-03-14T13:20:51Z\nUnlock Date: 2025-04-18T20:16:59Z\nUnlocked: Yes\nApplied Activation Policy: 10 - Unlock.\nInitial Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nPersonalized: No\nPart Covered: No\nLabor Covered: No\nOnsite Coverage: No\nLimited Warranty: No\nWarranty Status: Out Of Warranty (No Coverage)\nSold To Name: [redacted]\nPurchase Country: Japan\nMDM Lock: OFF\niCloud Lock: OFF\n\nCases History:\n[redacted] 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n[redacted] 2025-10-04T16:14:59.673Z Summary: Apple account disabled\nReplacement Details: Not Found"
+        "label": "Example result",
+        "output": "Config Description: IPHONE 16 PROMAX,NAJP,256GB,DSRT TTNM\nModel Description: IPHONE 16 PRO MAX DESERT 256GB-JPN\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nConfig Code: 0050CJ\nProduct Line: 301048\nProduct Version: 26.3.1\nLast Unbrick Os Build: 23D8133\nCSN/CSN2/EID: [redacted]\nWireless Mac Address: [redacted]\nCarrier Name: Carrier\nFirst Activation Date: 2025-01-18T20:09:36Z\nPurchase Date: 2025-01-19T00:00:00Z\nRegistration Date: 2025-01-18T00:00:00Z\nLast Restore Date: 2026-03-14T13:20:51Z\nUnlock Date: 2025-04-18T20:16:59Z\nUnlocked: Yes\nApplied Activation Policy: 10 - Unlock.\nInitial Activation Policy: 10 - Unlock.\nNext Tether Policy: 10 - Unlock.\nPersonalized: No\nPart Covered: No\nLabor Covered: No\nOnsite Coverage: No\nLimited Warranty: No\nWarranty Status: Out Of Warranty (No Coverage)\nSold To Name: [redacted]\nPurchase Country: Japan\nMDM Lock: OFF\niCloud Lock: OFF\nCases History:\n1028446XXXXX 2026-03-14T18:55:34.174Z Summary: Consumer Activation Lock\n1027139XXXXX 2025-10-04T16:30:13.521Z Summary: Consumer Activation Lock\n1027139XXXXX 2025-10-04T16:14:59.673Z Summary: Apple Account disabled\nReplacement Details: Not Found"
       }
     ]
   },
@@ -230,8 +271,17 @@
     "title": "Apple Case History",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Description: IPHONE XR WHITE 64GB-RUS\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 2020-11-15\nReplaced Device: No\n\nCase Details\nStatus: RESOL\nLast Modified: 2022-05-12T08:20:15.675Z\nId: [redacted]\nIssue Code: ICL0013\nIssue Desc: Login issue (iCloud Only)\nComponent Code: ICL001\nComponent Desc: iCloud Account\nTitle: log in to Apple ID issue\nSupport Topic: log in to Apple ID issue\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-13T10:14:37.072Z\nId: [redacted]\nIssue Code: ID05-02\nIssue Desc: How to - reset/change password\nComponent Code: ID05\nComponent Desc: Forgotten / Change Password\nTitle: forgoten id password\nSupport Topic: forgoten id password\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-12T08:01:55.081Z\nId: [redacted]\nIssue Code: NTI0302\nIssue Desc: Law Enforcement Referral\nComponent Code: NTI03\nComponent Desc: Law Enforcement Inquiry or Referral\nTitle: Referral\nSupport Topic: Referral\nStatus Description: Closed"
+        "label": "Example result",
+        "output": "Description: IPHONE XR WHITE 64GB-RUS\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 2020-11-15\nReplaced Device: No\nCase Details\nStatus: RESOL\nLast Modified: 2022-05-12T08:20:15.675Z\nId: [redacted]\nIssue Code: ICL0013\nIssue Desc: Login issue (iCloud Only)\nComponent Code: ICL001\nComponent Desc: iCloud Account\nTitle: log in to Apple ID issue\nSupport Topic: log in to Apple ID issue\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-13T10:14:37.072Z\nId: [redacted]\nIssue Code: ID05-02\nIssue Desc: How to - reset/change password\nComponent Code: ID05\nComponent Desc: Forgotten / Change Password\nTitle: forgoten id password\nSupport Topic: forgoten id password\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-12T08:01:55.081Z\nId: [redacted]\nIssue Code: NTI0302\nIssue Desc: Law Enforcement Referral\nComponent Code: NTI03\nComponent Desc: Law Enforcement Inquiry or Referral\nTitle: Referral\nSupport Topic: Referral\nStatus Description: Closed"
+      }
+    ]
+  },
+  "CHECK_266": {
+    "title": "Apple Repairs, Replacement Details",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Config Description: IPHONE 11 PRO MAX,ROW,256GB,GOLD\nProduct Family: iPhone 11 Pro Max\nWarranty Status Code: OO\nProduct Description: IPHONE 11 PRO MAX GLD 256GB-RUS\nReplacement History (2)\nH0DH5XXXN710 35287111XXX0825 352871112XXX013 35287111XXX082 Active\nFK1CDXXXN710 35392510XXX1894 353925109XXX607 35392510XXX189 Original 2022-03-04T08:%i:1646383653Z"
       }
     ]
   },
@@ -239,8 +289,8 @@
     "title": "Apple Case History, Repairs, Replacements, Diagnostics",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Description: IPHONE XR WHITE 64GB-RUS\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 2020-11-15\nReplaced Device: No\n\nCase Details\nStatus: RESOL\nLast Modified: 2022-05-12T08:20:15.675Z\nId: [redacted]\nIssue Code: ICL0013\nIssue Desc: Login issue (iCloud Only)\nComponent Code: ICL001\nComponent Desc: iCloud Account\nTitle: log in to Apple ID issue\nSupport Topic: log in to Apple ID issue\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-13T10:14:37.072Z\nId: [redacted]\nIssue Code: ID05-02\nIssue Desc: How to - reset/change password\nComponent Code: ID05\nComponent Desc: Forgotten / Change Password\nTitle: forgoten id password\nSupport Topic: forgoten id password\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-12T08:01:55.081Z\nId: [redacted]\nIssue Code: NTI0302\nIssue Desc: Law Enforcement Referral\nComponent Code: NTI03\nComponent Desc: Law Enforcement Inquiry or Referral\nTitle: Referral\nSupport Topic: Referral\nStatus Description: Closed\nNo Repair Found!"
+        "label": "Example result",
+        "output": "Description: IPHONE XR WHITE 64GB-RUS\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 2020-11-15\nReplaced Device: No\nCase Details\nStatus: RESOL\nLast Modified: 2022-05-12T08:20:15.675Z\nId: [redacted]\nIssue Code: ICL0013\nIssue Desc: Login issue (iCloud Only)\nComponent Code: ICL001\nComponent Desc: iCloud Account\nTitle: log in to Apple ID issue\nSupport Topic: log in to Apple ID issue\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-13T10:14:37.072Z\nId: [redacted]\nIssue Code: ID05-02\nIssue Desc: How to - reset/change password\nComponent Code: ID05\nComponent Desc: Forgotten / Change Password\nTitle: forgoten id password\nSupport Topic: forgoten id password\nStatus Description: Closed\nStatus: RESOL\nLast Modified: 2022-05-12T08:01:55.081Z\nId: [redacted]\nIssue Code: NTI0302\nIssue Desc: Law Enforcement Referral\nComponent Code: NTI03\nComponent Desc: Law Enforcement Inquiry or Referral\nTitle: Referral\nSupport Topic: Referral\nStatus Description: Closed\nNo Repair Found!"
       }
     ]
   },
@@ -248,8 +298,53 @@
     "title": "Apple Sold By, Case History, Replacement, Activation Policy [ICCID & MAC] (FULL GSX) S2",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model Description: IPHONE 12 BLACK 64GB ATT-USA\nModel: iPhone 12 64GB Black A2172 US\nEID Number: [redacted]\nManufacture Date: 18 Nov 2020\nUnit Age: 4 years, 11 months and 17 days\nAssembled In: Foxconn Chengdu, China\nActivation Status: Activated\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 28 Dec 2020\nPurchase Country: United States\nCoverage End Date: 12 Jun 2025\nTelephone Technical Support: Expired\nRepairs and Service Coverage: Expired\nAppleCare Eligible: No\nValid Purchase Date: Yes\nRegistered Device: Yes\nReplaced by Apple: No\nReplacement Device: No\nRefurbished: No\nDemo Unit: No\nLoaner Device: No\nFind My iPhone: OFF\nUS Block Status: Clean\nNext Activation Policy ID: 10\nLocked Carrier: Unlock\nCountry: United States\nSIM-Lock Status: Unlocked\nDevice Details\nProduct Sold By: [redacted]\nEstimated Purchase Date 28/12/20\nPurchased In United States\nCoverage Details Coverage Status\nOut Of Warranty (No Coverage)\nLoaner Device No\nActivation Policy Details\nDevice Details\nPart Description iPhone 12\nCSN/CSN2/EID: [redacted]\nWi-Fi Mac Address: [redacted]\nSoftware Version 18.5\nSoftware Build 22F76\nCarrier F-Contact\nICCID: [redacted]\nCarrier 2 MetTel\nDevice Enrollment Program No\nActivation Details\nInitial Activation Policy ID 23\nInitial Activation Policy US AT&T Activation Policy\nLast Applied Activation Policy ID 2303\nLast Applied Activation Policy Multi-Mode Unlock\nNext Tether Policy ID 2303\nNext Tether Policy Multi-Mode Unlock\nFirst Activation Date 27/12/20 02:27 AM\nLast Restore Date 18/06/25 02:03 PM\nUnlock Date 03/11/25 07:54 PM\nUnlocked Yes\n\nNo Repair Found\nNo Case History Found\nNo Replacement History Found\nNo Escalation Found\nNo Diagnostic History Found"
+        "label": "Example result",
+        "output": "Model Description: IPHONE 12 BLACK 64GB ATT-USA\nModel: iPhone 12 64GB Black A2172 US\nEID Number: [redacted]\nManufacture Date: 18 Nov 2020\nUnit Age: 4 years, 11 months and 17 days\nAssembled In: Foxconn Chengdu, China\nActivation Status: Activated\nWarranty Status: Out Of Warranty\nEstimated Purchase Date: 28 Dec 2020\nPurchase Country: United States\nCoverage End Date: 12 Jun 2025\nTelephone Technical Support: Expired\nRepairs and Service Coverage: Expired\nAppleCare Eligible: No\nValid Purchase Date: Yes\nRegistered Device: Yes\nReplaced by Apple: No\nReplacement Device: No\nRefurbished: No\nDemo Unit: No\nLoaner Device: No\nFind My iPhone: OFF\nUS Block Status: Clean\nNext Activation Policy ID: 10\nLocked Carrier: Unlock\nCountry: United States\nSIM-Lock Status: Unlocked\nDevice Details\nProduct Sold By AT&T MOBILITY LLC\nEstimated Purchase Date 28/12/20\nPurchased In United States\nCoverage Details Coverage Status\nOut Of Warranty (No Coverage)\nLoaner Device No\nActivation Policy Details\nDevice Details\nPart Description iPhone 12\nCSN/CSN2/EID 890490320060088826001021XXXXXX\nWi-Fi Mac Address A8817EAC1XXX\nSoftware Version 18.5\nSoftware Build 22F76\nCarrier F-Contact\nICCID [redacted]\nCarrier 2 MetTel\nDevice Enrollment Program No\nActivation Details\nInitial Activation Policy ID 23\nInitial Activation Policy US AT&T Activation Policy\nLast Applied Activation Policy ID 2303\nLast Applied Activation Policy Multi-Mode Unlock\nNext Tether Policy ID 2303\nNext Tether Policy Multi-Mode Unlock\nFirst Activation Date ‎27/12/20 02:27 AM\nLast Restore Date ‎18/06/25 02:03 PM\nUnlock Date ‎03/11/25 07:54 PM\nUnlocked Yes\nNo Repair Found\nNo Case History Found\nNo Replacement History Found\nNo Escalation Found\nNo Diagnostic History Found"
+      }
+    ]
+  },
+  "CHECK_973": {
+    "title": "Apple Case History (Picture)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "img"
+      }
+    ]
+  },
+  "CHECK_944": {
+    "title": "Apple Case History, Repairs, Replacements (Picture)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Img"
+      }
+    ]
+  },
+  "CHECK_977": {
+    "title": "Apple Sold By, Case History, Replacement (Picture)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Img"
+      }
+    ]
+  },
+  "CHECK_978": {
+    "title": "Apple Sold By, Case History, Repairs, Replacement, Diagnostics (Picture)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Img"
+      }
+    ]
+  },
+  "CHECK_974": {
+    "title": "Apple Full GSX (Picture)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "img"
       }
     ]
   },
@@ -257,12 +352,8 @@
     "title": "WorldWide GSMA Blacklist Status (SIMPLE INFO)",
     "variants": [
       {
-        "label": "Blacklisted",
-        "output": "[redacted] BLACKLIST STATUS: BLACKLISTED"
-      },
-      {
-        "label": "Clean",
-        "output": "[redacted] BLACKLIST STATUS: CLEAN"
+        "label": "Example result",
+        "output": "3592410641XXXXX BLACKLIST STATUS: BLACKLISTED\n3592410641XXXXX BLACKLIST STATUS: CLEAN"
       }
     ]
   },
@@ -270,15 +361,32 @@
     "title": "WorldWide GSMA Blacklist Status (FULL INFO)",
     "variants": [
       {
-        "label": "Blacklisted — Verizon",
-        "output": "Model Name: APPLE IPHONE 11 PRO (A2160)\nManufacturer: APPLE INC\nBlacklist Status: BLACKLISTED\nBlacklisted (FRAUD) By: VERIZON WIRELESS\nBlacklisted (FRAUD) Country: US\nBlacklisted (FRAUD) On: 24/01/2020 10:31:00\nNote: Reported stolen on 29/01/17"
+        "label": "Example result 1",
+        "output": "Model Name: APPLE IPHONE 11 PRO (A2160)\nManufacturer: APPLE INC\nBlacklist Status: BLACKLISTED\nBlacklisted (FRAUD) By: VERIZON WIRELESS\nBlacklisted (FRAUD) Country: US\nBlacklisted (FRAUD) On: 24/01/2020 10:31:00\nNote: CARGADO POR ROBO EL 29/01/17"
       },
       {
-        "label": "Blacklisted — O2",
+        "label": "Example result 2",
         "output": "IMEI: [redacted]\nModel: APPLE IPHONE 4S (A1387)\nBlacklist Status: BLACKLISTED\nBlacklisted By: O2 (UK) LIMITED\nBlacklisted On: 2017-08-05 07:44:48\nBlacklisted Country: UNITED KINGDOM"
       },
       {
-        "label": "Clean",
+        "label": "Example result 3",
+        "output": "IMEI: [redacted]\nModel Name: APPLE IPHONE 8 (A1905)\nModel Number: IPHONE 8 (A1905)\nManufacturer: APPLE INC\nBlacklist Status: CLEAN\nDetails: Never been blacklisted"
+      }
+    ]
+  },
+  "CHECK_988": {
+    "title": "Japan AU/KDDI/UQ/Softbank/YMobile/Mineo/Rakuten Blacklist Check",
+    "variants": [
+      {
+        "label": "Example result 1",
+        "output": "Model Name: APPLE IPHONE 11 PRO (A2160)\nManufacturer: APPLE INC\nBlacklist Status: BLACKLISTED\nBlacklisted (FRAUD) By: VERIZON WIRELESS\nBlacklisted (FRAUD) Country: US\nBlacklisted (FRAUD) On: 24/01/2020 10:31:00\nNote: CARGADO POR ROBO EL 29/01/17"
+      },
+      {
+        "label": "Example result 2",
+        "output": "IMEI: [redacted]\nModel: APPLE IPHONE 4S (A1387)\nBlacklist Status: BLACKLISTED\nBlacklisted By: O2 (UK) LIMITED\nBlacklisted On: 2017-08-05 07:44:48\nBlacklisted Country: UNITED KINGDOM"
+      },
+      {
+        "label": "Example result 3",
         "output": "IMEI: [redacted]\nModel Name: APPLE IPHONE 8 (A1905)\nModel Number: IPHONE 8 (A1905)\nManufacturer: APPLE INC\nBlacklist Status: CLEAN\nDetails: Never been blacklisted"
       }
     ]
@@ -287,11 +395,11 @@
     "title": "T-Mobile USA Status",
     "variants": [
       {
-        "label": "Blocked",
+        "label": "Example result 1",
         "output": "Model: iPhone XR\nManufacturer: Apple\nIMEI: [redacted]\nIMEI2: [redacted]\nStatus: Blocked"
       },
       {
-        "label": "Clean",
+        "label": "Example result 2",
         "output": "Model: Apple iPhone 11 (A2111)\nManufacturer: Apple Inc\nESN Status: CLEAN"
       }
     ]
@@ -300,15 +408,15 @@
     "title": "T-Mobile USA Status [PRO]",
     "variants": [
       {
-        "label": "Blocked",
+        "label": "Example result 1",
         "output": "Model: iPhone XR\nManufacturer: Apple\nIMEI: [redacted]\nIMEI2: [redacted]\neSIM CSN: [redacted]\neSIM Supported: Yes\nStatus: Blocked\nStatus Description: Reported unrecoverable by insurance Unrecoverable - Insurance"
       },
       {
-        "label": "Clean",
+        "label": "Example result 2",
         "output": "Model: Apple iPhone 11 (A2111)\nManufacturer: Apple Inc\nESN Status: CLEAN"
       },
       {
-        "label": "Clean — leased device",
+        "label": "Example result 3",
         "output": "Model: Apple iPhone 11 (A2111)\nManufacturer: Apple Inc\nESN Status: CLEAN (Leased device)"
       }
     ]
@@ -317,8 +425,17 @@
     "title": "Verizon USA Status",
     "variants": [
       {
-        "label": "Report example",
+        "label": "Example result",
         "output": "Model: GALAXY S22 ULTRA 512 BLK\nIMEI: [redacted]\nStatus: Clean\nPart Number: SMS908UZKFV\nProduct ID: DEV17760008\nDevice SKU: SKU5030023"
+      }
+    ]
+  },
+  "CHECK_584": {
+    "title": "Google Pixel Info",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Model: Pixel 4 XL (64GB, Clearly White, Unlocked)\nModel Description: PIXEL PHONE 4 XL WHITE 64GB UNLOCKED\nModel Number: GA01181-US\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial: [redacted]\nPurchase Country: United States\nDate: 2019-11-6\nWarranty Status: Expired\nWarranty Start Date: 2019-10-22 07:00:00\nWarranty End Date: 2020-10-21 07:00:00\nDevice Age: 4 Years, 9 Days"
       }
     ]
   },
@@ -326,8 +443,8 @@
     "title": "ZTE INFO",
     "variants": [
       {
-        "label": "Report excerpt",
-        "output": "IMEI: [redacted]\nProduct Name: P817A22\nProduct Description: Z971 Mobile Phone\nProduct Info: AT&T/No Charger&Cable/4FF SIM/3140mAh/SZLM/PAYGO\nProduct Line: North America\nModel: Z971"
+        "label": "Example result",
+        "output": "IMEI: [redacted]\nProduct Code 1265358XXX\nProduct Name: P817A22\nProduct Description: Z971 Mobile Phone\nProduct Info: AT&T/No Charger&Cable/4FF SIM/3140mAh/SZLM/PAYGO\nProduct Line: North America\nModel: Z971\nPrimary Handset ID: 8637666XXX\nProduction Date: 325275136427\nCompany Name: 709340613332"
       }
     ]
   },
@@ -335,11 +452,11 @@
     "title": "XIAOMI (ON / OFF)",
     "variants": [
       {
-        "label": "Device report example",
+        "label": "Example result 1",
         "output": "Model: Redmi Note 13 Mint Green 6GB RAM 128GB ROM\nIMEI: [redacted]\nSerial Number: [redacted]\nUnlock Number (FSN): [redacted]\nWarranty Status: Out of Warranty\nWarranty Description: Non-local sale and Non-global warranty\nWarranty Start Date: 2024-02-15 05:53:27\nWarranty End Date: 2026-02-14 05:53:27\nPurchased In: Paraguay\nMI Activation Lock: ON"
       },
       {
-        "label": "Lock status example",
+        "label": "Example result 2",
         "output": "IMEI/KeyLock: [redacted]\nMI Activation Lock: ON"
       }
     ]
@@ -348,8 +465,12 @@
     "title": "XIAOMI (Clean/ Lost)",
     "variants": [
       {
-        "label": "Clean activation status",
+        "label": "Example result 1",
         "output": "Model Name: Redmi6 Pro SIM Free 4GB RAM Obsidian Black 64GB\nModel Code: XIAOMI M1805D1SE\nIMEI Number: [redacted]\nIMEI2 Number: [redacted]\nMEID Number: [redacted]\nSerial Number: [redacted]\nUnlock Number: [redacted]\nSKU Number: MZB6271CN\nPurchase Country: China\nActivation Country: Uzbekistan\nWarranty Status: Non-Local device\nWarranty Description: Non-local sale\nWarranty Start Date: 2018-12-24 19:27:56\nWarranty End Date: 2020-12-23\nDelivery Date: 2018-09-27 14:20:32\nActivation Date: 2018-09-27 14:20:32\nProduction Date: 2018-08-16 08:40:19\nMI Activation Lock: ON\nMI Activation Status: Clean"
+      },
+      {
+        "label": "Example result 2",
+        "output": "MI Activation Lock: ON\nMI Activation Status: Clean"
       }
     ]
   },
@@ -357,8 +478,17 @@
     "title": "HUAWEI INFO",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Model Description: HUAWEI P50 8GB+256GB Cocoa Gold Single Card AT&T Ver. USA CHG\nModel Code: Amber-L09C\nIMEI: [redacted]\nS/N: [redacted]\nItem Code: 51097AVP\nOffer Code: OFFE00580406\nWarranty Valid In: Mexico\nWarranty Status: In warranty\nActivation Date: April 25, 2022\nShipment Date: May 17, 2022\nOrder Date: May 13, 2022\n\nWarranty Details:\nWarranty Type: 15 Day Device Return\nValid in Country: MX\nService Code: BS01000002\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\n\nWarranty Type: 15 Day Device Replacement\nValid in Country: MX\nService Code: BS02000001\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\n\nWarranty Type: 1 Year Warranty\nValid in Country: MX\nService Code: BS03000001\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: HUAWEI Accidental Screen Damage Warranty 6M1T\nValid in Country: MX\nService Code: ES02000004\nStart Date: December 10, 2022\nEnd Date: June 11, 2023\nBind Date: August 11, 2022\n\nWarranty Type: Huawei Setup Assistance 12Months 1 Time\nValid in Country: MX\nService Code: ES5330001101\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022"
+        "label": "Example result",
+        "output": "Model Description: HUAWEI P50 8GB+256GB Cocoa Gold Single Card AT&T Ver. USA CHG\nModel Code: Amber-L09C\nIMEI: [redacted]\nS/N: [redacted]\nItem Code: 51097AVP\nOffer Code: OFFE00580406\nWarranty Valid In: Mexico\nWarranty Status: In warranty\nActivation Date: April 25, 2022\nShipment Date: May 17, 2022\nOrder Date: May 13, 2022\nWarranty Details:\nWarranty Type: 15 Day Device Return\nValid in Country: MX\nService Code: BS01000002\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: 15 Day Device Replacement\nValid in Country: MX\nService Code: BS02000001\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: 1 Year Warranty\nValid in Country: MX\nService Code: BS03000001\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: HUAWEI Accidental Screen Damage Warranty 6M1T\nValid in Country: MX\nService Code: ES02000004\nStart Date: December 10, 2022\nEnd Date: June 11, 2023\nBind Date: August 11, 2022\nWarranty Type: Huawei Setup Assistance 12Months 1 Time\nValid in Country: MX\nService Code: ES5330001101\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022"
+      }
+    ]
+  },
+  "HONOR_INFO": {
+    "title": "HONOR INFO",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Model Description: HUAWEI P50 8GB+256GB Cocoa Gold Single Card AT&T Ver. USA CHG\nModel Code: Amber-L09C\nIMEI: [redacted]\nS/N: [redacted]\nItem Code: 51097AVP\nOffer Code: OFFE00580406\nWarranty Valid In: Mexico\nWarranty Status: In warranty\nActivation Date: April 25, 2022\nShipment Date: May 17, 2022\nOrder Date: May 13, 2022\nWarranty Details:\nWarranty Type: 15 Day Device Return\nValid in Country: MX\nService Code: BS01000002\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: 15 Day Device Replacement\nValid in Country: MX\nService Code: BS02000001\nStart Date: December 10, 2022\nEnd Date: December 25, 2022\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: 1 Year Warranty\nValid in Country: MX\nService Code: BS03000001\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022\nDescription: Mexico phone full warranty\nWarranty Type: HUAWEI Accidental Screen Damage Warranty 6M1T\nValid in Country: MX\nService Code: ES02000004\nStart Date: December 10, 2022\nEnd Date: June 11, 2023\nBind Date: August 11, 2022\nWarranty Type: Huawei Setup Assistance 12Months 1 Time\nValid in Country: MX\nService Code: ES5330001101\nStart Date: December 10, 2022\nEnd Date: December 11, 2023\nBind Date: August 11, 2022"
       }
     ]
   },
@@ -366,8 +496,8 @@
     "title": "SAMSUNG INFO",
     "variants": [
       {
-        "label": "Report example",
-        "output": "IMEI Number: [redacted]\nMaster Number: [redacted]\nSerial Number: [redacted]\nUn Number: [redacted]\nModel Info: MOBILE SM-J510FN BLACK BGL\nModel Number: [redacted]\nModel Name: SM-J510FN\nWarranty Status: Out of Warranty\nPurchase Country: Austria\nWarranty Until: 03.09.2017\nProduction Date: 09.03.2017\nManufacturer: P518 Samsung Electronics Vietnam\nCarrier: Bulgaria Open\nSold By: Austria / 10 March 2017\nShip To: Bulgaria / 22 March 2017"
+        "label": "Example result",
+        "output": "IMEI Number: [redacted]\nMaster Number: [redacted]\nSerial Number: [redacted]\nUn Number: [redacted]\nModel Info: MOBILE SM-J510FN BLACK BGL\nModel Number: SM2J510FZKXXXX\nModel Name: SM-J510FN\nWarranty Status: Out of Warranty\nPurchase Country: Austria\nWarranty Until: 03.09.2017\nProduction Date: 09.03.2017\nManufacturer: P518 Samsung Electronics Vietnam\nCarrier: Bulgaria Open\nSold By: Austria / 10 March 2017\nShip To: Bulgaria / 22 March 2017"
       }
     ]
   },
@@ -375,8 +505,8 @@
     "title": "SAMSUNG INFO (Server 2)",
     "variants": [
       {
-        "label": "Report example",
-        "output": "IMEI Number: [redacted]\nMaster Number: [redacted]\nSerial Number: [redacted]\nUn Number: [redacted]\nModel Info: MOBILE SM-J510FN BLACK BGL\nModel Number: [redacted]\nModel Name: SM-J510FN\nWarranty Status: Out of Warranty\nPurchase Country: Austria\nWarranty Until: 03.09.2017\nProduction Date: 09.03.2017\nManufacturer: P518 Samsung Electronics Vietnam\nCarrier: Bulgaria Open\nSold By: Austria / 10 March 2017\nShip To: Bulgaria / 22 March 2017"
+        "label": "Example result",
+        "output": "IMEI Number: [redacted]\nMaster Number: [redacted]\nSerial Number: [redacted]\nUn Number: [redacted]\nModel Info: MOBILE SM-J510FN BLACK BGL\nModel Number: SM2J510FZKXXXX\nModel Name: SM-J510FN\nWarranty Status: Out of Warranty\nPurchase Country: Austria\nWarranty Until: 03.09.2017\nProduction Date: 09.03.2017\nManufacturer: P518 Samsung Electronics Vietnam\nCarrier: Bulgaria Open\nSold By: Austria / 10 March 2017\nShip To: Bulgaria / 22 March 2017"
       }
     ]
   },
@@ -384,8 +514,8 @@
     "title": "SAMSUNG (Knox Guard Status, Samsung Lock - ON/OFF)",
     "variants": [
       {
-        "label": "Lock status report excerpt",
-        "output": "Model Info: MOBILE SM-A326B BLACK THL\nIMEI: [redacted]\nSerial Number: [redacted]\nModel Number: SM-A326BZKHTHL\nModel Name: SM-A326B\nModel Desc: Galaxy A32 5G\nWarranty Status: Warranty Expired\nProduction Date: July 27, 2021\nWarranty Until: July 27, 2022\nManufacturer: Samsung Electronics Vietnam (SEV), Bac Ninh City\nCarrier: Open (Regional lock) - Thailand\n\nSamsung Lock: ON\nSamsung Status: Lost Mode\nLost Number: [redacted]\n\n[KG] Registed: ON\n[KG] Company: [redacted]\n[KG] Device ID: [redacted]\n[KG] Device state: Locked"
+        "label": "Example result",
+        "output": "Model Info: MOBILE SM-A326B BLACK THL\nIMEI: [redacted]\nSerial Number: [redacted]\nModel Number: SM-A326BZKHTHL\nModel Name: SM-A326B\nModel Desc: Galaxy A32 5G\nWarranty Status: Warranty Expired\nProduction Date: July 27, 2021\nWarranty Until: July 27, 2022\nManufacturer: Samsung Electronics Vietnam (SEV), Bac Ninh City\nCarrier: Open (Regional lock) - Thailand\nSamsung Lock: ON ️\nSamsung Status: Lost Mode\nLost Number: [redacted]\nLost Message: **ALERTA DE SECURITATE**\n[KG] Registed: ON\n[KG] Company: [redacted]\n[KG] Device ID: [redacted]\n[KG] Device state: Locked\nMessage: Grab Finance has locked this phone because a payment is overdue. Please contact Grab Finance on [redacted], Monday–Friday, 10:00–18:00.\nMessage: Hello. Welcome to Grab Financial (Thailand).\nWARNING: Your phone will be locked soon, due to continued offline usage. Please connect the device to a network to prevent the device from being locked.\nOffline Message: For security, this phone has been locked after more than 40 days without an internet connection. Connect to the internet to unlock the phone."
       }
     ]
   },
@@ -393,8 +523,26 @@
     "title": "MOTOROLA INFO",
     "variants": [
       {
-        "label": "Warranty report excerpt",
-        "output": "Model: PHN MOTO XT2321-5 US PB 8+256 DL ATT\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial Number: [redacted]\nWarranty Status: In Warranty\nPurchased In: United States of America\n\nWarranty Entitlements:\nName: 1YR CCI, 8X5 NBD for MOTO smartphone\nWarranty Status: Active (184 days remaining)\nWarranty Start: June 15, 2023\nWarranty End: September 12, 2024\nDescription: This product has a one years limited warranty and is entitled to parts, labor and carry-in repair service, but it might exclude Battery, Charger and Earphone for Moto smartphone."
+        "label": "Example result",
+        "output": "Model: PHN MOTO XT2321-5 US PB 8+256 DL ATT\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial Number: [redacted]\nFactory Code: 616J\nItem: 6786D\nTransceiver: SA78D66354\nUlma: FCB9DFED3084\nUpd by: RFCMWEGP301\nCit: ZY22H3X2X4\nSoftware: zeekr_g-user 13 T1TZ33.3-62-25 7163f-a19e4 release-keysM8475_DE305_34.1529.01.96\nICCID: [redacted]\nShip To Customer Id: 1215318945\nShipment Number: 5248467029\nShipment Date: 2023-06-15 00:00:00\nShip To Customer Name: AT&T MOBILITY\nShip To City: Rialto\nShip To Country Code: US\nSold To Customer Id: 1215318942\nSold To Customer Name: AT&T MOBILITY\nSold To Country Name: United States\nWarranty Status: In Warranty\nPurchased In: United States of America\nWarranty Entitlements:\nName: 1YR CCI, 8X5 NBD for MOTO smartphone\nWarranty Status: Active (184 days remaining)\nWarranty Start: June 15, 2023\nWarranty End: September 12, 2024\nDescription: This product has a one years limited warranty and is entitled to parts, labor and carry-in repair service, but it might exclude Battery, Charger and Earphone for Moto smartphone.\nName: 1YR CCI, 8X5 NBD for MOTO Charger\nWarranty Status: Active (184 days remaining)\nWarranty Start: June 15, 2023\nWarranty End: September 12, 2024\nDescription: This product has a one years limited Battery warranty for Moto smartphone charger .This product is entitled to carry in repair service Mon-Fri, except holidays, with a next business day response objective.\nName: 12 month CCI, 8X5 NBD for MOTO Earphone\nWarranty Status: Active (184 days remaining)\nWarranty Start: June 15, 2023\nWarranty End: September 12, 2024\nDescription: This product has12 month limited Earphone warranty for Moto smartphone.This product is entitled to carry in repair service Mon-Fri, except holidays, with a next business day response objective.\nName: 12 month MOTO Embedded battery\nWarranty Status: Active (184 days remaining)\nWarranty Start: June 15, 2023\nWarranty End: September 12, 2024\nDescription: This product has one year limited warranty for Moto Embedded Battery of smartphone.This product is entitled to carry in repair service Mon-Fri, except holidays, with a next business day response objective."
+      }
+    ]
+  },
+  "LENOVO_INFO": {
+    "title": "LENOVO INFO",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Model: T14 Gen 1 (type 20S0, 20S1) Laptop (ThinkPad) - Type 20S1\nFull Model: LAPTOPS-AND-NETBOOKS THINKPAD-T-SERIES-LAPTOPS THINKPAD-T14-TYPE-20S0-20S1 20S1 20S1S1JA00 XXXXXX\nSerial Number: [redacted]\nBrand: TPG\nSeries: THINKPAD-T-SERIES-LAPTOPS\nSub Series: THINKPAD-T14-TYPE-20S0-20S1\nGroup: LAPTOPS-AND-NETBOOKS\nMachine Type: 20S1\nMTM: S1JA00\nSpecification:\nProcessor 1x 10th Generation Intel® Core™ i7-10510U Processor(Core i7-10510U)\nMemory 1x 16 GB DDR4-3200\nOperating System Windows 10 Home 64(EN:English)\nHard Drive 1x 256GB PCIe TLC\nWireless Network 1x Intel® Wi-Fi 6 AX201 2x2 AX\nBluetooth® 5.1 or above\nPorts 1x Ethernet\nHDMI 1.4b\n1x Mech Docking Port (CS18) (side docking)\n1 Type C (USB 3.2 Gen 2 + DP 1.2 + PD 3.0)\n1 Type C (USB 3.2 Gen 2 + DP 1.2 + PD 3.0 + Thunderbolt)\n2 USB 3.2 Gen 2 (Type A)\nHeadphone & Microphone combo Jack\nCamera 1x 720P HD with Array Microphone & ThinkShutter\nGraphics 1x Intel UHD Graphics\nMonitor 14.0 FHD 45%CG\nIncluded Warranty 4YR Depot/CCI\nIncluded Service Sealed Battery Replacement\nWarranty Registered: No\nWarranty Status: Out of warranty (0 days remaining)\nWarranty Start Date: July 12, 2021\nWarranty End Date: July 11, 2025\nShipment Date: 2021-06-28\nShip To Country: United States of America\nPurchased In: United States of America\nWarranty History:\nName: 1YR Battery (Carry-in/Depot Warranty)\nWarranty Type: 1EZBAT\nWarranty Status: Expired (0 days remaining)\nWarranty Start: July 12, 2021\nWarranty End: July 11, 2022\nDescription: The battery included within this product is entitled to a 1 year CRU/Depot/Carry-in warranty. Please note that this may differ from the warranty of the base product itself.\nName: 3Y Depot, 9X5 2BD Warranty\nWarranty Type: 3EZ\nWarranty Status: Expired (0 days remaining)\nWarranty Start: July 12, 2021\nWarranty End: July 11, 2024\nDescription: This product has a three year limited warranty and is entitled to depot/Carry-in repair service. Customers may call their local service center for more information. Dealers may provide carry-in repair for this product. Batteries have a one year warranty. If pen comes with the product, pen is entitled to one year warranty."
+      }
+    ]
+  },
+  "CHECK_932": {
+    "title": "Yandex Alice Info",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Model: T14 Gen 1 (type 20S0, 20S1) Laptop (ThinkPad) - Type 20S1\nFull Model: LAPTOPS-AND-NETBOOKS THINKPAD-T-SERIES-LAPTOPS THINKPAD-T14-TYPE-20S0-20S1 20S1 20S1S1JA00 XXXXXX\nSerial Number: [redacted]\nBrand: TPG\nSeries: THINKPAD-T-SERIES-LAPTOPS\nSub Series: THINKPAD-T14-TYPE-20S0-20S1\nGroup: LAPTOPS-AND-NETBOOKS\nMachine Type: 20S1\nMTM: S1JA00\nSpecification:\nProcessor 1x 10th Generation Intel® Core™ i7-10510U Processor(Core i7-10510U)\nMemory 1x 16 GB DDR4-3200\nOperating System Windows 10 Home 64(EN:English)\nHard Drive 1x 256GB PCIe TLC\nWireless Network 1x Intel® Wi-Fi 6 AX201 2x2 AX\nBluetooth® 5.1 or above\nPorts 1x Ethernet\nHDMI 1.4b\n1x Mech Docking Port (CS18) (side docking)\n1 Type C (USB 3.2 Gen 2 + DP 1.2 + PD 3.0)\n1 Type C (USB 3.2 Gen 2 + DP 1.2 + PD 3.0 + Thunderbolt)\n2 USB 3.2 Gen 2 (Type A)\nHeadphone & Microphone combo Jack\nCamera 1x 720P HD with Array Microphone & ThinkShutter\nGraphics 1x Intel UHD Graphics\nMonitor 14.0 FHD 45%CG\nIncluded Warranty 4YR Depot/CCI\nIncluded Service Sealed Battery Replacement\nWarranty Registered: No\nWarranty Status: Out of warranty (0 days remaining)\nWarranty Start Date: July 12, 2021\nWarranty End Date: July 11, 2025\nShipment Date: 2021-06-28\nShip To Country: United States of America\nPurchased In: United States of America\nWarranty History:\nName: 1YR Battery (Carry-in/Depot Warranty)\nWarranty Type: 1EZBAT\nWarranty Status: Expired (0 days remaining)\nWarranty Start: July 12, 2021\nWarranty End: July 11, 2022\nDescription: The battery included within this product is entitled to a 1 year CRU/Depot/Carry-in warranty. Please note that this may differ from the warranty of the base product itself.\nName: 3Y Depot, 9X5 2BD Warranty\nWarranty Type: 3EZ\nWarranty Status: Expired (0 days remaining)\nWarranty Start: July 12, 2021\nWarranty End: July 11, 2024\nDescription: This product has a three year limited warranty and is entitled to depot/Carry-in repair service. Customers may call their local service center for more information. Dealers may provide carry-in repair for this product. Batteries have a one year warranty. If pen comes with the product, pen is entitled to one year warranty."
       }
     ]
   },
@@ -402,8 +550,17 @@
     "title": "Home Location Register (HLR) Lookup",
     "variants": [
       {
-        "label": "Report example",
-        "output": "Number: [redacted]\nOriginal Network Name: Orange (Everything Everywhere Limited)\nOriginal Country Name: United Kingdom\nOriginal Country Prefix: +44\nPorted: Yes\nPorted Network Name: 3 (Hutchison 3G UK Ltd)\nPorted Country Name: United Kingdom\nPorted Country Prefix: +44\nRoaming: No\nLocal Time: Europe/London: GMT+01:00\nStatus: CONNECTED"
+        "label": "Example result",
+        "output": "Number: +447773####84\nOriginal Network Name: Orange (Everything Everywhere Limited)\nOriginal Country Name: United Kingdom\nOriginal Country Prefix: +44\nPorted: Yes\nPorted Network Name: 3 (Hutchison 3G UK Ltd)\nPorted Country Name: United Kingdom\nPorted Country Prefix: +44\nRoaming: No\nLocal Time: Europe/London: GMT+01:00\nStatus: CONNECTED"
+      }
+    ]
+  },
+  "CHECK_617": {
+    "title": "Number Type (NT) Lookup",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Number: +447773####84\nOriginal Network Name: Orange (Everything Everywhere Limited)\nOriginal Country Name: United Kingdom\nOriginal Country Prefix: +44\nPorted: Yes\nPorted Network Name: 3 (Hutchison 3G UK Ltd)\nPorted Country Name: United Kingdom\nPorted Country Prefix: +44\nRoaming: No\nLocal Time: Europe/London: GMT+01:00\nStatus: CONNECTED"
       }
     ]
   },
@@ -411,8 +568,8 @@
     "title": "Ping-SMS",
     "variants": [
       {
-        "label": "Delivered status example",
-        "output": "Number: [redacted]\nNetwork Name: MTS\nCountry: Russia\nRegion: Saint Petersburg and Leningrad Oblast\nStatus: Online\nStatus Description: Ping-SMS Delivered"
+        "label": "Example result",
+        "output": "Number: +79XXXXXXX76\nNetwork Name: MTS\nCountry: Russia\nRegion: Saint Petersburg and Leningrad Oblast\nStatus: Online\nStatus Description: Ping-SMS Delivered"
       }
     ]
   },
@@ -420,8 +577,115 @@
     "title": "Ping-SMS (Server 2)",
     "variants": [
       {
-        "label": "Delivered status example",
-        "output": "Number: [redacted]\nNetwork Name: MTS\nCountry: Russia\nRegion: Saint Petersburg and Leningrad Oblast\nStatus: Online\nStatus Description: Ping-SMS Delivered"
+        "label": "Example result",
+        "output": "Number: +79XXXXXXX76\nNetwork Name: MTS\nCountry: Russia\nRegion: Saint Petersburg and Leningrad Oblast\nStatus: Online\nStatus Description: Ping-SMS Delivered"
+      }
+    ]
+  },
+  "UNLOCK_780": {
+    "title": "MDM iOS Bypass - iKey Pro Tool (till iOS 26.x)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "1. Windows/Mac: Here ([download link supplied with completed order])\n2. Connect Device to PC\n3. Click Bypass MDM and Waiting"
+      }
+    ]
+  },
+  "UNLOCK_1001": {
+    "title": "MDM iOS Bypass - iKey Ultra (All iOS)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "1. Windows/Mac: Here ([download link supplied with completed order])\n2. Connect Device to PC\n3. Click Bypass MDM and Waiting"
+      }
+    ]
+  },
+  "UNLOCK_344": {
+    "title": "MDM iOS Bypass - iActivate Tool",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "1. Download iActivate application: [download link supplied with completed order]\n2. Follow bypass instructions guide: [download link supplied with completed order]"
+      }
+    ]
+  },
+  "UNLOCK_721": {
+    "title": "MDM MacOS Bypass - HFZ Tool (M1, M2, M3)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "1. Download HFZ application (Download ([download link supplied with completed order]))\n2. Submit Order\n3. Click Start Bypass MDM"
+      }
+    ]
+  },
+  "UNLOCK_430": {
+    "title": "MDM MacOS Bypass - iRemove Tool (M1, M2, M3, T2)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "1. Download iActivate application: [download link supplied with completed order]\n2. Follow bypass instructions guide: [download link supplied with completed order]"
+      }
+    ]
+  },
+  "CHECK_702": {
+    "title": "Apple Owner ID Info (World Wide) - (Read Description)",
+    "variants": [
+      {
+        "label": "Example result 1",
+        "output": "90% of orders are done within 1-5 minutes\n10% of orders are done within 2-3 hours\n5% of orders are done within 1-5 days"
+      },
+      {
+        "label": "Example result 2",
+        "output": "- Full Name\n- Email (If available)\n- Phone (If available)"
+      },
+      {
+        "label": "Example result 3",
+        "output": "Model: iPhone 12 Pro\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial Number: [redacted]\nOwner Details: Not Found\nModel: iPhone 12 Pro\nIMEI: [redacted]\nIMEI2: [redacted]\nSerial Number: [redacted]\nOwner Details:\nCathy DreXXXXs\n[redacted]\n+1707XXXXX97\nUnited States"
+      }
+    ]
+  },
+  "CHECK_661": {
+    "title": "Apple Owner ID Info (World Wide) 40% Found",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Service Provide:\n- Full Name (Only in case Email or Phone provided)\n- Email (If available)\n- Phone (If available)"
+      }
+    ]
+  },
+  "CHECK_904": {
+    "title": "iCloud ID Finder (Owner Info) - (Vietnam)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Service Provide:\n- First Name (If available)\n- Last Name (If available)\n- Phone Number"
+      }
+    ]
+  },
+  "UNLOCK_420": {
+    "title": "Nokia Worldwide (Read Service Info)",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Supported Models:\nNokia 1\nNokia 2\nNokia 2.1\nNokia 3\nNokia 3.1\nNokia 5\nNokia 5.1\nNokia 6\nNokia 6.1\nNokia 7\nNokia 7 Plus\nNokia 8\nNokia 8 Sirocco\nNokia X6\nNokia 3310 3G\nNokia 3310 4G\nNokia 8110"
+      }
+    ]
+  },
+  "UNLOCK_139": {
+    "title": "Alcatel - WorldWide Codes [Database 1]",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "Alcatel 331\nAlcatel Baby D\nAlcatel Beetle\nAlcatel Beetle Lite\nAlcatel Beetle Lite Edge\nAlcatel Beetle One\nAlcatel Brandy\nAlcatel Camry\nAlcatel Coctail\nAlcatel Diablo\nAlcatel Diablo Hd\nAlcatel Gin\nAlcatel Gin Dual Sim\nAlcatel Martel Lite\nAlcatel Medoc\nAlcatel Megane\nAlcatel Amsterdam\nAlcatel Crystal\nAlcatel Elle GlamPhone No.3\nAlcatel Elle GlamPhone No.5\nAlcatel Evolve\nAlcatel Fierce\nAlcatel Hero\nAlcatel Idol\nAlcatel Idol 2\nAlcatel Idol 2 Mini\nAlcatel Idol 2 Mini S\nAlcatel Idol 2 S\nAlcatel Idol S\nAlcatel Idol S Slate\nAlcatel Idol Ultra\nAlcatel Idol X\nAlcatel Idol Alpha\nAlcatel Kivo\nAlcatel Miss Sixty 1\nAlcatel Miss Sixty 2\nAlcatel Mpop\nAlcatel One Touch Fire\nAlcatel 090\nAlcatel 090X\nAlcatel OT - 1009\nAlcatel OT - 1009A\nAlcatel OT - 1009X\nAlcatel OT - 1010D\nAlcatel OT - 1010X\nAlcatel OT - 1011\nAlcatel OT - 1011A\nAlcatel OT - 1011D\nAlcatel OT - 1011X\nAlcatel OT - 1012\nAlcatel OT - 1012X\nAlcatel OT - 103\nAlcatel OT - 103A\nAlcatel OT - 103X\nAlcatel OT - 1030\nAlcatel OT - 1030A\nAlcatel OT - 1030D\nAlcatel OT - 1030X\nAlcatel OT - 104\nAlcatel OT - 104A\nAlcatel OT - 1040\nAlcatel OT - 1040D\nAlcatel OT - 1040X\nAlcatel OT - 1041\nAlcatel OT - 1041A\nAlcatel OT - 1041D\nAlcatel OT - 1041X\nAlcatel OT - 1042\nAlcatel OT - 1042D\nAlcatel OT - 1042X\nAlcatel OT - 1045\nAlcatel OT - 1045D\nAlcatel OT - 1045G\nAlcatel OT - 1046\nAlcatel OT - 1046D\nAlcatel OT - 1046G\nAlcatel OT - 105\nAlcatel OT - 105A\nAlcatel OT - 105X\nAlcatel OT - 106\nAlcatel OT - 106X\nAlcatel OT - 108\nAlcatel OT - 108X\nAlcatel OT - 109\nAlcatel OT - 109X\nAlcatel OT - 112\nAlcatel OT - 112X\nAlcatel OT - 113\nAlcatel OT - 113X\nAlcatel OT - 117\nAlcatel OT - 117X\nAlcatel OT - 132\nAlcatel OT - 132A\nAlcatel OT - 132X\nAlcatel OT - 140\nAlcatel OT - 140X\nAlcatel OT - 150\nAlcatel OT - 150\nAlcatel OT - 1801\nAlcatel OT - 2000\nAlcatel OT - 2000X\nAlcatel OT - 2001\nAlcatel OT - 2001A\nAlcatel OT - 2001X\nAlcatel OT - 2005\nAlcatel OT - 2005A\nAlcatel OT - 2005D\nAlcatel OT - 2005X\nAlcatel OT - 2010\nAlcatel OT - 2010D\nAlcatel OT - 2010G\nAlcatel OT - 2010X\nAlcatel OT - 203\nAlcatel OT - 203A\nAlcatel OT - 203E\nAlcatel OT - 203EX\nAlcatel OT - 203X\nAlcatel OT - 204\nAlcatel OT - 204X\nAlcatel OT - 205\nAlcatel OT - 205X\nAlcatel OT - 206\nAlcatel OT - 206X\nAlcatel OT - 208\nAlcatel OT - 208A\nAlcatel OT - 208X\nAlcatel OT - 209\nAlcatel OT - 209A\nAlcatel OT - 209X\nAlcatel OT - 2117\nAlcatel OT - 2117A\nAlcatel OT - 213\nAlcatel OT - 213X\nAlcatel OT - 214\nAlcatel OT - 214A\nAlcatel OT - 214W\nAlcatel OT - 214WX\nAlcatel OT - 214X\nAlcatel OT - 216\nAlcatel OT - 216X\nAlcatel OT - 217\nAlcatel OT - 217A\nAlcatel OT - 217D\nAlcatel OT - 217DX\nAlcatel OT - 217F\nAlcatel OT - 217X\nAlcatel OT - 222\nAlcatel OT - 222A\nAlcatel OT - 222X\nAlcatel OT - 223\nAlcatel OT - 223A\nAlcatel OT - 223X\nAlcatel OT - 228\nAlcatel OT - 228A\nAlcatel OT - 228D\nAlcatel OT - 228DX\nAlcatel OT - 228X\nAlcatel OT - 232\nAlcatel OT - 232A\nAlcatel OT - 232X\nAlcatel OT - 233\nAlcatel OT - 233X\nAlcatel OT - 236G VARIANT\nAlcatel OT - 250\nAlcatel OT - 250X\nAlcatel OT - 252\nAlcatel OT - 252X\nAlcatel OT - 255\nAlcatel OT - 255A\nAlcatel OT - 255D\nAlcatel OT - 255DX\nAlcatel OT - 255X\nAlcatel OT - 262\nAlcatel OT - 262X\nAlcatel OT - 268\nAlcatel OT - 268X\nAlcatel OT - 280\nAlcatel OT - 280X\nAlcatel OT - 282\nAlcatel OT - 282A\nAlcatel OT - 282X\nAlcatel OT - 292\nAlcatel OT - 292A\nAlcatel OT - 292F\nAlcatel OT - 292X\nAlcatel OT - 296\nAlcatel OT - 296A\nAlcatel OT - 296F\nAlcatel OT - 296X\nAlcatel OT - 297\nAlcatel OT - 297A\nAlcatel OT - 300\nAlcatel OT - 300X\nAlcatel OT - 3000\nAlcatel OT - 3000D\nAlcatel OT - 3000G\nAlcatel OT - 3000H\nAlcatel OT - 3000X\nAlcatel OT - 3001\nAlcatel OT - 3001G\nAlcatel OT - 3002\nAlcatel OT - 3002G\nAlcatel OT - 3003\nAlcatel OT - 3003G\nAlcatel OT - 301\nAlcatel OT - 301A\nAlcatel OT - 301X\nAlcatel OT - 3020\nAlcatel OT - 3020D\nAlcatel OT - 3020G\nAlcatel OT - 3035A\nAlcatel OT - 303\nAlcatel OT - 303A\nAlcatel OT - 303X\nAlcatel OT - 304\nAlcatel OT - 304X\nAlcatel OT - 3040\nAlcatel OT - 3040D\nAlcatel OT - 3040G\nAlcatel OT - 3041\nAlcatel OT - 3041D\nAlcatel OT - 3041G\nAlcatel OT - 3042\nAlcatel OT - 3042G\nAlcatel OT - 305\nAlcatel OT - 305A\nAlcatel OT - 305X\nAlcatel OT - 306\nAlcatel OT - 306X\nAlcatel OT - 3075A\nAlcatel OT - 3075M\nAlcatel OT - 308\nAlcatel OT - 308A\nAlcatel OT - 308F\nAlcatel OT - 308X\nAlcatel OT - 310\nAlcatel OT - 310A\nAlcatel OT - 310X\nAlcatel OT - 311\nAlcatel OT - 311X\nAlcatel OT - 312\nAlcatel OT - 312X\nAlcatel OT - 3142\nAlcatel OT - 3142G\nAlcatel OT - 315\nAlcatel OT - 315M\nAlcatel OT - 315MX\nAlcatel OT - 315X\nAlcatel OT - 317\nAlcatel OT - 317DX\nAlcatel OT - 317X\nAlcatel OT - 318\nAlcatel OT - 318DX\nAlcatel OT - 318X\nAlcatel OT - 318\nAlcatel OT - 319X\nAlcatel OT - 322\nAlcatel OT - 322D\nAlcatel OT - 322DX\nAlcatel OT - 322X\nAlcatel OT - 352\nAlcatel OT - 352X\nAlcatel OT - 355\nAlcatel OT - 355A\nAlcatel OT - 355D\nAlcatel OT - 355DX\nAlcatel OT - 355X\nAlcatel OT - 356\nAlcatel OT - 356A\nAlcatel OT - 358\nAlcatel OT - 358D\nAlcatel OT - 358DG\nAlcatel OT - 358G\nAlcatel OT - 360\nAlcatel OT - 360A\nAlcatel OT - 361\nAlcatel OT - 361A\nAlcatel OT - 361X\nAlcatel OT - 362\nAlcatel OT - 362X\nAlcatel OT - 363\nAlcatel OT - 363A\nAlcatel OT - 363X\nAlcatel OT - 380\nAlcatel OT - 380X\nAlcatel OT - 382\nAlcatel OT - 382X\nAlcatel OT - 383\nAlcatel OT - 383A\nAlcatel OT - 383X\nAlcatel OT - 385\nAlcatel OT - 385A\nAlcatel OT - 385D\nAlcatel OT - 385DX\nAlcatel OT - 385J\nAlcatel OT - 385JA\nAlcatel OT - 385X\nAlcatel OT - 390\nAlcatel OT - 390A\nAlcatel OT - 390X\nAlcatel OT - 4005\nAlcatel OT - 4005D\nAlcatel OT - 4007\nAlcatel OT - 4007A\nAlcatel OT - 4007D\nAlcatel OT - 4007E\nAlcatel OT - 4007X\nAlcatel OT - 4010\nAlcatel OT - 4010A\nAlcatel OT - 4010D\nAlcatel OT - 4010E\nAlcatel OT - 4010X\nAlcatel OT - 4011\nAlcatel OT - 4011X\nAlcatel OT - 4012\nAlcatel OT - 4012A\nAlcatel OT - 4012X\nAlcatel OT - 4015\nAlcatel OT - 4015A\nAlcatel OT - 4015D\nAlcatel OT - 4015N\nAlcatel OT - 4015T\nAlcatel OT - 4015X\nAlcatel OT - 4016A\nAlcatel OT - 4016D\nAlcatel OT - 4016X\nAlcatel OT - 4018A\nAlcatel OT - 4018D\nAlcatel OT - 4018F\nAlcatel OT - 4018M\nAlcatel OT - 4018X\nAlcatel OT - 4019\nAlcatel OT - 4019A\nAlcatel OT - 4019X\nAlcatel OT - 4030\nAlcatel OT - 4030A\nAlcatel OT - 4030D\nAlcatel OT - 4030E\nAlcatel OT - 4030X\nAlcatel OT - 4030Y\nAlcatel OT - 4032\nAlcatel OT - 4032D\nAlcatel OT - 4032E\nAlcatel OT - 4032X\nAlcatel OT - 4033\nAlcatel OT - 4033A\nAlcatel OT - 4033D\nAlcatel OT - 4033E\nAlcatel OT - 4033L\nAlcatel OT - 4033X\nAlcatel OT - 4035A\nAlcatel OT - 4035D\nAlcatel OT - 4035X\nAlcatel OT - 4036E\nAlcatel OT - 4037N\nAlcatel OT - 4037A\nAlcatel OT - 4037R\nAlcatel OT - 4037T\nAlcatel OT - 4037X\nAlcatel OT - 4110\nAlcatel OT - 4110E\nAlcatel OT - 4136E\nAlcatel OT - 4301\nAlcatel OT - 455\nAlcatel OT - 455X\nAlcatel OT - 5020\nAlcatel OT - 5020A\nAlcatel OT - 5020D\nAlcatel OT - 5020E\nAlcatel OT - 5020N\nAlcatel OT - 5020T\nAlcatel OT - 5020W\nAlcatel OT - 5020X\nAlcatel OT - 5021\nAlcatel OT - 5021E\nAlcatel OT - 5035\nAlcatel OT - 5035A\nAlcatel OT - 5035D\nAlcatel OT - 5035E\nAlcatel OT - 5035X\nAlcatel OT - 5036\nAlcatel OT - 5036A\nAlcatel OT - 5036D\nAlcatel OT - 5036F\nAlcatel OT - 5036X\nAlcatel OT - 5037\nAlcatel OT - 5037A\nAlcatel OT - 5037E\nAlcatel OT - 5037X\nAlcatel OT - 5038\nAlcatel OT - 5038A\nAlcatel OT - 5038D\nAlcatel OT - 5038E\nAlcatel OT - 5038X\nAlcatel OT - 505\nAlcatel OT - 505K\nAlcatel OT - 505KX\nAlcatel OT - 505X\nAlcatel OT - 5050\nAlcatel OT - 5050A\nAlcatel OT - 5050S\nAlcatel OT - 5050X\nAlcatel OT - 5050Y\nAlcatel OT - 506\nAlcatel OT - 506A\nAlcatel OT - 506D\nAlcatel OT - 506DX\nAlcatel OT - 506X\nAlcatel OT - 508\nAlcatel OT - 508A\nAlcatel OT - 510\nAlcatel OT - 510A\nAlcatel OT - 5120\nAlcatel OT - 5120A\nAlcatel OT - 5138E\nAlcatel OT - 5185\nAlcatel OT - 5185A\nAlcatel OT - 520A\nAlcatel OT - 520X\nAlcatel OT - 540\nAlcatel OT - 540X\nAlcatel OT - 543\nAlcatel OT - 543X\nAlcatel OT - 565\nAlcatel OT - 565A\nAlcatel OT - 565K\nAlcatel OT - 565KX\nAlcatel OT - 565X\nAlcatel OT - 585\nAlcatel OT - 585A\nAlcatel OT - 585D\nAlcatel OT - 585DF\nAlcatel OT - 585DX\nAlcatel OT - 585F\nAlcatel OT - 585FX\nAlcatel OT - 585X\nAlcatel OT - 595\nAlcatel OT - 595D\nAlcatel OT - 595DG\nAlcatel OT - 595G\nAlcatel OT - 600\nAlcatel OT - 600A\nAlcatel OT - 600X\nAlcatel OT - 6010\nAlcatel OT - 6010A\nAlcatel OT - 6010D\nAlcatel OT - 6010X\nAlcatel OT - 6012\nAlcatel OT - 6012A\nAlcatel OT - 6012D\nAlcatel OT - 6012E\nAlcatel OT - 6012X\nAlcatel OT - 6016\nAlcatel OT - 6016A\nAlcatel OT - 6016D\nAlcatel OT - 6016E\nAlcatel OT - 6016X\nAlcatel OT - 602\nAlcatel OT - 602A\nAlcatel OT - 602D\nAlcatel OT - 602DX\nAlcatel OT - 602X\nAlcatel OT - 6030\nAlcatel OT - 6030A\nAlcatel OT - 6030D\nAlcatel OT - 6030N\nAlcatel OT - 6030X\nAlcatel OT - 6032\nAlcatel OT - 6032A\nAlcatel OT - 6032X\nAlcatel OT - 6033\nAlcatel OT - 6033A\nAlcatel OT - 6033M\nAlcatel OT - 6033Q\nAlcatel OT - 6033X\nAlcatel OT - 6034\nAlcatel OT - 6034M\nAlcatel OT - 6034R\nAlcatel OT - 6034Y\nAlcatel OT - 6035\nAlcatel OT - 6035R\nAlcatel OT - 6036\nAlcatel OT - 6036A\nAlcatel OT - 6036X\nAlcatel OT - 6036Y\nAlcatel OT - 6037\nAlcatel OT - 6037B\nAlcatel OT - 6037K\nAlcatel OT - 6037Y\nAlcatel OT - 6040\nAlcatel OT - 6040A\nAlcatel OT - 6040D\nAlcatel OT - 6040E\nAlcatel OT - 6040X\nAlcatel OT - 6043\nAlcatel OT - 6043A\nAlcatel OT - 6043D\nAlcatel OT - 605\nAlcatel OT - 605D\nAlcatel OT - 605DG\nAlcatel OT - 605G\nAlcatel OT - 6050\nAlcatel OT - 6050A\nAlcatel OT - 6050F\nAlcatel OT - 6050Y\nAlcatel OT - 606\nAlcatel OT - 606A\nAlcatel OT - 606X\nAlcatel OT - 6110\nAlcatel OT - 6110A\nAlcatel OT - 650\nAlcatel OT - 650X\nAlcatel OT - 655\nAlcatel OT - 655W\nAlcatel OT - 655WX\nAlcatel OT - 655X\nAlcatel OT - 660\nAlcatel OT - 660A\nAlcatel OT - 660X\nAlcatel OT - 665\nAlcatel OT - 665A\nAlcatel OT - 665X\nAlcatel OT - 668\nAlcatel OT - 668A\nAlcatel OT - 668X\nAlcatel OT - 7024\nAlcatel OT - 7024N\nAlcatel OT - 7024R\nAlcatel OT - 7024W\nAlcatel OT - 7025\nAlcatel OT - 7025D\nAlcatel OT - 7025X\nAlcatel OT - 7030\nAlcatel OT - 7030R\nAlcatel OT - 7040\nAlcatel OT - 7040A\nAlcatel OT - 7040D\nAlcatel OT - 7040E\nAlcatel OT - 7040K\nAlcatel OT - 7040N\nAlcatel OT - 7040T\nAlcatel OT - 7041\nAlcatel OT - 7041D\nAlcatel OT - 7041X\nAlcatel OT - 7042\nAlcatel OT - 7042D\nAlcatel OT - 7045\nAlcatel OT - 7045Y\nAlcatel OT - 7047\nAlcatel OT - 7047A\nAlcatel OT - 7047D\nAlcatel OT - 7047E\nAlcatel OT - 7050\nAlcatel OT - 7050Y\nAlcatel OT - 706\nAlcatel OT - 706A\nAlcatel OT - 706X\nAlcatel OT - 708\nAlcatel OT - 708A\nAlcatel OT - 708X\nAlcatel OT - 710\nAlcatel OT - 710A\nAlcatel OT - 710D\nAlcatel OT - 710DX\nAlcatel OT - 710K\nAlcatel OT - 710KX\nAlcatel OT - 710X\nAlcatel OT - 7110\nAlcatel OT - 7110A\nAlcatel OT - 720\nAlcatel OT - 720D\nAlcatel OT - 720DG\nAlcatel OT - 720G\nAlcatel OT - 768\nAlcatel OT - 768T\nAlcatel OT - 799\nAlcatel OT - 799A\nAlcatel OT - 799X\nAlcatel OT - 800\nAlcatel OT - 800A\nAlcatel OT - 800X\nAlcatel OT - 8000\nAlcatel OT - 8000A\nAlcatel OT - 8000D\nAlcatel OT - 8008D\nAlcatel OT - 8008W\nAlcatel OT - 8008X\nAlcatel OT - 802\nAlcatel OT - 802A\nAlcatel OT - 802X\nAlcatel OT - 802Y\nAlcatel OT - 802YX\nAlcatel OT - 8020A\nAlcatel OT - 8020D\nAlcatel OT - 8020E\nAlcatel OT - 8020X\nAlcatel OT - 803\nAlcatel OT - 803A\nAlcatel OT - 803D\nAlcatel OT - 803DX\nAlcatel OT - 803F\nAlcatel OT - 803FX\nAlcatel OT - 803X\nAlcatel OT - 806\nAlcatel OT - 806A\nAlcatel OT - 806D\nAlcatel OT - 806DX\nAlcatel OT - 806X\nAlcatel OT - 807\nAlcatel OT - 807A\nAlcatel OT - 807D\nAlcatel OT - 807DX\nAlcatel OT - 807X\nAlcatel OT - 808\nAlcatel OT - 808A\nAlcatel OT - 808G\nAlcatel OT - 808GX\nAlcatel OT - 808M\nAlcatel OT - 808MX\nAlcatel OT - 808X\nAlcatel OT - 809\nAlcatel OT - 809X\nAlcatel OT - 810\nAlcatel OT - 810A\nAlcatel OT - 810D\nAlcatel OT - 810DX\nAlcatel OT - 810F\nAlcatel OT - 810FX\nAlcatel OT - 810X\nAlcatel OT - 8107\nAlcatel OT - 8107A\nAlcatel OT - 813\nAlcatel OT - 813A\nAlcatel OT - 813D\nAlcatel OT - 813DF\nAlcatel OT - 813DX\nAlcatel OT - 813F\nAlcatel OT - 813FA\nAlcatel OT - 813FX\nAlcatel OT - 813X\nAlcatel OT - 815\nAlcatel OT - 815D\nAlcatel OT - 815DG\nAlcatel OT - 815G\nAlcatel OT - 818\nAlcatel OT - 818A\nAlcatel OT - 818D\nAlcatel OT - 818DX\nAlcatel OT - 818X\nAlcatel OT - 819\nAlcatel OT - 819A\nAlcatel OT - 819D\nAlcatel OT - 819DX\nAlcatel OT - 819X\nAlcatel OT - 828\nAlcatel OT - 828X\nAlcatel OT - 838\nAlcatel OT - 838G\nAlcatel OT - 870\nAlcatel OT - 870A\nAlcatel OT - 870FA\nAlcatel OT - 870X\nAlcatel OT - 871\nAlcatel OT - 871A\nAlcatel OT - 871S\nAlcatel OT - 875\nAlcatel OT - 875T\nAlcatel OT - 880\nAlcatel OT - 880A\nAlcatel OT - 880X\nAlcatel OT - 888\nAlcatel OT - 888A\nAlcatel OT - 888D\nAlcatel OT - 888DX\nAlcatel OT - 888X\nAlcatel OT - 890\nAlcatel OT - 890G\nAlcatel OT - 891\nAlcatel OT - 891G\nAlcatel OT - 900\nAlcatel OT - 900A\nAlcatel OT - 900M\nAlcatel OT - 900X\nAlcatel OT - 901\nAlcatel OT - 901A\nAlcatel OT - 901N\nAlcatel OT - 901S\nAlcatel OT - 902\nAlcatel OT - 902A\nAlcatel OT - 902S\nAlcatel OT - 902X\nAlcatel OT - 903\nAlcatel OT - 903A\nAlcatel OT - 903D\nAlcatel OT - 903X\nAlcatel OT - 905\nAlcatel OT - 905A\nAlcatel OT - 905C\nAlcatel OT - 905D\nAlcatel OT - 905M\nAlcatel OT - 905X\nAlcatel OT - 907\nAlcatel OT - 907D\nAlcatel OT - 907N\nAlcatel OT - 908\nAlcatel OT - 908A\nAlcatel OT - 908F\nAlcatel OT - 908FX\nAlcatel OT - 908S\nAlcatel OT - 908X\nAlcatel OT - 909\nAlcatel OT - 909A\nAlcatel OT - 909B\nAlcatel OT - 909M\nAlcatel OT - 909S\nAlcatel OT - 910\nAlcatel OT - 910A\nAlcatel OT - 910X\nAlcatel OT - 916\nAlcatel OT - 916A\nAlcatel OT - 916DX\nAlcatel OT - 916X\nAlcatel OT - 918\nAlcatel OT - 918A\nAlcatel OT - 918D\nAlcatel OT - 918N\nAlcatel OT - 918S\nAlcatel OT - 918X\nAlcatel OT - 922\nAlcatel OT - 922X\nAlcatel OT - 928\nAlcatel OT - 928D\nAlcatel OT - 968\nAlcatel OT - 968X\nAlcatel OT - 970\nAlcatel OT - 970H\nAlcatel OT - 970X\nAlcatel OT - 972\nAlcatel OT - 972X\nAlcatel OT - 975\nAlcatel OT - 975Y\nAlcatel OT - 978\nAlcatel OT - 978X\nAlcatel OT - 980\nAlcatel OT - 980A\nAlcatel OT - 980X\nAlcatel OT - 981\nAlcatel OT - 981X\nAlcatel OT - 982\nAlcatel OT - 982X\nAlcatel OT - 985\nAlcatel OT - 985A\nAlcatel OT - 985D\nAlcatel OT - 985N\nAlcatel OT - 985S\nAlcatel OT - 985X\nAlcatel OT - 990\nAlcatel OT - 990A\nAlcatel OT - 990M\nAlcatel OT - 990S\nAlcatel OT - 990X\nAlcatel OT - 991\nAlcatel OT - 991A\nAlcatel OT - 991D\nAlcatel OT - 991S\nAlcatel OT - 991T\nAlcatel OT - 991X\nAlcatel OT - 992\nAlcatel OT - 992D\nAlcatel OT - 993\nAlcatel OT - 993D\nAlcatel OT - 993X\nAlcatel OT - 995\nAlcatel OT - 995A\nAlcatel OT - 995S\nAlcatel OT - 995X\nAlcatel OT - 996\nAlcatel OT - 996X\nAlcatel OT - 997\nAlcatel OT - 997D\nAlcatel OT - 997X\nAlcatel OT - 998\nAlcatel OT - 998X\nAlcatel OT - A10X\nAlcatel OT - A205G\nAlcatel OT - A382\nAlcatel OT - A382G\nAlcatel OT - A383G\nAlcatel OT - A392\nAlcatel OT - A392A\nAlcatel OT - A392G\nAlcatel OT - A875T\nAlcatel OT - A890\nAlcatel OT - A890G\nAlcatel OT - A909\nAlcatel OT - A919\nAlcatel OT - A966\nAlcatel OT - A980\nAlcatel OT - A986\nAlcatel OT - A988\nAlcatel OT - A988N\nAlcatel OT - A990\nAlcatel OT - A990M\nAlcatel OT - A998\nAlcatel OT - AM01\nAlcatel OT - AM01X\nAlcatel OT - AURUS\nAlcatel OT - B331\nAlcatel OT - B331X\nAlcatel OT - C700\nAlcatel OT - C701\nAlcatel OT - C707\nAlcatel OT - C710\nAlcatel OT - C710D\nAlcatel OT - C710DX\nAlcatel OT - C717\nAlcatel OT - C818\nAlcatel OT - C818D\nAlcatel OT - C819\nAlcatel OT - C819D\nAlcatel OT - C819DX\nAlcatel OT - C820\nAlcatel OT - C825\nAlcatel OT - C908\nAlcatel OT - C908M\nAlcatel OT - C918\nAlcatel OT - C919\nAlcatel OT - C990\nAlcatel OT - C990M\nAlcatel OT - C995\nAlcatel OT - C997\nAlcatel OT - DS1DX\nAlcatel OT - E101FLIP\nAlcatel OT - EASYMUSIC\nAlcatel OT - EL03\nAlcatel OT - EL05\nAlcatel OT - EL05A\nAlcatel OT - EL05X\nAlcatel OT - F0Z9X\nAlcatel OT - F101\nAlcatel OT - F101X\nAlcatel OT - F115\nAlcatel OT - F115X\nAlcatel OT - F117\nAlcatel OT - F117X\nAlcatel OT - F121\nAlcatel OT - F121X\nAlcatel OT - F122\nAlcatel OT - F122X\nAlcatel OT - F123\nAlcatel OT - F123X\nAlcatel OT - F152\nAlcatel OT - F152X\nAlcatel OT - F153\nAlcatel OT - F153G\nAlcatel OT - F262\nAlcatel OT - F262G\nAlcatel OT - F330\nAlcatel OT - F330X\nAlcatel OT - F331\nAlcatel OT - F331X\nAlcatel OT - F344\nAlcatel OT - F344X\nAlcatel OT - I210\nAlcatel OT - I310\nAlcatel OT - I606\nAlcatel OT - I650\nAlcatel OT - I650A\nAlcatel OT - I650X\nAlcatel OT - I780\nAlcatel OT - I780X\nAlcatel OT - I802\nAlcatel OT - I802X\nAlcatel OT - I806\nAlcatel OT - I806D\nAlcatel OT - I808\nAlcatel OT - I808X\nAlcatel OT - I818\nAlcatel OT - I818X\nAlcatel OT - I880\nAlcatel OT - I880X\nAlcatel OT - I888\nAlcatel OT - I888X\nAlcatel OT - I898\nAlcatel OT - I898X\nAlcatel OT - I900\nAlcatel OT - I905\nAlcatel OT - I905X\nAlcatel OT - J100\nAlcatel OT - J330\nAlcatel OT - J610\nAlcatel OT - J720\nAlcatel OT - J736L\nAlcatel OT - J920\nAlcatel OT - J929\nAlcatel OT - J929L\nAlcatel OT - KR01\nAlcatel OT - KR01A\nAlcatel OT - KR01X\nAlcatel OT - M65\nAlcatel OT - M160\nAlcatel OT - M160X\nAlcatel OT - M161\nAlcatel OT - M161X\nAlcatel OT - M180\nAlcatel OT - M180X\nAlcatel OT - M181\nAlcatel OT - M181AA\nAlcatel OT - M181AX\nAlcatel OT - M181X\nAlcatel OT - M260\nAlcatel OT - M260X\nAlcatel OT - M265\nAlcatel OT - M265X\nAlcatel OT - M280\nAlcatel OT - M280X\nAlcatel OT - M288\nAlcatel OT - M288X\nAlcatel OT - M290\nAlcatel OT - M290A\nAlcatel OT - M290X\nAlcatel OT - M295\nAlcatel OT - M295A\nAlcatel OT - M295X\nAlcatel OT - M390\nAlcatel OT - M390X\nAlcatel OT - M395\nAlcatel OT - M395X\nAlcatel OT - M655\nAlcatel OT - M665\nAlcatel OT - M665X\nAlcatel OT - M960X\nAlcatel OT - MD01\nAlcatel OT - MD01X\nAlcatel OT - MD02\nAlcatel OT - MD02X\nAlcatel OT - MOVE\nAlcatel OT - MOVEX\nAlcatel OT - MS01\nAlcatel OT - MS01X\nAlcatel OT - MS02\nAlcatel OT - MS02X\nAlcatel OT - MS3\nAlcatel OT - MS3B\nAlcatel OT - MS4\nAlcatel OT - MS4B\nAlcatel OT - P310\nAlcatel OT - P310A\nAlcatel OT - P310X\nAlcatel OT - P312\nAlcatel OT - P312X\nAlcatel OT - P320\nAlcatel OT - P320A\nAlcatel OT - P320X\nAlcatel OT - P321\nAlcatel OT - P322\nAlcatel OT - P322X\nAlcatel OT - P323\nAlcatel OT - P323X\nAlcatel OT - P330\nAlcatel OT - P330X\nAlcatel OT - P600\nAlcatel OT - P606\nAlcatel OT - PB01\nAlcatel OT - PB01A\nAlcatel OT - PB01X\nAlcatel OT - Q3\nAlcatel OT - Q3X\nAlcatel OT - Q5\nAlcatel OT - Q5X\nAlcatel OT - S122\nAlcatel OT - S122X\nAlcatel OT - S215\nAlcatel OT - S215X\nAlcatel OT - S218\nAlcatel OT - S218X\nAlcatel OT - S319\nAlcatel OT - S319X\nAlcatel OT - S320\nAlcatel OT - S320X\nAlcatel OT - S321\nAlcatel OT - S321X\nAlcatel OT - S500\nAlcatel OT - S520\nAlcatel OT - S521\nAlcatel OT - S521A\nAlcatel OT - S521X\nAlcatel OT - S530\nAlcatel OT - S530T\nAlcatel OT - S600\nAlcatel OT - S621\nAlcatel OT - S621X\nAlcatel OT - S626\nAlcatel OT - S626X\nAlcatel OT - S66\nAlcatel OT - S710\nAlcatel OT - S800\nAlcatel OT - S810\nAlcatel OT - S820\nAlcatel OT - S850\nAlcatel OT - S850L\nAlcatel OT - S860\nAlcatel OT - S950\nAlcatel OT - S960\nAlcatel OT - S960T\nAlcatel OT - T208\nAlcatel OT - T208X\nAlcatel OT - T218\nAlcatel OT - T218X\nAlcatel OT - T255\nAlcatel OT - T255X\nAlcatel OT - T268\nAlcatel OT - T268X\nAlcatel OT - T355\nAlcatel OT - T355X\nAlcatel OT - T66\nAlcatel OT - T66X\nAlcatel OT - TEST\nAlcatel OT - TESTX\nAlcatel OT - V155\nAlcatel OT - V155X\nAlcatel OT - V345\nAlcatel OT - V345X\nAlcatel OT - V350\nAlcatel OT - V350X\nAlcatel OT - V354\nAlcatel OT - V354X\nAlcatel OT - V355\nAlcatel OT - V355X\nAlcatel OT - V555\nAlcatel OT - V555A\nAlcatel OT - V555X\nAlcatel OT - V570\nAlcatel OT - V570A\nAlcatel OT - V570X\nAlcatel OT - V575\nAlcatel OT - V575X\nAlcatel OT - V607\nAlcatel OT - V670\nAlcatel OT - V770\nAlcatel OT - V785\nAlcatel OT - V861\nAlcatel OT - V861X\nAlcatel OT - V875\nAlcatel OT - V958\nAlcatel OT - V958X\nAlcatel OT - V975\nAlcatel OT - V975N\nAlcatel OT - V985N\nAlcatel OT - W869\nAlcatel OT - W939\nAlcatel OT - W969\nAlcatel OT - Y710\nAlcatel OT - Y710D\nAlcatel OT - Y900\nAlcatel OT - Y910\nAlcatel - SCRIBE5\nAlcatel - TELSA\nAlcatel - PIXI\nAlcatel - POP7\nAlcatel - POP C1\nAlcatel - POP C2\nAlcatel - POP C3\nAlcatel - POP C5\nAlcatel - POP C7\nAlcatel - POP C9\nAlcatel - POP S\nAlcatel - POP S3\nAlcatel - POP S7\nAlcatel - POP S9\nAlcatel - PRINCE\nAlcatel - SCRIBE EASY\nAlcatel - SCRIBE HD\nAlcatel - SESAME\nAlcatel - SMART\nAlcatel - SNAP\nAlcatel - SNAP DUAL\nAlcatel - SNAP LTE\nAlcatel - STAR\nAlcatel - TPOP\nAlcatel - VM363\nAlcatel - VM506\nAlcatel - VM560\nAlcatel - VM565\nAlcatel - VM575\nAlcatel - VM621I\nAlcatel - VM800\nY858V\nHero 2\nOT-1013D\nOT-1013X\nOT-1035A\nOT-1035D\nOT-1035X\nOT-2004C\nOT-2004G\nOT-2007D\nOT-2007X\nOT-2012D\nOT-2012G\nOT-4018E\nOT-4035Y\nOT-5042A\nOT-5042D\nOT-5042X\nOT-6014X\nOT-6015X\n6032X\nOT-7040R\nOT-7042A\nOT-8030B\nOT-8030Y\nOT-H900M\nOT-I215X\nOT-I216A\nOT-I216X\nOT-S66A\nOT-4009D\nOT-4009I\nOT-4013D\nOT-4013K\nOT-4013X\nOT-4014A\nOT-9005X\nOT-9010X\nOT-9020A\nPixi 3\nPixi 3 3.5 DualSIM\nPixi 3 4.0\nPixi 3 4.0 DualSIM\nPixi 8\nPixi 3 10\"\nOT-2067X\nOT-3074M\nOT-4009X\nOT-4013M\nOT-4118A\nOT-4003A\nOT-4003J\nOT-4009A\nOT-4009E\nOT-4009F\nOT-4009S\nOT-4013E\nOT-4013J\nOT-4014A\nOT-4022D\nOT-4022X\nOT-4023A\nOT-7147E\nOT-5015E\nOT-5015D\nOT-5015X\nOT-5016A\nOT-5016J\nOT-7055A\nAlcatel - X020 ( MODEM )\nAlcatel - X030 ( MODEM )\nAlcatel - X060 ( MODEM )\nAlcatel - X060S ( MODEM )\nAlcatel - X070S ( MODEM )\nAlcatel - X080S ( MODEM )\nAlcatel - X090S ( MODEM )\nAlcatel - X100X ( MODEM )\nAlcatel - X150X ( MODEM )\nAlcatel - X200S ( MODEM )\nAlcatel - X200X ( MODEM )\nAlcatel - X210S ( MODEM )\nAlcatel - X210X ( MODEM )\nAlcatel - X215S ( MODEM )\nAlcatel - X220X ( MODEM )\nAlcatel - X220L ( MODEM )\nAlcatel - X225L ( MODEM )\nAlcatel - X225S ( MODEM )\nAlcatel - X228L ( MODEM )\nAlcatel - X230X ( MODEM )\nAlcatel - X300X ( MODEM )\nAlcatel - X310X ( MODEM )\nAlcatel - X500X ( MODEM )\nAlcatel - X520X ( MODEM )\nAlcatel - L100 ( MODEM )\nAlcatel - L800 ( MODEM )\nAlcatel - M800V ( MODEM )\nAlcatel - W800Z ( MODEM )\nAlcatel - Y280X ( MODEM )\nAlcatel - Y580D ( MODEM )\nAlcatel - X602\nAlcatel - X602D ( MODEM )\nAlcatel - Y800 ( MODEM )\nAlcatel - Y800Z ( MODEM )\nAlcatel - Y855 ( MODEM )\nAlcatel - S220L ( MODEM )"
+      }
+    ]
+  },
+  "UNLOCK_277": {
+    "title": "Alcatel - WorldWide Codes [Database 2]",
+    "variants": [
+      {
+        "label": "Example result",
+        "output": "OT-2051X\nOT-3022G\nOT-4003A\nOT-4003J\nOT-4009A\nOT-4009D\nOT-4009E\nOT-4009F\nOT-4009K\nOT-4009M\nOT-4009S\nOT-4009X\nOT-4013X\nOT-4013D\nOT-4013K\nOT-4013M\nOT-4013E\nOT-4017A\nOT-4017D\nOT-4017F\nOT-4017S\nOT-4017X\nOT-4027A\nOT-4027D\nOT-4027N\nOT-4027X\nOT-4028A\nOT-4028E\nOT-4028J\nOT-4034A\nOT-4034D\nOT-4034E\nOT-4034F\nOT-4034G\nOT-4034M\nOT-4034N\nOT-4034X\nOT-4037N\nOT-4037R\nOT-4037T\nOT-5010D\nOT-5010E\nOT-5010G\nOT-5010S\nOT-5010U\nOT-5010X\nOT-5015X\nOT-5017A\nOT-5017X\nOT-5017D\nOT-5025D\nOT-5044\nOT-5045A\nOT-5045D\nOT-5045G\nOT-5045J\nOT-5045T\nOT-5045X\nOT-5116J ( POP 3 - 5.0 )\n5045I ( PIXI 4 - 4G ),PIXI 3(5) 3G - 5016A,\nALCATEL A3 - 5046\n5046D\n50046J\n5046U,5046Y\nALCATEL A3 PLUS - 5049\n5049E\nALCATEL A7 - 5090\n5090Y\nALCATEL IDOL 5 - 6058\n6058D\nALCATEL FLASH PLUS 2 - FL-02\nSHINE LITE - 5080X\n5080Q,A5 LED - 5085D\n5085J,POP 4S - 5095I\n5095K\n5095Y,POP 4(6) 4G - 7070X\n7070Q,PIXI 4(6) / A2 XL - 8050D\n8050E\n8050G,PIXI 5(6) /PIXI 3 (10) 3G TABLET - 9010X"
       }
     ]
   },
@@ -429,8 +693,8 @@
     "title": "LG WorldWide - 2020",
     "variants": [
       {
-        "label": "Unlock code example",
-        "output": "NCK=[redacted]"
+        "label": "Example result",
+        "output": "NCK= [redacted]"
       }
     ]
   },
@@ -438,8 +702,8 @@
     "title": "LG WorldWide - UNTIL 2019 (Premium)",
     "variants": [
       {
-        "label": "Unlock codes example",
-        "output": "NCK=[redacted]\nNSCK=[redacted]\nSPCK=[redacted]\nCPCK=[redacted]\nSIMCK=[redacted]"
+        "label": "Example result",
+        "output": "NCK= [redacted]\nNSCK= [redacted]\nSPCK= [redacted]\nCPCK= [redacted]\nSIMCK= [redacted]"
       }
     ]
   }

@@ -1,4 +1,6 @@
+import { serviceIdentifier, identifierField, type ServiceInputType } from './service-identifier'
 import { db } from './db'
+import { snapshotWebsiteAttribution } from './order-attribution'
 import {
   charge,
   getBalance,
@@ -8,7 +10,7 @@ import {
   refund,
   type Balance,
 } from './credits'
-import { isValidImei, maskIdentifier, normalizeImei } from './imei'
+import { isValidImei, maskIdentifier } from './imei'
 import { fingerprintImei } from './imei-privacy'
 import { decryptPaidReportImei, encryptPaidReportImei } from './paid-report-imei'
 import { buildProviderReport, providerReportHasContent, type ProviderReport } from './imei-report'
@@ -30,6 +32,7 @@ import { recordProviderEvent } from './provider-events'
 import { claimProviderPoll } from './provider-poll-lease'
 import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
+import { purchaseConversion, type PurchaseConversion } from './purchase-conversion'
 
 export type PaidReportStatus = 'processing' | 'completed' | 'refunded' | 'manual_review'
 
@@ -40,7 +43,7 @@ export type PaidReportProduct = {
   summary: string
   group: string
   domain: 'imei_check' | 'unlock'
-  inputType: 'imei'
+  inputType: ServiceInputType
   priceCents: number
   providerCostMicros: number
   etaMinutes: number
@@ -54,7 +57,7 @@ type PaidReportProductRow = {
   slug: string
   name: string
   summary: string
-  input_type: 'imei'
+  input_type: ServiceInputType
   price_cents: number
   provider_cost_micros: number
   eta_minutes: number
@@ -67,7 +70,7 @@ type PaidReportOrderRow = {
   user_id: number
   product_code: string
   product_name: string
-  input_type: 'imei'
+  input_type: ServiceInputType
   imei_fingerprint: string
   masked_imei: string
   imei_encrypted: string | null
@@ -96,11 +99,12 @@ export type PaidReportView = {
   id: number
   productCode: string
   productName: string
-  inputType: 'imei'
+  inputType: ServiceInputType
   maskedImei: string
   imei?: string
   status: PaidReportStatus
   priceCents: number
+  origin: string
   source: string
   report: ProviderReport | null
   providerCode?: string
@@ -113,6 +117,7 @@ export type PaidReportView = {
 export type PaidReportPayload = {
   success: true
   order: PaidReportView
+  conversion: PurchaseConversion | null
   credit: {
     beforeCents: number
     heldCents: number
@@ -126,6 +131,7 @@ export type CreatePaidReportInput = {
   productCode: string
   imei: string
   idempotencyKey: string
+  expectedPriceCents?: number
 }
 
 export class PaidReportError extends Error {
@@ -240,6 +246,7 @@ function toView(row: PaidReportOrderRow): PaidReportView {
     imei: decryptPaidReportImei(row.imei_encrypted) ?? undefined,
     status: row.status,
     priceCents: row.price_cents,
+    origin: row.source,
     source: row.provider_name ?? 'provider',
     report: parseReport(row.report_json),
     providerCode: decryptProviderCode(row.provider_code_encrypted) ?? undefined,
@@ -312,6 +319,8 @@ function payload(row: PaidReportOrderRow, before: Balance, after = getBalance(ro
   return {
     success: true,
     order: toView(current),
+    conversion: current.status === 'completed' && current.source === 'website'
+      ? purchaseConversion(current.user_id, 'paid_imei_report', current.id, current.price_cents) : null,
     credit: creditSnapshot(before, after, current.status, current.price_cents),
   }
 }
@@ -351,7 +360,7 @@ function settleCompleted(
   return db().transaction(() => {
     const current = reconcileSettlement(db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow)
     const completedImei = imeiFromProviderCode(current, providerCode)
-    const encryptedImei = completedImei ? encryptPaidReportImei(completedImei) : null
+    const encryptedImei = completedImei ? encryptPaidReportImei(completedImei, row.input_type) : null
     // Polls, submission responses and webhooks can arrive in any order. Once
     // money has settled, neither a duplicate nor a conflicting result may
     // rewrite the report or release credit reserved for a different order.
@@ -555,16 +564,16 @@ export function listPaidReports(userId: number, limit = 50): PaidReportView[] {
 export async function createPaidReport(
   userId: number,
   input: CreatePaidReportInput,
-  source: 'website' | 'api' = 'website',
+  source: 'website' | 'api' | 'guest' = 'website',
 ): Promise<PaidReportPayload> {
   const productCode = cleanProductCode(input.productCode)
-  const imei = normalizeImei(input.imei)
-  if (!imei) throw new PaidReportError('Enter the device IMEI.', 'imei_missing')
-  if (!isValidImei(imei)) throw new PaidReportError('Enter a valid 15-digit IMEI.', 'imei_invalid')
-  const fingerprint = fingerprintImei(imei)
   const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
-
   const existing = rowForIdempotency(userId, idempotencyKey)
+  const product = getProductRow(productCode)
+  const inputType = existing?.input_type ?? product?.input_type ?? 'imei'
+  const imei = serviceIdentifier(input.imei, inputType)
+  if (!imei) throw new PaidReportError(identifierField(inputType).error, 'imei_invalid')
+  const fingerprint = fingerprintImei(imei)
   if (existing) {
     if (existing.product_code !== productCode || existing.imei_fingerprint !== fingerprint) {
       throw new PaidReportError('That request key was already used for a different report.', 'idempotency_conflict')
@@ -575,9 +584,11 @@ export async function createPaidReport(
 
   // A saved request remains readable when a service is paused or provider
   // configuration changes. Operational availability applies only to new work.
-  const product = getProductRow(productCode)
   if (!product) throw new PaidReportError('Choose a valid paid report.', 'product_unknown')
   if (product.is_active !== 1) throw new PaidReportError('This paid report is not active.', 'product_inactive')
+  if (input.expectedPriceCents !== undefined && input.expectedPriceCents !== product.price_cents) {
+    throw new PaidReportError('The service price has changed.', 'product_inactive')
+  }
   const { config, service } = providerReadyFor(product)
 
   if (!consumeAttempt('paid-imei-report-user', String(userId), REPORT_RATE_LIMIT, REPORT_WINDOW_SECONDS)) {
@@ -603,7 +614,7 @@ export async function createPaidReport(
           product.input_type,
           fingerprint,
           maskIdentifier(imei),
-          encryptPaidReportImei(imei),
+          encryptPaidReportImei(imei, product.input_type),
           product.price_cents,
           product.provider_cost_micros,
           source,
@@ -626,11 +637,12 @@ export async function createPaidReport(
       return payload(replay, balance, balance)
     }
     if (error instanceof InsufficientCredit) {
-      throw new PaidReportError('Not enough credit for this report. Add funds and try again.', 'insufficient_credit')
+      throw new PaidReportError(error.message, 'insufficient_credit')
     }
     throw error
   }
 
+  await snapshotWebsiteAttribution('paid_report_order', row.id, source)
   recordProviderEvent({
     resourceType: 'paid_imei_report',
     resourceId: row.id,
@@ -739,3 +751,4 @@ export async function pollPaidReport(userId: number, orderId: number): Promise<P
     releasePoll()
   }
 }
+

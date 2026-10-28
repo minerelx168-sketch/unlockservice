@@ -14,7 +14,7 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
       { href: '/user/services/unlock', label: 'Unlock services', icon: 'lock' },
       { href: '/user/orders', label: 'Orders', icon: 'clock' },
       { href: '/user/reports', label: 'Service history', icon: 'file' },
-      { href: '/user/checks', label: 'Free checks', icon: 'keypad' },
+      { href: '/user/checks', label: 'Apple Free Check', icon: 'keypad' },
     ],
   },
   {
@@ -55,7 +55,9 @@ export function AppNav({ isAdmin = false, children }: { isAdmin?: boolean; child
           heading: 'Administration',
           items: [
             { href: '/admin', label: 'Control panel', icon: 'window' as IconName },
+            { href: '/admin/guest-orders', label: 'Direct card orders', icon: 'file' as IconName },
             { href: '/admin/payments', label: 'Payment history', icon: 'file' as IconName },
+            { href: '/admin/analytics', label: 'Customer analytics', icon: 'grid' as IconName },
           ],
         },
       ]

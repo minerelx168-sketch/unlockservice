@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { credit } from './credits'
 import { db } from './db'
 import {
-  enabledPaymentRoutes,
+  newRequestPaymentRoutes,
   paymentRouteDefinition,
   type PaymentChainKind,
   type PaymentProviderMode,
@@ -11,6 +11,8 @@ import {
 import { submitInvoiceTransaction } from './payment-verification'
 import { allocatePaymentAmount, codedInvoiceExpired, expireStaleCodedInvoices } from './payment-codes'
 import { consumeAttempt } from './rate-limit'
+import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from './topup-limits'
+export { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from './topup-limits'
 
 /**
  * An invoice locks its numbers and chain/token route at creation. A customer may
@@ -42,6 +44,7 @@ export type Invoice = {
   payment_provider_mode: PaymentProviderMode | null
   /** Exact amount to send, in 1/10,000 of a token; the last two digits are the code. */
   payment_amount_e4: number | null
+  payment_credit_policy: 'legacy_allowance' | 'actual_received'
   created_at: string
   updated_at: string
 }
@@ -95,7 +98,7 @@ function gatewayFromRoute(route: PaymentRouteConfig): Gateway {
 }
 
 /** A route is sellable only when the global gate, route gate, wallet and provider are ready. */
-export const GATEWAYS: Gateway[] = enabledPaymentRoutes().map(gatewayFromRoute)
+export const GATEWAYS: Gateway[] = newRequestPaymentRoutes().map(gatewayFromRoute)
 
 export function gatewayById(gatewayId: string): Gateway | undefined {
   return GATEWAYS.find((entry) => entry.id === gatewayId)
@@ -130,7 +133,6 @@ export type GatewayId = string
 
 export class PaymentError extends Error {}
 
-export const MAX_TOPUP_CENTS = 1_000_000
 /** Every open coded invoice holds a code; these keep one account from holding them all. */
 const MAX_OPEN_INVOICES = 5
 const NEW_INVOICES_PER_HOUR = 10
@@ -141,7 +143,7 @@ const INVOICE_COLUMNS = `
   payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
   payment_asset_code, payment_token_contract, payment_token_decimals,
   payment_destination_address, payment_confirmations_required, payment_provider_mode,
-  payment_amount_e4, created_at, updated_at
+  payment_amount_e4, payment_credit_policy, created_at, updated_at
 `
 
 function invoiceRow(reference: string, userId?: number): InvoiceRow | undefined {
@@ -152,33 +154,45 @@ function invoiceRow(reference: string, userId?: number): InvoiceRow | undefined 
 }
 
 export function createInvoice(userId: number, gatewayId: string, creditCents: number): Invoice {
+  return createInvoiceForPurpose(userId, gatewayId, creditCents, false)
+}
+
+/** Server-only per-order invoice. It never changes account top-up limits. */
+export function createGuestOrderInvoice(userId: number, gatewayId: string, serviceCents: number): Invoice {
+  const owner = db().prepare("SELECT 1 FROM users WHERE id=? AND status='guest' AND account_type='guest' AND password_hash='!guest-no-login'").get(userId)
+  if (!owner) throw new PaymentError('Guest payment owner is invalid.')
+  return createInvoiceForPurpose(userId, gatewayId, serviceCents, true)
+}
+
+function createInvoiceForPurpose(userId: number, gatewayId: string, creditCents: number, guestOrder: boolean): Invoice {
   const gateway = gatewayById(gatewayId)
   if (!gateway) throw new PaymentError('No payment method is configured. Contact support before sending funds.')
-  if (!Number.isSafeInteger(creditCents) || creditCents <= 0 || creditCents > MAX_TOPUP_CENTS) {
+  if (guestOrder && (gateway.chainId !== 56 || gateway.chainKind !== 'evm' || gateway.feeBasisPoints !== 0)) throw new PaymentError('Fee-free BNB Smart Chain payment is unavailable.')
+  if (!Number.isSafeInteger(creditCents) || creditCents < (guestOrder ? 1 : MIN_TOPUP_CENTS) || creditCents > (guestOrder ? 100_000 : MAX_TOPUP_CENTS)) {
+    if (guestOrder) throw new PaymentError('The service amount is invalid.')
     throw new PaymentError(
-      `Enter an amount greater than $0.00, up to $${(MAX_TOPUP_CENTS / 100).toFixed(2)}, with no more than 2 decimal places.`,
+      `Enter an amount from $${(MIN_TOPUP_CENTS / 100).toFixed(2)} to $${(MAX_TOPUP_CENTS / 100).toFixed(2)}, with no more than 2 decimal places.`,
     )
   }
 
   expireStaleCodedInvoices()
   return db().transaction(() => {
-    /* Reopening the same unpaid top-up shows the same request and code, as
-       long as it can still be paid. */
+    /* Reopening the same unpaid top-up shows the same request, coded or
+       manual-only, instead of filling the queue with duplicate requests. */
     const open = db()
       .prepare(
         `SELECT ${INVOICE_COLUMNS} FROM invoices
           WHERE user_id = ? AND gateway = ? AND credit_amount_cents = ?
             AND status = 'pending' AND payment_reference IS NULL
-            AND payment_amount_e4 IS NOT NULL
           ORDER BY created_at DESC, rowid DESC LIMIT 1`,
       )
       .get(userId, gateway.id, creditCents) as Invoice | undefined
-    if (open && !codedInvoiceExpired(open)) return open
+    if (open && (open.payment_amount_e4 === null || !codedInvoiceExpired(open))) return open
 
     const unpaid = db()
       .prepare(
         `SELECT COUNT(*) AS count FROM invoices
-          WHERE user_id = ? AND status IN ('pending', 'review') AND payment_amount_e4 IS NOT NULL`,
+          WHERE user_id = ? AND status IN ('pending', 'review')`,
       )
       .get(userId) as { count: number }
     if (unpaid.count >= MAX_OPEN_INVOICES) {
@@ -191,15 +205,11 @@ export function createInvoice(userId: number, gatewayId: string, creditCents: nu
     }
 
     const fee = Math.round((creditCents * gateway.feeBasisPoints) / 10_000)
-    /* Every new request carries a code. Without one it could only be paid
-       by a pasted hash, and an uncoded paste cannot be told apart from
-       someone else's transfer, so none is created. */
+    /* Once all 99 codes have ever been used near this amount, issue an
+       uncoded request. The customer must paste a transaction ID; it cannot
+       auto-credit and ownership remains subject to human review. */
     const paymentAmountE4 = allocatePaymentAmount(gateway.id, creditCents + fee)
-    if (paymentAmountE4 === null) {
-      throw new PaymentError(
-        'Too many open payment requests near this amount right now. Try a slightly different amount, or try again in a little while.',
-      )
-    }
+    if (guestOrder && paymentAmountE4 === null) throw new PaymentError('Crypto checkout is temporarily unavailable for this amount. Choose another available token or contact support; do not send funds.')
     const reference = randomBytes(16).toString('hex')
     db()
       .prepare(
@@ -209,8 +219,8 @@ export function createInvoice(userId: number, gatewayId: string, creditCents: nu
             payment_route_id, payment_network_id, payment_chain_kind, payment_chain_id,
             payment_asset_code, payment_token_contract, payment_token_decimals,
             payment_destination_address, payment_confirmations_required, payment_provider_mode,
-            payment_amount_e4)
-         VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            payment_amount_e4, payment_credit_policy)
+         VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'actual_received')`,
       )
       .run(
         reference,
@@ -275,9 +285,13 @@ export function selfApprovalEnabled(): boolean {
 
 /** Trusted confirmation. Duplicate confirmation is a no-op. */
 export function approveInvoice(reference: string, userId: number, providerChargeId?: string): Invoice {
+  // This legacy helper has no on-chain proof parameter. Reject production
+  // callers even if a future server action accidentally omits its own guard.
+  if (process.env.NODE_ENV === 'production') throw new PaymentError('Confirmation requires verified payment evidence.')
   return db().transaction(() => {
     const invoice = invoiceRow(reference, userId)
     if (!invoice) throw new PaymentError('No such invoice.')
+    if (invoice.gateway === 'whop_card') throw new PaymentError('Card payments must be verified with Whop.')
     if (invoice.status === 'success') return getInvoice(reference, userId)!
     if (!['pending', 'review'].includes(invoice.status)) {
       throw new PaymentError(`Invoice cannot be confirmed while ${invoice.status}.`)

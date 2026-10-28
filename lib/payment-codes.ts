@@ -19,8 +19,8 @@ import { db } from './db'
  *  - a transfer only pays an invoice created strictly before its block — a
  *    grace period would be a window to open an invoice that catches someone
  *    else's transfer;
- *  - a code stays reserved for a while after its invoice closes, so a late
- *    or duplicate send is never credited to a stranger.
+ *  - a code is never reissued near the same amount on the same route; once
+ *    exhausted, an uncoded request requires manual review instead.
  */
 
 /** A transfer within ±3 tokens of the asked amount can match. */
@@ -29,9 +29,7 @@ export const MATCH_BAND_E4 = 30_000
 export const INVOICE_TTL_DAYS = 7
 /** It is closed a day later, so a payment sent in its last minutes still finds it open. */
 const EXPIRY_GRACE_DAYS = 1
-const SETTLED_CODE_QUARANTINE_DAYS = 2
-const CLOSED_CODE_QUARANTINE_DAYS = 7
-/** Transfers below one token are never matched or recorded (address-poisoning spam). */
+/** Default dust floor; below it only a coded open invoice inside the shortfall cap may match. */
 export const DUST_FLOOR_E4 = 10_000
 
 export function paymentCode(amountE4: number): number {
@@ -61,21 +59,21 @@ function envInteger(name: string, fallback: number, max: number): number {
 }
 
 /**
- * How short a coded transfer may arrive and still credit the invoice in
- * full — exchanges that take their withdrawal fee out of the amount. Capped
- * in cents and as a share of the invoice, so it never becomes a discount
- * worth farming on small top-ups. Either setting at 0 credits only what arrives.
+ * An exchange-withdrawal shortfall up to the smaller of $1 or 3% of the
+ * requested total is absorbed by the merchant. Outside this cap, only the
+ * actual verified amount is credited. Both caps can be lowered by an operator.
  */
 export function shortfallToleranceCents(totalDueCents: number): number {
   const cents = envInteger('IUNLOCKMOBILE_PAYMENT_SHORTFALL_TOLERANCE_CENTS', 100, 500)
   const bps = envInteger('IUNLOCKMOBILE_PAYMENT_SHORTFALL_TOLERANCE_BPS', 300, 1_000)
-  return Math.min(cents, Math.floor((totalDueCents * bps) / 10_000))
+  return Math.min(100, cents, Math.floor((totalDueCents * Math.min(300, bps)) / 10_000))
 }
 
 export type CodedInvoiceTerms = {
   credit_amount_cents: number
   total_due_cents: number
   payment_amount_e4: number
+  payment_credit_policy?: 'legacy_allowance' | 'actual_received'
 }
 
 /** True when this amount is the invoice's: same code, inside the band. */
@@ -86,13 +84,29 @@ export function carriesInvoiceCode(invoice: Pick<CodedInvoiceTerms, 'payment_amo
   )
 }
 
+/** Hold a late transfer carrying any prior invoice's code, permanently. */
+export function reservedCodeOwners(routeId: string, receivedE4: number, sentAt: string, excludingReference: string): Array<{
+  reference: string; user_id: number; status: string; payment_reference: string | null
+}> {
+  const rows = db().prepare(`SELECT reference, user_id, status, payment_reference, payment_amount_e4
+      FROM invoices WHERE payment_route_id = ? AND reference != ?
+        AND payment_amount_e4 IS NOT NULL AND payment_amount_e4 % 100 = ?
+        AND ABS(payment_amount_e4 - ?) <= ?
+        AND julianday(created_at) < julianday(?)`)
+    .all(routeId, excludingReference, paymentCode(receivedE4), receivedE4, MATCH_BAND_E4,
+      sentAt) as Array<{
+      reference: string; user_id: number; status: string; payment_reference: string | null; payment_amount_e4: number
+    }>
+  return rows.filter((row) => carriesInvoiceCode(row, receivedE4))
+}
+
 /**
  * What a coded transfer is worth in credit. The asked amount credits the
- * invoice exactly; a small shortfall is absorbed; anything else credits what
- * actually arrived, floored to the cent, so nobody is left stuck on an
- * unpaid invoice and nothing is ever credited that did not arrive.
+ * invoice exactly; a shortfall within the merchant's cap credits the invoice
+ * in full, otherwise the verified amount is credited, floored to the cent.
  */
 export function creditForCodedTransfer(invoice: CodedInvoiceTerms, receivedE4: number): number {
+  if (invoice.payment_credit_policy === 'actual_received') return Math.floor(receivedE4 / 100)
   const askedE4 = invoice.payment_amount_e4
   if (receivedE4 >= askedE4) return invoice.credit_amount_cents + Math.floor((receivedE4 - askedE4) / 100)
   const shortCents = Math.ceil((askedE4 - receivedE4) / 100)
@@ -101,29 +115,18 @@ export function creditForCodedTransfer(invoice: CodedInvoiceTerms, receivedE4: n
 }
 
 /**
- * Picks a code no other recent invoice on this route near this amount
- * holds. Returns null when every code is taken; that invoice falls back to
- * a pasted transaction ID and a person.
+ * Picks a code no invoice on this route near this amount has ever held.
+ * Returns null when the codes are exhausted; no code is ever reused.
  */
 export function allocatePaymentAmount(routeId: string, totalDueCents: number): number | null {
   const base = totalDueCents * 100
-  /* paid_at and updated_at may be ISO or SQLite text; julianday reads both,
-     where a plain string comparison would not. */
   const taken = new Set(
     (
       db()
         .prepare(
           `SELECT payment_amount_e4 % 100 AS code FROM invoices
             WHERE payment_amount_e4 IS NOT NULL AND payment_route_id = ?
-              AND ABS(payment_amount_e4 - ?) <= ?
-              AND julianday(created_at) >= julianday('now') - 60
-              AND (
-                status IN ('pending', 'review')
-                OR (status = 'success'
-                    AND julianday(COALESCE(paid_at, updated_at)) >= julianday('now') - ?)
-                OR (status NOT IN ('pending', 'review', 'success')
-                    AND julianday(updated_at) >= julianday('now') - ?)
-              )`,
+              AND ABS(payment_amount_e4 - ?) <= ?`,
         )
         .all(
           routeId,
@@ -131,15 +134,13 @@ export function allocatePaymentAmount(routeId: string, totalDueCents: number): n
           // Two bands plus the code itself: invoices exactly two bands apart
           // could otherwise both claim a transfer landing halfway between.
           MATCH_BAND_E4 * 2 + 100,
-          SETTLED_CODE_QUARANTINE_DAYS,
-          CLOSED_CODE_QUARANTINE_DAYS,
         ) as Array<{ code: number }>
     ).map((row) => row.code),
   )
   const free: number[] = []
   for (let code = 1; code <= 99; code += 1) if (!taken.has(code)) free.push(code)
   if (free.length === 0) {
-    console.error(`[payments] no free payment code near ${base / 10_000} on ${routeId} — invoice created without one`)
+    console.warn(`[payments] coded amounts exhausted on ${routeId}; manual-review request required`)
     return null
   }
   return base + free[randomInt(free.length)]

@@ -48,7 +48,7 @@ function pendingReport(userId: number, reference: string) {
     INSERT INTO paid_report_orders
       (user_id, product_code, product_name, imei_fingerprint, masked_imei, status,
        price_cents, source, idempotency_key, provider_order_id, provider_name, provider_mode)
-    VALUES (?, 'APPLE_BASIC', 'Apple Basic', ?, '***********7518', 'processing',
+    VALUES (?, 'APPLE_CARRIER_LITE', 'Apple Basic', ?, '***********7518', 'processing',
       5, 'website', ?, ?, 'dhru', 'dhru')
   `).run(userId, privacy.fingerprintImei('490154203237518'), reference, reference)
   const id = Number(inserted.lastInsertRowid)
@@ -206,11 +206,11 @@ test('an existing paid request replays while product and provider are disabled',
   const id = pendingReport(userId, 'paid-replay-disabled-1')
   let calls = 0
   globalThis.fetch = async () => { calls += 1; throw new Error('Replay must not submit again.') }
-  database.db().prepare("UPDATE paid_report_products SET is_active = 0 WHERE code = 'APPLE_BASIC'").run()
+  database.db().prepare("UPDATE paid_report_products SET is_active = 0 WHERE code = 'APPLE_CARRIER_LITE'").run()
   process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled'
   try {
     const result = await reports.createPaidReport(userId, {
-      productCode: 'APPLE_BASIC', imei: '490154203237518', idempotencyKey: 'paid-replay-disabled-1',
+      productCode: 'APPLE_CARRIER_LITE', imei: '490154203237518', idempotencyKey: 'paid-replay-disabled-1',
     })
     assert.equal(result.order.id, id)
     assert.equal(calls, 0)
@@ -219,7 +219,7 @@ test('an existing paid request replays while product and provider are disabled',
       productCode: 'BLACKLIST_SIMPLE', imei: '490154203237518', idempotencyKey: 'paid-replay-disabled-1',
     }), (error: unknown) => error instanceof reports.PaidReportError && error.code === 'idempotency_conflict')
   } finally {
-    database.db().prepare("UPDATE paid_report_products SET is_active = 1 WHERE code = 'APPLE_BASIC'").run()
+    database.db().prepare("UPDATE paid_report_products SET is_active = 1 WHERE code = 'APPLE_CARRIER_LITE'").run()
     process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'enabled'
   }
 })
@@ -263,3 +263,4 @@ test('paid polling retains credit when provider configuration is disabled, incom
     restore()
   }
 })
+

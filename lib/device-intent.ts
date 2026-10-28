@@ -1,6 +1,7 @@
+import { serviceIdentifier, type ServiceInputType } from './service-identifier'
 import { cookies } from 'next/headers'
 import { DEVICE_INTENT_COOKIE } from './cookie-names'
-import { DEVICE_INTENT_TTL_SECONDS, deviceImei, parseDeviceIntent, type DeviceDomain } from './device-intent-value'
+import { DEVICE_INTENT_TTL_SECONDS, deviceEmail, parseDeviceIntent, type DeviceDomain } from './device-intent-value'
 
 export async function readDeviceIntent() {
   return parseDeviceIntent((await cookies()).get(DEVICE_INTENT_COOKIE)?.value)
@@ -12,14 +13,15 @@ export async function clearDeviceIntent() {
   })
 }
 
-export async function writeDeviceIntent(imei: string, domain: DeviceDomain, productCode?: string) {
-  const digits = deviceImei(imei)
+export async function writeDeviceIntent(imei: string, domain: DeviceDomain, productCode?: string, email?: string, inputType: ServiceInputType = 'imei') {
+  const digits = serviceIdentifier(imei, inputType)
   if (!digits) throw new Error('Invalid device identifier')
   const jar = await cookies()
   jar.set(DEVICE_INTENT_COOKIE, JSON.stringify({
-    imei: digits, domain, productCode, expiresAt: Date.now() + DEVICE_INTENT_TTL_SECONDS * 1000,
+    imei: digits, domain, productCode, ...(inputType === 'imei' ? {} : { inputType }), ...(deviceEmail(email) ? { email: deviceEmail(email) } : {}), expiresAt: Date.now() + DEVICE_INTENT_TTL_SECONDS * 1000,
   }), {
     httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production',
     path: '/', maxAge: DEVICE_INTENT_TTL_SECONDS,
   })
 }
+

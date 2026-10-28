@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { requireAdmin } from '@/lib/auth'
 import { adminPaymentSummary, listAdminPaymentHistory, type AdminPaymentFilter, type AdminPaymentRow } from '@/lib/admin-payment-history'
 import { formatUsd } from '@/lib/money'
+import { whopReviewSummary } from '@/lib/whop'
 
 export const metadata: Metadata = { title: 'Payment history | Control panel', robots: { index: false, follow: false } }
 export const dynamic = 'force-dynamic'
@@ -21,6 +22,7 @@ const NETWORKS: Record<string, string> = {
 }
 
 function paymentMethod(row: AdminPaymentRow): string {
+  if (row.gateway === 'whop_card') return 'Card · Whop'
   const network = NETWORKS[row.payment_network_id ?? '']
   if (network) return `${row.payment_asset_code ?? 'Token'} · ${network}`
   return row.gateway || 'Legacy payment request'
@@ -32,8 +34,8 @@ function paymentStatus(row: AdminPaymentRow): { label: string; className: string
   if (row.status === 'refunded') return { label: 'Refunded', className: 'badge badge--muted' }
   if (row.verification_status === 'manual_review') return { label: 'Needs review', className: 'badge badge--pending' }
   if (row.verification_status) return { label: 'Verifying transfer', className: 'badge badge--pending' }
-  if (row.status === 'review') return { label: 'Checking', className: 'badge badge--pending' }
-  return { label: 'Awaiting transfer', className: 'badge badge--muted' }
+  if (row.status === 'review') return { label: row.gateway === 'whop_card' ? 'Needs review' : 'Checking', className: 'badge badge--pending' }
+  return { label: 'Awaiting payment', className: 'badge badge--muted' }
 }
 
 function utcDate(value: string | null): string {
@@ -60,6 +62,7 @@ export default async function AdminPaymentHistoryPage({
   const rawReference = typeof params.ref === 'string' ? params.ref.slice(0, 64) : ''
   const requestedPage = typeof params.page === 'string' && /^[1-9]\d{0,8}$/.test(params.page) ? Number(params.page) : 1
   const summary = adminPaymentSummary()
+  const card = whopReviewSummary()
   const history = listAdminPaymentHistory({ filter, reference: rawReference, page: requestedPage })
   const reference = history.invalidReference ? '' : rawReference.trim().toLowerCase()
 
@@ -71,7 +74,7 @@ export default async function AdminPaymentHistoryPage({
           <h1>Payment history</h1>
           <p>Review payment requests across accounts. Only a verified, credited invoice counts as paid.</p>
         </div>
-        <Link className="button button--secondary" href="/admin">Back to control panel</Link>
+        <div className="admin-payment-nav"><Link className="button button--secondary" href="/admin/analytics?view=payments">Top-up analytics</Link><Link className="button button--quiet" href="/admin">Control panel</Link></div>
       </div>
 
       <div className="stat-grid">
@@ -82,6 +85,10 @@ export default async function AdminPaymentHistoryPage({
       </div>
 
       <section className="panel payment-history-panel">
+        {card.reviews + card.unmatched + card.retries > 0 ? <p className="alert" role="status">
+          Whop: {card.reviews} payments need review; {card.unmatched} unmatched events; {card.retries} events awaiting verification after retries.
+          Review the Whop dashboard and the reconciliation guide before making any manual balance adjustment.
+        </p> : null}
         <header>
           <div>
             <h2>Invoice records</h2>

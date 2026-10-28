@@ -25,9 +25,9 @@ import { safeContinuation, withContinuation } from './continuation'
 import { ContactError, submitContactMessage } from './contact'
 import { isValidImei, normalizeImei } from './imei'
 import { parseUsd } from './money'
-import { landingRoute, unlockOrderingEnabled } from './provider'
-import { writeQuote } from './quote'
-import { clearDeviceIntent } from './device-intent'
+import { landingRoute } from './provider'
+import { clearDeviceIntent, writeDeviceIntent } from './device-intent'
+import { storefrontAvailability } from './storefront-availability'
 import { joinUnlockWaitlist, WaitlistError } from './waitlist'
 import {
   approveInvoice,
@@ -57,15 +57,9 @@ export async function startUnlockQuoteAction(_: FormState, data: FormData): Prom
     return { error: 'Pick the network the phone is locked to.' }
   }
 
-  await writeQuote(imei, carrierId)
-
-  /* Never hand the visitor to a page that cannot take their order. While
-     unlock ordering is closed the quote goes to the reports catalogue,
-     which can be bought today; the IMEI travels with them either way. */
-  if (!unlockOrderingEnabled()) redirect('/services/imei-check')
-
-  const signedIn = (await currentSession()) !== null
-  redirect(signedIn ? '/user/unlock' : '/register')
+  // Navigation only: do not create a provider order or select a service from a legacy carrier ID.
+  await writeDeviceIntent(imei, 'unlock')
+  redirect('/services/unlock/catalog')
 }
 
 /**
@@ -76,7 +70,7 @@ export async function startUnlockQuoteAction(_: FormState, data: FormData): Prom
  * page from an ending into a step.
  */
 export async function joinUnlockWaitlistAction(_: FormState, data: FormData): Promise<FormState> {
-  if (unlockOrderingEnabled()) {
+  if (storefrontAvailability('unlock').accepting) {
     return { error: 'Unlock ordering is open — you can place the order now.' }
   }
 

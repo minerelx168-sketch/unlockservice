@@ -1,12 +1,12 @@
 import { Icon } from './icons'
 import type { DrawerGroup, DrawerLink } from './site-drawer'
-import { SiteFooter, type FooterFact } from './site-footer'
+import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { logoutAction } from '@/lib/actions'
 import { listArticles } from '@/lib/articles'
 import { currentSession } from '@/lib/auth'
 import { CARRIERS } from '@/lib/catalog'
-import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
+import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 
 /**
  * The public chrome, built on the server from the same catalog the
@@ -18,7 +18,7 @@ import { listPublicProviderProducts } from '@/lib/public-provider-catalog'
 async function chromeData() {
   const session = await currentSession()
   const isAuthenticated = session !== null
-  const reports = listPublicProviderProducts('imei_check')
+  const reports = listStorefrontProviderProducts('imei_check')
   const articles = listArticles()
   const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size
   return { isAuthenticated, reports, articles, networks }
@@ -46,14 +46,14 @@ export async function PublicHeader() {
       primary: {
         href: '/services/imei-check',
         label: 'Browse all reports',
-        note: `${reports.length} device checks available`,
+        note: `${reports.length} services listed`,
         icon: 'grid',
       },
-      items: reports.slice(0, 6).map((product) => ({
+      items: [{ href: '/check', label: 'Apple Free Check', icon: 'search' as const }, ...reports.slice(0, 5).map((product) => ({
         href: `/services/imei-check?product=${encodeURIComponent(product.productCode)}`,
         label: product.name,
         icon: 'file' as const,
-      })),
+      }))],
     },
   ]
 
@@ -83,15 +83,10 @@ export async function PublicHeader() {
 }
 
 export async function PublicFooter() {
-  const { isAuthenticated, articles, networks } = await chromeData()
+  const { isAuthenticated, articles } = await chromeData()
 
-  const facts: FooterFact[] = [
-    { icon: 'globe', title: `${networks} networks listed`, caption: 'Across four countries' },
-    { icon: 'file', title: `${articles.length} guides`, caption: 'Written for buyers and sellers' },
-    { icon: 'shieldCheck', title: 'Held, then charged', caption: 'Refused orders refund in full' },
-    { icon: 'lock', title: 'Masked identifiers', caption: 'Full IMEIs never shown in lists' },
-  ]
-  const guides = articles.slice(0, 6).map((article) => ({ href: `/articles/${article.slug}`, label: article.title }))
+  const guides = articles.slice(0, 4).map((article) => ({ href: `/articles/${article.slug}`, label: article.title }))
 
-  return <SiteFooter isAuthenticated={isAuthenticated} guides={guides} facts={facts} />
+  return <SiteFooter isAuthenticated={isAuthenticated} guides={guides} />
 }
+

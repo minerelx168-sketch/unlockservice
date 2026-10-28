@@ -137,3 +137,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+.price-check-total { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin: 10px 0 0; color: var(--ink); font-size: .875rem; }
+.price-check-total strong { color: var(--ink-strong); }
+.price-check-total span { width: 100%; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+.price-check-minimum { margin: 10px 0 0; font-size: .8125rem; line-height: 1.5; color: var(--muted); }
+.price-check-details { display: grid; gap: 16px; padding-top: 4px; }
+.price-check-details input { min-height: 50px; font-size: 16px; }

@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
@@ -34,7 +35,7 @@ export default async function ChecksPage() {
         <div className="card empty-state">
           <span className="icon-tile icon-tile--accent" aria-hidden="true"><Icon name="device" /></span>
           <h2 className="t-card">No checks yet</h2>
-          <p className="t-small">Run a free IMEI format and checksum check before placing an unlock order.</p>
+          <p className="t-small">Get Apple Basic Info with Apple Free Check. Each verified account gets 3 free checks per day.</p>
           <Link className="link-arrow" href="/check">Start a phone check <Icon name="arrowRight" /></Link>
         </div>
       ) : (
@@ -49,14 +50,16 @@ export default async function ChecksPage() {
                 <th role="columnheader" scope="col">Device</th>
                 <th role="columnheader" scope="col">Type</th>
                 <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col">Created</th>
                 <th role="columnheader" scope="col"><span className="visually-hidden">Action</span></th>
               </tr></thead>
               <tbody role="rowgroup">
                 {checks.map((check) => (
                   <tr role="row" key={check.id}>
                     <td role="cell" className="mono" data-label="Device">{check.imei ?? check.maskedImei}</td>
-                    <td role="cell" data-label="Type">{check.checkType === 'basic' ? 'Free IMEI check' : check.checkType}</td>
+                    <td role="cell" data-label="Type">{check.checkType === 'apple_free' ? 'Apple Free Check' : check.checkType === 'basic' ? 'IMEI format check' : check.checkType}</td>
                     <td role="cell" data-label="Status">{statusLabel(check.status)}</td>
+                    <td role="cell" data-label="Created"><LocalTime value={check.createdAt} /></td>
                     <td role="cell" className="account-table-action" data-label="Action">
                       <Link className="link-arrow" href={`/user/checks/${check.id}`} aria-label={`View check ${check.id}`}>
                         View <Icon name="arrowRight" />
@@ -72,3 +75,4 @@ export default async function ChecksPage() {
     </>
   )
 }
+

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { groupServices, storefrontDomain } from '@/lib/service-groups'
 import { formatUsd } from '@/lib/money'
 import type { ProviderProductDomain } from '@/lib/provider-products'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
@@ -27,7 +28,7 @@ const DOMAIN_COPY: Record<ProviderProductDomain, {
     groupLabel: 'Check category',
     searchPlaceholder: 'Apple, Samsung, carrier or blacklist',
     availableLabel: 'Reports available online',
-    notice: 'Phone Check prices are shown in USD. Review the service requirements and price before confirming your order.',
+    notice: 'Phone Check prices are shown in USD. Available reports can be ordered online; coming-soon checks remain view-only until their input and report formats are verified.',
   },
   unlock: {
     label: 'Unlock',
@@ -35,7 +36,7 @@ const DOMAIN_COPY: Record<ProviderProductDomain, {
     groupLabel: 'Unlock category',
     searchPlaceholder: 'Country, network, Apple or Android',
     availableLabel: 'Services available online',
-    notice: 'Unlock prices are shown in USD. Review the service requirements and price before confirming your order.',
+    notice: 'Unlock prices are shown in USD. Available services can be ordered online; services that require additional device or account details remain view-only until their input flow is verified.',
   },
 }
 
@@ -47,6 +48,7 @@ function customerText(value: string) {
 }
 
 function ProductCard({ product }: { product: PublicProviderProduct }) {
+  const browseDomain = storefrontDomain(product)
   const available = product.status === 'available'
   const productName = customerText(product.name)
   const productGroup = customerText(product.group)
@@ -55,11 +57,11 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
     <article className="card product-card">
       <div className="card-topline product-card-topline">
         <span className="kicker">
-          <Icon name={product.domain === 'unlock' ? 'lock' : 'search'} />
+          <Icon name={browseDomain === 'unlock' ? 'lock' : 'search'} />
           {productGroup}
         </span>
         <span className={available ? 'badge badge--success' : 'badge badge--muted'}>
-          {available ? 'Available' : 'Temporarily unavailable'}
+          {available ? 'Available' : 'Coming soon'}
         </span>
       </div>
 
@@ -70,20 +72,27 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
 
       <div className="product-card-price-row" aria-label={`Price for ${productName}`}>
         <span className="label">Price</span>
-        <strong className="product-price">{formatUsd(product.priceCents)}</strong>
+        <strong className="product-price">{product.priceAvailable === false ? 'Contact for price' : formatUsd(product.priceCents)}</strong>
       </div>
       <p className="t-small">Estimated delivery: {customerText(product.etaLabel)}</p>
 
       {product.hasExample ? <ServiceOutputExample productCode={product.productCode} productName={productName} className="product-card-example" /> : null}
 
       {available ? (
-        <Link className="button button--primary product-card-action" href={`/user/reports/new?product=${encodeURIComponent(product.productCode)}`}>
-          {product.domain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
+        <Link className="button button--primary product-card-action" href={`/services/${browseDomain === 'unlock' ? 'unlock' : 'imei-check'}?product=${encodeURIComponent(product.productCode)}&start=1#${browseDomain === 'unlock' ? 'unlock-entry-heading' : 'imei-check-browse'}`}>
+          {browseDomain === 'unlock' ? 'Choose unlock service' : 'Choose report'} <Icon name="arrowRight" />
+        </Link>
+      ) : browseDomain === 'unlock' ? (
+        /* A dead grey label was the whole of the offer on every unlock
+           card. The service is coming; the card can say so and take an
+           address instead of ending the visit. */
+        <Link className="button button--secondary product-card-action" href="/unlock-waitlist">
+          Notify me when this opens <Icon name="arrowRight" />
         </Link>
       ) : (
-        <Link className="button button--secondary product-card-action" href="/contact">
-          Contact support <Icon name="arrowRight" />
-        </Link>
+        <span className="button button--quiet product-card-action" aria-disabled="true">
+          Unavailable online
+        </span>
       )}
     </article>
   )
@@ -97,14 +106,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   const copy = DOMAIN_COPY[domain]
 
   const groups = useMemo(() => {
-    return Array.from(new Set(products.map((product) => customerText(product.group))))
-      .filter(Boolean)
-      .sort((left, right) => {
-        if (left.toLowerCase() === 'featured') return -1
-        if (right.toLowerCase() === 'featured') return 1
-        // Use the same collation during SSR and hydration, regardless of host locale.
-        return left.localeCompare(right, 'en')
-      })
+    return groupServices(products).map(({ group }) => group)
   }, [products])
 
   const visible = useMemo(() => {
@@ -130,6 +132,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
   }, [groups, visible])
 
   const availableCount = products.filter((product) => product.status === 'available').length
+  const comingSoonCount = products.length - availableCount
   const filtersActive = query.trim() !== '' || selectedGroup !== 'all' || selectedProductCode !== 'all'
   const advancedFilterCount = Number(selectedGroup !== 'all') + Number(selectedProductCode !== 'all')
   const selectedProduct = products.find((product) => product.productCode === selectedProductCode)
@@ -146,7 +149,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
       <div className="trust-bar" aria-label={`${copy.label} catalog summary`}>
         <div><b>{products.length} services</b><span>Published in this category</span></div>
         <div><b>{availableCount} available</b><span>{copy.availableLabel}</span></div>
-        <div><b>Order history</b><span>Results saved to your account</span></div>
+        <div><b>{comingSoonCount} coming soon</b><span>View-only until verified</span></div>
         <div><b>USD prices</b><span>Shown before ordering</span></div>
       </div>
 
@@ -227,7 +230,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
                     <optgroup key={group} label={group}>
                       {options.map((product) => (
                         <option key={product.productCode} value={product.productCode}>
-                          {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Temporarily unavailable'}
+                          {customerText(product.name)} — {product.priceAvailable === false ? 'Contact for price' : formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
                         </option>
                       ))}
                     </optgroup>

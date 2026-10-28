@@ -124,6 +124,19 @@ export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks,
         isAuthenticated={isAuthenticated}
         accountSlot={accountSlot}
       />
+
+      <nav className="mobile-nav" aria-label="Mobile navigation" hidden={open}>
+        {([
+          { href: '/services/unlock', label: 'Unlock', icon: 'lock' },
+          { href: '/services/imei-check', label: 'Check', icon: 'search' },
+          { href: isAuthenticated ? '/user/orders' : '/track', label: 'Track', icon: 'clock' },
+          { href: accountHref, label: 'Account', icon: 'user' },
+        ] as Array<{ href: string; label: string; icon: IconName }>).map((item) => {
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`) || (pathname === '/' && item.label === 'Unlock')
+          return <Link key={item.label} href={item.href} data-active={active || undefined} aria-current={pathname === item.href ? 'page' : active ? 'location' : undefined}><Icon name={item.icon} /><span>{item.label}</span></Link>
+        })}
+      </nav>
+
     </>
   )
 }

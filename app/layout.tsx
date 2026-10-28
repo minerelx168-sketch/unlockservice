@@ -1,16 +1,22 @@
+import { currentSession } from '@/lib/auth'
 import { headers } from 'next/headers'
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import { publicOrigin } from '@/lib/site'
 import '@/styles/globals.css'
+import { CustomerEngagement } from '@/components/customer-engagement'
+import { AnalyticsConsent } from '@/components/analytics-consent'
+import { GoogleAnalyticsNavigation } from '@/components/google-analytics-navigation'
+import { analyticsHostAllowed } from '@/lib/site'
+import { safeAnalyticsPage } from '@/lib/analytics-page'
 
 const DESCRIPTION =
-  'Unlock a phone from its carrier by IMEI. Filed with the network that holds the lock, permanent through updates and resets, with reserved account credit returned if the carrier refuses.'
+  'Compare phone network-unlock services and device reports by IMEI. Review carrier eligibility, service prices and delivery estimates before ordering; refused services release reserved account credit.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicOrigin()),
   title: {
-    default: 'iUnlockMobile — permanent IMEI phone unlocking',
+    default: 'iUnlockMobile — phone unlocking and device reports',
     template: '%s — iUnlockMobile',
   },
   description: DESCRIPTION,
@@ -19,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: 'iUnlockMobile',
-    title: 'iUnlockMobile — permanent IMEI phone unlocking',
+    title: 'iUnlockMobile — phone unlocking and device reports',
     description: DESCRIPTION,
     url: '/',
   },
@@ -45,23 +51,28 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   /* Minted per request in middleware.ts, which is also where the policy that
      makes it mean anything is written. Next.js stamps its own streamed
      scripts with it; this one has to be given the nonce by hand. */
-  const nonce = (await headers()).get('x-nonce') ?? undefined
+  const requestHeaders = await headers()
+  const nonce = requestHeaders.get('x-nonce') ?? undefined
+  const requestHost = requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim() ?? requestHeaders.get('host') ?? ''
+  const session = await currentSession()
+  const requestPath = requestHeaders.get('x-continuation-path')?.split('?')[0] ?? '/'
+  const analyticsEnabled = analyticsHostAllowed(requestHost) && session?.user.account_type !== 'admin' && !requestPath.startsWith('/admin')
   const googleAdsTag = 'AW-18465855968'
   const googleAnalyticsTag = 'G-9WCELVR3V3'
   // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
-  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${googleAdsTag}'); gtag('config', '${googleAnalyticsTag}');`
+  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); var safeAnalyticsContext = (${safeAnalyticsPage.toString()})(location.href, document.referrer); gtag('set', safeAnalyticsContext); gtag('js', new Date()); gtag('config', '${googleAdsTag}', {...safeAnalyticsContext, send_page_view:false}); gtag('config', '${googleAnalyticsTag}', {...safeAnalyticsContext, send_page_view:false});`
 
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="en" data-analytics-disabled={!analyticsEnabled ? 'true' : undefined} data-theme="light" suppressHydrationWarning>
       <head>
         {PRELOADED_FONTS.map((href) => (
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_GUARD }} />
-        <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} />
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} />
+        {analyticsEnabled ? <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} /> : null}
+        {analyticsEnabled ? <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} /> : null}
       </head>
-      <body>{children}</body>
+      <body>{children}<GoogleAnalyticsNavigation /><CustomerEngagement /><AnalyticsConsent /></body>
     </html>
   )
 }

@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OrderStatusBadge } from '@/components/order-status'
@@ -58,6 +59,7 @@ export default async function OrdersPage({
           </p>
         </div>
         <div className="app-head-actions" aria-label="Order history view">
+          <Link className="button button--quiet" href="/user/guest-orders">Direct card orders</Link>
           <a className={`button ${tab === 'orders' ? 'button--primary' : 'button--quiet'}`} href="?tab=orders&page=1">
             Orders
           </a>
@@ -92,7 +94,7 @@ export default async function OrdersPage({
                       <OrderStatusBadge status={order.status} />
                     </td>
                     <td role="cell" className="num" data-label="Price">{formatUsd(order.price_cents)}</td>
-                    <td role="cell" data-label="Placed">{order.created_at}</td>
+                    <td role="cell" data-label="Placed"><LocalTime value={order.created_at} /></td>
                     <td role="cell" className="account-table-action" data-label="Action">
                       <Link className="link-arrow" href={`/user/orders/${order.id}`}>
                         Open
@@ -137,7 +139,7 @@ export default async function OrdersPage({
                     </td>
                     <td role="cell" className="num" data-label="Amount">{formatUsd(row.amount_cents)}</td>
                     <td role="cell" className="num" data-label="Available after">{formatUsd(row.balance_after_cents)}</td>
-                    <td role="cell" data-label="When">{row.created_at}</td>
+                    <td role="cell" data-label="When"><LocalTime value={row.created_at} /></td>
                   </tr>
                 ))}
               </tbody>

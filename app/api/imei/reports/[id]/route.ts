@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { currentSession } from '@/lib/auth'
 import { guard } from '@/lib/api'
 import { getPaidReport, PaidReportError, pollPaidReport } from '@/lib/paid-reports'
+import { purchaseConversion } from '@/lib/purchase-conversion'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -20,7 +21,9 @@ export async function GET(_request: Request, { params }: RouteContext) {
   if (!id) return NextResponse.json({ success: false, error: 'Paid report not found.' }, { status: 404 })
   const report = getPaidReport(found.user.id, id)
   if (!report) return NextResponse.json({ success: false, error: 'Paid report not found.' }, { status: 404 })
-  return NextResponse.json({ success: true, report })
+  const conversion = report.status === 'completed' && report.origin === 'website'
+    ? purchaseConversion(found.user.id, 'paid_imei_report', report.id, report.priceCents) : null
+  return NextResponse.json({ success: true, report, conversion })
 }
 
 export async function POST(request: Request, { params }: RouteContext) {

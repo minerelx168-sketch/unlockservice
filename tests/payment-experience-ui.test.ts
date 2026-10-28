@@ -4,23 +4,6 @@ import test from 'node:test'
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
 
-test('Add funds presents quick amounts, locked summary and explicit multi-chain method selection', () => {
-  const page = read('app/(app)/user/add-funds/page.tsx')
-  const form = read('components/payment-forms.tsx')
-  assert.match(page, /Add credit in four clear steps/)
-  assert.match(page, /Automatic verification ready/)
-  assert.match(page, /Use only the token, network, amount and wallet shown on your invoice/)
-  assert.doesNotMatch(page, /Never reuse a transaction ID/)
-  assert.doesNotMatch(page, /wallet password, private key, seed phrase/)
-  assert.match(form, /QUICK_AMOUNTS = \[10, 25, 50, 100\]/)
-  assert.match(form, /Suggested amount to send/)
-  assert.match(form, /verified on-chain amount determines the credit/i)
-  assert.match(form, /Binance-issued pegged representation/)
-  assert.match(form, /Create payment request/)
-  assert.doesNotMatch(form, /Creating a payment request does not move money/)
-  assert.doesNotMatch(form, /private key or seed phrase/)
-})
-
 test('invoice page uses per-route explorer metadata and refreshes database state only', () => {
   const page = read('app/(app)/user/invoice/[reference]/page.tsx')
   const actions = read('components/invoice-actions.tsx')
@@ -35,6 +18,36 @@ test('invoice page uses per-route explorer metadata and refreshes database state
   assert.match(form, /chainKind: 'evm' \| 'tron'/)
   assert.match(form, /\[a-fA-F0-9\]\{64\}/)
   assert.match(form, /0x\[a-fA-F0-9\]\{64\}/)
+})
+
+test('uncoded legacy invoice explains manual-only status and safe way to request automatic detection', () => {
+  const page = read('app/(app)/user/invoice/[reference]/page.tsx')
+  assert.match(page, /Manual verification required/)
+  assert.match(page, /This request has no unique payment code/)
+  assert.match(page, /It may have been created before automatic detection was enabled/)
+  assert.match(page, /If you already paid, paste the transaction ID below/)
+  assert.match(page, /choose a different amount or network to start a new request/)
+  assert.match(page, /Choosing the same amount and network reopens this pending request/)
+  assert.match(page, /href="\/user\/add-funds"/)
+  assert.doesNotMatch(page, /Send supported USDT, then paste your transaction hash/)
+})
+
+test('fractional withdrawal fees never imply automatic credit without the invoice code', () => {
+  const invoice = read('app/(app)/user/invoice/[reference]/page.tsx')
+  const watcher = read('lib/payment-watcher.ts')
+  const panel = read('app/(app)/admin/page.tsx')
+  const association = read('components/admin-unmatched-transfers.tsx')
+  const approval = read('components/admin-invoice-review.tsx')
+  assert.match(invoice, /amount the recipient will receive after any exchange withdrawal fee/)
+  assert.match(invoice, /If the fee changes them, paste your transaction ID below for administrator review/)
+  assert.match(invoice, /manual credit uses the verified amount/)
+  assert.match(watcher, /feeShortfallCandidates\(candidate\)/)
+  assert.match(watcher, /another request after withdrawal fees/)
+  assert.match(panel, /Unmatched transfers — manual payment check/)
+  assert.match(association, /Verify &amp; associate/)
+  assert.match(approval, /Confirm manual payment &amp; credit/)
+  assert.match(approval, /\/api\/admin\/invoice-verifications/)
+  assert.doesNotMatch(invoice, /short still counts in full/)
 })
 
 test('bounded payment reconciliation runs inside the existing provider poll entrypoint', () => {

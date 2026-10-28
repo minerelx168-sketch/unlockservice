@@ -4,6 +4,7 @@ import { useActionState, useRef, useState, type FormEvent } from 'react'
 import { browseDevicesAction } from '@/lib/device-intent-actions'
 import { deviceImei } from '@/lib/device-intent-value'
 import { IMEI_LENGTH } from '@/lib/imei'
+import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon, type IconName } from './icons'
 
 export type QuickPickOption = { code: string; short: string; kicker: string; icon: IconName }
@@ -27,13 +28,15 @@ export function ImeiQuickForm({ picks, initialCode, allHref, allLabel }: Props) 
   const [imei, setImei] = useState('')
   const [error, setError] = useState<string | null>(null)
   const input = useRef<HTMLInputElement>(null)
+  const started = useRef(false)
   const [state, action, pending] = useActionState(browseDevicesAction, {})
   const selected = picks.find((pick) => pick.code === code) ?? picks[0]
   const digits = imei.replace(/[\s-]/g, '')
   const valid = deviceImei(imei) !== null
 
   function validate(event: FormEvent<HTMLFormElement>) {
-    if (valid) return
+    trackFunnelEvent('validation_result', { service_category: 'imei_check', validation_status: valid ? 'passed' : 'failed' })
+    if (valid) { trackFunnelEvent('service_selection', { service_category: 'imei_check' }); return }
     event.preventDefault()
     setError(`Enter the ${IMEI_LENGTH}-digit IMEI — dial *#06# on the phone to see it.`)
     input.current?.focus()
@@ -58,7 +61,7 @@ export function ImeiQuickForm({ picks, initialCode, allHref, allLabel }: Props) 
                 className="quick-pick"
                 aria-pressed={pick.code === code}
                 disabled={pending}
-                onClick={() => { setCode(pick.code); setError(null) }}
+                onClick={() => { setCode(pick.code); setError(null); trackFunnelEvent('service_selection', { service_category: 'imei_check' }) }}
               >
                 <span className="icon-tile icon-tile--sm" aria-hidden="true">
                   <Icon name={pick.icon} />
@@ -91,7 +94,7 @@ export function ImeiQuickForm({ picks, initialCode, allHref, allLabel }: Props) 
             disabled={pending}
             aria-invalid={error ? true : undefined}
             aria-describedby="quick-imei-help"
-            onChange={(event) => { setImei(event.currentTarget.value); setError(null) }}
+            onChange={(event) => { if (event.currentTarget.value && !started.current) { started.current = true; trackFunnelEvent('imei_input_started', { service_category: 'imei_check' }) } setImei(event.currentTarget.value); setError(null) }}
           />
           <span className="quick-form-count" aria-hidden="true">
             {valid ? <Icon name="checkSmall" strokeWidth={2.6} /> : `${Math.min(digits.length, IMEI_LENGTH)}/${IMEI_LENGTH}`}
@@ -108,7 +111,7 @@ export function ImeiQuickForm({ picks, initialCode, allHref, allLabel }: Props) 
       ) : null}
 
       <p className="quick-form-help" id="quick-imei-help">
-        Works on iPhone, Samsung, Xiaomi and every major brand. Dial <kbd>*#06#</kbd> on the phone to see its IMEI.
+        Device coverage depends on the selected report. Dial <kbd>*#06#</kbd> on the phone to see its IMEI.
         <a href="/support#faq"><Icon name="question" strokeWidth={2} />How to find my IMEI</a>
       </p>
     </form>

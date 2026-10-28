@@ -5,6 +5,76 @@
  * glance.
  */
 
+/* Compact deposit flow, with a native modal for keyboard/focus isolation. */
+.crypto-dialog { width: min(480px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 24px; background: var(--page, #fff); color: var(--ink); box-shadow: 0 24px 100px #071a2b30; overflow: auto; overscroll-behavior: contain; }
+.crypto-dialog::backdrop { background: #15263c66; backdrop-filter: blur(5px); }
+.crypto-close { position: sticky; top: 8px; float: right; z-index: 2; width: 44px; height: 44px; margin: 8px 8px -52px 0; border: 0; border-radius: 50%; background: var(--page, #fff); color: var(--muted); font-size: 28px; cursor: pointer; }
+.crypto-flow { padding: 28px 24px 24px; min-width: 0; }
+.crypto-heading { position: relative; text-align: center; padding: 0 28px; margin-bottom: 26px; }
+.crypto-heading h2 { margin: 0; font-size: 21px; font-weight: 650; letter-spacing: -.5px; }
+.crypto-heading h2:focus { outline: none; }
+.crypto-heading p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.crypto-back { position: absolute; left: -12px; top: -9px; display: grid; place-items: center; width: 44px; height: 44px; background: none; border: 0; cursor: pointer; }
+.crypto-back svg { width: 20px; height: 20px; }
+.crypto-amount-label { display: block; text-align: center; font-size: 13px; color: var(--muted); }
+.crypto-amount-input { display: flex; align-items: baseline; justify-content: center; margin-top: 10px; font-size: 52px; letter-spacing: -2px; font-weight: 600; }
+.crypto-amount-input span { color: var(--muted); }
+.crypto-amount-input input { width: 6ch; min-width: 0; padding: 0; border: 0; border-radius: 6px; background: none; text-align: center; color: inherit; font: inherit; letter-spacing: inherit; }
+.crypto-note { color: var(--muted); font-size: 12px; line-height: 1.6; text-align: center; margin: 10px 0 16px; }
+.crypto-presets { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 20px 0 24px; }
+.crypto-presets button { min-height: 44px; padding: 8px 2px; border: 1px solid var(--line); border-radius: 12px; background: var(--page); font: inherit; font-size: 14px; cursor: pointer; }
+.crypto-presets button[aria-pressed=true] { border-color: #2563eb; background: #eef4ff; color: #1d4ed8; font-weight: 650; }
+.crypto-token-label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 600; }
+.crypto-flow select, .crypto-tx input { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--page); color: inherit; font-size: 16px; }
+.crypto-chain { display: flex; gap: 12px; align-items: center; padding: 14px 0; }
+.crypto-chain > span { width: 34px; height: 34px; display: grid; place-items: center; background: #fbf4d5; color: #9c7200; border-radius: 50%; font-size: 22px; }
+.crypto-chain div { display: grid; gap: 3px; flex: 1; }
+.crypto-chain strong { font-size: 14px; }
+.crypto-chain small { color: var(--muted); font-size: 12px; }
+.crypto-chain svg { width: 19px; height: 19px; color: #15926b; }
+.crypto-facts { margin: 12px 0 16px; padding: 10px 14px; border-radius: 14px; background: var(--page-soft, #f5f7fa); }
+.crypto-facts > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 13px; line-height: 1.5; }
+.crypto-facts dt { color: var(--muted); }
+.crypto-facts dd { margin: 0; text-align: right; font-weight: 550; }
+.crypto-facts small { font-size: 11px; font-weight: 400; }
+.crypto-primary { display: flex; width: 100%; min-height: 48px; justify-content: center; text-align: center; margin-top: 12px; border-radius: 12px; }
+.crypto-token-pill { display: flex; width: fit-content; align-items: center; gap: 8px; margin: -8px auto 16px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 30px; font-size: 13px; }
+.crypto-token-pill > span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #e0f5ef; color: #18816b; font-weight: bold; }
+.crypto-qr { width: 220px; max-width: 100%; margin: 0 auto 18px; padding: 5px; border: 1px solid #dbe5ed; border-radius: 18px; background: #fff; box-shadow: 0 5px 18px #18304c0a; }
+.crypto-qr img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.crypto-flow .copy-value { margin: 12px 0; }
+.crypto-flow .copy-value > div { display: flex; gap: 8px; }
+.crypto-flow .copy-value label { font-size: 12px; }
+.crypto-flow .copy-value input { min-width: 0; flex: 1; width: 0; padding: 10px; font-size: 16px; border-radius: 10px; }
+.crypto-flow .copy-value button { flex: 0 0 auto; min-width: 58px; min-height: 44px; padding: 8px 12px; border-radius: 10px; }
+.crypto-transfer-note { font-size: 12px; line-height: 1.6; margin: 12px 0; color: var(--muted); }
+.crypto-tx summary { min-height: 44px; padding: 12px 0; font-size: 13px; cursor: pointer; }
+.crypto-tx summary span { color: var(--muted); }
+.crypto-tx label { display: block; font-size: 12px; margin: 6px 0; }
+.crypto-tx .crypto-note { text-align: left; }
+.crypto-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; font-size: 12px; color: #2157b6; }
+.crypto-links a { min-height: 44px; display: inline-flex; align-items: center; }
+.crypto-status { text-align: center; padding: 12px 0 6px; }
+.crypto-status h3 { font-size: 24px; margin: 18px 0 10px; letter-spacing: -.5px; }
+.crypto-status p { font-size: 14px; line-height: 1.65; color: var(--muted); }
+.crypto-status-symbol { display: grid; place-items: center; width: 76px; height: 76px; margin: 0 auto; border-radius: 50%; background: #eff5fd; color: #2563eb; }
+.crypto-status-symbol svg { width: 32px; height: 32px; }
+.crypto-status-symbol--success { background: #e2f6eb; color: #17824e; }
+.crypto-status-symbol--review, .crypto-status-symbol--closed { background: #fff4df; color: #9c6809; }
+.crypto-spinner { width: 28px; height: 28px; border: 3px solid #c9daf8; border-top-color: #2563eb; border-radius: 50%; animation: crypto-spin 1s linear infinite; }
+@keyframes crypto-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .crypto-spinner { animation: none; } }
+.crypto-page-top { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 24px; font-size: 14px; }
+.crypto-page-panel { max-width: 480px; margin: 0 auto; border: 1px solid var(--line); border-radius: 24px; background: var(--page); }
+@media (max-width: 480px) {
+  .crypto-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); border-radius: 20px; }
+  .crypto-flow { padding: 24px 16px 16px; }
+  .crypto-heading { margin-bottom: 20px; }
+  .crypto-amount-input { font-size: 48px; }
+  .crypto-facts { padding: 8px 12px; }
+  .crypto-facts > div { font-size: 12px; }
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 244px minmax(0, 1fr);
@@ -2361,6 +2431,42 @@ table.account-table td {
   font-size: 0.75rem;
 }
 
+.funding-journey {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.funding-journey li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.funding-journey li > span {
+  flex: 0 0 auto;
+  color: var(--primary-dark);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.funding-journey strong,
+.funding-journey small {
+  display: block;
+  line-height: 1.4;
+}
+
+.funding-journey strong { color: var(--ink-strong); }
+.funding-journey small { margin-top: 4px; color: var(--muted); }
+
 .invoice-progress li.is-complete {
   border-color: color-mix(in srgb, #16834b 30%, var(--line));
   background: color-mix(in srgb, #16834b 6%, var(--surface));
@@ -2381,6 +2487,75 @@ table.account-table td {
   grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.65fr);
   align-items: start;
   gap: 20px;
+}
+
+.funding-method-selector > header {
+  align-items: flex-start;
+}
+
+.funding-method-selector > header p {
+  margin: 5px 0 0;
+}
+
+.funding-method-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.funding-method-option {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 14px;
+  min-height: 100px;
+  padding: 20px;
+  appearance: none;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  color: var(--ink-strong);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.funding-method-option:hover,
+.funding-method-option[aria-pressed='true'] {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+
+.funding-method-option[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.funding-method-symbol {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-panel);
+  background: var(--page-soft);
+  color: var(--primary-dark);
+  font-size: 1.5rem;
+  font-weight: 750;
+}
+
+.funding-method-copy strong,
+.funding-method-copy small {
+  display: block;
+}
+
+.funding-method-copy small {
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.funding-method-status {
+  margin: 16px 0 22px;
+  color: var(--muted);
 }
 
 .funding-panel > header {
@@ -2430,8 +2605,12 @@ table.account-table td {
 
 .quick-amounts {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+}
+
+.quick-amounts--card {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .quick-amount,
@@ -2565,6 +2744,13 @@ table.account-table td {
   font-family: var(--font-display);
   font-size: 1.45rem;
   color: var(--primary-dark);
+}
+
+.funding-summary-note {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .funding-assurance > div:first-child,
@@ -2945,6 +3131,11 @@ table.account-table td {
     flex-direction: column;
   }
 
+  .funding-journey,
+  .funding-method-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .funding-progress,
   .invoice-progress {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3147,3 +3338,21 @@ table.account-table td {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* Business insights entry points; financial actions remain in their existing panels. */
+.admin-growth { margin-bottom: 26px; }
+.admin-growth-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; }
+.admin-growth-head h2 { margin:6px 0; font-size:22px; }
+.admin-growth-head p { color:var(--muted); font-size:13px; margin:0; }
+.admin-growth .caption { display:block; margin-top:10px; line-height:1.6; font-size:12px; color:var(--muted); }
+.admin-insight-links { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:16px; }
+.admin-insight-links a { display:grid; gap:6px; padding:18px; min-height:84px; border:1px solid var(--accent-border); border-radius:14px; background:var(--accent-soft); color:var(--accent-dark); }
+.admin-insight-links strong { font-size:14px; }
+.admin-insight-links span { font-size:12px; line-height:1.5; color:var(--muted); }
+.admin-payment-nav { display:flex; flex-wrap:wrap; gap:8px; }
+@media(max-width:900px) { .admin-insight-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .admin-growth .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .admin-growth .stat { padding:16px 12px; } .admin-growth .stat .label { font-size:10px; min-height:28px; } .admin-growth .stat .value { font-size:24px; } .admin-insight-links a { padding:14px; } }
+
+/* Customer timestamps may wrap inside compact table cards on small screens. */
+.customer-local-time { white-space: normal; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.customer-time-notice { margin: 24px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }

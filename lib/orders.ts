@@ -1,3 +1,4 @@
+import { snapshotWebsiteAttribution } from './order-attribution'
 import {
   db,
   getBrand,
@@ -14,6 +15,7 @@ import { recordProviderEvent } from './provider-events'
 import { claimProviderPoll } from './provider-poll-lease'
 import { enqueueOrderNotification } from './order-notifications'
 import { consumeAttempt } from './rate-limit'
+import { purchaseConversion, type PurchaseConversion } from './purchase-conversion'
 
 /**
  * The order pipeline.
@@ -78,6 +80,7 @@ export type OrderPayload = {
   success: boolean
   orderId: number
   status: OrderStatus
+  conversion: PurchaseConversion | null
   title: string
   imei: string
   priceCents: number
@@ -162,6 +165,8 @@ function payload(
     success: true,
     orderId: order.id,
     status: order.status,
+    conversion: order.status === 'delivered' && order.source === 'website'
+      ? purchaseConversion(order.user_id, 'order', order.id, order.price_cents) : null,
     title: order.title,
     imei: order.imei,
     priceCents: order.price_cents,
@@ -395,11 +400,12 @@ export async function submitOrder(
     }).immediate()
   } catch (error) {
     if (error instanceof InsufficientCredit) {
-      throw new OrderError('Not enough credit for this order. Add funds and try again.', 'insufficient_credit')
+      throw new OrderError(error.message, 'insufficient_credit')
     }
     throw error
   }
 
+  if (!replayed) await snapshotWebsiteAttribution('order', orderId, source)
   let order = getOrder(orderId, userId)!
   if (replayed) return restingPayload(order, readBalance(userId).availableCents)
   const config = providerConfiguration()
@@ -681,6 +687,16 @@ export function countOrders(userId: number): number {
     .prepare('SELECT COUNT(*) AS count FROM orders WHERE user_id = ?')
     .get(userId) as { count: number }
   return row.count
+}
+
+/** 48 hours covers the current local day in every supported IANA timezone.
+ * Minute buckets keep the payload bounded (at most 2,881 rows) for busy accounts.
+ * Modern timezone offsets, including 30/45-minute zones, align to these buckets.
+ */
+export function recentOrderCounts(userId: number, now = Date.now()): import('./customer-time').OrderMinuteCount[] {
+  return db().prepare(`SELECT strftime('%Y-%m-%d %H:%M:00', created_at) AS at, COUNT(*) AS count
+    FROM orders WHERE user_id = ? AND julianday(created_at) >= julianday(?) AND julianday(created_at) <= julianday(?)
+    GROUP BY at ORDER BY at`).all(userId, new Date(now - 2 * 86_400_000).toISOString(), new Date(now).toISOString()) as import('./customer-time').OrderMinuteCount[]
 }
 
 export function orderStats(userId: number) {

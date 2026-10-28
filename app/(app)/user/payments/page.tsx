@@ -1,3 +1,4 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireSession } from '@/lib/auth'
@@ -19,12 +20,13 @@ const STATUS_BADGE: Record<string, string> = {
 const STATUS_LABEL: Record<string, string> = {
   success: 'Verified',
   review: 'Checking',
-  pending: 'Awaiting transfer',
+  pending: 'Awaiting payment',
   failed: 'Closed',
   refunded: 'Refunded',
 }
 
 function paymentMethod(invoice: Invoice): string {
+  if (invoice.gateway === 'whop_card') return 'Card · Whop'
   const gateway = invoiceGateway(invoice)
   return gateway ? `${gateway.asset} · ${gateway.network}` : 'Legacy payment request'
 }
@@ -56,7 +58,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         <div>
           <span className="eyebrow">Balance and payment requests</span>
           <h1>Payments</h1>
-          <p>Track every request from transfer to on-chain verification. Credit is added only after settlement checks pass.</p>
+          <p>Track your payments and credit. Credit is added only after payment verification succeeds.</p>
         </div>
         <Link className="button button--accent" href="/user/add-funds">Add funds</Link>
       </div>
@@ -128,7 +130,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                       {STATUS_LABEL[invoice.status] ?? invoice.status}
                     </span>
                   </td>
-                  <td role="cell" data-label="Created">{invoice.created_at}</td>
+                  <td role="cell" data-label="Created"><LocalTime value={invoice.created_at} /></td>
                   <td role="cell" className="account-table-action" data-label="Action">
                     <Link className="link-arrow" href={`/user/invoice/${invoice.reference}`}>
                       {invoice.status === 'pending' ? 'Continue' : 'View details'}

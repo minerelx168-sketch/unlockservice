@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
+import { useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
+import { groupServices } from '@/lib/service-groups'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
 import { ServiceOutputExample } from './service-output-example'
@@ -11,6 +13,7 @@ export type ServiceOption = {
   summary: string
   group: string
   priceCents: number
+  priceAvailable?: boolean
   etaLabel: string
   available: boolean
   hasExample?: boolean
@@ -28,6 +31,7 @@ export function ServicePicker({
   disabled = false,
   label = 'Service',
   id,
+  triggerRef: providedTriggerRef,
 }: {
   options: ServiceOption[]
   value: string
@@ -35,25 +39,27 @@ export function ServicePicker({
   disabled?: boolean
   label?: string
   id?: string
+  triggerRef?: RefObject<HTMLButtonElement | null>
 }) {
   const generatedId = useId()
   const pickerId = id ?? `service-picker-${generatedId}`
   const [expanded, setExpanded] = useState(false)
   const [query, setQuery] = useState('')
-  const triggerRef = useRef<HTMLButtonElement>(null)
+  const localTriggerRef = useRef<HTMLButtonElement>(null)
+  const triggerRef = providedTriggerRef ?? localTriggerRef
   const searchRef = useRef<HTMLInputElement>(null)
   const selected = options.find((option) => option.code === value)
   const availableCount = options.filter((option) => option.available).length
   const open = expanded && !disabled
   const visible = useMemo(() => {
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
-    // Preserve catalog order within each availability group.
-    const ordered = [...options.filter((option) => option.available), ...options.filter((option) => !option.available)]
-    return ordered.filter((option) => {
+    return options.filter((option) => {
       const text = `${option.name} ${option.group} ${option.summary}`.toLowerCase()
       return words.every((word) => text.includes(word))
     })
   }, [options, query])
+
+  const groups = useMemo(() => groupServices(visible), [visible])
 
   useEffect(() => {
     if (open) searchRef.current?.focus()
@@ -91,7 +97,7 @@ export function ServicePicker({
         <span className="service-picker__selection" id={`${pickerId}-selection`}>
           <strong>{selected ? serviceDisplayText(selected.name) : 'Choose a service'}</strong>
           <small>{selected
-            ? `${formatUsd(selected.priceCents)} USD · ${serviceDisplayText(selected.etaLabel)}${selected.available ? '' : ' · Unavailable online'}`
+            ? `${selected.priceAvailable === false ? 'Contact for price' : `${formatUsd(selected.priceCents)} USD`} · ${serviceDisplayText(selected.etaLabel)}${selected.available ? '' : ' · Unavailable online'}`
             : 'Search by device, network or service name'}</small>
         </span>
         <span className="service-picker__affordance" aria-hidden="true">
@@ -99,6 +105,7 @@ export function ServicePicker({
           <span className="service-picker__chevron" />
         </span>
       </button>
+      {selected && !selected.available ? <p className="service-picker__inquiry"><Link href="/contact">Contact us about this service</Link></p> : null}
       {selected?.hasExample && !open ? (
         <div className="service-picker__selected-example"><ServiceOutputExample productCode={selected.code} productName={serviceDisplayText(selected.name)} /></div>
       ) : null}
@@ -117,7 +124,7 @@ export function ServicePicker({
                 // Searching inside an order form must not submit that form.
                 if (event.key === 'Enter') event.preventDefault()
               }}
-              placeholder="Try Apple, Samsung or blacklist"
+              placeholder="Search services"
               autoComplete="off"
               disabled={disabled}
               aria-controls={`${pickerId}-results`}
@@ -126,31 +133,38 @@ export function ServicePicker({
           <p className="service-picker__results-count" role="status">{visible.length} services shown · Prices in USD</p>
         </div>
         <ul className="service-picker__results" id={`${pickerId}-results`} aria-label={`${label} options`}>
-          {visible.map((option) => (
-            <li key={option.code}>
-              <button
-                type="button"
-                className="service-picker__option"
-                aria-pressed={option.code === value}
-                disabled={disabled}
-                onClick={() => {
-                  onChange(option.code)
-                  setQuery('')
-                  close()
-                }}
-              >
-                <span className="service-picker__option-copy">
-                  <small>{serviceDisplayText(option.group)}</small>
-                  <strong>{serviceDisplayText(option.name)}</strong>
-                  <span>{serviceDisplayText(option.summary)}</span>
-                  <small>{serviceDisplayText(option.etaLabel)} · {option.available ? 'Available' : 'Unavailable online'}</small>
-                </span>
-                <span className="service-picker__option-price">
-                  <strong>{formatUsd(option.priceCents)}</strong>
-                  {option.code === value ? <span><Icon name="checkSmall" /> Selected</span> : <span>Select service</span>}
-                </span>
-              </button>
-              {option.hasExample ? <div className="service-picker__example"><ServiceOutputExample productCode={option.code} productName={serviceDisplayText(option.name)} /></div> : null}
+          {groups.map(({ group, products }, groupIndex) => (
+            <li className="service-picker__group" key={group}>
+              <h3 className="service-picker__group-heading" id={`${pickerId}-group-${groupIndex}`}>
+                <span>{group}</span><small>{products.length}</small>
+              </h3>
+              <ul className="service-picker__group-options" aria-labelledby={`${pickerId}-group-${groupIndex}`}>
+                {products.map((option) => (
+                  <li key={option.code}>
+                    <button
+                      type="button"
+                      className="service-picker__option"
+                      aria-pressed={option.code === value}
+                      disabled={disabled}
+                      onClick={() => {
+                        onChange(option.code)
+                        setQuery('')
+                        close()
+                      }}
+                    >
+                      <span className="service-picker__option-copy">
+                        <strong>{serviceDisplayText(option.name)}</strong>
+                        <small>{serviceDisplayText(option.etaLabel)} · {option.available ? 'Available' : 'Unavailable online'}</small>
+                      </span>
+                      <span className="service-picker__option-price" data-unpriced={option.priceAvailable === false || undefined}>
+                        <strong>{option.priceAvailable === false ? 'Contact for price' : formatUsd(option.priceCents)}</strong>
+                        {option.code === value ? <span><Icon name="checkSmall" /> Selected</span> : null}
+                      </span>
+                    </button>
+                    {option.hasExample ? <div className="service-picker__example"><ServiceOutputExample productCode={option.code} productName={serviceDisplayText(option.name)} /></div> : null}
+                  </li>
+                ))}
+              </ul>
             </li>
           ))}
         </ul>

@@ -1,12 +1,15 @@
+import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { GoogleAdsPurchaseConversion } from '@/components/google-ads-purchase-conversion'
 import { Icon, type IconName } from '@/components/icons'
 import { OrderRefresh } from '@/components/order-refresh'
 import { formatEta, OrderStatusBadge } from '@/components/order-status'
 import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 import { getOrder } from '@/lib/orders'
+import { purchaseConversion } from '@/lib/purchase-conversion'
 
 export const metadata: Metadata = { title: 'Order' }
 export const dynamic = 'force-dynamic'
@@ -31,10 +34,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     ([key]) => key !== 'note' && key !== 'source' && key !== 'identifier',
   )
   const note = typeof result?.note === 'string' ? result.note : null
+  const conversion = order.status === 'delivered' && order.source === 'website'
+    ? purchaseConversion(user.id, 'order', order.id, order.price_cents) : null
+
   const disc = DISC[order.status]
 
   return (
     <>
+      <GoogleAdsPurchaseConversion purchase={conversion} />
       <Link className="back-link" href="/user/dashboard">
         <Icon name="arrowLeft" strokeWidth={2} />
         Back to dashboard
@@ -85,7 +92,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             </div>
             <div className="field-box">
               <dt><Icon name="clock" strokeWidth={2} />Created</dt>
-              <dd>{order.created_at}</dd>
+              <dd><LocalTime value={order.created_at} /></dd>
             </div>
             <div className="field-box">
               <dt><Icon name="bolt" strokeWidth={2} />Delivered as</dt>

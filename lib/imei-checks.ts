@@ -1,5 +1,7 @@
 import { db } from './db'
-import { isValidImei, maskIdentifier, normalizeImei } from './imei'
+import { decryptProviderCode } from './provider-code'
+import { maskIdentifier } from './imei'
+import { serviceIdentifier } from './service-identifier'
 import { fingerprintImei } from './imei-privacy'
 import { decryptImeiCheckImei, encryptImeiCheckImei } from './imei-check-imei'
 import { activeImeiCheckProvider, type ImeiCheckResult } from './imei-check-provider'
@@ -38,6 +40,7 @@ export type ImeiCheckView = {
   status: ImeiCheckStatus
   provider: string
   result: Record<string, unknown> | null
+  providerCode?: string
   message?: string
   createdAt: string
   updatedAt: string
@@ -57,7 +60,8 @@ export class ImeiCheckError extends Error {
       | 'rate_limited'
       | 'check_not_found'
       | 'idempotency_conflict'
-      | 'provider_not_ready',
+      | 'provider_not_ready'
+      | 'account_not_ready',
   ) {
     super(message)
   }
@@ -77,6 +81,9 @@ function parseResult(value: string | null): Record<string, unknown> | null {
 }
 
 function toView(row: ImeiCheckRow): ImeiCheckView {
+  const result = parseResult(row.result_json)
+  const encrypted = result?._providerCodeEncrypted
+  if (result) delete result._providerCodeEncrypted
   return {
     id: row.id,
     checkType: row.check_type,
@@ -84,7 +91,8 @@ function toView(row: ImeiCheckRow): ImeiCheckView {
     imei: decryptImeiCheckImei(row.imei_encrypted) ?? undefined,
     status: row.status,
     provider: row.provider,
-    result: parseResult(row.result_json),
+    result,
+    providerCode: decryptProviderCode(typeof encrypted === 'string' ? encrypted : null) ?? undefined,
     message: row.error_message ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -172,16 +180,27 @@ function auditOutcome(id: number, mode: string, outcome: ImeiCheckResult, eventK
   })
 }
 
-/** Creates a free report without creating an invoice or touching credit. */
+export const FREE_APPLE_DAILY_LIMIT = 3
+export function freeAppleQuota(userId: number) {
+  const row = db().prepare("SELECT count(*) AS used FROM imei_checks WHERE user_id=? AND check_type='apple_free' AND created_at>=datetime('now','start of day')").get(userId) as { used: number }
+  const resetAt = new Date(); resetAt.setUTCHours(24, 0, 0, 0)
+  return { limit: FREE_APPLE_DAILY_LIMIT, used: row.used, remaining: Math.max(0, FREE_APPLE_DAILY_LIMIT - row.used), resetAt: resetAt.toISOString() }
+}
+
+/** Each accepted attempt consumes a daily slot, including uncertain upstream responses. */
 export async function createImeiCheck(userId: number, input: CreateImeiCheckInput): Promise<ImeiCheckView> {
-  const imei = normalizeImei(input.imei)
-  if (!imei) throw new ImeiCheckError('Enter the device IMEI.', 'imei_missing')
-  if (!isValidImei(imei)) throw new ImeiCheckError('Enter a valid 15-digit IMEI.', 'imei_invalid')
+  const imei = serviceIdentifier(input.imei)
+  if (!imei) throw new ImeiCheckError('Enter a valid 15-digit IMEI.', 'imei_invalid')
+  const account = db().prepare("SELECT 1 FROM users WHERE id=? AND account_type='customer' AND status='active' AND banned_at IS NULL AND email_verified_at IS NOT NULL").get(userId)
+  if (!account) throw new ImeiCheckError('Sign in with a verified customer account to use Apple Free Check.', 'account_not_ready')
 
   const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
   if (idempotencyKey) {
     const existing = existingForIdempotency(userId, idempotencyKey)
-    if (existing) return existing
+    if (existing) {
+      if (existing.checkType !== 'apple_free' || existing.imei !== imei) throw new ImeiCheckError('This request key belongs to another check.', 'idempotency_conflict')
+      return existing
+    }
   }
 
   if (!consumeAttempt('imei-check-user', String(userId), CHECK_RATE_LIMIT, CHECK_WINDOW_SECONDS)) {
@@ -190,14 +209,26 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
 
   const provider = activeImeiCheckProvider()
   const config = providerConfiguration()
-  const service = imeiProviderService('basic')
-  const providerMode = config.enabled && service ? service.mode : 'local'
-  const inserted = db()
+  const service = imeiProviderService('apple_free')
+  if (!config.enabled || !config.endpoint || !config.apiKey || service?.id !== '214' || service.mode !== 'sync') {
+    throw new ImeiCheckError('Apple Free Check is temporarily unavailable. Please try again later.', 'provider_not_ready')
+  }
+  const providerMode = service.mode
+  const claim = db().transaction(() => {
+    if (idempotencyKey) {
+      const existing = existingForIdempotency(userId, idempotencyKey)
+      if (existing) {
+        if (existing.checkType !== 'apple_free' || existing.imei !== imei) throw new ImeiCheckError('This request key belongs to another check.', 'idempotency_conflict')
+        return { existing }
+      }
+    }
+    if (freeAppleQuota(userId).remaining === 0) throw new ImeiCheckError('You have used your 3 free checks today. Choose a paid Phone Check or come back after the daily reset.', 'rate_limited')
+    const inserted = db()
     .prepare(
       `INSERT INTO imei_checks
          (user_id, check_type, imei_fingerprint, masked_imei, imei_encrypted, status, provider,
           provider_mode, provider_service_id, idempotency_key)
-       VALUES (?, 'basic', ?, ?, ?, 'queued', ?, ?, ?, ?)`,
+       VALUES (?, 'apple_free', ?, ?, ?, 'queued', ?, ?, ?, ?)`,
     )
     .run(
       userId,
@@ -209,10 +240,12 @@ export async function createImeiCheck(userId: number, input: CreateImeiCheckInpu
       service?.id ?? null,
       idempotencyKey ?? null,
     )
-
-  const checkId = Number(inserted.lastInsertRowid)
+    return { id: Number(inserted.lastInsertRowid) }
+  }).immediate()
+  if ('existing' in claim) return claim.existing!
+  const checkId = claim.id
   try {
-    const outcome = await provider.check({ imei, checkType: 'basic' })
+    const outcome = await provider.check({ imei, checkType: 'apple_free' })
     updateResult(checkId, outcome)
     auditOutcome(checkId, providerMode, outcome, `submit:${outcome.providerCheckId ?? checkId}`)
   } catch {
@@ -258,3 +291,4 @@ export async function pollImeiCheck(userId: number, id: number): Promise<ImeiChe
     releasePoll()
   }
 }
+

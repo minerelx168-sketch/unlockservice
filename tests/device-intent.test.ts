@@ -4,6 +4,7 @@ import {
   DEVICE_INTENT_TTL_SECONDS,
   deviceDomain,
   deviceImei,
+  deviceEmail,
   intentImeiFor,
   parseDeviceIntent,
   type DeviceIntent,
@@ -39,6 +40,17 @@ test('service domains are allowlisted', () => {
   assert.equal(deviceDomain('unlock'), 'unlock')
   for (const value of [null, undefined, {}, 'check', 'UNLOCK', '/user/unlock']) {
     assert.equal(deviceDomain(value), null)
+  }
+})
+
+test('delivery email survives the short-lived handoff without becoming an identity claim', () => {
+  assert.equal(deviceEmail(' Buyer@Example.com '), 'buyer@example.com')
+  const draft = { ...DRAFT, email: 'buyer@example.com' }
+  assert.deepEqual(parseDeviceIntent(JSON.stringify(draft), NOW), draft)
+  assert.equal(parseDeviceIntent(JSON.stringify(draft), DRAFT.expiresAt), null)
+  for (const email of ['bad', 'a@b', 'name\n@example.com', '<a>@example.com', 'x'.repeat(255)+'@example.com']) {
+    assert.equal(deviceEmail(email), null)
+    assert.equal(parseDeviceIntent(JSON.stringify({ ...DRAFT, email }), NOW), null)
   }
 })
 

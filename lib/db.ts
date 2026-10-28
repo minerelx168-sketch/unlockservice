@@ -15,6 +15,83 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
 
 const SCHEMA = `
+CREATE TABLE IF NOT EXISTS guest_checkouts (
+  reference TEXT PRIMARY KEY,
+  request_key TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL,
+  product_code TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  imei_encrypted TEXT NOT NULL,
+  price_cents INTEGER NOT NULL CHECK(price_cents>0),
+  fee_cents INTEGER NOT NULL CHECK(fee_cents>=0),
+  wallet_credit_cents INTEGER NOT NULL DEFAULT 0 CHECK(wallet_credit_cents>=0),
+  customer_user_id INTEGER REFERENCES users(id),
+  wallet_review_reason TEXT,
+  account_id TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  environment TEXT NOT NULL,
+  checkout_id TEXT UNIQUE, plan_id TEXT, checkout_url TEXT,
+  payment_id TEXT UNIQUE,
+  payment_method TEXT NOT NULL DEFAULT 'card',
+  crypto_invoice_reference TEXT REFERENCES invoices(reference),
+  state TEXT NOT NULL DEFAULT 'pending',
+  user_id INTEGER REFERENCES users(id),
+  report_id INTEGER UNIQUE REFERENCES paid_report_orders(id),
+  paid_at TEXT, processor_updated_at TEXT,
+  review_reason TEXT,
+  last_error TEXT,
+  refund_requested_at TEXT,
+  receipt_sent_at TEXT, result_sent_at TEXT, refund_notice_sent_at TEXT,
+  email_attempts INTEGER NOT NULL DEFAULT 0,
+  email_next_at INTEGER NOT NULL DEFAULT 0,
+  lease_until INTEGER NOT NULL DEFAULT 0,
+  checked_at TEXT,
+  client_id TEXT, session_id TEXT,
+  analytics_state TEXT NOT NULL DEFAULT 'pending',
+  analytics_attempted_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS guest_checkouts_work ON guest_checkouts(state,checked_at);
+-- A paid guest order stays financially isolated from a customer wallet. Inbox
+-- verification links its history to a customer; the checkout return key cannot.
+CREATE TABLE IF NOT EXISTS guest_account_access (
+  reference TEXT PRIMARY KEY REFERENCES guest_checkouts(reference),
+  email TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_user_id INTEGER REFERENCES users(id),
+  verified_user_id INTEGER REFERENCES users(id),
+  consumed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS guest_account_access_customer ON guest_account_access(verified_user_id,created_at);
+CREATE TABLE IF NOT EXISTS purchase_analytics (
+ user_id INTEGER NOT NULL REFERENCES users(id), kind TEXT NOT NULL CHECK(kind IN ('order','paid_imei_report')),
+ request_key TEXT NOT NULL, client_id TEXT NOT NULL, session_id TEXT NOT NULL,
+ state TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL DEFAULT (datetime('now')), attempted_at TEXT,
+ PRIMARY KEY(user_id,kind,request_key)
+);
+CREATE INDEX IF NOT EXISTS purchase_analytics_pending ON purchase_analytics(state,created_at);
+CREATE TABLE IF NOT EXISTS payment_analytics (
+  invoice_reference TEXT PRIMARY KEY REFERENCES invoices(reference),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  client_id TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  consent INTEGER NOT NULL DEFAULT 1 CHECK(consent IN (0,1)),
+  state TEXT NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','sending','submitted','uncertain','suppressed','expired')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  attempted_at TEXT
+);
+CREATE INDEX IF NOT EXISTS payment_analytics_pending ON payment_analytics(state,created_at);
+
+CREATE TABLE IF NOT EXISTS order_attribution (
+  order_type TEXT NOT NULL CHECK (order_type IN ('order', 'paid_report_order')),
+  order_id INTEGER NOT NULL CHECK (order_id > 0),
+  gclid TEXT, gbraid TEXT, wbraid TEXT,
+  consent_state TEXT NOT NULL CHECK (consent_state = 'granted'),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (order_type, order_id)
+);
 CREATE TABLE IF NOT EXISTS users (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   username           TEXT    NOT NULL UNIQUE,
@@ -32,6 +109,23 @@ CREATE TABLE IF NOT EXISTS users (
   status             TEXT    NOT NULL DEFAULT 'active',
   created_at         TEXT    NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Consented signed-in analytics. Never store IPs, device IDs, IMEIs or URL parameters.
+CREATE TABLE IF NOT EXISTS analytics_identities (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  analytics_id TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS customer_page_visits (
+  visit_id TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  page TEXT NOT NULL,
+  active_ms INTEGER NOT NULL DEFAULT 0 CHECK(active_ms>=0),
+  started_at TEXT NOT NULL,
+  last_seen_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS customer_page_visits_user ON customer_page_visits(user_id,started_at);
+CREATE INDEX IF NOT EXISTS customer_page_visits_retention ON customer_page_visits(started_at);
 
 CREATE TABLE IF NOT EXISTS sessions (
   id         TEXT    PRIMARY KEY,
@@ -137,6 +231,44 @@ CREATE TABLE IF NOT EXISTS invoices (
 );
 CREATE INDEX IF NOT EXISTS invoices_user ON invoices(user_id, created_at DESC);
 
+-- Card top-ups retain their own immutable processor identity. Existing token
+-- invoices and balances are not rewritten by this additive schema.
+CREATE TABLE IF NOT EXISTS whop_topups (
+  invoice_reference TEXT PRIMARY KEY REFERENCES invoices(reference),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  request_key TEXT NOT NULL,
+  account_id TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  environment TEXT NOT NULL,
+  checkout_id TEXT UNIQUE,
+  plan_id TEXT,
+  checkout_url TEXT,
+  payment_id TEXT UNIQUE,
+  credited INTEGER NOT NULL DEFAULT 0,
+  reversed_cents INTEGER NOT NULL DEFAULT 0,
+  reversal_due_cents INTEGER NOT NULL DEFAULT 0,
+  review_reason TEXT,
+  processor_updated_at TEXT,
+  last_checked_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, request_key)
+);
+CREATE INDEX IF NOT EXISTS whop_topups_review ON whop_topups(user_id, review_reason);
+CREATE TABLE IF NOT EXISTS whop_webhook_events (
+  event_id TEXT PRIMARY KEY,
+  event_type TEXT NOT NULL,
+  payment_id TEXT NOT NULL,
+  account_id TEXT NOT NULL,
+  state TEXT NOT NULL DEFAULT 'pending',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  locked_until TEXT,
+  next_attempt_at TEXT,
+  last_error TEXT,
+  received_at TEXT NOT NULL DEFAULT (datetime('now')),
+  processed_at TEXT
+);
+CREATE INDEX IF NOT EXISTS whop_events_pending ON whop_webhook_events(state, next_attempt_at);
+
 CREATE TABLE IF NOT EXISTS invoice_verifications (
   invoice_reference    TEXT    PRIMARY KEY REFERENCES invoices(reference) ON DELETE RESTRICT,
   chain_id             INTEGER NOT NULL,
@@ -214,6 +346,27 @@ CREATE TABLE IF NOT EXISTS chain_transfers (
 );
 CREATE INDEX IF NOT EXISTS chain_transfers_status ON chain_transfers(status, block_time DESC);
 
+-- A permanent admin audit for decisions on transfers not automatically matched.
+-- No raw receipt, wallet credential or customer identifier is copied here.
+CREATE TABLE IF NOT EXISTS chain_transfer_admin_events (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  transfer_id     INTEGER NOT NULL REFERENCES chain_transfers(id) ON DELETE RESTRICT,
+  admin_user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  action          TEXT NOT NULL CHECK (action IN ('confirm', 'dismiss', 'reject')),
+  invoice_reference TEXT REFERENCES invoices(reference) ON DELETE RESTRICT,
+  reason          TEXT NOT NULL,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS chain_transfer_admin_events_transfer
+  ON chain_transfer_admin_events(transfer_id, id DESC);
+CREATE TRIGGER IF NOT EXISTS chain_transfer_admin_events_no_update
+  BEFORE UPDATE ON chain_transfer_admin_events
+  BEGIN SELECT RAISE(ABORT, 'transfer admin events are append-only'); END;
+CREATE TRIGGER IF NOT EXISTS chain_transfer_admin_events_no_delete
+  BEFORE DELETE ON chain_transfer_admin_events
+  BEGIN SELECT RAISE(ABORT, 'transfer admin events are append-only'); END;
+
 -- How far the watcher has read on each route, and a short lease so the
 -- poll timer and a customer's open invoice never scan the same range at once.
 CREATE TABLE IF NOT EXISTS payment_watch_cursors (
@@ -221,6 +374,7 @@ CREATE TABLE IF NOT EXISTS payment_watch_cursors (
   last_block    INTEGER,
   last_time_ms  INTEGER,
   resume_from_ms INTEGER,
+  resume_fingerprint TEXT,
   lease_until   TEXT,
   lease_token   TEXT,
   last_scan_at  TEXT,
@@ -538,10 +692,19 @@ function migrationApplied(connection: Database.Database, version: string): boole
 /** Additive compatibility migrations. Existing tables and financial rows remain readable. */
 function migrate(connection: Database.Database) {
   connection.transaction(() => {
+    addColumn(connection, 'guest_checkouts', "payment_method TEXT NOT NULL DEFAULT 'card'")
+    addColumn(connection, 'guest_checkouts', 'crypto_invoice_reference TEXT REFERENCES invoices(reference)')
+    addColumn(connection, 'guest_checkouts', 'refund_notice_sent_at TEXT')
+    addColumn(connection, 'guest_checkouts', 'wallet_credit_cents INTEGER NOT NULL DEFAULT 0')
+    addColumn(connection, 'guest_checkouts', 'customer_user_id INTEGER REFERENCES users(id)')
+    addColumn(connection, 'guest_checkouts', 'wallet_review_reason TEXT')
+    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')
     addColumn(connection, 'users', 'email_verified_at TEXT')
     addColumn(connection, 'users', 'banned_at TEXT')
     addColumn(connection, 'users', "avatar_style TEXT NOT NULL DEFAULT 'violet'")
     addColumn(connection, 'users', 'pending_email TEXT')
+    // Fail closed on semantic duplicates; deployment audits this invariant first.
+    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_email_casefold_unique ON users(lower(email))')
     addColumn(connection, 'credit_ledger', 'description TEXT')
     addColumn(connection, 'credit_ledger', 'affects_balance INTEGER NOT NULL DEFAULT 1')
     addColumn(connection, 'invoices', 'provider TEXT')
@@ -564,6 +727,10 @@ function migrate(connection: Database.Database) {
     // to an invoice without the customer pasting anything. Null on invoices
     // created before codes existed; those keep the paste-only flow.
     addColumn(connection, 'invoices', 'payment_amount_e4 INTEGER')
+    // Preserve existing requests' promised shortfall allowance. New crypto
+    // deposits snapshot actual_received and credit only confirmed net funds.
+    addColumn(connection, 'invoices', "payment_credit_policy TEXT NOT NULL DEFAULT 'legacy_allowance'")
+    addColumn(connection, 'payment_watch_cursors', 'resume_fingerprint TEXT')
     addColumn(connection, 'orders', 'provider_name TEXT')
     addColumn(connection, 'orders', 'provider_mode TEXT')
     addColumn(connection, 'orders', 'provider_service_id TEXT')

@@ -67,6 +67,14 @@ export function AvatarPicker({ username, current }: { username: string; current:
   )
 }
 
+function EmailCurrentPassword({ id }: { id: string }) {
+  return <div className="field">
+    <label htmlFor={id}>Current password</label>
+    <input id={id} name="current" type="password" autoComplete="current-password" maxLength={256} required />
+    <p className="field-note">Confirm your current password to protect the account recovery address.</p>
+  </div>
+}
+
 export function EmailChangeForm({
   currentEmail,
   pendingEmail,
@@ -101,6 +109,7 @@ export function EmailChangeForm({
           </p>
           <form className="profile-form" action={confirmAction} noValidate>
             <Notice state={confirmState} />
+            <EmailCurrentPassword id="profile-email-confirm-password" />
             <div className="field">
               <label htmlFor="profile-email-code">Code from the new inbox</label>
               <input
@@ -133,6 +142,7 @@ export function EmailChangeForm({
       ) : (
         <form className="profile-form" action={startAction} noValidate>
           <Notice state={startState} />
+          <EmailCurrentPassword id="profile-email-start-password" />
           <div className="field">
             <label htmlFor="profile-new-email">New email address</label>
             <input

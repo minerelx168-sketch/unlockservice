@@ -31,3 +31,18 @@ export function supportEmail(): string {
   const configured = process.env.IUNLOCKMOBILE_SUPPORT_EMAIL?.trim()
   return configured && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(configured) ? configured : DEFAULT_SUPPORT_EMAIL
 }
+
+
+const CANONICAL_ANALYTICS_HOSTS = new Set(['iunlockmobile.com', 'www.iunlockmobile.com'])
+
+/** Google must never load or receive hits on local, staging, or foreign hosts. */
+export function analyticsHostAllowed(hostname: string): boolean {
+  const host = hostname.trim().toLowerCase().replace(/\.$/, '')
+  if (!CANONICAL_ANALYTICS_HOSTS.has(host)) return false
+  try {
+    const configured = new URL(publicOrigin())
+    return configured.protocol === 'https:' && CANONICAL_ANALYTICS_HOSTS.has(configured.hostname)
+  } catch {
+    return false
+  }
+}

@@ -6,6 +6,7 @@ import {
   submitProviderRequest,
 } from './provider-api'
 import { buildProviderReport } from './imei-report'
+import { encryptProviderCode } from './provider-code'
 
 /** Provider-neutral request for a non-payment IMEI report. */
 export type ImeiCheckRequest = {
@@ -36,22 +37,19 @@ export interface ImeiCheckProvider {
 export const localValidationCheckProvider: ImeiCheckProvider = {
   name: 'local-validation',
 
-  async check(request) {
+  async check() {
     return {
       status: 'completed',
       provider: 'local-validation',
       providerCheckId: `local_${randomUUID()}`,
       result: {
-        checkType: request.checkType,
-        source: 'local-validation',
-        demo: true,
+        kind: 'format_checksum',
         title: 'IMEI format check complete',
-        summary: 'The IMEI passed the 15-digit Luhn validation used before a provider lookup.',
+        summary: 'This free check validates the 15-digit format and Luhn checksum only. It does not look up carrier, blacklist, warranty, lock or other device data.',
         checks: [
           { key: 'format', label: '15-digit format', status: 'passed' },
           { key: 'checksum', label: 'Luhn checksum', status: 'passed' },
         ],
-        nextStep: 'Connect an authorized device-data provider to add carrier, blacklist, warranty, or model results.',
       },
     }
   },
@@ -82,7 +80,9 @@ const configuredImeiProvider: ImeiCheckProvider = {
         status: 'completed',
         provider: config.name,
         providerCheckId: outcome.providerId,
-        result: buildProviderReport(request.checkType, config.name, outcome.data),
+        result: { ...buildProviderReport(request.checkType === 'apple_free' ? 'APPLE_BASIC' : request.checkType, config.name, outcome.data),
+          ...(request.checkType === 'apple_free' ? { _providerCodeEncrypted: encryptProviderCode(outcome.providerCode) } : {}),
+        },
       }
     }
     return {
@@ -129,3 +129,4 @@ const configuredImeiProvider: ImeiCheckProvider = {
 export function activeImeiCheckProvider(): ImeiCheckProvider {
   return providerConfiguration().enabled ? configuredImeiProvider : localValidationCheckProvider
 }
+

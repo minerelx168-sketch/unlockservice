@@ -75,12 +75,22 @@ test('quick picks follow the catalog and the landing sample prefers the blacklis
   assert.equal(sample?.product.productCode, 'B')
 })
 
-test('every landing sample is labelled as an example and shows a masked identifier only', () => {
+test('landing examples are service-specific, explicitly labelled, and never fabricated', () => {
+  // Both landing pages now lead with an order form. Reviewed examples live in the catalog.
+  const samplePage = read('app/(marketing)/services/imei-check/page.tsx')
+  assert.match(samplePage, /<HeroPriceCheck/)
+  assert.match(samplePage, /<ProductCatalog products=\{products\} domain="imei_check"/)
+  assert.doesNotMatch(samplePage, /<SampleReportCard/)
+  const catalog = read('components/product-catalog.tsx')
+  assert.match(catalog, /product.hasExample \? <ServiceOutputExample/)
+  const example = read('components/service-output-example.tsx')
+  assert.match(example, /Example output/)
+  assert.match(example, /Sample only\. Your result depends on the device and service\./)
+  assert.match(example, /An example is not available for this service yet\./)
+  assert.match(example, /credentials: 'omit'/)
+  assert.doesNotMatch(example, /initialImei|initialEmail|window.location.search/)
   for (const path of ['app/(marketing)/services/imei-check/page.tsx', 'app/(marketing)/services/unlock/page.tsx']) {
     const source = read(path)
-    assert.match(source, /<SampleReportCard/)
-    assert.match(source, /pill="Example/)
-    assert.match(source, /imei="35•• •••• ••80"/)
     assert.doesNotMatch(source, /LIVE DATA|Live source|Bank-grade|6,000\+|Trusted by/i)
   }
   const card = read('components/sample-report-card.tsx')

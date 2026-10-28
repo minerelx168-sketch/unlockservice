@@ -1,8 +1,8 @@
 'use client'
+import { ProviderOutputText } from './provider-output-text'
 
 import { useEffect, useId, useRef, useState } from 'react'
 import { Icon } from './icons'
-import { ReportCard } from './report-card'
 
 type Example = {
   title: string
@@ -169,7 +169,7 @@ export function ServiceOutputExample({ productCode, productName, className = '',
                 <section className="service-output-example__variant" key={`${variant.label}-${index}`}>
                   {state.example.variants.length > 1 ? <h3>{variant.label || `Example ${index + 1}`}</h3> : null}
                   {/* React escapes provider text: sample HTML is never executed. */}
-                  <ReportCard text={variant.output} fallbackClassName="" />
+                  <ProviderOutputText value={variant.output} />
                 </section>
               ))}
             </div>
@@ -182,3 +182,4 @@ export function ServiceOutputExample({ productCode, productName, className = '',
     </>
   )
 }
+
