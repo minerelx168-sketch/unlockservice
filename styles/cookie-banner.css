@@ -19,8 +19,11 @@
   /* Keep the fixed notice and the storefront navigation separately tappable. */
   body:has(.mobile-nav:not([hidden])) .analytics-consent[data-open='true'] { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); padding-bottom: 12px; }
   body:has(input:not([type='radio']):not([type='checkbox']):focus, textarea:focus) .analytics-consent[data-open='true'] { bottom: 0; }
-  .cookie-banner { grid-template-columns: minmax(0, 1fr) 44px; gap: 10px; }
-  .cookie-banner > p:first-child { grid-column: 1 / -1; font-size: .8125rem; line-height: 1.55; }
+  /* Compact on phones: the notice sits above the tab bar, so together they
+     were covering about a quarter of the screen. */
+  .analytics-consent[data-open='true'] { padding-top: 12px; }
+  .cookie-banner { grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; }
+  .cookie-banner > p:first-child { grid-column: 1 / -1; font-size: .75rem; line-height: 1.45; }
   .cookie-close { grid-column: 2; grid-row: 2; align-self: center; }
   .cookie-accept { grid-column: 1; grid-row: 2; width: 100%; min-width: 0; }
 }

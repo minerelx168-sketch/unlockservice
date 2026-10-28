@@ -76,6 +76,12 @@
   .support-hero .section-head { margin-bottom: 18px; }
   .support-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
   .support-tabs a { padding-inline: 8px; font-size: .8125rem; }
+  /* Three tabs in two columns left one stranded at half width: the two short
+     labels share the first row and the long one takes the whole second row. */
+  .support-tabs a:nth-child(2) { grid-column: 1 / -1; order: 3; }
+  /* The half-width cells may wrap on the narrowest phones; the icon keeps its size. */
+  .support-tabs a { white-space: normal; text-align: center; }
+  .support-tabs a svg { flex: 0 0 auto; }
   .support-hub { padding: 18px; }
   .support-hub li a, .chip { min-height: 44px; }
   .track-layout { gap: 20px; }

@@ -8,9 +8,13 @@
 
 /* ==== labels ======================================================== */
 
+/* justify-self: a kicker is a label, never a full-width bar. Inside the
+   grid .section-head it was stretched to the column — invisible until a
+   section painted kickers as pills, then a 720px bar around 169px of text. */
 .kicker {
   display: inline-flex;
   align-items: center;
+  justify-self: start;
   gap: 7px;
   font-size: 0.75rem;
   font-weight: 740;
@@ -1241,6 +1245,19 @@
   font-weight: 740;
   letter-spacing: 0.05em;
   color: #1a1130;
+}
+
+/* On a phone the label takes its own line so the six marks sit in one
+   row, instead of five and an orphan. */
+@media (max-width: 640px) {
+  .footer-accept {
+    gap: 10px 8px;
+  }
+
+  .footer-accept > span:first-child {
+    flex-basis: 100%;
+    text-align: center;
+  }
 }
 
 .site-footer h4 {

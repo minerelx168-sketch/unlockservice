@@ -146,6 +146,8 @@
   background: var(--surface);
 }
 
+/* nowrap: on a phone "Unlock troubleshooting" broke inside its own tab
+   and left the third tab stranded; whole tabs now wrap as units. */
 .support-tabs a {
   display: inline-flex;
   align-items: center;
@@ -158,6 +160,12 @@
   color: var(--ink);
   font-size: 0.9063rem;
   font-weight: 650;
+  white-space: nowrap;
+}
+
+/* A long placeholder ends in an ellipsis instead of mid-word. */
+.support-search-box input {
+  text-overflow: ellipsis;
 }
 
 .support-tabs a svg {
