@@ -14,7 +14,7 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
       { href: '/user/services/unlock', label: 'Unlock services', icon: 'lock' },
       { href: '/user/orders', label: 'Orders', icon: 'clock' },
       { href: '/user/reports', label: 'Service history', icon: 'file' },
-      { href: '/user/checks', label: 'Free checks', icon: 'keypad' },
+      { href: '/user/checks', label: 'Apple Free Check', icon: 'keypad' },
     ],
   },
   {

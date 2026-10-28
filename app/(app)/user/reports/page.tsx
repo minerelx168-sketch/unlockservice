@@ -38,7 +38,7 @@ export default async function PaidReportsPage() {
         <div className="card empty-state">
           <span className="icon-tile icon-tile--accent" aria-hidden="true"><Icon name="file" /></span>
           <h2 className="t-card">No paid reports yet</h2>
-          <p className="t-small">Paid Provider reports are separate from the Free IMEI Check.</p>
+          <p className="t-small">Paid reports are separate from Apple Free Check.</p>
           <Link className="link-arrow" href="/user/reports/new">Choose a paid report <Icon name="arrowRight" /></Link>
         </div>
       ) : (

@@ -41,7 +41,7 @@ export function ImeiCheckForm({ csrfToken, initialQuota }: { csrfToken?: string;
     const link = document.createElement('a'); link.href = url; link.download = `apple-free-check-${check.id}.json`; link.click(); URL.revokeObjectURL(url)
   }
   return <>
-    {csrfToken ? <p className="field-note" aria-live="polite"><strong>{quota?.remaining ?? 3} of 3 free checks remaining today.</strong> Resets daily at 00:00 UTC. Each submitted check uses one allowance.</p> : <p className="field-note">Sign in with a verified account to get 3 free Apple checks per day.</p>}
+    {csrfToken ? <p className="field-note" style={{ display: 'block' }} aria-live="polite"><strong style={{ display: 'block' }}>{quota?.remaining ?? 3} of 3 free checks remaining today.</strong> Resets daily at 00:00 UTC. Each submitted check uses one allowance.</p> : <p className="field-note">Sign in with a verified account to get 3 free Apple checks per day.</p>}
     <form className="unlock-quote" onSubmit={submit} noValidate>
       <div className="field"><label htmlFor="check-imei">Apple device IMEI</label><input id="check-imei" ref={input} type="text" inputMode="numeric" autoComplete="off" maxLength={40} spellCheck={false} placeholder="15-digit IMEI" value={value} disabled={busy} onChange={event => { setValue(event.currentTarget.value); requestKey.current = ''; setCheck(null); setError('') }} /><p className="field-note">Find the IMEI in Settings or dial *#06# on your Apple device.</p></div>
       {error ? <p role="alert" className="alert alert--error">{error}</p> : null}

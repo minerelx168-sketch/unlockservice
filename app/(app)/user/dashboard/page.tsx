@@ -71,7 +71,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     { icon: 'search', tint: ' icon-tile--accent', title: 'Phone Check', caption: 'Reports from the IMEI', href: '/user/reports/new' },
     { icon: 'lock', tint: '', title: 'Unlock', caption: ordering ? 'Network unlock by IMEI' : 'Ordering paused — browse prices', href: ordering ? '/user/services/unlock' : '/services/unlock' },
     { icon: 'wallet', tint: ' icon-tile--moss', title: 'Add credit', caption: 'USDT on TRC20 or BEP20', href: '/user/add-funds' },
-    { icon: 'keypad', tint: '', title: 'Free check', caption: 'Validate an IMEI number', href: '/check' },
+    { icon: 'keypad', tint: '', title: 'Apple Free Check', caption: 'Apple Basic Info · 3 free checks daily', href: '/check' },
   ]
 
   const tabs: Array<{ id: Tab; label: string; icon: IconName; count: number }> = [
