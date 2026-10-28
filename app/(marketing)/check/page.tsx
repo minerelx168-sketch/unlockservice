@@ -62,9 +62,11 @@ export default async function CheckPage() {
           </div>
         </div>
       </div>
-      <div className="shell" style={{ marginTop: 32 }}>
-        <h2 className="t-section">Paid Phone Check services and prices</h2>
-        <p className="t-small">Compare reports and prices first. Pay per report without an account, then receive the full result online and by email.</p>
+      <div className="shell free-check-paid">
+        <div className="section-head">
+          <h2 className="t-section">Paid Phone Check services and prices</h2>
+          <p className="t-small">Compare reports and prices first. Pay per report without an account, then receive the full result online and by email.</p>
+        </div>
         <ServiceBrowser products={products} domain="imei_check" isAuthenticated={Boolean(found)} />
       </div>
     </section>
