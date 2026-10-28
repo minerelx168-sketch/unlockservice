@@ -1,6 +1,6 @@
 import { Icon } from './icons'
 import type { DrawerGroup, DrawerLink } from './site-drawer'
-import { SiteFooter, type FooterFact } from './site-footer'
+import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { logoutAction } from '@/lib/actions'
 import { listArticles } from '@/lib/articles'
@@ -83,16 +83,10 @@ export async function PublicHeader() {
 }
 
 export async function PublicFooter() {
-  const { isAuthenticated, articles, networks } = await chromeData()
+  const { isAuthenticated, articles } = await chromeData()
 
-  const facts: FooterFact[] = [
-    { icon: 'globe', title: `${networks} networks listed`, caption: 'Across four countries' },
-    { icon: 'file', title: `${articles.length} guides`, caption: 'Written for buyers and sellers' },
-    { icon: 'shieldCheck', title: 'Pay per order', caption: 'Guest card checkout available' },
-    { icon: 'lock', title: 'Private results', caption: 'Track online and receive results by email' },
-  ]
-  const guides = articles.slice(0, 6).map((article) => ({ href: `/articles/${article.slug}`, label: article.title }))
+  const guides = articles.slice(0, 4).map((article) => ({ href: `/articles/${article.slug}`, label: article.title }))
 
-  return <SiteFooter isAuthenticated={isAuthenticated} guides={guides} facts={facts} />
+  return <SiteFooter isAuthenticated={isAuthenticated} guides={guides} />
 }
 

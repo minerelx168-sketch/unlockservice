@@ -1,9 +1,8 @@
 import Link from 'next/link'
 import { Brand } from './brand'
-import { Icon, type IconName } from './icons'
+import { PaymentMark } from './payment-badges'
 
 export type FooterGuide = { href: string; label: string }
-export type FooterFact = { icon: IconName; title: string; caption: string }
 
 const COLUMNS = [
   {
@@ -39,15 +38,13 @@ const COLUMNS = [
 type Props = {
   isAuthenticated?: boolean
   guides: FooterGuide[]
-  facts: FooterFact[]
 }
 
 /**
- * Brand and three facts, four link columns, then what we accept. The facts
- * come from the server so the footer can never claim more networks or
- * guides than the catalog actually holds.
+ * Brand and one line on what the service is, four link columns, then what
+ * we accept. Deliberately quiet: the selling happened above the footer.
  */
-export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
+export function SiteFooter({ isAuthenticated = false, guides }: Props) {
   return (
     <footer className="site-footer">
       <div className="shell">
@@ -56,20 +53,7 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
             <Brand />
             <p className="blurb">
               Network-unlock services and device reports for phones you own.
-              For people selling a phone, switching network, or travelling
-              with one they already own.
             </p>
-            <div className="footer-facts">
-              {facts.map((fact) => (
-                <div className="footer-fact" key={fact.title}>
-                  <Icon name={fact.icon} strokeWidth={2} />
-                  <div>
-                    {fact.title}
-                    <span>{fact.caption}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {COLUMNS.map((column) => (
@@ -103,11 +87,10 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
         </div>
 
         <div className="footer-accept">
-          <span>We Accept:</span>
-          {['Visa', 'Mastercard', 'Google Pay', 'Apple Pay', 'Bitcoin', 'USDT'].map((method) => (
-            <span className="pay-badge" key={method}>{method}</span>
+          <span>We accept</span>
+          {['visa', 'mastercard', 'googlepay', 'applepay', 'bitcoin', 'usdt'].map((method) => (
+            <PaymentMark method={method} key={method} />
           ))}
-          <span>Pay per order by card, or use your existing account credit.</span>
         </div>
 
         <div className="footer-base">
