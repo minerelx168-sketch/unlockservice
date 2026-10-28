@@ -26,6 +26,7 @@
 @import './mobile-pages.css';
 @import './cookie-banner.css';
 @import './motion.css';
+@import './apple-free-check.css';
 
 /* Browser-only validation and privacy controls. */
 .validation-results { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
