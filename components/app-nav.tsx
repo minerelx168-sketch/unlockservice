@@ -10,11 +10,11 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
     heading: 'Work',
     items: [
       { href: '/user/dashboard', label: 'Dashboard', icon: 'grid' },
-      { href: '/user/check', label: 'Check IMEI', icon: 'search' },
+      { href: '/user/check', label: 'Phone Check', icon: 'search' },
       { href: '/user/services/unlock', label: 'Unlock services', icon: 'lock' },
       { href: '/user/orders', label: 'Orders', icon: 'clock' },
       { href: '/user/reports', label: 'Service history', icon: 'file' },
-      { href: '/user/checks', label: 'Apple Free Check', icon: 'keypad' },
+      { href: '/user/checks', label: 'Free check history', icon: 'keypad' },
     ],
   },
   {

@@ -38,7 +38,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
           <div className="service-hero-copy unlock-landing-intro">
             <span className="hero-chip"><Icon name="lock" />Network unlock services</span>
             <h1 className="service-entry-title">Keep your phone.<br /><span className="accent">Explore your options.</span></h1>
-            <p className="t-lead">Choose the network your phone is locked to. See the price and delivery time first, then enter your IMEI and email to preview your order. Choose card or crypto at checkout.</p>
+            <p className="t-lead">Choose the network your phone is locked to. See the price and delivery time first, then enter the required device details and your email to preview your order. Choose card or crypto at checkout.</p>
             <ul className="service-micro" aria-label="Unlock facts">
               <li><Icon name="bolt" />Remote service</li>
               <li><Icon name="wallet" />Pay per order</li>
@@ -63,7 +63,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
           <h2>Three clear steps</h2>
           <ol>
             <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="search" /></span><b>1. Choose a service</b>Compare its price, delivery time and device requirements.</li>
-            <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="keypad" /></span><b>2. Add IMEI and email</b>Dial *#06#, enter the 15 digits and preview your order before paying.</li>
+            <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="keypad" /></span><b>2. Add device details and email</b>Enter the IMEI, serial or other identifier requested by your service, then preview your order before paying.</li>
             <li><span className="icon-tile icon-tile--sm" aria-hidden="true"><Icon name="clock" /></span><b>3. Order and track</b>Choose your payment method at checkout. Track your order using its private link and receive the result by email.</li>
           </ol>
         </div>

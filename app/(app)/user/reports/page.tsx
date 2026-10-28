@@ -6,7 +6,7 @@ import { requireSession } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
 import { listPaidReports } from '@/lib/paid-reports'
 
-export const metadata: Metadata = { title: 'Paid IMEI reports' }
+export const metadata: Metadata = { title: 'Service history' }
 export const dynamic = 'force-dynamic'
 
 function statusLabel(status: string) {
@@ -25,7 +25,7 @@ export default async function PaidReportsPage() {
       <div className="app-head">
         <div>
           <span className="kicker">Paid reports</span>
-          <h1>Paid IMEI reports</h1>
+          <h1>Service history</h1>
           <p>Every report you have ordered, and whether it was charged, is still held, or was refunded.</p>
         </div>
         <Link className="button button--primary" href="/user/reports/new">
@@ -51,7 +51,7 @@ export default async function PaidReportsPage() {
             <table role="table" className="grid account-table" aria-label="Recent paid reports">
               <thead role="rowgroup"><tr role="row">
                 <th role="columnheader" scope="col">Report</th>
-                <th role="columnheader" scope="col">IMEI</th>
+                <th role="columnheader" scope="col">Identifier</th>
                 <th role="columnheader" scope="col" className="num">Price</th>
                 <th role="columnheader" scope="col">Status</th>
                 <th role="columnheader" scope="col">Created</th>
@@ -61,7 +61,7 @@ export default async function PaidReportsPage() {
                 {reports.map((report) => (
                   <tr role="row" key={report.id}>
                     <td role="cell" data-label="Report">{report.productName}</td>
-                    <td role="cell" className="mono" data-label="IMEI">{report.imei ?? report.maskedImei}</td>
+                    <td role="cell" className="mono" data-label="Identifier">{report.imei ?? report.maskedImei}</td>
                     <td role="cell" className="num" data-label="Price">{formatUsd(report.priceCents)}</td>
                     <td role="cell" data-label="Status">{statusLabel(report.status)}</td>
                     <td role="cell" data-label="Created"><LocalTime value={report.createdAt} /></td>

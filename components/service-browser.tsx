@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { ServiceDescription } from './service-description'
 import { useActionState, useEffect, useRef, useState, type FormEvent } from 'react'
 import type { FormState } from '@/lib/actions'
 import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
-import { deviceImei } from '@/lib/device-intent-value'
+import { identifierField, serviceIdentifier } from '@/lib/service-identifier'
 import { guestCardQuote } from '@/lib/guest-card-quote'
 import { formatUsd } from '@/lib/money'
 import type { PublicProviderProduct } from '@/lib/public-provider-catalog'
@@ -43,8 +44,12 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
   const selected = products.find((product) => product.productCode === selectedCode)
   const orderDomain = selected?.domain ?? domain
   const available = selected?.status === 'available'
-  const validImei = deviceImei(imei) !== null
-  const digits = imei.replace(/[\s-]/g, '')
+  const field = identifierField(selected?.inputType)
+  const identifier = serviceIdentifier(imei, selected?.inputType)
+  const validImei = identifier !== null
+  const digits = identifier ?? imei.trim()
+  const imeiInput = !selected || selected.inputType === 'imei'
+  const canFindImei = imeiInput || selected?.inputType === 'serial_or_imei'
   const inputId = `${domain}-browse-imei`
   const cardQuote = selected && selected.priceCents > 0 ? guestCardQuote(selected.priceCents) : null
   const total = cardQuote?.totalCents ?? 0
@@ -81,19 +86,19 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
     <form ref={formRef} className="service-browser__form" action={action} onSubmit={handleSubmit} noValidate aria-busy={pending}>
       <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" /><input type="hidden" name="domain" value={orderDomain} /><input type="hidden" name="productCode" value={selectedCode} />
       <ServicePicker options={options} value={selectedCode} onChange={(code) => {
-        setSelectedCode(code); setFieldError(null); approved.current = false
+        setSelectedCode(code); setFieldError(null); setHelpOpen(false); approved.current = false
         const selectedDomain = products.find((product) => product.productCode === code)?.domain ?? domain
         trackFunnelEvent('service_selection', { service_category: selectedDomain })
         if (selectedDomain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: selectedDomain })
       }} disabled={pending} label={isUnlock ? 'Unlock service and price' : 'Report and price'} id={`${domain}-browse-service`} />
-      {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><p>{serviceDisplayText(selected.summary)}</p></div><div className="service-selected-price"><strong>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
+      {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><ServiceDescription value={selected.summary} /></div><div className="service-selected-price"><strong>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
       {selected && available ? <>
         <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p>
         {cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}
-        <div className="service-browser__field"><div className="service-browser__label-row"><label htmlFor={inputId}>IMEI number</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls={`${inputId}-guide`} onClick={() => setHelpOpen(!helpOpen)}>Find my IMEI<Icon name="question" /></button></div>
-          {helpOpen ? <p className="price-check-imei-guide" id={`${inputId}-guide`}>Dial <kbd>*#06#</kbd> on the phone, or open Settings → General → About. Paste the 15-digit IMEI here. Spaces and dashes are accepted.</p> : null}
-          <div className="service-browser__imei" data-invalid={fieldError === 'imei' || undefined}><Icon name="device" /><input ref={inputRef} id={inputId} name="imei" type="text" inputMode="numeric" autoComplete="off" spellCheck={false} enterKeyHint="next" value={imei} onChange={(event) => { if (event.currentTarget.value && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: orderDomain }) } setImei(event.currentTarget.value); setFieldError(null); approved.current = false }} placeholder="Paste or enter 15-digit IMEI" disabled={pending} aria-invalid={fieldError === 'imei'} aria-describedby={`${inputId}-hint`} />{imei ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); setFieldError(null); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}</div>
-          <p id={`${inputId}-hint`} className={fieldError === 'imei' ? 'service-browser__error' : 'service-browser__hint'} role={fieldError === 'imei' ? 'alert' : undefined}>{fieldError === 'imei' ? 'Check all 15 digits from *#06# or your phone settings.' : validImei ? 'IMEI format is valid. Device status is checked after payment.' : `${digits.length} / 15 digits · Find it by dialing *#06#`}</p>
+        <div className="service-browser__field"><div className="service-browser__label-row"><label htmlFor={inputId}>{field.label}</label>{canFindImei ? <button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls={`${inputId}-guide`} onClick={() => setHelpOpen(!helpOpen)}>Find my IMEI<Icon name="question" /></button> : null}</div>
+          {helpOpen && canFindImei ? <p className="price-check-imei-guide" id={`${inputId}-guide`}>Dial <kbd>*#06#</kbd> on the phone, or open Settings → General → About. Paste the 15-digit IMEI here. Spaces and dashes are accepted.</p> : null}
+          <div className="service-browser__imei" data-invalid={fieldError === 'imei' || undefined}><Icon name="device" /><input ref={inputRef} id={inputId} name="imei" type="text" inputMode={field.inputMode} maxLength={80} autoComplete="off" spellCheck={false} enterKeyHint="next" value={imei} onChange={(event) => { if (event.currentTarget.value && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: orderDomain }) } setImei(event.currentTarget.value); setFieldError(null); approved.current = false }} placeholder={field.placeholder} disabled={pending} aria-invalid={fieldError === 'imei'} aria-describedby={`${inputId}-hint`} />{imei ? <button type="button" aria-label={`Clear ${field.label}`} disabled={pending} onClick={() => { setImei(''); setFieldError(null); inputRef.current?.focus() }}><Icon name="cross" /></button> : null}</div>
+          <p id={`${inputId}-hint`} className={fieldError === 'imei' ? 'service-browser__error' : 'service-browser__hint'} role={fieldError === 'imei' ? 'alert' : undefined}>{fieldError === 'imei' ? field.error : validImei ? `${field.label} format is valid. The service starts after payment.` : imeiInput ? `${imei.replace(/[\s-]/g, '').length} / 15 digits · Find it by dialing *#06#` : field.hint}</p>
         </div>
         <div className="field service-browser__field"><label htmlFor={`${domain}-browse-email`}>Email for your result</label><input ref={emailRef} id={`${domain}-browse-email`} name="email" type="email" inputMode="email" autoComplete="email" spellCheck={false} enterKeyHint="go" required maxLength={254} value={email} onChange={(event) => { setEmail(event.currentTarget.value); setFieldError(null); approved.current = false }} placeholder="you@example.com" disabled={pending} aria-invalid={fieldError === 'email'} aria-describedby={`${domain}-email-hint`} /><p id={`${domain}-email-hint`} className={fieldError === 'email' ? 'service-browser__error' : 'service-browser__hint'} role={fieldError === 'email' ? 'alert' : undefined}>{fieldError === 'email' ? 'Enter a valid email for your result and private order link.' : 'Your private order link and result. No password needed.'}</p></div>
       </> : null}

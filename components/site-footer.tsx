@@ -87,7 +87,7 @@ export function SiteFooter({ isAuthenticated = false, guides }: Props) {
         </div>
 
         <div className="footer-accept">
-          <span>We accept</span>
+          <span>We Accept:</span>
           {['visa', 'mastercard', 'googlepay', 'applepay', 'bitcoin', 'usdt'].map((method) => (
             <PaymentMark method={method} key={method} />
           ))}

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { ServiceDescription } from './service-description'
 import { useMemo, useState } from 'react'
 import { groupServices, storefrontDomain } from '@/lib/service-groups'
 import { formatUsd } from '@/lib/money'
@@ -67,7 +68,7 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
 
       <div className="product-card-copy">
         <h3 className="t-card">{productName}</h3>
-        <p className="t-small">{customerText(product.summary)}</p>
+        <ServiceDescription value={product.summary} compact />
       </div>
 
       <div className="product-card-price-row" aria-label={`Price for ${productName}`}>

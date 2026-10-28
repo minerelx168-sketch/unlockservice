@@ -74,8 +74,9 @@ export default async function ContactPage() {
             <div className="contact-fact">
               <span className="label">Before you write about an order</span>
               <span className="value">
-                The order page shows its live status, and a refused unlock returns the credit
-                automatically — no message needed.{' '}
+                The order page shows the current status. If we cannot deliver, direct card orders
+                are refunded to the original payment method and balance-paid orders release their reserved credit.
+                Crypto refunds need support review.{' '}
                 {found ? (
                   <Link href="/user/orders">See your orders</Link>
                 ) : (

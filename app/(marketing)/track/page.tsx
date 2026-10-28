@@ -45,7 +45,7 @@ export default async function TrackOrderPage() {
             <ul className="track-facts">
               <li>
                 <Icon name="pulse" strokeWidth={2} />
-                <span><b>Live status</b>Updated when the network answers, no refresh needed.</span>
+                <span><b>Live status</b>Follow updates as your service is processed.</span>
               </li>
               <li>
                 <Icon name="file" strokeWidth={2} />
@@ -53,7 +53,7 @@ export default async function TrackOrderPage() {
               </li>
               <li>
                 <Icon name="shieldCheck" strokeWidth={2} />
-                <span><b>Refusals refund</b>Direct card orders refund to the original payment method. Balance-paid orders release their reserved credit.</span>
+                <span><b>Refusals refund</b>Direct card orders refund to the original payment method. Balance-paid orders release their reserved credit. Contact support for crypto refund review.</span>
               </li>
             </ul>
 
