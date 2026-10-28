@@ -34,7 +34,7 @@ export function SupportSearch({ guides }: { guides: SearchableGuide[] }) {
         <input
           id={`${id}-q`}
           type="search"
-          placeholder="Search guides — “SIM not supported”, “Verizon”, “blacklist”…"
+          placeholder="Try “SIM not supported”"
           value={query}
           onChange={(event) => setQuery(event.currentTarget.value)}
           autoComplete="off"
