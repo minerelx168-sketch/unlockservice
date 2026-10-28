@@ -44,7 +44,7 @@ export default function ServicesPage() {
                 <Link className="button button--primary" href="/services/imei-check">
                   Open Phone Check <Icon name="arrowRight" />
                 </Link>
-                <Link className="button button--quiet" href="/check">Basic IMEI validation</Link>
+                <Link className="button button--quiet" href="/check">Apple Free Check</Link>
               </div>
             </article>
 

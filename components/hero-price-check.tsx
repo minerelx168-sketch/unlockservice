@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { ServiceDescription } from '@/components/service-description'
 import { useActionState, useEffect, useRef, useState, type FormEvent } from 'react'
 import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
 import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
@@ -131,7 +132,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         }}
       />
       {selected ? <div className="price-check-result" data-unpriced={selected.priceAvailable === false || undefined} aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl>{selected.priceAvailable !== false ? <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p> : null}{cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}</div> : null}
-      {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><p style={{ whiteSpace: 'pre-line' }}>{selected.summary}</p><p>Review eligibility before ordering. Input format validation does not confirm eligibility.</p></details> : null}
+      {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><ServiceDescription value={selected.summary} /><p>Review eligibility before ordering. Input format validation does not confirm eligibility.</p></details> : null}
     </> : <p className="alert" role="status"><Icon name="info" /><span>No services are listed right now. <Link href="/contact">Contact support</Link> for availability.</span></p>}
     {selected?.available ? <div className="price-check-details">
       <div className="field"><div className="price-check-label-row"><label htmlFor="pc-imei">{field.label}</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls="pc-imei-guide" onClick={() => setHelpOpen(!helpOpen)}><Icon name="question" />Input help</button></div>

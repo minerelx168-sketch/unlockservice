@@ -1,0 +1,30 @@
+/* Shared service descriptions and example/result output. */
+.service-description { min-width: 0; font-size: .875rem; line-height: 1.7; color: var(--ink); }
+.service-description .service-description__text { margin: 0 0 14px; white-space: pre-line; overflow-wrap: anywhere; font-size: inherit; line-height: inherit; color: inherit; }
+.service-description > :last-child { margin-bottom: 0; }
+.service-description__table-block { max-width: 100%; margin-block: 10px 16px; }
+.service-description__table-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); overscroll-behavior-x: contain; }
+.service-description__table-scroll:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.service-description table { width: 100%; border-collapse: collapse; font-size: .75rem; line-height: 1.5; }
+.service-description th, .service-description td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.service-description thead th { background: var(--page-soft); color: var(--muted); font-weight: 650; min-width: 78px; }
+.service-description tbody th { min-width: 120px; color: var(--ink-strong); font-weight: 650; }
+.service-description tbody tr:last-child > * { border-bottom: 0; }
+.service-description tbody tr:nth-child(even) { background: var(--page-soft); }
+.service-description .service-description__table-hint { margin: 6px 0 0; color: var(--muted); font-size: .6875rem; }
+.service-description__details { min-width: 0; }
+.service-description__details > summary { min-height: 44px; padding-block: 10px; cursor: pointer; font-size: .8125rem; font-weight: 600; color: var(--primary); }
+.service-description__details[open] > summary { margin-bottom: 8px; }
+.provider-output { min-width: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); font-size: .875rem; line-height: 1.6; }
+.provider-output__row { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 10px 20px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.provider-output__row:last-child { border-bottom: 0; }
+.provider-output__row:nth-child(even) { background: var(--page-soft); }
+.provider-output__label { color: var(--muted); overflow-wrap: anywhere; }
+.provider-output__value { color: var(--ink-strong); font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
+.provider-output__value--clean { color: var(--success); font-weight: 650; }
+.provider-output .provider-output__line { margin: 0; padding: 8px 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .provider-output__row { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 10px 12px; }
+  .provider-output__label { font-size: .75rem; }
+  .provider-output .provider-output__line { padding-inline: 12px; }
+}

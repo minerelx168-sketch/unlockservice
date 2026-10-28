@@ -1,0 +1,88 @@
+/* Apple Free Check: one clear primary task, with paid reports below it. */
+.apple-check-page {
+  padding-block: clamp(32px, 5vw, 72px) 64px;
+  background: radial-gradient(ellipse at 86% 0%, var(--primary-soft) 0%, transparent 48%);
+}
+.apple-check-page .apple-check-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: 28px clamp(32px, 5vw, 72px);
+  align-items: start;
+  max-width: 1160px;
+}
+.apple-check-intro { min-width: 0; padding-top: 20px; }
+.apple-check-intro > .kicker { gap: 8px; margin-bottom: 20px; font-size: .75rem; letter-spacing: .1em; }
+.apple-check-intro .t-section { margin: 0 0 20px; font-size: clamp(2.5rem, 4.4vw, 4rem); line-height: 1.04; letter-spacing: -.055em; }
+.apple-check-intro .t-section > span { display: block; color: var(--primary); }
+.apple-check-intro .t-lead { max-width: 440px; margin: 0; font-size: 1.0625rem; line-height: 1.75; color: var(--muted); }
+.apple-check-highlights { display: flex; flex-wrap: wrap; gap: 10px 20px; list-style: none; margin: 22px 0 0; padding: 0; }
+.apple-check-highlights li { display: inline-flex; align-items: center; gap: 7px; font-size: .8125rem; font-weight: 600; color: var(--ink); }
+.apple-check-highlights svg { width: 16px; height: 16px; color: var(--primary); flex: 0 0 auto; }
+.apple-check-page .apple-check-card { padding: 28px; border-radius: 24px; border: 1px solid var(--line-strong); background: var(--surface); box-shadow: 0 12px 40px color-mix(in srgb, var(--ink-strong) 7%, transparent); }
+.apple-check-card .card-topline { gap: 16px; margin-bottom: 26px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.apple-check-product { display: flex; align-items: center; gap: 12px; min-width: 0; color: var(--ink-strong); font-weight: 700; font-size: .9375rem; }
+.apple-check-product-icon { display: grid; place-items: center; flex: 0 0 44px; height: 44px; border-radius: 13px; background: var(--primary-soft); color: var(--primary); }
+.apple-check-product-icon svg { width: 22px; height: 22px; }
+.apple-check-product small { display: block; margin-top: 3px; color: var(--muted); font-size: .75rem; font-weight: 500; }
+.apple-check-card .apple-check-history { display: inline-flex; align-items: center; justify-content: flex-end; min-height: 44px; gap: 6px; flex-shrink: 0; font-size: .8125rem; }
+.apple-check-free-label { color: var(--primary); background: var(--primary-soft); border-radius: 999px; padding: 6px 10px; font-size: .6875rem; font-weight: 750; letter-spacing: .06em; }
+.apple-check-form-title { margin: 0 0 18px; font-size: 1.375rem; line-height: 1.3; letter-spacing: -.025em; }
+.apple-check-allowance { padding: 14px 16px; margin: 0 0 24px; border: 1px solid var(--primary-border); border-radius: 12px; background: var(--primary-soft); color: var(--ink); }
+.apple-check-allowance > strong, .apple-check-allowance-summary > strong { font-size: .8125rem; line-height: 1.5; color: var(--ink-strong); }
+.apple-check-allowance-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.apple-check-allowance-meter { display: flex; gap: 4px; flex: 0 0 auto; }
+.apple-check-allowance-meter > span { width: 16px; height: 6px; border-radius: 3px; background: var(--line-strong); }
+.apple-check-allowance-meter > span[data-available='true'] { background: var(--primary); }
+.apple-check-allowance .field-note { display: block; margin: 5px 0 0; font-size: .75rem; line-height: 1.6; color: var(--muted); }
+.apple-check-card .apple-check-input-form { gap: 18px; }
+.apple-check-card .field { gap: 8px; }
+.apple-check-card .field label { font-size: .875rem; font-weight: 650; }
+.apple-check-card .field input { min-height: 56px; padding: 14px 16px; border-radius: 12px; font-family: var(--font-mono); font-size: 1rem; letter-spacing: .025em; }
+.apple-check-card .field input::placeholder { font-family: var(--font-body); letter-spacing: 0; font-size: .9375rem; }
+.apple-check-card .field .field-note { margin: 2px 0 0; font-size: .75rem; line-height: 1.65; }
+.apple-check-card .apple-check-input-form > .button { min-height: 54px; border-radius: 12px; font-size: .9375rem; gap: 10px; }
+.apple-check-card .unlock-quote-note { margin: 0; font-size: .75rem; line-height: 1.65; color: var(--muted); }
+.apple-check-card .alert { margin-block: 0; overflow-wrap: anywhere; }
+.apple-check-card .service-workbench-result { margin-top: 24px; min-width: 0; }
+.apple-check-card .service-workbench-result-actions { flex-wrap: wrap; gap: 10px; }
+.apple-check-card .service-workbench-result-actions .button { white-space: normal; text-align: center; }
+.apple-check-extras { min-width: 0; }
+.apple-check-notes { display: grid; gap: 22px; padding-top: 6px; }
+.apple-check-note { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: start; gap: 12px; }
+.apple-check-note-icon { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--primary); }
+.apple-check-note-icon svg { width: 17px; height: 17px; }
+.apple-check-note h2 { margin: 1px 0 5px; font-family: var(--font-body); font-size: .875rem; line-height: 1.4; letter-spacing: 0; }
+.apple-check-note p { margin: 0; font-size: .8125rem; line-height: 1.7; color: var(--muted); max-width: 380px; }
+.apple-check-next { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
+.apple-check-next > span { flex-basis: 100%; color: var(--muted); font-size: .75rem; }
+.apple-check-next > a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: .8125rem; }
+.apple-check-page .apple-check-paid { max-width: 1160px; margin-top: clamp(40px, 5vw, 64px); padding-top: clamp(28px, 4vw, 44px); border-top: 1px solid var(--line); }
+.apple-check-paid-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); align-items: end; gap: 20px 40px; margin-bottom: 24px; }
+.apple-check-paid-heading .kicker { margin-bottom: 10px; font-size: .6875rem; letter-spacing: .08em; }
+.apple-check-paid-heading h2 { margin: 0; font-size: clamp(1.375rem, 2.3vw, 1.875rem); line-height: 1.25; letter-spacing: -.03em; }
+.apple-check-paid-heading p { margin: 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
+.apple-check-paid .service-browser { margin-top: 0; }
+@media (max-width: 800px) {
+  .apple-check-page .apple-check-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'intro' 'form' 'extras'; gap: 24px; max-width: 620px; }
+  .apple-check-intro { padding-top: 0; }
+  .apple-check-intro > .kicker { margin-bottom: 14px; }
+  .apple-check-intro .t-section { font-size: clamp(2.25rem, 7vw, 3.25rem); margin-bottom: 14px; }
+  .apple-check-intro .t-section > span { display: inline; }
+  .apple-check-intro .t-lead { font-size: .9375rem; line-height: 1.65; max-width: none; }
+  .apple-check-highlights { margin-top: 16px; }
+  .apple-check-page .apple-check-paid { max-width: 620px; }
+  .apple-check-paid-heading { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .apple-check-notes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+}
+@media (max-width: 480px) {
+  .apple-check-page { padding-top: 28px; padding-bottom: 40px; }
+  .apple-check-page .apple-check-card { padding: 20px 18px; border-radius: 20px; }
+  .apple-check-card .card-topline { margin-bottom: 20px; padding-bottom: 16px; gap: 10px; }
+  .apple-check-form-title { font-size: 1.25rem; }
+  .apple-check-allowance { padding: 12px; margin-bottom: 20px; }
+  .apple-check-product { font-size: .875rem; gap: 10px; }
+  .apple-check-product-icon { flex-basis: 38px; height: 38px; border-radius: 11px; }
+  .apple-check-notes { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .apple-check-next { margin-top: 20px; }
+  .apple-check-next > a { flex-basis: 100%; }
+  .apple-check-card .service-workbench-result-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+}
