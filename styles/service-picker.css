@@ -1,5 +1,5 @@
 /* A service stays collapsed until requested; every option has its own readable tap target. */
-.service-picker { min-width: 0; }
+.service-picker { min-width: 0; container-type: inline-size; container-name: service-picker; }
 .service-picker__label-row,
 .service-browser__label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; font-weight: 700; color: var(--ink-strong); }
 .service-picker__count { flex-shrink: 0; color: var(--muted); font-size: .8125rem; font-weight: 500; }
@@ -11,7 +11,7 @@
 .service-picker__selection { min-width: 0; flex: 1; }
 .service-picker__selection strong { display: block; font-size: 1rem; line-height: 1.45; color: var(--ink-strong); overflow-wrap: anywhere; }
 .service-picker__selection small { display: block; margin-top: 4px; font-size: .8125rem; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
-.service-picker__affordance { display: flex; align-items: center; gap: 12px; color: var(--primary); font-size: .875rem; font-weight: 700; }
+.service-picker__affordance { flex-shrink: 0; display: flex; align-items: center; gap: 12px; color: var(--primary); font-size: .875rem; font-weight: 700; }
 .service-picker__chevron { display: block; width: 8px; height: 8px; margin-top: -4px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
 [aria-expanded='true'] .service-picker__chevron { transform: rotate(225deg); margin-top: 4px; }
 .service-picker__panel { margin-top: 10px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--surface); overflow: hidden; box-shadow: var(--shadow-sm); }
@@ -22,7 +22,7 @@
 .service-picker__search-control > svg { width: 19px; height: 19px; flex-shrink: 0; color: var(--muted); }
 .service-picker__search-control input { min-width: 0; width: 100%; height: 48px; padding: 8px 0; border: 0; border-radius: 6px; background: transparent; font-size: 1rem; }
 .service-picker__results-count { margin: 8px 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.5; }
-.service-picker__results { max-height: min(420px, 55svh); margin: 0; padding: 0; overflow-y: auto; overscroll-behavior-y: contain; list-style: none; }
+.service-picker__results { max-height: min(420px, 55svh); scrollbar-gutter: stable; margin: 0; padding: 0; overflow-y: auto; overscroll-behavior-y: contain; list-style: none; }
 .service-picker__results li + li { border-top: 1px solid var(--line); }
 .service-picker__option { display: flex; justify-content: space-between; width: 100%; min-height: 72px; gap: 16px; padding: 16px 18px; text-align: left; }
 .service-picker__option:hover:not(:disabled),
@@ -140,10 +140,10 @@
 .price-check .service-picker { margin-block: 4px; }
 .price-check .service-picker__trigger { min-height: 76px; }
 @media (max-width: 480px) {
-  .service-picker__option { flex-wrap: nowrap; gap: 12px; padding: 12px; }
-  .service-picker__option-copy { width: auto; flex: 1; }
-  .service-picker__option-copy > strong { font-size: .875rem; }
-  .service-picker__option-price { width: auto; flex-direction: column; align-items: flex-end; }
+  .service-picker__option { flex-direction: column; gap: 10px; padding: 14px 12px; }
+  .service-picker__option-copy { width: 100%; }
+  .service-picker__option-copy > strong { font-size: .9375rem; line-height: 1.5; }
+  .service-picker__option-price { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
   .service-picker__option-price > strong { font-size: .9375rem; }
   .service-picker__group-heading { padding-inline: 12px; }
   .service-picker__label-row { flex-wrap: wrap; gap: 4px 10px; }
@@ -152,3 +152,33 @@
 .service-picker__option-price[data-unpriced] > strong { max-width: 95px; white-space: normal; text-align: right; font-size: .8125rem; line-height: 1.4; }
 .service-picker__inquiry { margin: 10px 0 0; font-size: .875rem; }
 .service-picker__inquiry a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; font-weight: 600; }
+
+/* Fit the card's width, including narrow desktop columns and text zoom. */
+.service-picker__search-control:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.service-picker__search-control input:focus-visible:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.service-picker__option { align-items: flex-start; }
+.service-picker__option-copy { flex: 1; }
+.service-picker__option-price { max-width: 40%; }
+@container service-picker (max-width: 420px) {
+  .service-picker__option { flex-direction: column; gap: 10px; padding: 14px 12px; }
+  .service-picker__option-copy { width: 100%; }
+  .service-picker__option-copy > strong { font-size: .9375rem; line-height: 1.5; }
+  .service-picker__option-copy > small { font-size: .8125rem; }
+  .service-picker__option-price { width: 100%; max-width: none; flex-direction: row; align-items: center; justify-content: space-between; padding: 0; }
+  .service-picker__option-price[data-unpriced] > strong { max-width: none; text-align: left; }
+  .service-picker__trigger { gap: 10px; padding: 14px 12px; }
+  .service-picker__affordance > span:first-child { display: none; }
+}
+@container service-picker (max-width: 300px) {
+  .service-picker__icon { display: none; }
+  .service-picker__selection small { font-size: .8125rem; }
+}
+@media (forced-colors: active) {
+  .service-picker__search-control:focus-within { outline: 2px solid Highlight; outline-offset: 2px; }
+}

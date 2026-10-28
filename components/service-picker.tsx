@@ -124,7 +124,7 @@ export function ServicePicker({
                 // Searching inside an order form must not submit that form.
                 if (event.key === 'Enter') event.preventDefault()
               }}
-              placeholder="Search any service or category"
+              placeholder="Search services"
               autoComplete="off"
               disabled={disabled}
               aria-controls={`${pickerId}-results`}

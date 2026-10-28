@@ -4,6 +4,7 @@
   grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
   grid-template-areas: 'intro form' 'extras form';
   align-items: start;
+  grid-template-rows: min-content 1fr;
   row-gap: 28px;
 }
 .home-hero .hero-copy { grid-area: intro; align-content: start; gap: 16px; }
@@ -14,7 +15,7 @@
 .home-hero .hero-panel, .unlock-landing-form { padding: clamp(20px, 2.5vw, 30px); border-radius: 24px; box-shadow: var(--shadow-soft); }
 
 /* Compact labels and controls, with the entire chosen service name visible. */
-.price-check { gap: 18px; }
+.price-check { gap: 18px; width: 100%; container-type: inline-size; container-name: order-form; }
 .price-check-head { text-align: left; gap: 5px; }
 .price-check-title { font-size: 1.5rem; line-height: 1.2; }
 .price-check-sub { font-size: .875rem; line-height: 1.5; }
@@ -29,12 +30,12 @@
 .price-check .device-browse-options { gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--page-soft); }
 .price-check .device-browse-options span { gap: 7px; min-height: 44px; padding: 10px 6px; border: 1px solid transparent; border-radius: 10px; background: transparent; font-size: .875rem; }
 .price-check .device-browse-options input:checked + span { background: var(--surface); color: var(--primary-dark); border-color: var(--primary-border); box-shadow: 0 2px 5px var(--primary-soft); }
-.price-check-steps { display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; padding: 0 0 14px; margin: 0; border-bottom: 1px solid var(--line); }
+.price-check-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 12px; list-style: none; padding: 0 0 14px; margin: 0; border-bottom: 1px solid var(--line); }
 .price-check-steps li { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: .75rem; font-weight: 600; }
-.price-check-steps li > span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--page-soft); border: 1px solid var(--line); }
+.price-check-steps li > span:first-child { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--page-soft); border: 1px solid var(--line); }
 .price-check-steps li[aria-current='step'] { color: var(--primary-dark); }
-.price-check-steps li[aria-current='step'] > span { color: var(--on-primary); background: var(--primary); border-color: var(--primary); }
-.price-check-steps li[data-done='true'] > span { background: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary-border); }
+.price-check-steps li[aria-current='step'] > span:first-child { color: var(--on-primary); background: var(--primary); border-color: var(--primary); }
+.price-check-steps li[data-done='true'] > span:first-child { background: var(--primary-soft); color: var(--primary-dark); border-color: var(--primary-border); }
 .price-check-result { border: 1px solid var(--primary-border); border-radius: 14px; background: var(--primary-soft); overflow: hidden; }
 .price-check-service-name { margin: 0; padding: 12px 14px 0; font-size: .8125rem; font-weight: 650; line-height: 1.5; color: var(--ink-strong); overflow-wrap: anywhere; }
 .price-check .price-check-quote { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 0; border: 0; border-radius: 0; background: transparent; }
@@ -71,9 +72,9 @@
 .unlock-landing-intro .service-micro { justify-content: flex-start; }
 .unlock-landing-form { width: 100%; min-width: 0; }
 .unlock-landing .price-check { min-width: 0; }
-.unlock-landing .price-check-steps { justify-content: flex-start; gap: clamp(12px, 4vw, 48px); }
+.unlock-landing .price-check-steps { gap: 12px; }
 .unlock-landing .price-check-steps li { min-width: 0; }
-.unlock-landing .price-check-steps li > span { flex-shrink: 0; }
+.unlock-landing .price-check-steps li > span:first-child { flex-shrink: 0; }
 .unlock-landing .price-check-label-row { flex-wrap: wrap; }
 .unlock-landing .price-check-assurance { flex-wrap: wrap; }
 .unlock-landing .expect--wide { margin-top: 0; }
@@ -86,7 +87,7 @@
 .mobile-nav { display: none; }
 
 @media (max-width: 1080px) {
-  .home-hero .shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'intro' 'form' 'extras'; gap: 24px; max-width: 720px; }
+  .home-hero .shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'intro' 'form' 'extras'; grid-template-rows: auto; gap: 24px; max-width: 720px; }
   .home-hero .hero-copy { text-align: center; justify-items: center; }
   .home-hero .hero-panel { width: 100%; }
   .hero-extras .hero-tiles { max-width: none; }
@@ -165,4 +166,55 @@
   .price-check-text-button { font-size: .6875rem; }
   .price-check .device-browse-options span { font-size: .8125rem; gap: 5px; }
   .price-check-submit { font-size: .8125rem; padding-inline: 8px; }
+}
+
+/* Shared control sizing across the home, Phone Check and Unlock workspaces. */
+.price-check > *, .price-check-details > *, .price-check .field,
+.unlock-landing-grid > *, .home-hero .shell > * { min-width: 0; }
+.price-check-steps li { min-width: 0; line-height: 1.45; }
+.price-check-steps li > span:first-child { flex: 0 0 24px; height: 24px; }
+.price-check-step-label { min-width: 0; overflow-wrap: normal; }
+.price-check .button, .unlock-landing .button, .home-section .button,
+.home-hero .button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: center; line-height: 1.45; }
+.price-check .button > svg, .unlock-landing .link-arrow > svg { flex-shrink: 0; }
+.price-check-label-row { flex-wrap: wrap; gap: 8px 12px; }
+.price-check-text-button { margin-block: 0; }
+.price-check .device-browse-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.price-check .device-browse-options label { min-width: 0; }
+.price-check .device-browse-options span { height: 100%; line-height: 1.4; }
+.price-check .device-browse-options svg { flex-shrink: 0; }
+.price-check .device-browse-help { flex-wrap: wrap; }
+.price-check .price-check-result[data-unpriced] .price-check-quote dd { font-family: var(--font-body); font-size: 1rem; letter-spacing: 0; line-height: 1.45; }
+.price-check .price-check-assurance span { min-width: 0; line-height: 1.5; }
+.service-entry-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.service-entry-links > a { display: inline-flex; align-items: center; min-height: 44px; }
+.unlock-landing .link-arrow { display: inline-flex; align-items: center; gap: 8px; white-space: normal; }
+.unlock-landing .service-catalog-details > summary { min-height: 48px; line-height: 1.5; padding-block: 12px; overflow-wrap: anywhere; }
+.unlock-landing .service-guides { line-height: 1.7; overflow-wrap: anywhere; }
+.price-check :is(input, button, summary) { scroll-margin-block: 100px 120px; }
+@container order-form (max-width: 420px) {
+  .price-check-steps { gap: 8px; }
+  .price-check-steps li { flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+  .price-check-steps li > span:first-child { flex-basis: auto; width: 24px; }
+  .price-check-step-label { font-size: .75rem; }
+  .price-check-next, .price-check .field-note, .price-check-assurance { font-size: .8125rem; line-height: 1.55; }
+}
+@container order-form (max-width: 300px) {
+  .price-check .price-check-quote { grid-template-columns: minmax(0, 1fr); }
+  .price-check .price-check-quote > div + div { border-left: 0; border-top: 1px solid var(--primary-border); }
+  .price-check .device-browse-options span { flex-direction: column; gap: 4px; padding: 8px 4px; }
+  .price-check .device-browse-input > svg { display: none; }
+  .price-check .device-browse-input input { letter-spacing: 0; }
+}
+@media (max-width: 767px) {
+  .home-hero .hero-panel, .unlock-landing-form { padding: 20px 16px; }
+  .hero-extras .hero-tile { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+  .hero-extras .hero-tile .trust-bar-icon { grid-row: auto; }
+  .hero-extras .hero-tile > span:last-child { line-height: 1.55; }
+  .home-section .cta-actions, .home-section .cta-actions .button { min-width: 0; max-width: 100%; }
+  .unlock-landing-grid { gap: 20px; }
+}
+@media (max-width: 359px) {
+  .price-check-submit { font-size: .9375rem; padding-inline: 12px; }
+  .price-check-title { font-size: 1.25rem; line-height: 1.3; }
 }

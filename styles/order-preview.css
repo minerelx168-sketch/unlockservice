@@ -36,3 +36,18 @@
 .order-preview__crypto:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 .order-preview__crypto:disabled { opacity: .6; cursor: wait; }
 @media (max-width: 480px) { .order-preview { border-radius: 20px; } .order-preview__body { padding: 18px; gap: 14px; } }
+
+/* Keep payment choices and totals readable at small widths and browser zoom. */
+.order-preview .order-preview__body { min-width: 0; }
+.order-preview .order-preview__body > * { min-width: 0; }
+.order-preview .order-preview__quote > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 16px; }
+.order-preview .order-preview__quote :is(dt, dd) { min-width: 0; overflow-wrap: anywhere; }
+.order-preview .button { max-width: 100%; white-space: normal; text-align: center; overflow-wrap: anywhere; line-height: 1.45; padding-inline: 16px; }
+.order-preview .button > svg { flex-shrink: 0; }
+.order-preview .order-preview__live { line-height: 1.5; }
+.order-preview .order-preview__crypto > span { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 359px) {
+  .order-preview .order-preview__body { padding: 16px; }
+  .order-preview .order-preview__quote > div { grid-template-columns: minmax(0, 1fr) auto; }
+  .order-preview .order-preview__quote dd { max-width: 130px; }
+}

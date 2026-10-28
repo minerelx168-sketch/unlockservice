@@ -20,7 +20,7 @@
   body:has(.mobile-nav:not([hidden])) .analytics-consent[data-open='true'] { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); padding-bottom: 12px; }
   body:has(input:not([type='radio']):not([type='checkbox']):focus, textarea:focus) .analytics-consent[data-open='true'] { bottom: 0; }
   .cookie-banner { grid-template-columns: minmax(0, 1fr) 44px; gap: 10px; }
-  .cookie-banner > p:first-child { grid-column: 1; font-size: .8125rem; }
-  .cookie-close { grid-column: 2; grid-row: 1; align-self: start; }
-  .cookie-accept { grid-column: 1 / -1; grid-row: 2; width: 100%; }
+  .cookie-banner > p:first-child { grid-column: 1 / -1; font-size: .8125rem; line-height: 1.55; }
+  .cookie-close { grid-column: 2; grid-row: 2; align-self: center; }
+  .cookie-accept { grid-column: 1; grid-row: 2; width: 100%; min-width: 0; }
 }
