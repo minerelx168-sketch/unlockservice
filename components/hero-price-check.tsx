@@ -24,6 +24,7 @@ export type PriceCheckProduct = {
   etaLabel: string
   summary?: string
   available: boolean
+  hasExample?: boolean
 }
 
 type Domain = 'unlock' | 'imei_check'
@@ -75,9 +76,16 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
   }, [selected, orderDomain])
 
   function clearError() { setError(null); setShowActionError(false); approved.current = false }
+  function chooseService() {
+    serviceInput.current?.focus()
+    if (serviceInput.current?.getAttribute('aria-expanded') !== 'true') serviceInput.current?.click()
+  }
   function validate(event: FormEvent<HTMLFormElement>) {
     setError(null)
-    if (!selected || !selected.available) {
+    if (!selected) {
+      event.preventDefault(); chooseService(); return
+    }
+    if (!selected.available) {
       event.preventDefault(); setError({ field: 'service', message: 'Choose an available service to continue.' }); serviceInput.current?.focus(); return
     }
     if (!validImei) {
@@ -118,7 +126,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         options={products.map((product) => ({
           code: product.code, name: product.name, group: product.category,
           summary: product.summary ?? '', priceCents: product.priceCents, priceAvailable: product.priceAvailable,
-          etaLabel: product.etaLabel, available: product.available,
+          etaLabel: product.etaLabel, available: product.available, hasExample: product.hasExample,
         }))}
         value={selected?.code ?? ''}
         disabled={pending}
@@ -144,7 +152,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
     </div> : null}
     {selected ? <input type="hidden" name="productCode" value={selected.code} /> : null}
     {error || actionError ? <p className="alert alert--error" id="pc-error" role="alert"><Icon name="info" /><span>{error?.message || actionError}</span></p> : null}
-    <button className="button button--primary button--wide price-check-submit" type="submit" disabled={pending || products.length === 0 || Boolean(selected && !selected.available)}>{pending ? <><Icon name="clock" />Opening…</> : <>{domain === 'unlock' ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></>}</button>
+    <button className="button button--primary button--wide price-check-submit" type={selected ? "submit" : "button"} onClick={selected ? undefined : chooseService} disabled={pending || products.length === 0 || Boolean(selected && !selected.available)}>{pending ? <><Icon name="clock" />Opening…</> : <>{!selected ? 'Choose a service' : domain === 'unlock' ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></>}</button>
     <p className="price-check-next">{domain === 'unlock' ? 'Review your order before paying. Unlock processing starts after payment.' : 'View the report preview before paying. The real check starts after payment.'}</p>
     <p className="price-check-assurance"><span><Icon name="shieldCheck" />Clear total</span><span><Icon name="clock" />Private tracking link</span></p>
     {selected && selected.priceCents > 0 ? <OrderPreviewDialog open={previewOpen} product={selected} domain={orderDomain} imei={digits} email={email.trim()} pending={pending} error={actionError} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={continueToPayment} /> : null}

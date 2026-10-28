@@ -23,7 +23,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
   const ordering = unlockOrderingEnabled() || products.some((product) => product.status === 'available')
   const quoteProducts: PriceCheckProduct[] = products.map((product) => ({
     code: product.productCode, domain: product.domain, name: product.name, category: product.group,
-    summary: product.summary, available: product.status === 'available',
+    summary: product.summary, hasExample: product.hasExample, available: product.status === 'available',
     inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable, etaLabel: product.etaLabel,
   }))
   const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size

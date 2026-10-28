@@ -11,7 +11,7 @@
 }
 .apple-check-intro { min-width: 0; padding-top: 20px; }
 .apple-check-intro > .kicker { gap: 8px; margin-bottom: 20px; font-size: .75rem; letter-spacing: .1em; }
-.apple-check-intro .t-section { margin: 0 0 20px; font-size: clamp(2.5rem, 4.4vw, 4rem); line-height: 1.04; letter-spacing: -.055em; }
+.apple-check-intro .t-section { margin: 0 0 20px; font-size: clamp(2.5rem, 4.4vw, 4rem); line-height: 1.12; letter-spacing: -.025em; }
 .apple-check-intro .t-section > span { display: block; color: var(--primary); }
 .apple-check-intro .t-lead { max-width: 440px; margin: 0; font-size: 1.0625rem; line-height: 1.75; color: var(--muted); }
 .apple-check-highlights { display: flex; flex-wrap: wrap; gap: 10px 20px; list-style: none; margin: 22px 0 0; padding: 0; }
@@ -24,7 +24,7 @@
 .apple-check-product-icon svg { width: 22px; height: 22px; }
 .apple-check-product small { display: block; margin-top: 3px; color: var(--muted); font-size: .75rem; font-weight: 500; }
 .apple-check-card .apple-check-history { display: inline-flex; align-items: center; justify-content: flex-end; min-height: 44px; gap: 6px; flex-shrink: 0; font-size: .8125rem; }
-.apple-check-free-label { color: var(--primary); background: var(--primary-soft); border-radius: 999px; padding: 6px 10px; font-size: .6875rem; font-weight: 750; letter-spacing: .06em; }
+.apple-check-free-label { color: var(--primary); background: var(--primary-soft); border-radius: 999px; padding: 6px 10px; font-size: .75rem; font-weight: 750; letter-spacing: .06em; }
 .apple-check-form-title { margin: 0 0 18px; font-size: 1.375rem; line-height: 1.3; letter-spacing: -.025em; }
 .apple-check-allowance { padding: 14px 16px; margin: 0 0 24px; border: 1px solid var(--primary-border); border-radius: 12px; background: var(--primary-soft); color: var(--ink); }
 .apple-check-allowance > strong, .apple-check-allowance-summary > strong { font-size: .8125rem; line-height: 1.5; color: var(--ink-strong); }
@@ -38,9 +38,9 @@
 .apple-check-card .field label { font-size: .875rem; font-weight: 650; }
 .apple-check-card .field input { min-height: 56px; padding: 14px 16px; border-radius: 12px; font-family: var(--font-mono); font-size: 1rem; letter-spacing: .025em; }
 .apple-check-card .field input::placeholder { font-family: var(--font-body); letter-spacing: 0; font-size: .9375rem; }
-.apple-check-card .field .field-note { margin: 2px 0 0; font-size: .75rem; line-height: 1.65; }
+.apple-check-card .field .field-note { margin: 2px 0 0; font-size: .8125rem; line-height: 1.65; }
 .apple-check-card .apple-check-input-form > .button { min-height: 54px; border-radius: 12px; font-size: .9375rem; gap: 10px; }
-.apple-check-card .unlock-quote-note { margin: 0; font-size: .75rem; line-height: 1.65; color: var(--muted); }
+.apple-check-card .unlock-quote-note { margin: 0; font-size: .8125rem; line-height: 1.65; color: var(--muted); }
 .apple-check-card .alert { margin-block: 0; overflow-wrap: anywhere; }
 .apple-check-card .service-workbench-result { margin-top: 24px; min-width: 0; }
 .apple-check-card .service-workbench-result-actions { flex-wrap: wrap; gap: 10px; }
@@ -57,7 +57,7 @@
 .apple-check-next > a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: .8125rem; }
 .apple-check-page .apple-check-paid { max-width: 1160px; margin-top: clamp(40px, 5vw, 64px); padding-top: clamp(28px, 4vw, 44px); border-top: 1px solid var(--line); }
 .apple-check-paid-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); align-items: end; gap: 20px 40px; margin-bottom: 24px; }
-.apple-check-paid-heading .kicker { margin-bottom: 10px; font-size: .6875rem; letter-spacing: .08em; }
+.apple-check-paid-heading .kicker { margin-bottom: 10px; font-size: .75rem; letter-spacing: .08em; }
 .apple-check-paid-heading h2 { margin: 0; font-size: clamp(1.375rem, 2.3vw, 1.875rem); line-height: 1.25; letter-spacing: -.03em; }
 .apple-check-paid-heading p { margin: 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
 .apple-check-paid .service-browser { margin-top: 0; }

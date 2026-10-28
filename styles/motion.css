@@ -1,312 +1,86 @@
 /**
- * Motion. Loaded last, because everything here decorates anatomy that
- * already works without it: scroll reveals, the animated gradient on the
- * two-tone headings, sheens on cards and the primary action, and the slow
- * ambient drift behind the hero. Every effect is cancelled in one block
- * under prefers-reduced-motion, and nothing is hidden until the reveal
- * runner has stamped `js-motion` on the root — no JavaScript, no motion,
- * no missing content.
+ * Quiet motion: a soft static hero wash, short reveals and deliberate feedback.
+ * The ordering form is never hidden or animated on scroll. Touch devices avoid
+ * hover-only decoration, and reduced-motion users see all content immediately.
  */
-
-/* ==== scroll reveal ================================================== */
-
 html.js-motion [data-reveal] {
   opacity: 0;
-  transform: translateY(26px);
+  transform: translateY(12px);
 }
-
-html.js-motion [data-reveal].is-in {
+html.js-motion [data-reveal].is-in,
+html.js-motion [data-reveal]:focus-within {
   opacity: 1;
   transform: none;
-  transition:
-    opacity 0.65s cubic-bezier(0.22, 0.8, 0.3, 1),
-    transform 0.65s cubic-bezier(0.22, 0.8, 0.3, 1);
-  transition-delay: calc(var(--ri, 0) * 75ms);
+  transition: opacity 360ms ease-out, transform 360ms ease-out;
+  transition-delay: calc(var(--ri, 0) * 40ms);
 }
+html.js-motion [data-reveal]:focus-within { transition-delay: 0ms; }
 
-/* ==== animated gradient accent ====================================== */
-
-/* The accent word keeps its solid colour as the fallback; where the
-   browser can clip a background to text, it carries a slow violet pan
-   instead — the reference's gradient headline, on our palette. */
 @supports (-webkit-background-clip: text) or (background-clip: text) {
   .t-hero .accent,
   .t-display .accent,
   .t-section .accent {
-    background: linear-gradient(
-      100deg,
-      var(--primary) 0%,
-      var(--color-brand-primary-glow) 28%,
-      var(--color-brand-accent-strong) 55%,
-      var(--primary) 82%
-    );
-    background-size: 220% 100%;
+    background: linear-gradient(110deg, var(--primary), var(--color-brand-primary-glow) 55%, var(--primary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: var(--primary);
-    animation: accent-pan 7s linear infinite;
   }
 }
 
-@keyframes accent-pan {
-  from {
-    background-position: 0% 50%;
-  }
-
-  to {
-    background-position: -220% 50%;
-  }
-}
-
-/* ==== ambient drift behind the hero ================================= */
-
-/* The washes the hero already paints, breathing: scale and drift only,
-   far too slow to notice directly — the page simply feels alive. */
-.hero::before {
-  animation: hero-drift 16s ease-in-out infinite alternate;
-  will-change: transform;
-}
-
-@keyframes hero-drift {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-
-  to {
-    transform: translate3d(0, -26px, 0) scale(1.06);
-  }
-}
-
-/* The halo behind the hero form card breathes with it. */
-.hero-panel::before {
-  animation: halo-pulse 6s ease-in-out infinite;
-}
-
-@keyframes halo-pulse {
-  0%,
-  100% {
-    opacity: 0.75;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-/* ==== sheens ========================================================= */
-
-/* One light sweep across the primary action on hover. */
-.button--primary {
-  position: relative;
-  overflow: hidden;
-}
-
+.button--primary { position: relative; overflow: hidden; }
 .button--primary::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    105deg,
-    transparent 38%,
-    rgb(255 255 255 / 28%) 50%,
-    transparent 62%
-  );
+  background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / 22%) 50%, transparent 62%);
   background-size: 240% 100%;
   background-position: 120% 0;
   background-repeat: no-repeat;
   pointer-events: none;
 }
 
-.button--primary:hover::after {
-  animation: sheen-sweep 0.9s ease forwards;
+.home-hero .hero-panel,
+.unlock-landing-form,
+.apple-check-page .apple-check-card {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.home-hero .hero-panel:focus-within,
+.unlock-landing-form:focus-within,
+.apple-check-page .apple-check-card:focus-within {
+  border-color: var(--primary-border);
+  box-shadow: 0 12px 36px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.hub-card .icon-tile,
+.quick-pick .icon-tile,
+.link-arrow svg { transition: transform 180ms ease; }
+
+@media (hover: hover) and (pointer: fine) {
+  .button--primary:not(:disabled):hover::after { animation: sheen-sweep 550ms ease-out; }
+  .hub-card:hover .icon-tile,
+  .quick-pick:hover .icon-tile { transform: translateY(-2px); }
+  .link-arrow:hover svg { transform: translateX(3px); }
 }
 
 @keyframes sheen-sweep {
-  from {
-    background-position: 120% 0;
-  }
-
-  to {
-    background-position: -120% 0;
-  }
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
 }
 
-/* Marketing cards get the same sweep, fainter and violet-tinted. */
-.card--step,
-.card--benefit,
-.hub-card,
-.support-card,
-.quick-pick,
-.tile {
-  position: relative;
-  overflow: hidden;
+.price-check-result,
+.faq-item[open] .answer { animation: content-in 180ms ease-out; }
+@keyframes content-in {
+  from { opacity: 0.6; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
 }
-
-.card--step::after,
-.card--benefit::after,
-.hub-card::after,
-.support-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    105deg,
-    transparent 40%,
-    color-mix(in srgb, var(--primary) 9%, transparent) 50%,
-    transparent 60%
-  );
-  background-size: 260% 100%;
-  background-position: 130% 0;
-  background-repeat: no-repeat;
-  pointer-events: none;
-}
-
-.card--step:hover::after,
-.card--benefit:hover::after,
-.hub-card:hover::after,
-.support-card:hover::after {
-  animation: card-sheen 1s ease forwards;
-}
-
-@keyframes card-sheen {
-  from {
-    background-position: 130% 0;
-  }
-
-  to {
-    background-position: -130% 0;
-  }
-}
-
-/* ==== small life ===================================================== */
-
-/* The step tile sways; its card hovering lifts it a little further. */
-.card--step .step-numeral {
-  animation: numeral-float 5s ease-in-out infinite;
-}
-
-.card--step:nth-child(2) .step-numeral {
-  animation-delay: 1.6s;
-}
-
-.card--step:nth-child(3) .step-numeral {
-  animation-delay: 3.2s;
-}
-
-@keyframes numeral-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-/* Icon tiles tip slightly when their card is hovered. */
-.hub-card .icon-tile,
-.quick-pick .icon-tile,
-.eligibility-item .icon-tile,
-.tile i {
-  transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.44, 1);
-}
-
-.hub-card:hover .icon-tile,
-.quick-pick:hover .icon-tile,
-.eligibility-item:hover .icon-tile,
-.tile:hover i {
-  transform: scale(1.1) rotate(-4deg);
-}
-
-/* The live dot the hero chip wears. */
-.hero-chip svg {
-  animation: chip-beat 2.6s ease-in-out infinite;
-  transform-origin: center;
-}
-
-@keyframes chip-beat {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  12% {
-    transform: scale(1.18);
-  }
-
-  24% {
-    transform: scale(1);
-  }
-}
-
-/* Arrows in the inline links slide on hover. */
-.link-arrow svg {
-  transition: transform 0.22s ease;
-}
-
-.link-arrow:hover svg {
-  transform: translateX(4px);
-}
-
-/* ==== FAQ ============================================================ */
-
-/* The answer eases in when a question opens; the plus-to-cross turn
-   already lives in components.css. */
-.faq-item[open] .answer {
-  animation: faq-open 0.4s cubic-bezier(0.22, 0.8, 0.3, 1) both;
-}
-
-@keyframes faq-open {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* ==== reduced motion ================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  html.js-motion [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .t-hero .accent,
-  .t-display .accent,
-  .t-section .accent,
-  .hero::before,
-  .hero-panel::before,
-  .card--step .step-numeral,
-  .hero-chip svg {
-    animation: none;
-  }
-
-  .button--primary:hover::after,
-  .card--step:hover::after,
-  .card--benefit:hover::after,
-  .hub-card:hover::after,
-  .support-card:hover::after {
-    animation: none;
-  }
-
-  .faq-item[open] .answer {
-    animation: none;
-  }
-
+  html.js-motion [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .button--primary:not(:disabled):hover::after,
+  .price-check-result,
+  .faq-item[open] .answer { animation: none; }
   .hub-card:hover .icon-tile,
   .quick-pick:hover .icon-tile,
-  .eligibility-item:hover .icon-tile,
-  .tile:hover i,
-  .link-arrow:hover svg {
-    transform: none;
-  }
+  .link-arrow:hover svg { transform: none; }
 }

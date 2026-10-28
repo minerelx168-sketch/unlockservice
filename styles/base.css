@@ -1,10 +1,8 @@
 /**
  * iUnlockMobile — reset, type ramp and page rhythm.
  *
- * The ramp is the part that carries the character: negative tracking
- * scales with the size (-0.058em at hero, none at body) and headline
- * leading drops below 1. Getting this wrong makes correct colours look
- * generic.
+ * Headings keep an open letter fit and readable line spacing; body copy
+ * and controls respect the browser's text size preference.
  */
 
 *,
@@ -146,22 +144,22 @@ h4 {
    four lines and pushed the paragraph under it off the first screen. */
 .t-hero {
   font-size: clamp(2.125rem, 4.4vw, 3.625rem);
-  line-height: 1.06;
-  letter-spacing: -0.03em;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
   font-weight: 700;
 }
 
 .t-display {
   font-size: clamp(2.125rem, 4.9vw, 3.875rem);
-  line-height: 1.08;
-  letter-spacing: -0.028em;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
   font-weight: 640;
 }
 
 .t-section {
   font-size: clamp(1.875rem, 4.1vw, 3.125rem);
-  line-height: 1.14;
-  letter-spacing: -0.024em;
+  line-height: 1.2;
+  letter-spacing: -0.018em;
   font-weight: 680;
 }
 
