@@ -38,6 +38,6 @@ test('responsive logo grids match reference column counts and remain scoped to l
 test('homepage preserves public service entry points without publishing placeholder reviews', () => {
   const home = read('app/(marketing)/page.tsx')
   assert.match(home, /<HeroPriceCheck unlock=/)
-  assert.match(home, /listPublicProviderProducts\('unlock'\)/)
+  assert.match(home, /listStorefrontProviderProducts\('unlock'\)/)
   assert.doesNotMatch(home, /Testimonials|SAMPLE_TESTIMONIALS|AggregateRating|ratingValue|reviewCount/)
 })

@@ -42,10 +42,17 @@ test('SPA pageview suppresses initial duplicate but tracks private route changes
 test('consent restores only validated click IDs and never arbitrary landing query', () => {
   const consent = read('components/analytics-consent.tsx')
   assert.match(consent, /validateClickId/)
-  assert.match(consent, /safeLocation.searchParams.set\(field, safeIds\[field\]!\)/)
-  assert.match(consent, /send_page_view: false/)
-  assert.match(consent, /safeAnalyticsPage/)
-  assert.doesNotMatch(consent, /page_location: window.location.href|page_title: document.title/)
+  // The banner validates captured IDs and delegates tag emission to the shared helper.
+  assert.match(consent, /updateGoogleConsent\(state, state === 'granted' \? clicks.current : \{\}\)/)
+  const tracking = read('lib/google-consent-tracking.ts')
+  assert.match(tracking, /const safeIds = readClickIds\(clickIds\)/)
+  assert.match(tracking, /validateClickId\(\(input as Record<string, unknown>\)\[field\]\)/)
+  assert.match(tracking, /safeLocation.searchParams.set\(field, safeIds\[field\]!\)/)
+  assert.match(tracking, /send_page_view: false/)
+  assert.match(tracking, /safeAnalyticsPage/)
+  for (const source of [consent, tracking]) {
+    assert.doesNotMatch(source, /page_location: window.location.href|page_title: document.title/)
+  }
   const route = read('app/api/consent/route.ts')
   assert.match(route, /parseAttributionCookie/)
   assert.match(route, /Cache-Control.*no-store/)
