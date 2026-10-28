@@ -6,6 +6,7 @@ import {
   submitProviderRequest,
 } from './provider-api'
 import { buildProviderReport } from './imei-report'
+import { encryptProviderCode } from './provider-code'
 
 /** Provider-neutral request for a non-payment IMEI report. */
 export type ImeiCheckRequest = {
@@ -79,7 +80,9 @@ const configuredImeiProvider: ImeiCheckProvider = {
         status: 'completed',
         provider: config.name,
         providerCheckId: outcome.providerId,
-        result: buildProviderReport(request.checkType, config.name, outcome.data),
+        result: { ...buildProviderReport(request.checkType === 'apple_free' ? 'APPLE_BASIC' : request.checkType, config.name, outcome.data),
+          ...(request.checkType === 'apple_free' ? { _providerCodeEncrypted: encryptProviderCode(outcome.providerCode) } : {}),
+        },
       }
     }
     return {
@@ -126,3 +129,4 @@ const configuredImeiProvider: ImeiCheckProvider = {
 export function activeImeiCheckProvider(): ImeiCheckProvider {
   return providerConfiguration().enabled ? configuredImeiProvider : localValidationCheckProvider
 }
+

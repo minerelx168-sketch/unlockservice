@@ -228,40 +228,16 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
   )
 })
 
-test('provider product catalog publishes only reviewed products and keeps activation fail-closed', () => {
-  assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 130)
-  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 108)
-  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 99)
-  assert.equal(providerProducts.COMING_SOON_PROVIDER_PRODUCTS.length, 9)
-  assert.equal(providerProducts.REPRICE_PROVIDER_PRODUCTS.length, 14)
-  assert.equal(providerProducts.RESTRICTED_PROVIDER_PRODUCTS.length, 8)
-  assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map((product) => product.productCode)).size, 130)
-  assert.partialDeepStrictEqual(
-    providerProducts.providerProductByCode('CHECK_988'),
-    {
-      serviceId: '988',
-      status: 'hidden_reprice',
-      priceCents: 0,
-      providerCostMicros: 20_000,
-    },
-  )
-  assert.equal(
-    providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter((product) => product.domain === 'unlock').length,
-    54,
-  )
-  assert.equal(
-    providerProducts.AVAILABLE_PROVIDER_PRODUCTS.every((product) =>
-      product.inputType === 'imei'
-      && product.priceCents * 10_000 > product.providerCostMicros,
-    ),
-    true,
-  )
-
-  const paidRows = database.db()
-    .prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products')
-    .get() as { total: number; active: number }
-  assert.deepEqual(paidRows, { total: 99, active: 99 })
-
+test('provider catalog separates approved paid products, the free reward and retired services', () => {
+  assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 137)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 128)
+  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 128)
+  assert.equal(providerProducts.providerProductByCode('APPLE_BASIC')?.status, 'free')
+  assert.equal(providerProducts.PROVIDER_PRODUCTS.filter(p => p.status === 'unavailable').length, 8)
+  assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map(p => p.productCode)).size, 137)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter(p => p.domain === 'unlock').length, 61)
+  assert.ok(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.every(p => p.priceCents * 10_000 >= p.providerCostMicros * 1.3))
+  assert.deepEqual(database.db().prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products').get(), { total: 128, active: 128 })
   assert.equal(providerProducts.etaMinutesFromLabel('1-10 sec'), 1)
   assert.equal(providerProducts.etaMinutesFromLabel('10 minutes-1 hour'), 60)
   assert.equal(providerProducts.etaMinutesFromLabel('Instant to 5 days'), 7_200)
@@ -635,41 +611,16 @@ test('Google OAuth creates protected authorization transactions and stable ident
   }
 })
 
-test('free IMEI checks are repeatable, owner-scoped, and never touch credit', async () => {
-  const user = auth.authenticate('alice', 'correct-horse-battery-staple')
+test('free checks fail closed without the approved Apple mapping and never touch credit', async () => {
+  const user = auth.register('apple-free-test', 'apple-free@example.test', 'correct-horse-battery-staple')
+  database.db().prepare("UPDATE users SET email_verified_at=datetime('now') WHERE id=?").run(user.id)
   const before = credits.getBalance(user.id)
-
-  const first = await imeiChecks.createImeiCheck(user.id, { imei: '490154203237518' })
-  const repeat = await imeiChecks.createImeiCheck(user.id, { imei: '490154203237518' })
-  const replay = await imeiChecks.createImeiCheck(user.id, {
-    imei: '356938035643809',
-    idempotencyKey: 'free-check-replay',
-  })
-  const replayAgain = await imeiChecks.createImeiCheck(user.id, {
-    imei: '356938035643809',
-    idempotencyKey: 'free-check-replay',
-  })
-
-  assert.equal(first.status, 'completed')
-  assert.equal(first.result?.kind, 'format_checksum')
-  assert.equal(first.result?.demo, undefined)
-  assert.equal(first.result?.source, undefined)
-  assert.equal(first.result?.nextStep, undefined)
-  assert.equal(first.maskedImei, '49·········7518')
-  assert.equal(first.imei, '490154203237518')
-  const encrypted = database.db().prepare('SELECT masked_imei, imei_encrypted FROM imei_checks WHERE id = ?').get(first.id) as { masked_imei: string; imei_encrypted: string }
-  assert.equal(encrypted.masked_imei, '49·········7518')
-  assert.ok(encrypted.imei_encrypted)
-  assert.doesNotMatch(encrypted.imei_encrypted, /490154203237518/)
-  assert.notEqual(first.id, repeat.id)
-  assert.equal(replay.id, replayAgain.id)
-  assert.equal(imeiChecks.getImeiCheck(2, first.id), undefined)
-  assert.equal(imeiChecks.listImeiChecks(user.id).length >= 3, true)
+  await assert.rejects(imeiChecks.createImeiCheck(user.id, { imei: '490154203237518' }),
+    (error: unknown) => error instanceof imeiChecks.ImeiCheckError && error.code === 'provider_not_ready')
   assert.deepEqual(credits.getBalance(user.id), before)
-  await assert.rejects(
-    imeiChecks.createImeiCheck(user.id, { imei: '123456789012345' }),
-    (error: unknown) => error instanceof imeiChecks.ImeiCheckError && error.code === 'imei_invalid',
-  )
+  assert.equal(imeiChecks.listImeiChecks(user.id).length, 0)
+  await assert.rejects(imeiChecks.createImeiCheck(user.id, { imei: '123456789012345' }),
+    (error: unknown) => error instanceof imeiChecks.ImeiCheckError && error.code === 'imei_invalid')
 })
 
 test('provider adapters normalize sync and DHRU flows without leaking secrets or bypassing credit invariants', async () => {
@@ -694,7 +645,7 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
     process.env.IUNLOCKMOBILE_PROVIDER_URL = 'https://provider.example/api'
     process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = 'sync-secret-key'
     process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
-      'check:basic': { id: '343', mode: 'sync' },
+      'check:apple_free': { id: '214', mode: 'sync' },
     })
 
     globalThis.fetch = async (input, init) => {
@@ -705,7 +656,7 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
       assert.equal(init?.method, 'POST')
       const body = new URLSearchParams(String(init?.body))
       assert.equal(body.get('key'), 'sync-secret-key')
-      assert.equal(body.get('service'), '343')
+      assert.equal(body.get('service'), '214')
       assert.equal(body.get('imei'), '490154203237518')
       return new Response(
         JSON.stringify({
@@ -724,7 +675,8 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
       )
     }
 
-    const alice = auth.authenticate('alice', 'correct-horse-battery-staple')
+    const alice = auth.register('apple-adapter-test', 'apple-adapter@example.test', 'correct-horse-battery-staple')
+    database.db().prepare("UPDATE users SET email_verified_at=datetime('now') WHERE id=?").run(alice.id)
     const aliceCredit = credits.getBalance(alice.id)
     const syncCheck = await imeiChecks.createImeiCheck(alice.id, {
       imei: '490154203237518',
@@ -786,11 +738,10 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
       return new Response(JSON.stringify({ ERROR: [{ MESSAGE: 'unexpected request' }] }), { status: 400 })
     }
 
-    const asyncCheck = await imeiChecks.createImeiCheck(alice.id, {
-      imei: '356938035643809',
-      idempotencyKey: 'provider-dhru-check',
-    })
-    assert.equal(checkPlaced, true)
+    // An old processing check must remain pollable after free checks move to Apple ID 214.
+    const legacyCheckId = Number(database.db().prepare("INSERT INTO imei_checks(user_id,check_type,imei_fingerprint,masked_imei,status,provider,provider_check_id,provider_mode,provider_service_id) VALUES(?,'basic','legacy-fingerprint','***********3809','processing','dhru','dhru-check-1','dhru','900')").run(alice.id).lastInsertRowid)
+    const asyncCheck = imeiChecks.getImeiCheck(alice.id, legacyCheckId)!
+    assert.equal(checkPlaced, false)
     assert.equal(asyncCheck.status, 'processing')
     database
       .db()
@@ -828,7 +779,7 @@ test('provider adapters normalize sync and DHRU flows without leaking secrets or
       .db()
       .prepare('SELECT metadata_json FROM provider_events ORDER BY id')
       .all() as Array<{ metadata_json: string | null }>
-    assert.equal(events.length >= 4, true)
+    assert.equal(events.length >= 3, true)
     const auditText = events.map((event) => event.metadata_json ?? '').join(' ')
     assert.equal(auditText.includes('sync-secret-key'), false)
     assert.equal(auditText.includes('dhru-secret-key'), false)
@@ -890,17 +841,20 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     const freeChecksBefore = imeiChecks.listImeiChecks(alice.id).length
 
     const activeCatalog = paidReports.listPaidReportProducts()
-    assert.equal(activeCatalog.length, 99)
+    assert.equal(activeCatalog.length, 128)
     assert.equal(activeCatalog.every((product) => product.isActive), true)
     assert.equal(activeCatalog.every((product) => !product.providerReady), true)
-    const seeded = paidReports.getPaidReportProduct('APPLE_BASIC')
+    const seeded = paidReports.getPaidReportProduct('APPLE_CARRIER_LITE')
     assert.equal(seeded?.isActive, true)
-    assert.equal(seeded?.priceCents, 5)
+    assert.equal(seeded?.priceCents, 170)
 
-    process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled'
+    // Fixed fixture prices keep ledger assertions independent from retail repricing.
+    connection.prepare("UPDATE paid_report_products SET price_cents=5 WHERE code='APPLE_CARRIER_LITE'").run()
+    connection.prepare("UPDATE paid_report_products SET price_cents=1 WHERE code='BLACKLIST_SIMPLE'").run()
+    process.env.IUNLOCKMOBILE_PROVIDER_MODE = 'disabled' 
     await assert.rejects(
       paidReports.createPaidReport(alice.id, {
-        productCode: 'APPLE_BASIC',
+        productCode: 'APPLE_CARRIER_LITE',
         imei: '490154203237518',
         idempotencyKey: 'paid-disabled',
       }),
@@ -917,12 +871,12 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     process.env.IUNLOCKMOBILE_PROVIDER_URL = 'https://provider.example/api'
     process.env.IUNLOCKMOBILE_PROVIDER_API_KEY = 'paid-report-secret'
     process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
-      'check:apple_basic': { id: '999', mode: 'sync' },
+      'check:apple_carrier_lite': { id: '999', mode: 'sync' },
     })
     const beforeWrongMapping = credits.getBalance(alice.id)
     await assert.rejects(
       paidReports.createPaidReport(alice.id, {
-        productCode: 'APPLE_BASIC',
+        productCode: 'APPLE_CARRIER_LITE',
         imei: '490154203237518',
         idempotencyKey: 'paid-wrong-service-id',
       }),
@@ -935,7 +889,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     )
 
     process.env.IUNLOCKMOBILE_IMEI_SERVICE_MAP = JSON.stringify({
-      'check:apple_basic': { id: '214', mode: 'sync' },
+      'check:apple_carrier_lite': { id: '444', mode: 'sync' },
       'check:blacklist_simple': { id: '419', mode: 'sync' },
     })
 
@@ -948,7 +902,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
       assert.equal(init?.method, 'POST')
       const body = new URLSearchParams(String(init?.body))
       assert.equal(body.get('key'), 'paid-report-secret')
-      assert.equal(body.get('service'), '214')
+      assert.equal(body.get('service'), '444')
       assert.equal(body.get('imei'), '490154203237518')
       return new Response(
         JSON.stringify({
@@ -968,7 +922,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
 
     const beforeSuccess = credits.getBalance(alice.id)
     const delivered = await paidReports.createPaidReport(alice.id, {
-      productCode: 'APPLE_BASIC',
+      productCode: 'APPLE_CARRIER_LITE',
       imei: '490154203237518',
       idempotencyKey: 'paid-success-1',
     })
@@ -991,7 +945,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.match(deliveredView?.providerCode ?? '', /providerInternalNote: must never be stored/)
 
     const replay = await paidReports.createPaidReport(alice.id, {
-      productCode: 'APPLE_BASIC',
+      productCode: 'APPLE_CARRIER_LITE',
       imei: '490154203237518',
       idempotencyKey: 'paid-success-1',
     })
@@ -999,7 +953,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     assert.equal(providerCalls, 1)
     await assert.rejects(
       paidReports.createPaidReport(alice.id, {
-        productCode: 'APPLE_BASIC',
+        productCode: 'APPLE_CARRIER_LITE',
         imei: '356938035643809',
         idempotencyKey: 'paid-success-1',
       }),
@@ -1017,12 +971,12 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     }
     const [concurrentA, concurrentB] = await Promise.all([
       paidReports.createPaidReport(alice.id, {
-        productCode: 'APPLE_BASIC',
+        productCode: 'APPLE_CARRIER_LITE',
         imei: '356938035643809',
         idempotencyKey: 'paid-concurrent-1',
       }),
       paidReports.createPaidReport(alice.id, {
-        productCode: 'APPLE_BASIC',
+        productCode: 'APPLE_CARRIER_LITE',
         imei: '356938035643809',
         idempotencyKey: 'paid-concurrent-1',
       }),
@@ -1425,9 +1379,10 @@ test('the production switches are closed unless they are opened by hand', async 
   const imeiPrivacy = await import('../lib/imei-privacy')
   await assert.rejects(
     imeiChecks.createImeiCheck(user.id, { imei: '354909000000095' }),
-    (error: unknown) => error instanceof imeiPrivacy.FingerprintUnavailable,
+    (error: unknown) => error instanceof imeiChecks.ImeiCheckError && ['provider_not_ready', 'account_not_ready'].includes(error.code),
   )
 
+  assert.throws(() => imeiPrivacy.fingerprintImei('354909000000095'), imeiPrivacy.FingerprintUnavailable)
   if (originalNodeEnv === undefined) delete env.NODE_ENV
   else Object.assign(process.env, { NODE_ENV: originalNodeEnv })
 })
@@ -1733,3 +1688,4 @@ test('a second process can wait for the writer instead of failing', async () => 
     errors: 0,
   })
 })
+

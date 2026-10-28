@@ -11,7 +11,7 @@ export type ServiceOutputExampleData = {
 export function getServiceOutputExample(value: unknown): ServiceOutputExampleData | null {
   if (typeof value !== 'string' || !/^[A-Z0-9_]{2,64}$/.test(value)) return null
   const product = providerProductByCode(value)
-  if (!product || !['available', 'coming_soon'].includes(product.status)) return null
+  if (!product || !['available', 'coming_soon', 'free'].includes(product.status)) return null
   if (!Object.hasOwn(examples, value)) return null
   const example = (examples as Record<string, ServiceOutputExampleData>)[value]
   if (!example?.title || !example.variants?.length) return null
@@ -24,3 +24,4 @@ export function getServiceOutputExample(value: unknown): ServiceOutputExampleDat
 export function hasServiceOutputExample(value: unknown) {
   return getServiceOutputExample(value) !== null
 }
+

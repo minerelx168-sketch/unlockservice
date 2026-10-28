@@ -5,8 +5,7 @@ import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { IMEI_LENGTH } from '@/lib/imei'
-import { deviceImei } from '@/lib/device-intent-value'
+import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
 import { formatUsd } from '@/lib/money'
 import type { PurchaseConversion } from '@/lib/purchase-conversion'
 import { GoogleAdsPurchaseConversion } from './google-ads-purchase-conversion'
@@ -17,6 +16,7 @@ import { ServicePicker } from './service-picker'
 import { saveDeviceIntentAction, clearAcceptedDeviceIntentAction } from '@/lib/device-intent-actions'
 
 type Product = {
+  inputType: ServiceInputType
   code: string
   name: string
   summary: string
@@ -106,10 +106,11 @@ export function PaidReportConsole({
   const idempotencyRef = useRef<string | null>(null)
 
   const product = products.find((entry) => entry.code === productCode) ?? null
+  const field = identifierField(product?.inputType)
   const visibleProducts = useMemo(() => products.filter((entry) => storefrontDomain(entry) === domain), [products, domain])
   const affordable = !product || product.priceCents <= balanceCents
   // Validate the original input: never truncate a longer identifier or discard letters.
-  const digits = deviceImei(imei)
+  const digits = serviceIdentifier(imei, product?.inputType)
   const digitCount = imei.replace(/\D/g, '').length
   const imeiValid = digits !== null
   const imeiInvalid = imeiTouched && !imeiValid
@@ -217,11 +218,11 @@ export function PaidReportConsole({
     event.preventDefault()
     if (locked) return
     setImeiTouched(true)
-    const digits = deviceImei(imei)
+    const digits = serviceIdentifier(imei, product?.inputType)
     if (!product) return setError('Choose a service first.')
     if (!product.providerReady) return setError('This service is not available yet.')
     if (!digits) {
-      setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+      setError(field.error)
       imeiRef.current?.focus()
       return
     }
@@ -233,9 +234,9 @@ export function PaidReportConsole({
 
   async function confirmOrder() {
     if (inFlight.current || payload) return
-    const digits = deviceImei(imei)
+    const digits = serviceIdentifier(imei, product?.inputType)
     if (!product || !product.providerReady) return setError('This service is not available yet.')
-    if (!digits) return setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`)
+    if (!digits) return setError(field.error)
     if (!affordable) return setError('Not enough credit for this report.')
 
     const idempotencyKey = idempotencyRef.current ?? crypto.randomUUID()
@@ -268,9 +269,9 @@ export function PaidReportConsole({
 
   async function continueToFunding() {
     if (locked || !product?.providerReady || affordable) return
-    if (imei.trim() && !deviceImei(imei)) {
+    if (imei.trim() && !serviceIdentifier(imei, product.inputType)) {
       setImeiTouched(true)
-      setError('Enter a valid 15-digit IMEI, or clear it before adding credit.')
+      setError(field.error)
       imeiRef.current?.focus()
       return
     }
@@ -303,7 +304,7 @@ export function PaidReportConsole({
           <span className="service-workbench-icon"><Icon name={domain === 'unlock' ? 'lock' : 'device'} /></span>
           <div>
             <h2>{domain === 'unlock' ? 'Unlock a device' : 'Check a device'}</h2>
-            <p>Enter an IMEI, choose a service, then review your order.</p>
+            <p>Choose a service, enter its required identifier, then review your order.</p>
           </div>
           <div className="service-workbench-credit">
             <span>Available credit</span>
@@ -317,9 +318,9 @@ export function PaidReportConsole({
 
           <div className="field service-workbench-imei">
             <div className="service-workbench-label">
-              <label htmlFor="paid-report-imei">IMEI number</label>
+              <label htmlFor="paid-report-imei">{field.label}</label>
               <span className="service-workbench-validation" data-state={imeiInvalid ? 'invalid' : imeiValid ? 'valid' : undefined} aria-live="polite">
-                {imeiInvalid ? 'Check number' : imeiValid ? 'Valid format' : '15 digits'}
+                {imeiInvalid ? 'Check number' : imeiValid ? 'Valid format' : field.label}
               </span>
             </div>
             <div className="service-workbench-input" data-invalid={imeiInvalid || undefined}>
@@ -332,10 +333,11 @@ export function PaidReportConsole({
                 aria-describedby="paid-report-imei-help"
                 onBlur={() => setImeiTouched(true)}
                 type="text"
-                inputMode="numeric"
+                inputMode={field.inputMode}
+                maxLength={80}
                 autoComplete="off"
                 spellCheck={false}
-                placeholder="Enter your 15-digit IMEI"
+                placeholder={field.placeholder}
                 value={imei}
                 onChange={(event) => {
                   if (event.currentTarget.value && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { service_category: domain }) }
@@ -345,7 +347,7 @@ export function PaidReportConsole({
                   resetRequestIdentity()
                 }}
               />
-              {imei ? <button type="button" className="service-workbench-clear" aria-label="Clear IMEI" disabled={locked} onClick={() => {
+              {imei ? <button type="button" className="service-workbench-clear" aria-label="Clear identifier" disabled={locked} onClick={() => {
                 setImei('')
                 setImeiTouched(false)
                 setError(null)
@@ -353,13 +355,13 @@ export function PaidReportConsole({
                 imeiRef.current?.focus()
               }}><Icon name="cross" /></button> : null}
             </div>
-            <ImeiSegments count={digitCount} valid={imeiValid} />
+            {(product?.inputType ?? 'imei') === 'imei' ? <ImeiSegments count={digitCount} valid={imeiValid} /> : null}
             <div className="service-workbench-help">
               <p className="field-note" id="paid-report-imei-help" data-state={imeiInvalid ? 'invalid' : undefined}>
                 <Icon name="info" strokeWidth={1.9} />
-                <span>{imeiInvalid ? 'Enter exactly 15 digits with a valid checksum. Only spaces or hyphens may separate digits.' : 'Find it in Settings or dial *#06#. IMEI only; serial numbers are not accepted.'}</span>
+                <span>{imeiInvalid ? field.error : field.hint}</span>
               </p>
-              <span>{digitCount} / {IMEI_LENGTH}</span>
+              {(product?.inputType ?? 'imei') === 'imei' ? <span>{digitCount} / 15</span> : null}
             </div>
           </div>
 
@@ -428,7 +430,7 @@ export function PaidReportConsole({
                 </div>
                 <span className="badge">Review</span>
               </div>
-              <p className="t-small">IMEI {digits ?? ''}</p>
+              <p className="t-small">{field.label} {digits ?? ''}</p>
               <div className="quote">
                 <div><span className="label">Price</span><span className="value">{formatUsd(product.priceCents)}</span></div>
                 <div><span className="label">Estimated delivery</span><span className="value">{product.etaLabel ?? deliveryLabel(product.etaMinutes)}</span></div>
@@ -471,7 +473,7 @@ export function PaidReportConsole({
                   <p className="t-small" role="status">
                     You need {formatUsd(product.priceCents - balanceCents)} more credit. Choose your amount on the add-funds page.
                     {paymentMethods.length > 0 ? ` Payment: ${paymentMethods.join(', ')}; transfers are verified before credit is available.` : ' Top-ups are currently unavailable; contact support for help.'}
-                    {' '}Your IMEI and selected service are kept privately for 15 minutes. You will review and confirm the order after returning.
+                    {' '}Your identifier and selected service are kept privately for 15 minutes. You will review and confirm the order after returning.
                   </p>
                 ) : null}
               </div>
@@ -490,7 +492,7 @@ export function PaidReportConsole({
             <span className="kicker"><Icon name="file" /> {payload.order.productName}</span>
             <span className={payload.order.status === 'completed' ? 'badge badge--success' : 'badge'}>{statusLabel(payload.order.status)}</span>
           </div>
-          <h3 className="t-card">IMEI {payload.order.imei ?? digits ?? payload.order.maskedImei}</h3>
+          <h3 className="t-card">{field.label} {payload.order.imei ?? digits ?? payload.order.maskedImei}</h3>
           {payload.order.status === 'completed' && payload.order.providerCode ? (
             <pre className="provider-code-result service-workbench-inline-code">{payload.order.providerCode}</pre>
           ) : null}
@@ -519,3 +521,4 @@ export function PaidReportConsole({
     </div>
   )
 }
+

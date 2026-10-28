@@ -1,3 +1,4 @@
+import { ProviderOutputText } from '@/components/provider-output-text'
 import { LocalTime } from '@/components/customer-time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -62,7 +63,8 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
               <span>The IMEI is shown only to the signed-in owner. Provider results are a point-in-time lookup, not proof of ownership or a guarantee of unlock eligibility.</span>
             </p>
           ) : null}
-          {items.length > 0 ? (
+          {check.providerCode ? <ProviderOutputText value={check.providerCode} /> : null}
+          {!check.providerCode && items.length > 0 ? (
             <dl className="report-details" style={{ marginTop: 20 }}>
               {items.map((item, index) => (
                 <div key={item.key ?? item.label ?? index}>
@@ -83,7 +85,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         </section>
       </div>
 
-      {sections.length > 0 ? (
+      {!check.providerCode && sections.length > 0 ? (
         <div className="grid-2" style={{ marginTop: 20 }}>
           {sections.map((section, sectionIndex) => {
             const sectionItems = Array.isArray(section.items) ? section.items : []
@@ -109,3 +111,4 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
     </>
   )
 }
+

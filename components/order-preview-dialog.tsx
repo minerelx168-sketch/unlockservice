@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useId, useRef } from 'react'
+import { identifierField, type ServiceInputType } from '@/lib/service-identifier'
 import { guestCardQuote } from '@/lib/guest-card-quote'
 import { formatUsd } from '@/lib/money'
 import { Icon } from './icons'
 import '@/styles/order-preview.css'
 
-type PreviewProduct = { code: string; name: string; priceCents: number; etaLabel: string }
+type PreviewProduct = { inputType: ServiceInputType; code: string; name: string; priceCents: number; etaLabel: string }
 
 /** A live order quote only. Locked bars contain no result or provider data. */
 export function OrderPreviewDialog({ open, product, domain, imei, email, pending, error, onClose, onContinue }: {
@@ -41,7 +42,7 @@ export function OrderPreviewDialog({ open, product, domain, imei, email, pending
       <div className="order-preview__top"><span className="order-preview__live"><span aria-hidden="true" />Live order preview</span><button type="button" className="order-preview__close" aria-label="Close order preview" disabled={pending} onClick={onClose}><Icon name="cross" /></button></div>
       <h2 id={titleId}>{isUnlock ? 'Ready to unlock your phone?' : 'Your full report starts here.'}</h2>
       <p className="order-preview__service">{product.name}</p>
-      <dl className="order-preview__device"><div><dt>IMEI</dt><dd>{imei}</dd></div><div><dt>Result email</dt><dd>{email}</dd></div></dl>
+      <dl className="order-preview__device"><div><dt>{identifierField(product.inputType).label}</dt><dd>{imei}</dd></div><div><dt>Result email</dt><dd>{email}</dd></div></dl>
       <div className="order-preview__locked" aria-label="Result is not available before payment and processing">
         <div className="order-preview__placeholder" aria-hidden="true"><span /><span /><span /><span /></div>
         <div className="order-preview__lock-message"><Icon name="lock" /><strong>{isUnlock ? 'Unlock result' : 'Full report'}</strong></div>
@@ -57,3 +58,4 @@ export function OrderPreviewDialog({ open, product, domain, imei, email, pending
     </div>
   </dialog>
 }
+

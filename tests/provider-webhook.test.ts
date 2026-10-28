@@ -61,7 +61,7 @@ function seed(providerOrderId: string, resourceType = 'order', provider = 'signe
     : database.db().prepare(`
       INSERT INTO paid_report_orders (user_id, product_code, product_name, imei_fingerprint,
         masked_imei, status, price_cents, provider_order_id, provider_name, provider_mode)
-      VALUES (?, 'APPLE_BASIC', 'Apple Basic', 'test-fingerprint', '***********7518',
+      VALUES (?, 'APPLE_CARRIER_LITE', 'Apple Carrier Lite', 'test-fingerprint', '***********7518',
         'processing', 100, ?, ?, 'dhru')
     `).run(userId, providerOrderId, provider)
   const id = Number(inserted.lastInsertRowid)
@@ -293,3 +293,4 @@ test('a failed rejected-report receipt rolls back the refund and still never cre
   assert.equal(credits.getBalance(fixture.userId).availableCents, 1_000)
   assert.equal(credits.creditIntegrity().mismatches, 0)
 })
+

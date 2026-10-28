@@ -43,7 +43,7 @@ export function listPublicProviderProducts(domain: ProviderProductDomain): Publi
  */
 export function listStorefrontProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
   const byId = new Map(PROVIDER_PRODUCTS.map((product) => [product.serviceId, product]))
-  return directory.services.filter((entry) => entry.domain === domain).map((entry) => {
+  return directory.services.filter((entry) => entry.domain === domain && entry.serviceId !== '214').map((entry) => {
     const configured = byId.get(entry.serviceId)
     const productCode = configured?.productCode ?? `${domain === 'unlock' ? 'UNLOCK' : 'CHECK'}_${entry.serviceId}`
     const live = getPaidReportProduct(productCode)
@@ -67,3 +67,4 @@ export function listStorefrontProviderProducts(domain: ProviderProductDomain): P
     }
   })
 }
+

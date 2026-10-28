@@ -1,8 +1,9 @@
+import type { ServiceInputType } from './service-identifier'
 import catalog from '@/catalog/provider-products.json'
 
 export type ProviderProductDomain = 'imei_check' | 'unlock'
-export type ProviderProductInput = 'imei' | 'serial_or_imei' | 'phone'
-export type ProviderProductStatus = 'available' | 'coming_soon' | 'hidden_reprice' | 'hidden_restricted'
+export type ProviderProductInput = ServiceInputType
+export type ProviderProductStatus = 'available' | 'coming_soon' | 'hidden_reprice' | 'hidden_restricted' | 'unavailable' | 'free'
 
 export type ProviderProduct = {
   serviceId: string
@@ -63,3 +64,4 @@ export function etaMinutesFromLabel(label: string) {
   if (values.length > 0) return Math.max(1, Math.ceil(Math.max(...values)))
   return normalized.includes('instant') ? 1 : 24 * 60
 }
+

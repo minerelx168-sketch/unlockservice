@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useActionState, useEffect, useRef, useState, type FormEvent } from 'react'
 import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
-import { deviceImei } from '@/lib/device-intent-value'
+import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
 import { guestCardQuote } from '@/lib/guest-card-quote'
 import { formatUsd } from '@/lib/money'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
@@ -14,6 +14,7 @@ import { OrderPreviewDialog } from './order-preview-dialog'
 /** Public catalog fields only; prices are checked again by the order flow. */
 export type PriceCheckProduct = {
   code: string
+  inputType: ServiceInputType
   domain: 'unlock' | 'imei_check'
   name: string
   category: string
@@ -58,8 +59,10 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
   const selected = products.find((product) => product.code === service[domain])
   const orderDomain = selected?.domain ?? domain
   const [state, action, pending] = useActionState(continueDeviceServiceAction, {})
-  const digits = imei.replace(/[\s-]/g, '')
-  const validImei = deviceImei(imei) !== null
+  const inputType = selected?.inputType ?? 'imei'
+  const field = identifierField(inputType)
+  const digits = serviceIdentifier(imei, inputType) ?? imei.trim()
+  const validImei = serviceIdentifier(imei, inputType) !== null
   const cardQuote = selected && selected.priceCents > 0 ? guestCardQuote(selected.priceCents) : null
   const total = cardQuote?.totalCents ?? 0
   const actionError = showActionError ? state.error : undefined
@@ -77,7 +80,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
       event.preventDefault(); setError({ field: 'service', message: 'Choose an available service to continue.' }); serviceInput.current?.focus(); return
     }
     if (!validImei) {
-      event.preventDefault(); setError({ field: 'imei', message: 'Check your IMEI: enter all 15 digits from *#06# or Settings.' }); input.current?.focus()
+      event.preventDefault(); setError({ field: 'imei', message: field.error }); input.current?.focus()
       trackFunnelEvent('validation_result', { service_category: orderDomain, validation_status: 'failed', status: 'imei' }); return
     }
     if (!email.trim() || !emailInput.current?.validity.valid) {
@@ -128,13 +131,13 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         }}
       />
       {selected ? <div className="price-check-result" data-unpriced={selected.priceAvailable === false || undefined} aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl>{selected.priceAvailable !== false ? <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p> : null}{cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}</div> : null}
-      {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><p>{selected.summary}</p><p>Review eligibility before ordering. IMEI format validation does not confirm eligibility.</p></details> : null}
+      {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><p style={{ whiteSpace: 'pre-line' }}>{selected.summary}</p><p>Review eligibility before ordering. Input format validation does not confirm eligibility.</p></details> : null}
     </> : <p className="alert" role="status"><Icon name="info" /><span>No services are listed right now. <Link href="/contact">Contact support</Link> for availability.</span></p>}
     {selected?.available ? <div className="price-check-details">
-      <div className="field"><div className="price-check-label-row"><label htmlFor="pc-imei">IMEI number</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls="pc-imei-guide" onClick={() => setHelpOpen(!helpOpen)}><Icon name="question" />Find my IMEI</button></div>
-        {helpOpen ? <p className="price-check-imei-guide" id="pc-imei-guide">Dial <kbd>*#06#</kbd> on the phone, or open Settings → General → About. Copy and paste the 15-digit IMEI here. Spaces and dashes are accepted.</p> : null}
-        <div className="device-browse-input" data-invalid={error?.field === 'imei' || undefined}><Icon name="device" /><input id="pc-imei" ref={input} name="imei" type="text" inputMode="numeric" enterKeyHint="next" autoComplete="off" spellCheck={false} placeholder="Paste or enter 15-digit IMEI" value={imei} disabled={pending} aria-describedby={`pc-imei-help${error?.field === 'imei' ? ' pc-error' : ''}`} aria-invalid={error?.field === 'imei'} onChange={(event) => { if (event.currentTarget.value && !started.current[domain]) { started.current[domain] = true; trackFunnelEvent('imei_input_started', { service_category: orderDomain }) } setImei(event.currentTarget.value); clearError() }} />{imei ? <button type="button" aria-label="Clear IMEI" disabled={pending} onClick={() => { setImei(''); clearError(); input.current?.focus() }}><Icon name="cross" /></button> : null}</div>
-        <p className="device-browse-help" id="pc-imei-help"><span>Dial <kbd>*#06#</kbd> to find it</span><span className={validImei ? 'price-check-valid' : undefined}>{validImei ? <><Icon name="checkSmall" />Format valid</> : `${digits.length} / 15`}</span></p>
+      <div className="field"><div className="price-check-label-row"><label htmlFor="pc-imei">{field.label}</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls="pc-imei-guide" onClick={() => setHelpOpen(!helpOpen)}><Icon name="question" />Input help</button></div>
+        {helpOpen ? <p className="price-check-imei-guide" id="pc-imei-guide">{field.hint}</p> : null}
+        <div className="device-browse-input" data-invalid={error?.field === 'imei' || undefined}><Icon name="device" /><input id="pc-imei" ref={input} name="imei" type="text" inputMode={field.inputMode} enterKeyHint="next" autoComplete="off" spellCheck={false} placeholder={field.placeholder} maxLength={80} value={imei} disabled={pending} aria-describedby={`pc-imei-help${error?.field === 'imei' ? ' pc-error' : ''}`} aria-invalid={error?.field === 'imei'} onChange={(event) => { if (event.currentTarget.value && !started.current[domain]) { started.current[domain] = true; trackFunnelEvent('imei_input_started', { service_category: orderDomain }) } setImei(event.currentTarget.value); clearError() }} />{imei ? <button type="button" aria-label="Clear identifier" disabled={pending} onClick={() => { setImei(''); clearError(); input.current?.focus() }}><Icon name="cross" /></button> : null}</div>
+        <p className="device-browse-help" id="pc-imei-help"><span>{field.hint}</span><span className={validImei ? 'price-check-valid' : undefined}>{validImei ? <><Icon name="checkSmall" />Format valid</> : inputType === 'imei' ? `${digits.length} / 15` : field.label}</span></p>
       </div>
       <div className="field"><label htmlFor="pc-email">Email for your result</label><input id="pc-email" ref={emailInput} name="email" type="email" autoComplete="email" inputMode="email" enterKeyHint="go" spellCheck={false} placeholder="you@example.com" required maxLength={254} value={email} disabled={pending} aria-invalid={error?.field === 'email'} aria-describedby={`pc-email-help${error?.field === 'email' ? ' pc-error' : ''}`} onChange={(event) => { setEmail(event.currentTarget.value); clearError() }} /><p id="pc-email-help" className="field-note">Your private order link and result. No password needed.</p></div>
     </div> : null}
@@ -146,3 +149,4 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
     {selected && selected.priceCents > 0 ? <OrderPreviewDialog open={previewOpen} product={selected} domain={orderDomain} imei={digits} email={email.trim()} pending={pending} error={actionError} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={continueToPayment} /> : null}
   </form>
 }
+

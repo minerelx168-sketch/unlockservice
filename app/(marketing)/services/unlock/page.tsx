@@ -24,7 +24,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
   const quoteProducts: PriceCheckProduct[] = products.map((product) => ({
     code: product.productCode, domain: product.domain, name: product.name, category: product.group,
     summary: product.summary, available: product.status === 'available',
-    priceCents: product.priceCents, priceAvailable: product.priceAvailable, etaLabel: product.etaLabel,
+    inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable, etaLabel: product.etaLabel,
   }))
   const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size
 
@@ -80,3 +80,4 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
     </section>
   )
 }
+

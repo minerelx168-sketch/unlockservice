@@ -41,15 +41,12 @@ test('paid report console shows Provider Code inline, auto-refreshes from the da
   assert.doesNotMatch(page, /maskIdentifier/)
 })
 
-test('free check result shows the complete owner IMEI inline and offers Save instead of a detail link', () => {
+test('free check result shows the owner IMEI and saves the returned provider fields', () => {
   const form = read('components/imei-check-form.tsx')
-  assert.match(form, /check\.imei \?\? normalizeImei\(value\)/)
-  assert.match(form, /api\/imei\/checks\/\$\{check\.id\}/)
-  assert.match(form, /method: 'GET'/)
-  assert.match(form, /cleanResultForSave\(check\)/)
-  assert.match(form, /JSON\.stringify\(clean, null, 2\)/)
-  assert.match(form, /<table className="validation-results"/)
-  assert.match(form, />Save<\/button>/)
+  assert.match(form, /check\.imei \?\? check\.maskedImei/)
+  assert.match(form, /ProviderOutputText value=\{check.providerCode\}/)
+  assert.match(form, /check\.result.sections.map/)
+  assert.match(form, />Save result<\/button>/)
   assert.doesNotMatch(form, /View full report|Open this check/)
 })
 
@@ -66,3 +63,4 @@ test('all authenticated history and dashboard surfaces prefer complete owner IME
   assert.match(dashboard, /\{order\.imei\}/)
   assert.doesNotMatch(dashboard, /maskIdentifier/)
 })
+

@@ -79,14 +79,14 @@ test('funnel transport is denied until consent and emits exactly one gtag event 
     assert.equal(calls.length, 1)
   } finally { if (previous) Object.defineProperty(globalThis, 'window', previous); else Reflect.deleteProperty(globalThis, 'window') }
 })
-test('public pricing and structured free results require no login or provider network request', () => {
+test('Apple free checks require an account and send only a non-purchase analytics event', () => {
   const check = read('app/(marketing)/check/page.tsx'), form = read('components/imei-check-form.tsx')
-  assert.match(check, /<ImeiCheckForm csrfToken=\{found\?\.session\.csrfToken\} \/>/); assert.match(check, /listPublicProviderProducts\('imei_check'\)/); assert.match(check, /<ServiceBrowser products=/)
-  assert.match(form, /<table className="validation-results"/); assert.match(form, /15-digit format/); assert.match(form, /Luhn checksum/)
-  const submit = form.slice(form.indexOf('  async function submit'), form.indexOf('  function reset'))
-  assert.match(submit, /if \(csrfToken\)/); assert.match(submit, /JSON.stringify\(\{ imei: digits, csrfToken \}\)/); assert.match(submit, /else \{[\s\S]*localResult\(digits\)/)
-  const local = read('lib/imei-check-provider.ts').split('const configuredImeiProvider')[0]
-  assert.doesNotMatch(local, /demo:|source:|nextStep:/)
+  assert.match(check, /Apple Free Check/)
+  assert.match(form, /Sign in for Apple Free Check/)
+  assert.match(form, /fetch\('\/api\/imei\/checks'/)
+  assert.match(form, /idempotencyKey: requestKey.current/)
+  assert.match(form, /trackFunnelEvent\('validation_result'/)
+  assert.doesNotMatch(form, /trackFunnelEvent\('(?:purchase|payment_completed)'/)
 })
 test('consent defaults precede Google configuration and no GTM/custom conversion replacement is installed', () => {
   const layout = read('app/layout.tsx')
@@ -125,3 +125,4 @@ test('consent API rejects malformed choice and invalid click ID without setting 
     assert.equal(response.status, 400)
   }
 })
+

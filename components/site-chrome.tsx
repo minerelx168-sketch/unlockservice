@@ -49,11 +49,11 @@ export async function PublicHeader() {
         note: `${reports.length} services listed`,
         icon: 'grid',
       },
-      items: reports.slice(0, 6).map((product) => ({
+      items: [{ href: '/check', label: 'Apple Free Check', icon: 'search' as const }, ...reports.slice(0, 5).map((product) => ({
         href: `/services/imei-check?product=${encodeURIComponent(product.productCode)}`,
         label: product.name,
         icon: 'file' as const,
-      })),
+      }))],
     },
   ]
 
@@ -95,3 +95,4 @@ export async function PublicFooter() {
 
   return <SiteFooter isAuthenticated={isAuthenticated} guides={guides} facts={facts} />
 }
+

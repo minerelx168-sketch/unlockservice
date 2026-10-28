@@ -4,7 +4,7 @@ import { authorizedGuestCheckout, getGuestCheckout, guestCheckoutCoreEnabled, gu
 import { createGuestOrderInvoice, GATEWAYS, PaymentError, submitPaymentReference } from './payments'
 import { getCryptoDeposit } from './crypto-deposit'
 import { decryptPaidReportImei, encryptPaidReportImei } from './paid-report-imei'
-import { isValidImei, normalizeImei } from './imei'
+import { serviceIdentifier, identifierField } from './service-identifier'
 import { getPaidReportProduct } from './paid-reports'
 import { consumeAttempt } from './rate-limit'
 import { WhopPaymentError } from './whop'
@@ -23,9 +23,10 @@ export async function createGuestCryptoCheckout(input:{
   if (!guestCryptoEnabled()) throw new WhopPaymentError('Crypto checkout is temporarily unavailable.',503)
   const route=guestCryptoRoutes().find(candidate=>candidate.id===input.routeId)
   if (!route) throw new WhopPaymentError('Choose an available token on BNB Smart Chain.')
-  const email=input.email.trim().toLowerCase(),imei=normalizeImei(input.imei)
+  const inputType=getPaidReportProduct(input.productCode)?.inputType ?? 'imei'
+  const email=input.email.trim().toLowerCase(),imei=serviceIdentifier(input.imei,inputType)
   if (email.length>254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WhopPaymentError('Enter a valid delivery email.')
-  if (!isValidImei(imei)) throw new WhopPaymentError('Enter a valid 15-digit IMEI.')
+  if (!imei) throw new WhopPaymentError(identifierField(inputType).error)
   if (!/^[a-f0-9-]{32,64}$/i.test(input.requestKey)) throw new WhopPaymentError('Reload the checkout and try again.')
   const row=db().transaction(()=>{
     const existing=db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as GuestCheckout|undefined
@@ -49,7 +50,7 @@ export async function createGuestCryptoCheckout(input:{
     db().prepare(`INSERT INTO guest_checkouts (reference,request_key,email,product_code,product_name,imei_encrypted,price_cents,fee_cents,
       account_id,product_id,environment,payment_method,crypto_invoice_reference,user_id,client_id,session_id)
       VALUES (?,?,?,?,?,?,?,0,'crypto',?,'live','crypto',?,?,?,?)`).run(reference,input.requestKey,email,product.code,product.name,
-      encryptPaidReportImei(imei),product.priceCents,route.id,invoice.reference,userId,validAnalytics?a.clientId:null,validAnalytics?a.sessionId:null)
+      encryptPaidReportImei(imei,product.inputType),product.priceCents,route.id,invoice.reference,userId,validAnalytics?a.clientId:null,validAnalytics?a.sessionId:null)
     return getGuestCheckout(reference)!
   }).immediate()
   return {url:row.state==='pending' ? guestCryptoPath(row.reference) : guestOrderPath(row.reference)}
@@ -104,3 +105,4 @@ export function submitGuestCryptoTransaction(reference:string,key:string,transac
   }
   return row.crypto_invoice_reference
 }
+

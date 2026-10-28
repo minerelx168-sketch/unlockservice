@@ -4,7 +4,7 @@ import type { Whop } from '@whop/sdk'
 import { db } from './db'
 import { guestCardQuote } from './guest-card-quote'
 import { parseUsd } from './money'
-import { isValidImei, normalizeImei } from './imei'
+import { serviceIdentifier, identifierField } from './service-identifier'
 import { decryptPaidReportImei, encryptPaidReportImei } from './paid-report-imei'
 import { createPaidReport, getPaidReport, getPaidReportProduct, PaidReportError } from './paid-reports'
 import { credit, getBalance, hasCreditTransition } from './credits'
@@ -57,9 +57,11 @@ export async function createGuestCheckout(input: {
 }) {
   const config = whopConfiguration()
   if (!config || !guestCheckoutEnabled()) throw new WhopPaymentError('Guest checkout is temporarily unavailable.', 503)
-  const email = input.email.trim().toLowerCase(), imei = normalizeImei(input.imei)
+  const inputProduct = getPaidReportProduct(input.productCode)
+  const inputType = inputProduct?.inputType ?? 'imei'
+  const email = input.email.trim().toLowerCase(), imei = serviceIdentifier(input.imei, inputType)
   if (email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WhopPaymentError('Enter a valid delivery email.')
-  if (!isValidImei(imei)) throw new WhopPaymentError('Enter a valid 15-digit IMEI.')
+  if (!imei) throw new WhopPaymentError(identifierField(inputType).error)
   if (!/^[a-f0-9-]{32,64}$/i.test(input.requestKey)) throw new WhopPaymentError('Reload the checkout and try again.')
   const row = db().transaction(() => {
     const existing = db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as GuestCheckout | undefined
@@ -98,7 +100,7 @@ export async function createGuestCheckout(input: {
     const validAnalytics = a && /^\d{1,20}\.\d{1,20}$/.test(a.clientId) && /^\d{1,12}$/.test(a.sessionId) && Number(a.sessionId)>0
     db().prepare(`INSERT INTO guest_checkouts (reference,request_key,email,product_code,product_name,imei_encrypted,price_cents,fee_cents,
       account_id,product_id,environment,client_id,session_id,wallet_credit_cents,customer_user_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
-      reference,input.requestKey,email,product.code,product.name,encryptPaidReportImei(imei),product.priceCents,quote.feeCents,
+      reference,input.requestKey,email,product.code,product.name,encryptPaidReportImei(imei,product.inputType),product.priceCents,quote.feeCents,
       config.accountId,config.productId,config.mode,validAnalytics ? a.clientId : null, validAnalytics ? a.sessionId : null,quote.walletCreditCents,customerUserId)
     return getGuestCheckout(reference)!
   }).immediate()
@@ -359,3 +361,4 @@ export async function processGuestCheckouts(limit=5) {
   }
   return stats
 }
+

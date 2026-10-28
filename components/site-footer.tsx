@@ -12,7 +12,7 @@ const COLUMNS = [
       { href: '/services', label: 'Service categories' },
       { href: '/services/unlock', label: 'Unlock Service' },
       { href: '/services/imei-check', label: 'Phone Check' },
-      { href: '/check', label: 'Basic IMEI validation' },
+      { href: '/check', label: 'Apple Free Check' },
       { href: '/register', label: 'Create an account' },
     ],
   },
@@ -118,3 +118,4 @@ export function SiteFooter({ isAuthenticated = false, guides, facts }: Props) {
     </footer>
   )
 }
+

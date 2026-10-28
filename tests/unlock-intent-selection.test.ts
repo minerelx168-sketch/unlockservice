@@ -1,3 +1,4 @@
+import { serviceIdentifier, identifierField } from '../lib/service-identifier'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -21,7 +22,8 @@ function actionHarness(guestEnabled = false, cryptoEnabled = false, priceCents =
     './continuation': { withContinuation },
     './device-intent': { writeDeviceIntent: async (...args: unknown[]) => { writes.push(args) } },
     './device-intent-value': { deviceDomain, deviceImei, deviceEmail },
-    './paid-reports': { listPaidReportProducts: () => [{code:'UNLOCK_ACTIVE',domain:'unlock',providerReady:true,priceCents}] },
+    './service-identifier': { serviceIdentifier, identifierField },
+    './paid-reports': { listPaidReportProducts: () => [{code:'UNLOCK_ACTIVE',domain:'unlock',providerReady:true,priceCents,inputType:'imei'}] },
     './public-provider-catalog': { listPublicProviderProducts: (domain: string) => domain === 'unlock' ? products : [] },
   }
   const code = ts.transpileModule(readFileSync('lib/device-intent-actions.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
@@ -65,7 +67,7 @@ test('guest service navigation preserves IMEI and email once, without creating a
   const data=form('49 015420 323751 8','UNLOCK_ACTIVE')
   data.set('domain','unlock');data.set('email',' Buyer@Example.com ')
   await assert.rejects(continueAction({},data),/REDIRECT:\/checkout\?product=UNLOCK_ACTIVE/)
-  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com'])
+  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com','imei'])
   assert.equal(writes.length,1)
 })
 
@@ -82,7 +84,7 @@ test('crypto navigation preserves the draft and payment choice even when card ch
   const data=form('490154203237518','UNLOCK_ACTIVE')
   data.set('domain','unlock');data.set('email','buyer@example.com');data.set('paymentMethod','crypto')
   await assert.rejects(continueAction({},data),/REDIRECT:\/checkout\?product=UNLOCK_ACTIVE&method=crypto$/)
-  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com'])
+  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com','imei'])
 })
 
 test('unavailable crypto does not silently switch the payment method or overwrite the draft', async () => {
@@ -98,7 +100,7 @@ test('a card service below $1 saves the draft and resumes checkout after signup'
   const data=form('490154203237518','UNLOCK_ACTIVE')
   data.set('domain','unlock');data.set('email','buyer@example.com');data.set('paymentMethod','card')
   await assert.rejects(continueAction({},data),/REDIRECT:\/register\?next=%2Fcheckout%3Fproduct%3DUNLOCK_ACTIVE%26method%3Dcard$/)
-  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com'])
+  assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com','imei'])
   assert.equal(writes.length,1)
 })
 
@@ -125,9 +127,10 @@ test('direct checkout account handoff returns a navigation URL without throwing 
     const {prepareAction,writes}=actionHarness(true,true,75,accountType)
     const result=await prepareAction({productCode:'UNLOCK_ACTIVE',imei:'49 015420 323751 8',email:'Edited@Example.com',domain:'unlock'})
     assert.equal(result.url,accountType?'/checkout?product=UNLOCK_ACTIVE&method=card':'/register?next=%2Fcheckout%3Fproduct%3DUNLOCK_ACTIVE%26method%3Dcard')
-    assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','edited@example.com'])
+    assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','edited@example.com', 'imei'])
   }
   const unavailable=actionHarness(false,true,75)
   assert.ok((await unavailable.prepareAction({productCode:'UNLOCK_ACTIVE',imei:'490154203237518',email:'buyer@example.com',domain:'unlock'})).error)
   assert.equal(unavailable.writes.length,0)
 })
+

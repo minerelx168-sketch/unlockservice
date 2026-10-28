@@ -18,9 +18,9 @@ test('the complete directory uses our current retail prices and never exposes su
   const checks = listStorefrontProviderProducts('imei_check')
   const unlocks = listStorefrontProviderProducts('unlock')
   const all = [...checks, ...unlocks]
-  assert.equal(checks.length, 66)
+  assert.equal(checks.length, 65)
   assert.equal(unlocks.length, 63)
-  assert.equal(new Set(all.map((product) => product.productCode)).size, 129)
+  assert.equal(new Set(all.map((product) => product.productCode)).size, 128)
   const moved = checks.find((product) => product.productCode === 'UNLOCK_346')!
   assert.equal(moved.priceCents, retail)
   assert.equal(moved.domain, 'unlock')
@@ -39,7 +39,8 @@ test('the complete directory uses our current retail prices and never exposes su
     if (configured) assert.equal(product.domain, configured.domain)
   }
   const unpriced = all.find((product) => product.productCode === 'CHECK_998')!
-  assert.equal(unpriced.priceAvailable, false)
+  assert.equal(unpriced.priceAvailable, true)
   assert.equal(unpriced.status, 'coming_soon')
-  assert.ok(all.filter((product) => product.inputType !== 'imei').every((product) => product.status === 'coming_soon'))
+  assert.ok(all.filter((product) => product.inputType !== 'imei').every((product) => product.status === 'coming_soon')) // Provider is disabled in this fixture.
 })
+

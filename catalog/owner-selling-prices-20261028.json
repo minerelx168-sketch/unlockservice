@@ -1,0 +1,523 @@
+{
+  "approvedAt": "2026-10-28",
+  "currency": "USD",
+  "sourceSha256": "72a98266e6f608e33eeb5a11e03cf535960685a42ba055fabc479d40d8d025b0",
+  "prices": [
+    {
+      "serviceId": "214",
+      "sellingPriceCents": 150
+    },
+    {
+      "serviceId": "444",
+      "sellingPriceCents": 170
+    },
+    {
+      "serviceId": "445",
+      "sellingPriceCents": 295
+    },
+    {
+      "serviceId": "448",
+      "sellingPriceCents": 320
+    },
+    {
+      "serviceId": "976",
+      "sellingPriceCents": 350
+    },
+    {
+      "serviceId": "998",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "991",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "985",
+      "sellingPriceCents": 145
+    },
+    {
+      "serviceId": "996",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "696",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "806",
+      "sellingPriceCents": 295
+    },
+    {
+      "serviceId": "343",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "590",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "504",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "503",
+      "sellingPriceCents": 145
+    },
+    {
+      "serviceId": "574",
+      "sellingPriceCents": 281
+    },
+    {
+      "serviceId": "10",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "11",
+      "sellingPriceCents": 136
+    },
+    {
+      "serviceId": "847",
+      "sellingPriceCents": 136
+    },
+    {
+      "serviceId": "845",
+      "sellingPriceCents": 247
+    },
+    {
+      "serviceId": "457",
+      "sellingPriceCents": 247
+    },
+    {
+      "serviceId": "299",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "984",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "945",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "201",
+      "sellingPriceCents": 200
+    },
+    {
+      "serviceId": "928",
+      "sellingPriceCents": 110
+    },
+    {
+      "serviceId": "623",
+      "sellingPriceCents": 200
+    },
+    {
+      "serviceId": "707",
+      "sellingPriceCents": 300
+    },
+    {
+      "serviceId": "348",
+      "sellingPriceCents": 410
+    },
+    {
+      "serviceId": "987",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "979",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "981",
+      "sellingPriceCents": 349
+    },
+    {
+      "serviceId": "690",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "266",
+      "sellingPriceCents": 159
+    },
+    {
+      "serviceId": "621",
+      "sellingPriceCents": 136
+    },
+    {
+      "serviceId": "975",
+      "sellingPriceCents": 140
+    },
+    {
+      "serviceId": "980",
+      "sellingPriceCents": 160
+    },
+    {
+      "serviceId": "942",
+      "sellingPriceCents": 200
+    },
+    {
+      "serviceId": "973",
+      "sellingPriceCents": 104
+    },
+    {
+      "serviceId": "944",
+      "sellingPriceCents": 144
+    },
+    {
+      "serviceId": "977",
+      "sellingPriceCents": 144
+    },
+    {
+      "serviceId": "978",
+      "sellingPriceCents": 160
+    },
+    {
+      "serviceId": "974",
+      "sellingPriceCents": 300
+    },
+    {
+      "serviceId": "419",
+      "sellingPriceCents": 347
+    },
+    {
+      "serviceId": "66",
+      "sellingPriceCents": 160
+    },
+    {
+      "serviceId": "988",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "346",
+      "sellingPriceCents": 800
+    },
+    {
+      "serviceId": "688",
+      "sellingPriceCents": 347
+    },
+    {
+      "serviceId": "127",
+      "sellingPriceCents": 347
+    },
+    {
+      "serviceId": "423",
+      "sellingPriceCents": 197
+    },
+    {
+      "serviceId": "584",
+      "sellingPriceCents": 297
+    },
+    {
+      "serviceId": "267",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "439",
+      "sellingPriceCents": 347
+    },
+    {
+      "serviceId": "856",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "130",
+      "sellingPriceCents": 297
+    },
+    {
+      "serviceId": "936",
+      "sellingPriceCents": 347
+    },
+    {
+      "serviceId": "9",
+      "sellingPriceCents": 347
+    },
+    {
+      "serviceId": "500",
+      "sellingPriceCents": 347
+    },
+    {
+      "serviceId": "851",
+      "sellingPriceCents": 300
+    },
+    {
+      "serviceId": "132",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "969",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "932",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "616",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "617",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "618",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "619",
+      "sellingPriceCents": 100
+    },
+    {
+      "serviceId": "664",
+      "sellingPriceCents": 560
+    },
+    {
+      "serviceId": "937",
+      "sellingPriceCents": 1120
+    },
+    {
+      "serviceId": "938",
+      "sellingPriceCents": 1680
+    },
+    {
+      "serviceId": "939",
+      "sellingPriceCents": 2240
+    },
+    {
+      "serviceId": "940",
+      "sellingPriceCents": 2560
+    },
+    {
+      "serviceId": "931",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "926",
+      "sellingPriceCents": 16000
+    },
+    {
+      "serviceId": "25",
+      "sellingPriceCents": 6400
+    },
+    {
+      "serviceId": "893",
+      "sellingPriceCents": 4720
+    },
+    {
+      "serviceId": "967",
+      "sellingPriceCents": 1600
+    },
+    {
+      "serviceId": "966",
+      "sellingPriceCents": 1600
+    },
+    {
+      "serviceId": "212",
+      "sellingPriceCents": 1400
+    },
+    {
+      "serviceId": "609",
+      "sellingPriceCents": 2000
+    },
+    {
+      "serviceId": "626",
+      "sellingPriceCents": 3900
+    },
+    {
+      "serviceId": "485",
+      "sellingPriceCents": 3920
+    },
+    {
+      "serviceId": "452",
+      "sellingPriceCents": 2800
+    },
+    {
+      "serviceId": "780",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "1001",
+      "sellingPriceCents": 2400
+    },
+    {
+      "serviceId": "344",
+      "sellingPriceCents": 3499
+    },
+    {
+      "serviceId": "721",
+      "sellingPriceCents": 3999
+    },
+    {
+      "serviceId": "430",
+      "sellingPriceCents": 3999
+    },
+    {
+      "serviceId": "702",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "661",
+      "sellingPriceCents": 4800
+    },
+    {
+      "serviceId": "904",
+      "sellingPriceCents": 1760
+    },
+    {
+      "serviceId": "718",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "1000",
+      "sellingPriceCents": 6000
+    },
+    {
+      "serviceId": "999",
+      "sellingPriceCents": 1600
+    },
+    {
+      "serviceId": "340",
+      "sellingPriceCents": 1800
+    },
+    {
+      "serviceId": "989",
+      "sellingPriceCents": 3900
+    },
+    {
+      "serviceId": "649",
+      "sellingPriceCents": 1999
+    },
+    {
+      "serviceId": "710",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "719",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "48",
+      "sellingPriceCents": 800
+    },
+    {
+      "serviceId": "49",
+      "sellingPriceCents": 2999
+    },
+    {
+      "serviceId": "461",
+      "sellingPriceCents": 1900
+    },
+    {
+      "serviceId": "410",
+      "sellingPriceCents": 552
+    },
+    {
+      "serviceId": "36",
+      "sellingPriceCents": 1999
+    },
+    {
+      "serviceId": "329",
+      "sellingPriceCents": 2600
+    },
+    {
+      "serviceId": "39",
+      "sellingPriceCents": 1400
+    },
+    {
+      "serviceId": "289",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "711",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "384",
+      "sellingPriceCents": 9230
+    },
+    {
+      "serviceId": "385",
+      "sellingPriceCents": 29900
+    },
+    {
+      "serviceId": "733",
+      "sellingPriceCents": 29900
+    },
+    {
+      "serviceId": "84",
+      "sellingPriceCents": 11040
+    },
+    {
+      "serviceId": "87",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "453",
+      "sellingPriceCents": 1600
+    },
+    {
+      "serviceId": "294",
+      "sellingPriceCents": 1300
+    },
+    {
+      "serviceId": "589",
+      "sellingPriceCents": 1600
+    },
+    {
+      "serviceId": "935",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "252",
+      "sellingPriceCents": 10900
+    },
+    {
+      "serviceId": "65",
+      "sellingPriceCents": 2470
+    },
+    {
+      "serviceId": "64",
+      "sellingPriceCents": 3499
+    },
+    {
+      "serviceId": "420",
+      "sellingPriceCents": 1568
+    },
+    {
+      "serviceId": "139",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "277",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "140",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "272",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "273",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "352",
+      "sellingPriceCents": 544
+    },
+    {
+      "serviceId": "342",
+      "sellingPriceCents": 499
+    },
+    {
+      "serviceId": "265",
+      "sellingPriceCents": 2160
+    },
+    {
+      "serviceId": "137",
+      "sellingPriceCents": 1120
+    }
+  ]
+}

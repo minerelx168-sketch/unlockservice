@@ -1,3 +1,4 @@
+import { serviceIdentifier, identifierField, type ServiceInputType } from './service-identifier'
 import { db } from './db'
 import { snapshotWebsiteAttribution } from './order-attribution'
 import {
@@ -9,7 +10,7 @@ import {
   refund,
   type Balance,
 } from './credits'
-import { isValidImei, maskIdentifier, normalizeImei } from './imei'
+import { isValidImei, maskIdentifier } from './imei'
 import { fingerprintImei } from './imei-privacy'
 import { decryptPaidReportImei, encryptPaidReportImei } from './paid-report-imei'
 import { buildProviderReport, providerReportHasContent, type ProviderReport } from './imei-report'
@@ -42,7 +43,7 @@ export type PaidReportProduct = {
   summary: string
   group: string
   domain: 'imei_check' | 'unlock'
-  inputType: 'imei'
+  inputType: ServiceInputType
   priceCents: number
   providerCostMicros: number
   etaMinutes: number
@@ -56,7 +57,7 @@ type PaidReportProductRow = {
   slug: string
   name: string
   summary: string
-  input_type: 'imei'
+  input_type: ServiceInputType
   price_cents: number
   provider_cost_micros: number
   eta_minutes: number
@@ -69,7 +70,7 @@ type PaidReportOrderRow = {
   user_id: number
   product_code: string
   product_name: string
-  input_type: 'imei'
+  input_type: ServiceInputType
   imei_fingerprint: string
   masked_imei: string
   imei_encrypted: string | null
@@ -98,7 +99,7 @@ export type PaidReportView = {
   id: number
   productCode: string
   productName: string
-  inputType: 'imei'
+  inputType: ServiceInputType
   maskedImei: string
   imei?: string
   status: PaidReportStatus
@@ -359,7 +360,7 @@ function settleCompleted(
   return db().transaction(() => {
     const current = reconcileSettlement(db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(row.id) as PaidReportOrderRow)
     const completedImei = imeiFromProviderCode(current, providerCode)
-    const encryptedImei = completedImei ? encryptPaidReportImei(completedImei) : null
+    const encryptedImei = completedImei ? encryptPaidReportImei(completedImei, row.input_type) : null
     // Polls, submission responses and webhooks can arrive in any order. Once
     // money has settled, neither a duplicate nor a conflicting result may
     // rewrite the report or release credit reserved for a different order.
@@ -566,13 +567,13 @@ export async function createPaidReport(
   source: 'website' | 'api' | 'guest' = 'website',
 ): Promise<PaidReportPayload> {
   const productCode = cleanProductCode(input.productCode)
-  const imei = normalizeImei(input.imei)
-  if (!imei) throw new PaidReportError('Enter the device IMEI.', 'imei_missing')
-  if (!isValidImei(imei)) throw new PaidReportError('Enter a valid 15-digit IMEI.', 'imei_invalid')
-  const fingerprint = fingerprintImei(imei)
   const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)
-
   const existing = rowForIdempotency(userId, idempotencyKey)
+  const product = getProductRow(productCode)
+  const inputType = existing?.input_type ?? product?.input_type ?? 'imei'
+  const imei = serviceIdentifier(input.imei, inputType)
+  if (!imei) throw new PaidReportError(identifierField(inputType).error, 'imei_invalid')
+  const fingerprint = fingerprintImei(imei)
   if (existing) {
     if (existing.product_code !== productCode || existing.imei_fingerprint !== fingerprint) {
       throw new PaidReportError('That request key was already used for a different report.', 'idempotency_conflict')
@@ -583,7 +584,6 @@ export async function createPaidReport(
 
   // A saved request remains readable when a service is paused or provider
   // configuration changes. Operational availability applies only to new work.
-  const product = getProductRow(productCode)
   if (!product) throw new PaidReportError('Choose a valid paid report.', 'product_unknown')
   if (product.is_active !== 1) throw new PaidReportError('This paid report is not active.', 'product_inactive')
   if (input.expectedPriceCents !== undefined && input.expectedPriceCents !== product.price_cents) {
@@ -614,7 +614,7 @@ export async function createPaidReport(
           product.input_type,
           fingerprint,
           maskIdentifier(imei),
-          encryptPaidReportImei(imei),
+          encryptPaidReportImei(imei, product.input_type),
           product.price_cents,
           product.provider_cost_micros,
           source,
@@ -751,3 +751,4 @@ export async function pollPaidReport(userId: number, orderId: number): Promise<P
     releasePoll()
   }
 }
+

@@ -1,4 +1,5 @@
 'use client'
+import { ProviderOutputText } from './provider-output-text'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { formatUsd } from '@/lib/money'
@@ -30,9 +31,10 @@ export function GuestOrderResult({initial,accessKey}:{initial:Result;accessKey:s
       {result.walletCreditCents>0 ? <p className="guest-credit-note"><strong>{result.walletCreditApplied ? `${formatUsd(result.walletCreditCents)} was added to your account credit.${result.walletCreditReview ? ' A payment review currently restricts spending.' : ''}` : ['refunded','refund_pending'].includes(result.state) ? 'The unused account credit is included in your card refund.' : result.walletCreditReview ? 'Your account credit is under payment review. Contact support with this order reference.' : `${formatUsd(result.walletCreditCents)} will be saved as account credit after payment is confirmed.`}</strong>{result.walletCreditApplied ? <> <Link href="/user/dashboard">View my credit</Link></> : null}</p> : null}
       {result.cryptoReceivedCents!==null && result.cryptoReceivedCents>result.priceCents ? <p className="guest-note">We received {formatUsd(result.cryptoReceivedCents)} for this {formatUsd(result.priceCents)} service. Contact support with your order reference to arrange the return of the extra {formatUsd(result.cryptoReceivedCents-result.priceCents)}.</p>:null}
       {!terminal&&result.paymentReceived?<p className="guest-note">{isUnlock?'We submit your paid order to the service provider and update this page when they respond.':'Your paid check starts automatically. The full report appears here as soon as the provider returns it.'} No need to keep this page open.</p>:null}
-      {result.report ? <div className="guest-report"><p>IMEI: {result.report.imei??result.report.maskedImei}</p>{result.report.providerCode ? <pre>{result.report.providerCode}</pre> : result.report.report?.sections.map((section,index)=><section key={index}><h3>{section.title}</h3><dl>{section.items.map((item,i)=><div key={i}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl></section>)}</div>:null}
+      {result.report ? <div className="guest-report"><p>Identifier: {result.report.imei??result.report.maskedImei}</p>{result.report.providerCode ? <ProviderOutputText value={result.report.providerCode} /> : result.report.report?.sections.map((section,index)=><section key={index}><h3>{section.title}</h3><dl>{section.items.map((item,i)=><div key={i}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl></section>)}</div>:null}
       {error?<p role="status">{error}</p>:null}<p className="guest-note">Keep this link private. Anyone with it can view this order and its result.</p>
       {result.paymentReceived?<p className="guest-note">{result.walletCreditCents>0 ? 'Your private order link was sent to your account email. You can also find this order in your account.' : 'Your email contains your private order link. You can view this result without a password; account activation and setting a password are optional.'}</p>:null}
       <Link className="button button--secondary" href="/support">Contact support</Link>
     </article></section>
 }
+

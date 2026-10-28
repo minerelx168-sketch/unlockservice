@@ -1,5 +1,6 @@
 'use server'
 
+import { serviceIdentifier, identifierField } from './service-identifier'
 import { redirect } from 'next/navigation'
 import { currentSession } from './auth'
 import { withContinuation } from './continuation'
@@ -60,11 +61,11 @@ export async function showUnlockServicesAction(_: IntentState, form: FormData): 
 
 export async function continueDeviceServiceAction(_: IntentState, form: FormData): Promise<IntentState> {
   const domain = deviceDomain(form.get('domain'))
-  const imei = deviceImei(form.get('imei'))
-  if (!imei) return { error: 'Enter a valid 15-digit IMEI before continuing.' }
   const productCode = form.get('productCode')
   const product = listPaidReportProducts().find((entry) => entry.code === productCode && entry.domain === domain && entry.providerReady)
   if (!product) return { error: 'Choose an available service. Availability may have changed; refresh to see current options.' }
+  const imei = serviceIdentifier(form.get('imei'), product.inputType)
+  if (!imei) return { error: identifierField(product.inputType).error }
   const rawEmail = form.get('email')
   const email = deviceEmail(rawEmail)
   if (rawEmail !== null && !email) return { error: 'Enter a valid email address so we can deliver your result.' }
@@ -75,7 +76,7 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   if (smallCardOrder && customer && customer.user.account_type !== 'customer') {
     return { error: 'Use a customer account for card orders below $1.00, or choose crypto.' }
   }
-  await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined)
+  await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined, product.inputType)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
   if (smallCardOrder && !customer) {
     redirect(withContinuation('/register', `/checkout?product=${encodeURIComponent(product.code)}&method=card`))
@@ -88,15 +89,16 @@ export async function prepareSmallCardAccountAction(value: {
   productCode: string; imei: string; email: string; domain: 'imei_check' | 'unlock'
 }): Promise<IntentState & { url?: string }> {
   if (!value || typeof value !== 'object') return { error: 'Unable to save your selection.' }
-  const domain = deviceDomain(value.domain), imei = deviceImei(value.imei), email = deviceEmail(value.email)
-  if (!imei) return { error: 'Enter a valid 15-digit IMEI before continuing.' }
+  const domain = deviceDomain(value.domain), email = deviceEmail(value.email)
   if (!email) return { error: 'Enter a valid email address so we can deliver your result.' }
   const product = listPaidReportProducts().find(entry => entry.code === value.productCode && entry.domain === domain && entry.providerReady)
   if (!product || product.priceCents <= 0 || product.priceCents >= 100) return { error: 'This service is no longer eligible for small card checkout. Refresh to review the current price.' }
+  const imei = serviceIdentifier(value.imei, product.inputType)
+  if (!imei) return { error: identifierField(product.inputType).error }
   if (!guestCheckoutEnabled()) return { error: 'Card checkout is temporarily unavailable. Please try again shortly.' }
   const customer = await currentSession()
   if (customer && customer.user.account_type !== 'customer') return { error: 'Use a customer account for card orders below $1.00, or choose crypto.' }
-  await writeDeviceIntent(imei, product.domain, product.code, email)
+  await writeDeviceIntent(imei, product.domain, product.code, email, product.inputType)
   const checkout = `/checkout?product=${encodeURIComponent(product.code)}&method=card`
   return { url: customer ? checkout : withContinuation('/register', checkout) }
 }
@@ -112,9 +114,9 @@ export async function saveDeviceIntentAction(value: { imei: string; productCode?
     await clearDeviceIntent()
     return {}
   }
-  const imei = deviceImei(value.imei)
-  if (!imei) return { error: 'Enter a valid 15-digit IMEI, or clear it before adding credit.' }
-  await writeDeviceIntent(imei, product.domain, product.code)
+  const imei = serviceIdentifier(value.imei, product.inputType)
+  if (!imei) return { error: identifierField(product.inputType).error }
+  await writeDeviceIntent(imei, product.domain, product.code, undefined, product.inputType)
   return {}
 }
 
@@ -124,7 +126,8 @@ export async function saveDeviceIntentAction(value: { imei: string; productCode?
 export async function clearAcceptedDeviceIntentAction(value: { imei: string; productCode: string }): Promise<void> {
   if (!value || typeof value !== 'object') return
   const intent = await readDeviceIntent()
-  if (intent && intent.imei === deviceImei(value.imei) && intent.productCode === value.productCode) {
+  if (intent && intent.imei === serviceIdentifier(value.imei, intent.inputType ?? 'imei') && intent.productCode === value.productCode) {
     await clearDeviceIntent()
   }
 }
+

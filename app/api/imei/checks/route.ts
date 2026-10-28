@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { guard } from '@/lib/api'
-import { createImeiCheck, ImeiCheckError, listImeiChecks } from '@/lib/imei-checks'
+import { createImeiCheck, ImeiCheckError, listImeiChecks, freeAppleQuota } from '@/lib/imei-checks'
 import { FingerprintUnavailable } from '@/lib/imei-privacy'
 import { currentSession } from '@/lib/auth'
 
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   const found = await currentSession()
   if (!found) return NextResponse.json({ success: false, error: 'Sign in to continue.' }, { status: 401 })
-  return NextResponse.json({ success: true, checks: listImeiChecks(found.user.id) })
+  return NextResponse.json({ success: true, checks: listImeiChecks(found.user.id), quota: freeAppleQuota(found.user.id) })
 }
 
 /** Creates a free IMEI report without an invoice or credit movement. */
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       imei: String(body.imei ?? ''),
       idempotencyKey: body.idempotencyKey === undefined ? undefined : String(body.idempotencyKey),
     })
-    return NextResponse.json({ success: true, check }, { status: 201 })
+    return NextResponse.json({ success: true, check, quota: freeAppleQuota(found.user.id) }, { status: 201 })
   } catch (error) {
     /* Not the customer's fault and not fixable by retrying with a different
        IMEI — the service has not been given its fingerprint key. */
@@ -37,9 +37,10 @@ export async function POST(request: Request) {
     }
     if (error instanceof ImeiCheckError) {
       const status =
-        error.code === 'rate_limited' ? 429 : error.code === 'provider_not_ready' ? 503 : 400
-      return NextResponse.json({ success: false, error: error.message, code: error.code }, { status })
+        error.code === 'account_not_ready' ? 403 : error.code === 'rate_limited' ? 429 : error.code === 'provider_not_ready' ? 503 : 400
+      return NextResponse.json({ success: false, error: error.message, code: error.code, quota: freeAppleQuota(found.user.id) }, { status })
     }
     throw error
   }
 }
+

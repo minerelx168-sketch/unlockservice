@@ -71,8 +71,8 @@ const HUB: Array<{ icon: IconName; tint: string; title: string; body: string; hr
   {
     icon: 'keypad',
     tint: '',
-    title: 'Basic IMEI validation',
-    body: 'Confirms the number is a real, well-formed IMEI. Nothing is ordered.',
+    title: 'Apple Free Check',
+    body: 'Get Apple Basic Info with 3 free checks per verified account each day.',
     href: '/check',
     chip: 'Free',
   },
@@ -152,7 +152,7 @@ export default function HomePage() {
     category: product.group,
     summary: product.summary,
     available: product.status === 'available',
-    priceCents: product.priceCents, priceAvailable: product.priceAvailable,
+    inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
     etaLabel: product.etaLabel,
   }))
   const checkWidget: PriceCheckProduct[] = checkProducts.map((product) => ({
@@ -161,7 +161,7 @@ export default function HomePage() {
     category: product.group,
     summary: product.summary,
     available: product.status === 'available',
-    priceCents: product.priceCents, priceAvailable: product.priceAvailable,
+    inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
     etaLabel: product.etaLabel,
   }))
 
@@ -498,3 +498,4 @@ export default function HomePage() {
     </>
   )
 }
+

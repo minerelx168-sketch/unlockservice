@@ -21,6 +21,7 @@ export default async function CheckoutPage({searchParams}:{searchParams:Promise<
   return <section className="guest-shell">
     <Link className="guest-back" href={storefrontDomain(product)==='unlock'?'/services/unlock':'/services/imei-check'}>← Back to services</Link>
     <div className="guest-heading"><span className="eyebrow">SECURE CHECKOUT</span><h1>Your service.<br/>One simple payment.</h1><p>Pay securely. Follow your order online and receive the result by email.</p></div>
-    <GuestCheckoutPanel product={{code:product.code,name:product.name,summary:product.summary,priceCents:product.priceCents,domain:product.domain}} deliveryLabel={deliveryLabel} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email??'':''} cardEnabled={guestCheckoutEnabled()} cryptoEnabled={guestCryptoEnabled()} cryptoRoutes={guestCryptoRoutes()} initialMethod={params.method==='crypto'?'crypto':'card'} accountReady={accountReady} accountEmail={accountReady?session!.user.email:''} />
+    <GuestCheckoutPanel product={{code:product.code,name:product.name,summary:product.summary,inputType:product.inputType,priceCents:product.priceCents,domain:product.domain}} deliveryLabel={deliveryLabel} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email??'':''} cardEnabled={guestCheckoutEnabled()} cryptoEnabled={guestCryptoEnabled()} cryptoRoutes={guestCryptoRoutes()} initialMethod={params.method==='crypto'?'crypto':'card'} accountReady={accountReady} accountEmail={accountReady?session!.user.email:''} />
   </section>
 }
+

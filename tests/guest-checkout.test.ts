@@ -6,14 +6,14 @@ import { join } from 'node:path'
 import test,{before,after} from 'node:test'
 import type { Whop } from '@whop/sdk'
 const dir=mkdtempSync(join(tmpdir(),'guest-checkout-'))
-Object.assign(process.env,{IUNLOCKMOBILE_DB:join(dir,'test.db'),IUNLOCKMOBILE_WHOP_ENABLED:'1',IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED:'1',WHOP_MODE:'live',WHOP_ACCOUNT_ID:'biz_test',WHOP_PRODUCT_ID:'prod_test',WHOP_API_KEY:'test-only',WHOP_WEBHOOK_SECRET:'test-only',RESEND_API_KEY:'test-only',IUNLOCKMOBILE_EMAIL_FROM:'support@example.test',IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET:'test-secret-for-guest-checkout-32-characters',IUNLOCKMOBILE_PROVIDER_MODE:'enabled',IUNLOCKMOBILE_PROVIDER_NAME:'test',IUNLOCKMOBILE_PROVIDER_URL:'https://provider.example.test/api',IUNLOCKMOBILE_PROVIDER_API_KEY:'test-only',IUNLOCKMOBILE_IMEI_SERVICE_MAP:JSON.stringify({'check:apple_basic':{id:'214',mode:'sync'}}),IUNLOCKMOBILE_PUBLIC_ORIGIN:'https://iunlockmobile.com',GA4_SERVER_PAYMENTS_ENABLED:'1',GA4_MEASUREMENT_API_SECRET:'test-only'})
+Object.assign(process.env,{IUNLOCKMOBILE_DB:join(dir,'test.db'),IUNLOCKMOBILE_WHOP_ENABLED:'1',IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED:'1',WHOP_MODE:'live',WHOP_ACCOUNT_ID:'biz_test',WHOP_PRODUCT_ID:'prod_test',WHOP_API_KEY:'test-only',WHOP_WEBHOOK_SECRET:'test-only',RESEND_API_KEY:'test-only',IUNLOCKMOBILE_EMAIL_FROM:'support@example.test',IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET:'test-secret-for-guest-checkout-32-characters',IUNLOCKMOBILE_PROVIDER_MODE:'enabled',IUNLOCKMOBILE_PROVIDER_NAME:'test',IUNLOCKMOBILE_PROVIDER_URL:'https://provider.example.test/api',IUNLOCKMOBILE_PROVIDER_API_KEY:'test-only',IUNLOCKMOBILE_IMEI_SERVICE_MAP:JSON.stringify({'check:apple_carrier_lite':{id:'444',mode:'sync'}}),IUNLOCKMOBILE_PUBLIC_ORIGIN:'https://iunlockmobile.com',GA4_SERVER_PAYMENTS_ENABLED:'1',GA4_MEASUREMENT_API_SECRET:'test-only'})
 let guest:typeof import('../lib/guest-checkout'),db:typeof import('../lib/db'),credits:typeof import('../lib/credits')
 const originalFetch=globalThis.fetch,payments=new Map<string,Whop.Payment>()
 const emails:Record<string,unknown>[]=[],events:Record<string,unknown>[]=[],refunds:string[]=[]
 let providerCalls=0,checkoutCalls=0,emailFailure=false,providerFailure=false,providerUncertain=false
 before(async()=>{
   guest=await import('../lib/guest-checkout');db=await import('../lib/db');credits=await import('../lib/credits')
-  db.db().prepare("UPDATE paid_report_products SET price_cents=1000,is_active=1 WHERE code='APPLE_BASIC'").run()
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000,is_active=1 WHERE code='APPLE_CARRIER_LITE'").run()
   globalThis.fetch=async(input,init)=>{
     const url=new URL(typeof input==='string'||input instanceof URL?input:input.url)
     if(url.hostname==='api.whop.com') {
@@ -46,7 +46,7 @@ before(async()=>{
 })
 after(()=>{globalThis.fetch=originalFetch;db.db().close();rmSync(dir,{recursive:true,force:true})})
 async function checkout(extra:Record<string,unknown>={}) {
-  const input={productCode:'APPLE_BASIC',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:1000,...extra}
+  const input={productCode:'APPLE_CARRIER_LITE',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:1000,...extra}
   const result=await guest.createGuestCheckout(input)
   const row=db.db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as import('../lib/guest-checkout').GuestCheckout
   return {input,result,row}
@@ -112,10 +112,10 @@ test('pre-fulfilment refund and disputed/duplicate payments never dispatch',asyn
 })
 test('changed service price after payment refunds instead of charging more',async()=>{
   const {row}=await checkout();guest.settleGuestPayment(payment(row))
-  db.db().prepare("UPDATE paid_report_products SET price_cents=2000 WHERE code='APPLE_BASIC'").run()
+  db.db().prepare("UPDATE paid_report_products SET price_cents=2000 WHERE code='APPLE_CARRIER_LITE'").run()
   const before=providerCalls;await cycle(row.reference)
   assert.equal(providerCalls,before);assert.equal(guest.getGuestCheckout(row.reference)?.state,'refunded')
-  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_BASIC'").run()
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
 })
 test('uncertain provider response is not retried or refunded blindly; failed email retries without a second order',async()=>{
   const {row}=await checkout();providerUncertain=true;emailFailure=true;guest.settleGuestPayment(payment(row))
@@ -133,11 +133,11 @@ function customer(email=`${randomUUID()}@example.test`,extra:Record<string,strin
 }
 async function smallCheckout(extra:Record<string,unknown>={}) {
   const account=customer()
-  db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_BASIC'").run()
+  db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_CARRIER_LITE'").run()
   return {...await checkout({email:account.email,authenticatedUserId:account.id,expectedPriceCents:75,...extra}),account}
 }
 test('sub-dollar card quote requires a verified active customer and preserves the service price',async()=>{
-  db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_BASIC'").run()
+  db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_CARRIER_LITE'").run()
   const calls=checkoutCalls
   await assert.rejects(checkout({expectedPriceCents:75}),/Create an account/)
   for (const extra of [{account_type:'admin'},{status:'paused'},{banned_at:new Date().toISOString()},{email_verified_at:null}] as Array<Record<string,string|null>>) {
@@ -225,3 +225,4 @@ test('reopening a small pending checkout revalidates account state and payment r
   db.db().prepare("UPDATE guest_checkouts SET wallet_review_reason='dispute' WHERE reference=?").run(row.reference)
   await assert.rejects(guest.createGuestCheckout(input),/payment.*review/)
 })
+

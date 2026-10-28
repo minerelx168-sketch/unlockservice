@@ -26,7 +26,7 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
         key={`${domain ?? 'all'}:${selected?.productCode ?? 'choose'}`}
         products={products.map((product) => ({
           code: product.productCode, name: product.name, summary: product.summary,
-          group: product.group, domain: product.domain, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
+          group: product.group, domain: product.domain, inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
           etaMinutes: orderable.get(product.productCode)?.etaMinutes ?? 0, etaLabel: product.etaLabel,
           providerReady: product.status === 'available',
           hasExample: product.hasExample,
@@ -39,8 +39,9 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
         paymentMethods={GATEWAYS.map((gateway) => `${gateway.asset} on ${gateway.network}`)}
       />
       <p className="t-small" style={{ marginTop: 18 }}>
-        Only need format and checksum validation? <Link href="/check">Use the Free IMEI Check</Link>; it does not use your credit.
+        Want Apple Basic Info first? <Link href="/check">Use Apple Free Check</Link>; 3 free checks per day, with no credit charge.
       </p>
     </>
   )
 }
+

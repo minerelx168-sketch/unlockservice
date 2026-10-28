@@ -17,7 +17,7 @@ export default async function ImeiCheckServicesPage({ searchParams }: { searchPa
   const available = products.some((product) => product.status === 'available')
   const requested = typeof query.product === 'string' ? query.product : undefined
   const initialProductCode = products.find((product) => product.productCode === requested)?.productCode ?? products.find((product) => product.productCode === intent?.productCode)?.productCode
-  const quoteProducts: PriceCheckProduct[] = products.map((product) => ({ code: product.productCode, domain: product.domain, name: product.name, category: product.group, summary: product.summary, available: product.status === 'available', priceCents: product.priceCents, priceAvailable: product.priceAvailable, etaLabel: product.etaLabel }))
+  const quoteProducts: PriceCheckProduct[] = products.map((product) => ({ code: product.productCode, domain: product.domain, name: product.name, category: product.group, summary: product.summary, available: product.status === 'available', inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable, etaLabel: product.etaLabel }))
 
   return <section className="section section--tint service-entry-section unlock-landing">
     <div className="shell">
@@ -35,3 +35,4 @@ export default async function ImeiCheckServicesPage({ searchParams }: { searchPa
     </div>
   </section>
 }
+

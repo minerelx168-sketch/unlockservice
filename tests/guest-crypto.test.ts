@@ -10,7 +10,7 @@ Object.assign(process.env,{IUNLOCKMOBILE_DB:join(dir,'test.db'),IUNLOCKMOBILE_WH
   IUNLOCKMOBILE_TOPUP_ENABLED:'1',IUNLOCKMOBILE_TOPUP_BEP20_BSC_USD_ENABLED:'1',IUNLOCKMOBILE_EVM_RECEIVING_ADDRESS:wallet,IUNLOCKMOBILE_USDT_FEE_BPS:'0',
   RESEND_API_KEY:'test-only',IUNLOCKMOBILE_EMAIL_FROM:'support@example.test',IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET:'test-secret-for-guest-checkout-32-characters',
   IUNLOCKMOBILE_PROVIDER_MODE:'enabled',IUNLOCKMOBILE_PROVIDER_NAME:'test',IUNLOCKMOBILE_PROVIDER_URL:'https://provider.example.test/api',
-  IUNLOCKMOBILE_PROVIDER_API_KEY:'test-only',IUNLOCKMOBILE_IMEI_SERVICE_MAP:JSON.stringify({'check:apple_basic':{id:'214',mode:'sync'}}),
+  IUNLOCKMOBILE_PROVIDER_API_KEY:'test-only',IUNLOCKMOBILE_IMEI_SERVICE_MAP:JSON.stringify({'check:apple_carrier_lite':{id:'444',mode:'sync'}}),
   IUNLOCKMOBILE_PUBLIC_ORIGIN:'https://iunlockmobile.com',GA4_SERVER_PAYMENTS_ENABLED:'1',GA4_MEASUREMENT_API_SECRET:'test-only'})
 let crypto:typeof import('../lib/guest-crypto'),guest:typeof import('../lib/guest-checkout'),db:typeof import('../lib/db'),credits:typeof import('../lib/credits'),payments:typeof import('../lib/payments'),verification:typeof import('../lib/payment-verification')
 const originalFetch=globalThis.fetch,events:Record<string,unknown>[]=[],emails:Record<string,unknown>[]=[]
@@ -36,8 +36,8 @@ before(async()=>{
 })
 after(()=>{globalThis.fetch=originalFetch;db.db().close();rmSync(dir,{recursive:true,force:true})})
 async function checkout(priceCents=15,extra:Record<string,unknown>={}) {
-  db.db().prepare("UPDATE paid_report_products SET price_cents=?,is_active=1 WHERE code='APPLE_BASIC'").run(priceCents)
-  const input={productCode:'APPLE_BASIC',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:priceCents,routeId:'bsc-usdt-peg',...extra}
+  db.db().prepare("UPDATE paid_report_products SET price_cents=?,is_active=1 WHERE code='APPLE_CARRIER_LITE'").run(priceCents)
+  const input={productCode:'APPLE_CARRIER_LITE',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:priceCents,routeId:'bsc-usdt-peg',...extra}
   const result=await crypto.createGuestCryptoCheckout(input)
   const row=db.db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as import('../lib/guest-checkout').GuestCheckout
   return {input,result,row,key:new URL(result.url,'https://iunlockmobile.com').searchParams.get('key')!}
@@ -145,3 +145,4 @@ test('exhausted unique amount codes fail without creating an uncoded guest reque
   assert.equal((db.db().prepare('SELECT COUNT(*) AS n FROM users').get() as {n:number}).n,users)
   assert.equal(db.db().prepare("SELECT 1 FROM guest_checkouts g JOIN invoices i ON i.reference=g.crypto_invoice_reference WHERE i.payment_amount_e4 IS NULL").get(),undefined)
 })
+

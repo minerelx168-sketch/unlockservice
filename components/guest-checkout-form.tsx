@@ -2,7 +2,7 @@
 import { useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { formatUsd } from '@/lib/money'
-import { isValidImei, normalizeImei } from '@/lib/imei'
+import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { deviceEmail } from '@/lib/device-intent-value'
@@ -11,14 +11,15 @@ import { guestCardQuote } from '@/lib/guest-card-quote'
 import { Icon } from './icons'
 
 export function GuestCheckoutForm({ product, initialImei, initialEmail = '', enabled, method, onMethodChange, cryptoEnabled, cryptoRoutes, accountReady, accountEmail }: {
-  product: { code: string; name: string; priceCents: number; domain: 'unlock' | 'imei_check' }
+  product: { inputType: ServiceInputType; code: string; name: string; priceCents: number; domain: 'unlock' | 'imei_check' }
   initialImei: string; initialEmail?: string; enabled: boolean
   method: 'card' | 'crypto'; onMethodChange: (method: 'card' | 'crypto') => void
   cryptoEnabled: boolean; cryptoRoutes: { id: string; label: string; asset: string }[]
   accountReady: boolean; accountEmail: string
 }) {
+  const field = identifierField(product.inputType)
   const [imei, setImei] = useState(initialImei), [email, setEmail] = useState(initialEmail), [busy, setBusy] = useState(false), [error, setError] = useState('')
-  const [editing, setEditing] = useState(!isValidImei(normalizeImei(initialImei)) || !deviceEmail(initialEmail))
+  const [editing, setEditing] = useState(!serviceIdentifier(initialImei, product.inputType) || !deviceEmail(initialEmail))
   const key = useRef(''), lock = useRef(false)
   const [routeId, setRouteId] = useState(cryptoRoutes[0]?.id ?? '')
   const isCrypto = method === 'crypto'
@@ -38,7 +39,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     event.preventDefault()
     if (lock.current) return
     if (isCrypto ? !cryptoEnabled || !routeId : !enabled) return
-    if (!isValidImei(normalizeImei(imei))) { setEditing(true); setError('Check your 15-digit IMEI. Dial *#06# to find it.'); return }
+    if (!serviceIdentifier(imei, product.inputType)) { setEditing(true); setError(field.error); return }
     if (!deviceEmail(deliveryEmail)) { setEditing(true); setError('Enter a valid email address for your result.'); return }
     lock.current = true; setBusy(true); setError('')
     try {
@@ -62,11 +63,11 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     } catch (e) { setError(e instanceof Error ? e.message : 'Unable to open checkout. Please retry.'); setBusy(false); lock.current = false }
   }
   return <form onSubmit={submit} className="guest-form" aria-busy={busy}>
-    {!editing ? <div className="guest-details-review"><dl><div><dt>Device IMEI</dt><dd>{normalizeImei(imei)}</dd></div><div><dt>Result email</dt><dd>{deliveryEmail}</dd></div></dl><button className="guest-edit" type="button" onClick={() => setEditing(true)} disabled={busy}>Edit details</button><p className="guest-note">{accountCard && accountReady ? 'Your result and unused credit go to your signed-in account.' : 'Your details are saved for this order.'}</p></div> : <>
-      <label htmlFor="guest-imei">Device IMEI</label>
-      <input id="guest-imei" name="imei" type="text" inputMode="numeric" autoComplete="off" maxLength={30} required value={imei} disabled={busy}
-        onChange={e => { setImei(e.target.value); key.current = '' }} placeholder="15-digit IMEI" aria-describedby="guest-imei-hint" />
-      <small id="guest-imei-hint">Dial *#06# or find it in Settings. Check every digit before paying.</small>
+    {!editing ? <div className="guest-details-review"><dl><div><dt>{field.label}</dt><dd>{serviceIdentifier(imei, product.inputType)}</dd></div><div><dt>Result email</dt><dd>{deliveryEmail}</dd></div></dl><button className="guest-edit" type="button" onClick={() => setEditing(true)} disabled={busy}>Edit details</button><p className="guest-note">{accountCard && accountReady ? 'Your result and unused credit go to your signed-in account.' : 'Your details are saved for this order.'}</p></div> : <>
+      <label htmlFor="guest-imei">{field.label}</label>
+      <input id="guest-imei" name="imei" type="text" inputMode={field.inputMode} autoComplete="off" maxLength={80} required value={imei} disabled={busy}
+        onChange={e => { setImei(e.target.value); key.current = '' }} placeholder={field.placeholder} aria-describedby="guest-imei-hint" />
+      <small id="guest-imei-hint">{field.hint}</small>
       <label htmlFor="guest-email">Email for your result</label>
       <input id="guest-email" name="email" type="email" autoComplete="email" maxLength={254} required value={deliveryEmail} disabled={busy} readOnly={accountCard && accountReady}
         onChange={e => { setEmail(e.target.value); key.current = '' }} placeholder="you@example.com" aria-describedby="guest-email-hint" />
@@ -74,7 +75,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     </>}
     {isCrypto ? <div className="guest-crypto-choice"><strong>Crypto · No fee · No minimum</strong><label htmlFor="guest-crypto-asset">Pay with</label><select id="guest-crypto-asset" value={routeId} disabled={busy || !cryptoEnabled} onChange={event => { setRouteId(event.target.value); key.current = '' }}>{cryptoRoutes.map(route => <option key={route.id} value={route.id}>{route.label}</option>)}</select><small>BNB Smart Chain (BEP-20) only. Network or exchange fees may apply.</small></div> : null}
     {accountCard ? <p className="guest-credit-note"><strong>{needsAccount ? `Create an account to continue. ${formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.` : `Your ${formatUsd(cardQuote.walletCreditCents)} difference is saved as account credit after payment.`}</strong></p> : null}
-    {!needsAccount ? <label className="guest-agreement"><input type="checkbox" required disabled={busy} /><span>I own this device or am authorized to service it. I have checked the IMEI and service requirements and agree to the <Link href="/terms" target="_blank">Terms</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link>.</span></label> : null}
+    {!needsAccount ? <label className="guest-agreement"><input type="checkbox" required disabled={busy} /><span>I own this device or am authorized to service it. I have checked the identifier and service requirements and agree to the <Link href="/terms" target="_blank">Terms</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link>.</span></label> : null}
     {error ? <p role="alert" className="guest-error">{error}</p> : null}
     <button className="button button--primary" type="submit" disabled={busy || (isCrypto ? !cryptoEnabled || !routeId : !enabled)}>{busy ? needsAccount ? 'Opening account setup…' : 'Opening secure payment…' : isCrypto ? `Continue with crypto · ${formatUsd(product.priceCents)}` : needsAccount ? 'Create account & continue' : `Pay ${formatUsd(cardQuote.totalCents)} by card`}</button>
     <button type="button" className="guest-payment-alternative" disabled={busy} onClick={changeMethod}><Icon name="wallet" /><span>{isCrypto ? 'Pay by card instead (+5%)' : 'Pay with crypto'}</span>{!isCrypto ? <span className="guest-no-fee">No fee · No minimum</span> : null}</button>
@@ -82,3 +83,4 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     {(isCrypto ? !cryptoEnabled : !enabled) ? <p role="status">{isCrypto ? 'Crypto' : 'Card'} checkout is temporarily unavailable. Please choose another payment method or <Link href="/support">contact support</Link>.</p> : null}
   </form>
 }
+

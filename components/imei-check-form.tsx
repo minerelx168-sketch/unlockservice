@@ -1,157 +1,64 @@
 'use client'
 import Link from 'next/link'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { groupImei, IMEI_LENGTH, luhnValid, normalizeImei } from '@/lib/imei'
+import { useRef, useState, type FormEvent } from 'react'
+import { serviceIdentifier } from '@/lib/service-identifier'
+import type { ProviderReport } from '@/lib/imei-report'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
+import { ProviderOutputText } from './provider-output-text'
 
-type CheckPayload = {
-  id: number
-  maskedImei: string
-  imei?: string
-  status: 'queued' | 'processing' | 'completed' | 'unavailable'
-  provider: string
-  result: Record<string, unknown> | null
-  message?: string
-  createdAt: string
-}
-type ValidationCheck = { key: string; label: string; status: 'passed' | 'failed' }
-const STATUS: Record<CheckPayload['status'], { kicker: string; badge: string; label: string }> = {
-  completed: { kicker: 'RESULT', badge: 'badge--success', label: 'Complete' },
-  queued: { kicker: 'Check queued', badge: 'badge--pending', label: 'Queued' },
-  processing: { kicker: 'Check processing', badge: 'badge--pending', label: 'Processing' },
-  unavailable: { kicker: 'Check unavailable', badge: 'badge--error', label: 'Unavailable' },
-}
-function isLocalValidation(check: CheckPayload) {
-  return check.provider === 'local-validation' || check.result?.kind === 'format_checksum'
-}
-function localResult(imei: string): Record<string, unknown> {
-  return {
-    kind: 'format_checksum',
-    title: 'IMEI format check complete',
-    summary: 'This free check validates the 15-digit format and Luhn checksum only. It does not look up carrier, blacklist, warranty, lock or other device data.',
-    checks: [
-      { key: 'format', label: '15-digit format', status: 'passed' },
-      { key: 'checksum', label: 'Luhn checksum', status: 'passed' },
-    ],
-    imei,
-  }
-}
-function validationChecks(result: Record<string, unknown> | null): ValidationCheck[] {
-  if (!Array.isArray(result?.checks)) return []
-  return result.checks.flatMap((item) => {
-    if (!item || typeof item !== 'object') return []
-    const row = item as Record<string, unknown>
-    if (typeof row.label !== 'string' || (row.status !== 'passed' && row.status !== 'failed')) return []
-    return [{ key: typeof row.key === 'string' ? row.key : row.label, label: row.label, status: row.status }]
-  })
-}
-function displayLabel(key: string) {
-  return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
-}
-function cleanResultForSave(check: CheckPayload) {
-  if (isLocalValidation(check)) {
-    const checks = validationChecks(check.result)
-    return {
-      title: 'IMEI format check complete',
-      summary: String(check.result?.summary ?? 'Format and checksum validation only.'),
-      checks: checks.map(({ label, status }) => ({ label, status })),
-    }
-  }
-  return check.result
-}
-export function ImeiCheckForm({ csrfToken }: { csrfToken?: string }) {
-  const [value, setValue] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [check, setCheck] = useState<CheckPayload | null>(null)
-  const startedRef = useRef(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  useEffect(() => {
-    if (!check || !csrfToken || (check.status !== 'queued' && check.status !== 'processing')) return
-    let cancelled = false
-    const refreshFromDatabase = async () => {
-      try {
-        const response = await fetch(`/api/imei/checks/${check.id}`, { method: 'GET', credentials: 'same-origin', cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        const data = (await response.json()) as { success?: boolean; check?: CheckPayload }
-        if (response.ok && data.success && data.check && !cancelled) setCheck(data.check)
-      } catch { /* background refresh is best effort */ }
-    }
-    void refreshFromDatabase()
-    const timer = window.setInterval(refreshFromDatabase, 5_000)
-    return () => { cancelled = true; window.clearInterval(timer) }
-  }, [check?.id, check?.status, csrfToken])
-  function saveCheckResult() {
-    if (!check?.result) return
-    const clean = cleanResultForSave(check)
-    const text = JSON.stringify(clean, null, 2)
-    const blob = new Blob([`${text}\n`], { type: 'application/json;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `imei-check-${check.id || 'local'}.json`
-    document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
-  }
-  function change(event: FormEvent<HTMLInputElement>) {
-    const digits = normalizeImei(event.currentTarget.value)
-    if (digits && !startedRef.current) { startedRef.current = true; trackFunnelEvent('imei_input_started', { event_category: 'phone_check', service_category: 'free_check' }) }
-    setValue(groupImei(digits))
-    setError(digits.length === IMEI_LENGTH && !luhnValid(digits) ? 'That IMEI checksum does not match.' : null)
-  }
+type Quota = { limit: number; used: number; remaining: number; resetAt: string }
+type Check = { id: number; imei?: string; maskedImei: string; status: string; result: ProviderReport | null; providerCode?: string; message?: string }
+export function ImeiCheckForm({ csrfToken, initialQuota }: { csrfToken?: string; initialQuota?: Quota }) {
+  const [value, setValue] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('')
+  const [check, setCheck] = useState<Check | null>(null), [quota, setQuota] = useState(initialQuota)
+  const requestKey = useRef(''), inFlight = useRef(false), input = useRef<HTMLInputElement>(null)
+  const exhausted = quota?.remaining === 0
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const digits = normalizeImei(value)
-    if (digits.length !== IMEI_LENGTH || !luhnValid(digits)) {
-      setError(`Enter a valid ${IMEI_LENGTH}-digit IMEI.`); trackFunnelEvent('validation_result', { event_category: 'phone_check', service_category: 'free_check', validation_status: 'failed' }); inputRef.current?.focus(); return
-    }
-    setBusy(true); setError(null); setCheck(null)
+    if (!csrfToken || inFlight.current || exhausted) return
+    const imei = serviceIdentifier(value)
+    if (!imei) { setError('Enter a valid 15-digit IMEI.'); input.current?.focus(); return }
+    if (!requestKey.current) requestKey.current = crypto.randomUUID()
+    inFlight.current = true; setBusy(true); setError('')
     try {
-      if (csrfToken) {
-        const response = await fetch('/api/imei/checks', {
-          method: 'POST', credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-          body: JSON.stringify({ imei: digits, csrfToken }),
-        })
-        const data = await response.json() as { success?: boolean; check?: CheckPayload; error?: string }
-        if (!response.ok || !data.check || data.success === false) throw new Error(data.error ?? 'The IMEI check could not be completed.')
-        setCheck(data.check)
-      } else {
-        setCheck({ id: 0, maskedImei: digits, imei: digits, status: 'completed', provider: 'local-validation', result: localResult(digits), createdAt: new Date().toISOString() })
-      }
-      trackFunnelEvent('validation_result', { event_category: 'phone_check', service_category: 'free_check', validation_status: 'passed' })
-    } catch (thrown) {
-      setError(thrown instanceof Error ? thrown.message : 'The IMEI check could not be completed.')
-      trackFunnelEvent('validation_result', { event_category: 'phone_check', service_category: 'free_check', validation_status: 'error' })
-    } finally { setBusy(false) }
+      const response = await fetch('/api/imei/checks', { method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify({ imei, csrfToken, idempotencyKey: requestKey.current }) })
+      const data = await response.json() as { success?: boolean; check?: Check; quota?: Quota; error?: string }
+      if (data.quota) setQuota(data.quota)
+      if (!response.ok || !data.check) throw new Error(data.error || 'Unable to complete this check.')
+      setCheck(data.check)
+      // A free provider lookup is never a purchase or payment conversion.
+      trackFunnelEvent('validation_result', { service_category: 'free_check', validation_status: data.check.status === 'completed' ? 'passed' : 'error' })
+    } catch (caught) { setError(caught instanceof Error ? caught.message : 'Unable to confirm the result. Retry this same request safely.') }
+    finally { inFlight.current = false; setBusy(false) }
   }
-  function reset() { setCheck(null); setError(null); setValue(''); inputRef.current?.focus() }
-  const checks = validationChecks(check?.result ?? null)
-  return (
-    <>
-      <form className="unlock-quote" onSubmit={submit} noValidate>
-        <div className="field">
-          <label htmlFor="check-imei">IMEI number</label>
-          <input id="check-imei" ref={inputRef} type="text" inputMode="numeric" autoComplete="off" spellCheck={false} placeholder="35 490912 345678 9" value={value} onChange={change} />
-          <p className="field-note" data-state={error ? 'invalid' : 'idle'} aria-live="polite"><Icon name={error ? 'cross' : 'info'} strokeWidth={error ? 2.2 : 1.9} /><span>{error ?? 'Find the IMEI in Settings or dial *#06# on the phone.'}</span></p>
-        </div>
-        <button className="button button--primary button--wide unlock-submit" type="submit" disabled={busy}><Icon name="search" strokeWidth={1.9} />{busy ? 'Checking…' : 'Check IMEI'}</button>
-        <p className="unlock-quote-note">Free format and checksum validation only. Choose a paid Phone Check for carrier, blacklist, warranty and device data.</p>
-      </form>
-      {check ? (
-        <section className="card service-workbench-result" role="status" aria-live="polite">
-          <div className="card-topline"><span className="kicker"><Icon name={check.status === 'completed' ? 'check' : 'info'} />{STATUS[check.status].kicker}</span><span className={`badge ${STATUS[check.status].badge}`}>{STATUS[check.status].label}</span></div>
-          {check.status === 'completed' && isLocalValidation(check) ? (
-            <>
-              <h3 className="t-card">IMEI format check complete</h3>
-              <p className="t-small">{String(check.result?.summary ?? 'This free check validates format and checksum only.')}</p>
-              <table className="validation-results"><caption className="sr-only">IMEI format and checksum results</caption><thead><tr><th scope="col">Validation</th><th scope="col">Result</th></tr></thead><tbody>{(checks.length ? checks : validationChecks(localResult(check.imei ?? normalizeImei(value)))).map((item) => <tr key={item.key}><th scope="row">{item.label}</th><td className={item.status === 'passed' ? 'service-workbench-valid' : 'service-workbench-error'}>{item.status === 'passed' ? 'Passed' : 'Not passed'}</td></tr>)}</tbody></table>
-            </>
-          ) : (
-            <><h3 className="t-card">IMEI {check.imei ?? check.maskedImei}</h3><p className="t-small">{String(check.result?.summary ?? check.message ?? 'The report is ready.')}</p>{check.status === 'completed' && check.result ? <div className="service-check-result-list">{Object.entries(check.result).filter(([key]) => !['source', 'demo', 'nextStep', 'checkType'].includes(key)).map(([key, result]) => <div className="service-check-result-row" key={key}><span>{displayLabel(key)}</span><strong>{typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean' ? String(result) : JSON.stringify(result)}</strong></div>)}</div> : null}</>
-          )}
-          {check.status === 'completed' && check.result ? <div className="service-workbench-result-actions"><button className="button button--primary" type="button" onClick={saveCheckResult}>Save</button><button className="button button--quiet" type="button" onClick={reset}>Run another check</button><Link className="button button--quiet" href="/services/imei-check">Choose a paid Phone Check</Link><Link className="button button--quiet" href="/services/unlock">Choose an Unlock service</Link></div> : null}
-        </section>
-      ) : null}
-    </>
-  )
+  function reset() { requestKey.current = ''; setCheck(null); setValue(''); setError(''); input.current?.focus() }
+  function save() {
+    if (!check?.result) return
+    const url = URL.createObjectURL(new Blob([JSON.stringify(check.providerCode ? { imei: check.imei, result: check.providerCode } : check.result, null, 2)], { type: 'application/json' }))
+    const link = document.createElement('a'); link.href = url; link.download = `apple-free-check-${check.id}.json`; link.click(); URL.revokeObjectURL(url)
+  }
+  return <>
+    {csrfToken ? <p className="field-note" aria-live="polite"><strong>{quota?.remaining ?? 3} of 3 free checks remaining today.</strong> Resets daily at 00:00 UTC. Each submitted check uses one allowance.</p> : <p className="field-note">Sign in with a verified account to get 3 free Apple checks per day.</p>}
+    <form className="unlock-quote" onSubmit={submit} noValidate>
+      <div className="field"><label htmlFor="check-imei">Apple device IMEI</label><input id="check-imei" ref={input} type="text" inputMode="numeric" autoComplete="off" maxLength={40} spellCheck={false} placeholder="15-digit IMEI" value={value} disabled={busy} onChange={event => { setValue(event.currentTarget.value); requestKey.current = ''; setCheck(null); setError('') }} /><p className="field-note">Find the IMEI in Settings or dial *#06# on your Apple device.</p></div>
+      {error ? <p role="alert" className="alert alert--error">{error}</p> : null}
+      {csrfToken ? <button className="button button--primary button--wide unlock-submit" type="submit" disabled={busy || exhausted || Boolean(check)}><Icon name="search" />{busy ? 'Checking Apple data…' : exhausted ? 'Daily free limit reached' : 'Run Apple Free Check'}</button> : <Link className="button button--primary button--wide" href="/login?next=%2Fcheck">Sign in for Apple Free Check</Link>}
+      <p className="unlock-quote-note">Apple Basic Info · No payment or credit required. Available fields depend on the device data returned.</p>
+    </form>
+    {exhausted ? <p className="alert" role="status">You have used today’s free checks. <Link href="/services/imei-check">Choose a paid Phone Check</Link> for more reports.</p> : null}
+    {check ? <section className="service-workbench-result" aria-live="polite"><div className="service-workbench-result-head"><div><span className="kicker">APPLE FREE CHECK</span><h3 className="t-card">{check.status === 'completed' ? 'Your Apple result' : 'Check status'}</h3></div><span className={check.status === 'completed' ? 'badge badge--success' : 'badge badge--pending'}>{check.status}</span></div>
+      <p className="t-small">IMEI {check.imei ?? check.maskedImei}</p>{check.message ? <p role="status">{check.message}</p> : null}
+      {check.status === 'completed' && check.result ? <>
+        {check.providerCode ? <ProviderOutputText value={check.providerCode} /> : <>
+        {check.result.sections.map(section => <section key={section.title}><h4>{section.title}</h4><dl className="service-check-result-list">{section.items.map(item => <div className="service-check-result-row" key={item.key}><dt>{item.label}</dt><dd className={/^clean$/i.test(item.value.trim()) ? 'service-workbench-valid' : undefined}>{item.value}</dd></div>)}</dl></section>)}
+        {check.result.checks.length ? <dl className="service-check-result-list">{check.result.checks.map(item => <div className="service-check-result-row" key={item.key}><dt>{item.label}</dt><dd className={item.status === 'passed' ? 'service-workbench-valid' : undefined}>{item.value}</dd></div>)}</dl> : null}
+        </>}
+        <button className="button button--quiet" type="button" onClick={save}>Save result</button>
+      </> : null}
+      <div className="service-workbench-result-actions">{!exhausted ? <button className="button button--quiet" type="button" onClick={reset}>Check another Apple device</button> : null}<Link className="button button--primary" href="/services/imei-check">See paid Phone Check services</Link></div>
+    </section> : null}
+  </>
 }

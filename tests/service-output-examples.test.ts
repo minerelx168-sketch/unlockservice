@@ -43,7 +43,7 @@ function assertPublicSample(value: unknown) {
 }
 
 test('every curated sample has an exact public product mapping and a safe English-only payload', () => {
-  const publicCodes = new Set(PUBLIC_PROVIDER_PRODUCTS.map((product) => product.productCode))
+  const publicCodes = new Set(PROVIDER_PRODUCTS.filter(product => ['available', 'coming_soon', 'free'].includes(product.status)).map(product => product.productCode))
   assert.ok(Object.keys(examples).length > 0)
   for (const [code, sample] of Object.entries(examples)) {
     assert.ok(publicCodes.has(code), `Example ${code} is not a published service`)
@@ -55,20 +55,20 @@ test('every curated sample has an exact public product mapping and a safe Englis
 
 test('unreviewed, hidden and unrelated services never receive a generic or neighbouring example', () => {
   assert.ok(getServiceOutputExample('APPLE_BASIC'))
-  for (const code of ['UNLOCK_346', 'CHECK_980', 'CHECK_973', 'HONOR_INFO', 'CHECK_266']) {
+  for (const code of ['UNLOCK_346', 'UNKNOWN_SERVICE']) {
     assert.equal(getServiceOutputExample(code), null, `Unclear or mismatched output ${code} remains unpublished`)
   }
   for (const product of PROVIDER_PRODUCTS) {
-    const published = product.status === 'available' || product.status === 'coming_soon'
+    const published = ['available', 'coming_soon', 'free'].includes(product.status)
     const reviewed = Object.hasOwn(examples, product.productCode)
     assert.equal(hasServiceOutputExample(product.productCode), published && reviewed, product.productCode)
     if (!published || !reviewed) assert.equal(getServiceOutputExample(product.productCode), null)
   }
 })
 
-test('a clear reviewed preview is readable even when the public service is coming soon', async () => {
+test('a clear reviewed preview is readable for an available service', async () => {
   const product = PUBLIC_PROVIDER_PRODUCTS.find(({ productCode }) => productCode === 'CHECK_343')
-  assert.equal(product?.status, 'coming_soon')
+  assert.equal(product?.status, 'available')
   assert.equal(hasServiceOutputExample('CHECK_343'), true)
   const response = await GET(new Request('https://iunlockmobile.test/api/services/CHECK_343/example'), {
     params: Promise.resolve({ productCode: 'CHECK_343' }),
@@ -122,7 +122,7 @@ test('the public example API returns only the reviewed static display data and c
 })
 
 test('missing or restricted example API requests return a non-cacheable 404 without fallback data', async () => {
-  const hiddenCode = PROVIDER_PRODUCTS.find((product) => product.status.startsWith('hidden_'))?.productCode
+  const hiddenCode = PROVIDER_PRODUCTS.find((product) => product.status === 'unavailable')?.productCode
   assert.ok(hiddenCode, 'The catalog fixture must include a restricted service')
   for (const productCode of ['UNLOCK_346', 'UNKNOWN_SERVICE', '__proto__', hiddenCode]) {
     const response = await GET(new Request('https://iunlockmobile.test/api/services/example'), {
@@ -137,3 +137,4 @@ test('missing or restricted example API requests return a non-cacheable 404 with
     assert.equal(Object.hasOwn(payload, 'variants'), false)
   }
 })
+
