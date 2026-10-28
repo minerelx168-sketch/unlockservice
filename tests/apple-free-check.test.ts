@@ -10,7 +10,7 @@ const originalFetch = globalThis.fetch
 let calls = 0, fail = false
 const imei = '490154203237518'
 after(() => { globalThis.fetch = originalFetch; rmSync(folder, { recursive: true, force: true }) })
-test('Apple Free Check uses ID 214, enforces 3 daily attempts atomically and never charges credit', async () => {
+test('Apple Free Check uses ID 214, enforces 3 daily attempts atomically for customers and admins and never charges credit', async () => {
   const { db } = await import('../lib/db')
   const { createImeiCheck, freeAppleQuota } = await import('../lib/imei-checks')
   const { listStorefrontProviderProducts } = await import('../lib/public-provider-catalog')
@@ -51,7 +51,43 @@ test('Apple Free Check uses ID 214, enforces 3 daily attempts atomically and nev
   assert.equal(uncertain.status, 'unavailable'); assert.equal(freeAppleQuota(user).remaining, 2)
   await createImeiCheck(user, { imei, idempotencyKey: timeoutKey }); assert.equal(calls, 4)
   db().prepare('UPDATE users SET email_verified_at=NULL WHERE id=?').run(user)
-  await assert.rejects(createImeiCheck(user, { imei }), /verified customer/)
+  await assert.rejects(createImeiCheck(user, { imei }), /active verified account/)
   assert.equal(calls, 4)
+
+  // The owner uses an admin account: grant the same verified-account allowance,
+  // without changing roles, bypassing caps, or creating paid transactions.
+  fail = false
+  const admin = Number(db().prepare("INSERT INTO users(username,email,password_hash,status,account_type,email_verified_at,credit_cents) VALUES ('free-admin','admin-free@example.test','test','active','admin',datetime('now'),1234)").run().lastInsertRowid)
+  const adminStartCalls = calls
+  const adminKey = randomUUID()
+  const adminFirst = await createImeiCheck(admin, { imei, idempotencyKey: adminKey })
+  assert.equal(adminFirst.status, 'completed')
+  assert.equal(freeAppleQuota(admin).remaining, 2)
+  assert.equal((await createImeiCheck(admin, { imei, idempotencyKey: adminKey })).id, adminFirst.id)
+  assert.equal(calls, adminStartCalls + 1)
+  const adminAttempts = await Promise.allSettled(Array.from({ length: 6 }, () => createImeiCheck(admin, { imei, idempotencyKey: randomUUID() })))
+  assert.equal(adminAttempts.filter(result => result.status === 'fulfilled').length, 2)
+  assert.equal(freeAppleQuota(admin).remaining, 0)
+  assert.equal(calls, adminStartCalls + 3)
+  await assert.rejects(createImeiCheck(admin, { imei, idempotencyKey: randomUUID() }), /3 free checks/)
+  assert.equal(calls, adminStartCalls + 3)
+  assert.deepEqual(db().prepare('SELECT account_type,credit_cents,held_cents FROM users WHERE id=?').get(admin), { account_type: 'admin', credit_cents: 1234, held_cents: 0 })
+
+  // Unverified, paused, banned and unsupported accounts still cannot call the provider.
+  for (const [index, state] of [
+    { type: 'admin', status: 'active', verified: null, banned: null },
+    { type: 'admin', status: 'paused', verified: '2026-01-01T00:00:00Z', banned: null },
+    { type: 'admin', status: 'active', verified: '2026-01-01T00:00:00Z', banned: '2026-01-01T00:00:00Z' },
+    { type: 'unsupported', status: 'active', verified: '2026-01-01T00:00:00Z', banned: null },
+  ].entries()) {
+    const denied = Number(db().prepare('INSERT INTO users(username,email,password_hash,status,account_type,email_verified_at,banned_at) VALUES (?,?,?,?,?,?,?)')
+      .run('free-denied-' + index, 'denied-' + index + '@example.test', 'test', state.status, state.type, state.verified, state.banned).lastInsertRowid)
+    await assert.rejects(createImeiCheck(denied, { imei }), /active verified account/)
+    assert.equal(freeAppleQuota(denied).used, 0)
+  }
+  assert.equal(calls, adminStartCalls + 3)
+  assert.deepEqual(db().prepare('SELECT count(*) AS n FROM credit_ledger').get(), { n: 0 })
+  assert.deepEqual(db().prepare('SELECT count(*) AS n FROM invoices').get(), { n: 0 })
+  assert.deepEqual(db().prepare('SELECT count(*) AS n FROM paid_report_orders').get(), { n: 0 })
   db().close()
 })
