@@ -5,7 +5,7 @@ import { Icon } from '@/components/icons'
 import { requireSession } from '@/lib/auth'
 import { listImeiChecks } from '@/lib/imei-checks'
 
-export const metadata: Metadata = { title: 'Phone checks' }
+export const metadata: Metadata = { title: 'Free check history' }
 export const dynamic = 'force-dynamic'
 
 function statusLabel(status: string) {
@@ -22,8 +22,8 @@ export default async function ChecksPage() {
     <>
       <div className="app-head">
         <div>
-          <h1>Phone checks</h1>
-          <p>Review your IMEI reports. A new check is independent, so you can re-check a device when its status changes.</p>
+          <h1>Free check history</h1>
+          <p>Review your free checks. Each new Apple Free Check uses your daily allowance.</p>
         </div>
         <Link className="button button--primary" href="/check">
           <Icon name="search" strokeWidth={1.9} />
@@ -45,7 +45,7 @@ export default async function ChecksPage() {
             <span className="t-micro">{checks.length} shown</span>
           </div>
           <div className="table-wrap">
-            <table role="table" className="grid account-table" aria-label="Recent phone checks">
+            <table role="table" className="grid account-table" aria-label="Recent free checks">
               <thead role="rowgroup"><tr role="row">
                 <th role="columnheader" scope="col">Device</th>
                 <th role="columnheader" scope="col">Type</th>
