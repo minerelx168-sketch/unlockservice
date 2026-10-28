@@ -397,7 +397,8 @@ export function PaidReportConsole({
               onChange={(code) => {
                 if (locked) return
                 setProductCode(code)
-                trackFunnelEvent('service_selection', { service_category: domain }); if (domain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: domain })
+                const selectedDomain = products.find((entry) => entry.code === code)?.domain ?? domain
+                trackFunnelEvent('service_selection', { service_category: selectedDomain }); if (selectedDomain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: selectedDomain })
                 setError(null)
                 resetRequestIdentity()
               }}

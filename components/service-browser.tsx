@@ -82,8 +82,9 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
       <input ref={paymentMethod} type="hidden" name="paymentMethod" defaultValue="card" /><input type="hidden" name="domain" value={orderDomain} /><input type="hidden" name="productCode" value={selectedCode} />
       <ServicePicker options={options} value={selectedCode} onChange={(code) => {
         setSelectedCode(code); setFieldError(null); approved.current = false
-        trackFunnelEvent('service_selection', { service_category: orderDomain })
-        if (isUnlock) trackFunnelEvent('unlock_service_selected', { service_category: orderDomain })
+        const selectedDomain = products.find((product) => product.productCode === code)?.domain ?? domain
+        trackFunnelEvent('service_selection', { service_category: selectedDomain })
+        if (selectedDomain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: selectedDomain })
       }} disabled={pending} label={isUnlock ? 'Unlock service and price' : 'Report and price'} id={`${domain}-browse-service`} />
       {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><p>{serviceDisplayText(selected.summary)}</p></div><div className="service-selected-price"><strong>{formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
       {selected && available ? <>
