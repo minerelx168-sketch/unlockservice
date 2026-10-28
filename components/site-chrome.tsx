@@ -46,7 +46,7 @@ export async function PublicHeader() {
       primary: {
         href: '/services/imei-check',
         label: 'Browse all reports',
-        note: `${reports.length} device checks available`,
+        note: `${reports.length} services listed`,
         icon: 'grid',
       },
       items: reports.slice(0, 6).map((product) => ({
