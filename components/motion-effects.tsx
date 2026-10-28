@@ -46,7 +46,7 @@ const GROUPS = [
   '.step-strip',
 ].join(', ')
 
-const STAGGER_CAP = 7
+const STAGGER_CAP = 4
 
 export function MotionEffects() {
   const pathname = usePathname()
