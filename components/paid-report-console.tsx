@@ -3,6 +3,7 @@ import { storefrontDomain } from '@/lib/service-groups'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import Link from 'next/link'
+import { ServiceDescription } from './service-description'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
@@ -412,7 +413,7 @@ export function PaidReportConsole({
             <section className="service-workbench-selection" aria-label="Selected service">
               <div className="service-workbench-selection-copy">
                 <h3>{product.name}</h3>
-                <p>{product.summary}</p>
+                <ServiceDescription value={product.summary} />
               </div>
               <dl className="service-workbench-quote">
                 <div><dt>Price</dt><dd>{product.priceAvailable === false ? 'Contact for price' : formatUsd(product.priceCents)}</dd></div>

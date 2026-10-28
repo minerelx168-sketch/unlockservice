@@ -9,14 +9,14 @@ import { ProviderOutputText } from './provider-output-text'
 
 type Quota = { limit: number; used: number; remaining: number; resetAt: string }
 type Check = { id: number; imei?: string; maskedImei: string; status: string; result: ProviderReport | null; providerCode?: string; message?: string }
-export function ImeiCheckForm({ csrfToken, initialQuota }: { csrfToken?: string; initialQuota?: Quota }) {
+export function ImeiCheckForm({ csrfToken, initialQuota, disabledReason }: { csrfToken?: string; initialQuota?: Quota; disabledReason?: string }) {
   const [value, setValue] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('')
   const [check, setCheck] = useState<Check | null>(null), [quota, setQuota] = useState(initialQuota)
   const requestKey = useRef(''), inFlight = useRef(false), input = useRef<HTMLInputElement>(null)
   const exhausted = quota?.remaining === 0
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!csrfToken || inFlight.current || exhausted) return
+    if (!csrfToken || disabledReason || inFlight.current || exhausted) return
     const imei = serviceIdentifier(value)
     if (!imei) { setError('Enter a valid 15-digit IMEI.'); input.current?.focus(); return }
     if (!requestKey.current) requestKey.current = crypto.randomUUID()
@@ -41,11 +41,11 @@ export function ImeiCheckForm({ csrfToken, initialQuota }: { csrfToken?: string;
     const link = document.createElement('a'); link.href = url; link.download = `apple-free-check-${check.id}.json`; link.click(); URL.revokeObjectURL(url)
   }
   return <>
-    {csrfToken ? <div className="apple-check-allowance" aria-live="polite"><div className="apple-check-allowance-summary"><strong>{quota?.remaining ?? 3} of 3 free checks remaining today.</strong><span className="apple-check-allowance-meter" aria-hidden="true">{[1, 2, 3].map(slot => <span key={slot} data-available={slot <= (quota?.remaining ?? 3)} />)}</span></div><p className="field-note">Resets daily at 00:00 UTC. Each submitted check uses one allowance.</p></div> : <div className="apple-check-allowance"><strong>3 free checks. Every day.</strong><p className="field-note">Sign in with a verified account to use your free allowance.</p></div>}
+    {disabledReason ? <div className="apple-check-allowance" role="status"><strong>Customer account required</strong><p className="field-note">{disabledReason}</p></div> : csrfToken ? <div className="apple-check-allowance" aria-live="polite"><div className="apple-check-allowance-summary"><strong>{quota?.remaining ?? 3} of 3 free checks remaining today.</strong><span className="apple-check-allowance-meter" aria-hidden="true">{[1, 2, 3].map(slot => <span key={slot} data-available={slot <= (quota?.remaining ?? 3)} />)}</span></div><p className="field-note">Resets daily at 00:00 UTC. Each submitted check uses one allowance.</p></div> : <div className="apple-check-allowance"><strong>3 free checks. Every day.</strong><p className="field-note">Sign in with a verified account to use your free allowance.</p></div>}
     <form className="unlock-quote apple-check-input-form" onSubmit={submit} noValidate>
-      <div className="field"><label htmlFor="check-imei">Apple device IMEI</label><input id="check-imei" ref={input} type="text" inputMode="numeric" autoComplete="off" maxLength={40} spellCheck={false} placeholder="Enter your 15-digit IMEI" aria-describedby="check-imei-help" value={value} disabled={busy} onChange={event => { setValue(event.currentTarget.value); requestKey.current = ''; setCheck(null); setError('') }} /><p id="check-imei-help" className="field-note">Find it in Settings → General → About, or dial <strong>*#06#</strong>.</p></div>
+      <div className="field"><label htmlFor="check-imei">Apple device IMEI</label><input id="check-imei" ref={input} type="text" inputMode="numeric" autoComplete="off" maxLength={40} spellCheck={false} placeholder="Enter your 15-digit IMEI" aria-describedby="check-imei-help" value={value} disabled={busy || Boolean(disabledReason)} onChange={event => { setValue(event.currentTarget.value); requestKey.current = ''; setCheck(null); setError('') }} /><p id="check-imei-help" className="field-note">Find it in Settings → General → About, or dial <strong>*#06#</strong>.</p></div>
       {error ? <p role="alert" className="alert alert--error">{error}</p> : null}
-      {csrfToken ? <button className="button button--primary button--wide unlock-submit" type="submit" disabled={busy || exhausted || Boolean(check)}><Icon name="search" />{busy ? 'Checking Apple data…' : exhausted ? 'Daily free limit reached' : 'Run Apple Free Check'}</button> : <Link className="button button--primary button--wide" href="/login?next=%2Fcheck">Sign in for Apple Free Check</Link>}
+      {csrfToken ? <button className="button button--primary button--wide unlock-submit" type="submit" disabled={busy || exhausted || Boolean(check) || Boolean(disabledReason)}><Icon name="search" />{disabledReason ? 'Customer account required' : busy ? 'Checking Apple data…' : exhausted ? 'Daily free limit reached' : 'Run Apple Free Check'}</button> : <Link className="button button--primary button--wide" href="/login?next=%2Fcheck">Sign in for Apple Free Check</Link>}
       <p className="unlock-quote-note">Apple Basic Info · No payment or credit required. Available fields depend on the device data returned.</p>
     </form>
     {exhausted ? <p className="alert" role="status">You have used today’s free checks. <Link href="/services/imei-check">Choose a paid Phone Check</Link> for more reports.</p> : null}

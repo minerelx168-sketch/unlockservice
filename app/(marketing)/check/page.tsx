@@ -14,6 +14,7 @@ export const metadata = pageMetadata("/check", "Apple Free Check", "Get Apple Ba
 
 export default async function CheckPage() {
   const found = await currentSession()
+  const eligible = Boolean(found && found.user.account_type === 'customer' && found.user.email_verified_at)
   const unlock = storefrontAvailability('unlock')
   const products = listStorefrontProviderProducts('imei_check')
 
@@ -36,7 +37,7 @@ export default async function CheckPage() {
             {found ? <Link className="link-arrow apple-check-history" href="/user/checks">History <Icon name="arrowRight" /></Link> : <span className="apple-check-free-label">FREE</span>}
           </div>
           <h2 className="apple-check-form-title">Check your Apple device</h2>
-          <ImeiCheckForm csrfToken={found?.session.csrfToken} initialQuota={found ? freeAppleQuota(found.user.id) : undefined} />
+          <ImeiCheckForm csrfToken={found?.session.csrfToken} initialQuota={eligible && found ? freeAppleQuota(found.user.id) : undefined} disabledReason={found && !eligible ? 'Apple Free Check is for verified customer accounts. Admin accounts do not use the free allowance.' : undefined} />
         </div>
 
         <div className="free-check-extras apple-check-extras">
