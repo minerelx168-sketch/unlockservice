@@ -86,8 +86,9 @@ export default function TermsPage() {
         </p>
       </section>
 
-      <p className="auth-foot">
-        <Link href="/">Return to iUnlockMobile</Link> · <Link href="/privacy">Privacy Policy</Link>
+      <p className="auth-foot auth-foot--links">
+        <Link href="/">Return to iUnlockMobile</Link>
+        <Link href="/privacy">Privacy Policy</Link>
       </p>
     </article>
   )
