@@ -1042,11 +1042,20 @@
   list-style: none;
 }
 
-.feature-list li {
+/* Rows may be <li> or <div>: the Apple Free Check page uses divs, and with
+   only li styled the icon stacked above its text instead of beside it. */
+.feature-list > li,
+.feature-list > div {
   display: grid;
   grid-template-columns: 34px 1fr;
   gap: 14px;
   align-items: start;
+}
+
+/* The tile is a span too; without this, the block rule below beat its
+   centring grid and the glyph sat in the tile's top-left corner. */
+.feature-list .icon-tile {
+  display: grid;
 }
 
 .feature-list b {

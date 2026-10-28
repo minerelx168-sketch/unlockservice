@@ -246,6 +246,26 @@
   font-weight: 680;
 }
 
+/* An eyebrow pill labels the heading under it; on Payments and the admin
+   heads nothing separated them and the pill sat on the heading's letters. */
+.app-head .eyebrow + :is(h1, h2),
+.admin-growth-head .eyebrow + h2,
+.admin-invoice-card .eyebrow + h3 {
+  margin-top: 10px;
+}
+
+/* Empty states had no styles at all, so the icon tile sat directly on the
+   heading. Icon, heading, sentence and link now read as spaced steps. */
+.empty-state {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.empty-state > .icon-tile {
+  margin-bottom: 8px;
+}
+
 .app-head p {
   margin: 8px 0 0;
   font-size: 1rem;
@@ -2365,7 +2385,7 @@ table.account-table td {
 
 .funding-hero h1,
 .payment-request-head h1 {
-  margin: 5px 0 10px;
+  margin: 10px 0 10px;
   font-family: var(--font-display);
   font-size: clamp(1.85rem, 4vw, 3rem);
   line-height: 1.06;

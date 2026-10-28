@@ -6,7 +6,10 @@
 .free-check-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'intro form' 'extras form'; align-items: start; gap: 24px 40px; }
 .free-check-intro { grid-area: intro; }
 .free-check-form { grid-area: form; min-width: 0; }
-.free-check-extras { grid-area: extras; }
+/* gap: the buttons and the feature list had none and touched. */
+.free-check-extras { grid-area: extras; gap: 28px; }
+.free-check-paid { margin-top: 40px; }
+.free-check-paid > .section-head { margin-bottom: 22px; }
 .article-contents { border: 1px solid var(--line); border-radius: 14px; padding: 0 16px; background: var(--surface); }
 .article-contents summary { min-height: 48px; padding-block: 12px; cursor: pointer; font-weight: 650; color: var(--ink-strong); }
 .article-contents nav { padding-bottom: 12px; }
