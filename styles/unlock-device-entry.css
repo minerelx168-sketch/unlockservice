@@ -14,9 +14,46 @@
 .unlock-device-entry__spinner { width: 18px; height: 18px; flex-shrink: 0; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: unlock-entry-spin .8s linear infinite; }
 @keyframes unlock-entry-spin { to { transform: rotate(360deg); } }
 
+.unlock-service-preview { min-width: 0; padding: 28px; border-top: 1px solid var(--line); background: var(--page-soft); }
+.unlock-service-preview__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.unlock-service-preview__heading > div { min-width: 0; }
+.unlock-service-preview__heading h3 { margin: 0; font-size: 1.25rem; line-height: 1.4; letter-spacing: -.02em; }
+.unlock-service-preview__heading p { margin: 6px 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.6; }
+.unlock-service-preview__currency { flex: 0 0 auto; padding-block: 4px; color: var(--muted); font-size: .8125rem; line-height: 1.6; }
+.unlock-service-preview__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.unlock-service-preview__card { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: 18px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--surface); }
+.unlock-service-preview__card-top { display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 14px; }
+.unlock-service-preview__icon { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px; border-radius: 12px; color: var(--primary); background: var(--primary-soft); }
+.unlock-service-preview__icon svg { width: 22px; height: 22px; }
+.unlock-service-preview__category { min-width: 0; color: var(--muted); font-size: .8125rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.unlock-service-preview__card h4 { margin: 0 0 12px; color: var(--ink-strong); font-size: 1rem; font-weight: 700; line-height: 1.5; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.unlock-service-preview__availability { display: inline-flex; margin-bottom: 18px; color: var(--muted); font-size: .8125rem; line-height: 1.5; }
+.unlock-service-preview__availability.is-available { color: var(--primary-dark); }
+.unlock-service-preview__card-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin-top: auto; }
+.unlock-service-preview__price { color: var(--primary); font-size: 1.25rem; font-weight: 750; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.unlock-service-preview__card-bottom .button { min-height: 44px; padding: 10px 12px; font-size: .875rem; gap: 6px; }
+.unlock-service-preview__card-bottom .button svg { width: 16px; height: 16px; }
+.unlock-service-preview__more { display: flex; justify-content: center; margin-top: 22px; }
+.unlock-service-preview__more .button { min-width: 200px; min-height: 48px; }
+
+@media (max-width: 1099px) {
+  .unlock-service-preview__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 740px) {
   .unlock-device-entry .service-browser__header { padding-block: 22px; }
   .unlock-device-entry__body { padding: 22px; }
+  .unlock-service-preview { padding: 24px 22px; }
+}
+
+@media (max-width: 599px) {
+  .unlock-service-preview__heading { flex-direction: column; gap: 6px; }
+  .unlock-service-preview__currency { padding: 0; }
+  .unlock-service-preview__grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .unlock-service-preview__card { padding: 18px; }
+  .unlock-service-preview__card-top { margin-bottom: 10px; }
+  .unlock-service-preview__card h4 { margin-bottom: 8px; }
+  .unlock-service-preview__availability { margin-bottom: 12px; }
 }
 
 @media (max-width: 480px) {
@@ -28,6 +65,8 @@
   .unlock-device-entry__steps li > span { flex-basis: auto; width: 28px; }
   .unlock-device-entry .service-browser__actions > .button { width: 100%; min-width: 0; padding-inline: 12px; }
   .unlock-device-entry .service-browser__hint { font-size: .875rem; }
+  .unlock-service-preview { padding: 22px 16px; }
+  .unlock-service-preview__more .button { width: 100%; min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
