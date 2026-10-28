@@ -148,3 +148,7 @@
   .service-picker__group-heading { padding-inline: 12px; }
   .service-picker__label-row { flex-wrap: wrap; gap: 4px 10px; }
 }
+
+.service-picker__option-price[data-unpriced] > strong { max-width: 95px; white-space: normal; text-align: right; font-size: .8125rem; line-height: 1.4; }
+.service-picker__inquiry { margin: 10px 0 0; font-size: .875rem; }
+.service-picker__inquiry a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; font-weight: 600; }

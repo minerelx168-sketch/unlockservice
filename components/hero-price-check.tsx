@@ -18,6 +18,7 @@ export type PriceCheckProduct = {
   name: string
   category: string
   priceCents: number
+  priceAvailable?: boolean
   etaLabel: string
   summary?: string
   available: boolean
@@ -112,7 +113,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
         label={domain === 'unlock' ? 'Unlock service' : 'Phone Check service'}
         options={products.map((product) => ({
           code: product.code, name: product.name, group: product.category,
-          summary: product.summary ?? '', priceCents: product.priceCents,
+          summary: product.summary ?? '', priceCents: product.priceCents, priceAvailable: product.priceAvailable,
           etaLabel: product.etaLabel, available: product.available,
         }))}
         value={selected?.code ?? ''}
@@ -126,7 +127,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
           }
         }}
       />
-      {selected ? <div className="price-check-result" aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl><p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p>{cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}</div> : null}
+      {selected ? <div className="price-check-result" aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Service price <span>USD</span></dt><dd>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(selected.priceCents)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl>{selected.priceAvailable !== false ? <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p> : null}{cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}</div> : null}
       {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><p>{selected.summary}</p><p>Review eligibility before ordering. IMEI format validation does not confirm eligibility.</p></details> : null}
     </> : <p className="alert" role="status"><Icon name="info" /><span>No services are listed right now. <Link href="/contact">Contact support</Link> for availability.</span></p>}
     {selected?.available ? <div className="price-check-details">
@@ -139,7 +140,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
     </div> : null}
     {selected ? <input type="hidden" name="productCode" value={selected.code} /> : null}
     {error || actionError ? <p className="alert alert--error" id="pc-error" role="alert"><Icon name="info" /><span>{error?.message || actionError}</span></p> : null}
-    <button className="button button--primary button--wide price-check-submit" type="submit" disabled={pending || products.length === 0}>{pending ? <><Icon name="clock" />Opening…</> : <>{domain === 'unlock' ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></>}</button>
+    <button className="button button--primary button--wide price-check-submit" type="submit" disabled={pending || products.length === 0 || Boolean(selected && !selected.available)}>{pending ? <><Icon name="clock" />Opening…</> : <>{domain === 'unlock' ? 'Preview unlock order' : 'Preview my report'}<Icon name="arrowRight" /></>}</button>
     <p className="price-check-next">{domain === 'unlock' ? 'Review your order before paying. Unlock processing starts after payment.' : 'View the report preview before paying. The real check starts after payment.'}</p>
     <p className="price-check-assurance"><span><Icon name="shieldCheck" />Clear total</span><span><Icon name="clock" />Private tracking link</span></p>
     {selected && selected.priceCents > 0 ? <OrderPreviewDialog open={previewOpen} product={selected} domain={orderDomain} imei={digits} email={email.trim()} pending={pending} error={actionError} onClose={() => { setPreviewOpen(false); approved.current = false }} onContinue={continueToPayment} /> : null}

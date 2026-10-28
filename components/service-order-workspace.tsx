@@ -26,7 +26,7 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
         key={`${domain ?? 'all'}:${selected?.productCode ?? 'choose'}`}
         products={products.map((product) => ({
           code: product.productCode, name: product.name, summary: product.summary,
-          group: product.group, domain: product.domain, priceCents: product.priceCents,
+          group: product.group, domain: product.domain, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
           etaMinutes: orderable.get(product.productCode)?.etaMinutes ?? 0, etaLabel: product.etaLabel,
           providerReady: product.status === 'available',
           hasExample: product.hasExample,

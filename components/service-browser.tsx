@@ -53,7 +53,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
     const key = selected ? `${orderDomain}:${selected.productCode}:${selected.priceCents}` : ''
     if (selected && selected.status === 'available' && key !== lastQuote.current) { lastQuote.current = key; trackFunnelEvent('service_quote_viewed', { service_category: orderDomain, currency: 'USD', value: selected.priceCents / 100 }) }
   }, [selected, orderDomain])
-  const options = products.map((product) => ({ code: product.productCode, name: product.name, summary: product.summary, group: product.group, priceCents: product.priceCents, etaLabel: product.etaLabel, available: product.status === 'available', hasExample: product.hasExample }))
+  const options = products.map((product) => ({ code: product.productCode, name: product.name, summary: product.summary, group: product.group, priceCents: product.priceCents, priceAvailable: product.priceAvailable, etaLabel: product.etaLabel, available: product.status === 'available', hasExample: product.hasExample }))
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     setFieldError(null)
@@ -86,7 +86,7 @@ export function ServiceBrowser({ products, domain, initialImei = '', initialProd
         trackFunnelEvent('service_selection', { service_category: selectedDomain })
         if (selectedDomain === 'unlock') trackFunnelEvent('unlock_service_selected', { service_category: selectedDomain })
       }} disabled={pending} label={isUnlock ? 'Unlock service and price' : 'Report and price'} id={`${domain}-browse-service`} />
-      {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><p>{serviceDisplayText(selected.summary)}</p></div><div className="service-selected-price"><strong>{formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
+      {selected ? <div className="service-selected" aria-live="polite"><span className="service-selected-badge" aria-hidden="true"><Icon name={isUnlock ? 'lock' : 'file'} strokeWidth={1.7} /></span><div className="service-selected-copy"><h3>{serviceDisplayText(selected.name)}</h3><p>{serviceDisplayText(selected.summary)}</p></div><div className="service-selected-price"><strong>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(selected.priceCents)}</strong><span>{available ? 'One-time service price' : 'Currently unavailable'}</span><em>{serviceDisplayText(selected.etaLabel)}</em></div></div> : null}
       {selected && available ? <>
         <p className="price-check-total">Card total <strong>{formatUsd(total)}</strong></p>
         {cardQuote?.requiresAccount ? <p className="price-check-minimum"><strong>Card orders under $1 need an account. {formatUsd(cardQuote.walletCreditCents)} is saved as credit after payment.</strong></p> : null}

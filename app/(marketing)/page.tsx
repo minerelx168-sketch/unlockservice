@@ -152,7 +152,7 @@ export default function HomePage() {
     category: product.group,
     summary: product.summary,
     available: product.status === 'available',
-    priceCents: product.priceCents,
+    priceCents: product.priceCents, priceAvailable: product.priceAvailable,
     etaLabel: product.etaLabel,
   }))
   const checkWidget: PriceCheckProduct[] = checkProducts.map((product) => ({
@@ -161,7 +161,7 @@ export default function HomePage() {
     category: product.group,
     summary: product.summary,
     available: product.status === 'available',
-    priceCents: product.priceCents,
+    priceCents: product.priceCents, priceAvailable: product.priceAvailable,
     etaLabel: product.etaLabel,
   }))
 

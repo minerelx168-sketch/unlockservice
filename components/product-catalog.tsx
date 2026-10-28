@@ -72,7 +72,7 @@ function ProductCard({ product }: { product: PublicProviderProduct }) {
 
       <div className="product-card-price-row" aria-label={`Price for ${productName}`}>
         <span className="label">Price</span>
-        <strong className="product-price">{formatUsd(product.priceCents)}</strong>
+        <strong className="product-price">{product.priceAvailable === false ? 'Contact for price' : formatUsd(product.priceCents)}</strong>
       </div>
       <p className="t-small">Estimated delivery: {customerText(product.etaLabel)}</p>
 
@@ -230,7 +230,7 @@ export function ProductCatalog({ products, domain }: ProductCatalogProps) {
                     <optgroup key={group} label={group}>
                       {options.map((product) => (
                         <option key={product.productCode} value={product.productCode}>
-                          {customerText(product.name)} — {formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
+                          {customerText(product.name)} — {product.priceAvailable === false ? 'Contact for price' : formatUsd(product.priceCents)} — {product.status === 'available' ? 'Available' : 'Coming soon'}
                         </option>
                       ))}
                     </optgroup>

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
 import { groupServices } from '@/lib/service-groups'
 import { formatUsd } from '@/lib/money'
@@ -12,6 +13,7 @@ export type ServiceOption = {
   summary: string
   group: string
   priceCents: number
+  priceAvailable?: boolean
   etaLabel: string
   available: boolean
   hasExample?: boolean
@@ -95,7 +97,7 @@ export function ServicePicker({
         <span className="service-picker__selection" id={`${pickerId}-selection`}>
           <strong>{selected ? serviceDisplayText(selected.name) : 'Choose a service'}</strong>
           <small>{selected
-            ? `${formatUsd(selected.priceCents)} USD · ${serviceDisplayText(selected.etaLabel)}${selected.available ? '' : ' · Unavailable online'}`
+            ? `${selected.priceAvailable === false ? 'Contact for price' : `${formatUsd(selected.priceCents)} USD`} · ${serviceDisplayText(selected.etaLabel)}${selected.available ? '' : ' · Unavailable online'}`
             : 'Search by device, network or service name'}</small>
         </span>
         <span className="service-picker__affordance" aria-hidden="true">
@@ -103,6 +105,7 @@ export function ServicePicker({
           <span className="service-picker__chevron" />
         </span>
       </button>
+      {selected && !selected.available ? <p className="service-picker__inquiry"><Link href="/contact">Contact us about this service</Link></p> : null}
       {selected?.hasExample && !open ? (
         <div className="service-picker__selected-example"><ServiceOutputExample productCode={selected.code} productName={serviceDisplayText(selected.name)} /></div>
       ) : null}
@@ -142,7 +145,7 @@ export function ServicePicker({
                       type="button"
                       className="service-picker__option"
                       aria-pressed={option.code === value}
-                      disabled={disabled || !option.available}
+                      disabled={disabled}
                       onClick={() => {
                         onChange(option.code)
                         setQuery('')
@@ -151,10 +154,10 @@ export function ServicePicker({
                     >
                       <span className="service-picker__option-copy">
                         <strong>{serviceDisplayText(option.name)}</strong>
-                        <small>{serviceDisplayText(option.etaLabel)} · {option.available ? 'Available' : 'Coming soon'}</small>
+                        <small>{serviceDisplayText(option.etaLabel)} · {option.available ? 'Available' : 'Unavailable online'}</small>
                       </span>
-                      <span className="service-picker__option-price">
-                        <strong>{formatUsd(option.priceCents)}</strong>
+                      <span className="service-picker__option-price" data-unpriced={option.priceAvailable === false || undefined}>
+                        <strong>{option.priceAvailable === false ? 'Contact for price' : formatUsd(option.priceCents)}</strong>
                         {option.code === value ? <span><Icon name="checkSmall" /> Selected</span> : null}
                       </span>
                     </button>

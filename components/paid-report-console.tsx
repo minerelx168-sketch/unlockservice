@@ -23,6 +23,7 @@ type Product = {
   group: string
   domain: 'imei_check' | 'unlock'
   priceCents: number
+  priceAvailable?: boolean
   etaMinutes: number
   etaLabel?: string
   providerReady: boolean
@@ -387,7 +388,7 @@ export function PaidReportConsole({
                 name: entry.name,
                 summary: entry.summary,
                 group: entry.group,
-                priceCents: entry.priceCents,
+                priceCents: entry.priceCents, priceAvailable: entry.priceAvailable,
                 etaLabel: entry.etaLabel ?? deliveryLabel(entry.etaMinutes),
                 available: entry.providerReady,
                 hasExample: entry.hasExample,
@@ -412,7 +413,7 @@ export function PaidReportConsole({
                 <p>{product.summary}</p>
               </div>
               <dl className="service-workbench-quote">
-                <div><dt>Price</dt><dd>{formatUsd(product.priceCents)}</dd></div>
+                <div><dt>Price</dt><dd>{product.priceAvailable === false ? 'Contact for price' : formatUsd(product.priceCents)}</dd></div>
                 <div><dt>Estimated delivery</dt><dd>{product.etaLabel ?? deliveryLabel(product.etaMinutes)}</dd></div>
               </dl>
             </section>
@@ -459,7 +460,7 @@ export function PaidReportConsole({
                     disabled={locked || !product?.providerReady}
                   >
                     <Icon name="file" strokeWidth={1.9} />
-                    {product ? `Review order · ${formatUsd(product.priceCents)}` : 'Choose a service to continue'}
+                    {product ? product.providerReady ? `Review order · ${formatUsd(product.priceCents)}` : 'Service unavailable online' : 'Choose a service to continue'}
                   </button>
                 )}
                 {!product ? <p className="t-small">{visibleProducts.length > 0 ? 'Choose a service above to see its price and delivery estimate.' : 'No services in this category are available right now. Choose another category or contact support.'}</p> : null}

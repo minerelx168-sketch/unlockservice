@@ -1,14 +1,15 @@
-import { groupServices, storefrontDomain } from './service-groups'
+import directory from '@/catalog/storefront-service-directory.json'
+import { serviceGroupLabel } from './service-groups'
 import { CUSTOMER_IMEI_CHECK_PRODUCTS, CUSTOMER_UNLOCK_PRODUCTS } from './customer-provider-products'
-import { listPaidReportProducts } from './paid-reports'
+import { getPaidReportProduct, listPaidReportProducts } from './paid-reports'
 import { hasServiceOutputExample } from './service-output-examples'
-import type { ProviderProduct, ProviderProductDomain } from './provider-products'
+import { PROVIDER_PRODUCTS, type ProviderProduct, type ProviderProductDomain } from './provider-products'
 
 /** The storefront never needs supplier identifiers or wholesale prices. */
 export type PublicProviderProduct = Pick<ProviderProduct,
   'productCode' | 'slug' | 'name' | 'summary' | 'group' | 'domain' |
   'inputType' | 'status' | 'priceCents' | 'etaLabel' | 'sortOrder'
-> & { hasExample: boolean }
+> & { hasExample: boolean; priceAvailable?: boolean }
 
 /** Resolve availability and retail prices from the same gates as checkout. */
 export function listPublicProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
@@ -35,11 +36,34 @@ export function listPublicProviderProducts(domain: ProviderProductDomain): Publi
   })
 }
 
-/** Match the storefront sections to the supplier's group order without changing checkout identity. */
+/**
+ * All supplier-listed names and groups, using only our own selling prices.
+ * Listing a service never enables a provider mapping, a new input flow or payment.
+ * Newly listed services without a retail price remain view-only, with no invented quote.
+ */
 export function listStorefrontProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
-  const products = [
-    ...listPublicProviderProducts('imei_check'),
-    ...listPublicProviderProducts('unlock'),
-  ].filter((product) => storefrontDomain(product) === domain)
-  return groupServices(products).flatMap((group) => group.products)
+  const byId = new Map(PROVIDER_PRODUCTS.map((product) => [product.serviceId, product]))
+  return directory.services.filter((entry) => entry.domain === domain).map((entry) => {
+    const configured = byId.get(entry.serviceId)
+    const productCode = configured?.productCode ?? `${domain === 'unlock' ? 'UNLOCK' : 'CHECK'}_${entry.serviceId}`
+    const live = getPaidReportProduct(productCode)
+    const retail = live?.priceCents ?? configured?.priceCents
+    const priceAvailable = typeof retail === 'number' && retail > 0
+    return {
+      productCode,
+      slug: configured?.slug ?? productCode.toLowerCase().replaceAll('_', '-'),
+      name: serviceGroupLabel(entry.name),
+      summary: configured?.summary ?? 'Contact us to confirm the requirements, price and delivery time for this service.',
+      group: serviceGroupLabel(entry.group),
+      // Display section is separate from the existing processing and billing domain.
+      domain: configured?.domain ?? domain,
+      inputType: configured?.inputType ?? 'imei',
+      status: configured?.status === 'available' && live?.providerReady && priceAvailable ? 'available' : 'coming_soon',
+      priceCents: priceAvailable ? retail : 0,
+      priceAvailable,
+      etaLabel: configured?.etaLabel ?? 'Confirm with support',
+      sortOrder: entry.sortOrder,
+      hasExample: hasServiceOutputExample(productCode),
+    }
+  })
 }
