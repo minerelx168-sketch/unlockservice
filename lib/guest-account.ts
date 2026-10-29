@@ -23,7 +23,7 @@ function customer(email: string) {
   return db().prepare('SELECT * FROM users WHERE lower(email)=?').get(email) as Account | undefined
 }
 function eligibleCustomer(account: Account | undefined): account is Account {
-  return !!account && account.account_type === 'customer' && account.status === 'active' && !account.banned_at
+  return !!account && ['customer', 'reseller'].includes(account.account_type) && account.status === 'active' && !account.banned_at
 }
 function tokenFor(row: Access) {
   const secret = process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET?.trim()
@@ -106,7 +106,7 @@ export function activateGuestAccount(reference: string, token: string, password?
 
 export function listClaimedGuestOrders(userId: number) {
   const user = getUser(userId)
-  if (!user || !user.email_verified_at || user.account_type !== 'customer' || user.status !== 'active' || user.banned_at) return []
+  if (!user || !user.email_verified_at || !['customer', 'reseller'].includes(user.account_type) || user.status !== 'active' || user.banned_at) return []
   return db().prepare(`SELECT g.reference,g.product_name,g.price_cents,g.card_order_price_cents,g.fee_cents,g.wallet_credit_cents,g.state,g.created_at
     FROM guest_checkouts g
     WHERE EXISTS (SELECT 1 FROM guest_account_access a WHERE a.reference=g.reference

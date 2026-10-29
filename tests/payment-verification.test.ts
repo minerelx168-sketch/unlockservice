@@ -737,3 +737,21 @@ test('legacy requests retain their original withdrawal fee allowance', async () 
   assert.equal(codes.creditForCodedTransfer(large, 990_037), 10_000, 'exactly $1 short is inside the cap')
   assert.equal(codes.creditForCodedTransfer(large, 989_937), 9899, '$1.01 short credits only the verified amount')
 })
+
+test('finalized USDT $100 upgrades only after on-chain verification, with one immutable topup',async()=>{
+  const user=auth.register('reseller-chain','reseller-chain@example.test','correct-horse-battery-staple')
+  const invoice=payments.createInvoice(user.id,'bsc-usdt-peg',10000)
+  backdate(invoice.reference)
+  const hash='0x'+('ab'.repeat(32))
+  payments.submitPaymentReference(invoice.reference,user.id,hash,'')
+  assert.equal(auth.getUser(user.id)?.role,'RETAIL')
+  const previous=globalThis.fetch
+  globalThis.fetch=mockChainProvider(transferReceipt(hash,10000,{rawAmount:codedRaw(invoice,18)})) as typeof fetch
+  try {
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference),'verified')
+    assert.equal(await verification.verifyInvoiceTransaction(invoice.reference),'verified')
+  }finally{globalThis.fetch=previous}
+  assert.equal(auth.getUser(user.id)?.role,'RESELLER')
+  assert.equal(credits.getBalance(user.id).availableCents,10000)
+  assert.deepEqual(database.db().prepare("SELECT COUNT(*) n FROM wallet_transactions WHERE user_id=? AND type='TOPUP'").get(user.id),{n:1})
+})

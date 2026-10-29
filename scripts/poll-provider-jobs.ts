@@ -1,3 +1,4 @@
+import { deliverResellerWebhooks } from '../lib/reseller-webhooks'
 import { deliverPurchaseAnalytics } from '../lib/purchase-analytics'
 import { processGuestCheckouts, processPaidGuestCheckouts } from '../lib/guest-checkout'
 import { deliverPaymentAnalytics } from '../lib/payment-analytics'
@@ -13,6 +14,7 @@ async function main() {
   const whop = await processWhopEvents(Math.min(boundedLimit, 5))
   const paidGuests = await processPaidGuestCheckouts(5).catch(() => ({ checked: 0, errors: 1 }))
   const provider = await pollProviderJobs(boundedLimit)
+  const resellerWebhooks = await deliverResellerWebhooks(10)
   // Find payments nobody pasted before checking the attached ones, so a
   // transfer detected now is verified in this same run.
   const watcher = await scanPaymentWallets()
@@ -22,7 +24,7 @@ async function main() {
   const paymentAnalytics = await deliverPaymentAnalytics(boundedLimit).catch(() => ({ failed: true }))
   const purchaseAnalytics = await deliverPurchaseAnalytics(boundedLimit).catch(() => ({ failed: true }))
   const notifications = await deliverOrderNotifications(boundedLimit)
-  process.stdout.write(`${JSON.stringify({ paidGuests, provider, watcher, payments, whop, whopReconciliation, guestCheckouts, paymentAnalytics, purchaseAnalytics, notifications })}\n`)
+  process.stdout.write(`${JSON.stringify({ resellerWebhooks, paidGuests, provider, watcher, payments, whop, whopReconciliation, guestCheckouts, paymentAnalytics, purchaseAnalytics, notifications })}\n`)
   if (
     paidGuests.errors > 0
     || guestCheckouts.errors > 0

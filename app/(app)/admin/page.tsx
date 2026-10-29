@@ -5,6 +5,7 @@ import { adminOverview, listAdminUsers } from '@/lib/admin'
 import { listAdminCreditAdjustments } from '@/lib/admin-credit-adjustments'
 import { requireAdmin } from '@/lib/auth'
 import { formatUsd } from '@/lib/money'
+import { accountRole } from '@/lib/reseller-pricing'
 import { AdminCreditAdjustment } from '@/components/admin-credit-adjustment'
 import { AdminInvoiceReviewQueue } from '@/components/admin-invoice-review'
 import { listAdminInvoiceReviews } from '@/lib/payment-verification'
@@ -209,7 +210,6 @@ export default async function AdminPage() {
                 <th scope="col" role="columnheader">User</th>
                 <th scope="col" role="columnheader">Role</th>
                 <th scope="col" role="columnheader">Status</th>
-                <th scope="col" role="columnheader">Tier</th>
                 <th scope="col" role="columnheader" className="num">Available credit</th>
                 <th scope="col" role="columnheader" className="num">Held</th>
                 <th scope="col" role="columnheader">Created</th>
@@ -222,9 +222,8 @@ export default async function AdminPage() {
                     <strong>{user.username}</strong>
                     <div className="t-small">{user.email}</div>
                   </td>
-                  <td role="cell" data-label="Role">{user.account_type}</td>
+                  <td role="cell" data-label="Role">{user.account_type === 'guest' ? 'GUEST' : accountRole(user.account_type)}</td>
                   <td role="cell" data-label="Status">{user.status}</td>
-                  <td role="cell" data-label="Tier">{user.membership_tier}</td>
                   <td role="cell" data-label="Available credit" className="num">{formatUsd(user.credit_cents - user.held_cents)}</td>
                   <td role="cell" data-label="Held" className="num">{formatUsd(user.held_cents)}</td>
                   <td role="cell" data-label="Created">{user.created_at.slice(0, 10)}</td>

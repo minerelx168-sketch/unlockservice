@@ -1,3 +1,4 @@
+import { accountPriceCents, isReseller, resellerPriceCents } from './reseller-pricing'
 import { serviceIdentifier, identifierField, type ServiceInputType } from './service-identifier'
 import { db } from './db'
 import { snapshotWebsiteAttribution } from './order-attribution'
@@ -210,7 +211,8 @@ function providerServiceConfigured(config: ReturnType<typeof providerConfigurati
   return Boolean(config.dhruEndpoint && config.username && config.dhruKey)
 }
 
-function productFromRow(row: PaidReportProductRow): PaidReportProduct {
+function productFromRow(row: PaidReportProductRow, reseller = false): PaidReportProduct {
+  const accountPrice = reseller ? resellerPriceCents(row.price_cents, row.provider_cost_micros) : row.price_cents
   const config = providerConfiguration()
   const mapping = imeiProviderService(mappingKey(row.code))
   const catalogProduct = providerProductByCode(row.code)
@@ -227,11 +229,11 @@ function productFromRow(row: PaidReportProductRow): PaidReportProduct {
     group: catalogProduct?.group ?? 'Device checks',
     domain: catalogProduct?.domain ?? 'imei_check',
     inputType: row.input_type,
-    priceCents: row.price_cents,
+    priceCents: accountPrice ?? row.price_cents,
     providerCostMicros: row.provider_cost_micros,
     etaMinutes: row.eta_minutes,
     isActive: row.is_active === 1,
-    providerReady: row.is_active === 1 && approvedMapping,
+    providerReady: row.is_active === 1 && approvedMapping && accountPrice !== null,
     sortOrder: row.sort_order,
   }
 }
@@ -536,11 +538,12 @@ function providerReadyFor(product: PaidReportProductRow): { config: ReturnType<t
   return { config, service }
 }
 
-export function listPaidReportProducts(): PaidReportProduct[] {
+export function listPaidReportProducts(userId?: number): PaidReportProduct[] {
   const rows = db()
     .prepare(`${PRODUCT_SELECT} WHERE is_active = 1 ORDER BY sort_order, code`)
     .all() as PaidReportProductRow[]
-  return rows.map(productFromRow)
+  const reseller = userId !== undefined && isReseller(userId)
+  return rows.map(row => productFromRow(row, reseller))
 }
 
 export function getPaidReportProduct(code: string): PaidReportProduct | undefined {
@@ -586,12 +589,14 @@ export async function createPaidReport(
   // configuration changes. Operational availability applies only to new work.
   if (!product) throw new PaidReportError('Choose a valid paid report.', 'product_unknown')
   if (product.is_active !== 1) throw new PaidReportError('This paid report is not active.', 'product_inactive')
-  if (input.expectedPriceCents !== undefined && input.expectedPriceCents !== product.price_cents) {
+  const priceCents = source === 'guest' ? product.price_cents : accountPriceCents(userId, product.price_cents, product.provider_cost_micros)
+  if (priceCents === null) throw new PaidReportError('Reseller pricing is temporarily unavailable for this service.', 'product_inactive')
+  if (input.expectedPriceCents !== undefined && input.expectedPriceCents !== priceCents) {
     throw new PaidReportError('The service price has changed.', 'product_inactive')
   }
   const { config, service } = providerReadyFor(product)
 
-  if (!consumeAttempt('paid-imei-report-user', String(userId), REPORT_RATE_LIMIT, REPORT_WINDOW_SECONDS)) {
+  if (!consumeAttempt('paid-imei-report-user', String(userId), isReseller(userId) ? 600 : REPORT_RATE_LIMIT, REPORT_WINDOW_SECONDS)) {
     throw new PaidReportError('Too many paid report requests. Please try again later.', 'rate_limited')
   }
 
@@ -615,7 +620,7 @@ export async function createPaidReport(
           fingerprint,
           maskIdentifier(imei),
           encryptPaidReportImei(imei, product.input_type),
-          product.price_cents,
+          priceCents,
           product.provider_cost_micros,
           source,
           idempotencyKey,
@@ -624,7 +629,7 @@ export async function createPaidReport(
           service.id,
         )
       const orderId = Number(inserted.lastInsertRowid)
-      hold(userId, product.price_cents, CREDIT_REF_TYPE, String(orderId))
+      hold(userId, priceCents, CREDIT_REF_TYPE, String(orderId))
       return db().prepare(`${ORDER_SELECT} WHERE id = ?`).get(orderId) as PaidReportOrderRow
     }).immediate()
   } catch (error) {

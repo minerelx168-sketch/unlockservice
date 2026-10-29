@@ -77,7 +77,7 @@ export async function createGuestCheckout(input: {
         throw new WhopPaymentError('This checkout belongs to a different selection. Reload to start a new order.', 409)
       }
       if (existing.customer_user_id !== null) {
-        const valid=db().prepare("SELECT 1 FROM users WHERE id=? AND account_type='customer' AND status='active' AND banned_at IS NULL AND email_verified_at IS NOT NULL AND lower(email)=?").get(input.authenticatedUserId,email)
+        const valid=db().prepare("SELECT 1 FROM users WHERE id=? AND account_type IN ('customer','reseller') AND status='active' AND banned_at IS NULL AND email_verified_at IS NOT NULL AND lower(email)=?").get(input.authenticatedUserId,email)
         if (!valid) throw new WhopPaymentError('Sign in to the customer account for this order.',401)
         if (existing.state==='pending' && (db().prepare('SELECT 1 FROM guest_checkouts WHERE customer_user_id=? AND wallet_review_reason IS NOT NULL LIMIT 1').get(existing.customer_user_id)
           || db().prepare('SELECT 1 FROM whop_topups WHERE user_id=? AND review_reason IS NOT NULL LIMIT 1').get(existing.customer_user_id))) throw new WhopPaymentError('A payment on this account needs review. Contact support before paying again.',409)

@@ -1,6 +1,7 @@
 import { storefrontDomain } from '@/lib/service-groups'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { currentSession } from '@/lib/auth'
+import { notFound, redirect } from 'next/navigation'
 import { getPaidReportProduct } from '@/lib/paid-reports'
 import { readDeviceIntent } from '@/lib/device-intent'
 import { guestCheckoutEnabled } from '@/lib/guest-checkout'
@@ -14,6 +15,7 @@ export default async function CheckoutPage({searchParams}:{searchParams:Promise<
   const params=await searchParams
   const product=getPaidReportProduct(params.product??'')
   if(!product || !product.providerReady || product.priceCents<=0) notFound()
+  if ((await currentSession())?.user.account_type === 'reseller') redirect(`/user/reports/new?product=${encodeURIComponent(product.code)}`)
   const intent = await readDeviceIntent()
   const deliveryLabel=[...CUSTOMER_IMEI_CHECK_PRODUCTS,...CUSTOMER_UNLOCK_PRODUCTS].find(entry=>entry.productCode===product.code)?.etaLabel ?? 'Confirmed for your selected service'
   return <section className="guest-shell">

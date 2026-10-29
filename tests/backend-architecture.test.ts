@@ -208,6 +208,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-09-provider-product-catalog-v2',
       '2026-09-provider-product-catalog-v3-strict-rollout',
       '2026-09-usdt-verified-amount-v1',
+      '2026-10-reseller-wallet-v1',
     ],
   )
 

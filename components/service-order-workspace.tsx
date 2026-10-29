@@ -11,7 +11,7 @@ import { storefrontDomain } from '@/lib/service-groups'
 /** Workspace entry points and payment returns share one explicit review flow. */
 export async function ServiceOrderWorkspace({ domain, requestedProduct, fallbackImei }: { domain?: DeviceDomain; requestedProduct?: string; fallbackImei?: string }) {
   const [{ user, session }, intent] = await Promise.all([requireSession(), readDeviceIntent()])
-  const orderable = new Map(listPaidReportProducts().map((product) => [product.code, product]))
+  const orderable = new Map(listPaidReportProducts(user.id).map((product) => [product.code, product]))
   const products = [...listStorefrontProviderProducts('imei_check'), ...listStorefrontProviderProducts('unlock')]
   const selected = products.find((product) => product.productCode === requestedProduct)
   const initialDomain = (selected ? storefrontDomain(selected) : domain ?? intent?.domain) ?? 'imei_check'
@@ -20,15 +20,15 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
   return (
     <>
       <div className="app-head service-workspace-title">
-        <div><h1>{title}</h1></div>
+        <div><h1>{title}</h1>{user.account_type === 'reseller' ? <p>Reseller prices · Pay with your USD wallet</p> : null}</div>
       </div>
       <PaidReportConsole
         key={`${domain ?? 'all'}:${selected?.productCode ?? 'choose'}`}
         products={products.map((product) => ({
           code: product.productCode, name: product.name, summary: product.summary,
-          group: product.group, domain: product.domain, inputType: product.inputType, priceCents: product.priceCents, priceAvailable: product.priceAvailable,
+          group: product.group, domain: product.domain, inputType: product.inputType, priceCents: orderable.get(product.productCode)?.priceCents ?? product.priceCents, priceAvailable: product.priceAvailable,
           etaMinutes: orderable.get(product.productCode)?.etaMinutes ?? 0, etaLabel: product.etaLabel,
-          providerReady: product.status === 'available',
+          providerReady: product.status === 'available' && Boolean(orderable.get(product.productCode)?.providerReady),
           hasExample: product.hasExample,
         }))}
         csrfToken={session.csrfToken}

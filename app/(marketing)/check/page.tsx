@@ -14,7 +14,7 @@ export const metadata = pageMetadata("/check", "Apple Free Check", "Get Apple Ba
 
 export default async function CheckPage() {
   const found = await currentSession()
-  const eligible = Boolean(found && ['customer', 'admin'].includes(found.user.account_type) && found.user.email_verified_at)
+  const eligible = Boolean(found && ['customer', 'reseller', 'admin'].includes(found.user.account_type) && found.user.email_verified_at)
   const unlock = storefrontAvailability('unlock')
   const products = listStorefrontProviderProducts('imei_check')
 

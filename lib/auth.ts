@@ -24,6 +24,7 @@ export type User = {
   email_verified_at: string | null
   credit_cents: number
   held_cents: number
+  role: 'RETAIL' | 'RESELLER' | 'ADMIN' | null
   account_type: string
   membership_tier: string
   status: string
@@ -112,7 +113,7 @@ export function getUser(id: number): User | undefined {
   return db()
     .prepare(
       `SELECT id, username, email, email_verified_at, credit_cents, held_cents,
-              account_type, membership_tier, status, banned_at, created_at
+              role, account_type, membership_tier, status, banned_at, created_at
          FROM users WHERE id = ?`,
     )
     .get(id) as User | undefined

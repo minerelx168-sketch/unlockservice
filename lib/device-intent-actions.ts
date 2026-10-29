@@ -55,6 +55,7 @@ export async function showUnlockServicesAction(_: IntentState, form: FormData): 
     return { error: 'This service is no longer available. Choose another service or refresh the page.' }
   }
   await writeDeviceIntent(imei, 'unlock', product?.productCode)
+  if (product && (await currentSession())?.user.account_type === 'reseller') redirect(`/user/reports/new?product=${encodeURIComponent(product.productCode)}`)
   if (product && guestCheckoutEnabled()) redirect(`/checkout?product=${encodeURIComponent(product.productCode)}`)
   redirect('/services/unlock/catalog')
 }
@@ -73,6 +74,7 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   if (crypto && !guestCryptoEnabled()) return { error: 'Crypto checkout is temporarily unavailable. Please try again shortly.' }
   await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined, product.inputType)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
+  if ((await currentSession())?.user.account_type === 'reseller') redirect(target)
   redirect(crypto || guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}${crypto ? '&method=crypto' : ''}` : target)
 }
 
@@ -89,7 +91,7 @@ export async function prepareSmallCardAccountAction(value: {
   if (!imei) return { error: identifierField(product.inputType).error }
   if (!guestCheckoutEnabled()) return { error: 'Card checkout is temporarily unavailable. Please try again shortly.' }
   const customer = await currentSession()
-  if (customer && customer.user.account_type !== 'customer') return { error: 'Use a customer account for card orders below $1.00, or choose crypto.' }
+  if (customer && !['customer', 'reseller'].includes(customer.user.account_type)) return { error: 'Use a customer account for card orders below $1.00, or choose crypto.' }
   await writeDeviceIntent(imei, product.domain, product.code, email, product.inputType)
   const checkout = `/checkout?product=${encodeURIComponent(product.code)}&method=card`
   return { url: customer ? checkout : withContinuation('/register', checkout) }
