@@ -1,3 +1,4 @@
+import { migrateResellers } from './reseller-schema'
 import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import Database from 'better-sqlite3'
@@ -660,6 +661,7 @@ export function db(): Database.Database {
 			  seedCatalog(connection)
 	      seedPaidReportCatalog(connection)
       applyProviderProductCatalogRollout(connection)
+      migrateResellers(connection)
 
 	  handle = connection
   return handle

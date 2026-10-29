@@ -21,6 +21,7 @@ export async function POST(request:Request) {
     if(body.acceptedTerms!==true) throw new WhopPaymentError('Confirm the service requirements and terms before paying.')
     const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent==='granted'
     const found=await currentSession()
+    if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const result=await createGuestCryptoCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       routeId:String(body.routeId??''),requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),
       analytics:consent && found?.user.account_type!=='admin' ? body.analyticsContext as {clientId:string;sessionId:string}|undefined : undefined})

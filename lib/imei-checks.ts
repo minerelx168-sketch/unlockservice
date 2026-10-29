@@ -191,7 +191,7 @@ export function freeAppleQuota(userId: number) {
 export async function createImeiCheck(userId: number, input: CreateImeiCheckInput): Promise<ImeiCheckView> {
   const imei = serviceIdentifier(input.imei)
   if (!imei) throw new ImeiCheckError('Enter a valid 15-digit IMEI.', 'imei_invalid')
-  const account = db().prepare("SELECT 1 FROM users WHERE id=? AND account_type IN ('customer', 'admin') AND status='active' AND banned_at IS NULL AND email_verified_at IS NOT NULL").get(userId)
+  const account = db().prepare("SELECT 1 FROM users WHERE id=? AND account_type IN ('customer', 'reseller', 'admin') AND status='active' AND banned_at IS NULL AND email_verified_at IS NOT NULL").get(userId)
   if (!account) throw new ImeiCheckError('Sign in with an active verified account to use Apple Free Check.', 'account_not_ready')
 
   const idempotencyKey = cleanIdempotencyKey(input.idempotencyKey)

@@ -1,3 +1,4 @@
+import { upgradeResellerAfterTopup } from './reseller-pricing'
 import { logPaymentFailure } from './payment-diagnostics'
 import { randomBytes } from 'node:crypto'
 import { WhopClient, WhopEnvironment, type Whop } from '@whop/sdk'
@@ -223,6 +224,7 @@ function settlePayment(payment: Whop.Payment, config: Configuration): string {
     let credited = topup.credited
     if (!credited && successful && !fullyRefunded && !disputed) {
       credit(topup.user_id, amount, 'topup', 'invoice', ref)
+      if (config.mode === 'live' && targetReversed === 0) upgradeResellerAfterTopup(topup.user_id, amount, ref)
       credited = 1
     }
     let reversed = topup.reversed_cents

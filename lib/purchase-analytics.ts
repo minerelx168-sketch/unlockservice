@@ -16,7 +16,7 @@ export function savePurchaseAnalytics(userId: number, kind: Kind, requestKey: st
     || typeof sessionId !== 'string' || !/^\d{1,12}$/.test(sessionId) || Number(sessionId) <= 0) return
   const table = kind === 'order' ? 'orders' : 'paid_report_orders'
   db().prepare(`INSERT OR IGNORE INTO purchase_analytics(user_id,kind,request_key,client_id,session_id)
-    SELECT id,?,?,?,? FROM users WHERE id=? AND account_type='customer'
+    SELECT id,?,?,?,? FROM users WHERE id=? AND account_type IN ('customer','reseller')
     AND NOT EXISTS(SELECT 1 FROM ${table} WHERE user_id=? AND idempotency_key=?)`)
     .run(kind,requestKey,clientId,sessionId,userId,userId,requestKey)
 }
@@ -40,7 +40,7 @@ export async function deliverPurchaseAnalytics(limit=20) {
     ) o ON o.user_id=a.user_id AND o.kind=a.kind AND o.idempotency_key=a.request_key
     JOIN credit_ledger l ON l.user_id=o.user_id AND l.ref_type=o.kind AND l.ref_id=CAST(o.id AS TEXT)
       AND l.type='charge' AND l.amount_cents=-o.price_cents
-    WHERE a.state='pending' AND a.client_id!='' AND a.session_id!='' AND u.account_type='customer'
+    WHERE a.state='pending' AND a.client_id!='' AND a.session_id!='' AND u.account_type IN ('customer','reseller')
       AND o.source='website' AND o.price_cents>0 AND o.created_at>=a.created_at
       AND l.created_at>=datetime('now','-48 hours')
       AND NOT EXISTS(SELECT 1 FROM credit_ledger refund WHERE refund.user_id=o.user_id AND refund.ref_type=o.kind

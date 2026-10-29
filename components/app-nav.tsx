@@ -26,7 +26,7 @@ const SECTIONS: Array<{ heading: string; items: Array<{ href: string; label: str
   },
   {
     heading: 'Account',
-    items: [{ href: '/user/profile', label: 'Profile', icon: 'user' }],
+    items: [{ href: '/user/reseller', label: 'Reseller API', icon: 'keypad' }, { href: '/user/profile', label: 'Profile', icon: 'user' }],
   },
 ]
 

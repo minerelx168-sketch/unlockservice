@@ -63,7 +63,7 @@ export default async function ProfilePage() {
             </div>
             <div className="field-box">
               <dt>Account type</dt>
-              <dd>{user.account_type === 'admin' ? 'Administrator' : 'Customer'}</dd>
+              <dd>{user.account_type === 'admin' ? 'ADMIN' : user.account_type === 'reseller' ? 'RESELLER' : 'RETAIL'}</dd>
             </div>
             <div className="field-box">
               <dt>Email verified</dt>

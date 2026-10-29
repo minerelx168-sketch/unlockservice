@@ -1,3 +1,4 @@
+import { upgradeResellerAfterTopup } from './reseller-pricing'
 import { randomUUID } from 'node:crypto'
 import { getUser, hasAdminRole } from './auth'
 import { credit, getBalance, type Balance } from './credits'
@@ -539,6 +540,7 @@ function settleVerifiedInvoice(
     }
 
     credit(fresh.user_id, verifiedCreditCents, 'topup', 'invoice', fresh.invoice_reference)
+    upgradeResellerAfterTopup(fresh.user_id, verifiedCreditCents, fresh.invoice_reference)
     const timestamp = new Date().toISOString()
     db()
       .prepare(
@@ -1024,6 +1026,7 @@ export async function decideInvoiceVerification(
       }
       const approvedCreditCents = row.verified_credit_cents ?? row.credit_amount_cents
       const balance = credit(row.user_id, approvedCreditCents, 'topup', 'invoice', row.invoice_reference)
+      upgradeResellerAfterTopup(row.user_id, approvedCreditCents, row.invoice_reference)
       db()
         .prepare(
           `UPDATE invoices
