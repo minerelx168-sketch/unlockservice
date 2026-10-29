@@ -109,7 +109,8 @@ export async function createGuestCheckout(input: {
     plan: { account_id: config.accountId, product_id: config.productId, currency: 'usd',
       ...(row.card_order_price_cents !== null ? { override_tax_type: 'inclusive' } : {}),
       initial_price: total / 100, plan_type: 'one_time', renewal_price: 0,
-      title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — one device service order. Total $${(total/100).toFixed(2)} USD, including our card fee and any applicable tax. No subscription.`,
+      // Whop variants accept a maximum 30-character title; retain the complete service in the description.
+      title: row.product_name.slice(0,30), description: row.wallet_credit_cents > 0 ? `${row.product_name}. One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — ${row.product_name}. One device service order. Total $${(total/100).toFixed(2)} USD, including our card fee and any applicable tax. No subscription.`,
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
     metadata: { guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
@@ -332,7 +333,43 @@ export async function processPaidGuestCheckouts(limit=5) {
   return stats
 }
 
-/** One requested checkout link, never a campaign or a retrospective email to old orders. */
+/** Recover recent failed link creation once per request, using its original gateway idempotency key.
+ * Unknown outcomes are left for an explicit customer retry, never blind key rotation or payment submission.
+ */
+export async function recoverGuestCheckoutLinks(limit=3) {
+  const config=whopConfiguration(),stats={recovered:0,errors:0}
+  if (!config || !guestCheckoutEnabled()) return stats
+  const rows=db().prepare(`SELECT * FROM guest_checkouts WHERE payment_method='card' AND state='pending'
+    AND environment=? AND account_id=? AND product_id=? AND checkout_id IS NULL AND checkout_url IS NULL
+    AND card_order_price_cents IS NOT NULL AND review_reason IS NULL AND last_error IS NULL
+    AND created_at>=datetime('now','-24 hours') AND created_at<=datetime('now','-2 minutes')
+    AND lease_until<=? AND checkout_link_next_at<=?
+    ORDER BY created_at LIMIT ?`).all(config.mode,config.accountId,config.productId,Date.now(),Date.now(),Math.max(1,Math.min(limit,3))) as GuestCheckout[]
+  for (const row of rows) {
+    const product=getPaidReportProduct(row.product_code)
+    if (!product?.providerReady || product.priceCents!==row.price_cents) continue
+    const locked=db().prepare(`UPDATE guest_checkouts SET last_error='Checkout link recovery started.',checkout_link_next_at=?
+      WHERE reference=? AND state='pending' AND checkout_id IS NULL AND last_error IS NULL AND checkout_link_next_at<=?`)
+      .run(Date.now()+60000,row.reference,Date.now())
+    if (!locked.changes) continue
+    try {
+      const imei=decryptPaidReportImei(row.imei_encrypted)
+      if (!imei) throw new Error('Saved checkout identifier unavailable.')
+      await createGuestCheckout({productCode:row.product_code,imei,email:row.email,requestKey:row.request_key,
+        expectedPriceCents:row.price_cents,authenticatedUserId:row.customer_user_id??undefined})
+      db().prepare('UPDATE guest_checkouts SET last_error=NULL,checkout_link_next_at=0 WHERE reference=?').run(row.reference)
+      await sendGuestCheckoutLink(row.reference)
+      stats.recovered++
+    } catch(error) {
+      logPaymentFailure('guest.checkout.recover',error)
+      db().prepare("UPDATE guest_checkouts SET last_error='Checkout link recovery needs an explicit retry; no payment was submitted.' WHERE reference=?").run(row.reference)
+      stats.errors++
+    }
+  }
+  return stats
+}
+
+/** One requested transactional checkout link, never a campaign or a repeated reminder sequence. */
 export async function sendGuestCheckoutLink(reference:string) {
   const row=getGuestCheckout(reference)
   if (!row || row.card_order_price_cents===null || row.state!=='pending' || row.review_reason
@@ -341,9 +378,10 @@ export async function sendGuestCheckoutLink(reference:string) {
     AND state='pending' AND checkout_link_sent_at IS NULL AND checkout_link_next_at<=?`).run(Date.now()+60000,reference,Date.now())
   if (!locked.changes) return
   const url=publicOrigin()+guestOrderPath(reference)
-  const body=`iUnlockMobile\n${row.product_name}\nOrder: ${reference}\n\nYour order is saved. Complete your secure card payment to start the service. If you have already paid, this private link shows your payment status. Do not pay twice.\n\n${url}`
+  const total=`$${(guestCheckoutTotal(row)/100).toFixed(2)} USD`
+  const body=`iUnlockMobile\n${row.product_name}\nOrder: ${reference}\nTotal: ${total} including our card fee and applicable tax.\n\nYour checkout is saved, but payment has not been confirmed. Continue your secure card payment to start the service. No subscription. If you have already paid, this private link shows your payment status. Do not pay twice. If you did not request this checkout, ignore this email.\n\nContinue secure card payment:\n${url}`
   try {
-    await sendTransactionalEmail(row.email,'Your iUnlockMobile order — secure payment link',`<p>${escape(row.product_name)}</p><p>Complete your payment to start your order. Already paid? This link shows your status.</p><p><a href="${escape(url)}">Open my order</a></p>`,body,{idempotencyKey:`guest/${reference}/checkout-link`})
+    await sendTransactionalEmail(row.email,'Your iUnlockMobile order — secure payment link',`<p>${escape(row.product_name)}</p><p>Total: <strong>${escape(total)}</strong>, including our card fee and applicable tax.</p><p>Your checkout is saved, but payment has not been confirmed. Continue your secure card payment to start the service. No subscription.</p><p><a href="${escape(url)}">Continue secure card payment</a></p><p>Already paid? This private link shows your status. Do not pay twice. If you did not request this checkout, ignore this email.</p>`,body,{idempotencyKey:`guest/${reference}/checkout-link`})
     db().prepare("UPDATE guest_checkouts SET checkout_link_sent_at=datetime('now') WHERE reference=?").run(reference)
   } catch { /* Scheduled worker retries; email delivery must not block checkout. */ }
 }
@@ -351,6 +389,7 @@ export async function sendGuestCheckoutLink(reference:string) {
 /** Existing signed webhook is primary; bounded API reconciliation recovers missed webhooks. */
 export async function processGuestCheckouts(limit=5) {
   await processPaidGuestCheckouts(limit)
+  await recoverGuestCheckoutLinks(Math.min(limit,3))
   const config=whopConfiguration(),stats={checked:0,errors:0}
   const rows=db().prepare(`SELECT * FROM guest_checkouts WHERE ((payment_method='card' AND environment=? AND account_id=? AND checkout_id IS NOT NULL) OR (payment_method='crypto' AND environment='live' AND crypto_invoice_reference IS NOT NULL))
     AND (checked_at IS NULL OR checked_at<=datetime('now','-1 minute'))
@@ -416,5 +455,3 @@ export async function processGuestCheckouts(limit=5) {
   }
   return stats
 }
-
-

@@ -10,6 +10,7 @@ import { CONSENT_COOKIE } from '@/lib/cookie-names'
 import { parseSignedConsent } from '@/lib/order-attribution'
 import { currentSession } from '@/lib/auth'
 import { captureCheckoutContext } from '@/lib/checkout-context-request'
+import { logPaymentFailure } from '@/lib/payment-diagnostics'
 export const runtime='nodejs'
 export const dynamic='force-dynamic'
 export async function POST(request:Request) {
@@ -32,8 +33,8 @@ export async function POST(request:Request) {
     after(() => sendGuestCheckoutLink(result.reference))
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
+    if (!(error instanceof WhopPaymentError)) logPaymentFailure('guest.checkout.create',error)
     return NextResponse.json({error:error instanceof WhopPaymentError ? error.message : 'Checkout is temporarily unavailable. Please retry; no order has been placed.'},
       {status:error instanceof WhopPaymentError ? error.status : 503,headers:{'Cache-Control':'no-store'}})
   }
 }
-
