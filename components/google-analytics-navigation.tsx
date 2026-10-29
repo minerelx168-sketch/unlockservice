@@ -1,4 +1,5 @@
 'use client'
+import { analyticsActive } from '@/lib/google-consent-tracking'
 
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
@@ -27,7 +28,7 @@ export function GoogleAnalyticsNavigation() {
     if (lastPath.current === pathname) return
     lastPath.current = pathname
     if (pathname.startsWith('/admin') || document.documentElement.dataset.analyticsDisabled === 'true') return
-    if (browser.iunlockmobileAnalyticsConsent !== 'granted') return
+    if (!analyticsActive()) return
     if (typeof browser.gtag !== 'function') return
     const page = safeAnalyticsPage(window.location.href, document.referrer)
     // Keep subsequent custom events on the same sanitized current page as well.
