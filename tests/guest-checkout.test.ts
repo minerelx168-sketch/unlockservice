@@ -20,7 +20,7 @@ before(async()=>{
       if(url.pathname.endsWith('/checkout_configurations')) {
         checkoutCalls++
         const body=JSON.parse(String(init?.body)),ref=body.metadata.guest_reference
-        const quote=db.db().prepare('SELECT price_cents+wallet_credit_cents+fee_cents AS total FROM guest_checkouts WHERE reference=?').get(ref) as {total:number}
+        const quote=db.db().prepare('SELECT COALESCE(card_order_price_cents,price_cents+wallet_credit_cents)+fee_cents AS total FROM guest_checkouts WHERE reference=?').get(ref) as {total:number}
         assert.equal(body.plan.initial_price,quote.total/100);assert.equal(body.plan.plan_type,'one_time')
         assert.equal(JSON.stringify(body).includes('490154203237518'),false)
         return Response.json({id:`ch_${ref}`,account_id:'biz_test',purchase_url:`https://whop.com/checkout/ch_${ref}`,plan:{...body.plan,id:`plan_${ref}`}})
@@ -54,7 +54,7 @@ async function checkout(extra:Record<string,unknown>={}) {
 function payment(row:import('../lib/guest-checkout').GuestCheckout,overrides:Record<string,unknown>={}) {
   const money=(amount:string)=>({amount,currency:'usd',decimals:2})
   const p={id:`pay_${row.reference}`,account_id:'biz_test',product_id:'prod_test',plan_id:row.plan_id,checkout_configuration_id:row.checkout_id,
-    metadata:{integration:'iunlockmobile-guest-v1',guest_reference:row.reference},status:'paid',substatus:'succeeded',currency:'usd',subtotal:money(((row.price_cents+row.wallet_credit_cents+row.fee_cents)/100).toFixed(2)),total:money(((row.price_cents+row.wallet_credit_cents+row.fee_cents)/100).toFixed(2)),tax_amount:null,refunded_amount:money('0.00'),payment_method_type:'card',billing_reason:'one_time',paid_at:new Date().toISOString(),updated_at:new Date().toISOString(),...overrides} as unknown as Whop.Payment
+    metadata:{integration:'iunlockmobile-guest-v1',guest_reference:row.reference},status:'paid',substatus:'succeeded',currency:'usd',subtotal:money(((guest.guestCheckoutTotal(row))/100).toFixed(2)),total:money(((guest.guestCheckoutTotal(row))/100).toFixed(2)),tax_amount:null,refunded_amount:money('0.00'),payment_method_type:'card',billing_reason:'one_time',paid_at:new Date().toISOString(),updated_at:new Date().toISOString(),...overrides} as unknown as Whop.Payment
   payments.set(p.id,p);return p
 }
 function due(ref:string) {db.db().prepare("UPDATE guest_checkouts SET checked_at=datetime('now','-2 minutes'),email_next_at=0 WHERE reference=?").run(ref)}
@@ -134,25 +134,25 @@ function customer(email=`${randomUUID()}@example.test`,extra:Record<string,strin
 async function smallCheckout(extra:Record<string,unknown>={}) {
   const account=customer()
   db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_CARRIER_LITE'").run()
-  return {...await checkout({email:account.email,authenticatedUserId:account.id,expectedPriceCents:75,...extra}),account}
+  const created=await checkout({email:account.email,authenticatedUserId:account.id,expectedPriceCents:75,...extra})
+  // Simulate the historical contract, which must survive the new direct-order pricing.
+  db.db().prepare('UPDATE guest_checkouts SET card_order_price_cents=NULL,wallet_credit_cents=25,customer_user_id=? WHERE reference=?').run(account.id,created.row.reference)
+  return {...created,row:guest.getGuestCheckout(created.row.reference)!,account}
 }
-test('sub-dollar card quote requires a verified active customer and preserves the service price',async()=>{
+test('sub-dollar direct card orders need no account and allocate no customer wallet credit',async()=>{
   db.db().prepare("UPDATE paid_report_products SET price_cents=75 WHERE code='APPLE_CARRIER_LITE'").run()
-  const calls=checkoutCalls
-  await assert.rejects(checkout({expectedPriceCents:75}),/Create an account/)
-  for (const extra of [{account_type:'admin'},{status:'paused'},{banned_at:new Date().toISOString()},{email_verified_at:null}] as Array<Record<string,string|null>>) {
-    const account=customer(undefined,extra)
-    await assert.rejects(checkout({email:account.email,authenticatedUserId:account.id,expectedPriceCents:75}),/Create an account/)
-  }
-  assert.equal(checkoutCalls,calls)
-  const account=customer()
-  await assert.rejects(checkout({email:'other@example.test',authenticatedUserId:account.id,expectedPriceCents:75}),/account email/)
-  const {row,input}=await smallCheckout()
-  assert.equal(row.price_cents,75);assert.equal(row.wallet_credit_cents,25);assert.equal(row.fee_cents,5)
-  assert.equal(row.price_cents+row.wallet_credit_cents+row.fee_cents,105)
-  await assert.rejects(guest.createGuestCheckout({...input,authenticatedUserId:account.id}),/different selection/)
-  await assert.rejects(guest.createGuestCheckout({...input,authenticatedUserId:undefined}),(error:unknown)=>!!error && typeof error==='object' && 'status' in error && error.status===401)
-  assert.equal(credits.getBalance(row.customer_user_id!).availableCents,0)
+  const {row,input}=await checkout({expectedPriceCents:75})
+  assert.equal(row.price_cents,75);assert.equal(row.card_order_price_cents,100)
+  assert.equal(row.wallet_credit_cents,0);assert.equal(row.customer_user_id,null)
+  assert.equal(guest.guestCheckoutTotal(row),105)
+  const before=providerCalls
+  await guest.createGuestCheckout(input);assert.equal(providerCalls,before)
+  guest.settleGuestPayment(payment(row))
+  await guest.processPaidGuestCheckouts(10)
+  const saved=guest.getGuestCheckout(row.reference)!
+  assert.equal(providerCalls,before+1);assert.equal(guest.guestResult(saved).state,'completed')
+  assert.equal(credits.getBalance(saved.user_id!).availableCents,0)
+  assert.equal((db.db().prepare("SELECT COUNT(*) AS n FROM credit_ledger WHERE ref_type='guest_card_difference' AND ref_id=?").get(row.reference) as {n:number}).n,0)
 })
 test('verified small card payment grants the difference once then orders only the service amount',async()=>{
   const {row,account}=await smallCheckout(),before=providerCalls
@@ -226,3 +226,43 @@ test('reopening a small pending checkout revalidates account state and payment r
   await assert.rejects(guest.createGuestCheckout(input),/payment.*review/)
 })
 
+
+
+
+test('paid webhook work dispatches without any gateway read or browser return and survives duplicate jobs',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  const {row}=await checkout(),before=providerCalls
+  await guest.processPaidGuestCheckouts(10);assert.equal(providerCalls,before)
+  const p=payment(row);guest.settleGuestPayment(p)
+  payments.delete(p.id) // Reconciliation would fail; verified paid work must still start.
+  await Promise.all([guest.processPaidGuestCheckouts(10),guest.processPaidGuestCheckouts(10)])
+  await guest.processPaidGuestCheckouts(10)
+  const saved=guest.getGuestCheckout(row.reference)!
+  assert.equal(providerCalls,before+1);assert.ok(saved.report_id)
+  assert.ok(saved.receipt_sent_at || saved.result_sent_at)
+  payments.set(p.id,p)
+})
+test('requested checkout email retries once without provider work and disappears as a payment action after payment',async()=>{
+  const {row}=await checkout(),before=providerCalls
+  emailFailure=true;await guest.sendGuestCheckoutLink(row.reference);emailFailure=false
+  assert.equal(guest.getGuestCheckout(row.reference)?.checkout_link_sent_at,null)
+  db.db().prepare('UPDATE guest_checkouts SET checkout_link_next_at=0 WHERE reference=?').run(row.reference)
+  await Promise.all([guest.sendGuestCheckoutLink(row.reference),guest.sendGuestCheckoutLink(row.reference)])
+  assert.equal(emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference)).length,1)
+  assert.equal(providerCalls,before)
+  assert.ok(guest.guestResult(guest.getGuestCheckout(row.reference)!).checkoutUrl)
+  guest.settleGuestPayment(payment(row))
+  assert.equal(guest.guestResult(guest.getGuestCheckout(row.reference)!).checkoutUrl,null)
+  await guest.sendGuestCheckoutLink(row.reference)
+  assert.equal(emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference)).length,1)
+})
+
+test('inclusive card tax never adds to the quoted order total and excess collections are refused',async()=>{
+  const {row}=await checkout()
+  const m=(amount:string)=>({amount,currency:'usd',decimals:2,display_decimals:2})
+  const p=payment(row,{tax_amount:m('0.50'),tax_behavior:'inclusive',subtotal:m('10.00')})
+  assert.equal(guest.settleGuestPayment(p),'paid')
+  assert.equal(guest.getGuestCheckout(row.reference)?.tax_cents,50)
+  const other=await checkout(),q=payment(other.row,{tax_amount:m('0.50'),tax_behavior:'exclusive',total:m('11.00')})
+  assert.throws(()=>guest.settleGuestPayment(q),/amount mismatch/)
+})

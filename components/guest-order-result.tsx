@@ -23,11 +23,12 @@ export function GuestOrderResult({initial,accessKey}:{initial:Result;accessKey:s
   const isUnlock=result.domain==='unlock'
   const terminal=result.state==='completed'||result.refused||['refund_pending','refunded'].includes(result.state)
   const outcome=result.refused?'Refused':result.state==='refunded'?'Refunded':result.state==='refund_pending'?'Refund pending':'Completed'
-  const steps=[{name:'Received',done:result.paymentReceived},{name:isUnlock?'Submitted':'Checking',done:result.submitted},{name:outcome,done:terminal}]
+  const steps=[{name:'Paid',done:result.paymentReceived},{name:'Processing',done:result.submitted},{name:outcome,done:terminal}]
   const title=result.state==='completed'?(isUnlock?'Your unlock result is ready':'Your full report is ready'):['paid','processing'].includes(result.state)?'Order received':message[0]
   return <section className="guest-shell guest-result"><span className="eyebrow">{isUnlock?'UNLOCK ORDER':'PHONE CHECK ORDER'}</span><h1 aria-live="polite">{title}</h1><p>{message[1]}</p>
     <ol className="guest-progress" aria-label="Order progress">{steps.map((step,index)=><li key={index} data-done={step.done?'true':'false'} aria-current={!terminal&&index===(result.submitted?1:0)?'step':undefined}><span aria-hidden="true">{step.done?'✓':index+1}</span><strong>{step.name}</strong>{!step.done?<small>Pending</small>:null}</li>)}</ol>
-    <article className="guest-card"><h2>{result.productName}</h2><p className="guest-reference">Order reference: {result.reference}</p><p>Order total before tax: <strong>{formatUsd(result.priceCents+result.feeCents+result.walletCreditCents)}</strong></p>
+    <article className="guest-card"><h2>{result.productName}</h2><p className="guest-reference">Order reference: {result.reference}</p><p>{result.taxInclusive ? 'Order total: ' : 'Order total before tax: '}<strong>{formatUsd(result.totalCents)}</strong></p>
+      {result.checkoutUrl && !result.paymentReceived ? <><a className="button button--primary guest-resume" href={result.checkoutUrl} rel="noreferrer">Continue secure payment</a><p className="guest-note">Already paid? Wait for confirmation here. Do not pay again.</p></> : null}
       {result.walletCreditCents>0 ? <p className="guest-credit-note"><strong>{result.walletCreditApplied ? `${formatUsd(result.walletCreditCents)} was added to your account credit.${result.walletCreditReview ? ' A payment review currently restricts spending.' : ''}` : ['refunded','refund_pending'].includes(result.state) ? 'The unused account credit is included in your card refund.' : result.walletCreditReview ? 'Your account credit is under payment review. Contact support with this order reference.' : `${formatUsd(result.walletCreditCents)} will be saved as account credit after payment is confirmed.`}</strong>{result.walletCreditApplied ? <> <Link href="/user/dashboard">View my credit</Link></> : null}</p> : null}
       {result.cryptoReceivedCents!==null && result.cryptoReceivedCents>result.priceCents ? <p className="guest-note">We received {formatUsd(result.cryptoReceivedCents)} for this {formatUsd(result.priceCents)} service. Contact support with your order reference to arrange the return of the extra {formatUsd(result.cryptoReceivedCents-result.priceCents)}.</p>:null}
       {!terminal&&result.paymentReceived?<p className="guest-note">{isUnlock?'We submit your paid order to the service provider and update this page when they respond.':'Your paid check starts automatically. The full report appears here as soon as the provider returns it.'} No need to keep this page open.</p>:null}
@@ -37,4 +38,5 @@ export function GuestOrderResult({initial,accessKey}:{initial:Result;accessKey:s
       <Link className="button button--secondary" href="/support">Contact support</Link>
     </article></section>
 }
+
 

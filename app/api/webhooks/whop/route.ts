@@ -1,4 +1,5 @@
 import { after } from 'next/server'
+import { processPaidGuestCheckouts } from '@/lib/guest-checkout'
 import { enqueueWhopEvent, processWhopEvents, WhopPaymentError } from '@/lib/whop'
 
 export const runtime = 'nodejs'
@@ -38,9 +39,10 @@ export async function POST(request: Request) {
     const status = enqueueWhopEvent(raw, Object.fromEntries(request.headers))
     // The inbox is committed before 200. The existing worker retries if this
     // process stops after responding. Redirects never trigger fulfillment.
-    if (status !== 'ignored') after(async () => { await processWhopEvents(3) })
+    if (status !== 'ignored') after(async () => { await processWhopEvents(3); await processPaidGuestCheckouts(5) })
     return Response.json({ received: true }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     return new Response('Webhook could not be accepted', { status: error instanceof WhopPaymentError && error.status === 503 ? 503 : 400 })
   }
 }
+

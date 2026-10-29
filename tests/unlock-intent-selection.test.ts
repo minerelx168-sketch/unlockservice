@@ -95,11 +95,11 @@ test('unavailable crypto does not silently switch the payment method or overwrit
   assert.equal(writes.length,0)
 })
 
-test('a card service below $1 saves the draft and resumes checkout after signup', async () => {
+test('a card service below $1 saves the draft and opens checkout without signup', async () => {
   const {continueAction,writes}=actionHarness(true,true,75)
   const data=form('490154203237518','UNLOCK_ACTIVE')
   data.set('domain','unlock');data.set('email','buyer@example.com');data.set('paymentMethod','card')
-  await assert.rejects(continueAction({},data),/REDIRECT:\/register\?next=%2Fcheckout%3Fproduct%3DUNLOCK_ACTIVE%26method%3Dcard$/)
+  await assert.rejects(continueAction({},data),/REDIRECT:\/checkout\?product=UNLOCK_ACTIVE$/)
   assert.deepEqual(Array.from(writes[0]),['490154203237518','unlock','UNLOCK_ACTIVE','buyer@example.com','imei'])
   assert.equal(writes.length,1)
 })
@@ -114,12 +114,12 @@ test('signed-in small card customers and all crypto guests proceed without signu
   }
 })
 
-test('admin small card checkout cannot loop through registration or overwrite the draft', async () => {
+test('small card navigation does not require or change account ownership', async () => {
   const {continueAction,writes}=actionHarness(true,true,75,'admin')
   const data=form('490154203237518','UNLOCK_ACTIVE')
   data.set('domain','unlock');data.set('email','buyer@example.com');data.set('paymentMethod','card')
-  assert.match((await continueAction({},data)).error??'',/customer account/)
-  assert.equal(writes.length,0)
+  await assert.rejects(continueAction({},data),/REDIRECT:\/checkout\?product=UNLOCK_ACTIVE$/)
+  assert.equal(writes.length,1)
 })
 
 test('direct checkout account handoff returns a navigation URL without throwing or losing edited details', async () => {
@@ -133,4 +133,5 @@ test('direct checkout account handoff returns a navigation URL without throwing 
   assert.ok((await unavailable.prepareAction({productCode:'UNLOCK_ACTIVE',imei:'490154203237518',email:'buyer@example.com',domain:'unlock'})).error)
   assert.equal(unavailable.writes.length,0)
 })
+
 

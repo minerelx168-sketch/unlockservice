@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
+import { after, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createHash } from 'node:crypto'
-import { createGuestCheckout } from '@/lib/guest-checkout'
+import { createGuestCheckout, sendGuestCheckoutLink } from '@/lib/guest-checkout'
 import { WhopPaymentError } from '@/lib/whop'
 import { readCommandJson } from '@/lib/request-json'
 import { publicOrigin } from '@/lib/site'
@@ -26,9 +26,11 @@ export async function POST(request:Request) {
     const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
       analytics: consent && found?.user.account_type!=='admin' ? context : undefined})
+    after(() => sendGuestCheckoutLink(result.reference))
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
     return NextResponse.json({error:error instanceof WhopPaymentError ? error.message : 'Checkout is temporarily unavailable. Please retry; no order has been placed.'},
       {status:error instanceof WhopPaymentError ? error.status : 503,headers:{'Cache-Control':'no-store'}})
   }
 }
+
