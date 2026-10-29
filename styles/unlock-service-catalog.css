@@ -41,7 +41,7 @@
 .unlock-catalog__groups { display: grid; gap: 28px; }
 .unlock-catalog__group { min-width: 0; scroll-margin-top: 112px; }
 .unlock-catalog__group-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 12px; }
-.unlock-catalog__group-heading h2 { margin: 0; color: var(--ink-strong); font-size: 1.25rem; line-height: 1.4; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.unlock-catalog__group-heading h2 { margin: 0; color: var(--ink-strong); font-size: 1.25rem; line-height: 1.4; letter-spacing: var(--ls-heading); overflow-wrap: anywhere; }
 .unlock-catalog__group-heading > span { color: var(--muted); font-size: .75rem; white-space: nowrap; }
 .unlock-catalog__rows { display: grid; gap: 10px; }
 .unlock-catalog__service { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }

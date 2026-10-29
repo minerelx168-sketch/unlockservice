@@ -56,12 +56,28 @@ export function MotionEffects() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (!('IntersectionObserver' in window)) return
 
+    const timers: number[] = []
+    /* Once its reveal has played, an element goes back to being itself:
+       the reveal's transition list would otherwise keep replacing the
+       element's own, and hover lifts would lag behind the stagger delay. */
+    const settle = (el: Element) => {
+      const index = Number((el as HTMLElement).style.getPropertyValue('--ri') || 0)
+      timers.push(
+        window.setTimeout(() => {
+          el.removeAttribute('data-reveal')
+          el.classList.remove('is-in')
+          ;(el as HTMLElement).style.removeProperty('--ri')
+        }, 400 + index * 40),
+      )
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue
           entry.target.classList.add('is-in')
           observer.unobserve(entry.target)
+          settle(entry.target)
         }
       },
       { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
@@ -88,10 +104,12 @@ export function MotionEffects() {
 
     return () => {
       observer.disconnect()
+      timers.forEach((t) => window.clearTimeout(t))
       /* Leave nothing hidden behind when the page changes under us. */
       for (const el of tagged) {
-        el.classList.add('is-in')
+        el.classList.remove('is-in')
         el.removeAttribute('data-reveal')
+        ;(el as HTMLElement).style.removeProperty('--ri')
       }
     }
   }, [pathname])

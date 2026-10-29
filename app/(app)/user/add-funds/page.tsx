@@ -36,7 +36,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
               ? 'Choose how you want to pay, then enter your credit amount. Your credit is added after payment has been verified.'
               : onlyBep20
               ? 'Choose USDT or USDC on BEP20 (BNB Smart Chain). We’ll create a payment request with the exact amount, wallet address and QR code. Send only after you see those details.'
-              : 'Enter your credit amount and choose a network. We’ll create a payment request with the exact amount, wallet address and QR code. Send only after you see those details.'}
+              : 'Enter an amount and network. Send only after the exact amount, wallet address and QR code appear.'}
           </p>
         </div>
         <div className="funding-balance-card">
@@ -78,8 +78,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
         /> : undefined}
       /> : <p className="alert" role="status">
         <Icon name="info" strokeWidth={1.9} />
-        <span>Top-ups are temporarily unavailable. <Link href="/contact">Contact support</Link> for help;
-          do not send a payment until the payment details appear on your request.</span>
+        <span>Top-ups are paused. Do not send a payment until payment details appear — <Link href="/contact">contact support</Link> if you need help.</span>
       </p>}
     </>
   )

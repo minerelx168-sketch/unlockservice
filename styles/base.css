@@ -115,6 +115,9 @@ button {
 
 /* ---- type ramp ----------------------------------------------------- */
 
+/* Headings no longer inherit the body's 1.7: a heading that wrapped took
+   paragraph spacing, while the named styles below went the other way and
+   set 1.04-1.14. Both now read the one heading standard from tokens.css. */
 h1,
 h2,
 h3,
@@ -122,6 +125,8 @@ h4 {
   font-family: var(--font-display);
   color: var(--ink-strong);
   margin: 0;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
   overflow-wrap: anywhere;
 }
 
@@ -144,22 +149,22 @@ h4 {
    four lines and pushed the paragraph under it off the first screen. */
 .t-hero {
   font-size: clamp(2.125rem, 4.4vw, 3.625rem);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   font-weight: 700;
 }
 
 .t-display {
   font-size: clamp(2.125rem, 4.9vw, 3.875rem);
-  line-height: 1.14;
-  letter-spacing: -0.02em;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   font-weight: 640;
 }
 
 .t-section {
   font-size: clamp(1.875rem, 4.1vw, 3.125rem);
-  line-height: 1.2;
-  letter-spacing: -0.018em;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   font-weight: 680;
 }
 
@@ -168,6 +173,13 @@ h4 {
   line-height: 1.4;
   letter-spacing: -0.012em;
   font-weight: 660;
+}
+
+/* The larger card heading used for block titles (was an inline style). */
+.t-card--lg {
+  font-size: 1.75rem;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
 }
 
 .t-lead {

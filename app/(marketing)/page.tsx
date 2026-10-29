@@ -14,34 +14,34 @@ const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   {
     icon: 'shield',
     title: 'Not reported lost or stolen',
-    body: 'A lost-or-stolen report may prevent unlocking or activation. Review the selected report’s coverage and the carrier’s eligibility policy before ordering.',
+    body: 'A lost-or-stolen report can block the unlock. Run a Phone Check first if unsure.',
   },
   {
     icon: 'check',
     title: 'Account in good standing',
-    body: 'An unpaid balance or an active contract on the original line is the most common reason a network says no.',
+    body: 'An unpaid balance or active contract is the most common reason for a refusal.',
   },
   {
     icon: 'wallet',
     title: 'Check financing requirements',
-    body: 'Financing and account requirements depend on the original carrier. Check its current policy before ordering; if the service is refused, direct card payments are refunded to the original payment method.',
+    body: 'Rules depend on the original carrier. If it refuses, card payments are refunded.',
   },
 ]
 
 const STEPS: Array<{ title: string; body: string; art: 'imei' | 'review' | 'done' }> = [
   {
     title: 'Choose your service',
-    body: 'Select your original network or report. See the service price and estimated delivery before entering an IMEI.',
+    body: 'Pick your network or report and see the price and delivery time.',
     art: 'imei',
   },
   {
     title: 'Add your IMEI and review',
-    body: 'Dial *#06# to find the 15 digits. Add your result email, review the requirements, then choose card or crypto. Card orders below $1 need an account.',
+    body: 'Dial *#06# for the 15-digit IMEI, add your email, then pay by card or crypto.',
     art: 'review',
   },
   {
     title: 'Use a supported SIM',
-    body: 'When the service is delivered, follow its device-specific instructions. Use a SIM from a network whose bands your phone supports. A refused direct card order is refunded to the original payment method.',
+    body: 'Follow the instructions you receive and insert your new SIM. Refused orders are refunded.',
     art: 'done',
   },
 ]
@@ -170,10 +170,10 @@ export default function HomePage() {
   const picks = quickPicks(checkProducts, 2)
 
   const heroTiles: Array<{ icon: IconName; title: string; caption: string }> = [
-    { icon: 'bolt', title: 'Remote', caption: 'Nothing installed, no shop visit' },
-    { icon: 'shieldCheck', title: 'Pay per order', caption: 'Card or crypto, with the total shown before payment' },
-    { icon: 'lock', title: 'Carrier-approved', caption: 'Eligibility and method depend on the selected service' },
-    { icon: 'globe', title: `${networks} networks`, caption: `Across ${countries.length} countries, more on request` },
+    { icon: 'bolt', title: 'Remote', caption: 'No shop visit' },
+    { icon: 'shieldCheck', title: 'Pay per order', caption: 'Card or crypto' },
+    { icon: 'lock', title: 'Carrier-approved', caption: 'Permanent unlock' },
+    { icon: 'globe', title: `${networks} networks`, caption: `In ${countries.length} countries` },
   ]
 
   return (
@@ -208,8 +208,8 @@ export default function HomePage() {
 
             <p className="t-lead">
               {ordering
-                ? 'Compare prices and delivery times for your original network. Review the service before you pay.'
-                : 'Explore device reports and unlock services. Compare prices and availability, then choose card or crypto at checkout.'}
+                ? 'See the price and delivery time for your network before you pay.'
+                : 'Compare device reports and unlock services, then pay by card or crypto.'}
             </p>
 
 
@@ -265,11 +265,6 @@ export default function HomePage() {
               ))}
             </div>
 
-            <p className="quick-form-help hero-imei-tip">
-              Dial <kbd>*#06#</kbd> on the phone to see its IMEI.
-              <Link href="/support#faq"><Icon name="question" strokeWidth={2} />How to find my IMEI</Link>
-              <Link href="/track"><Icon name="clock" strokeWidth={2} />Track an order</Link>
-            </p>
           </div>
         </div>
       </section>
@@ -286,8 +281,7 @@ export default function HomePage() {
               Carriers <span className="accent">We Unlock</span>
             </h2>
             <p className="t-lead">
-              Browse {networks} listed networks across {countries.length} countries. Check your carrier’s current
-              availability, price and typical turnaround before you order.
+              {networks} networks in {countries.length} countries. See the price and turnaround before you order.
             </p>
           </div>
 
@@ -304,7 +298,7 @@ export default function HomePage() {
 
           <div className="tile-foot">
             <p className="t-small">
-              Not listed? The unlock catalog carries more networks than fit here, and new ones are added as suppliers open them.
+              Not listed? The full catalog has more networks.
             </p>
             <Link className="button button--quiet" href="/services/unlock">
               <Icon name="search" strokeWidth={1.9} />
@@ -318,7 +312,7 @@ export default function HomePage() {
                 <Icon name="check" strokeWidth={2} />
                 Before you order
               </span>
-              <h2 className="t-card" style={{ fontSize: 28, letterSpacing: '-0.03em' }}>
+              <h2 className="t-card t-card--lg">
                 Is your phone eligible?
               </h2>
               <p className="t-small">Thirty seconds of checking saves a refused order. Three things decide it.</p>
@@ -337,8 +331,7 @@ export default function HomePage() {
             <p className="eligibility-note">
               <Icon name="info" strokeWidth={1.9} />
               <span>
-                Not sure? Order with the best information you have. If the network turns the device down,
-                direct card orders receive an original-method refund; balance-paid orders release the reserved credit.
+                Not sure? If the network refuses the device, your payment or credit comes back.
               </span>
             </p>
           </div>
@@ -479,8 +472,7 @@ export default function HomePage() {
             <div>
               <h3>Not sure which one you need?</h3>
               <p>
-                The help centre walks through the common cases — buying used, switching network, a phone
-                that says “SIM not supported” — and points you at the right service.
+                Buying used, switching network or seeing “SIM not supported”? The help centre points you to the right service.
               </p>
             </div>
             <div className="cta-actions">

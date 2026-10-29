@@ -53,8 +53,7 @@ export function TrackOrderForm({ defaultEmail = '' }: { defaultEmail?: string })
         </button>
 
         <p className="t-small">
-          Orders are only shown to the account that placed them, so you will be asked to sign in if
-          you are not already. The order number is also a link in your confirmation email.
+          Only the account that placed an order can see it, so you may be asked to sign in.
         </p>
       </div>
     </form>

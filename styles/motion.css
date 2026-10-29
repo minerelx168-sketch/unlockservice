@@ -5,13 +5,13 @@
  */
 html.js-motion [data-reveal] {
   opacity: 0;
-  transform: translateY(12px);
+  translate: 0 12px;
 }
 html.js-motion [data-reveal].is-in,
 html.js-motion [data-reveal]:focus-within {
   opacity: 1;
-  transform: none;
-  transition: opacity 360ms ease-out, transform 360ms ease-out;
+  translate: none;
+  transition: opacity 360ms ease-out, translate 360ms ease-out;
   transition-delay: calc(var(--ri, 0) * 40ms);
 }
 html.js-motion [data-reveal]:focus-within { transition-delay: 0ms; }
@@ -76,7 +76,7 @@ html.js-motion [data-reveal]:focus-within { transition-delay: 0ms; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.js-motion [data-reveal] { opacity: 1; transform: none; transition: none; }
+  html.js-motion [data-reveal] { opacity: 1; translate: none; transform: none; transition: none; }
   .button--primary:not(:disabled):hover::after,
   .price-check-result,
   .faq-item[open] .answer { animation: none; }

@@ -60,7 +60,7 @@ export function AnalyticsConsent() {
     {open ? <div aria-hidden="true" style={{ height: noticeHeight }} /> : null}
     <aside ref={noticeRef} className="analytics-consent" data-open={open} aria-label="Privacy choices">
     {open ? <div className="cookie-banner" role="region" aria-label="Cookie notice" aria-busy={busy}>
-      <p>We use cookies to ensure that we give you the best experience on our website. If you continue to use this site we will assume that you are happy with it</p>
+      <p>We use cookies to improve your experience.</p>
       <button type="button" className="button button--primary cookie-accept" disabled={busy} onClick={() => void choose('granted')}>{busy ? 'Saving…' : 'Accept'}</button>
       <button type="button" className="cookie-close" aria-label="Close cookie notice without accepting optional tracking" disabled={busy} onClick={() => void choose('denied')}>×</button>
       {error ? <p className="cookie-error" role="alert">{error}</p> : null}

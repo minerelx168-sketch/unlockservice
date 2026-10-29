@@ -31,9 +31,7 @@ export default async function ContactPage() {
           </span>
           <h1 className="t-section">Talk to a person.</h1>
           <p className="t-lead">
-            Questions about an order, a payment, or whether a device can be unlocked at all. Write
-            below and it reaches the same inbox as an email to us — or write to that address
-            directly, whichever you prefer.
+            Questions about an order, a payment or a device? Write below or email us — it is the same inbox.
           </p>
         </div>
 

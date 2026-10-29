@@ -11,7 +11,7 @@
 }
 .apple-check-intro { min-width: 0; padding-top: 20px; }
 .apple-check-intro > .kicker { gap: 8px; margin-bottom: 20px; font-size: .75rem; letter-spacing: .1em; }
-.apple-check-intro .t-section { margin: 0 0 20px; font-size: clamp(2.5rem, 4.4vw, 4rem); line-height: 1.12; letter-spacing: -.025em; }
+.apple-check-intro .t-section { margin: 0 0 var(--heading-gap); font-size: clamp(2.5rem, 4.4vw, 4rem); line-height: var(--lh-display); letter-spacing: var(--ls-display); }
 .apple-check-intro .t-section > span { display: block; color: var(--primary); }
 .apple-check-intro .t-lead { max-width: 440px; margin: 0; font-size: 1.0625rem; line-height: 1.75; color: var(--muted); }
 .apple-check-highlights { display: flex; flex-wrap: wrap; gap: 10px 20px; list-style: none; margin: 22px 0 0; padding: 0; }
