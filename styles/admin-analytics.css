@@ -94,3 +94,21 @@
  .analytics-table td { grid-template-columns: minmax(0,1fr); gap: 3px; }
  .analytics-table tr { gap: 14px; }
 }
+
+/* ---- Tracking health ------------------------------------------------ */
+.tracking-status { display: flex; align-items: flex-start; gap: 14px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.tracking-status.is-off { border-color: color-mix(in srgb, var(--danger, #c2410c) 35%, var(--line)); }
+.tracking-status .badge { flex-shrink: 0; margin-top: 2px; }
+.tracking-status h2 { margin: 0 0 6px; font-size: 17px; line-height: var(--lh-heading); }
+.tracking-status p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.tracking-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.tracking-grid .panel { min-width: 0; }
+.tracking-counts { list-style: none; margin: 0; padding: 4px 20px 12px; }
+.tracking-counts li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.tracking-counts li:first-child { border-top: 0; }
+.tracking-counts small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.tracking-counts strong { font-size: 18px; font-variant-numeric: tabular-nums; color: var(--ink-strong); }
+.tracking-health .analytics-empty { padding: 24px 20px; }
+.tracking-health .analytics-footnote { padding: 0 4px; }
+@media (max-width: 1100px) { .tracking-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) { .tracking-status { flex-direction: column; gap: 10px; padding: 16px; } .tracking-counts { padding: 4px 16px 10px; } }
