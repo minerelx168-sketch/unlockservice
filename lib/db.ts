@@ -700,6 +700,7 @@ function migrate(connection: Database.Database) {
     addColumn(connection, 'guest_checkouts', 'wallet_review_reason TEXT')
     // Null preserves legacy wallet allocations and existing checkout amounts.
     addColumn(connection, 'guest_checkouts', 'card_order_price_cents INTEGER')
+    addColumn(connection, 'guest_checkouts', 'tax_cents INTEGER NOT NULL DEFAULT 0')
     addColumn(connection, 'guest_checkouts', 'checkout_link_sent_at TEXT')
     addColumn(connection, 'guest_checkouts', 'checkout_link_next_at INTEGER NOT NULL DEFAULT 0')
     connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')

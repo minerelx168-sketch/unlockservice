@@ -20,7 +20,7 @@ export const GUEST_CARD_MIN_TOTAL_CENTS = 100
 
 export type GuestCheckout = {
   reference: string; request_key: string; email: string; product_code: string; product_name: string
-  imei_encrypted: string; card_order_price_cents: number | null; checkout_link_sent_at: string | null; checkout_link_next_at: number; price_cents: number; fee_cents: number; wallet_credit_cents: number; customer_user_id: number | null; wallet_review_reason: string | null; account_id: string; product_id: string
+  imei_encrypted: string; card_order_price_cents: number | null; tax_cents: number; checkout_link_sent_at: string | null; checkout_link_next_at: number; price_cents: number; fee_cents: number; wallet_credit_cents: number; customer_user_id: number | null; wallet_review_reason: string | null; account_id: string; product_id: string
   environment: string; checkout_id: string | null; plan_id: string | null; checkout_url: string | null
   payment_method: 'card' | 'crypto'; crypto_invoice_reference: string | null
   payment_id: string | null; state: string; user_id: number | null; report_id: number | null
@@ -104,8 +104,9 @@ export async function createGuestCheckout(input: {
   const checkout = await client(config).checkoutConfigurations.create({
     account_id: config.accountId, mode: 'payment',
     plan: { account_id: config.accountId, product_id: config.productId, currency: 'usd',
+      ...(row.card_order_price_cents !== null ? { override_tax_type: 'inclusive' } : {}),
       initial_price: total / 100, plan_type: 'one_time', renewal_price: 0,
-      title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — one device service order. Total $${(total/100).toFixed(2)} USD before any applicable tax. No subscription.`,
+      title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — one device service order. Total $${(total/100).toFixed(2)} USD, including our card fee and any applicable tax. No subscription.`,
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
     metadata: { guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
@@ -167,8 +168,13 @@ export function settleGuestPayment(payment: Whop.Payment): string {
       return 'review'
     }
     const total=money(payment.total), subtotal=money(payment.subtotal), tax=money(payment.tax_amount,true), refunded=money(payment.refunded_amount,true)
-    if (payment.currency!=='usd' || subtotal!==guestCheckoutTotal(row) || total-tax!==subtotal || total<subtotal
-      || (tax>0 && payment.tax_behavior!=='exclusive') || refunded>total || payment.payment_method_type!=='card'
+    const expectedTotal=guestCheckoutTotal(row)
+    // New inclusive quotes fix the amount collected; legacy exclusive quotes retain their contract.
+    const validAmount=row.card_order_price_cents !== null
+      ? total===expectedTotal && tax<=total && (subtotal===total || subtotal===total-tax)
+        && (tax===0 || payment.tax_behavior==='inclusive')
+      : subtotal===expectedTotal && total-tax===subtotal && total>=subtotal && (tax===0 || payment.tax_behavior==='exclusive')
+    if (payment.currency!=='usd' || !validAmount || refunded>total || payment.payment_method_type!=='card'
       || payment.promo_code_id || !['one_time','subscription_create'].includes(payment.billing_reason??'')) throw new Error('Guest payment amount mismatch.')
     const disputed=(/dispute|resolution/.test(payment.substatus) || !!payment.dispute_alerted_at)
       && !['dispute_won','dispute_warning_closed','resolution_won'].includes(payment.substatus)
@@ -193,8 +199,8 @@ export function settleGuestPayment(payment: Whop.Payment): string {
       if (!row.customer_user_id) throw new Error('Small card order is missing its customer.')
       credit(row.customer_user_id,row.wallet_credit_cents,'topup','guest_card_difference',ref)
     }
-    db().prepare(`UPDATE guest_checkouts SET payment_id=?,state=?,review_reason=?,wallet_review_reason=?,processor_updated_at=?,
-      paid_at=COALESCE(paid_at,?),checked_at=datetime('now') WHERE reference=?`).run(payment.id,state,review,walletReview,payment.updated_at,payment.paid_at,ref)
+    db().prepare(`UPDATE guest_checkouts SET tax_cents=?,payment_id=?,state=?,review_reason=?,wallet_review_reason=?,processor_updated_at=?,
+      paid_at=COALESCE(paid_at,?),checked_at=datetime('now') WHERE reference=?`).run(tax,payment.id,state,review,walletReview,payment.updated_at,payment.paid_at,ref)
     return review ? 'review' : state
   }).immediate()
 }
@@ -204,7 +210,7 @@ export function guestResult(row: GuestCheckout) {
   const received=row.payment_method==='crypto' && row.crypto_invoice_reference && row.user_id
     ? db().prepare("SELECT credit_amount_cents FROM invoices WHERE reference=? AND user_id=? AND status='success'").get(row.crypto_invoice_reference,row.user_id) as {credit_amount_cents:number}|undefined : undefined
   const progress=row.report_id && row.user_id ? db().prepare('SELECT provider_order_id FROM paid_report_orders WHERE id=? AND user_id=?').get(row.report_id,row.user_id) as {provider_order_id:string|null}|undefined : undefined
-  return { reference:row.reference, totalCents:guestCheckoutTotal(row), checkoutUrl:row.state==='pending' && !row.review_reason ? row.checkout_url : null, paymentMethod:row.payment_method, walletCreditCents:row.wallet_credit_cents,
+  return { reference:row.reference, totalCents:guestCheckoutTotal(row), taxInclusive:row.card_order_price_cents!==null, checkoutUrl:row.state==='pending' && !row.review_reason ? row.checkout_url : null, paymentMethod:row.payment_method, walletCreditCents:row.wallet_credit_cents,
     walletCreditApplied:row.wallet_credit_cents>0 && hasCreditTransition('guest_card_difference',row.reference,'topup') && !hasCreditTransition('guest_card_difference_refund',row.reference,'adjustment'),
     walletCreditReview:Boolean(row.wallet_review_reason), cryptoReceivedCents:received?.credit_amount_cents??null, productName:row.product_name, priceCents:row.price_cents, feeCents:row.fee_cents,
     domain:getPaidReportProduct(row.product_code)?.domain??'imei_check',
@@ -282,8 +288,8 @@ async function guestAnalytics(row:GuestCheckout) {
   try {
     const response=await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=G-9WCELVR3V3&api_secret=${encodeURIComponent(process.env.GA4_MEASUREMENT_API_SECRET)}`,{
       method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(10000),body:JSON.stringify({client_id:row.client_id,
-        events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row))/100,currency:'USD',session_id:Number(row.session_id),
-          items:[{item_id:row.product_code,item_name:row.product_name,price:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row))/100,quantity:1}]}}]})})
+        events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)/100,currency:'USD',session_id:Number(row.session_id),
+          items:[{item_id:row.product_code,item_name:row.product_name,price:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)/100,quantity:1}]}}]})})
     if(response.ok) state='submitted'
     else logPaymentFailure('guest.analytics', { name: 'Error', status: response.status })
   } catch (error) { logPaymentFailure('guest.analytics', error) /* Never replay an ambiguously accepted event. */ }
@@ -291,9 +297,12 @@ async function guestAnalytics(row:GuestCheckout) {
 }
 /** Run immediately after verified webhooks; durable paid state survives process restarts. */
 export async function processPaidGuestCheckouts(limit=5) {
+  const config=whopConfiguration()
   const rows=db().prepare(`SELECT * FROM guest_checkouts WHERE state='paid' AND paid_at IS NOT NULL
+    AND ((payment_method='card' AND environment=? AND account_id=? AND checkout_id IS NOT NULL)
+      OR (payment_method='crypto' AND environment='live' AND crypto_invoice_reference IS NOT NULL))
     AND payment_id IS NOT NULL AND review_reason IS NULL AND lease_until<=? ORDER BY paid_at LIMIT ?`)
-    .all(Date.now(),Math.max(1,Math.min(limit,10))) as GuestCheckout[]
+    .all(config?.mode??'',config?.accountId??'',Date.now(),Math.max(1,Math.min(limit,10))) as GuestCheckout[]
   const stats={checked:0,errors:0}
   for (const row of rows) {
     try {

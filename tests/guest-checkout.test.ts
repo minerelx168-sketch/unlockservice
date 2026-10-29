@@ -256,3 +256,13 @@ test('requested checkout email retries once without provider work and disappears
   await guest.sendGuestCheckoutLink(row.reference)
   assert.equal(emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference)).length,1)
 })
+
+test('inclusive card tax never adds to the quoted order total and excess collections are refused',async()=>{
+  const {row}=await checkout()
+  const m=(amount:string)=>({amount,currency:'usd',decimals:2,display_decimals:2})
+  const p=payment(row,{tax_amount:m('0.50'),tax_behavior:'inclusive',subtotal:m('10.00')})
+  assert.equal(guest.settleGuestPayment(p),'paid')
+  assert.equal(guest.getGuestCheckout(row.reference)?.tax_cents,50)
+  const other=await checkout(),q=payment(other.row,{tax_amount:m('0.50'),tax_behavior:'exclusive',total:m('11.00')})
+  assert.throws(()=>guest.settleGuestPayment(q),/amount mismatch/)
+})

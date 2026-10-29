@@ -68,7 +68,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     {error ? <p role="alert" className="guest-error">{error}</p> : null}
     <button className="button button--primary" type="submit" disabled={busy || (isCrypto ? !cryptoEnabled || !routeId : !enabled)}>{busy ? 'Opening secure payment…' : isCrypto ? `Continue with crypto · ${formatUsd(product.priceCents)}` : `Pay ${formatUsd(cardQuote.totalCents)} by card`}</button>
     <button type="button" className="guest-payment-alternative" disabled={busy} onClick={changeMethod}><Icon name="wallet" /><span>{isCrypto ? `Pay ${formatUsd(cardQuote.totalCents)} by card` : 'Pay with crypto'}</span>{!isCrypto ? <span className="guest-no-fee">No fee · No minimum</span> : null}</button>
-    <p className="guest-note">{isCrypto ? 'Your QR code and exact transfer amount appear next. The service starts after your transfer is confirmed.' : 'Your service starts after payment confirmation. Any required tax is shown by Whop before you pay.'}</p>
+    <p className="guest-note">{isCrypto ? 'Your QR code and exact transfer amount appear next. The service starts after your transfer is confirmed.' : 'Includes our card fee and applicable tax. Whop shows any payment-provider charges before you confirm. Your service starts after payment.'}</p>
     {(isCrypto ? !cryptoEnabled : !enabled) ? <p role="status">{isCrypto ? 'Crypto' : 'Card'} checkout is temporarily unavailable. Please choose another payment method or <Link href="/support">contact support</Link>.</p> : null}
   </form>
 }
