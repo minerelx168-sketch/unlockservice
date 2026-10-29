@@ -50,7 +50,7 @@
 .apple-check-note { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: start; gap: 12px; }
 .apple-check-note-icon { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--primary); }
 .apple-check-note-icon svg { width: 17px; height: 17px; }
-.apple-check-note h2 { margin: 1px 0 5px; font-family: var(--font-body); font-size: .875rem; line-height: 1.4; letter-spacing: 0; }
+.apple-check-note h2 { margin: 1px 0 8px; font-family: var(--font-body); font-size: .875rem; line-height: 1.4; letter-spacing: 0; }
 .apple-check-note p { margin: 0; font-size: .8125rem; line-height: 1.7; color: var(--muted); max-width: 380px; }
 .apple-check-next { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
 .apple-check-next > span { flex-basis: 100%; color: var(--muted); font-size: .75rem; }
@@ -58,7 +58,7 @@
 .apple-check-page .apple-check-paid { max-width: 1160px; margin-top: clamp(40px, 5vw, 64px); padding-top: clamp(28px, 4vw, 44px); border-top: 1px solid var(--line); }
 .apple-check-paid-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); align-items: end; gap: 20px 40px; margin-bottom: 24px; }
 .apple-check-paid-heading .kicker { margin-bottom: 10px; font-size: .75rem; letter-spacing: .08em; }
-.apple-check-paid-heading h2 { margin: 0; font-size: clamp(1.375rem, 2.3vw, 1.875rem); line-height: 1.25; letter-spacing: -.03em; }
+.apple-check-paid-heading h2 { margin: 0; font-size: clamp(1.375rem, 2.3vw, 1.875rem); line-height: var(--lh-heading); letter-spacing: var(--ls-heading); }
 .apple-check-paid-heading p { margin: 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
 .apple-check-paid .service-browser { margin-top: 0; }
 @media (max-width: 800px) {
