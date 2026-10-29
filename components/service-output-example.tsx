@@ -169,7 +169,7 @@ export function ServiceOutputExample({ productCode, productName, className = '',
                 <section className="service-output-example__variant" key={`${variant.label}-${index}`}>
                   {state.example.variants.length > 1 ? <h3>{variant.label || `Example ${index + 1}`}</h3> : null}
                   {/* React escapes provider text: sample HTML is never executed. */}
-                  <ProviderOutputText value={variant.output} />
+                  <ProviderOutputText value={variant.output} variant="inline" />
                 </section>
               ))}
             </div>
