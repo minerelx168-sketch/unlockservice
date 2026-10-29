@@ -9,6 +9,7 @@ import { consumeAttempt } from '@/lib/rate-limit'
 import { CONSENT_COOKIE } from '@/lib/cookie-names'
 import { parseSignedConsent } from '@/lib/order-attribution'
 import { currentSession } from '@/lib/auth'
+import { captureCheckoutContext } from '@/lib/checkout-context-request'
 export const runtime='nodejs'
 export const dynamic='force-dynamic'
 export async function POST(request:Request) {
@@ -20,13 +21,14 @@ export async function POST(request:Request) {
   try {
     const body=await readCommandJson(request)
     if(body.acceptedTerms!==true) throw new WhopPaymentError('Confirm the service requirements and terms before paying.')
-    const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent==='granted'
+    const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent!=='denied'
     const found=await currentSession()
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const context=body.analyticsContext as {clientId:string;sessionId:string}|undefined
     const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
       analytics: consent && found?.user.account_type!=='admin' ? context : undefined})
+    if(found?.user.account_type!=='admin') await captureCheckoutContext('guest',result.reference,found?.user.id ?? null,body.analyticsContext)
     after(() => sendGuestCheckoutLink(result.reference))
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
