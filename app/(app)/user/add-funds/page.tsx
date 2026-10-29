@@ -17,7 +17,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
   const { user, session } = await requireSession()
   const query = await searchParams
   const productCode = query.product
-  const resellerTopup = query.reseller === '1'
+  const resellerTopup = query.reseller === '1' && user.account_type !== 'reseller'
   const product = productCode ? listPaidReportProducts(user.id).find((entry) => entry.code === productCode && entry.providerReady) : undefined
   const available = user.credit_cents - user.held_cents
   const shortfall = product ? Math.max(0, product.priceCents - available) : 0
@@ -48,7 +48,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
         </div>
       </section>
 
-      <p className="alert">{user.account_type === 'reseller' ? 'Your reseller access is active. Top up any amount for more orders.' : 'A single verified top-up of $100 USD or more activates permanent reseller prices and API access. Card fees do not count toward $100.'}</p>
+      <p className="alert">{user.account_type === 'reseller' ? 'Reseller Mode is permanently active. No further $100 top-up is required; choose any amount within the usual payment limits.' : <><strong>Become a Reseller with one verified top-up of $100 USD or more.</strong> This is a one-time activation requirement. Future top-ups do not need to be $100. Payment fees do not count toward the qualifying amount.</>}</p>
 
       {product && returnTo ? (
         <section className="panel checkout-funding-summary" aria-label="Your selected report">

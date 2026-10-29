@@ -1,11 +1,12 @@
-# Reseller API v1
+# Reseller Mode — API v1
 
 Customer roles are RETAIL / RESELLER / ADMIN. The existing `account_type` values remain
 `customer` / `reseller` / `admin` for compatibility; `users.role` is generated from them.
 Internal guest settlement records are not customer roles and cannot authenticate.
 
 A single verified wallet top-up of >= 10000 USD cents permanently upgrades RETAIL to
-RESELLER. Card fees/tax are excluded. Multiple smaller deposits, adjustments, test-mode
+RESELLER. This is a one-time activation requirement; subsequent top-ups follow normal
+payment limits and do not need to reach $100. Card fees/tax are excluded. Multiple smaller deposits, adjustments, test-mode
 Whop payments and direct guest purchases never qualify. The migration honors historical
 verified, unreversed qualifying deposits. Refunds do not downgrade membership, while
 existing disputes/payment review, suspension and ban controls still block wallet spending.
@@ -19,7 +20,11 @@ signed-in resellers are routed to wallet checkout.
 
 ## Authentication and endpoints
 
-Create a key in `/user/reseller`. Up to 3 active keys; only SHA256 hashes are stored.
+Open **Account → Reseller Mode** at `/user/reseller`. The API Docs section has copy
+buttons for the base URL, Authorization header, full endpoint URLs and cURL requests.
+Documentation examples contain placeholders and never include a real API key.
+
+Create a key in the same page. Up to 3 active keys; only SHA256 hashes are stored.
 Keys authorize only the owner's services, balance, orders and transactions. Revocation
 and account suspension take effect immediately. Never embed a key in browser JavaScript.
 
