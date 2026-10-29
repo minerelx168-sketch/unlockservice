@@ -1,6 +1,7 @@
 import { revokePurchaseAnalytics } from '@/lib/purchase-analytics'
 import { currentSession } from '@/lib/auth'
 import { revokePaymentAnalytics } from '@/lib/payment-analytics'
+import { revokeCheckoutContext } from '@/lib/ga4'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { ATTRIBUTION_COOKIE, CONSENT_COOKIE } from '@/lib/cookie-names'
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
   try {
     if (body.consent === 'denied') {
       const session = await currentSession()
-      if (session) { revokePaymentAnalytics(session.user.id); revokePurchaseAnalytics(session.user.id) }
+      if (session) { revokePaymentAnalytics(session.user.id); revokePurchaseAnalytics(session.user.id); revokeCheckoutContext(session.user.id) }
     }
     const signed = encodeSignedConsent(body.consent)
     const existing = parseSignedConsent(jar.get(ATTRIBUTION_COOKIE)?.value)
