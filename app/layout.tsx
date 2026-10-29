@@ -8,6 +8,7 @@ import { CustomerEngagement } from '@/components/customer-engagement'
 import { AnalyticsConsent } from '@/components/analytics-consent'
 import { GoogleAnalyticsNavigation } from '@/components/google-analytics-navigation'
 import { analyticsHostAllowed } from '@/lib/site'
+import { clientIp, isInternalIp } from '@/lib/ga4'
 import { safeAnalyticsPage } from '@/lib/analytics-page'
 
 const DESCRIPTION =
@@ -62,7 +63,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const requestHost = requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim() ?? requestHeaders.get('host') ?? ''
   const session = await currentSession()
   const requestPath = requestHeaders.get('x-continuation-path')?.split('?')[0] ?? '/'
+  // INTERNAL_IPS: the same team list the server-side conversion rules skip.
   const analyticsEnabled = analyticsHostAllowed(requestHost) && session?.user.account_type !== 'admin' && !requestPath.startsWith('/admin')
+    && !isInternalIp(clientIp(requestHeaders))
   const googleAdsTag = 'AW-18465855968'
   const googleAnalyticsTag = 'G-9WCELVR3V3'
   // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
