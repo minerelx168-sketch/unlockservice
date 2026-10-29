@@ -45,7 +45,8 @@ test('only verified paid live nonadmin deposits with actual ledger credit are se
  assert.equal(payload.events[0].params.customer_type,'new')
  assert.equal(payload.events[0].params.items,undefined)
  const reasons=db().prepare("SELECT reason FROM ga4_events_sent WHERE state='skipped' ORDER BY reason").all()
- assert.deepEqual(reasons,[{reason:'consent_denied'},{reason:'internal_user'}])
+ // The sandbox deposit is not sent either, and its reason is recorded too.
+ assert.deepEqual(reasons,[{reason:'consent_denied'},{reason:'internal_user'},{reason:'test_environment'}])
  assert.equal((await analytics.deliverPaymentAnalytics()).submitted,0)
 })
 test('a top-up without a browser ID is still counted with a fallback ID and labelled missing_client_id',async()=>{

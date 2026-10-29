@@ -18,8 +18,8 @@ test('fractional costs round up so a margin is never overstated; never negative'
   assert.deepEqual(marginCents('718', 3), { valueCents: 0, known: true })
 })
 
-test('unknown service falls back to the net price and is flagged', () => {
-  assert.deepEqual(marginCents(null, 150), { valueCents: 150, known: false })
+test('unknown service never reports revenue as value: 0 and flagged', () => {
+  assert.deepEqual(marginCents(null, 150), { valueCents: 0, known: false })
   assert.equal(serviceForProviderId('not-a-number').serviceId, null)
   assert.equal(serviceForCode('CHECK_99999').serviceId, '99999')
 })

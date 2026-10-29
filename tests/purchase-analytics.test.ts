@@ -25,6 +25,9 @@ function fixture({admin=false,consent=true,charge=true,status='delivered',price=
  a.savePurchaseAnalytics(u,'order',key,{clientId:'12345.67890',sessionId:String(Math.floor(Date.now()/1000))},consent)
  if(!consent)ga4.recordCheckoutContext('order',key,u,'denied',null)
  const id=Number(db().prepare("INSERT INTO orders(user_id,kind,imei,delivery_email,status,delivery,price_cents,eta_hours,idempotency_key) VALUES(?,'carrier_unlock','test-only','test@example.test',?,'remote',?,1,?)").run(u,status,price,key).lastInsertRowid)
+ // Real money first: a verified top-up funds the credit that pays for the service.
+ db().prepare("INSERT INTO invoices(reference,user_id,gateway,credit_amount_cents,total_due_cents,status) VALUES(?,?,'bsc_usdt',1000,1000,'success')").run(key.padStart(32,'0'),u)
+ db().prepare("INSERT INTO credit_ledger(user_id,amount_cents,type,ref_type,ref_id,balance_after_cents) VALUES(?,1000,'topup','invoice',?,1000)").run(u,key.padStart(32,'0'))
  if(charge)db().prepare("INSERT INTO credit_ledger(user_id,amount_cents,type,ref_type,ref_id,balance_after_cents) VALUES(?,?,'charge','order',?,0)").run(u,-price,String(id))
  return {u,id,key,price}
 }
@@ -37,8 +40,8 @@ test('server sends charged delivered purchases without opening result page, excl
  assert.equal(result.submitted,1);assert.equal(result.skipped,2)
  assert.equal(sent.length-start,1)
  assert.equal(sent.at(-1)!.events[0].params.transaction_id,'unlock-'+row.id)
- // No provider service recorded: value falls back to the charged price and the event says so.
- assert.equal(sent.at(-1)!.events[0].params.value,1.5)
+ // No provider service recorded: value is 0 (never revenue) and the event says so.
+ assert.equal(sent.at(-1)!.events[0].params.value,0)
  assert.equal(sent.at(-1)!.events[0].params.payment_method,'credit')
  assert.equal(sent.at(-1)!.events[0].params.customer_type,'new')
  assert.equal((db().prepare("SELECT reason FROM ga4_events_sent WHERE transaction_id=?").get('unlock-'+row.id) as {reason:string}).reason,'margin_unknown')
@@ -85,6 +88,8 @@ test('paid phone reports send value = price minus sheet cost and the charged pri
  a.savePurchaseAnalytics(u,'paid_imei_report',key,{clientId:'12345.67890',sessionId:String(Math.floor(Date.now()/1000))},true)
  db().prepare("INSERT OR IGNORE INTO paid_report_products(code,slug,name,summary,price_cents) VALUES('UNLOCK_718','unlock-718','AT&T Clean','test',499)").run()
  const id=Number(db().prepare("INSERT INTO paid_report_orders(user_id,product_code,product_name,imei_fingerprint,masked_imei,status,price_cents,idempotency_key) VALUES(?,'UNLOCK_718','AT&T Clean','test','test','completed',499,?)").run(u,key).lastInsertRowid)
+ db().prepare("INSERT INTO invoices(reference,user_id,gateway,credit_amount_cents,total_due_cents,status) VALUES(?,?,'bsc_usdt',1000,1000,'success')").run(key.padStart(32,'0'),u)
+ db().prepare("INSERT INTO credit_ledger(user_id,amount_cents,type,ref_type,ref_id,balance_after_cents) VALUES(?,1000,'topup','invoice',?,1000)").run(u,key.padStart(32,'0'))
  db().prepare("INSERT INTO credit_ledger(user_id,amount_cents,type,ref_type,ref_id,balance_after_cents) VALUES(?,-499,'charge','paid_imei_report',?,0)").run(u,String(id))
  assert.equal((await a.deliverPurchaseAnalytics()).submitted,1)
  const event=sent.at(-1)!.events[0]
