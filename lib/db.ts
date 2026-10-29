@@ -16,6 +16,33 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
 
 const SCHEMA = `
+-- Phase 0 measurement. One row per (transaction, event): the claim is the
+-- exactly-once guard, and the row is what Tracking health reports from.
+CREATE TABLE IF NOT EXISTS ga4_events_sent (
+ transaction_id TEXT NOT NULL, event_name TEXT NOT NULL CHECK(event_name IN ('purchase','payment_completed')),
+ kind TEXT NOT NULL, state TEXT NOT NULL CHECK(state IN ('sending','submitted','uncertain','skipped')),
+ reason TEXT, value_cents INTEGER, paid_cents INTEGER, client_source TEXT CHECK(client_source IN ('ga','fallback') OR client_source IS NULL),
+ customer_type TEXT, margin_known INTEGER, paid_at TEXT NOT NULL,
+ created_at TEXT NOT NULL DEFAULT (datetime('now')), sent_at TEXT,
+ PRIMARY KEY(transaction_id,event_name)
+);
+CREATE INDEX IF NOT EXISTS ga4_events_sent_day ON ga4_events_sent(paid_at);
+-- What the checkout request knew: consent choice, internal network, landing and click IDs.
+CREATE TABLE IF NOT EXISTS ga4_checkout_context (
+ kind TEXT NOT NULL CHECK(kind IN ('topup','order','paid_imei_report','guest')), reference TEXT NOT NULL,
+ user_id INTEGER, consent TEXT NOT NULL CHECK(consent IN ('granted','denied','unknown')),
+ internal INTEGER NOT NULL DEFAULT 0 CHECK(internal IN (0,1)),
+ gclid TEXT, gbraid TEXT, wbraid TEXT, landing_page TEXT, utm_source TEXT, utm_medium TEXT, utm_campaign TEXT,
+ created_at TEXT NOT NULL DEFAULT (datetime('now')),
+ PRIMARY KEY(kind,reference)
+);
+CREATE TABLE IF NOT EXISTS ga4_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+-- Daily figures from Google Ads / GA4 entered by an administrator until the APIs are connected.
+CREATE TABLE IF NOT EXISTS tracking_daily_manual (
+ day TEXT PRIMARY KEY, ads_clicks INTEGER, ga4_cpc_sessions INTEGER, ads_conversions INTEGER,
+ updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS tracking_capture_diagnostics (
  kind TEXT NOT NULL, reference TEXT NOT NULL, user_id INTEGER NOT NULL REFERENCES users(id),
  reason TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -663,6 +690,8 @@ export function db(): Database.Database {
   connection.pragma('foreign_keys = ON')
   connection.pragma('busy_timeout = 5000')
 	  connection.exec(SCHEMA)
+  // Phase 0 cutoff: the first start of this release. Nothing paid earlier is ever sent to GA4.
+  connection.prepare("INSERT OR IGNORE INTO ga4_meta(key,value) VALUES('delivery_started_at',datetime('now'))").run()
 		  migrate(connection)
 			  seedCatalog(connection)
 	      seedPaidReportCatalog(connection)

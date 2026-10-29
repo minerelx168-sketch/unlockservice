@@ -1,3 +1,4 @@
+import { captureCheckoutContext } from './checkout-context-request'
 import { recordTrackingCapture } from './tracking-diagnostics'
 import { serverPurchasesEnabled } from './purchase-analytics'
 import { cookies } from 'next/headers'
@@ -7,7 +8,8 @@ import { savePaymentAnalytics } from './payment-analytics'
 export async function snapshotPaymentAnalytics(reference: string, userId: number, input: unknown) {
   try {
     const consent = parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)
-    savePaymentAnalytics(reference, userId, input, consent?.consent === 'granted')
-    recordTrackingCapture('topup', reference, userId, input, consent?.consent === 'granted', serverPurchasesEnabled())
+    savePaymentAnalytics(reference, userId, input, consent?.consent !== 'denied')
+    recordTrackingCapture('topup', reference, userId, input, consent?.consent !== 'denied', serverPurchasesEnabled())
+    await captureCheckoutContext('topup', reference, userId, input)
   } catch { /* Measurement must not fail a payment request. */ }
 }

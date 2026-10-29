@@ -7,7 +7,7 @@ export function recordTrackingCapture(kind: 'topup' | 'order' | 'paid_imei_repor
   const context = input && typeof input === 'object' ? input as Record<string,unknown> : {}
   const valid = typeof context.clientId === 'string' && /^\d{1,20}\.\d{1,20}$/.test(context.clientId)
     && typeof context.sessionId === 'string' && /^\d{1,12}$/.test(context.sessionId) && Number(context.sessionId)>0
-  const reason = !consent ? 'consent_not_granted' : !enabled ? 'server_tracking_disabled' : !valid ? 'browser_context_missing' : 'context_received'
+  const reason = !consent ? 'consent_denied' : !enabled ? 'server_tracking_disabled' : !valid ? 'browser_context_missing' : 'context_received'
   db().prepare("DELETE FROM tracking_capture_diagnostics WHERE created_at<datetime('now','-90 days')").run()
   db().prepare('INSERT OR IGNORE INTO tracking_capture_diagnostics(kind,reference,user_id,reason) VALUES(?,?,?,?)').run(kind,reference,userId,reason)
 }

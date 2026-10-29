@@ -13,7 +13,18 @@ function readClickIds(input: unknown): Partial<Record<ClickIdField, string>> {
 }
 
 let initialPageViewSent = false
-export function updateGoogleConsent(state: 'granted' | 'denied', clickIds: Partial<Record<ClickIdField, string>> = {}) {
+/**
+ * 'default' = the visitor has not chosen yet. Google's region-specific consent
+ * default decides (denied in the EEA/UK/CH, granted elsewhere), so page views and
+ * funnel events are sent and Google applies the right mode.
+ */
+export type AnalyticsState = 'granted' | 'denied' | 'default'
+export function analyticsActive(): boolean {
+  if (typeof window === 'undefined') return false
+  const state = (window as Window & { iunlockmobileAnalyticsConsent?: string }).iunlockmobileAnalyticsConsent
+  return state === 'granted' || state === 'default'
+}
+export function updateGoogleConsent(state: AnalyticsState, clickIds: Partial<Record<ClickIdField, string>> = {}) {
   const browser = window as Window & { iunlockmobileAnalyticsConsent?: string; gtag?: (...args: unknown[]) => void }
   browser.iunlockmobileAnalyticsConsent = state
   if (!analyticsHostAllowed(window.location.hostname) || document.documentElement.dataset.analyticsDisabled === 'true' || window.location.pathname.startsWith('/admin')) {
@@ -21,8 +32,8 @@ export function updateGoogleConsent(state: 'granted' | 'denied', clickIds: Parti
     window.dispatchEvent(new Event('iunlockmobile-consent'))
     return
   }
-  browser.gtag?.('consent', 'update', { analytics_storage: state, ad_storage: state, ad_user_data: state, ad_personalization: state })
-  if (state === 'granted') {
+  if (state !== 'default') browser.gtag?.('consent', 'update', { analytics_storage: state, ad_storage: state, ad_user_data: state, ad_personalization: state })
+  if (state !== 'denied') {
     const safeIds = readClickIds(clickIds)
     if (typeof browser.gtag === 'function') {
       if (Object.keys(safeIds).length) browser.gtag('set', safeIds)
