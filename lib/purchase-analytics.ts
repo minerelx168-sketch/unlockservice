@@ -62,7 +62,7 @@ export async function deliverPurchaseAnalytics(limit=20) {
         method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(10000),
         body:JSON.stringify({client_id:row.client_id,timestamp_micros:Date.parse(row.charged_at.replace(' ','T')+'Z')*1000,
           events:[{name:'purchase',params:{transaction_id:conversion.transactionId,value:conversion.value,currency:'USD',
-            session_id:Number(row.session_id),items:conversion.items,payment_method:'account_credit'}}]})
+            session_id:Number(row.session_id),engagement_time_msec:1,items:conversion.items,payment_method:'account_credit'}}]})
       })
       if(response.ok)state='submitted'
       else logPaymentFailure('purchase.analytics', {name:'Error',status:response.status})

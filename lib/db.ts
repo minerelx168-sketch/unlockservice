@@ -16,6 +16,12 @@ import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 const DB_PATH = process.env.IUNLOCKMOBILE_DB ?? join(process.cwd(), 'data', 'iunlockmobile.db')
 
 const SCHEMA = `
+CREATE TABLE IF NOT EXISTS tracking_capture_diagnostics (
+ kind TEXT NOT NULL, reference TEXT NOT NULL, user_id INTEGER NOT NULL REFERENCES users(id),
+ reason TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')),
+ PRIMARY KEY(kind,reference,user_id)
+);
+
 CREATE TABLE IF NOT EXISTS guest_checkouts (
   reference TEXT PRIMARY KEY,
   request_key TEXT NOT NULL UNIQUE,

@@ -22,7 +22,7 @@ export function paymentEventPayload(row: PaymentEvent) {
     consent: { ad_user_data: 'GRANTED', ad_personalization: 'GRANTED' },
     events: [{ name: 'payment_completed', params: {
       transaction_id: `topup-${row.invoice_reference}`, value: row.credit_amount_cents / 100, currency: 'USD',
-      session_id: Number(row.session_id), payment_method: row.gateway === 'whop_card' ? 'card' : 'crypto',
+      session_id: Number(row.session_id), engagement_time_msec: 1, payment_method: row.gateway === 'whop_card' ? 'card' : 'crypto',
       service_category: 'account_credit', status: 'verified',
       items: [{ item_id: 'account_credit', item_name: 'Account credit', price: row.credit_amount_cents / 100, quantity: 1 }],
     } }],

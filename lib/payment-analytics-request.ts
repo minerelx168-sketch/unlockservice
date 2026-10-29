@@ -1,3 +1,5 @@
+import { recordTrackingCapture } from './tracking-diagnostics'
+import { serverPurchasesEnabled } from './purchase-analytics'
 import { cookies } from 'next/headers'
 import { CONSENT_COOKIE } from './cookie-names'
 import { parseSignedConsent } from './order-attribution'
@@ -6,5 +8,6 @@ export async function snapshotPaymentAnalytics(reference: string, userId: number
   try {
     const consent = parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)
     savePaymentAnalytics(reference, userId, input, consent?.consent === 'granted')
+    recordTrackingCapture('topup', reference, userId, input, consent?.consent === 'granted', serverPurchasesEnabled())
   } catch { /* Measurement must not fail a payment request. */ }
 }

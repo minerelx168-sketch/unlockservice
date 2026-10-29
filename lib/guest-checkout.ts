@@ -288,7 +288,7 @@ async function guestAnalytics(row:GuestCheckout) {
   try {
     const response=await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=G-9WCELVR3V3&api_secret=${encodeURIComponent(process.env.GA4_MEASUREMENT_API_SECRET)}`,{
       method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(10000),body:JSON.stringify({client_id:row.client_id,
-        events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)/100,currency:'USD',session_id:Number(row.session_id),
+        events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)/100,currency:'USD',session_id:Number(row.session_id),engagement_time_msec:1,
           items:[{item_id:row.product_code,item_name:row.product_name,price:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)/100,quantity:1}]}}]})})
     if(response.ok) state='submitted'
     else logPaymentFailure('guest.analytics', { name: 'Error', status: response.status })
