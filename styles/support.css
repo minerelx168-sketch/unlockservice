@@ -205,7 +205,7 @@
 .support-hub h3 {
   font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--ls-heading);
 }
 
 .support-hub p {
@@ -260,6 +260,10 @@
   align-items: center;
   gap: 16px;
   margin: 18px 0 20px;
+}
+
+.support-title h2 + p {
+  margin-top: var(--heading-gap);
 }
 
 .support-title .icon-tile {
@@ -426,8 +430,8 @@
 
 .track-facts {
   display: grid;
-  gap: 12px;
-  margin: 6px 0 0;
+  gap: 16px;
+  margin: 6px 0 20px;
   padding: 0;
   list-style: none;
 }

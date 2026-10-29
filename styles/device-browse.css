@@ -26,4 +26,4 @@
 .service-catalog-details { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
 .service-catalog-details > summary { cursor: pointer; min-height: 48px; font-weight: 650; color: var(--ink-strong); padding-block: 12px; }
 .service-catalog-details[open] > summary { margin-bottom: 20px; }
-.service-entry-title { margin: 0 0 20px; color: var(--ink-strong); font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.2; letter-spacing: -0.03em; }
+.service-entry-title { margin: 0 0 20px; color: var(--ink-strong); font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: var(--lh-heading); letter-spacing: var(--ls-heading); }

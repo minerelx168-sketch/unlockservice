@@ -45,7 +45,7 @@ body:has(.service-output-example__dialog[open]) { overflow: hidden; }
 }
 .service-output-example__header > div { min-width: 0; }
 .service-output-example__eyebrow { margin: 0 0 6px; color: var(--primary); font-size: .8125rem; line-height: 1.4; font-weight: 700; }
-.service-output-example__header h2 { margin: 0; color: var(--ink-strong); font-size: clamp(1.125rem, 2.6vw, 1.5rem); line-height: 1.35; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.service-output-example__header h2 { margin: 0; color: var(--ink-strong); font-size: clamp(1.125rem, 2.6vw, 1.5rem); line-height: 1.35; letter-spacing: var(--ls-heading); overflow-wrap: anywhere; }
 .service-output-example__header h2:focus { outline: none; box-shadow: none; }
 .service-output-example__close { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; margin: -4px -4px 0 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 .service-output-example__close:hover { border-color: var(--primary); color: var(--primary); }

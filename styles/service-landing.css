@@ -25,8 +25,8 @@
 .service-hero-copy .service-entry-title {
   margin: 0;
   font-size: clamp(2.125rem, 4.4vw, 3.5rem);
-  line-height: 1.04;
-  letter-spacing: -0.034em;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   font-weight: 700;
 }
 
@@ -533,8 +533,8 @@
 .unlock-intro .service-entry-title {
   margin: 0;
   font-size: clamp(2.125rem, 4vw, 3.25rem);
-  line-height: 1.04;
-  letter-spacing: -0.034em;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   font-weight: 700;
 }
 
@@ -867,6 +867,7 @@ button.quick-pick {
 
   .expect ol {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .unlock-two-col .unlock-service-preview__grid {

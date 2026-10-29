@@ -7,9 +7,9 @@
 .free-check-intro { grid-area: intro; }
 .free-check-form { grid-area: form; min-width: 0; }
 /* gap: the buttons and the feature list had none and touched. */
-.free-check-extras { grid-area: extras; gap: 28px; }
+.free-check-extras { grid-area: extras; gap: var(--space-after-actions); }
 .free-check-paid { margin-top: 40px; }
-.free-check-paid > .section-head { margin-bottom: 22px; }
+.free-check-paid > .section-head { gap: var(--heading-gap); margin-bottom: var(--space-before-panel); }
 .article-contents { border: 1px solid var(--line); border-radius: 14px; padding: 0 16px; background: var(--surface); }
 .article-contents summary { min-height: 48px; padding-block: 12px; cursor: pointer; font-weight: 650; color: var(--ink-strong); }
 .article-contents nav { padding-bottom: 12px; }
@@ -40,7 +40,7 @@
   .service-entry-section { padding-top: 20px; }
   .service-hero { gap: 24px; padding-block: 20px 28px; }
   .service-hero-copy { gap: 12px; padding-top: 0; }
-  .service-hero-copy .service-entry-title { font-size: clamp(1.875rem, 8vw, 2.5rem); line-height: 1.12; }
+  .service-hero-copy .service-entry-title { font-size: clamp(1.875rem, 8vw, 2.5rem); line-height: var(--lh-heading); }
   .service-hero-tagline { font-size: 1.25rem; line-height: 1.35; margin: 0; }
   .service-hero-copy .t-lead, .track-layout .t-lead { font-size: .9375rem; line-height: 1.6; margin: 0; }
   .service-hero-copy .hero-chip { font-size: .6875rem; line-height: 1.5; padding: 6px 10px; }
@@ -101,14 +101,14 @@
   .service-breadcrumb { flex-wrap: wrap; gap: 6px 10px; }
   .service-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; }
   .free-check-page, .contact-page { padding-top: 24px; }
-  .free-check-intro .t-section { font-size: 2rem; line-height: 1.15; }
+  .free-check-intro .t-section { font-size: 2rem; line-height: var(--lh-heading); }
   .free-check-intro .t-lead, .contact-page .t-lead { font-size: .9375rem; line-height: 1.6; }
   .free-check-form { padding: 20px 16px; }
   .free-check-extras .cta-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .contact-page .contact-shortcuts { gap: 10px; margin-bottom: 20px; }
+  .contact-page .contact-shortcuts { gap: 16px; margin-bottom: 24px; }
   .contact-shortcuts .hub-card { padding: 16px; }
   .contact-shortcuts .hub-card .link-arrow { min-height: 44px; }
-  .article-head .t-section { font-size: clamp(1.75rem, 7vw, 2.25rem); line-height: 1.2; }
+  .article-head .t-section { font-size: clamp(1.75rem, 7vw, 2.25rem); line-height: var(--lh-heading); }
   .article-head .t-lead { font-size: 1rem; line-height: 1.6; }
   .article-layout { gap: 20px; }
   .article-body { font-size: 1rem; line-height: 1.75; overflow-wrap: anywhere; }

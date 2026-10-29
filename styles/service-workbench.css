@@ -89,13 +89,13 @@
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(1.375rem, 2.4vw, 1.75rem);
-  line-height: 1.2;
-  letter-spacing: -0.03em;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
   color: var(--ink-strong);
 }
 
 .service-workbench-heading p {
-  margin: 6px 0 0;
+  margin: var(--heading-gap) 0 0;
   font-size: 0.9375rem;
   line-height: 1.55;
   color: var(--muted);
@@ -157,6 +157,13 @@
   font-size: 0.8125rem;
   font-weight: 650;
   color: var(--muted);
+}
+
+/* Empty until there is something to say: it used to repeat the field label
+   beside the label. The element stays for the live announcement. */
+.service-workbench-validation:empty {
+  padding: 0;
+  background: none;
 }
 
 .service-workbench-validation[data-state='valid'] {

@@ -240,8 +240,8 @@
 
 .app-head h1 {
   font-size: clamp(1.75rem, 2.5vw, 2rem);
-  line-height: 1.2;
-  letter-spacing: -0.025em;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
   overflow-wrap: anywhere;
   font-weight: 680;
 }
@@ -814,8 +814,8 @@ table.account-table td {
 .auth-card h1 {
   margin-top: 18px;
   font-size: 1.6875rem;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
   font-weight: 680;
 }
 
@@ -1371,8 +1371,8 @@ table.account-table td {
 .product-domain-header h2 {
   margin: 0;
   font-size: clamp(26px, 3vw, 36px);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
 }
 
 .product-domain-header p {
@@ -1863,8 +1863,8 @@ table.account-table td {
   margin: 0;
   overflow-wrap: anywhere;
   font-size: clamp(1.75rem, 3vw, 2.375rem);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
 }
 
 .service-hub-copy p {
@@ -1995,8 +1995,8 @@ table.account-table td {
   margin: 0;
   overflow-wrap: anywhere;
   font-size: clamp(1.4375rem, 2.4vw, 1.9375rem);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
 }
 
 .product-subcategory-count {
@@ -2196,8 +2196,8 @@ table.account-table td {
   margin-top: 40px;
   font-family: var(--font-display);
   font-size: 25px;
-  line-height: 1.2;
-  letter-spacing: -0.022em;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
   color: var(--ink-strong);
   /* Anchored from the table of contents, so the sticky header must not
      land on top of the heading it just jumped to. */
@@ -2271,7 +2271,7 @@ table.account-table td {
   margin-bottom: 16px;
   font-family: var(--font-display);
   font-size: 25px;
-  letter-spacing: -0.022em;
+  letter-spacing: var(--ls-heading);
   color: var(--ink-strong);
   scroll-margin-top: 96px;
 }
@@ -2388,8 +2388,8 @@ table.account-table td {
   margin: 10px 0 10px;
   font-family: var(--font-display);
   font-size: clamp(1.85rem, 4vw, 3rem);
-  line-height: 1.06;
-  letter-spacing: -0.03em;
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
   color: var(--ink-strong);
 }
 
@@ -3022,6 +3022,10 @@ table.account-table td {
 
 .payment-history-panel > header {
   align-items: center;
+}
+
+.payment-history-panel > header h2 + p {
+  margin-top: var(--heading-gap);
 }
 
 .payment-filters {
