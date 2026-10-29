@@ -1,0 +1,38 @@
+.page { --us-space: clamp(24px, 4vw, 48px); }
+.page > div { display: grid; gap: var(--us-space); }
+.page :global(.service-breadcrumb) { margin-bottom: 0; flex-wrap: wrap; line-height: 1.6; }
+.page :global(.service-hero-copy) { max-width: 760px; margin: 0; }
+.page :global(.service-entry-title) { line-height: 1.12; margin: 20px 0; }
+.page :global(.t-lead) { line-height: 1.75; margin: 0; }
+.infoCard { margin: 0; padding: clamp(22px, 3vw, 32px); }
+.infoCard h2 { line-height: 1.35; margin: 0 0 16px; }
+.infoCard p { line-height: 1.8; margin: 0; }
+.infoCard p + p { margin-top: 16px; }
+.infoCard > a { display: inline-flex; align-items: center; min-height: 44px; margin-top: 16px; font-weight: 650; }
+.sectionHeading { text-align: center; max-width: 660px; margin: 0 auto 54px; }
+.sectionHeading h2 { font-size: clamp(26px, 3vw, 36px); line-height: 1.25; margin: 16px 0 12px; letter-spacing: -.025em; }
+.sectionHeading p { line-height: 1.75; margin: 0; color: var(--muted); }
+.serviceGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px 28px; list-style: none; padding: 0; margin: 0; }
+.serviceCard { min-width: 0; padding: 54px 30px 30px; height: 100%; }
+.carrierLabel { color: var(--muted); font-size: 12px; font-weight: 650; letter-spacing: .06em; line-height: 1.6; text-transform: uppercase; }
+.serviceCard h3 { font-size: clamp(21px, 2vw, 26px); line-height: 1.4; max-width: 340px; margin: 16px 0 24px; text-wrap: balance; }
+.price { display: grid; gap: 8px; margin-top: auto; }
+.price > span, .delivery > span { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.price strong { font-size: 40px; letter-spacing: -.035em; line-height: 1.2; color: var(--primary); }
+.delivery { display: grid; gap: 6px; width: 100%; margin: 24px 0 0; padding: 18px 12px; border-radius: 16px; background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+.delivery strong { font-size: 16px; line-height: 1.6; }
+.priceNote { color: var(--muted); font-size: 12px; line-height: 1.7; margin: 18px 0; }
+.chooseButton { width: 100%; min-height: 50px; justify-content: center; gap: 14px; white-space: normal; line-height: 1.5; padding: 14px 20px; }
+.networkNote { margin: 0; padding: 22px 24px; line-height: 1.85; border-left: 3px solid color-mix(in srgb, var(--primary) 35%, transparent); background: color-mix(in srgb, var(--surface) 65%, transparent); border-radius: 0 16px 16px 0; }
+.networkNote a { text-decoration: underline; text-underline-offset: 3px; }
+.orderPanel { scroll-margin-top: 110px; margin: 0; }
+.footerLinks { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin: 0; }
+.footerLinks a { display: inline-flex; align-items: center; min-height: 44px; line-height: 1.6; }
+@media (max-width: 640px) {
+  .serviceGrid { grid-template-columns: minmax(0, 1fr); gap: 52px; }
+  .serviceCard { padding: 44px 22px 24px; }
+  .sectionHeading { margin-bottom: 48px; }
+  .networkNote { padding: 18px 20px; }
+  .page :global(.service-entry-title) { font-size: clamp(34px, 9vw, 44px); }
+}
+@media (prefers-reduced-motion: reduce) { .serviceCard:hover { transform: none; } }
