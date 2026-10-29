@@ -112,7 +112,9 @@ const configuredImeiProvider: ImeiCheckProvider = {
         status: 'completed',
         provider: config.name,
         providerCheckId: outcome.providerId,
-        result: buildProviderReport(checkType, config.name, outcome.data),
+        result: { ...buildProviderReport(checkType === 'apple_free' ? 'APPLE_BASIC' : checkType, config.name, outcome.data),
+          ...(checkType === 'apple_free' ? { _providerCodeEncrypted: encryptProviderCode(outcome.providerCode) } : {}),
+        },
       }
     }
     return {

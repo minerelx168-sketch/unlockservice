@@ -28,3 +28,29 @@
   .provider-output__label { font-size: .75rem; }
   .provider-output .provider-output__line { padding-inline: 12px; }
 }
+
+/* Apple Free Check: the provider's own lines, in one readable text panel. */
+.provider-output-plain {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: clamp(16px, 2.5vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink-strong);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: normal;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  tab-size: 2;
+}
+.free-check-report { min-width: 0; margin-bottom: 20px; }
+.free-check-report-note { margin: 12px 0 0; }
