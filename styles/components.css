@@ -1036,7 +1036,7 @@
 
 .feature-list {
   display: grid;
-  gap: 18px;
+  gap: 24px;
   margin: 0;
   padding: 0;
   list-style: none;

@@ -18,31 +18,60 @@
 
 /* ---- hero trust tiles (2 × 2) -------------------------------------- */
 
+/* Full width of the hero column, so the tiles end where the "All
+   services" link above them ends instead of 40px short of it. */
 .hero-tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   width: 100%;
-  max-width: 540px;
 }
 
-/* Soft stat tiles, the reference way: a quiet lavender field and no
-   border, so four of them read as one strip rather than four boxes. */
+/* Framed stat tiles. The border had been dropped for a soft field alone;
+   the phone layout paints the tile white on a white page and only sets
+   border-color, so with no border style the four tiles lost their frame
+   entirely. The border is back at every size. */
 .hero-tile {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
   gap: 4px 12px;
   align-items: center;
   padding: 14px 16px;
+  border: 1px solid var(--line);
   border-radius: var(--radius-panel);
   background: color-mix(in srgb, var(--page-soft) 80%, transparent);
   backdrop-filter: blur(6px);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .hero-tile:hover {
   background: var(--primary-soft);
+  border-color: var(--primary-border);
   transform: translateY(-2px);
+}
+
+/* Quick picks: room between the label row and the cards, and a real hit
+   area for "All services" rather than bare text in the column corner. */
+.hero-extras .quick-picks {
+  gap: 14px;
+}
+
+.hero-extras .quick-picks-label {
+  align-items: center;
+}
+
+.hero-extras .quick-picks-label a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  transition: background-color 0.18s ease;
+}
+
+.hero-extras .quick-picks-label a:hover {
+  background: var(--primary-soft);
 }
 
 .hero-tile .trust-bar-icon {
@@ -228,9 +257,131 @@
   stroke: var(--success);
 }
 
+/* ---- how it works: numbered step buttons ------------------------- */
+/* The UnlockRiver treatment: each step is a glass card with a soft
+   violet border, and its number is a gradient tile sitting on the card's
+   top edge with a ring and a glow. Hovering the card lifts it, deepens
+   the border, adds the glow and grows the number tile and illustration;
+   the title turns violet. The number replaces the large faint numeral
+   that sat in the corner. Centring and growth use the individual
+   translate and scale properties so they compose with any transform. */
+
+#how .home-card-grid {
+  gap: 56px 28px;
+  padding-top: 30px;
+}
+
+.card--step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  padding: 58px 28px 30px;
+  border: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 0.8, 0.3, 1),
+    border-color 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.card--step:hover {
+  transform: translateY(-8px);
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  box-shadow: 0 8px 40px rgb(139 92 246 / 25%);
+}
+
 .card--step .step-numeral {
-  top: 20px;
-  right: 20px;
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  right: auto;
+  z-index: 1;
+  translate: -50% 0;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--color-brand-primary-glow), var(--primary) 55%, var(--color-brand-accent));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  box-shadow:
+    0 0 0 4px var(--page),
+    0 8px 30px rgb(139 92 246 / 60%);
+  transition:
+    scale 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s ease;
+}
+
+.card--step:hover .step-numeral {
+  scale: 1.1;
+  box-shadow:
+    0 0 0 4px var(--page),
+    0 12px 36px rgb(139 92 246 / 72%);
+}
+
+.card--step .step-art {
+  width: 100%;
+}
+
+.card--step .step-art svg {
+  transition: scale 0.5s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+.card--step:hover .step-art svg {
+  scale: 1.1;
+}
+
+.card--step .t-card {
+  transition: color 0.3s ease;
+}
+
+.card--step:hover .t-card {
+  color: var(--primary);
+}
+
+@media (max-width: 767px) {
+  #how .home-card-grid {
+    gap: 48px;
+    padding-top: 26px;
+  }
+
+  .card--step {
+    padding: 48px 20px 24px;
+  }
+
+  .card--step .step-numeral {
+    top: -24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 20px;
+  }
+
+  /* Phone tap targets stay 44px even where desktop uses a smaller pill. */
+  .hero-extras .quick-picks-label a {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card--step,
+  .card--step .step-numeral,
+  .card--step .step-art svg {
+    transition: none;
+  }
+
+  .card--step:hover .step-numeral,
+  .card--step:hover .step-art svg {
+    scale: none;
+  }
 }
 
 /* ---- reviews ------------------------------------------------------- */
@@ -416,7 +567,7 @@
   position: relative;
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
-  gap: 6px 14px;
+  gap: var(--heading-gap) 14px;
   align-content: start;
   padding: 20px 22px;
   border: 1px solid var(--line);
@@ -496,11 +647,11 @@
 .help-band h3 {
   font-size: 1.375rem;
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: var(--ls-heading);
 }
 
 .help-band p {
-  margin: 6px 0 0;
+  margin: var(--heading-gap) 0 0;
   color: var(--muted);
   max-width: 44em;
 }

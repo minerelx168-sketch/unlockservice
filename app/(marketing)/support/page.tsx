@@ -144,7 +144,7 @@ export default function SupportPage() {
               <Icon name="device" strokeWidth={1.7} />
             </span>
             <div>
-              <h2 className="t-card" style={{ fontSize: 28, letterSpacing: '-0.03em' }}>Network unlocks</h2>
+              <h2 className="t-card t-card--lg">Network unlocks</h2>
               <p className="t-small">Eligibility, tracking, and what to do when the new SIM does not work straight away.</p>
             </div>
           </div>
@@ -152,8 +152,7 @@ export default function SupportPage() {
           <p className="callout callout--warn">
             <Icon name="info" strokeWidth={2} />
             <span>
-              <b>The device must not be reported lost or stolen.</b> A Phone Check report shows the status
-              before you order. Check the original carrier’s current financing and account requirements before ordering.
+              <b>The device must not be reported lost or stolen.</b> A Phone Check shows the status; financing rules depend on the original carrier.
             </span>
           </p>
 

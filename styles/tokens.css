@@ -212,6 +212,34 @@
   --font-display: 'Inter Tight', 'Inter Tight Fallback', system-ui, sans-serif;
   --font-body: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---- type rhythm ------------------------------------------------- */
+  /* One standard for every heading on the site. Wrapped headings were
+     set as tight as 1.04 with -0.035em tracking, so the second line sat
+     on the first and the letters ran together. Every heading rule now
+     reads these tokens instead of carrying its own numbers. */
+  --lh-heading: 1.25;
+  --ls-heading: -0.015em;
+  /* Headlines of 44px and up, on wide screens only: at that size 1.25
+     opens 15px of air between the two lines of the hero and they read as
+     two separate statements. Below 1081px they take the heading values. */
+  --lh-display: 1.12;
+  --ls-display: -0.025em;
+  /* The space under a heading before its text. */
+  --heading-gap: 10px;
+  /* Body copy stays in the 1.5-1.7 band that is already used site-wide. */
+  --lh-body: 1.6;
+  /* Separation between a group of actions and the content after it, and
+     between a paragraph and the panel it introduces. */
+  --space-after-actions: 28px;
+  --space-before-panel: 24px;
+}
+
+@media (max-width: 1080px) {
+  :root {
+    --lh-display: var(--lh-heading);
+    --ls-display: -0.02em;
+  }
 }
 
 /**

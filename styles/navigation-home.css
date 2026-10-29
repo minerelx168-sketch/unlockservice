@@ -96,7 +96,7 @@
 
   .home-hero .t-hero {
     font-size: clamp(2.5rem, 3.5vw, 3.125rem);
-    line-height: 1.12;
+    line-height: var(--lh-display);
   }
 
   .home-hero .t-lead {
@@ -107,7 +107,7 @@
   .home-section .t-section,
   .home-section .t-display {
     font-size: clamp(2rem, 2.8vw, 2.5rem);
-    line-height: 1.18;
+    line-height: var(--lh-heading);
   }
 
   .home-section .t-small {

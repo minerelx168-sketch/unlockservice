@@ -321,7 +321,7 @@ export function PaidReportConsole({
             <div className="service-workbench-label">
               <label htmlFor="paid-report-imei">{field.label}</label>
               <span className="service-workbench-validation" data-state={imeiInvalid ? 'invalid' : imeiValid ? 'valid' : undefined} aria-live="polite">
-                {imeiInvalid ? 'Check number' : imeiValid ? 'Valid format' : field.label}
+                {imeiInvalid ? 'Check number' : imeiValid ? 'Valid format' : ''}
               </span>
             </div>
             <div className="service-workbench-input" data-invalid={imeiInvalid || undefined}>
@@ -481,7 +481,7 @@ export function PaidReportConsole({
             </>
           )}
           <p className="service-workbench-privacy">
-            <Icon name="shield" /> <span>Credit is reserved when you confirm. A delivered result uses that credit; an undeliverable service returns it to your account balance. If the result is uncertain, the credit stays reserved while we check. You can follow the status in service history.</span>
+            <Icon name="shield" /> <span>Credit is held when you confirm and used only when the result is delivered. Otherwise it returns to your balance.</span>
           </p>
         </div>
       </form>
