@@ -49,7 +49,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
           <div className="card-topline"><span className="kicker"><Icon name="check" /> {check.status === 'completed' ? 'Saved result' : 'Check status'}</span></div>
           <h2 className="t-card">{String(report.title ?? 'IMEI check')}</h2>
           <p className="t-small">{String(report.summary ?? check.message ?? 'The report is not available yet.')}</p>
-          {isProviderReport ? <p className="field-note">The original provider response is unavailable for this older check. Saved report fields are shown below.</p> : null}
+          {isProviderReport ? <p className="field-note">The original provider response is unavailable for this check. Saved report fields are shown below.</p> : null}
           {sections.map((section, sectionIndex) => {
             const sectionItems = Array.isArray(section.items) ? section.items : []
             if (!sectionItems.length) return null

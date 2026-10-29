@@ -53,7 +53,7 @@ export function ImeiCheckForm({ csrfToken, initialQuota, disabledReason, trackEv
       <p className="t-small">IMEI {check.imei ?? check.maskedImei}</p>{check.message ? <p role="status">{check.message}</p> : null}
       {check.status === 'completed' && check.result ? <>
         {check.providerCode ? <ProviderOutputText value={check.providerCode} variant="plain" /> : <>
-        <p className="field-note">The original provider response is unavailable for this older check. Saved report fields are shown below.</p>
+        <p className="field-note">The original provider response is unavailable for this check. Saved report fields are shown below.</p>
         {check.result.sections.map(section => <section key={section.title}><h4>{section.title}</h4><dl className="service-check-result-list">{section.items.map(item => <div className="service-check-result-row" key={item.key}><dt>{item.label}</dt><dd className={/^clean$/i.test(item.value.trim()) ? 'service-workbench-valid' : undefined}>{item.value}</dd></div>)}</dl></section>)}
         {check.result.checks.length ? <dl className="service-check-result-list">{check.result.checks.map(item => <div className="service-check-result-row" key={item.key}><dt>{item.label}</dt><dd className={item.status === 'passed' ? 'service-workbench-valid' : undefined}>{item.value}</dd></div>)}</dl> : null}
         </>}

@@ -1,3 +1,5 @@
+import React from 'react'
+
 /** Preserve provider values verbatim; only explicit Clean values get a positive colour. */
 export function ProviderOutputText({ value, variant = 'table' }: { value: string; variant?: 'table' | 'plain' }) {
   // Free Check shows the saved provider response as escaped text, without parsing,
