@@ -8,6 +8,7 @@ import { CustomerEngagement } from '@/components/customer-engagement'
 import { AnalyticsConsent } from '@/components/analytics-consent'
 import { GoogleAnalyticsNavigation } from '@/components/google-analytics-navigation'
 import { analyticsHostAllowed } from '@/lib/site'
+import { clientIp, isInternalIp } from '@/lib/ga4'
 import { safeAnalyticsPage } from '@/lib/analytics-page'
 
 const DESCRIPTION =
@@ -47,6 +48,12 @@ const THEME_GUARD = `(function(){try{var s=localStorage.getItem('iunlockmobile-t
    on demand by the browser when a glyph in it is actually used. */
 const PRELOADED_FONTS = ['/fonts/inter-latin.woff2', '/fonts/inter-tight-latin.woff2']
 
+/* Opt-in regions (EEA, UK, Switzerland): Google tags stay denied until the visitor
+   accepts. Elsewhere (the US market this site serves) measurement is on by
+   default and the notice still lets anyone switch it off. Google applies the
+   region-specific default; a stored choice always overrides both. */
+const CONSENT_REQUIRED_REGIONS = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH']
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   /* Minted per request in middleware.ts, which is also where the policy that
      makes it mean anything is written. Next.js stamps its own streamed
@@ -56,11 +63,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const requestHost = requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim() ?? requestHeaders.get('host') ?? ''
   const session = await currentSession()
   const requestPath = requestHeaders.get('x-continuation-path')?.split('?')[0] ?? '/'
+  // INTERNAL_IPS: the same team list the server-side conversion rules skip.
   const analyticsEnabled = analyticsHostAllowed(requestHost) && session?.user.account_type !== 'admin' && !requestPath.startsWith('/admin')
+    && !isInternalIp(clientIp(requestHeaders))
   const googleAdsTag = 'AW-18465855968'
   const googleAnalyticsTag = 'G-9WCELVR3V3'
   // One nonce-bearing Google tag snippet in <head>, configured for both destinations.
-  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); var safeAnalyticsContext = (${safeAnalyticsPage.toString()})(location.href, document.referrer); gtag('set', safeAnalyticsContext); gtag('js', new Date()); gtag('config', '${googleAdsTag}', {...safeAnalyticsContext, send_page_view:false}); gtag('config', '${googleAnalyticsTag}', {...safeAnalyticsContext, send_page_view:false});`
+  const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', region: ${JSON.stringify(CONSENT_REQUIRED_REGIONS)}}); gtag('consent', 'default', {analytics_storage: 'granted', ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', wait_for_update: 500}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); var safeAnalyticsContext = (${safeAnalyticsPage.toString()})(location.href, document.referrer); gtag('set', safeAnalyticsContext); gtag('js', new Date()); gtag('config', '${googleAdsTag}', {...safeAnalyticsContext, send_page_view:false}); gtag('config', '${googleAnalyticsTag}', {...safeAnalyticsContext, send_page_view:false});`
 
   return (
     <html lang="en" data-analytics-disabled={!analyticsEnabled ? 'true' : undefined} data-theme="light" suppressHydrationWarning>

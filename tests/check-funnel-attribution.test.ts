@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test, { after } from 'node:test'
 import { createHmac } from 'node:crypto'
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { allowlistedFunnelParams, trackFunnelEvent } from '../lib/funnel-analytics'
@@ -93,7 +93,10 @@ test('consent defaults precede Google configuration and no GTM/custom conversion
   assert.ok(layout.indexOf("gtag('consent', 'default'") < layout.indexOf("gtag('config'"))
   assert.match(layout, /analytics_storage: 'denied'/); assert.match(layout, /safeAnalyticsPage.toString\(\)/); assert.match(read('lib/analytics-page.ts'), /'\/account'/)
   assert.doesNotMatch(layout, /GTM-PDB4DNWC|gtm\.js|iunlockmobile_purchase/)
-  assert.match(read('components/google-ads-purchase-conversion.tsx'), /AW-18465855968\/NzXJCKKYj5QdEOCzmuVE/)
+  // Phase 0: opt-in regions stay denied by default; elsewhere Google's default is granted.
+  assert.match(layout, /region: \$\{JSON.stringify\(CONSENT_REQUIRED_REGIONS\)\}/); assert.match(layout, /'GB','CH'/)
+  // No browser purchase/Ads conversion: purchases are sent only by the server worker.
+  assert.ok(!existsSync(join(process.cwd(), 'components/google-ads-purchase-conversion.tsx')))
   const route = read('app/api/consent/route.ts')
   assert.match(route, /httpOnly: true/); assert.match(route, /sameSite: 'lax'/); assert.match(route, /maxAge: 0/); assert.match(route, /encodeSignedConsent/)
 })

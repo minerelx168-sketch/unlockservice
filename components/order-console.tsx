@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatUsd } from '@/lib/money'
 import type { PurchaseConversion } from '@/lib/purchase-conversion'
-import { GoogleAdsPurchaseConversion } from './google-ads-purchase-conversion'
 import { Icon } from './icons'
 import { formatEta, OrderStatusBadge } from './order-status'
 
@@ -429,7 +428,6 @@ function OrderResult({ payload }: { payload: OrderPayload }) {
 
   return (
     <section className="panel">
-      {payload.status === 'delivered' ? <GoogleAdsPurchaseConversion purchase={payload.conversion} /> : null}
       <header>
         <h2>{payload.title}</h2>
         <span>

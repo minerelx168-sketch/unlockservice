@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { PENDING_ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateClickId, type ClickIdField } from '@/lib/attribution'
 import { updateGoogleConsent } from '@/lib/google-consent-tracking'
+import { forgetLanding, rememberLanding } from '@/lib/landing-context'
 export function AnalyticsConsent() {
   const [consent, setConsent] = useState<'unknown' | 'granted' | 'denied'>('unknown')
   const [open, setOpen] = useState(false)
@@ -23,12 +24,14 @@ export function AnalyticsConsent() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     for (const field of CLICK_ID_FIELDS) { const id = validateClickId(params.get(field)); if (id) clicks.current[field] = id }
+    rememberLanding(window.location.pathname, params)
     let active = true
     void fetch('/api/consent', { cache: 'no-store', credentials: 'same-origin' }).then((response) => response.json()).then(async (data) => {
       if (!active) return
       const state = data.consent === 'granted' ? 'granted' : data.consent === 'denied' ? 'denied' : 'unknown'
       setConsent(state); setOpen(true)
-      if (state !== 'granted') updateGoogleConsent('denied')
+      if (state === 'denied') { updateGoogleConsent('denied'); forgetLanding() }
+      if (state === 'unknown') updateGoogleConsent('default', clicks.current)
       if (state === 'granted') {
         // New landing click IDs are accepted only after previously saved consent is verified.
         if (Object.keys(clicks.current).length && Date.now() - capturedAt.current <= PENDING_ATTRIBUTION_MAX_AGE_SECONDS * 1000) {
@@ -45,7 +48,7 @@ export function AnalyticsConsent() {
   }, [])
   async function choose(state: 'granted' | 'denied') {
     setBusy(true); setError('')
-    updateGoogleConsent('denied')
+    if (state === 'denied') updateGoogleConsent('denied')
     if (Date.now() - capturedAt.current > PENDING_ATTRIBUTION_MAX_AGE_SECONDS * 1000) clicks.current = {}
     try {
       const response = await fetch('/api/consent', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ consent: state, ...(state === 'granted' ? clicks.current : {}) }) })
@@ -53,7 +56,7 @@ export function AnalyticsConsent() {
       await response.json().catch(() => ({}))
       updateGoogleConsent(state, state === 'granted' ? clicks.current : {})
       setConsent(state); setOpen(false)
-      if (state === 'denied') clicks.current = {}
+      if (state === 'denied') { clicks.current = {}; forgetLanding() }
     } catch (error) { setError(error instanceof Error ? error.message : 'Unable to save your choice.') } finally { setBusy(false) }
   }
   return <>

@@ -14,6 +14,9 @@ Environment=IUNLOCKMOBILE_DB=/home/ubuntu/apps/unlockservice/data/iunlockmobile.
 # The same file the app reads. Without a supplier configured in it,
 # pollProviderJobs() returns immediately and this run does nothing at all —
 # which is why the timer is safe to leave enabled before the provider is.
+# The web service's env (GA4_*, INTERNAL_IPS, Whop) so conversions also send from
+# this timer; the two files below keep precedence for supplier settings.
+EnvironmentFile=-/etc/iunlockmobile.env
 EnvironmentFile=/etc/unlockservice.env
 EnvironmentFile=/etc/unlockservice-dhru.env
 ExecStart=/usr/bin/npm run provider:poll -- 40

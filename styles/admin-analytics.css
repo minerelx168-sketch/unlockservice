@@ -112,3 +112,13 @@
 .tracking-health .analytics-footnote { padding: 0 4px; }
 @media (max-width: 1100px) { .tracking-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .tracking-status { flex-direction: column; gap: 10px; padding: 16px; } .tracking-counts { padding: 4px 16px 10px; } }
+.tracking-daily td:first-child .analytics-account { white-space: nowrap; }
+.tracking-low { color: var(--danger, #c2410c); font-weight: 650; }
+.tracking-manual { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 12px; align-items: end; padding: 16px 20px 20px; border-top: 1px solid var(--line); }
+.tracking-manual label { display: grid; gap: 7px; min-width: 0; font-size: 13px; font-weight: 600; }
+.tracking-manual input { width: 100%; min-width: 0; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font-size: 16px; }
+.tracking-manual .button { min-height: 46px; }
+.tracking-saved { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--success, #168773); }
+.tracking-saved.is-error { color: var(--danger, #c2410c); }
+@media (max-width: 1100px) { .tracking-manual { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tracking-manual .button { grid-column: 1 / -1; } }
+@media (max-width: 480px) { .tracking-manual { grid-template-columns: minmax(0, 1fr); padding: 16px; } }

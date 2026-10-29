@@ -93,6 +93,10 @@ test('confirmation threshold gates paid API; finalized crypto dispatches once wi
   assert.equal(db.db().prepare('SELECT 1 FROM payment_analytics WHERE invoice_reference=?').get(saved.crypto_invoice_reference),undefined)
   const sent=events.filter(event=>JSON.stringify(event).includes(`guest-${row.reference}`))
   assert.equal(sent.length,1);assert.equal(JSON.stringify(sent).includes('payment_completed'),false)
+  // Phase 0: value = service price minus the sheet cost of Apple Carrier (Lite) ($0.04); items carry what was paid.
+  const params=(sent[0] as {events:Array<{params:{value:number;payment_method:string;items:Array<{item_id:string;price:number}>}}>}).events[0].params
+  assert.equal(params.payment_method,'crypto');assert.equal(params.items[0].item_id,'444')
+  assert.equal(Math.round(params.value*100),Math.max(0,(saved.card_order_price_cents ?? saved.price_cents)-4))
   assert.ok(emails.some(email=>String(email.text).includes(row.reference)&&String(email.text).includes('SIM Lock: Unlocked')))
   const other=await checkout(15)
   assert.throws(()=>crypto.submitGuestCryptoTransaction(other.row.reference,other.key,hash),/another|already|used/i)

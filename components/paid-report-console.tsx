@@ -9,7 +9,6 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
 import { formatUsd } from '@/lib/money'
 import type { PurchaseConversion } from '@/lib/purchase-conversion'
-import { GoogleAdsPurchaseConversion } from './google-ads-purchase-conversion'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 import { ImeiSegments } from './imei-segments'
@@ -488,7 +487,6 @@ export function PaidReportConsole({
 
       {payload ? (
         <section className="card service-workbench-result" role="status" ref={resultRef} tabIndex={-1}>
-          {payload.order.status === 'completed' ? <GoogleAdsPurchaseConversion purchase={payload.conversion} /> : null}
           <div className="card-topline">
             <span className="kicker"><Icon name="file" /> {payload.order.productName}</span>
             <span className={payload.order.status === 'completed' ? 'badge badge--success' : 'badge'}>{statusLabel(payload.order.status)}</span>

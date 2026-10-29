@@ -1,11 +1,10 @@
 import { db } from './db'
-import { purchaseConversion } from './purchase-conversion'
-import { logPaymentFailure } from './payment-diagnostics'
+import { checkoutContext, claimEvent, fundedByTestCredit, ga4Config, identity, isInternalEmail, markDeliveryStarted, releaseStaleClaims, sendClaimedEvent, skipEvent, toMicros } from './ga4'
+import { marginCents, serviceForCode, serviceForProviderId } from './service-margins'
 
 type Kind = 'order' | 'paid_imei_report'
 export function serverPurchasesEnabled() {
-  return process.env.GA4_SERVER_PAYMENTS_ENABLED === '1' && !!process.env.GA4_MEASUREMENT_API_SECRET?.trim()
-    && process.env.IUNLOCKMOBILE_PUBLIC_ORIGIN === 'https://iunlockmobile.com'
+  return ga4Config().enabled
 }
 /** Capture before submitting a new order; never attach a new session to historical sales. */
 export function savePurchaseAnalytics(userId: number, kind: Kind, requestKey: string, input: unknown, consent: boolean) {
@@ -24,52 +23,67 @@ export function revokePurchaseAnalytics(userId: number) {
   db().prepare(`UPDATE purchase_analytics SET client_id='',session_id='',
     state=CASE WHEN state='pending' THEN 'suppressed' ELSE state END WHERE user_id=?`).run(userId)
 }
-type Candidate = { user_id:number; kind:Kind; request_key:string; client_id:string; session_id:string;
-  order_id:number; price_cents:number; charged_at:string }
+type Candidate = { user_id:number; email:string; account_type:string; kind:Kind; order_id:number; idempotency_key:string|null;
+  price_cents:number; charged_at:string; charge_id:number; client_id:string|null; session_id:string|null; capture_state:string|null;
+  product_code:string|null; product_name:string|null; provider_service_id:string|null; order_kind:string|null }
+
+/** Earlier paid service for this customer, by account or by email on guest checkouts. */
+export function customerTypeFor(userId: number | null, email: string | null, paidAt: string, excludeGuest?: string): 'new' | 'returning' {
+  const charge = userId ? db().prepare(`SELECT 1 FROM credit_ledger WHERE user_id=? AND type='charge' AND ref_type IN ('order','paid_imei_report') AND created_at<? LIMIT 1`).get(userId, paidAt) : undefined
+  if (charge) return 'returning'
+  const guest = email ? db().prepare(`SELECT 1 FROM guest_checkouts WHERE lower(email)=lower(?) AND paid_at IS NOT NULL AND paid_at<? AND environment='live'
+    AND state NOT IN ('refunded','refund_pending') AND reference IS NOT ? LIMIT 1`).get(email, paidAt, excludeGuest ?? null) : undefined
+  return guest ? 'returning' : 'new'
+}
+
+/**
+ * purchase for services paid from account credit: value = gross margin of the
+ * service (price charged minus provider cost), items[].price = amount charged.
+ */
 export async function deliverPurchaseAnalytics(limit=20) {
-  const stats={submitted:0,uncertain:0,disabled:!serverPurchasesEnabled()}
+  const stats={submitted:0,uncertain:0,skipped:0,disabled:!serverPurchasesEnabled()}
   if(stats.disabled) return stats
-  db().prepare("UPDATE purchase_analytics SET state='uncertain' WHERE state='sending' AND attempted_at<datetime('now','-5 minutes')").run()
-  db().prepare("UPDATE purchase_analytics SET state='expired',client_id='',session_id='' WHERE state='pending' AND created_at<datetime('now','-90 days')").run()
-  const eligible = `SELECT a.*,o.id AS order_id,o.price_cents,l.created_at AS charged_at
-    FROM purchase_analytics a JOIN users u ON u.id=a.user_id
-    JOIN (
-      SELECT id,user_id,idempotency_key,price_cents,created_at,source,'order' AS kind FROM orders WHERE status='delivered'
+  const started=markDeliveryStarted()
+  releaseStaleClaims()
+  const eligible = `SELECT o.user_id,u.email,u.account_type,o.kind,o.id AS order_id,o.idempotency_key,o.price_cents,l.created_at AS charged_at,l.id AS charge_id,
+      a.client_id,a.session_id,a.state AS capture_state,o.product_code,o.product_name,o.provider_service_id,o.order_kind
+    FROM (
+      SELECT id,user_id,idempotency_key,price_cents,source,'order' AS kind,NULL AS product_code,NULL AS product_name,provider_service_id,kind AS order_kind FROM orders WHERE status='delivered'
       UNION ALL
-      SELECT id,user_id,idempotency_key,price_cents,created_at,source,'paid_imei_report' AS kind FROM paid_report_orders WHERE status='completed'
-    ) o ON o.user_id=a.user_id AND o.kind=a.kind AND o.idempotency_key=a.request_key
-    JOIN credit_ledger l ON l.user_id=o.user_id AND l.ref_type=o.kind AND l.ref_id=CAST(o.id AS TEXT)
-      AND l.type='charge' AND l.amount_cents=-o.price_cents
-    WHERE a.state='pending' AND a.client_id!='' AND a.session_id!='' AND u.account_type IN ('customer','reseller')
-      AND o.source='website' AND o.price_cents>0 AND o.created_at>=a.created_at
-      AND l.created_at>=datetime('now','-48 hours')
+      SELECT id,user_id,idempotency_key,price_cents,source,'paid_imei_report' AS kind,product_code,product_name,provider_service_id,NULL AS order_kind FROM paid_report_orders WHERE status='completed'
+    ) o JOIN users u ON u.id=o.user_id
+    JOIN credit_ledger l ON l.user_id=o.user_id AND l.ref_type=o.kind AND l.ref_id=CAST(o.id AS TEXT) AND l.type='charge' AND l.amount_cents=-o.price_cents
+    LEFT JOIN purchase_analytics a ON a.user_id=o.user_id AND a.kind=o.kind AND a.request_key=o.idempotency_key
+    WHERE o.source='website' AND o.price_cents>0 AND l.created_at>=? AND l.created_at>=datetime('now','-48 hours')
+      AND NOT EXISTS(SELECT 1 FROM ga4_events_sent e WHERE e.event_name='purchase' AND e.transaction_id=(CASE o.kind WHEN 'order' THEN 'unlock-' ELSE 'report-' END)||o.id)
       AND NOT EXISTS(SELECT 1 FROM credit_ledger refund WHERE refund.user_id=o.user_id AND refund.ref_type=o.kind
-        AND refund.ref_id=CAST(o.id AS TEXT) AND refund.type='refund')`
+        AND refund.ref_id=CAST(o.id AS TEXT) AND refund.type='refund')
+    ORDER BY l.created_at LIMIT 1`
   for(let i=0;i<Math.max(0,Math.min(50,limit));i++) {
-    const row=db().transaction(()=>{
-      const found=db().prepare(eligible+' ORDER BY l.created_at LIMIT 1').get() as Candidate|undefined
-      if(!found)return
-      db().prepare("UPDATE purchase_analytics SET state='sending',attempted_at=datetime('now') WHERE user_id=? AND kind=? AND request_key=? AND state='pending'")
-        .run(found.user_id,found.kind,found.request_key)
-      return found
-    }).immediate()
+    const row=db().prepare(eligible).get(started) as Candidate|undefined
     if(!row)break
-    const conversion=purchaseConversion(row.user_id,row.kind,row.order_id,row.price_cents)
-    let state='uncertain'
-    try {
-      if(!conversion)throw new Error('Ineligible purchase')
-      const response=await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=G-9WCELVR3V3&api_secret=${encodeURIComponent(process.env.GA4_MEASUREMENT_API_SECRET!)}`,{
-        method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(10000),
-        body:JSON.stringify({client_id:row.client_id,timestamp_micros:Date.parse(row.charged_at.replace(' ','T')+'Z')*1000,
-          events:[{name:'purchase',params:{transaction_id:conversion.transactionId,value:conversion.value,currency:'USD',
-            session_id:Number(row.session_id),engagement_time_msec:1,items:conversion.items,payment_method:'account_credit'}}]})
-      })
-      if(response.ok)state='submitted'
-      else logPaymentFailure('purchase.analytics', {name:'Error',status:response.status})
-    }catch(error){logPaymentFailure('purchase.analytics',error)}
-    db().prepare('UPDATE purchase_analytics SET state=? WHERE user_id=? AND kind=? AND request_key=?')
-      .run(state,row.user_id,row.kind,row.request_key)
-    if(state==='submitted')stats.submitted++;else stats.uncertain++
+    const event={transactionId:`${row.kind==='order'?'unlock':'report'}-${row.order_id}`,eventName:'purchase' as const,kind:row.kind,paidAt:row.charged_at}
+    const context=row.idempotency_key ? checkoutContext(row.kind,row.idempotency_key) : undefined
+    const skip=row.account_type==='admin' || isInternalEmail(row.email) || context?.internal ? 'internal_user'
+      : row.capture_state==='suppressed' || context?.consent==='denied' ? 'consent_denied'
+      : fundedByTestCredit(row.user_id,row.charge_id,row.price_cents) ? 'test_credit' : null
+    if(skip){skipEvent(event,skip);stats.skipped++;continue}
+    if(!claimEvent(event))continue
+    const service=row.kind==='paid_imei_report'
+      ? (row.product_code ? serviceForCode(row.product_code,row.product_name ?? undefined) : serviceForProviderId(row.provider_service_id,row.product_name ?? undefined))
+      : serviceForProviderId(row.provider_service_id,row.order_kind==='carrier_unlock'?'Network unlock':'Device service')
+    const margin=marginCents(service.serviceId,row.price_cents)
+    const who=identity(row.client_id,row.session_id)
+    const customerType=customerTypeFor(row.user_id,row.email,row.charged_at)
+    const params:Record<string,unknown>={transaction_id:event.transactionId,value:margin.valueCents/100,currency:'USD',engagement_time_msec:100,
+      payment_method:'credit',customer_type:customerType,
+      items:[{item_id:service.serviceId ?? row.product_code ?? `order:${row.order_id}`,item_name:service.name,item_category:service.category,price:row.price_cents/100,quantity:1}]}
+    if(who.sessionId)params.session_id=who.sessionId
+    const reasons=[who.source==='fallback'?'missing_client_id':null,margin.known?null:'margin_unknown'].filter(Boolean).join('; ')||null
+    const state=await sendClaimedEvent(event,{client_id:who.clientId,...(who.source==='ga'?{user_id:String(row.user_id)}:{}),
+      timestamp_micros:toMicros(row.charged_at),non_personalized_ads:false,events:[{name:'purchase',params}]},
+      {valueCents:margin.valueCents,paidCents:row.price_cents,clientSource:who.source,customerType,marginKnown:margin.known,reason:reasons})
+    stats[state]++
   }
   return stats
 }

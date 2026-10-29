@@ -16,7 +16,7 @@ test('capture diagnostics distinguish consent and absent IDs without storing ide
  recordTrackingCapture('topup','four',user,{clientId:'123.456',sessionId:'123'},true,false)
  recordTrackingCapture('topup','one',user,{clientId:'123.456',sessionId:'123'},true)
  const rows=db().prepare('SELECT reason FROM tracking_capture_diagnostics ORDER BY rowid').all()
- assert.deepEqual(rows,[{reason:'consent_not_granted'},{reason:'browser_context_missing'},{reason:'context_received'},{reason:'server_tracking_disabled'}])
+ assert.deepEqual(rows,[{reason:'consent_denied'},{reason:'browser_context_missing'},{reason:'context_received'},{reason:'server_tracking_disabled'}])
  assert.equal(JSON.stringify(db().prepare('SELECT * FROM tracking_capture_diagnostics').all()).includes('123.456'),false)
  db().prepare("UPDATE users SET account_type='admin' WHERE id=?").run(user)
  recordTrackingCapture('topup','admin',user,undefined,true)

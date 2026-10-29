@@ -1,3 +1,6 @@
+import { alreadyHandled, checkoutContext, claimEvent, ga4Config, identity, isInternalEmail, markDeliveryStarted, sendClaimedEvent, skipEvent, toMicros } from './ga4'
+import { marginCents, serviceForCode } from './service-margins'
+import { customerTypeFor } from './purchase-analytics'
 import { logPaymentFailure } from './payment-diagnostics'
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Whop } from '@whop/sdk'
@@ -278,21 +281,34 @@ async function notifyGuest(row:GuestCheckout) {
   } finally { db().prepare('UPDATE guest_checkouts SET lease_until=0 WHERE reference=?').run(row.reference) }
 }
 async function guestAnalytics(row:GuestCheckout) {
-  if (row.environment!=='live' || !row.client_id || !row.session_id || !row.user_id || !row.report_id || row.review_reason || row.state==='refunded'
-    || row.analytics_state!=='pending' || !process.env.GA4_MEASUREMENT_API_SECRET || process.env.GA4_SERVER_PAYMENTS_ENABLED!=='1'
-    || publicOrigin()!=='https://iunlockmobile.com') return
+  if (row.environment!=='live' || !row.user_id || !row.report_id || row.review_reason || row.state==='refunded' || !ga4Config().enabled) return
   const report=guestReport(row)
   if (report?.status!=='completed' || !hasCreditTransition('paid_imei_report',String(row.report_id),'charge')) return
-  if (!db().prepare("UPDATE guest_checkouts SET analytics_state='sending',analytics_attempted_at=datetime('now') WHERE reference=? AND analytics_state='pending'").run(row.reference).changes) return
-  let state='uncertain'
-  try {
-    const response=await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=G-9WCELVR3V3&api_secret=${encodeURIComponent(process.env.GA4_MEASUREMENT_API_SECRET)}`,{
-      method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(10000),body:JSON.stringify({client_id:row.client_id,
-        events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)/100,currency:'USD',session_id:Number(row.session_id),engagement_time_msec:1,
-          items:[{item_id:row.product_code,item_name:row.product_name,price:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)/100,quantity:1}]}}]})})
-    if(response.ok) state='submitted'
-    else logPaymentFailure('guest.analytics', { name: 'Error', status: response.status })
-  } catch (error) { logPaymentFailure('guest.analytics', error) /* Never replay an ambiguously accepted event. */ }
+  const started=markDeliveryStarted()
+  const paidAt=row.paid_at ?? row.created_at
+  if (toMicros(paidAt)<toMicros(started)) return
+  const event={transactionId:`guest-${row.reference}`,eventName:'purchase' as const,kind:'guest',paidAt}
+  if (alreadyHandled(event.transactionId,event.eventName)) return
+  const context=checkoutContext('guest',row.reference)
+  const buyer=row.customer_user_id ? db().prepare('SELECT account_type FROM users WHERE id=?').get(row.customer_user_id) as {account_type:string}|undefined : undefined
+  const skip=buyer?.account_type==='admin' || isInternalEmail(row.email) || context?.internal ? 'internal_user'
+    : context?.consent==='denied' ? 'consent_denied' : null
+  if (skip) { skipEvent(event,skip); db().prepare("UPDATE guest_checkouts SET analytics_state='suppressed' WHERE reference=?").run(row.reference); return }
+  if (!claimEvent(event)) return
+  db().prepare("UPDATE guest_checkouts SET analytics_state='sending',analytics_attempted_at=datetime('now') WHERE reference=?").run(row.reference)
+  // The customer paid the service price (plus any fee); value is that price minus provider cost.
+  const paidCents=(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)
+  const service=serviceForCode(row.product_code,row.product_name)
+  const margin=marginCents(service.serviceId,row.card_order_price_cents ?? row.price_cents)
+  const who=identity(row.client_id,row.session_id)
+  const customerType=customerTypeFor(row.customer_user_id,row.email,paidAt,row.reference)
+  const params:Record<string,unknown>={transaction_id:event.transactionId,value:margin.valueCents/100,currency:'USD',engagement_time_msec:100,
+    payment_method:row.payment_method==='crypto'?'crypto':'card',customer_type:customerType,
+    items:[{item_id:service.serviceId ?? row.product_code,item_name:service.name,item_category:service.category,price:paidCents/100,quantity:1}]}
+  if (who.sessionId) params.session_id=who.sessionId
+  const reasons=[who.source==='fallback'?'missing_client_id':null,margin.known?null:'margin_unknown'].filter(Boolean).join('; ')||null
+  const state=await sendClaimedEvent(event,{client_id:who.clientId,timestamp_micros:toMicros(paidAt),non_personalized_ads:false,events:[{name:'purchase',params}]},
+    {valueCents:margin.valueCents,paidCents,clientSource:who.source,customerType,marginKnown:margin.known,reason:reasons})
   db().prepare('UPDATE guest_checkouts SET analytics_state=? WHERE reference=?').run(state,row.reference)
 }
 /** Run immediately after verified webhooks; durable paid state survives process restarts. */

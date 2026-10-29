@@ -1,4 +1,5 @@
 'use client'
+import { analyticsActive } from './google-consent-tracking'
 
 export const FUNNEL_EVENTS = [
   'service_quote_viewed',
@@ -41,7 +42,7 @@ export function allowlistedFunnelParams(input: Record<string, unknown>): Record<
 }
 
 export function trackFunnelEvent(name: FunnelEventName, input: Record<string, unknown> = {}): boolean {
-  if (typeof window === 'undefined' || (window as Window & { iunlockmobileAnalyticsConsent?: string }).iunlockmobileAnalyticsConsent !== 'granted') return false
+  if (typeof window === 'undefined' || !analyticsActive()) return false
   const host = window.location.hostname.toLowerCase().replace(/\.$/, '')
   if (host !== 'iunlockmobile.com' && host !== 'www.iunlockmobile.com') return false
   const params = allowlistedFunnelParams(input)
@@ -56,7 +57,7 @@ export function trackFunnelEvent(name: FunnelEventName, input: Record<string, un
 const sentFunnelEvents = new Set<string>()
 let lastFunnelPruned = 0
 export function trackFunnelEventOnce(name: FunnelEventName, reference: string, input: Record<string, unknown> = {}): boolean {
-  if (typeof window === 'undefined' || !reference || (window as Window & { iunlockmobileAnalyticsConsent?: string }).iunlockmobileAnalyticsConsent !== 'granted') return false
+  if (typeof window === 'undefined' || !reference || !analyticsActive()) return false
   const host = window.location.hostname.toLowerCase().replace(/\.$/, '')
   if (host !== 'iunlockmobile.com' && host !== 'www.iunlockmobile.com') return false
   const key = `iunlockmobile-funnel:${name}:${reference}`

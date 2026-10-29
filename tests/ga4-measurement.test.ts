@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { analyticsHostAllowed } from '../lib/site'
 const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
@@ -14,16 +14,13 @@ test('analytics loader allows only actual production hosts', () => {
   assert.equal((layout.match(/gtag\/js\?id=/g) ?? []).length, 1)
 })
 
-test('GA4 purchase is separate from Ads, uses real proof and consent replay', () => {
-  const event = read('components/google-ads-purchase-conversion.tsx')
-  assert.match(event, /G-9WCELVR3V3/)
-  assert.match(event, /tag\('event', 'purchase', event\)/)
-  assert.match(event, /if \(browser.iunlockmobileAnalyticsConsent !== 'granted'\) return/)
-  assert.match(event, /addEventListener\('iunlockmobile-consent', emit\)/)
-  for (const field of ['transaction_id: purchase.transactionId', 'value: purchase.value', 'currency: purchase.currency', 'event.items = purchase.items']) assert.ok(event.includes(field))
-  assert.match(event, /iunlockmobile:ga4-purchase:/)
-  assert.match(event, /iunlockmobile:ads-purchase:/)
-  for (const path of ['components/payment-forms.tsx', 'components/payment-funnel-events.tsx']) assert.doesNotMatch(read(path), /GoogleAdsPurchaseConversion|['"]purchase['"]/)
+test('purchase is sent only by the server worker, never from a page', () => {
+  assert.ok(!existsSync(join(process.cwd(), 'components/google-ads-purchase-conversion.tsx')))
+  for (const path of ['components/order-console.tsx', 'components/paid-report-console.tsx', 'app/(app)/user/orders/[id]/page.tsx', 'app/(app)/user/reports/[id]/page.tsx', 'components/payment-forms.tsx', 'components/payment-funnel-events.tsx'])
+    assert.doesNotMatch(read(path), /GoogleAdsPurchaseConversion|tag\('event', ['"]purchase['"]/)
+  const worker = read('lib/ga4.ts')
+  assert.match(worker, /INSERT OR IGNORE INTO ga4_events_sent/)
+  assert.match(worker, /GA4_MP_API_SECRET/)
 })
 
 test('SPA pageview suppresses initial duplicate but tracks private route changes without IDs', () => {

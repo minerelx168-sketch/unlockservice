@@ -8,7 +8,10 @@ www.iunlockmobile.com {
 # the real domain has propagated. Drop it once iunlockmobile.com resolves.
 iunlockmobile.com, unlockservice.34-138-231-163.sslip.io {
     encode zstd gzip
-    reverse_proxy 127.0.0.1:3000
+    reverse_proxy 127.0.0.1:3000 {
+        # The app reads the visitor address for rate limits and INTERNAL_IPS.
+        header_up X-Real-IP {remote_host}
+    }
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
