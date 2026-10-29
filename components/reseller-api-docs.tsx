@@ -43,7 +43,7 @@ function curl(method: string, path: string) {
 export function ResellerApiDocs() {
   return <section className="panel reseller-api-docs" id="api-docs" aria-labelledby="api-docs-heading">
     <header><div><span className="eyebrow">Developer guide · v1</span><h2 id="api-docs-heading">API Docs</h2></div>
-      <a className="api-guide-link" href="https://github.com/minerelx168-sketch/unlockservice/blob/main/docs/reseller-api.md" target="_blank" rel="noopener noreferrer">Full integration guide ↗</a>
+      <a className="api-guide-link" href="/api/reseller/docs" download="iunlockmobile-reseller-api.md">Download integration guide (.md) ↓</a>
     </header>
     <div className="panel-body reseller-docs">
       <p>Connect your store to iUnlockMobile. Copy an endpoint or a ready-to-edit request, then replace the placeholders with your own values.</p>
