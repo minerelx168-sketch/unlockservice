@@ -39,7 +39,7 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
         paymentMethods={GATEWAYS.map((gateway) => `${gateway.asset} on ${gateway.network}`)}
       />
       <p className="t-small" style={{ marginTop: 18 }}>
-        Want Apple Basic Info first? <Link href="/check">Use Apple Free Check</Link>; 3 free checks per day, with no credit charge.
+        Want Apple Basic Info first? <Link href="/check">Try the free Apple check</Link>.
       </p>
     </>
   )
