@@ -20,7 +20,7 @@ export default function ServicesPage() {
             <span className="kicker"><Icon name="grid" /> Service categories</span>
             <h1 className="t-display">Phone unlocking and IMEI check services.</h1>
             <p className="t-lead">
-              Phone checks and unlocking are different services. Select one category first so you only see relevant products, prices and next steps.
+              Choose a category to see its services and prices.
             </p>
           </div>
         </div>
@@ -34,7 +34,7 @@ export default function ServicesPage() {
               <div className="service-hub-copy">
                 <span className="kicker">Device information</span>
                 <h2>Phone Check</h2>
-                <p>Check device, carrier, warranty, blacklist and lock-status information before buying, selling or unlocking a phone.</p>
+                <p>Carrier, warranty, blacklist and lock status — before you buy, sell or unlock.</p>
               </div>
               <div className="service-hub-stats">
                 <div><strong>{checks.publishedCount}</strong><span>published checks</span></div>
@@ -68,7 +68,7 @@ export default function ServicesPage() {
           </div>
 
           <p className="t-micro service-hub-version">
-            Prices and availability are current as shown. A report describes the phone at the moment it is run; it does not prove who owns it, and it does not guarantee the network will release it.
+            A report shows the phone’s status when it runs. It does not prove ownership or guarantee an unlock.
           </p>
         </div>
       </section>
