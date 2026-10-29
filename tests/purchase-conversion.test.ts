@@ -63,18 +63,13 @@ test('administrator orders never emit a marketing purchase, even with a valid ch
   assert.equal((connection.prepare('SELECT count(*) AS n FROM credit_ledger WHERE user_id = ?').get(admin) as {n:number}).n, 2)
 })
 
-test('source protects all completion points and no sitewide purchase snippet is duplicated', () => {
+test('no page fires a purchase or Ads conversion; the server worker owns purchase', () => {
   const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8')
   const layout = read('app/layout.tsx')
   assert.match(layout, /gtag\/js\?id=/)
   assert.doesNotMatch(layout, /NzXJCKKYj5QdEOCzmuVE/)
-  const event = read('components/google-ads-purchase-conversion.tsx')
-  assert.match(event, /AW-18465855968\/NzXJCKKYj5QdEOCzmuVE/)
-  assert.match(event, /transaction_id: purchase.transactionId/)
-  assert.match(event, /new_customer: purchase.newCustomer/)
-  for (const path of ['lib/orders.ts', 'lib/paid-reports.ts', 'app/(app)/user/orders/[id]/page.tsx']) {
-    assert.match(read(path), /status === '(delivered|completed)'/)
-    assert.match(read(path), /purchaseConversion/)
-  }
-  assert.match(read('components/paid-report-console.tsx'), /data\.report!\.status === 'completed'/)
+  for (const path of ['app/(app)/user/orders/[id]/page.tsx', 'app/(app)/user/reports/[id]/page.tsx', 'components/order-console.tsx', 'components/paid-report-console.tsx'])
+    assert.doesNotMatch(read(path), /GoogleAdsPurchaseConversion|NzXJCKKYj5QdEOCzmuVE/)
+  for (const path of ['lib/orders.ts', 'lib/paid-reports.ts']) assert.match(read(path), /status === '(delivered|completed)'/)
+  assert.match(read('lib/purchase-analytics.ts'), /status='delivered'/)
 })

@@ -15,7 +15,8 @@ test('new hero entry points use consented allowlisted funnel transport without r
     assert.doesNotMatch(source, /trackFunnelEvent\([^\n]+\{[^\n]*(imei:|email:|productCode:)/)
   }
   const transport = read('lib/funnel-analytics.ts')
-  assert.match(transport, /iunlockmobileAnalyticsConsent !== 'granted'/)
+  // Funnel events follow the visitor's choice: off once refused, Google's regional default otherwise.
+  assert.match(transport, /!analyticsActive\(\)/)
   assert.match(transport, /allowlistedFunnelParams/)
 })
 test('homepage and FAQ qualify unlock compatibility and describe direct card and crypto orders', () => {
