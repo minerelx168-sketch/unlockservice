@@ -71,16 +71,8 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   if (rawEmail !== null && !email) return { error: 'Enter a valid email address so we can deliver your result.' }
   const crypto = form.get('paymentMethod') === 'crypto'
   if (crypto && !guestCryptoEnabled()) return { error: 'Crypto checkout is temporarily unavailable. Please try again shortly.' }
-  const smallCardOrder = !crypto && guestCheckoutEnabled() && product.priceCents < 100
-  const customer = smallCardOrder ? await currentSession() : null
-  if (smallCardOrder && customer && customer.user.account_type !== 'customer') {
-    return { error: 'Use a customer account for card orders below $1.00, or choose crypto.' }
-  }
   await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined, product.inputType)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
-  if (smallCardOrder && !customer) {
-    redirect(withContinuation('/register', `/checkout?product=${encodeURIComponent(product.code)}&method=card`))
-  }
   redirect(crypto || guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}${crypto ? '&method=crypto' : ''}` : target)
 }
 
@@ -130,4 +122,5 @@ export async function clearAcceptedDeviceIntentAction(value: { imei: string; pro
     await clearDeviceIntent()
   }
 }
+
 

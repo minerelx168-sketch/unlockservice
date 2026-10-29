@@ -20,7 +20,7 @@ export const GUEST_CARD_MIN_TOTAL_CENTS = 100
 
 export type GuestCheckout = {
   reference: string; request_key: string; email: string; product_code: string; product_name: string
-  imei_encrypted: string; price_cents: number; fee_cents: number; wallet_credit_cents: number; customer_user_id: number | null; wallet_review_reason: string | null; account_id: string; product_id: string
+  imei_encrypted: string; card_order_price_cents: number | null; checkout_link_sent_at: string | null; checkout_link_next_at: number; price_cents: number; fee_cents: number; wallet_credit_cents: number; customer_user_id: number | null; wallet_review_reason: string | null; account_id: string; product_id: string
   environment: string; checkout_id: string | null; plan_id: string | null; checkout_url: string | null
   payment_method: 'card' | 'crypto'; crypto_invoice_reference: string | null
   payment_id: string | null; state: string; user_id: number | null; report_id: number | null
@@ -29,6 +29,11 @@ export type GuestCheckout = {
   email_attempts: number; email_next_at: number; client_id: string | null; session_id: string | null
   analytics_state: string; created_at: string
 }
+/** Legacy rows keep their promised wallet allocation; new direct orders have none. */
+export function guestCheckoutTotal(row: Pick<GuestCheckout, 'card_order_price_cents' | 'price_cents' | 'wallet_credit_cents' | 'fee_cents'>) {
+  return (row.card_order_price_cents ?? row.price_cents + row.wallet_credit_cents) + row.fee_cents
+}
+
 export function guestCheckoutCoreEnabled() {
   return process.env.IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED === '1' && emailDeliveryConfigured()
     && (process.env.IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET?.trim().length ?? 0) >= 32
@@ -82,39 +87,28 @@ export async function createGuestCheckout(input: {
     const product = getPaidReportProduct(input.productCode)
     if (!product?.providerReady || product.priceCents <= 0 || product.priceCents > 100000) throw new WhopPaymentError('This service is not available for online payment.', 409)
     const quote = guestCardQuote(product.priceCents)
-    let customerUserId: number | null = null
-    if (quote.requiresAccount) {
-      const customer = Number.isSafeInteger(input.authenticatedUserId) ? db().prepare('SELECT id,email,account_type,status,banned_at,email_verified_at FROM users WHERE id=?').get(input.authenticatedUserId) as {id:number;email:string;account_type:string;status:string;banned_at:string|null;email_verified_at:string|null}|undefined : undefined
-      if (!customer || customer.account_type !== 'customer' || customer.status !== 'active' || customer.banned_at || !customer.email_verified_at) {
-        throw new WhopPaymentError('Create an account or sign in to pay by card and save the difference as credit.', 401)
-      }
-      if (customer.email.toLowerCase() !== email) throw new WhopPaymentError('Use your signed-in account email for this card order, or sign in to the matching account.', 409)
-      if (db().prepare('SELECT 1 FROM guest_checkouts WHERE customer_user_id=? AND wallet_review_reason IS NOT NULL LIMIT 1').get(customer.id)
-        || db().prepare('SELECT 1 FROM whop_topups WHERE user_id=? AND review_reason IS NOT NULL LIMIT 1').get(customer.id)) throw new WhopPaymentError('A payment on this account needs review. Contact support before paying again.', 409)
-      customerUserId = customer.id
-    }
     if (product.priceCents !== input.expectedPriceCents) throw new WhopPaymentError('The price changed. Reload to review the current price.', 409)
     if (!consumeAttempt('guest-checkout-email', email, 6, 3600)) throw new WhopPaymentError('Too many requests. Please try again later.', 429)
     const reference = randomBytes(16).toString('hex')
     const a = input.analytics
     const validAnalytics = a && /^\d{1,20}\.\d{1,20}$/.test(a.clientId) && /^\d{1,12}$/.test(a.sessionId) && Number(a.sessionId)>0
     db().prepare(`INSERT INTO guest_checkouts (reference,request_key,email,product_code,product_name,imei_encrypted,price_cents,fee_cents,
-      account_id,product_id,environment,client_id,session_id,wallet_credit_cents,customer_user_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
+      account_id,product_id,environment,client_id,session_id,wallet_credit_cents,customer_user_id,card_order_price_cents) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
       reference,input.requestKey,email,product.code,product.name,encryptPaidReportImei(imei,product.inputType),product.priceCents,quote.feeCents,
-      config.accountId,config.productId,config.mode,validAnalytics ? a.clientId : null, validAnalytics ? a.sessionId : null,quote.walletCreditCents,customerUserId)
+      config.accountId,config.productId,config.mode,validAnalytics ? a.clientId : null, validAnalytics ? a.sessionId : null,0,null,quote.fundingCents)
     return getGuestCheckout(reference)!
   }).immediate()
-  if (row.state !== 'pending') return { url: guestOrderPath(row.reference) }
-  if (row.checkout_url) return { url: row.checkout_url }
-  const total = row.price_cents + row.wallet_credit_cents + row.fee_cents
+  if (row.state !== 'pending') return { url: guestOrderPath(row.reference), reference: row.reference }
+  if (row.checkout_url) return { url: row.checkout_url, reference: row.reference }
+  const total = guestCheckoutTotal(row)
   const checkout = await client(config).checkoutConfigurations.create({
     account_id: config.accountId, mode: 'payment',
     plan: { account_id: config.accountId, product_id: config.productId, currency: 'usd',
       initial_price: total / 100, plan_type: 'one_time', renewal_price: 0,
-      title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `One device service order on iunlockmobile.com. Service $${(row.price_cents/100).toFixed(2)} + 5% card fee $${(row.fee_cents/100).toFixed(2)}. No wallet top-up or subscription.`,
+      title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — one device service order. Total $${(total/100).toFixed(2)} USD before any applicable tax. No subscription.`,
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
-    metadata: { guest_reference: row.reference, integration: 'iunlockmobile-guest-v1' },
+    metadata: { guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
     payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false },
     redirect_url: publicOrigin() + guestOrderPath(row.reference),
   }, { idempotencyKey: `guest-checkout-${row.reference}` })
@@ -125,7 +119,7 @@ export async function createGuestCheckout(input: {
   const url = safeWhopCheckoutUrl(checkout.purchase_url, config.mode)
   db().prepare('UPDATE guest_checkouts SET checkout_id=?,plan_id=?,checkout_url=? WHERE reference=? AND checkout_id IS NULL')
     .run(checkout.id,checkout.plan.id,url,row.reference)
-  return { url }
+  return { url, reference: row.reference }
 }
 function money(value: Whop.Money | null | undefined, optional=false) {
   if (!value && optional) return 0
@@ -173,7 +167,7 @@ export function settleGuestPayment(payment: Whop.Payment): string {
       return 'review'
     }
     const total=money(payment.total), subtotal=money(payment.subtotal), tax=money(payment.tax_amount,true), refunded=money(payment.refunded_amount,true)
-    if (payment.currency!=='usd' || subtotal!==row.price_cents+row.wallet_credit_cents+row.fee_cents || total-tax!==subtotal || total<subtotal
+    if (payment.currency!=='usd' || subtotal!==guestCheckoutTotal(row) || total-tax!==subtotal || total<subtotal
       || (tax>0 && payment.tax_behavior!=='exclusive') || refunded>total || payment.payment_method_type!=='card'
       || payment.promo_code_id || !['one_time','subscription_create'].includes(payment.billing_reason??'')) throw new Error('Guest payment amount mismatch.')
     const disputed=(/dispute|resolution/.test(payment.substatus) || !!payment.dispute_alerted_at)
@@ -210,7 +204,7 @@ export function guestResult(row: GuestCheckout) {
   const received=row.payment_method==='crypto' && row.crypto_invoice_reference && row.user_id
     ? db().prepare("SELECT credit_amount_cents FROM invoices WHERE reference=? AND user_id=? AND status='success'").get(row.crypto_invoice_reference,row.user_id) as {credit_amount_cents:number}|undefined : undefined
   const progress=row.report_id && row.user_id ? db().prepare('SELECT provider_order_id FROM paid_report_orders WHERE id=? AND user_id=?').get(row.report_id,row.user_id) as {provider_order_id:string|null}|undefined : undefined
-  return { reference:row.reference, paymentMethod:row.payment_method, walletCreditCents:row.wallet_credit_cents,
+  return { reference:row.reference, totalCents:guestCheckoutTotal(row), checkoutUrl:row.state==='pending' && !row.review_reason ? row.checkout_url : null, paymentMethod:row.payment_method, walletCreditCents:row.wallet_credit_cents,
     walletCreditApplied:row.wallet_credit_cents>0 && hasCreditTransition('guest_card_difference',row.reference,'topup') && !hasCreditTransition('guest_card_difference_refund',row.reference,'adjustment'),
     walletCreditReview:Boolean(row.wallet_review_reason), cryptoReceivedCents:received?.credit_amount_cents??null, productName:row.product_name, priceCents:row.price_cents, feeCents:row.fee_cents,
     domain:getPaidReportProduct(row.product_code)?.domain??'imei_check',
@@ -288,15 +282,50 @@ async function guestAnalytics(row:GuestCheckout) {
   try {
     const response=await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=G-9WCELVR3V3&api_secret=${encodeURIComponent(process.env.GA4_MEASUREMENT_API_SECRET)}`,{
       method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(10000),body:JSON.stringify({client_id:row.client_id,
-        events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:row.price_cents/100,currency:'USD',session_id:Number(row.session_id),
-          items:[{item_id:row.product_code,item_name:row.product_name,price:row.price_cents/100,quantity:1}]}}]})})
+        events:[{name:'purchase',params:{transaction_id:`guest-${row.reference}`,value:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row))/100,currency:'USD',session_id:Number(row.session_id),
+          items:[{item_id:row.product_code,item_name:row.product_name,price:(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row))/100,quantity:1}]}}]})})
     if(response.ok) state='submitted'
     else logPaymentFailure('guest.analytics', { name: 'Error', status: response.status })
   } catch (error) { logPaymentFailure('guest.analytics', error) /* Never replay an ambiguously accepted event. */ }
   db().prepare('UPDATE guest_checkouts SET analytics_state=? WHERE reference=?').run(state,row.reference)
 }
+/** Run immediately after verified webhooks; durable paid state survives process restarts. */
+export async function processPaidGuestCheckouts(limit=5) {
+  const rows=db().prepare(`SELECT * FROM guest_checkouts WHERE state='paid' AND paid_at IS NOT NULL
+    AND payment_id IS NOT NULL AND review_reason IS NULL AND lease_until<=? ORDER BY paid_at LIMIT ?`)
+    .all(Date.now(),Math.max(1,Math.min(limit,10))) as GuestCheckout[]
+  const stats={checked:0,errors:0}
+  for (const row of rows) {
+    try {
+      await dispatchGuest(row)
+      const current=getGuestCheckout(row.reference)!
+      await notifyGuest(current)
+      await guestAnalytics(current)
+      stats.checked++
+    } catch(error) { logPaymentFailure('guest.paid.dispatch',error); stats.errors++ }
+  }
+  return stats
+}
+
+/** One requested checkout link, never a campaign or a retrospective email to old orders. */
+export async function sendGuestCheckoutLink(reference:string) {
+  const row=getGuestCheckout(reference)
+  if (!row || row.card_order_price_cents===null || row.state!=='pending' || row.review_reason
+    || !row.checkout_url || row.checkout_link_sent_at || row.checkout_link_next_at>Date.now()) return
+  const locked=db().prepare(`UPDATE guest_checkouts SET checkout_link_next_at=? WHERE reference=?
+    AND state='pending' AND checkout_link_sent_at IS NULL AND checkout_link_next_at<=?`).run(Date.now()+60000,reference,Date.now())
+  if (!locked.changes) return
+  const url=publicOrigin()+guestOrderPath(reference)
+  const body=`iUnlockMobile\n${row.product_name}\nOrder: ${reference}\n\nYour order is saved. Complete your secure card payment to start the service. If you have already paid, this private link shows your payment status. Do not pay twice.\n\n${url}`
+  try {
+    await sendTransactionalEmail(row.email,'Your iUnlockMobile order — secure payment link',`<p>${escape(row.product_name)}</p><p>Complete your payment to start your order. Already paid? This link shows your status.</p><p><a href="${escape(url)}">Open my order</a></p>`,body,{idempotencyKey:`guest/${reference}/checkout-link`})
+    db().prepare("UPDATE guest_checkouts SET checkout_link_sent_at=datetime('now') WHERE reference=?").run(reference)
+  } catch { /* Scheduled worker retries; email delivery must not block checkout. */ }
+}
+
 /** Existing signed webhook is primary; bounded API reconciliation recovers missed webhooks. */
 export async function processGuestCheckouts(limit=5) {
+  await processPaidGuestCheckouts(limit)
   const config=whopConfiguration(),stats={checked:0,errors:0}
   const rows=db().prepare(`SELECT * FROM guest_checkouts WHERE ((payment_method='card' AND environment=? AND account_id=? AND checkout_id IS NOT NULL) OR (payment_method='crypto' AND environment='live' AND crypto_invoice_reference IS NOT NULL))
     AND (checked_at IS NULL OR checked_at<=datetime('now','-1 minute'))
@@ -319,6 +348,7 @@ export async function processGuestCheckouts(limit=5) {
         for(const payment of page.data) if(payment.metadata?.guest_reference===row.reference) settleGuestPayment(await client(config).payments.retrieve({id:payment.id}))
       }
       row=getGuestCheckout(row.reference)!
+      if(row.state==='pending') await sendGuestCheckoutLink(row.reference)
       diagnosticStage = 'guest.service.dispatch'
       if(row.state==='paid' && !row.review_reason) await dispatchGuest(row)
       row=getGuestCheckout(row.reference)!
@@ -361,4 +391,5 @@ export async function processGuestCheckouts(limit=5) {
   }
   return stats
 }
+
 

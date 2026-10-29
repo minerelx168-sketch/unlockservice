@@ -4,6 +4,7 @@ export const FUNNEL_EVENTS = [
   'service_quote_viewed',
   'guest_details_completed',
   'order_preview_viewed',
+  'order_summary_requested',
   'order_preview_continue',
   'imei_input_started',
   'unlock_imei_submitted',
@@ -78,3 +79,4 @@ export function trackFunnelEventOnce(name: FunnelEventName, reference: string, i
   try { window.sessionStorage.setItem(key, '1') } catch { /* Storage is optional. */ }
   return true
 }
+
