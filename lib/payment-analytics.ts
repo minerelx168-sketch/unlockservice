@@ -1,4 +1,4 @@
-import { checkoutContext, claimEvent, ga4Config, identity, isInternalEmail, markDeliveryStarted, releaseStaleClaims, sendClaimedEvent, skipEvent, toMicros, type Identity } from './ga4'
+import { checkoutContext, claimEvent, ga4Config, identity, isInternalEmail, markDeliveryStarted, recordUnsentPayments, releaseStaleClaims, sendClaimedEvent, skipEvent, toMicros, type Identity } from './ga4'
 import { db } from './db'
 
 export function savePaymentAnalytics(reference: string, userId: number, input: unknown, consent: boolean) {
@@ -51,6 +51,7 @@ export async function deliverPaymentAnalytics(limit = 20) {
   if (!config.enabled) return { ...result, disabled: true }
   const started = markDeliveryStarted()
   releaseStaleClaims()
+  recordUnsentPayments(started)
   const eligible = `SELECT i.reference AS invoice_reference,i.user_id,u.email,u.account_type,a.client_id,a.session_id,a.consent,
       i.credit_amount_cents,i.gateway,i.credited_at
     FROM invoices i JOIN users u ON u.id=i.user_id LEFT JOIN payment_analytics a ON a.invoice_reference=i.reference AND a.user_id=i.user_id

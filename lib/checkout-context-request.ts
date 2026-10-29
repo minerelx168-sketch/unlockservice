@@ -1,7 +1,7 @@
 import { cookies, headers } from 'next/headers'
 import { CLICK_ID_FIELDS, validateClickId, type ClickIdField } from './attribution'
 import { ATTRIBUTION_COOKIE, CONSENT_COOKIE } from './cookie-names'
-import { recordCheckoutContext, type ConsentChoice } from './ga4'
+import { clientIp, recordCheckoutContext, type ConsentChoice } from './ga4'
 import { parseAttributionCookie, parseSignedConsent } from './order-attribution'
 
 /** The visitor's stored choice: 'unknown' until they press Accept or close the notice. */
@@ -14,7 +14,7 @@ export async function captureCheckoutContext(kind: 'topup' | 'order' | 'paid_ime
   try {
     const jar = await cookies()
     const consent = await consentChoice()
-    const ip = (await headers()).get('x-real-ip')
+    const ip = clientIp(await headers())
     const clickIds: Partial<Record<ClickIdField, string>> = {}
     const fromCookie = consent === 'granted' ? parseAttributionCookie(jar.get(ATTRIBUTION_COOKIE)?.value) : null
     const fromPage = input && typeof input === 'object' ? input as Record<string, unknown> : {}

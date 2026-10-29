@@ -43,6 +43,10 @@ export function isInternalIp(ip: string | null | undefined): boolean {
   const candidate = ip.split(',')[0].trim().toLowerCase().replace(/^::ffff:/, '')
   return listEnv('INTERNAL_IPS').some((entry) => entry === candidate)
 }
+/** The visitor address as seen by Caddy (single proxy in front of Node). */
+export function clientIp(headers: { get(name: string): string | null }): string | null {
+  return headers.get('x-real-ip')?.trim() || headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null
+}
 export function isInternalEmail(email: string | null | undefined): boolean {
   const domain = email?.toLowerCase().split('@')[1]
   return !!domain && listEnv('INTERNAL_EMAIL_DOMAINS').some((entry) => domain === entry.replace(/^@/, ''))
@@ -122,6 +126,56 @@ export async function sendClaimedEvent(event: EventRecord, body: Record<string, 
     details.valueCents, details.paidCents, details.clientSource, details.customerType, details.marginKnown === null ? null : details.marginKnown ? 1 : 0,
     event.transactionId, event.eventName)
   return state
+}
+
+/**
+ * True when a credit-paid service was funded by credit that did not come from a
+ * real payment (admin adjustments, test credit): the money never came in.
+ */
+export function fundedByTestCredit(userId: number, chargeLedgerId: number, amountCents: number): boolean {
+  const funded = db().prepare(`SELECT COALESCE(SUM(l.amount_cents),0) total FROM credit_ledger l
+    LEFT JOIN invoices i ON l.ref_type='invoice' AND i.reference=l.ref_id
+    LEFT JOIN whop_topups w ON w.invoice_reference=i.reference
+    WHERE l.user_id=? AND l.id<? AND (
+      (l.type='topup' AND l.ref_type='invoice' AND i.status='success' AND (i.gateway!='whop_card' OR w.environment='live'))
+      OR (l.type='topup' AND l.ref_type='guest_card_difference')
+      OR (l.type='adjustment' AND l.ref_type IN ('whop_refund','guest_card_difference_refund')))`).get(userId, chargeLedgerId) as { total: number }
+  const spent = db().prepare("SELECT COALESCE(SUM(-amount_cents),0) total FROM credit_ledger WHERE user_id=? AND id<? AND type='charge'")
+    .get(userId, chargeLedgerId) as { total: number }
+  return funded.total - spent.total < amountCents
+}
+
+/**
+ * Spec: every payment that is NOT sent is recorded with its reason. The send
+ * queries only pick eligible rows, so failed, refunded, disputed, sandbox and
+ * zero-amount payments since delivery started are written here as skipped.
+ */
+export function recordUnsentPayments(started: string) {
+  const skip = db().prepare(`INSERT OR IGNORE INTO ga4_events_sent(transaction_id,event_name,kind,state,reason,paid_at) VALUES(?,?,?,'skipped',?,?)`)
+  const topups = db().prepare(`SELECT i.reference,i.status,i.credit_amount_cents,COALESCE(i.credited_at,i.paid_at,i.updated_at) at,w.environment,w.reversed_cents,w.review_reason
+    FROM invoices i JOIN users u ON u.id=i.user_id LEFT JOIN whop_topups w ON w.invoice_reference=i.reference
+    WHERE u.account_type!='guest' AND julianday(COALESCE(i.credited_at,i.paid_at,i.updated_at))>=julianday(?)
+      AND (i.status IN ('failed','refunded') OR (i.status='success' AND (i.credit_amount_cents<=0 OR (w.invoice_reference IS NOT NULL AND (w.environment!='live' OR w.reversed_cents>0 OR w.review_reason IS NOT NULL))))
+        OR (i.status='review' AND w.review_reason LIKE '%dispute%'))
+      AND NOT EXISTS(SELECT 1 FROM guest_checkouts g WHERE g.crypto_invoice_reference=i.reference)`).all(started) as
+    { reference: string; status: string; credit_amount_cents: number; at: string; environment: string | null; reversed_cents: number | null; review_reason: string | null }[]
+  for (const t of topups) {
+    const reason = t.status === 'failed' ? 'payment_failed' : t.review_reason && /dispute|resolution/.test(t.review_reason) ? 'chargeback'
+      : t.status === 'refunded' || (t.reversed_cents ?? 0) > 0 ? 'refunded' : t.environment && t.environment !== 'live' ? 'test_environment'
+      : t.credit_amount_cents <= 0 ? 'zero_amount' : 'payment_review'
+    if (reason !== 'payment_review') skip.run(`topup-${t.reference}`, 'payment_completed', 'topup', reason, t.at)
+  }
+  const guests = db().prepare(`SELECT reference,state,review_reason,environment,payment_method,paid_at FROM guest_checkouts
+    WHERE paid_at IS NOT NULL AND state!='pending' AND julianday(paid_at)>=julianday(?)
+      AND (state IN ('refunded','refund_pending') OR review_reason IS NOT NULL OR (payment_method='card' AND environment!='live'))`).all(started) as
+    { reference: string; state: string; review_reason: string | null; environment: string; payment_method: string; paid_at: string }[]
+  for (const g of guests) {
+    const reason = g.review_reason && /dispute|resolution/.test(g.review_reason) ? 'chargeback'
+      : ['refunded', 'refund_pending'].includes(g.state) || g.review_reason === 'partial_refund' ? 'refunded'
+      : g.payment_method === 'card' && g.environment !== 'live' ? 'test_environment' : 'payment_review'
+    // A review that later clears is still sent: only final outcomes are recorded here.
+    if (reason !== 'payment_review') skip.run(`guest-${g.reference}`, 'purchase', 'guest', reason, g.paid_at)
+  }
 }
 
 /** Claims older than five minutes that never finished: the process died mid-send. */

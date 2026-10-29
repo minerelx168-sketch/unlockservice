@@ -1,5 +1,5 @@
 import { db } from './db'
-import { checkoutContext, claimEvent, ga4Config, identity, isInternalEmail, markDeliveryStarted, releaseStaleClaims, sendClaimedEvent, skipEvent, toMicros } from './ga4'
+import { checkoutContext, claimEvent, fundedByTestCredit, ga4Config, identity, isInternalEmail, markDeliveryStarted, releaseStaleClaims, sendClaimedEvent, skipEvent, toMicros } from './ga4'
 import { marginCents, serviceForCode, serviceForProviderId } from './service-margins'
 
 type Kind = 'order' | 'paid_imei_report'
@@ -65,7 +65,8 @@ export async function deliverPurchaseAnalytics(limit=20) {
     const event={transactionId:`${row.kind==='order'?'unlock':'report'}-${row.order_id}`,eventName:'purchase' as const,kind:row.kind,paidAt:row.charged_at}
     const context=row.idempotency_key ? checkoutContext(row.kind,row.idempotency_key) : undefined
     const skip=row.account_type==='admin' || isInternalEmail(row.email) || context?.internal ? 'internal_user'
-      : row.capture_state==='suppressed' || context?.consent==='denied' ? 'consent_denied' : null
+      : row.capture_state==='suppressed' || context?.consent==='denied' ? 'consent_denied'
+      : fundedByTestCredit(row.user_id,row.charge_id,row.price_cents) ? 'test_credit' : null
     if(skip){skipEvent(event,skip);stats.skipped++;continue}
     if(!claimEvent(event))continue
     const service=row.kind==='paid_imei_report'

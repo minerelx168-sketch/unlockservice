@@ -40,9 +40,9 @@ export function serviceCostCents(serviceId: string | null): number | null {
   return null
 }
 
-/** Margin for one sold service. Unknown cost falls back to the net price and says so. */
+/** Margin for one sold service. Unknown cost sends 0 (never revenue) and is flagged margin_unknown. */
 export function marginCents(serviceId: string | null, netPriceCents: number): { valueCents: number; known: boolean } {
   const cost = serviceCostCents(serviceId)
-  if (cost === null) return { valueCents: Math.max(0, netPriceCents), known: false }
+  if (cost === null) return { valueCents: 0, known: false }
   return { valueCents: Math.max(0, netPriceCents - cost), known: true }
 }
