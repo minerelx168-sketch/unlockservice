@@ -1,5 +1,8 @@
 /** Preserve provider values verbatim; only explicit Clean values get a positive colour. */
-export function ProviderOutputText({ value }: { value: string }) {
+export function ProviderOutputText({ value, variant = 'table' }: { value: string; variant?: 'table' | 'plain' }) {
+  // Free Check shows the saved provider response as escaped text, without parsing,
+  // relabelling, filtering or interpreting any of its fields.
+  if (variant === 'plain') return <pre className="provider-output-plain">{value}</pre>
   return <div className="provider-output">{value.split('\n').map((line, index) => {
     const pair = line.match(/^([^:\n]{1,80}):\s*(.*)$/)
     const clean = /^\s*clean\s*$/i.test(pair ? pair[2] : line)
