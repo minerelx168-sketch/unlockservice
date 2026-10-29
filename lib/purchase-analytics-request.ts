@@ -1,3 +1,5 @@
+import { recordTrackingCapture } from './tracking-diagnostics'
+import { serverPurchasesEnabled } from './purchase-analytics'
 import { cookies } from 'next/headers'
 import { CONSENT_COOKIE } from './cookie-names'
 import { parseSignedConsent } from './order-attribution'
@@ -6,5 +8,6 @@ export async function snapshotPurchaseAnalytics(userId:number,kind:'order'|'paid
   try {
     const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)
     savePurchaseAnalytics(userId,kind,typeof requestKey==='string'?requestKey:'',input,consent?.consent==='granted')
+    recordTrackingCapture(kind, typeof requestKey==='string'?requestKey:'', userId, input, consent?.consent === 'granted', serverPurchasesEnabled())
   } catch { /* Optional measurement must never block an order. */ }
 }

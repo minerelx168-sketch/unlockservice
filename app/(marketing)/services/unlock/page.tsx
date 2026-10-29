@@ -39,6 +39,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
             <span className="hero-chip"><Icon name="lock" />Network unlock services</span>
             <h1 className="service-entry-title">Keep your phone.<br /><span className="accent">Explore your options.</span></h1>
             <p className="t-lead">Choose the network your phone is locked to. See the price and delivery time first, then enter the required device details and your email to review your order. Choose card or crypto at checkout.</p>
+            <p><Link className="link-arrow" href="/services/unlock/us">US customer? View available US carrier services →</Link></p>
             <ul className="service-micro" aria-label="Unlock facts">
               <li><Icon name="bolt" />Remote service</li>
               <li><Icon name="wallet" />Pay per order</li>
@@ -56,7 +57,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
               <li><Icon name="checkSmall" />Financing and account rules depend on the carrier.</li>
             </ul>
             <Link className="link-arrow" href="/services/imei-check">Not sure which carrier? Check your phone<Icon name="arrowRight" /></Link>
-            <p className="t-small">If we cannot deliver a direct card order, we request a full refund to the original payment method. Orders paid with existing account credit release that credit back to the balance.</p>
+            <p className="t-small">If a direct card order cannot be delivered, the system initiates a refund to the original payment method. Bank processing time varies; payments requiring review are handled by support. Orders paid with existing account credit release that credit back to the balance.</p>
           </div>
         </div>
         <div className="expect expect--wide">

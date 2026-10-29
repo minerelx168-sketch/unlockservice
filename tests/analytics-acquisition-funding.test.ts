@@ -23,7 +23,7 @@ test('private paths, identifiers, arbitrary queries and free-text campaign value
 })
 
 test('invalid, credential-bearing, local and authentication referrers are omitted', () => {
-  for (const referrer of ['not a URL', 'javascript:alert(1)', 'https://name:password@external.test/private', 'http://192.168.1.1/private', 'http://localhost/private', 'https://accounts.google.com/o/oauth?code=secret']) {
+  for (const referrer of ['not a URL', 'javascript:alert(1)', 'https://name:password@external.test/private', 'http://192.168.1.1/private', 'http://localhost/private', 'https://accounts.google.com/o/oauth?code=secret', 'https://tagassistant.google.com/', 'https://whop.com/checkout/test']) {
     assert.equal(safeAnalyticsPage('https://iunlockmobile.com/', referrer).page_referrer, '')
   }
   assert.equal(safeAnalyticsPage('https://iunlockmobile.com/', 'https://news.example.test/article?email=private@example.test').page_referrer, 'https://news.example.test')

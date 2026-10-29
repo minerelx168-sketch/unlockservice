@@ -58,6 +58,7 @@ export function AppNav({ isAdmin = false, children }: { isAdmin?: boolean; child
             { href: '/admin/guest-orders', label: 'Direct card orders', icon: 'file' as IconName },
             { href: '/admin/payments', label: 'Payment history', icon: 'file' as IconName },
             { href: '/admin/analytics', label: 'Customer analytics', icon: 'grid' as IconName },
+            { href: '/admin/tracking', label: 'Tracking health', icon: 'grid' as IconName },
           ],
         },
       ]

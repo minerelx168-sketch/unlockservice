@@ -35,7 +35,7 @@ export function safeAnalyticsPage(href: string, referrer: string): AnalyticsPage
       const sourceHost = source.hostname.toLowerCase().replace(/\.$/, '')
       if (['http:', 'https:'].includes(source.protocol) && !source.username && !source.password
           && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(sourceHost)
-          && !['iunlockmobile.com', 'www.iunlockmobile.com', 'accounts.google.com'].includes(sourceHost)) result.page_referrer = source.origin
+          && !['iunlockmobile.com', 'www.iunlockmobile.com', 'accounts.google.com', 'tagassistant.google.com', 'whop.com', 'checkout.whop.com'].includes(sourceHost)) result.page_referrer = source.origin
     }
   } catch { /* Malformed input cannot break a page or enter analytics. */ }
   return result
