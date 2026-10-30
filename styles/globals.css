@@ -29,6 +29,7 @@
 @import './motion.css';
 @import './apple-free-check.css';
 @import './service-description.css';
+@import './checkout-reminders.css';
 
 /* Browser-only validation and privacy controls. */
 .validation-results { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; }
