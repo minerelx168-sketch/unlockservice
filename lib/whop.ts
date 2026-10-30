@@ -10,6 +10,7 @@ import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
 import { MIN_TOPUP_CENTS, MAX_TOPUP_CENTS } from './topup-limits'
 import { cardFeeCents } from './card-fee'
+import type { GuestCheckout } from './guest-checkout'
 
 export const WHOP_API_VERSION = '2026-10-15-1'
 export const WHOP_MIN_CENTS = MIN_TOPUP_CENTS
@@ -42,6 +43,56 @@ export function client(config: Configuration): WhopClient {
   return new WhopClient({ token: config.apiKey, apiVersionDate: WHOP_API_VERSION,
     environment: config.mode === 'live' ? WhopEnvironment.Production : WhopEnvironment.Sandbox,
     timeoutInSeconds: 10, maxRetries: 0 })
+}
+
+/**
+ * Reconcile a previously bound guest payment before accepting a different
+ * payment ID. The retrieve is proof-only: no retry, capture, refund or other
+ * provider write is performed. Any timeout, mismatch, paid/refunded/disputed
+ * result, or local financial transition fails closed and leaves the binding.
+ */
+export async function reconcileGuestPaymentBinding(reference: string, priorPaymentId: string): Promise<boolean> {
+  const config = whopConfiguration()
+  if (!config || !/^pay_[A-Za-z0-9]+$/.test(priorPaymentId)) return false
+  const row = db().prepare('SELECT * FROM guest_checkouts WHERE reference=?').get(reference) as GuestCheckout | undefined
+  if (!row || row.payment_method !== 'card' || row.payment_id !== priorPaymentId) return false
+  let payment: Whop.Payment
+  try {
+    payment = await client(config).payments.retrieve({ id: priorPaymentId })
+  } catch {
+    return false
+  }
+  if (payment.id !== priorPaymentId) return false
+  const guest = await import('./guest-checkout')
+  if (!guest.guestPaymentCanClearPriorBinding(row, payment)) return false
+  const cleared = db().transaction(() => {
+    const current = db().prepare('SELECT * FROM guest_checkouts WHERE reference=?').get(reference) as GuestCheckout | undefined
+    if (!current || !guest.guestPaymentCanClearPriorBinding(current, payment)) return 0
+    return db().prepare(`UPDATE guest_checkouts SET payment_id=NULL,paid_at=NULL,processor_updated_at=NULL,
+      checked_at=NULL,last_error=NULL WHERE reference=? AND payment_id=? AND state='pending' AND report_id IS NULL AND user_id IS NULL
+      AND review_reason IS NULL AND wallet_review_reason IS NULL AND refund_requested_at IS NULL
+      AND NOT EXISTS (SELECT 1 FROM credit_ledger
+        WHERE ref_id=? AND ref_type IN ('guest_payment','guest_card_difference','guest_card_difference_refund','guest_refund'))`)
+      .run(reference, priorPaymentId, reference).changes
+  }).immediate()
+  return cleared === 1
+}
+
+/** Reconcile a prior guest binding before a different settled payment is applied. */
+export async function reconcileGuestPaymentBeforeSettlement(payment: Whop.Payment): Promise<void> {
+  if (payment.metadata?.integration !== 'iunlockmobile-guest-v1') return
+  const reference = payment.metadata?.guest_reference
+  if (typeof reference !== 'string' || !/^[a-f0-9]{32}$/.test(reference)) return
+  const row = db().prepare('SELECT payment_id FROM guest_checkouts WHERE reference=?').get(reference) as { payment_id: string | null } | undefined
+  if (!row?.payment_id || row.payment_id === payment.id) return
+  const guest = await import('./guest-checkout')
+  if (guest.guestPaymentIsSettled(payment)) {
+    const cleared = await reconcileGuestPaymentBinding(reference, row.payment_id)
+    const current = db().prepare('SELECT payment_id,state FROM guest_checkouts WHERE reference=?').get(reference) as { payment_id: string | null; state: string } | undefined
+    if (!cleared && current?.state === 'pending' && current.payment_id && current.payment_id !== payment.id) {
+      throw new WhopPaymentError('Prior payment verification is pending; do not retry payment.', 503)
+    }
+  }
 }
 
 export type WhopTopup = {
@@ -105,7 +156,7 @@ export async function createWhopCheckout(userId: number, amountCents: number, re
       title: `Service credits — USD ${(amountCents / 100).toFixed(2)}`,
       description: 'Prepaid credits on iunlockmobile.com for device reports, carrier unlocking and available device services, including iCloud activation-lock, MDM profile and Google account (FRP) removal, subject to eligibility.'
         + (topup.fee_cents > 0 ? ` Includes ${formatUsd(topup.credit_amount_cents)} service credits and ${formatUsd(topup.fee_cents)} card payment fee. The fee is not added to your credit balance.` : ''),
-      visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true,
+      visibility: 'hidden', unlimited_stock: true, force_create_new_plan: true,
       three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
     metadata: { invoice_reference: topup.invoice_reference, integration: 'iunlockmobile-credit-v1' },
@@ -271,7 +322,7 @@ export async function processWhopEvents(limit = 10): Promise<{ processed: number
       const payment = await client(config).payments.retrieve({ id: job.payment_id })
       if (payment.id !== job.payment_id) throw new WhopPaymentError('Payment identity mismatch.')
       const outcome = payment.metadata?.integration === 'iunlockmobile-guest-v1'
-        ? (await import('./guest-checkout')).settleGuestPayment(payment)
+        ? (await reconcileGuestPaymentBeforeSettlement(payment), (await import('./guest-checkout')).settleGuestPayment(payment))
         : settlePayment(payment, config)
       db().prepare(`UPDATE whop_webhook_events SET state = ?, processed_at = datetime('now'), locked_until = NULL, last_error = NULL
         WHERE event_id = ?`).run(outcome === 'unmatched' ? 'unmatched' : 'processed', job.event_id)

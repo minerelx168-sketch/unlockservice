@@ -12,7 +12,7 @@ import { decryptPaidReportImei, encryptPaidReportImei } from './paid-report-imei
 import { createPaidReport, getPaidReport, getPaidReportProduct, PaidReportError } from './paid-reports'
 import { credit, getBalance, hasCreditTransition } from './credits'
 import { emailDeliveryConfigured, sendTransactionalEmail } from './account-security'
-import { client, whopCheckoutEnabled, whopConfiguration, safeWhopCheckoutUrl, WhopPaymentError } from './whop'
+import { client, reconcileGuestPaymentBeforeSettlement, whopCheckoutEnabled, whopConfiguration, safeWhopCheckoutUrl, WhopPaymentError } from './whop'
 import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
 import { prepareGuestAccount } from './guest-account'
@@ -111,7 +111,7 @@ export async function createGuestCheckout(input: {
       initial_price: total / 100, plan_type: 'one_time', renewal_price: 0,
       // Whop variants accept a maximum 30-character title; retain the complete service in the description.
       title: row.product_name.slice(0,30), description: row.wallet_credit_cents > 0 ? `${row.product_name}. One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — ${row.product_name}. One device service order. Total $${(total/100).toFixed(2)} USD, including our card fee and any applicable tax. No subscription.`,
-      visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
+      visibility: 'hidden', unlimited_stock: true, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
     metadata: { guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
     payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false },
@@ -132,6 +132,56 @@ function money(value: Whop.Money | null | undefined, optional=false) {
   const result=parseUsd(value.amount)
   if (result===null || !Number.isSafeInteger(result) || result<0) throw new Error('Unexpected payment amount.')
   return result
+}
+function guestPaymentIdentityMatches(row: GuestCheckout, payment: Whop.Payment, config: NonNullable<ReturnType<typeof whopConfiguration>>) {
+  return row.account_id===payment.account_id && row.environment===config.mode && row.product_id===payment.product_id
+    && row.plan_id===payment.plan_id && row.checkout_id===payment.checkout_configuration_id
+    && payment.metadata?.integration==='iunlockmobile-guest-v1' && payment.metadata?.guest_reference===row.reference
+}
+export function guestPaymentIsSettled(payment: Whop.Payment) {
+  if (['refunded','auto_refunded'].includes(payment.substatus)) return true
+  if (payment.status!=='paid') return false
+  return ['succeeded','partially_refunded','dispute_won','dispute_warning_closed','resolution_won'].includes(payment.substatus)
+    || /dispute|resolution/.test(payment.substatus)
+}
+function guestPaymentAmounts(row: GuestCheckout, payment: Whop.Payment) {
+  const total=money(payment.total), subtotal=money(payment.subtotal), tax=money(payment.tax_amount,true), refunded=money(payment.refunded_amount,true)
+  const expectedTotal=guestCheckoutTotal(row)
+  // New inclusive quotes fix the amount collected; legacy exclusive quotes retain their contract.
+  const validAmount=row.card_order_price_cents !== null
+    ? total===expectedTotal && tax<=total && (subtotal===total || subtotal===total-tax)
+      && (tax===0 || payment.tax_behavior==='inclusive')
+    : subtotal===expectedTotal && total-tax===subtotal && total>=subtotal && (tax===0 || payment.tax_behavior==='exclusive')
+  if (payment.currency!=='usd' || !validAmount || refunded>total || payment.payment_method_type!=='card'
+    || payment.promo_code_id || !['one_time','subscription_create'].includes(payment.billing_reason??'')) throw new Error('Guest payment amount mismatch.')
+  return { total, tax, refunded }
+}
+export function guestPaymentQuoteMatches(row: GuestCheckout, payment: Whop.Payment) {
+  try { guestPaymentAmounts(row,payment); return true } catch { return false }
+}
+function guestPaymentHasNoCollectedFunds(payment: Whop.Payment) {
+  if (payment.paid_at===null) return true
+  const paidAt=Date.parse(payment.paid_at), createdAt=Date.parse(payment.created_at)
+  // Failed Whop receipts can expose a pre-creation sentinel in paid_at. It is
+  // not collection proof and must never authorize a paid settlement.
+  return Number.isFinite(paidAt) && Number.isFinite(createdAt) && paidAt<createdAt
+}
+function guestPaymentIsDefinitelyFailed(payment: Whop.Payment) {
+  const terminal=['failed','blocked','canceled','uncollectible'].includes(payment.substatus)
+  return terminal && ((payment.status==='open' && payment.substatus!=='uncollectible')
+    || payment.status==='void' || payment.status==='uncollectible')
+}
+/** Proof-only check used by the async Whop worker before clearing a prior ID. */
+export function guestPaymentCanClearPriorBinding(row: GuestCheckout, payment: Whop.Payment) {
+  const config=whopConfiguration()
+  if (!config || !/^pay_[A-Za-z0-9]+$/.test(payment.id) || !guestPaymentIdentityMatches(row,payment,config)
+    || row.payment_id!==payment.id || row.state!=='pending' || row.report_id!==null || row.user_id!==null || row.review_reason!==null
+    || row.wallet_review_reason!==null || row.refund_requested_at!==null || !guestPaymentIsDefinitelyFailed(payment)
+    || !guestPaymentHasNoCollectedFunds(payment) || !Array.isArray(payment.holds) || payment.holds.length
+    || payment.dispute_alerted_at!==null || /dispute|resolution/.test(payment.substatus)
+    || payment.refunded_at!==null || payment.auto_refunded!==false
+    || !Object.prototype.hasOwnProperty.call(payment,'refunded_amount') || !guestPaymentQuoteMatches(row,payment)) return false
+  try { return money(payment.refunded_amount,true)===0 } catch { return false }
 }
 /** Revoke only this checkout's untouched difference, never unrelated wallet funds.
  * Any outgoing use since the credit is conservatively reviewed because wallet money is fungible.
@@ -159,27 +209,17 @@ export function settleGuestPayment(payment: Whop.Payment): string {
     if (!row) return 'unmatched'
     if (row.payment_method !== 'card') throw new Error('Guest payment method mismatch.')
     if (!row.checkout_id) throw new Error('Checkout is still being saved.')
-    if (row.account_id!==payment.account_id || row.environment!==config.mode || row.product_id!==payment.product_id
-      || row.plan_id!==payment.plan_id || row.checkout_id!==payment.checkout_configuration_id
-      || payment.metadata?.integration!=='iunlockmobile-guest-v1') throw new Error('Guest payment identity mismatch.')
+    if (!guestPaymentIdentityMatches(row,payment,config)) throw new Error('Guest payment identity mismatch.')
     if (!/^pay_[A-Za-z0-9]+$/.test(payment.id)) throw new Error('Invalid payment ID.')
     const updated=Date.parse(payment.updated_at)
     if (!Number.isFinite(updated)) throw new Error('Invalid payment timestamp.')
     if (row.payment_id===payment.id && row.processor_updated_at && updated<Date.parse(row.processor_updated_at)) return 'stale'
-    if (payment.status!=='paid' && !payment.paid_at && !['refunded','auto_refunded'].includes(payment.substatus)) return 'pending'
+    if (!guestPaymentIsSettled(payment)) return 'pending'
     if (row.payment_id && row.payment_id!==payment.id) {
       db().prepare("UPDATE guest_checkouts SET review_reason='multiple_payments',wallet_review_reason=CASE WHEN wallet_credit_cents>0 THEN 'multiple_payments' ELSE wallet_review_reason END WHERE reference=?").run(ref)
       return 'review'
     }
-    const total=money(payment.total), subtotal=money(payment.subtotal), tax=money(payment.tax_amount,true), refunded=money(payment.refunded_amount,true)
-    const expectedTotal=guestCheckoutTotal(row)
-    // New inclusive quotes fix the amount collected; legacy exclusive quotes retain their contract.
-    const validAmount=row.card_order_price_cents !== null
-      ? total===expectedTotal && tax<=total && (subtotal===total || subtotal===total-tax)
-        && (tax===0 || payment.tax_behavior==='inclusive')
-      : subtotal===expectedTotal && total-tax===subtotal && total>=subtotal && (tax===0 || payment.tax_behavior==='exclusive')
-    if (payment.currency!=='usd' || !validAmount || refunded>total || payment.payment_method_type!=='card'
-      || payment.promo_code_id || !['one_time','subscription_create'].includes(payment.billing_reason??'')) throw new Error('Guest payment amount mismatch.')
+    const {total,tax,refunded}=guestPaymentAmounts(row,payment)
     const disputed=(/dispute|resolution/.test(payment.substatus) || !!payment.dispute_alerted_at)
       && !['dispute_won','dispute_warning_closed','resolution_won'].includes(payment.substatus)
     const fullyRefunded=refunded===total || ['refunded','auto_refunded'].includes(payment.substatus)
@@ -404,12 +444,34 @@ export async function processGuestCheckouts(limit=5) {
     let diagnosticStage = 'guest.payment.verify'
     try {
       if(row.payment_method==='crypto') settleGuestCryptoPayment(row.reference)
-      else if(config && row.payment_id) settleGuestPayment(await client(config).payments.retrieve({id:row.payment_id}))
+      else if(config && row.payment_id) {
+        const bound=await client(config).payments.retrieve({id:row.payment_id})
+        settleGuestPayment(bound)
+        row=getGuestCheckout(row.reference)!
+        // A failed first attempt remains bound only until a later paid receipt
+        // is found and the Whop worker proves the first ID is unpaid.
+        if (row.state==='pending' && !row.review_reason && row.payment_id && row.plan_id) {
+          diagnosticStage = 'guest.whop.list'
+          const page=await client(config).payments.list({plan_id:row.plan_id,first:10})
+          diagnosticStage = 'guest.whop.settle'
+          for(const listed of page.data) if(listed.id!==row.payment_id && listed.metadata?.guest_reference===row.reference) {
+            const payment=await client(config).payments.retrieve({id:listed.id})
+            await reconcileGuestPaymentBeforeSettlement(payment)
+            settleGuestPayment(payment)
+            row=getGuestCheckout(row.reference)!
+            if (row.state!=='pending' || row.review_reason) break
+          }
+        }
+      }
       else if(config && row.payment_method==='card' && row.plan_id) {
         diagnosticStage = 'guest.whop.list'
         const page=await client(config).payments.list({plan_id:row.plan_id,first:10})
         diagnosticStage = 'guest.whop.settle'
-        for(const payment of page.data) if(payment.metadata?.guest_reference===row.reference) settleGuestPayment(await client(config).payments.retrieve({id:payment.id}))
+        for(const listed of page.data) if(listed.metadata?.guest_reference===row.reference) {
+          const payment=await client(config).payments.retrieve({id:listed.id})
+          await reconcileGuestPaymentBeforeSettlement(payment)
+          settleGuestPayment(payment)
+        }
       }
       row=getGuestCheckout(row.reference)!
       if(row.state==='pending') await sendGuestCheckoutLink(row.reference)

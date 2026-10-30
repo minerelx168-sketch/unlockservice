@@ -7,13 +7,14 @@ import test,{before,after} from 'node:test'
 import type { Whop } from '@whop/sdk'
 const dir=mkdtempSync(join(tmpdir(),'guest-checkout-'))
 Object.assign(process.env,{IUNLOCKMOBILE_DB:join(dir,'test.db'),IUNLOCKMOBILE_WHOP_ENABLED:'1',IUNLOCKMOBILE_GUEST_CHECKOUT_ENABLED:'1',WHOP_MODE:'live',WHOP_ACCOUNT_ID:'biz_test',WHOP_PRODUCT_ID:'prod_test',WHOP_API_KEY:'test-only',WHOP_WEBHOOK_SECRET:'test-only',RESEND_API_KEY:'test-only',IUNLOCKMOBILE_EMAIL_FROM:'support@example.test',IUNLOCKMOBILE_IMEI_FINGERPRINT_SECRET:'test-secret-for-guest-checkout-32-characters',IUNLOCKMOBILE_PROVIDER_MODE:'enabled',IUNLOCKMOBILE_PROVIDER_NAME:'test',IUNLOCKMOBILE_PROVIDER_URL:'https://provider.example.test/api',IUNLOCKMOBILE_PROVIDER_API_KEY:'test-only',IUNLOCKMOBILE_IMEI_SERVICE_MAP:JSON.stringify({'check:apple_carrier_lite':{id:'444',mode:'sync'}}),IUNLOCKMOBILE_PUBLIC_ORIGIN:'https://iunlockmobile.com',GA4_SERVER_PAYMENTS_ENABLED:'1',GA4_MEASUREMENT_API_SECRET:'test-only'})
-let guest:typeof import('../lib/guest-checkout'),db:typeof import('../lib/db'),credits:typeof import('../lib/credits')
+let guest:typeof import('../lib/guest-checkout'),db:typeof import('../lib/db'),credits:typeof import('../lib/credits'),whop:typeof import('../lib/whop')
 const originalFetch=globalThis.fetch,payments=new Map<string,Whop.Payment>()
+let listedPayments:Whop.Payment[]=[]
 const emails:Record<string,unknown>[]=[],events:Record<string,unknown>[]=[],refunds:string[]=[]
 let providerCalls=0,checkoutCalls=0,emailFailure=false,providerFailure=false,providerUncertain=false
 let checkoutFailure=false
 before(async()=>{
-  guest=await import('../lib/guest-checkout');db=await import('../lib/db');credits=await import('../lib/credits')
+  guest=await import('../lib/guest-checkout');db=await import('../lib/db');credits=await import('../lib/credits');whop=await import('../lib/whop')
   db.db().prepare("UPDATE paid_report_products SET price_cents=1000,is_active=1 WHERE code='APPLE_CARRIER_LITE'").run()
   globalThis.fetch=async(input,init)=>{
     const url=new URL(typeof input==='string'||input instanceof URL?input:input.url)
@@ -27,6 +28,8 @@ before(async()=>{
         const service=db.db().prepare('SELECT product_name FROM guest_checkouts WHERE reference=?').get(ref) as {product_name:string}
         assert.ok(body.plan.description.includes(service.product_name), 'Full service name remains disclosed')
         assert.equal(body.plan.initial_price,quote.total/100);assert.equal(body.plan.plan_type,'one_time')
+        assert.equal(body.plan.unlimited_stock,true, 'Digital checkout must not be inventory-limited')
+        assert.equal(body.plan.stock,undefined, 'No finite stock is sent for new digital bills')
         assert.equal(JSON.stringify(body).includes('490154203237518'),false)
         return Response.json({id:`ch_${ref}`,account_id:'biz_test',purchase_url:`https://whop.com/checkout/ch_${ref}`,plan:{...body.plan,id:`plan_${ref}`}})
       }
@@ -35,7 +38,7 @@ before(async()=>{
         refunds.push(id);const result={...p,substatus:'refunded',refunded_amount:p.total,updated_at:new Date().toISOString()} as Whop.Payment
         payments.set(id,result);return Response.json(result)
       }
-      if(url.pathname.endsWith('/payments')) return Response.json({data:[],page_info:{has_next_page:false,has_previous_page:false}})
+      if(url.pathname.endsWith('/payments')) return Response.json({data:listedPayments,page_info:{has_next_page:false,has_previous_page:false}})
       const p=payments.get(url.pathname.split('/').at(-1)!)
       return p?Response.json(p):Response.json({error:'not found'},{status:404})
     }
@@ -64,7 +67,13 @@ function payment(row:import('../lib/guest-checkout').GuestCheckout,overrides:Rec
   payments.set(p.id,p);return p
 }
 function due(ref:string) {db.db().prepare("UPDATE guest_checkouts SET checked_at=datetime('now','-2 minutes'),email_next_at=0 WHERE reference=?").run(ref)}
-async function cycle(ref:string) {due(ref);const stats=await guest.processGuestCheckouts(10);assert.equal(stats.errors,0)}
+async function cycle(ref:string) {due(ref);try {const stats=await guest.processGuestCheckouts(10);assert.equal(stats.errors,0)} finally {listedPayments=[]}}
+function bindPayment(row:import('../lib/guest-checkout').GuestCheckout,p:Whop.Payment) {
+  db.db().prepare('UPDATE guest_checkouts SET payment_id=?,paid_at=?,processor_updated_at=? WHERE reference=?').run(p.id,p.paid_at,p.updated_at,row.reference)
+}
+function failedSentinel(row:import('../lib/guest-checkout').GuestCheckout,id=`pay_failed${row.reference}`) {
+  return payment(row,{id,status:'open',substatus:'failed',paid_at:'2026-10-29T23:59:00Z',created_at:'2026-10-30T00:00:00Z',updated_at:'2026-10-30T00:01:00Z',holds:[],dispute_alerted_at:null,refunded_at:null,auto_refunded:false})
+}
 test('guest checkout accepts no login, quotes exact service + 5%, validates price and request replay',async()=>{
   const {input,row}=await checkout(),calls=checkoutCalls
   await guest.createGuestCheckout(input);assert.equal(checkoutCalls,calls)
@@ -328,4 +337,86 @@ test('recovery revalidates the quote and does not blindly retry or rotate keys a
   await guest.recoverGuestCheckoutLinks(3)
   assert.equal(checkoutCalls,failedCalls)
   assert.equal(guest.getGuestCheckout(row.reference)?.checkout_link_sent_at,null)
+})
+
+test('failed paid_at sentinel never binds as a paid guest receipt',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  const {row}=await checkout(),failed=failedSentinel(row)
+  assert.equal(guest.settleGuestPayment(failed),'pending')
+  const saved=guest.getGuestCheckout(row.reference)!
+  assert.equal(saved.payment_id,null)
+  assert.equal(saved.paid_at,null)
+  assert.equal(saved.state,'pending')
+})
+
+test('a later success rebinds only after an authoritative failed-ID GET and CAS clear',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  const {row}=await checkout(),failed=failedSentinel(row),success=payment(row,{id:`pay_success${row.reference}`})
+  bindPayment(row,failed)
+  payments.set(failed.id,failed);payments.set(success.id,success);listedPayments=[success]
+  await cycle(row.reference)
+  const saved=guest.getGuestCheckout(row.reference)!
+  assert.equal(saved.payment_id,success.id)
+  assert.equal(saved.state,'completed')
+  assert.equal(saved.review_reason,null)
+})
+
+test('paid, refunded, disputed, inflight and unknown prior receipts fail closed',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  const cases:[string,Record<string,unknown>|null][]=[
+    ['paid',{status:'paid',substatus:'succeeded'}],
+    ['refunded',{status:'paid',substatus:'refunded',refunded_amount:{amount:'10.50',currency:'usd',decimals:2},refunded_at:'2026-10-30T00:02:00Z'}],
+    ['disputed',{status:'paid',substatus:'dispute_opened',dispute_alerted_at:'2026-10-30T00:02:00Z'}],
+    ['inflight',{status:'open',substatus:'pending',paid_at:null}],
+  ]
+  for(const [label,overrides] of cases){
+    const {row}=await checkout(),prior=payment(row,{id:`pay_${label}${row.reference}`,...overrides})
+    bindPayment(row,prior);payments.set(prior.id,prior)
+    assert.equal(await whop.reconcileGuestPaymentBinding(row.reference,prior.id),false,label)
+    assert.equal(guest.getGuestCheckout(row.reference)?.payment_id,prior.id,label)
+  }
+  const {row}=await checkout(),unknown=failedSentinel(row,`pay_unknown${row.reference}`)
+  bindPayment(row,unknown)
+  payments.delete(unknown.id)
+  assert.equal(await whop.reconcileGuestPaymentBinding(row.reference,unknown.id),false)
+  assert.equal(guest.getGuestCheckout(row.reference)?.payment_id,unknown.id)
+})
+
+test('prior binding CAS permits one concurrent clear and never clears after local financial transition',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  const {row}=await checkout(),failed=failedSentinel(row)
+  bindPayment(row,failed);payments.set(failed.id,failed)
+  const results=await Promise.all([whop.reconcileGuestPaymentBinding(row.reference,failed.id),whop.reconcileGuestPaymentBinding(row.reference,failed.id)])
+  assert.deepEqual(results.sort(),[false,true])
+  assert.equal(guest.getGuestCheckout(row.reference)?.payment_id,null)
+  const next=await checkout(),blocked=failedSentinel(next.row)
+  bindPayment(next.row,blocked);payments.set(blocked.id,blocked)
+  db.db().prepare("INSERT INTO users(username,email,password_hash) VALUES (?,?,?)").run(`guest-owner-${next.row.reference}`,`${next.row.reference}@guest.invalid`,'!guest-no-login')
+  db.db().prepare("UPDATE guest_checkouts SET user_id=last_insert_rowid() WHERE reference=?").run(next.row.reference)
+  assert.equal(await whop.reconcileGuestPaymentBinding(next.row.reference,blocked.id),false)
+  assert.equal(guest.getGuestCheckout(next.row.reference)?.payment_id,blocked.id)
+})
+
+test('unavailable prior proof defers new settlement without permanent multiple-payment review',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  const {row}=await checkout(),prior=failedSentinel(row),next=payment(row,{id:`pay_next${row.reference}`})
+  bindPayment(row,prior);payments.delete(prior.id)
+  await assert.rejects(whop.reconcileGuestPaymentBeforeSettlement(next),/Prior payment verification is pending/)
+  const current=guest.getGuestCheckout(row.reference)!
+  assert.equal(current.state,'pending');assert.equal(current.payment_id,prior.id);assert.equal(current.review_reason,null)
+})
+test('wallet review arriving during prior GET prevents clearing inside transaction',async()=>{
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  const {row}=await checkout(),prior=failedSentinel(row)
+  bindPayment(row,prior);const mock=globalThis.fetch
+  globalThis.fetch=async(input,init)=>{
+    const response=await mock(input,init)
+    const url=new URL(typeof input==='string'||input instanceof URL?input:input.url)
+    if(url.hostname==='api.whop.com'&&url.pathname.endsWith('/'+prior.id)) {
+      db.db().prepare("UPDATE guest_checkouts SET wallet_review_reason='manual_review' WHERE reference=?").run(row.reference)
+    }
+    return response
+  }
+  try {assert.equal(await whop.reconcileGuestPaymentBinding(row.reference,prior.id),false)} finally {globalThis.fetch=mock}
+  assert.equal(guest.getGuestCheckout(row.reference)?.payment_id,prior.id)
 })
