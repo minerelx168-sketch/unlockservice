@@ -7,6 +7,7 @@ import { pollProviderJobs } from '../lib/provider-jobs'
 import { pollInvoiceVerifications } from '../lib/payment-verification'
 import { scanPaymentWallets } from '../lib/payment-watcher'
 import { processWhopEvents, reconcileWhopPayments } from '../lib/whop'
+import { sendCheckoutReminders } from '../lib/checkout-reminders'
 
 async function main() {
   const limit = Number(process.argv[2] ?? 20)
@@ -21,10 +22,12 @@ async function main() {
   const payments = await pollInvoiceVerifications(boundedLimit)
   const whopReconciliation = await reconcileWhopPayments(Math.min(boundedLimit, 5))
   const guestCheckouts = await processGuestCheckouts(5).catch(() => ({ checked: 0, errors: 1 }))
+  // Reminder delivery is marketing-only and bounded; a failure must not block payments.
+  const reminders = await sendCheckoutReminders(Date.now(), 5).catch(() => ({ enabled: false, claimed: 0, sent: 0, skipped: 0, unresolved: 1 }))
   const paymentAnalytics = await deliverPaymentAnalytics(boundedLimit).catch(() => ({ failed: true }))
   const purchaseAnalytics = await deliverPurchaseAnalytics(boundedLimit).catch(() => ({ failed: true }))
   const notifications = await deliverOrderNotifications(boundedLimit)
-  process.stdout.write(`${JSON.stringify({ resellerWebhooks, paidGuests, provider, watcher, payments, whop, whopReconciliation, guestCheckouts, paymentAnalytics, purchaseAnalytics, notifications })}\n`)
+  process.stdout.write(`${JSON.stringify({ resellerWebhooks, paidGuests, provider, watcher, payments, whop, whopReconciliation, guestCheckouts, reminders, paymentAnalytics, purchaseAnalytics, notifications })}\n`)
   if (
     paidGuests.errors > 0
     || guestCheckouts.errors > 0
@@ -45,4 +48,3 @@ main().catch((error) => {
   process.stderr.write(`${message}\n`)
   process.exitCode = 1
 })
-

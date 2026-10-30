@@ -11,6 +11,7 @@ import { parseSignedConsent } from '@/lib/order-attribution'
 import { currentSession } from '@/lib/auth'
 import { captureCheckoutContext } from '@/lib/checkout-context-request'
 import { logPaymentFailure } from '@/lib/payment-diagnostics'
+import { requestCheckoutReminderOptIn } from '@/lib/checkout-reminders'
 export const runtime='nodejs'
 export const dynamic='force-dynamic'
 export async function POST(request:Request) {
@@ -30,6 +31,10 @@ export async function POST(request:Request) {
       requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
       analytics: consent && found?.user.account_type!=='admin' ? context : undefined})
     if(found?.user.account_type!=='admin') await captureCheckoutContext('guest',result.reference,found?.user.id ?? null,body.analyticsContext)
+    if (body.paymentReminderOptIn === true && found && ['customer','reseller'].includes(found.user.account_type)) {
+      try { requestCheckoutReminderOptIn('guest', result.reference, found.user.email, found.user.id) }
+      catch { console.warn('[checkout-reminders] optional opt-in unavailable') }
+    }
     after(() => sendGuestCheckoutLink(result.reference))
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
