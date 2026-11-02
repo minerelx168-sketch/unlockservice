@@ -772,6 +772,10 @@ function migrate(connection: Database.Database) {
 	        send_provider_id TEXT,
 	        next_attempt_at INTEGER NOT NULL DEFAULT 0,
 	        idempotency_key TEXT NOT NULL UNIQUE,
+	        opened_at_ms INTEGER,
+	        destination_url TEXT,
+	        open_source TEXT,
+	        amount_cents INTEGER,
 	        unresolved INTEGER NOT NULL DEFAULT 0 CHECK(unresolved IN (0,1)),
 	        unresolved_reason TEXT,
 	        suppressed INTEGER NOT NULL DEFAULT 0 CHECK(suppressed IN (0,1)),
@@ -783,9 +787,16 @@ function migrate(connection: Database.Database) {
         WHERE send_accepted_at IS NULL AND unresolved = 0 AND suppressed = 0;
       CREATE INDEX IF NOT EXISTS checkout_reminders_recipient
         ON checkout_payment_reminders(recipient_hash, kind, send_accepted_at);
-    `)
-    addColumn(connection, 'checkout_payment_reminders', 'send_provider_id TEXT')
-	    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')
+	    `)
+	    addColumn(connection, 'checkout_payment_reminders', 'send_provider_id TEXT')
+	    // Reminder consent is dormant until the payment page is actually opened.
+	    // The first open and destination are immutable sidecar facts; they never
+	    // rewrite the financial bill or the requested transactional email marker.
+	    addColumn(connection, 'checkout_payment_reminders', 'opened_at_ms INTEGER')
+	    addColumn(connection, 'checkout_payment_reminders', 'destination_url TEXT')
+	    addColumn(connection, 'checkout_payment_reminders', 'open_source TEXT')
+	    addColumn(connection, 'checkout_payment_reminders', 'amount_cents INTEGER')
+		    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')
     addColumn(connection, 'users', 'email_verified_at TEXT')
     addColumn(connection, 'users', 'banned_at TEXT')
     addColumn(connection, 'users', "avatar_style TEXT NOT NULL DEFAULT 'violet'")

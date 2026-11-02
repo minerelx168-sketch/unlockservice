@@ -1,4 +1,5 @@
 'use client'
+import { CheckoutReminderOpen } from './checkout-reminder-open'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import Image from 'next/image'
@@ -14,8 +15,9 @@ import { trackFunnelEventOnce } from '@/lib/funnel-analytics'
 
 type Token = { id: string; asset: string; feeBasisPoints: number }
 
-export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, initialCents = 1000, initialDeposit, returnTo }: {
+export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, initialCents = 1000, initialDeposit, returnTo, reminderAllowed = false }: {
   csrfToken: string
+  reminderAllowed?: boolean
   gateways: Token[]
   minCents: number
   maxCents: number
@@ -37,6 +39,7 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
   const [txId, setTxId] = useState('')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
+  const [paymentReminderOptIn, setPaymentReminderOptIn] = useState(false)
   const cents = parseUsd(amount)
   const valid = cents !== null && cents >= minCents && cents <= maxCents
   const token = gateways.find(item => item.id === gateway)
@@ -59,7 +62,7 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
     try {
       const response = await fetch('/api/payments/crypto', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, csrfToken, ...values, analyticsContext: action === 'create' ? await paymentAnalyticsContext() : undefined }),
+        body: JSON.stringify({ action, csrfToken, ...values, ...(action === 'create' && reminderAllowed ? { paymentReminderOptIn } : {}), analyticsContext: action === 'create' ? await paymentAnalyticsContext() : undefined }),
       })
       const result = await response.json()
       if (!response.ok || !result.deposit) throw new Error(result.error ?? 'Unable to check your deposit.')
@@ -82,7 +85,7 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
       busy.current = false
       if (mounted.current) setPending(false)
     }
-  }, [csrfToken, router])
+  }, [csrfToken, router, reminderAllowed, paymentReminderOptIn])
 
   useEffect(() => {
     if (!reference || terminal) return
@@ -123,8 +126,10 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
         <div className="crypto-chain"><span aria-hidden="true">◆</span><div><strong>BNB Smart Chain</strong><small>BEP-20 network</small></div><Icon name="checkSmall" /></div>
         <dl className="crypto-facts"><div><dt>Deposit fee</dt><dd>{valid ? formatUsd(fee) : '—'}</dd></div><div><dt>Selected amount</dt><dd>{valid ? formatUsd(cents) : '—'}</dd></div></dl>
         <p className="crypto-note">Your QR code and exact transfer amount appear next.</p>
+        {reminderAllowed ? <label className="funding-reminder"><input type="checkbox" checked={paymentReminderOptIn} onChange={event => setPaymentReminderOptIn(event.target.checked)} disabled={pending} /><span>Email me one payment reminder if this bill is unpaid 5 minutes after opening. You can unsubscribe anytime.</span></label> : null}
         <button className="button button--primary crypto-primary" type="submit" disabled={pending || !valid || !token}>{pending ? 'Preparing deposit…' : 'Continue'}</button>
       </form> : <>
+        {deposit.status === 'pending' ? <CheckoutReminderOpen kind="topup" reference={deposit.reference} csrfToken={csrfToken} /> : null}
         {showStatus ? <section className="crypto-status" aria-live="polite">
           <div className={`crypto-status-symbol crypto-status-symbol--${status}`} aria-hidden="true">{status === 'success' ? <Icon name="check" /> : terminal ? <Icon name="info" /> : <span className="crypto-spinner" />}</div>
           <h3>{status === 'success' ? `${formatUsd(deposit.creditedCents!)} added` : status === 'review' ? 'Payment needs review' : status === 'closed' ? 'Request closed' : status === 'confirming' ? 'Confirming your deposit' : status === 'checking' ? 'Checking your transfer' : 'Waiting for funds'}</h3>
@@ -144,7 +149,8 @@ export function CryptoDepositFlow({ csrfToken, gateways, minCents, maxCents, ini
         </dl>
         {!terminal && <form onSubmit={event => { event.preventDefault(); void check() }}>
           <details className="crypto-tx"><summary>Add transaction ID <span>(optional)</span></summary><label htmlFor="crypto-txid">Transaction ID (Tx ID)</label><input id="crypto-txid" value={txId} onChange={event => setTxId(event.target.value)} placeholder="0x…" autoComplete="off" spellCheck={false} pattern="0x[a-fA-F0-9]{64}" minLength={66} maxLength={66} disabled={pending} /><p className="crypto-note">Paste it from your wallet or exchange to help locate your transfer.</p></details>
-          <button className="button button--primary crypto-primary" type="submit" disabled={pending}>{pending ? 'Checking deposit…' : waiting ? 'Check deposit again' : 'I have deposited my funds'}</button>
+          {reminderAllowed ? <label className="funding-reminder"><input type="checkbox" checked={paymentReminderOptIn} onChange={event => setPaymentReminderOptIn(event.target.checked)} disabled={pending} /><span>Email me one payment reminder if this bill is unpaid 5 minutes after opening. You can unsubscribe anytime.</span></label> : null}
+        <button className="button button--primary crypto-primary" type="submit" disabled={pending}>{pending ? 'Checking deposit…' : waiting ? 'Check deposit again' : 'I have deposited my funds'}</button>
         </form>}
         {status === 'success' ? <Link href={returnTo ?? '/user/reports/new'} className="button button--primary crypto-primary">Continue to services</Link> : null}
         {status === 'review' || status === 'closed' ? <Link href="/contact" className="button button--secondary crypto-primary">Contact support</Link> : null}

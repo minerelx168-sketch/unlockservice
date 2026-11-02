@@ -9,6 +9,7 @@ import { guestCryptoEnabled, guestCryptoRoutes } from '@/lib/guest-crypto'
 import { CUSTOMER_IMEI_CHECK_PRODUCTS, CUSTOMER_UNLOCK_PRODUCTS } from '@/lib/customer-provider-products'
 import { GuestCheckoutPanel } from '@/components/guest-checkout-panel'
 import { checkoutReminderConfigured } from '@/lib/checkout-reminders'
+import { getUnlockEligibility } from '@/lib/unlock-eligibility'
 import '@/styles/guest-checkout.css'
 export const dynamic='force-dynamic'
 export const metadata={title:'Secure service checkout | iUnlockMobile',robots:{index:false,follow:false},referrer:'no-referrer' as const}
@@ -21,10 +22,13 @@ export default async function CheckoutPage({searchParams}:{searchParams:Promise<
   const reminderAllowed=checkoutReminderConfigured() && !!found && ['customer','reseller'].includes(found.user.account_type)
     && found.user.status==='active' && !found.user.banned_at && !!found.user.email_verified_at
   const intent = await readDeviceIntent()
+  const eligibility = product.domain === 'unlock' && intent?.productCode === product.code && intent.imei && found
+    ? getUnlockEligibility(found.user.id, intent.imei, product.code)
+    : null
   const deliveryLabel=[...CUSTOMER_IMEI_CHECK_PRODUCTS,...CUSTOMER_UNLOCK_PRODUCTS].find(entry=>entry.productCode===product.code)?.etaLabel ?? 'Confirmed for your selected service'
   return <section className="guest-shell">
     <Link className="guest-back" href={storefrontDomain(product)==='unlock'?'/services/unlock':'/services/imei-check'}>← Back to services</Link>
     <div className="guest-heading"><span className="eyebrow">SECURE CHECKOUT</span><h1>Review and pay</h1><p>No account needed. Your result and private tracking link arrive by email.</p></div>
-    <GuestCheckoutPanel product={{code:product.code,name:product.name,summary:product.summary,inputType:product.inputType,priceCents:product.priceCents,domain:product.domain}} deliveryLabel={deliveryLabel} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email??'':''} cardEnabled={guestCheckoutEnabled()} cryptoEnabled={guestCryptoEnabled()} cryptoRoutes={guestCryptoRoutes()} initialMethod={params.method==='crypto'?'crypto':'card'} reminderAllowed={reminderAllowed} />
+    {eligibility?.blocksCheckout ? <article className="guest-card" role="alert"><h2>{eligibility.message ?? 'This unlock service is not available for this device.'}</h2><p>Payment has not been opened. Return to the unlock services page and use a trusted carrier result or contact support before paying.</p><Link className="button button--primary" href="/services/unlock">Back to unlock services</Link></article> : <GuestCheckoutPanel product={{code:product.code,name:product.name,summary:product.summary,inputType:product.inputType,priceCents:product.priceCents,domain:product.domain}} deliveryLabel={deliveryLabel} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email??'':''} cardEnabled={guestCheckoutEnabled()} cryptoEnabled={guestCryptoEnabled()} cryptoRoutes={guestCryptoRoutes()} initialMethod={params.method==='crypto'?'crypto':'card'} reminderAllowed={reminderAllowed} />}
   </section>
 }

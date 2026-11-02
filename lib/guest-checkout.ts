@@ -17,6 +17,7 @@ import { publicOrigin } from './site'
 import { consumeAttempt } from './rate-limit'
 import { prepareGuestAccount } from './guest-account'
 import { settleGuestCryptoPayment } from './guest-crypto'
+import { getUnlockEligibility } from './unlock-eligibility'
 
 // Verified against the live Whop create-checkout API: minimum plan total is USD 1.00.
 export const GUEST_CARD_MIN_TOTAL_CENTS = 100
@@ -70,6 +71,8 @@ export async function createGuestCheckout(input: {
   const email = input.email.trim().toLowerCase(), imei = serviceIdentifier(input.imei, inputType)
   if (email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WhopPaymentError('Enter a valid delivery email.')
   if (!imei) throw new WhopPaymentError(identifierField(inputType).error)
+  const eligibility = getUnlockEligibility(input.authenticatedUserId, imei, input.productCode)
+  if (eligibility.blocksCheckout) throw new WhopPaymentError(eligibility.message ?? 'This unlock service is not available for this device.', 409)
   if (!/^[a-f0-9-]{32,64}$/i.test(input.requestKey)) throw new WhopPaymentError('Reload the checkout and try again.')
   const row = db().transaction(() => {
     const existing = db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as GuestCheckout | undefined
@@ -398,7 +401,6 @@ export async function recoverGuestCheckoutLinks(limit=3) {
       await createGuestCheckout({productCode:row.product_code,imei,email:row.email,requestKey:row.request_key,
         expectedPriceCents:row.price_cents,authenticatedUserId:row.customer_user_id??undefined})
       db().prepare('UPDATE guest_checkouts SET last_error=NULL,checkout_link_next_at=0 WHERE reference=?').run(row.reference)
-      await sendGuestCheckoutLink(row.reference)
       stats.recovered++
     } catch(error) {
       logPaymentFailure('guest.checkout.recover',error)
@@ -409,21 +411,12 @@ export async function recoverGuestCheckoutLinks(limit=3) {
   return stats
 }
 
-/** One requested transactional checkout link, never a campaign or a repeated reminder sequence. */
-export async function sendGuestCheckoutLink(reference:string) {
-  const row=getGuestCheckout(reference)
-  if (!row || row.card_order_price_cents===null || row.state!=='pending' || row.review_reason
-    || !row.checkout_url || row.checkout_link_sent_at || row.checkout_link_next_at>Date.now()) return
-  const locked=db().prepare(`UPDATE guest_checkouts SET checkout_link_next_at=? WHERE reference=?
-    AND state='pending' AND checkout_link_sent_at IS NULL AND checkout_link_next_at<=?`).run(Date.now()+60000,reference,Date.now())
-  if (!locked.changes) return
-  const url=publicOrigin()+guestOrderPath(reference)
-  const total=`$${(guestCheckoutTotal(row)/100).toFixed(2)} USD`
-  const body=`iUnlockMobile\n${row.product_name}\nOrder: ${reference}\nTotal: ${total} including our card fee and applicable tax.\n\nYour checkout is saved, but payment has not been confirmed. Continue your secure card payment to start the service. No subscription. If you have already paid, this private link shows your payment status. Do not pay twice. If you did not request this checkout, ignore this email.\n\nContinue secure card payment:\n${url}`
-  try {
-    await sendTransactionalEmail(row.email,'Your iUnlockMobile order — secure payment link',`<p>${escape(row.product_name)}</p><p>Total: <strong>${escape(total)}</strong>, including our card fee and applicable tax.</p><p>Your checkout is saved, but payment has not been confirmed. Continue your secure card payment to start the service. No subscription.</p><p><a href="${escape(url)}">Continue secure card payment</a></p><p>Already paid? This private link shows your status. Do not pay twice. If you did not request this checkout, ignore this email.</p>`,body,{idempotencyKey:`guest/${reference}/checkout-link`})
-    db().prepare("UPDATE guest_checkouts SET checkout_link_sent_at=datetime('now') WHERE reference=?").run(reference)
-  } catch { /* Scheduled worker retries; email delivery must not block checkout. */ }
+/** Legacy entry point retained for old callers. Immediate checkout-link mail was
+ * replaced by the separately consented, one-time five-minute reminder worker.
+ * Never send here, including link-recovery and pending-payment polling paths.
+ */
+export async function sendGuestCheckoutLink(_reference:string):Promise<void> {
+  void _reference
 }
 
 /** Existing signed webhook is primary; bounded API reconciliation recovers missed webhooks. */
@@ -474,7 +467,6 @@ export async function processGuestCheckouts(limit=5) {
         }
       }
       row=getGuestCheckout(row.reference)!
-      if(row.state==='pending') await sendGuestCheckoutLink(row.reference)
       diagnosticStage = 'guest.service.dispatch'
       if(row.state==='paid' && !row.review_reason) await dispatchGuest(row)
       row=getGuestCheckout(row.reference)!

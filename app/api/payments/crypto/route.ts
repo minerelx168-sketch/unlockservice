@@ -1,3 +1,4 @@
+import { requestCheckoutReminderOptIn } from '@/lib/checkout-reminders'
 import { snapshotPaymentAnalytics } from '@/lib/payment-analytics-request'
 import { NextResponse, after } from 'next/server'
 import { guard } from '@/lib/api'
@@ -23,6 +24,10 @@ export async function POST(request: Request) {
       const gateway = gatewayById(gatewayId)
       if (gateway?.chainId !== 56 || gateway.chainKind !== 'evm') throw new PaymentError('Choose a supported token on BNB Smart Chain.')
       reference = createInvoice(found.user.id, gatewayId, typeof body.amountCents === 'number' ? body.amountCents : NaN).reference
+    }
+    if (body.action === 'create' && body.paymentReminderOptIn === true && ['customer','reseller'].includes(found.user.account_type)) {
+      try { requestCheckoutReminderOptIn('topup', reference, found.user.email, found.user.id) }
+      catch { /* Optional reminder never blocks a payment request. */ }
     }
     if (body.action === 'create') await snapshotPaymentAnalytics(reference, found.user.id, body.analyticsContext)
     // Read the owned request before accepting a hash or triggering a scan.

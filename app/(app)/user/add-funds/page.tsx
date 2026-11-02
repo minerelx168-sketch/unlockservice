@@ -78,6 +78,7 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
             reminderAllowed={reminderAllowed} /></div>
         </section> : undefined}
         cryptocurrency={ready ? <CryptoDepositFlow
+          reminderAllowed={reminderAllowed}
           csrfToken={session.csrfToken}
           gateways={cryptoGateways.map(gateway => ({ id: gateway.id, asset: gateway.asset, feeBasisPoints: gateway.feeBasisPoints }))}
           minCents={MIN_TOPUP_CENTS} maxCents={MAX_TOPUP_CENTS}

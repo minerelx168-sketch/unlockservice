@@ -34,6 +34,7 @@ import { claimProviderPoll } from './provider-poll-lease'
 import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
 import { purchaseConversion, type PurchaseConversion } from './purchase-conversion'
+import { getUnlockEligibility } from './unlock-eligibility'
 
 export type PaidReportStatus = 'processing' | 'completed' | 'refunded' | 'manual_review'
 
@@ -148,6 +149,7 @@ export class PaidReportError extends Error {
       | 'idempotency_conflict'
       | 'rate_limited'
       | 'insufficient_credit'
+      | 'ineligible'
       | 'report_not_found',
   ) {
     super(message)
@@ -594,6 +596,10 @@ export async function createPaidReport(
   if (input.expectedPriceCents !== undefined && input.expectedPriceCents !== priceCents) {
     throw new PaidReportError('The service price has changed.', 'product_inactive')
   }
+  const eligibility = getUnlockEligibility(userId, imei, productCode)
+  if (eligibility.blocksCheckout) {
+    throw new PaidReportError(eligibility.message ?? 'This unlock service is not available for this device.', 'ineligible')
+  }
   const { config, service } = providerReadyFor(product)
 
   if (!consumeAttempt('paid-imei-report-user', String(userId), isReseller(userId) ? 600 : REPORT_RATE_LIMIT, REPORT_WINDOW_SECONDS)) {
@@ -756,4 +762,3 @@ export async function pollPaidReport(userId: number, orderId: number): Promise<P
     releasePoll()
   }
 }
-

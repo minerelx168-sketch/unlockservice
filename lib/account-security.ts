@@ -146,10 +146,11 @@ export async function sendMarketingEmail(
   subject: string,
   html: string,
   text: string,
-  options: { idempotencyKey: string; unsubscribeUrl: string },
+  options: { idempotencyKey: string; unsubscribeUrl: string; replyTo?: string },
 ): Promise<{ providerMessageId: string }> {
   return (await sendEmail(to, subject, html, text, {
     idempotencyKey: options.idempotencyKey,
+    replyTo: options.replyTo,
     marketing: true,
     headers: {
       'List-Unsubscribe': `<${options.unsubscribeUrl}>`,

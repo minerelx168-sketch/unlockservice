@@ -272,19 +272,19 @@ test('paid webhook work dispatches without any gateway read or browser return an
   assert.ok(saved.receipt_sent_at || saved.result_sent_at)
   payments.set(p.id,p)
 })
-test('requested checkout email retries once without provider work and disappears as a payment action after payment',async()=>{
+test('legacy immediate checkout email is disabled before and after payment without provider work',async()=>{
   const {row}=await checkout(),before=providerCalls
   emailFailure=true;await guest.sendGuestCheckoutLink(row.reference);emailFailure=false
   assert.equal(guest.getGuestCheckout(row.reference)?.checkout_link_sent_at,null)
   db.db().prepare('UPDATE guest_checkouts SET checkout_link_next_at=0 WHERE reference=?').run(row.reference)
   await Promise.all([guest.sendGuestCheckoutLink(row.reference),guest.sendGuestCheckoutLink(row.reference)])
-  assert.equal(emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference)).length,1)
+  assert.equal(emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference)).length,0)
   assert.equal(providerCalls,before)
   assert.ok(guest.guestResult(guest.getGuestCheckout(row.reference)!).checkoutUrl)
   guest.settleGuestPayment(payment(row))
   assert.equal(guest.guestResult(guest.getGuestCheckout(row.reference)!).checkoutUrl,null)
   await guest.sendGuestCheckoutLink(row.reference)
-  assert.equal(emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference)).length,1)
+  assert.equal(emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference)).length,0)
 })
 
 test('inclusive card tax never adds to the quoted order total and excess collections are refused',async()=>{
@@ -297,7 +297,7 @@ test('inclusive card tax never adds to the quoted order total and excess collect
   assert.throws(()=>guest.settleGuestPayment(q),/amount mismatch/)
 })
 
-test('failed checkout creation recovers the same row and emails its secure payment link once without dispatch',async()=>{
+test('failed checkout creation recovers the same row without immediate email or dispatch',async()=>{
   const input={productCode:'APPLE_CARRIER_LITE',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:1000}
   checkoutFailure=true
   try { await assert.rejects(guest.createGuestCheckout(input)) } finally { checkoutFailure=false }
@@ -312,9 +312,7 @@ test('failed checkout creation recovers the same row and emails its secure payme
   assert.ok(guest.getGuestCheckout(row.reference)?.checkout_url)
   assert.equal((db.db().prepare('SELECT COUNT(*) AS n FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as {n:number}).n,1)
   const sent=emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference))
-  assert.equal(sent.length,1)
-  assert.ok(String(sent[0].text).includes('$10.50 USD'))
-  assert.ok(String(sent[0].html).includes('Continue secure card payment'))
+  assert.equal(sent.length,0)
   await guest.recoverGuestCheckoutLinks(3)
   assert.equal(checkoutCalls,calls+1)
 })

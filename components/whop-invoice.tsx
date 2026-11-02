@@ -1,9 +1,10 @@
 import Link from 'next/link'
+import { CheckoutReminderLink } from './checkout-reminder-open'
 import { AutoRefreshPaymentStatus } from './invoice-actions'
 import { formatUsd } from '@/lib/money'
 import { safeWhopCheckoutUrl, type WhopTopup } from '@/lib/whop'
 
-export function WhopInvoice({ topup }: { topup: WhopTopup }) {
+export function WhopInvoice({ topup, csrfToken }: { topup: WhopTopup; csrfToken?: string }) {
   const review = Boolean(topup.review_reason)
   const refunded = topup.status === 'refunded'
   const settled = Boolean(topup.credited)
@@ -28,7 +29,7 @@ export function WhopInvoice({ topup }: { topup: WhopTopup }) {
         : failed ? <p>Your card payment did not complete. You can retry securely on Whop.</p>
         : <p>Pay securely on Whop. Credit appears after payment verification, even if you close the checkout page.</p>}
       {topup.reversed_cents > 0 ? <p>Credit removed after refund: {formatUsd(topup.reversed_cents)}</p> : null}
-      {checkout ? <a className="button button--accent" href={checkout} rel="noreferrer">Pay on Whop</a> : null}
+      {checkout ? <CheckoutReminderLink className="button button--accent" href={checkout} reference={topup.invoice_reference} csrfToken={csrfToken}>Pay on Whop</CheckoutReminderLink> : null}
       {!settled && !refunded && !review ? <AutoRefreshPaymentStatus active /> : null}
       <p><Link href="/user/payments">Payment history</Link> · <Link href="/user/services/unlock">Browse services</Link> · <Link href="/contact">Contact support</Link></p>
     </div>

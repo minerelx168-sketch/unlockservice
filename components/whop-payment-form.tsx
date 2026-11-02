@@ -1,4 +1,5 @@
 'use client'
+import { reportCheckoutReminderOpen } from '@/lib/checkout-reminder-client'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -65,6 +66,7 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents, r
         if (checkout.protocol !== 'https:' || !['whop.com', 'sandbox.whop.com'].includes(checkout.hostname)
           || checkout.username || checkout.password || checkout.port) throw new Error('Invalid checkout response.')
         if (checkout.hostname === 'whop.com') trackFunnelEventOnce('payment_request_created', reference, { service_category: 'account_credit', payment_method: 'card', status: 'created' })
+        reportCheckoutReminderOpen('topup', reference, { csrfToken })
         window.location.assign(checkout.href)
         return
       }

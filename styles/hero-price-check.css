@@ -144,3 +144,6 @@
 .price-check-minimum { margin: 10px 0 0; font-size: .8125rem; line-height: 1.5; color: var(--muted); }
 .price-check-details { display: grid; gap: 16px; padding-top: 4px; }
 .price-check-details input { min-height: 50px; font-size: 16px; }
+.unlock-carrier-notice { margin: 0; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--line)); border-left: 3px solid var(--primary); border-radius: 12px; background: color-mix(in srgb, var(--primary) 6%, var(--surface)); color: var(--ink); font-size: .8125rem; line-height: 1.65; }
+.unlock-carrier-notice strong { color: var(--ink-strong); }
+.unlock-carrier-notice span { display: block; margin-top: 5px; color: var(--muted); }

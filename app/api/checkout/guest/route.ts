@@ -1,7 +1,7 @@
-import { after, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createHash } from 'node:crypto'
-import { createGuestCheckout, sendGuestCheckoutLink } from '@/lib/guest-checkout'
+import { createGuestCheckout } from '@/lib/guest-checkout'
 import { WhopPaymentError } from '@/lib/whop'
 import { readCommandJson } from '@/lib/request-json'
 import { publicOrigin } from '@/lib/site'
@@ -35,7 +35,6 @@ export async function POST(request:Request) {
       try { requestCheckoutReminderOptIn('guest', result.reference, found.user.email, found.user.id) }
       catch { console.warn('[checkout-reminders] optional opt-in unavailable') }
     }
-    after(() => sendGuestCheckoutLink(result.reference))
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
     if (!(error instanceof WhopPaymentError)) logPaymentFailure('guest.checkout.create',error)
