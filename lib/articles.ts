@@ -41,6 +41,432 @@ export type Article = {
 }
 
 const ARTICLES: Article[] = [
+{
+  "published": "2026-11-03",
+  "updated": "2026-11-03",
+  "minutes": 6,
+  "slug": "rogers-iphone-unlock-sim-locked-guide",
+  "title": "Rogers iPhone Unlock: SIM Locked?",
+  "heading": "Rogers iPhone Unlock: What to Do When It Still Says SIM Locked",
+  "description": "Check your Rogers iPhone unlock status, identify the correct carrier record and prepare an official request before paying for help.",
+  "standfirst": "A Rogers SIM and a Rogers carrier lock are different evidence. Check the iPhone, its original purchase record and the official support route.",
+  "topic": "Rogers iPhone unlock",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "For a Rogers iPhone unlock, check Settings > General > About > Carrier Lock first. No SIM restrictions means the carrier lock is absent. If a restriction remains, confirm Rogers supplied the handset before requesting help; a Rogers SIM alone does not identify the original locking carrier.",
+      "links": [
+        {
+          "label": "Check Apple’s unlock instructions",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Read Carrier Lock on the actual phone, not a seller’s screenshot of a different device.",
+        "Rogers says new devices bought directly from it arrive unlocked.",
+        "A used or replacement iPhone needs its current IMEI matched to the purchase history.",
+        "A carrier unlock does not clear a blacklist, finance balance, passcode, SIM PIN or Activation Lock."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "rogers-route",
+      "text": "Which Rogers support route applies?"
+    },
+    {
+      "kind": "p",
+      "text": "Rogers currently offers unlocking for its directly purchased devices to active customers and customers whose account was cancelled within the last 12 months. Its published conditions require no past-due balance and no national lost/stolen blacklist entry. Cancelled accounts must also be paid in full and not cancelled for fraud. Rogers lists no charge or waiting period for these consumer categories; enterprise fees may differ. Contact its Wireless Billing & Payment team with the IMEI. These are eligibility conditions, not a promise of instant activation.",
+      "links": [
+        {
+          "label": "Read current Rogers eligibility and contact instructions",
+          "href": "https://www.rogers.com/support/mobility/device-unlocking-faqs"
+        }
+      ]
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Situation",
+        "Evidence to collect",
+        "Next action"
+      ],
+      "rows": [
+        [
+          "Bought new from Rogers",
+          "Invoice and current Carrier Lock result",
+          "Ask Rogers to investigate an unexpected restriction"
+        ],
+        [
+          "Bought used from another person",
+          "Original seller, country and matching IMEI",
+          "Have the seller establish the purchase record"
+        ],
+        [
+          "Using a Rogers SIM in an imported iPhone",
+          "Original overseas carrier and model",
+          "Contact the carrier responsible for the lock"
+        ],
+        [
+          "Replacement handset",
+          "Replacement paperwork and current IMEI",
+          "Have support check the replacement record"
+        ]
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "prepare-request",
+      "text": "Prepare a request that support can investigate"
+    },
+    {
+      "kind": "p",
+      "text": "A useful support request connects three things: the handset in your hand, the purchase record and the exact symptom. Avoid sending an old box number without checking it against the device. If there are two IMEIs, retain both labels and ask support which identifier it needs; do not assume an IMEI from a previous phone is interchangeable."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Record the current IMEI privately from the About screen.",
+        "Write down the exact Carrier Lock wording and iOS version.",
+        "Keep the invoice or replacement paperwork ready.",
+        "Explain whether you are the original purchaser, an active customer or a former customer.",
+        "Ask for a case reference and the next action if the record cannot be matched."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Suggested message: “This iPhone shows a carrier restriction in Settings. I believe it was supplied by Rogers because of the attached purchase record. Please confirm whether Rogers controls this IMEI, whether my account qualifies and what completion step applies.” Share identifiers only through the carrier’s verified support channel."
+    },
+    {
+      "kind": "h2",
+      "id": "code-or-activation",
+      "text": "Does a Rogers iPhone need an unlock code?"
+    },
+    {
+      "kind": "p",
+      "text": "Rogers distinguishes remote iPhone unlocking from code entry on other handsets. Do not copy an Android code-entry tutorial onto an iPhone. First obtain carrier confirmation, then follow Apple’s instructions for activating a different SIM or eSIM. If another SIM is unavailable, Apple describes a backup, erase and restore route after approval; erasing before approval cannot create carrier authorization.",
+      "links": [
+        {
+          "label": "Review the official iPhone completion process",
+          "href": "https://support.apple.com/en-ca/109316"
+        },
+        {
+          "label": "Understand iPhone unlock codes",
+          "href": "/articles/iphone-carrier-unlock-code-authorization-guide"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "still-not-working",
+      "text": "What if another SIM still does not work?"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Result",
+        "Meaning",
+        "Next check"
+      ],
+      "rows": [
+        [
+          "No SIM restrictions, but no service",
+          "An unlock is not the missing permission",
+          "Line activation, coverage and compatibility"
+        ],
+        [
+          "Carrier Lock still restricted",
+          "Completion or the submitted record needs checking",
+          "Ask the responsible carrier to verify the current IMEI"
+        ],
+        [
+          "SIM PIN or PUK prompt",
+          "The SIM line has its own security lock",
+          "Contact the SIM provider; do not guess codes"
+        ],
+        [
+          "iPhone Locked to Owner",
+          "Apple account ownership restriction",
+          "The legitimate owner must resolve it"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Keep a screenshot of the status after support says the request is complete. If the next carrier rejects the device, ask it to state the reason rather than assuming the original carrier has relocked it. A compatibility rejection, a lost-device block and a failed eSIM download call for different investigations.",
+      "links": [
+        {
+          "label": "Troubleshoot no service after unlocking",
+          "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "paid-help",
+      "text": "When should you consider paid help?"
+    },
+    {
+      "kind": "p",
+      "text": "Start with the official route and the on-device check. A third party may help interpret a report or organize a supported request, but cannot replace Rogers’s account decision or guarantee removal of a restriction. Before paying, establish the exact service, supported device, refusal terms and what evidence will demonstrate completion. A carrier report is information, not an unlock authorization."
+    },
+    {
+      "kind": "p",
+      "text": "iUnlockMobile’s report catalogue can help you compare available checks. Read the actual report fields before ordering, and contact support if you need help identifying which question to investigate. Do not assume Rogers unlock ordering is available from the existence of this guide.",
+      "links": [
+        {
+          "label": "Compare device reports",
+          "href": "/services/imei-check"
+        },
+        {
+          "label": "Find the original carrier",
+          "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Have an unexpected Rogers carrier-lock result? Share the exact wording and purchase history so support can help identify the next check. Keep passwords and full IMEIs out of public messages.",
+      "href": "/contact",
+      "label": "Ask about the correct carrier check"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Are all Rogers iPhones locked?",
+      "answer": "No. Rogers says new devices bought directly from it are unlocked. Check the individual iPhone rather than relying only on its network name."
+    },
+    {
+      "question": "Can Rogers unlock a phone supplied by another carrier?",
+      "answer": "Its published unlocking route is for devices purchased directly from Rogers. Trace the original supplier if your phone came from elsewhere."
+    },
+    {
+      "question": "Can an IMEI report unlock the iPhone?",
+      "answer": "No. A report provides information. Carrier approval and device activation are separate steps."
+    },
+    {
+      "question": "Does unlocking remove unpaid finance or a blacklist?",
+      "answer": "No. Payment obligations and lost/stolen blocking are separate from Carrier Lock."
+    }
+  ]
+},
+{
+  "published": "2026-11-03",
+  "updated": "2026-11-03",
+  "minutes": 6,
+  "slug": "iphone-blacklist-check-canada-before-buying",
+  "title": "iPhone Blacklist Check in Canada",
+  "heading": "iPhone Blacklist Check in Canada: What a Clean Result Cannot Prove",
+  "description": "Run an iPhone blacklist check in Canada before buying used. Learn what a clean result misses and which carrier and ownership checks to make.",
+  "standfirst": "A Canadian blacklist lookup answers a narrow lost-or-stolen question. Combine it with a matching IMEI, ownership checks and a purchase record.",
+  "topic": "Canadian used iPhone blacklist checks",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "An iPhone blacklist check in Canada can show whether an IMEI has been reported lost or stolen within the service’s coverage. A clear result is not proof of ownership, paid-off finance, carrier unlocking or future network access. Before buying, match the result to the actual phone and investigate those questions separately."
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Check the device’s IMEI, not just a number pasted into a listing.",
+        "Use DeviceCheck Canada’s consumer route for its Canadian lost/stolen lookup.",
+        "A clear result is a point-in-time finding with coverage and reporting limits.",
+        "Check Carrier Lock and Activation Lock separately before completing the purchase."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "canadian-lookup",
+      "text": "Start with the Canadian consumer lookup"
+    },
+    {
+      "kind": "p",
+      "text": "DeviceCheck Canada directs consumers buying a pre-owned device to check its IMEI for Canadian lost/stolen reports. A listed device cannot be used on participating Canadian networks. Its published disclaimer warns that a report may take up to 48 hours to appear and that billing-related carrier blocks may not appear on the shared blacklist. A device can also be added later.",
+      "links": [
+        {
+          "label": "Open DeviceCheck Canada’s consumer page",
+          "href": "https://www.devicecheck.ca/consumers/"
+        },
+        {
+          "label": "Read DeviceCheck’s published lookup limitations",
+          "href": "https://www.devicecheck.ca/businesses/device-lookup/"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "If a lookup does not load or returns an error, record the check as unavailable. Do not convert a blank response into “clean.” Ask the intended carrier or a report provider what sources and countries its check covers. An imported iPhone deserves checks relevant to its origin as well as the network you plan to use."
+    },
+    {
+      "kind": "h2",
+      "id": "match-device",
+      "text": "Match the result to the phone you are buying"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Ask the seller to show the IMEI on the actual iPhone’s About screen.",
+        "Compare the identifier with the receipt and any report you receive.",
+        "Keep IMEI and IMEI2 labels distinct on Dual SIM models; ask which identifiers the checker covers.",
+        "Record the date and result privately, without publishing a complete IMEI.",
+        "Resolve a mismatch before transferring payment."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "For a remote sale, a screenshot is supporting evidence rather than proof that the shipped phone is the same unit. Agree on the return process and inspect the received handset while that option is available. A fresh report on the wrong identifier does not answer the question you intended to ask."
+    },
+    {
+      "kind": "h2",
+      "id": "separate-checks",
+      "text": "Four checks that should not be combined into one verdict"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Check",
+        "Question it answers",
+        "What it does not establish"
+      ],
+      "rows": [
+        [
+          "Blacklist lookup",
+          "Is a covered lost/stolen report recorded?",
+          "Ownership, full account history or future status"
+        ],
+        [
+          "Carrier Lock in Settings",
+          "Is this iPhone restricted to a carrier?",
+          "Lost/stolen or finance clearance"
+        ],
+        [
+          "Setup and Activation Lock",
+          "Can the legitimate owner release the device for your setup?",
+          "Network compatibility or payment history"
+        ],
+        [
+          "Intended carrier compatibility check",
+          "Can this model and identifier use the planned service?",
+          "A guarantee that no later block will occur"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Apple identifies No SIM restrictions under Carrier Lock as the on-device unlocked result. That result does not replace a blacklist lookup. Apple’s used-iPhone guidance also says not to buy an Activation Locked phone; the Hello screen alone requires completing activation before you know the device can be set up.",
+      "links": [
+        {
+          "label": "Check Carrier Lock with Apple",
+          "href": "https://support.apple.com/en-ca/109316"
+        },
+        {
+          "label": "Read Apple’s pre-owned iPhone inspection guide",
+          "href": "https://support.apple.com/en-ca/104999"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "clean-but-risky",
+      "text": "Why “clean” can still leave an unresolved purchase risk"
+    },
+    {
+      "kind": "p",
+      "text": "Consider a seller who supplies a clear lookup, but cannot match the receipt to the phone. The report has answered one database question; the seller has not resolved the identity and ownership questions. Likewise, a phone that works on the seller’s line should still be tested for your intended setup. Decide based on the combined evidence rather than treating any one green status as a purchase guarantee."
+    },
+    {
+      "kind": "h3",
+      "id": "purchase-record",
+      "text": "Keep a useful purchase record"
+    },
+    {
+      "kind": "p",
+      "text": "Ask for a receipt identifying the seller, handset, agreed condition and return terms. Retain the listing and relevant messages. Keep these records private and collect only what is needed for the sale. If the seller will not allow reasonable checks, you can postpone the purchase instead of paying for more reports that cannot resolve ownership."
+    },
+    {
+      "kind": "h2",
+      "id": "blocked-result",
+      "text": "What to do with a blocked or conflicting result"
+    },
+    {
+      "kind": "p",
+      "text": "Pause the transaction if a lost/stolen entry appears. Ask the seller and relevant carrier to investigate through their official channels. Do not pay someone to alter an identifier or promise a blacklist bypass. If two reports disagree, compare their identifiers, timestamps and coverage before deciding which question remains unanswered."
+    },
+    {
+      "kind": "p",
+      "text": "If the phone is already yours, keep the order evidence and contact the seller promptly about the applicable return or dispute process. A network unlock cannot resolve a lost/stolen record. For a SIM PIN or PUK prompt, contact the SIM provider instead; for a forgotten passcode or Activation Lock, use Apple’s documented ownership and recovery route.",
+      "links": [
+        {
+          "label": "Separate blacklist blocking from carrier unlocking",
+          "href": "/articles/blacklisted-iphone-unlock-carrier-lock-difference"
+        },
+        {
+          "label": "Distinguish SIM PIN and carrier lock",
+          "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "report-choice",
+      "text": "Choose a paid report only for a specific unanswered question"
+    },
+    {
+      "kind": "p",
+      "text": "A paid report can be useful when its listed fields and coverage address something you still need to know. Check whether it reports carrier information, blacklist status or another device attribute, and read its delivery estimate and terms. Price alone does not establish coverage, and no report can certify every future event."
+    },
+    {
+      "kind": "p",
+      "text": "Use the check results to decide the next step: resolve ownership and blocking first, then investigate carrier eligibility only if Carrier Lock is restricted. Do not buy an unlock merely because a blacklist report is clear.",
+      "links": [
+        {
+          "label": "Compare available IMEI reports",
+          "href": "/services/imei-check"
+        },
+        {
+          "label": "Understand report limitations",
+          "href": "/articles/what-an-imei-check-tells-you"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Unsure which report answers your used-iPhone question? Compare the listed checks or send support the exact result wording before ordering.",
+      "href": "/contact",
+      "label": "Ask which device check you need"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Does a clean Canadian blacklist check mean an iPhone is unlocked?",
+      "answer": "No. Check Carrier Lock separately in Settings. A blacklist result concerns covered lost/stolen records, not permission to use another carrier."
+    },
+    {
+      "question": "Can an iPhone be blacklisted after I buy it?",
+      "answer": "Yes. A point-in-time check cannot prevent a later report or block. Keep purchase evidence and understand the seller’s return terms."
+    },
+    {
+      "question": "Does a Canadian check cover every country?",
+      "answer": "Do not assume worldwide coverage. Confirm the checker’s stated sources and countries, especially for imported phones."
+    },
+    {
+      "question": "Should I buy an iPhone that shows Locked to Owner?",
+      "answer": "Apple advises against buying an Activation Locked iPhone. The legitimate owner needs to resolve that restriction before the sale."
+    }
+  ]
+},
   {
     "slug": "unlock-telstra-phone-iphone-prepaid-guide",
     "title": "Unlock a Telstra Phone",
