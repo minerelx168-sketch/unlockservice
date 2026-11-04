@@ -8,7 +8,7 @@ import { guestCardQuote } from '@/lib/guest-card-quote'
 import { GuestCheckoutForm } from './guest-checkout-form'
 
 export function GuestCheckoutPanel({ product, deliveryLabel, initialImei, initialEmail, cardEnabled, cryptoEnabled, cryptoRoutes, initialMethod, reminderAllowed }: {
-  product: { inputType: ServiceInputType; code: string; name: string; summary: string; priceCents: number; domain: 'unlock' | 'imei_check' }
+  product: { inputType: ServiceInputType; code: string; name: string; summary: string; priceCents: number; domain: 'unlock' | 'imei_check'; requiresAttInstallmentConfirmation?: boolean }
   deliveryLabel: string; initialImei: string; initialEmail: string
   cardEnabled: boolean; cryptoEnabled: boolean; cryptoRoutes: { id: string; label: string; asset: string }[]
   initialMethod: 'card' | 'crypto'; reminderAllowed: boolean

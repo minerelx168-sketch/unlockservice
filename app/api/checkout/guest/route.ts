@@ -1,3 +1,4 @@
+import { assertAttInstallmentConfirmation, AttInstallmentConfirmationError } from '@/lib/att-installment-confirmation'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createHash } from 'node:crypto'
@@ -23,12 +24,18 @@ export async function POST(request:Request) {
   try {
     const body=await readCommandJson(request)
     if(body.acceptedTerms!==true) throw new WhopPaymentError('Confirm the service requirements and terms before paying.')
+    try { assertAttInstallmentConfirmation(String(body.productCode??''),body.attInstallmentConfirmation) }
+    catch(error) {
+      if(error instanceof AttInstallmentConfirmationError) throw new WhopPaymentError(error.message,error.status,error.code)
+      throw error
+    }
     const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent!=='denied'
     const found=await currentSession()
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const context=body.analyticsContext as {clientId:string;sessionId:string}|undefined
     const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
+      attInstallmentConfirmation:body.attInstallmentConfirmation,
       analytics: consent && found?.user.account_type!=='admin' ? context : undefined})
     if(found?.user.account_type!=='admin') await captureCheckoutContext('guest',result.reference,found?.user.id ?? null,body.analyticsContext)
     if (body.paymentReminderOptIn === true && found && ['customer','reseller'].includes(found.user.account_type)) {
@@ -38,7 +45,8 @@ export async function POST(request:Request) {
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
     if (!(error instanceof WhopPaymentError)) logPaymentFailure('guest.checkout.create',error)
-    return NextResponse.json({error:error instanceof WhopPaymentError ? error.message : 'Checkout is temporarily unavailable. Please retry; no order has been placed.'},
+    return NextResponse.json({error:error instanceof WhopPaymentError ? error.message : 'Checkout is temporarily unavailable. Please retry; no order has been placed.',
+      ...(error instanceof WhopPaymentError && error.code ? {code:error.code} : {})},
       {status:error instanceof WhopPaymentError ? error.status : 503,headers:{'Cache-Control':'no-store'}})
   }
 }

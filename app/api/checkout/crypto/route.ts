@@ -1,3 +1,4 @@
+import { assertAttInstallmentConfirmation, AttInstallmentConfirmationError } from '@/lib/att-installment-confirmation'
 import { requestCheckoutReminderOptIn } from '@/lib/checkout-reminders'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
@@ -20,11 +21,17 @@ export async function POST(request:Request) {
   try {
     const body=await readCommandJson(request)
     if(body.acceptedTerms!==true) throw new WhopPaymentError('Confirm the service requirements and terms before paying.')
+    try { assertAttInstallmentConfirmation(String(body.productCode??''),body.attInstallmentConfirmation) }
+    catch(error) {
+      if(error instanceof AttInstallmentConfirmationError) throw new WhopPaymentError(error.message,error.status,error.code)
+      throw error
+    }
     const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent==='granted'
     const found=await currentSession()
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const result=await createGuestCryptoCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       routeId:String(body.routeId??''),requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),
+      attInstallmentConfirmation:body.attInstallmentConfirmation,
       authenticatedUserId:found?.user.account_type==='customer' ? found.user.id : undefined,
       analytics:consent && found?.user.account_type!=='admin' ? body.analyticsContext as {clientId:string;sessionId:string}|undefined : undefined})
     if (body.paymentReminderOptIn === true && found && ['customer','reseller'].includes(found.user.account_type)) {
@@ -32,5 +39,6 @@ export async function POST(request:Request) {
       catch { /* Optional reminder never blocks checkout. */ }
     }
     return reply(result)
-  } catch(error) { return reply({error:error instanceof WhopPaymentError?error.message:'Crypto checkout is temporarily unavailable. Please retry; do not send funds.'},error instanceof WhopPaymentError?error.status:503) }
+  } catch(error) { return reply({error:error instanceof WhopPaymentError?error.message:'Crypto checkout is temporarily unavailable. Please retry; do not send funds.',
+    ...(error instanceof WhopPaymentError && error.code ? {code:error.code} : {})},error instanceof WhopPaymentError?error.status:503) }
 }

@@ -2,6 +2,8 @@ import { snapshotPurchaseAnalytics } from '@/lib/purchase-analytics-request'
 import { NextResponse } from 'next/server'
 import { guard } from '@/lib/api'
 import { OrderError, submitOrder } from '@/lib/orders'
+import { getCarrier } from '@/lib/db'
+import { assertAttInstallmentConfirmationForTrustedName, AttInstallmentConfirmationError } from '@/lib/att-installment-confirmation'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -20,6 +22,19 @@ export async function POST(request: Request) {
 
   const kind = body.kind === 'device_service' ? 'device_service' : 'carrier_unlock'
 
+  if (kind === 'carrier_unlock') {
+    const carrier = getCarrier(Number(body.carrierId))
+    if (carrier) {
+      try {
+        assertAttInstallmentConfirmationForTrustedName(carrier.name, body.attInstallmentConfirmation)
+      } catch (error) {
+        if (error instanceof AttInstallmentConfirmationError) {
+          return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: 400 })
+        }
+        throw error
+      }
+    }
+  }
   await snapshotPurchaseAnalytics(found.user.id, 'order', body.idempotencyKey, body.analytics)
   try {
     const payload = await submitOrder(found.user.id, {

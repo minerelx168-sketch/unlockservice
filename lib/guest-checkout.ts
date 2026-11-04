@@ -18,6 +18,7 @@ import { consumeAttempt } from './rate-limit'
 import { prepareGuestAccount } from './guest-account'
 import { settleGuestCryptoPayment } from './guest-crypto'
 import { getUnlockEligibility } from './unlock-eligibility'
+import { assertAttInstallmentConfirmation } from './att-installment-confirmation'
 
 // Verified against the live Whop create-checkout API: minimum plan total is USD 1.00.
 export const GUEST_CARD_MIN_TOTAL_CENTS = 100
@@ -62,6 +63,7 @@ export function authorizedGuestCheckout(reference: string, key: string) {
 
 export async function createGuestCheckout(input: {
   productCode: string; imei: string; email: string; requestKey: string; expectedPriceCents: number; authenticatedUserId?: number
+  attInstallmentConfirmation?: unknown
   analytics?: { clientId: string; sessionId: string }
 }) {
   const config = whopConfiguration()
@@ -92,6 +94,14 @@ export async function createGuestCheckout(input: {
     }
     const product = getPaidReportProduct(input.productCode)
     if (!product?.providerReady || product.priceCents <= 0 || product.priceCents > 100000) throw new WhopPaymentError('This service is not available for online payment.', 409)
+    try {
+      assertAttInstallmentConfirmation(input.productCode, input.attInstallmentConfirmation)
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && 'status' in error) {
+        throw new WhopPaymentError(error.message, Number(error.status), String(error.code))
+      }
+      throw error
+    }
     const quote = guestCardQuote(product.priceCents)
     if (product.priceCents !== input.expectedPriceCents) throw new WhopPaymentError('The price changed. Reload to review the current price.', 409)
     if (!consumeAttempt('guest-checkout-email', email, 6, 3600)) throw new WhopPaymentError('Too many requests. Please try again later.', 429)

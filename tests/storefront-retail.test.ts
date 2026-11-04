@@ -25,7 +25,8 @@ test('the complete directory uses our current retail prices and never exposes su
   assert.equal(moved.priceCents, retail)
   assert.equal(moved.domain, 'unlock')
   assert.equal(unlocks.some((product) => product.productCode === moved.productCode), false)
-  const allowed = ['domain', 'etaLabel', 'group', 'hasExample', 'inputType', 'name', 'priceAvailable', 'priceCents', 'productCode', 'slug', 'sortOrder', 'status', 'summary'].sort()
+  assert.equal(moved.requiresAttInstallmentConfirmation, true)
+  const allowed = ['domain', 'etaLabel', 'group', 'hasExample', 'inputType', 'name', 'priceAvailable', 'priceCents', 'productCode', 'slug', 'sortOrder', 'status', 'summary', 'requiresAttInstallmentConfirmation'].sort()
   for (const product of all) {
     assert.deepEqual(Object.keys(product).sort(), allowed)
     const configured = PROVIDER_PRODUCTS.find((entry) => entry.productCode === product.productCode)
@@ -43,4 +44,3 @@ test('the complete directory uses our current retail prices and never exposes su
   assert.equal(unpriced.status, 'coming_soon')
   assert.ok(all.filter((product) => product.inputType !== 'imei').every((product) => product.status === 'coming_soon')) // Provider is disabled in this fixture.
 })
-

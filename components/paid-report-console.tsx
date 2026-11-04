@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
 import { formatUsd } from '@/lib/money'
+import { ATT_INSTALLMENT_CONFIRMATION_TEXT } from '@/lib/att-installment-confirmation'
 import type { PurchaseConversion } from '@/lib/purchase-conversion'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
@@ -28,6 +29,7 @@ type Product = {
   etaLabel?: string
   providerReady: boolean
   hasExample: boolean
+  requiresAttInstallmentConfirmation?: boolean
 }
 
 type PaidReportView = {
@@ -104,8 +106,10 @@ export function PaidReportConsole({
   const [error, setError] = useState<string | null>(null)
   const [payload, setPayload] = useState<PaidReportPayload | null>(null)
   const idempotencyRef = useRef<string | null>(null)
+  const [attInstallmentConfirmation, setAttInstallmentConfirmation] = useState(false)
 
   const product = products.find((entry) => entry.code === productCode) ?? null
+  const requiresAtt = product?.requiresAttInstallmentConfirmation === true
   const field = identifierField(product?.inputType)
   const visibleProducts = useMemo(() => products.filter((entry) => storefrontDomain(entry) === domain), [products, domain])
   const affordable = !product || product.priceCents <= balanceCents
@@ -176,6 +180,7 @@ export function PaidReportConsole({
     idempotencyRef.current = null
     setPayload(null)
     setReviewing(false)
+    setAttInstallmentConfirmation(false)
   }
 
   function deliveryLabel(minutes: number) {
@@ -238,6 +243,7 @@ export function PaidReportConsole({
     if (!product || !product.providerReady) return setError('This service is not available yet.')
     if (!digits) return setError(field.error)
     if (!affordable) return setError('Not enough credit for this report.')
+    if (requiresAtt && attInstallmentConfirmation !== true) return setError(ATT_INSTALLMENT_CONFIRMATION_TEXT)
 
     const idempotencyKey = idempotencyRef.current ?? crypto.randomUUID()
     idempotencyRef.current = idempotencyKey
@@ -247,7 +253,7 @@ export function PaidReportConsole({
     try {
       if (product.domain === 'unlock') trackFunnelEvent('unlock_imei_submitted', { service_category: product.domain })
       trackFunnelEvent('order_submission', { service_category: product.domain })
-      const result = await post('/api/imei/reports', { productCode: product.code, imei: digits, idempotencyKey })
+      const result = await post('/api/imei/reports', { productCode: product.code, imei: digits, idempotencyKey, attInstallmentConfirmation: requiresAtt ? attInstallmentConfirmation : false })
       trackFunnelEvent('order_accepted', { service_category: product.domain, status: result.order.status })
       setPayload(result)
       setBalanceCents(result.credit.balanceCents)
@@ -437,8 +443,9 @@ export function PaidReportConsole({
                 <div><span className="label">Billing</span><span className="value">Charge on delivery</span></div>
               </div>
               <p className="t-small">Your credit is held, not spent. You are charged only when the report is delivered; if it cannot be, the hold is released.</p>
+              {requiresAtt ? <label className="field-note paid-report-att-confirmation"><input id="paid-report-att-installment-confirmation" type="checkbox" checked={attInstallmentConfirmation} onChange={(event) => setAttInstallmentConfirmation(event.target.checked)} disabled={busy} /><span>{ATT_INSTALLMENT_CONFIRMATION_TEXT}</span></label> : null}
               <div className="order-review-actions">
-                <button className="button button--primary" type="button" disabled={busy} onClick={confirmOrder}>
+                <button className="button button--primary" type="button" disabled={busy || (requiresAtt && attInstallmentConfirmation !== true)} onClick={confirmOrder}>
                   <Icon name="file" strokeWidth={1.9} />
                   {busy ? 'Submitting…' : uncertain ? 'Retry the same request' : `Confirm and order ${formatUsd(product.priceCents)}`}
                 </button>
@@ -520,4 +527,3 @@ export function PaidReportConsole({
     </div>
   )
 }
-

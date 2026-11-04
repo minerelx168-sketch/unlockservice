@@ -19,12 +19,12 @@ export async function POST(request:Request) {
     if(typeof body.service_code!=='string'||typeof body.identifier!=='string') throw new ResellerError('service_code and identifier are required strings.')
     if(body.expected_price_cents!==undefined&&(!Number.isSafeInteger(body.expected_price_cents)||Number(body.expected_price_cents)<=0)) throw new ResellerError('expected_price_cents must be a positive integer.')
     const result=await createPaidReport(userId,{productCode:body.service_code,imei:body.identifier,idempotencyKey:`reseller:${key}`,
-      expectedPriceCents:body.expected_price_cents as number|undefined},'api')
+      expectedPriceCents:body.expected_price_cents as number|undefined,attInstallmentConfirmation:body.att_installment_confirmation},'api')
     after(()=>deliverResellerWebhooks(5))
     return resellerResponse({order:resellerOrder(result.order),wallet_balance_cents:result.credit.balanceCents})
   }catch(error){
     if(error instanceof PaidReportError) return resellerResponse({error:error.message,code:error.code},
-      error.code==='insufficient_credit'?402:error.code==='rate_limited'?429:error.code==='idempotency_conflict'?409:error.code==='provider_not_ready'?503:422)
+      error.code==='att_installment_confirmation_required'?400:error.code==='insufficient_credit'?402:error.code==='rate_limited'?429:error.code==='idempotency_conflict'?409:error.code==='provider_not_ready'?503:422)
     return resellerError(error)
   }
 }

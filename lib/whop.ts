@@ -20,7 +20,7 @@ export const WHOP_EVENTS = ['payment.succeeded', 'payment.failed', 'payment.canc
   'resolution_center_case.created', 'resolution_center_case.updated', 'resolution_center_case.decided'] as const
 
 export class WhopPaymentError extends Error {
-  constructor(message: string, readonly status = 400) { super(message) }
+  constructor(message: string, readonly status = 400, readonly code?: string) { super(message) }
 }
 
 type Configuration = { apiKey: string; secret: string; accountId: string; productId: string; mode: 'live' | 'sandbox' }
