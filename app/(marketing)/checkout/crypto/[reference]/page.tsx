@@ -1,3 +1,4 @@
+import { CheckoutReminderOpen } from '@/components/checkout-reminder-open'
 import { notFound } from 'next/navigation'
 import { authorizedGuestCheckout } from '@/lib/guest-checkout'
 import { getGuestCryptoStatus } from '@/lib/guest-crypto'
@@ -22,6 +23,6 @@ export default async function CryptoCheckoutPage({ params, searchParams }: {
   if (!row || row.payment_method !== 'crypto') notFound()
   const initial = await getGuestCryptoStatus(reference, key)
   if (!initial) notFound()
-  return <GuestCryptoPayment initial={initial} accessKey={key}
-    backUrl={`/checkout?product=${encodeURIComponent(row.product_code)}&method=crypto`} />
+  return <>{row.state === 'pending' ? <CheckoutReminderOpen kind="guest" reference={reference} /> : null}<GuestCryptoPayment initial={initial} accessKey={key}
+    backUrl={`/checkout?product=${encodeURIComponent(row.product_code)}&method=crypto`} /></>
 }

@@ -10,6 +10,7 @@ import { formatUsd } from '@/lib/money'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 import { ServicePicker } from './service-picker'
+import { UNLOCK_CARRIER_NOTICE } from '@/lib/unlock-policy'
 
 /** Public catalog fields only; prices are checked again by the order flow. */
 export type PriceCheckProduct = {
@@ -129,7 +130,8 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
       {selected ? <div className="price-check-result" data-unpriced={selected.priceAvailable === false || undefined} aria-live="polite" aria-atomic="true"><p className="price-check-service-name">{selected.name}</p><dl className="price-check-quote"><div><dt>Card total <span>USD</span></dt><dd>{selected.priceAvailable === false ? 'Contact for price' : formatUsd(total)}</dd></div><div><dt>Estimated delivery</dt><dd>{selected.etaLabel}</dd></div></dl>{selected.priceAvailable !== false ? <p className="price-check-total">Or crypto <strong>{formatUsd(selected.priceCents)}</strong> · No service fee</p> : null}</div> : null}
       {selected?.summary ? <details className="price-check-requirements" key={selected.code}><summary>Service details &amp; requirements</summary><ServiceDescription value={selected.summary} /><p>Review eligibility before ordering. Input format validation does not confirm eligibility.</p></details> : null}
     </> : <p className="alert" role="status"><Icon name="info" /><span>No services are listed right now. <Link href="/contact">Contact support</Link> for availability.</span></p>}
-    {selected?.available ? <div className="price-check-details">
+      {selected?.available ? <div className="price-check-details">
+      {orderDomain === 'unlock' ? <aside className="unlock-carrier-notice" aria-label="Unlock carrier eligibility notice"><strong>{UNLOCK_CARRIER_NOTICE}</strong> <span>Carrier plan eligibility must be confirmed from a trusted result when available; an IMEI format/TAC check, carrier name alone, client claim, or IMEI prefix is not proof of support.</span></aside> : null}
       <div className="field"><div className="price-check-label-row"><label htmlFor="pc-imei">{field.label}</label><button type="button" className="price-check-text-button" aria-expanded={helpOpen} aria-controls="pc-imei-guide" onClick={() => setHelpOpen(!helpOpen)}><Icon name="question" />Input help</button></div>
         {helpOpen ? <p className="price-check-imei-guide" id="pc-imei-guide">{field.hint}</p> : null}
         <div className="device-browse-input" data-invalid={error?.field === 'imei' || undefined}><Icon name="device" /><input id="pc-imei" ref={input} name="imei" type="text" inputMode={field.inputMode} enterKeyHint="next" autoComplete="off" spellCheck={false} placeholder={field.placeholder} maxLength={80} value={imei} disabled={pending} aria-describedby={`pc-imei-help${error?.field === 'imei' ? ' pc-error' : ''}`} aria-invalid={error?.field === 'imei'} onChange={(event) => { if (event.currentTarget.value && !started.current[domain]) { started.current[domain] = true; trackFunnelEvent('imei_input_started', { service_category: orderDomain }) } setImei(event.currentTarget.value); clearError() }} />{imei ? <button type="button" aria-label="Clear identifier" disabled={pending} onClick={() => { setImei(''); clearError(); input.current?.focus() }}><Icon name="cross" /></button> : null}</div>

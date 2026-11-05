@@ -8,6 +8,8 @@ import { serviceIdentifier, identifierField } from './service-identifier'
 import { getPaidReportProduct } from './paid-reports'
 import { consumeAttempt } from './rate-limit'
 import { WhopPaymentError } from './whop'
+import { getUnlockEligibility } from './unlock-eligibility'
+import { assertAttInstallmentConfirmation } from './att-installment-confirmation'
 
 export function guestCryptoRoutes() {
   return GATEWAYS.filter(route => route.chainId === 56 && route.chainKind === 'evm' && route.feeBasisPoints === 0)
@@ -18,6 +20,8 @@ export function guestCryptoPath(reference:string) { return guestOrderPath(refere
 
 export async function createGuestCryptoCheckout(input:{
   productCode:string; imei:string; email:string; requestKey:string; expectedPriceCents:number; routeId:string
+  attInstallmentConfirmation?:unknown
+  authenticatedUserId?:number
   analytics?:{clientId:string;sessionId:string}
 }) {
   if (!guestCryptoEnabled()) throw new WhopPaymentError('Crypto checkout is temporarily unavailable.',503)
@@ -27,6 +31,15 @@ export async function createGuestCryptoCheckout(input:{
   const email=input.email.trim().toLowerCase(),imei=serviceIdentifier(input.imei,inputType)
   if (email.length>254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WhopPaymentError('Enter a valid delivery email.')
   if (!imei) throw new WhopPaymentError(identifierField(inputType).error)
+  // This ID is supplied by the route from currentSession, never from the
+  // request body. Keep the invoice owner below as an isolated guest user;
+  // customer_user_id is only an account/reminder ownership link.
+  const authenticatedUserId = input.authenticatedUserId && Number.isSafeInteger(input.authenticatedUserId) && input.authenticatedUserId > 0
+    && db().prepare("SELECT 1 FROM users WHERE id=? AND account_type IN ('customer','reseller') AND status='active' AND banned_at IS NULL AND email_verified_at IS NOT NULL").get(input.authenticatedUserId)
+    ? input.authenticatedUserId
+    : undefined
+  const eligibility = getUnlockEligibility(authenticatedUserId, imei, input.productCode)
+  if (eligibility.blocksCheckout) throw new WhopPaymentError(eligibility.message ?? 'This unlock service is not available for this device.', 409)
   if (!/^[a-f0-9-]{32,64}$/i.test(input.requestKey)) throw new WhopPaymentError('Reload the checkout and try again.')
   const row=db().transaction(()=>{
     const existing=db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as GuestCheckout|undefined
@@ -37,6 +50,14 @@ export async function createGuestCryptoCheckout(input:{
     }
     const product=getPaidReportProduct(input.productCode)
     if (!product?.providerReady || !Number.isSafeInteger(product.priceCents) || product.priceCents<1 || product.priceCents>100000) throw new WhopPaymentError('This service is not available for online payment.',409)
+    try {
+      assertAttInstallmentConfirmation(input.productCode, input.attInstallmentConfirmation)
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && 'status' in error) {
+        throw new WhopPaymentError(error.message, Number(error.status), String(error.code))
+      }
+      throw error
+    }
     if (product.priceCents!==input.expectedPriceCents) throw new WhopPaymentError('The price changed. Reload to review the current price.',409)
     if (!consumeAttempt('guest-checkout-email',email,6,3600)) throw new WhopPaymentError('Too many requests. Please try again later.',429)
     const reference=randomBytes(16).toString('hex')
@@ -48,12 +69,12 @@ export async function createGuestCryptoCheckout(input:{
     const a=input.analytics
     const validAnalytics=a && /^\d{1,20}\.\d{1,20}$/.test(a.clientId) && /^\d{1,12}$/.test(a.sessionId) && Number(a.sessionId)>0
     db().prepare(`INSERT INTO guest_checkouts (reference,request_key,email,product_code,product_name,imei_encrypted,price_cents,fee_cents,
-      account_id,product_id,environment,payment_method,crypto_invoice_reference,user_id,client_id,session_id)
-      VALUES (?,?,?,?,?,?,?,0,'crypto',?,'live','crypto',?,?,?,?)`).run(reference,input.requestKey,email,product.code,product.name,
-      encryptPaidReportImei(imei,product.inputType),product.priceCents,route.id,invoice.reference,userId,validAnalytics?a.clientId:null,validAnalytics?a.sessionId:null)
+      account_id,product_id,environment,payment_method,crypto_invoice_reference,user_id,customer_user_id,client_id,session_id)
+      VALUES (?,?,?,?,?,?,?,0,'crypto',?,'live','crypto',?,?,?,?,?)`).run(reference,input.requestKey,email,product.code,product.name,
+      encryptPaidReportImei(imei,product.inputType),product.priceCents,route.id,invoice.reference,userId,authenticatedUserId ?? null,validAnalytics?a.clientId:null,validAnalytics?a.sessionId:null)
     return getGuestCheckout(reference)!
   }).immediate()
-  return {url:row.state==='pending' ? guestCryptoPath(row.reference) : guestOrderPath(row.reference)}
+  return {reference:row.reference,url:row.state==='pending' ? guestCryptoPath(row.reference) : guestOrderPath(row.reference)}
 }
 
 /** Only verified chain evidence and its matching ledger transition can release a provider order. */
@@ -105,4 +126,3 @@ export function submitGuestCryptoTransaction(reference:string,key:string,transac
   }
   return row.crypto_invoice_reference
 }
-

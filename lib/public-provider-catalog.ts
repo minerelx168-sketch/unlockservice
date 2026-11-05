@@ -4,12 +4,13 @@ import { CUSTOMER_IMEI_CHECK_PRODUCTS, CUSTOMER_UNLOCK_PRODUCTS } from './custom
 import { getPaidReportProduct, listPaidReportProducts } from './paid-reports'
 import { hasServiceOutputExample } from './service-output-examples'
 import { PROVIDER_PRODUCTS, type ProviderProduct, type ProviderProductDomain } from './provider-products'
+import { requiresAttInstallmentConfirmation } from './att-installment-confirmation'
 
 /** The storefront never needs supplier identifiers or wholesale prices. */
 export type PublicProviderProduct = Pick<ProviderProduct,
   'productCode' | 'slug' | 'name' | 'summary' | 'group' | 'domain' |
   'inputType' | 'status' | 'priceCents' | 'etaLabel' | 'sortOrder'
-> & { hasExample: boolean; priceAvailable?: boolean }
+> & { hasExample: boolean; priceAvailable?: boolean; requiresAttInstallmentConfirmation?: boolean }
 
 /** Resolve availability and retail prices from the same gates as checkout. */
 export function listPublicProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
@@ -32,6 +33,7 @@ export function listPublicProviderProducts(domain: ProviderProductDomain): Publi
       etaLabel: product.etaLabel,
       sortOrder: product.sortOrder,
       hasExample: hasServiceOutputExample(product.productCode),
+      requiresAttInstallmentConfirmation: requiresAttInstallmentConfirmation(product.productCode),
     }
   })
 }
@@ -64,7 +66,7 @@ export function listStorefrontProviderProducts(domain: ProviderProductDomain): P
       etaLabel: configured?.etaLabel ?? 'Confirm with support',
       sortOrder: entry.sortOrder,
       hasExample: hasServiceOutputExample(productCode),
+      requiresAttInstallmentConfirmation: requiresAttInstallmentConfirmation(productCode),
     }
   })
 }
-

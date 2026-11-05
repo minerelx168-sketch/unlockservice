@@ -10,6 +10,7 @@ import { clearDeviceIntent, readDeviceIntent, writeDeviceIntent } from './device
 import { deviceDomain, deviceImei, deviceEmail } from './device-intent-value'
 import { listPaidReportProducts } from './paid-reports'
 import { listPublicProviderProducts } from './public-provider-catalog'
+import { getUnlockEligibility } from './unlock-eligibility'
 
 type IntentState = { error?: string }
 
@@ -55,7 +56,12 @@ export async function showUnlockServicesAction(_: IntentState, form: FormData): 
     return { error: 'This service is no longer available. Choose another service or refresh the page.' }
   }
   await writeDeviceIntent(imei, 'unlock', product?.productCode)
-  if (product && (await currentSession())?.user.account_type === 'reseller') redirect(`/user/reports/new?product=${encodeURIComponent(product.productCode)}`)
+  const found = product ? await currentSession() : null
+  if (product) {
+    const eligibility = getUnlockEligibility(found?.user.id, imei, product.productCode)
+    if (eligibility.blocksCheckout) return { error: eligibility.message ?? 'This unlock service is not available for this device.' }
+  }
+  if (product && found?.user.account_type === 'reseller') redirect(`/user/reports/new?product=${encodeURIComponent(product.productCode)}`)
   if (product && guestCheckoutEnabled()) redirect(`/checkout?product=${encodeURIComponent(product.productCode)}`)
   redirect('/services/unlock/catalog')
 }
@@ -72,9 +78,14 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   if (rawEmail !== null && !email) return { error: 'Enter a valid email address so we can deliver your result.' }
   const crypto = form.get('paymentMethod') === 'crypto'
   if (crypto && !guestCryptoEnabled()) return { error: 'Crypto checkout is temporarily unavailable. Please try again shortly.' }
+  const found = await currentSession()
+  if (product.domain === 'unlock') {
+    const eligibility = getUnlockEligibility(found?.user.id, imei, product.code)
+    if (eligibility.blocksCheckout) return { error: eligibility.message ?? 'This unlock service is not available for this device.' }
+  }
   await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined, product.inputType)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
-  if ((await currentSession())?.user.account_type === 'reseller') redirect(target)
+  if (found?.user.account_type === 'reseller') redirect(target)
   redirect(crypto || guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}${crypto ? '&method=crypto' : ''}` : target)
 }
 
@@ -124,5 +135,4 @@ export async function clearAcceptedDeviceIntentAction(value: { imei: string; pro
     await clearDeviceIntent()
   }
 }
-
 

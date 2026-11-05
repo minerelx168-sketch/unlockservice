@@ -34,6 +34,8 @@ import { claimProviderPoll } from './provider-poll-lease'
 import { providerProductByCode } from './provider-products'
 import { consumeAttempt } from './rate-limit'
 import { purchaseConversion, type PurchaseConversion } from './purchase-conversion'
+import { getUnlockEligibility } from './unlock-eligibility'
+import { assertAttInstallmentConfirmation, requiresAttInstallmentConfirmation } from './att-installment-confirmation'
 
 export type PaidReportStatus = 'processing' | 'completed' | 'refunded' | 'manual_review'
 
@@ -51,6 +53,7 @@ export type PaidReportProduct = {
   isActive: boolean
   sortOrder: number
   providerReady: boolean
+  requiresAttInstallmentConfirmation: boolean
 }
 
 type PaidReportProductRow = {
@@ -133,6 +136,7 @@ export type CreatePaidReportInput = {
   imei: string
   idempotencyKey: string
   expectedPriceCents?: number
+  attInstallmentConfirmation?: unknown
 }
 
 export class PaidReportError extends Error {
@@ -148,6 +152,8 @@ export class PaidReportError extends Error {
       | 'idempotency_conflict'
       | 'rate_limited'
       | 'insufficient_credit'
+      | 'ineligible'
+      | 'att_installment_confirmation_required'
       | 'report_not_found',
   ) {
     super(message)
@@ -235,6 +241,7 @@ function productFromRow(row: PaidReportProductRow, reseller = false): PaidReport
     isActive: row.is_active === 1,
     providerReady: row.is_active === 1 && approvedMapping && accountPrice !== null,
     sortOrder: row.sort_order,
+    requiresAttInstallmentConfirmation: requiresAttInstallmentConfirmation(row.code),
   }
 }
 
@@ -589,10 +596,24 @@ export async function createPaidReport(
   // configuration changes. Operational availability applies only to new work.
   if (!product) throw new PaidReportError('Choose a valid paid report.', 'product_unknown')
   if (product.is_active !== 1) throw new PaidReportError('This paid report is not active.', 'product_inactive')
+  if (source !== 'guest') {
+    try {
+      assertAttInstallmentConfirmation(productCode, input.attInstallmentConfirmation)
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'att_installment_confirmation_required') {
+        throw new PaidReportError(error.message, 'att_installment_confirmation_required')
+      }
+      throw error
+    }
+  }
   const priceCents = source === 'guest' ? product.price_cents : accountPriceCents(userId, product.price_cents, product.provider_cost_micros)
   if (priceCents === null) throw new PaidReportError('Reseller pricing is temporarily unavailable for this service.', 'product_inactive')
   if (input.expectedPriceCents !== undefined && input.expectedPriceCents !== priceCents) {
     throw new PaidReportError('The service price has changed.', 'product_inactive')
+  }
+  const eligibility = getUnlockEligibility(userId, imei, productCode)
+  if (eligibility.blocksCheckout) {
+    throw new PaidReportError(eligibility.message ?? 'This unlock service is not available for this device.', 'ineligible')
   }
   const { config, service } = providerReadyFor(product)
 
@@ -756,4 +777,3 @@ export async function pollPaidReport(userId: number, orderId: number): Promise<P
     releasePoll()
   }
 }
-

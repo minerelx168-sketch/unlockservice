@@ -4,6 +4,7 @@ import vm from 'node:vm'
 import test from 'node:test'
 import ts from 'typescript'
 import { serviceIdentifier, identifierField } from '../lib/service-identifier'
+import { UNLOCK_CARRIER_NOTICE } from '../lib/unlock-policy'
 import { guestCardQuote } from '../lib/guest-card-quote'
 type Element = { type: unknown; props: Record<string, unknown> & { children?:unknown; ref?:{current:unknown}; onSubmit?:(event:{preventDefault:()=>void})=>void } }
 function render(domain:'unlock'|'imei_check',imei='490154203237518',validEmail=true) {
@@ -14,6 +15,7 @@ function render(domain:'unlock'|'imei_check',imei='490154203237518',validEmail=t
     'react':{useState:(value:unknown)=>[value,()=>{}],useRef:(value:unknown)=>({current:value}),useEffect:()=>{},useActionState:()=>[{},navigate,false]},
     '@/lib/device-intent-actions':{continueDeviceServiceAction:navigate},
     '@/lib/service-identifier':{serviceIdentifier,identifierField},
+    '@/lib/unlock-policy':{UNLOCK_CARRIER_NOTICE},
     '@/lib/guest-card-quote':{guestCardQuote},
     '@/lib/money':{formatUsd:(cents:number)=>`$${(cents/100).toFixed(2)}`},
     '@/lib/funnel-analytics':{trackFunnelEvent:(name:string)=>events.push(name)},
@@ -49,4 +51,9 @@ test('public unlock and phone-check forms go directly to the one order summary',
 test('invalid public-form details still stop navigation before any payment request',()=>{
   assert.equal(render('unlock','123').prevented,true)
   assert.equal(render('imei_check','490154203237518',false).prevented,true)
+})
+
+test('supported-carrier notice is present only on the unlock IMEI form',()=>{
+  assert.ok(JSON.stringify(render('unlock').tree).includes(UNLOCK_CARRIER_NOTICE))
+  assert.equal(JSON.stringify(render('imei_check').tree).includes(UNLOCK_CARRIER_NOTICE),false)
 })

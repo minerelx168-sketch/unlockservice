@@ -314,6 +314,7 @@ test('an approved DHRU unlock product holds, places once and settles through the
       productCode: 'UNLOCK_346',
       imei: '490154203237518',
       idempotencyKey: 'strict-unlock-346-once',
+      attInstallmentConfirmation: true,
     })
     assert.equal(created.order.status, 'processing')
     assert.equal(created.order.productCode, 'UNLOCK_346')
@@ -413,4 +414,3 @@ test('public availability follows operational gates, current prices and omits su
   assert.equal(find().status, 'coming_soon')
   assert.equal(findUnlock().status, 'available')
 })
-

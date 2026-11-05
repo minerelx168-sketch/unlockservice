@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatUsd } from '@/lib/money'
 import type { PurchaseConversion } from '@/lib/purchase-conversion'
+import { ATT_INSTALLMENT_CONFIRMATION_TEXT, isAttName } from '@/lib/att-installment-confirmation'
 import { Icon } from './icons'
 import { formatEta, OrderStatusBadge } from './order-status'
 
@@ -87,6 +88,8 @@ export function OrderConsole({
   )
   const [serviceId, setServiceId] = useState<number | null>(null)
   const [email, setEmail] = useState(defaultEmail)
+  const [attInstallmentConfirmation, setAttInstallmentConfirmation] = useState(false)
+  const [attConfirmationSelectionKey, setAttConfirmationSelectionKey] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [order, setOrder] = useState<OrderPayload | null>(null)
@@ -103,10 +106,14 @@ export function OrderConsole({
      from. */
   useEffect(() => {
     attemptKeyRef.current = null
+    setAttInstallmentConfirmation(false)
   }, [kind, imei, brandId, carrierId, serviceId, email])
 
   const brand = brands.find((entry) => entry.id === brandId) ?? null
   const carrier = carriers.find((entry) => entry.id === carrierId) ?? null
+  const requiresAtt = kind === 'carrier_unlock' && Boolean(carrier && isAttName(carrier.name))
+  const attSelectionKey = `${kind}:${brandId}:${carrierId}:${serviceId ?? ''}:${imei}`
+  const attConfirmed = requiresAtt && attConfirmationSelectionKey === attSelectionKey && attInstallmentConfirmation === true
 
   const offeredServices = useMemo(
     () => services.filter((service) => service.brandIds.length === 0 || service.brandIds.includes(brandId)),
@@ -156,6 +163,10 @@ export function OrderConsole({
       setError(kind === 'carrier_unlock' ? 'Pick the network first.' : 'Pick a service first.')
       return
     }
+    if (requiresAtt && !attConfirmed) {
+      setError(ATT_INSTALLMENT_CONFIRMATION_TEXT)
+      return
+    }
 
     const controller = new AbortController()
     abortRef.current = controller
@@ -176,6 +187,7 @@ export function OrderConsole({
           serviceId: kind === 'device_service' ? serviceId : undefined,
           imei,
           email,
+          attInstallmentConfirmation: attConfirmed,
           idempotencyKey: attemptKeyRef.current,
         },
         controller.signal,
@@ -326,6 +338,8 @@ export function OrderConsole({
             ) : null}
           </div>
 
+          {requiresAtt ? <label className="field-note legacy-att-confirmation"><input id="legacy-att-installment-confirmation" type="checkbox" checked={attConfirmationSelectionKey === attSelectionKey && attInstallmentConfirmation} onChange={(event) => { setAttInstallmentConfirmation(event.target.checked); setAttConfirmationSelectionKey(attSelectionKey) }} disabled={busy} /><span>{ATT_INSTALLMENT_CONFIRMATION_TEXT}</span></label> : null}
+
           {kind === 'device_service' ? (
             <div className="picker-list">
               {offeredServices.map((entry) => (
@@ -390,7 +404,7 @@ export function OrderConsole({
                 Add funds and order
               </Link>
             ) : (
-              <button className="button button--primary" type="submit" disabled={busy}>
+              <button className="button button--primary" type="submit" disabled={busy || (requiresAtt && !attConfirmed)}>
                 <Icon name="bolt" strokeWidth={1.9} />
                 {busy ? 'Placing the order…' : chosen ? `Order for ${formatUsd(priceCents)}` : 'Place order'}
               </button>

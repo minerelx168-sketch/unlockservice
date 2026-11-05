@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { currentSession } from '@/lib/auth'
 import { guard } from '@/lib/api'
 import { createPaidReport, listPaidReports, PaidReportError } from '@/lib/paid-reports'
+import { assertAttInstallmentConfirmation, AttInstallmentConfirmationError } from '@/lib/att-installment-confirmation'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,6 +18,14 @@ export async function POST(request: Request) {
   const guarded = await guard(request)
   if ('error' in guarded) return guarded.error
   const { found, body } = guarded
+  try {
+    assertAttInstallmentConfirmation(String(body.productCode ?? ''), body.attInstallmentConfirmation)
+  } catch (error) {
+    if (error instanceof AttInstallmentConfirmationError) {
+      return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: error.status })
+    }
+    throw error
+  }
 
   await snapshotPurchaseAnalytics(found.user.id, 'paid_imei_report', body.idempotencyKey, body.analytics)
   try {
@@ -24,6 +33,7 @@ export async function POST(request: Request) {
       productCode: String(body.productCode ?? ''),
       imei: String(body.imei ?? ''),
       idempotencyKey: String(body.idempotencyKey ?? ''),
+      attInstallmentConfirmation: body.attInstallmentConfirmation,
     })
     return NextResponse.json(payload)
   } catch (error) {
@@ -37,6 +47,8 @@ export async function POST(request: Request) {
               ? 503
               : error.code === 'idempotency_conflict'
                 ? 409
+                : error.code === 'att_installment_confirmation_required'
+                  ? 400
                 : error.code === 'product_unknown' || error.code === 'product_inactive'
                   ? 404
                   : 422

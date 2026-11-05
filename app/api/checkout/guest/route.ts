@@ -1,7 +1,8 @@
-import { after, NextResponse } from 'next/server'
+import { assertAttInstallmentConfirmation, AttInstallmentConfirmationError } from '@/lib/att-installment-confirmation'
+import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createHash } from 'node:crypto'
-import { createGuestCheckout, sendGuestCheckoutLink } from '@/lib/guest-checkout'
+import { createGuestCheckout } from '@/lib/guest-checkout'
 import { WhopPaymentError } from '@/lib/whop'
 import { readCommandJson } from '@/lib/request-json'
 import { publicOrigin } from '@/lib/site'
@@ -10,6 +11,8 @@ import { CONSENT_COOKIE } from '@/lib/cookie-names'
 import { parseSignedConsent } from '@/lib/order-attribution'
 import { currentSession } from '@/lib/auth'
 import { captureCheckoutContext } from '@/lib/checkout-context-request'
+import { logPaymentFailure } from '@/lib/payment-diagnostics'
+import { requestCheckoutReminderOptIn } from '@/lib/checkout-reminders'
 export const runtime='nodejs'
 export const dynamic='force-dynamic'
 export async function POST(request:Request) {
@@ -21,19 +24,29 @@ export async function POST(request:Request) {
   try {
     const body=await readCommandJson(request)
     if(body.acceptedTerms!==true) throw new WhopPaymentError('Confirm the service requirements and terms before paying.')
+    try { assertAttInstallmentConfirmation(String(body.productCode??''),body.attInstallmentConfirmation) }
+    catch(error) {
+      if(error instanceof AttInstallmentConfirmationError) throw new WhopPaymentError(error.message,error.status,error.code)
+      throw error
+    }
     const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent!=='denied'
     const found=await currentSession()
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const context=body.analyticsContext as {clientId:string;sessionId:string}|undefined
     const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
+      attInstallmentConfirmation:body.attInstallmentConfirmation,
       analytics: consent && found?.user.account_type!=='admin' ? context : undefined})
     if(found?.user.account_type!=='admin') await captureCheckoutContext('guest',result.reference,found?.user.id ?? null,body.analyticsContext)
-    after(() => sendGuestCheckoutLink(result.reference))
+    if (body.paymentReminderOptIn === true && found && ['customer','reseller'].includes(found.user.account_type)) {
+      try { requestCheckoutReminderOptIn('guest', result.reference, found.user.email, found.user.id) }
+      catch { console.warn('[checkout-reminders] optional opt-in unavailable') }
+    }
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
-    return NextResponse.json({error:error instanceof WhopPaymentError ? error.message : 'Checkout is temporarily unavailable. Please retry; no order has been placed.'},
+    if (!(error instanceof WhopPaymentError)) logPaymentFailure('guest.checkout.create',error)
+    return NextResponse.json({error:error instanceof WhopPaymentError ? error.message : 'Checkout is temporarily unavailable. Please retry; no order has been placed.',
+      ...(error instanceof WhopPaymentError && error.code ? {code:error.code} : {})},
       {status:error instanceof WhopPaymentError ? error.status : 503,headers:{'Cache-Control':'no-store'}})
   }
 }
-

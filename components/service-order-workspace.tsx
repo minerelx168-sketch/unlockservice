@@ -29,7 +29,7 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
           group: product.group, domain: product.domain, inputType: product.inputType, priceCents: orderable.get(product.productCode)?.priceCents ?? product.priceCents, priceAvailable: product.priceAvailable,
           etaMinutes: orderable.get(product.productCode)?.etaMinutes ?? 0, etaLabel: product.etaLabel,
           providerReady: product.status === 'available' && Boolean(orderable.get(product.productCode)?.providerReady),
-          hasExample: product.hasExample,
+          hasExample: product.hasExample, requiresAttInstallmentConfirmation: product.requiresAttInstallmentConfirmation,
         }))}
         csrfToken={session.csrfToken}
         availableCents={user.credit_cents - user.held_cents}
@@ -44,4 +44,3 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
     </>
   )
 }
-
