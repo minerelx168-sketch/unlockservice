@@ -42,6 +42,422 @@ export type Article = {
 
 const ARTICLES: Article[] = [
 {
+  "slug": "telus-iphone-unlock-security-lock-guide",
+  "title": "TELUS iPhone Unlock: Security Lock",
+  "heading": "TELUS iPhone Unlock: Verify the Security Lock Before You Wait",
+  "description": "Check your TELUS iPhone unlock status, resolve conflicting security-lock timelines and prepare the right questions for official support.",
+  "standfirst": "A countdown in an old article is not an unlock decision for your phone. Match the device, activation record and current TELUS instructions.",
+  "topic": "TELUS iPhone carrier unlock",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "For a TELUS iPhone unlock, first check Carrier Lock on the actual handset and then ask TELUS which security-lock policy applies to its activation record. Do not assume a timer quoted for another device is your deadline. If Settings already says No SIM restrictions, investigate the line or activation problem instead.",
+      "links": [
+        {
+          "label": "Apple Carrier Lock instructions",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Check Settings > General > About > Carrier Lock before buying an unlock.",
+        "TELUS support materials retrieved on 4 November 2026 showed different security-lock timelines. Confirm your device-specific route.",
+        "Keep the activation date separate from the purchase date.",
+        "An unlock does not remove a SIM PIN, passcode, Activation Lock, blacklist or payment obligation."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "timeline-conflict",
+      "text": "Why a single countdown can be misleading"
+    },
+    {
+      "kind": "p",
+      "text": "The TELUS page titled Unlock your mobile device describes a two-day security lock from activation and an automatic unlock without charge. A separate TELUS page titled Unlocking your TELUS device still surfaced a 60-day reference. These public descriptions do not establish which rule applies to your particular record. Use the linked official support route and ask for confirmation rather than treating either number as a universal promise.",
+      "links": [
+        {
+          "label": "TELUS mobile-device unlocking guidance",
+          "href": "https://www.telus.com/en/support/article/unlock-mobile-device"
+        },
+        {
+          "label": "TELUS device unlocking page",
+          "href": "https://www.telus.com/en/support/article/unlock-telus-device"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "This matters when a phone was purchased earlier, activated later, exchanged or bought second-hand. A receipt date and the network activation date may answer different questions. Do not restart a purchase or erase the phone simply to try to change the clock."
+    },
+    {
+      "kind": "h2",
+      "id": "evidence",
+      "text": "Build a short device evidence checklist"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Record the current IMEI privately from the About screen, preserving IMEI and IMEI2 labels if both appear.",
+        "Write down the exact Carrier Lock wording and the date you checked it.",
+        "Find the order receipt, activation confirmation and any replacement paperwork.",
+        "State whether TELUS supplied the handset or you brought it from another seller.",
+        "Keep the exact support-page link that describes the timing you were given."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Using a TELUS SIM is not proof that TELUS controls the lock. An imported or previously owned phone can retain a restriction from its original carrier. If the purchase history is unclear, resolve that question before submitting a request to the wrong company.",
+      "links": [
+        {
+          "label": "Find an iPhone’s original carrier",
+          "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "contact",
+      "text": "What to ask TELUS Assist"
+    },
+    {
+      "kind": "p",
+      "text": "TELUS directs customers to its virtual assistant and the request unlock my phone. Its guidance says it can unlock TELUS-locked devices and may refuse requests associated with fraud. Use that official channel to confirm eligibility, the relevant activation record and the completion process.",
+      "links": [
+        {
+          "label": "Open TELUS unlocking support",
+          "href": "https://www.telus.com/en/support/article/unlock-mobile-device"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Suggested request: “My current iPhone shows a carrier restriction. Please confirm whether TELUS controls this IMEI, which activation date your record uses and whether I can request an unlock now. If I need to wait, please explain the applicable condition and the next review date.” Keep the case reference and the response together."
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Support response",
+        "Useful follow-up"
+      ],
+      "rows": [
+        [
+          "Device cannot be identified",
+          "Check the current IMEI against replacement or purchase paperwork"
+        ],
+        [
+          "A waiting period applies",
+          "Ask which policy and activation record determine it"
+        ],
+        [
+          "The device is already unlocked",
+          "Recheck Carrier Lock and diagnose the new line separately"
+        ],
+        [
+          "A lost/stolen or fraud flag applies",
+          "Resolve the underlying record through official support"
+        ]
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "completion",
+      "text": "Confirm completion on the iPhone"
+    },
+    {
+      "kind": "p",
+      "text": "Apple says only the carrier can authorize a carrier unlock. After approval, follow its instructions for another SIM or eSIM. If you have no alternative SIM, Apple documents a backup, erase and restore path after confirmation. Erasing the phone beforehand does not grant carrier permission.",
+      "links": [
+        {
+          "label": "Apple’s completion steps",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Record the Carrier Lock result after completion. If No SIM restrictions appears but another line fails, ask the intended provider to check activation and device compatibility. Keep an eSIM download error separate from evidence of an ongoing carrier lock.",
+      "links": [
+        {
+          "label": "No service after unlocking",
+          "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "different-locks",
+      "text": "Do not confuse different locks"
+    },
+    {
+      "kind": "p",
+      "text": "A SIM PIN or PUK protects the SIM or eSIM and needs help from the line provider; do not guess codes. A passcode controls access to the handset, while Activation Lock concerns the Apple Account owner. Lost/stolen blocking and finance obligations are separate again. A paid carrier-unlock request cannot clear all of these records.",
+      "links": [
+        {
+          "label": "SIM PIN and carrier-lock differences",
+          "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "paid-check",
+      "text": "When a paid check helps"
+    },
+    {
+      "kind": "p",
+      "text": "A report may help identify a carrier or clarify a listed device attribute. It does not override TELUS eligibility or accelerate a security review. Compare the report fields, delivery estimate and refusal terms before ordering. This guide does not establish that TELUS unlock ordering is available at iUnlockMobile.",
+      "links": [
+        {
+          "label": "Compare available IMEI reports",
+          "href": "/services/imei-check"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Unsure whether you need a carrier report or an official unlock request? Send support the result wording and purchase history before ordering. Do not post your full IMEI publicly.",
+      "href": "/contact",
+      "label": "Ask about the right device check"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Should I wait exactly 60 days to unlock a TELUS iPhone?",
+      "answer": "Do not rely on that number alone. TELUS materials retrieved for this guide showed different timelines. Ask support which policy applies to your device and activation record."
+    },
+    {
+      "question": "Can a carrier report remove the TELUS security lock?",
+      "answer": "No. A report provides information; the carrier controls unlock authorization."
+    },
+    {
+      "question": "Does No SIM restrictions mean my TELUS bill is paid?",
+      "answer": "No. Carrier Lock status does not certify account payment or ownership."
+    }
+  ],
+  "published": "2026-11-04",
+  "updated": "2026-11-04",
+  "minutes": 6
+},
+{
+  "slug": "bell-iphone-unlock-before-travel",
+  "title": "Bell iPhone Unlock Before Travel",
+  "heading": "Bell iPhone Unlock Before Travel: Request Early Access and Test It",
+  "description": "Plan a Bell iPhone unlock before travel. Check the current security lock, request early help and test your destination SIM or eSIM before departure.",
+  "standfirst": "Bell provides an early-contact route for its security lock. Build time for confirmation and a separate destination-line test before travelling.",
+  "topic": "Bell iPhone unlock for travel",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "A Bell iPhone unlock should be confirmed before you depend on a different carrier abroad. Bell currently describes a two-day security lock after activation, with a support route if you need an earlier unlock. Check the handset’s Carrier Lock result first, then separate the unlock request from travel-plan activation.",
+      "links": [
+        {
+          "label": "Bell’s current unlock instructions",
+          "href": "https://support.bell.ca/mobility/smartphones_and_mobile_internet/unlock_your_bell_device"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Bell’s published timer starts from activation, not your flight booking.",
+        "An early request is a support process, not an instant-unlock guarantee.",
+        "No SIM restrictions answers the carrier-lock question, not destination coverage or plan readiness.",
+        "Have a fallback connection if your travel line cannot be fully tested before departure."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "early-request",
+      "text": "How to request an unlock before the standard window"
+    },
+    {
+      "kind": "p",
+      "text": "Bell’s support page, checked on 4 November 2026, says the security lock automatically ends two days after activation at no cost. It directs customers needing an earlier unlock to 1 877 327-8151. Its eligibility list requires a Bell-locked device that is not flagged lost or stolen; it also warns that requests intended to defraud Bell or its customers may be refused.",
+      "links": [
+        {
+          "label": "Verify the contact number and eligibility on Bell’s page",
+          "href": "https://support.bell.ca/mobility/smartphones_and_mobile_internet/unlock_your_bell_device"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Contact Bell before the departure day where possible. Explain that you need to use another carrier, give the current device identifier through the verified support channel, and ask what happens next. An agent accepting the request is different from confirmation that the restriction has been removed."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Check Settings > General > About > Carrier Lock and note the result.",
+        "Prepare the current IMEI and your activation confirmation.",
+        "Explain the date you need another carrier’s SIM or eSIM.",
+        "Ask for a case reference, any remaining action and how completion will be confirmed.",
+        "Recheck the phone after Bell confirms the unlock."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "travel-decision",
+      "text": "Which connection actually needs an unlock?"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Travel option",
+        "Carrier-lock question",
+        "Separate question"
+      ],
+      "rows": [
+        [
+          "Continue with the Bell line",
+          "You are not changing the line’s carrier",
+          "Does your Bell plan cover the destination and cost?"
+        ],
+        [
+          "Add another provider’s travel eSIM",
+          "Confirm the iPhone can accept another carrier",
+          "Does the exact model support that plan and activation method?"
+        ],
+        [
+          "Use a destination physical SIM",
+          "Confirm carrier permission first",
+          "Does the phone have a compatible SIM tray and network support?"
+        ],
+        [
+          "Use Wi-Fi while resolving service",
+          "Wi-Fi is not a carrier unlock",
+          "Do you have reliable access and the accounts needed for setup?"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Do not choose a travel package only because it advertises iPhone support. Ask its provider about your exact model, destination and activation conditions. Keep the original line available until you understand how the new plan handles data, calls and messages; a data-only plan may not replace your usual phone number."
+    },
+    {
+      "kind": "h2",
+      "id": "test",
+      "text": "Test the result in the right order"
+    },
+    {
+      "kind": "p",
+      "text": "Apple identifies No SIM restrictions in the About screen as the unlocked status. After the carrier confirms completion, follow Apple’s instructions to activate a different SIM or set up the new eSIM. This check is more useful than relying solely on an order email.",
+      "links": [
+        {
+          "label": "Apple’s carrier-unlock and activation instructions",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Save Bell’s completion response and check Carrier Lock again.",
+        "Follow the new provider’s installation instructions and confirm when its plan validity begins.",
+        "If the provider permits a pre-travel test, test the supported functions rather than assuming installation proves working coverage.",
+        "Record the provider’s support contact and retain access to your purchase confirmation."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Some travel plans cannot register until you reach their covered destination. In that case, distinguish the checks completed at home from the ones still pending. A downloaded eSIM is not proof of coverage at your arrival location. Keep a practical fallback, such as access to airport Wi-Fi, so you can contact the provider if setup fails."
+    },
+    {
+      "kind": "h2",
+      "id": "failure",
+      "text": "If the travel line still fails"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "What you see",
+        "Who to contact first"
+      ],
+      "rows": [
+        [
+          "Carrier Lock remains restricted after approval",
+          "Bell, with the current IMEI and case reference"
+        ],
+        [
+          "No SIM restrictions but eSIM installation fails",
+          "The travel-plan provider"
+        ],
+        [
+          "SIM PIN or PUK required",
+          "The provider that issued that SIM or eSIM"
+        ],
+        [
+          "iPhone Locked to Owner",
+          "The legitimate Apple Account owner through Apple’s process"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "A passcode reset, a SIM PIN recovery and a carrier unlock are different operations. Unlocking also does not clear lost/stolen blocking, pay a finance balance or cancel an existing contract. For a used handset, resolve ownership and blocking before spending money on travel connectivity.",
+      "links": [
+        {
+          "label": "Understand blacklist and carrier-lock differences",
+          "href": "/articles/blacklisted-iphone-unlock-carrier-lock-difference"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "paid-service",
+      "text": "Should you pay an unlock website before your flight?"
+    },
+    {
+      "kind": "p",
+      "text": "Start with Bell’s official route. A third party may help interpret a device report or submit a supported request, but cannot guarantee an exception or destination service. Read exactly what is being sold: a carrier report is not an unlock. Do not treat this informational guide as confirmation that Bell unlock orders are available at iUnlockMobile.",
+      "links": [
+        {
+          "label": "Compare report fields before ordering",
+          "href": "/services/imei-check"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Need help deciding whether the unresolved issue is carrier identification or travel-line setup? Contact support with the exact message before purchasing a report.",
+      "href": "/contact",
+      "label": "Ask about the right device check"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Can Bell unlock my iPhone before two days?",
+      "answer": "Bell publishes an early-contact route for devices meeting its other eligibility conditions. Call the number on its official unlock page; completion time is not guaranteed by this guide."
+    },
+    {
+      "question": "Does a Bell roaming plan require another-carrier unlocking?",
+      "answer": "Using your existing Bell line is different from adding another carrier. Check Bell’s destination coverage and plan terms separately."
+    },
+    {
+      "question": "Can I buy a travel eSIM before the unlock completes?",
+      "answer": "Check the provider’s purchase, validity and refund terms first. Do not assume you can activate it on a restricted iPhone."
+    },
+    {
+      "question": "Will unlocking clear a lost or stolen block?",
+      "answer": "No. That record needs a separate official investigation and cannot be bypassed by a carrier unlock."
+    }
+  ],
+  "published": "2026-11-04",
+  "updated": "2026-11-04",
+  "minutes": 6
+},
+{
   "published": "2026-11-03",
   "updated": "2026-11-03",
   "minutes": 6,
