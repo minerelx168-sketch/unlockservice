@@ -41,6 +41,1603 @@ export type Article = {
 }
 
 const ARTICLES: Article[] = [
+{
+  "slug": "telus-iphone-unlock-security-lock-guide",
+  "title": "TELUS iPhone Unlock: Security Lock",
+  "heading": "TELUS iPhone Unlock: Verify the Security Lock Before You Wait",
+  "description": "Check your TELUS iPhone unlock status, resolve conflicting security-lock timelines and prepare the right questions for official support.",
+  "standfirst": "A countdown in an old article is not an unlock decision for your phone. Match the device, activation record and current TELUS instructions.",
+  "topic": "TELUS iPhone carrier unlock",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "For a TELUS iPhone unlock, first check Carrier Lock on the actual handset and then ask TELUS which security-lock policy applies to its activation record. Do not assume a timer quoted for another device is your deadline. If Settings already says No SIM restrictions, investigate the line or activation problem instead.",
+      "links": [
+        {
+          "label": "Apple Carrier Lock instructions",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Check Settings > General > About > Carrier Lock before buying an unlock.",
+        "TELUS support materials retrieved on 4 November 2026 showed different security-lock timelines. Confirm your device-specific route.",
+        "Keep the activation date separate from the purchase date.",
+        "An unlock does not remove a SIM PIN, passcode, Activation Lock, blacklist or payment obligation."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "timeline-conflict",
+      "text": "Why a single countdown can be misleading"
+    },
+    {
+      "kind": "p",
+      "text": "The TELUS page titled Unlock your mobile device describes a two-day security lock from activation and an automatic unlock without charge. A separate TELUS page titled Unlocking your TELUS device still surfaced a 60-day reference. These public descriptions do not establish which rule applies to your particular record. Use the linked official support route and ask for confirmation rather than treating either number as a universal promise.",
+      "links": [
+        {
+          "label": "TELUS mobile-device unlocking guidance",
+          "href": "https://www.telus.com/en/support/article/unlock-mobile-device"
+        },
+        {
+          "label": "TELUS device unlocking page",
+          "href": "https://www.telus.com/en/support/article/unlock-telus-device"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "This matters when a phone was purchased earlier, activated later, exchanged or bought second-hand. A receipt date and the network activation date may answer different questions. Do not restart a purchase or erase the phone simply to try to change the clock."
+    },
+    {
+      "kind": "h2",
+      "id": "evidence",
+      "text": "Build a short device evidence checklist"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Record the current IMEI privately from the About screen, preserving IMEI and IMEI2 labels if both appear.",
+        "Write down the exact Carrier Lock wording and the date you checked it.",
+        "Find the order receipt, activation confirmation and any replacement paperwork.",
+        "State whether TELUS supplied the handset or you brought it from another seller.",
+        "Keep the exact support-page link that describes the timing you were given."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Using a TELUS SIM is not proof that TELUS controls the lock. An imported or previously owned phone can retain a restriction from its original carrier. If the purchase history is unclear, resolve that question before submitting a request to the wrong company.",
+      "links": [
+        {
+          "label": "Find an iPhone’s original carrier",
+          "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "contact",
+      "text": "What to ask TELUS Assist"
+    },
+    {
+      "kind": "p",
+      "text": "TELUS directs customers to its virtual assistant and the request unlock my phone. Its guidance says it can unlock TELUS-locked devices and may refuse requests associated with fraud. Use that official channel to confirm eligibility, the relevant activation record and the completion process.",
+      "links": [
+        {
+          "label": "Open TELUS unlocking support",
+          "href": "https://www.telus.com/en/support/article/unlock-mobile-device"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Suggested request: “My current iPhone shows a carrier restriction. Please confirm whether TELUS controls this IMEI, which activation date your record uses and whether I can request an unlock now. If I need to wait, please explain the applicable condition and the next review date.” Keep the case reference and the response together."
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Support response",
+        "Useful follow-up"
+      ],
+      "rows": [
+        [
+          "Device cannot be identified",
+          "Check the current IMEI against replacement or purchase paperwork"
+        ],
+        [
+          "A waiting period applies",
+          "Ask which policy and activation record determine it"
+        ],
+        [
+          "The device is already unlocked",
+          "Recheck Carrier Lock and diagnose the new line separately"
+        ],
+        [
+          "A lost/stolen or fraud flag applies",
+          "Resolve the underlying record through official support"
+        ]
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "completion",
+      "text": "Confirm completion on the iPhone"
+    },
+    {
+      "kind": "p",
+      "text": "Apple says only the carrier can authorize a carrier unlock. After approval, follow its instructions for another SIM or eSIM. If you have no alternative SIM, Apple documents a backup, erase and restore path after confirmation. Erasing the phone beforehand does not grant carrier permission.",
+      "links": [
+        {
+          "label": "Apple’s completion steps",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Record the Carrier Lock result after completion. If No SIM restrictions appears but another line fails, ask the intended provider to check activation and device compatibility. Keep an eSIM download error separate from evidence of an ongoing carrier lock.",
+      "links": [
+        {
+          "label": "No service after unlocking",
+          "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "different-locks",
+      "text": "Do not confuse different locks"
+    },
+    {
+      "kind": "p",
+      "text": "A SIM PIN or PUK protects the SIM or eSIM and needs help from the line provider; do not guess codes. A passcode controls access to the handset, while Activation Lock concerns the Apple Account owner. Lost/stolen blocking and finance obligations are separate again. A paid carrier-unlock request cannot clear all of these records.",
+      "links": [
+        {
+          "label": "SIM PIN and carrier-lock differences",
+          "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "paid-check",
+      "text": "When a paid check helps"
+    },
+    {
+      "kind": "p",
+      "text": "A report may help identify a carrier or clarify a listed device attribute. It does not override TELUS eligibility or accelerate a security review. Compare the report fields, delivery estimate and refusal terms before ordering. This guide does not establish that TELUS unlock ordering is available at iUnlockMobile.",
+      "links": [
+        {
+          "label": "Compare available IMEI reports",
+          "href": "/services/imei-check"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Unsure whether you need a carrier report or an official unlock request? Send support the result wording and purchase history before ordering. Do not post your full IMEI publicly.",
+      "href": "/contact",
+      "label": "Ask about the right device check"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Should I wait exactly 60 days to unlock a TELUS iPhone?",
+      "answer": "Do not rely on that number alone. TELUS materials retrieved for this guide showed different timelines. Ask support which policy applies to your device and activation record."
+    },
+    {
+      "question": "Can a carrier report remove the TELUS security lock?",
+      "answer": "No. A report provides information; the carrier controls unlock authorization."
+    },
+    {
+      "question": "Does No SIM restrictions mean my TELUS bill is paid?",
+      "answer": "No. Carrier Lock status does not certify account payment or ownership."
+    }
+  ],
+  "published": "2026-11-04",
+  "updated": "2026-11-04",
+  "minutes": 6
+},
+{
+  "slug": "bell-iphone-unlock-before-travel",
+  "title": "Bell iPhone Unlock Before Travel",
+  "heading": "Bell iPhone Unlock Before Travel: Request Early Access and Test It",
+  "description": "Plan a Bell iPhone unlock before travel. Check the current security lock, request early help and test your destination SIM or eSIM before departure.",
+  "standfirst": "Bell provides an early-contact route for its security lock. Build time for confirmation and a separate destination-line test before travelling.",
+  "topic": "Bell iPhone unlock for travel",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "A Bell iPhone unlock should be confirmed before you depend on a different carrier abroad. Bell’s support page describes a two-day security lock after activation and an automatic no-cost unlock after that period; this is Bell’s operational wording, not a statement that you must wait. The CRTC Wireless Code says devices provided by a service provider must be provided unlocked, and that if a device is locked the provider must unlock it or give the customer the means to unlock it upon request at no charge. Check the handset’s Carrier Lock result first, then separate the unlock request from travel-plan activation.",
+      "links": [
+        {
+          "label": "Bell’s current unlock instructions",
+          "href": "https://support.bell.ca/mobility/smartphones_and_mobile_internet/unlock_your_bell_device"
+        },
+        {
+          "label": "CRTC Wireless Code: unlocking",
+          "href": "https://crtc.gc.ca/eng/phone/mobile/codesimpl.htm"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Bell’s published support wording describes a two-day security lock from activation; it is not presented here as a mandatory wait.",
+        "An early request is a support process, not an instant-unlock guarantee.",
+        "No SIM restrictions answers the carrier-lock question, not destination coverage or plan readiness.",
+        "Have a fallback connection if your travel line cannot be fully tested before departure."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "early-request",
+      "text": "How to request an unlock before Bell’s published two-day timing"
+    },
+    {
+      "kind": "p",
+      "text": "Bell’s support page, checked on 4 November 2026, says the security lock automatically ends two days after activation at no cost. It directs customers needing an earlier unlock to 1 877 327-8151 and says customers who meet its other eligibility criteria can call if fewer than two days have elapsed. Treat that as Bell’s operational process, not as a statement that you must wait two days. The CRTC Wireless Code says devices provided by a service provider must be provided unlocked, and that if a device is locked the provider must unlock it or give the customer the means to unlock it upon request at no charge. This article does not make a case-specific legal conclusion; the official number is a support route, not a guarantee of immediate completion. Bell’s eligibility list requires a Bell-locked device that is not flagged lost or stolen; it also warns that requests intended to defraud Bell or its customers may be refused.",
+      "links": [
+        {
+          "label": "Verify the contact number and eligibility on Bell’s page",
+          "href": "https://support.bell.ca/mobility/smartphones_and_mobile_internet/unlock_your_bell_device"
+        },
+        {
+          "label": "Read the CRTC Wireless Code unlocking rule",
+          "href": "https://crtc.gc.ca/eng/phone/mobile/codesimpl.htm"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Contact Bell before the departure day where possible. Explain that you need to use another carrier, give the current device identifier through the verified support channel, and ask what happens next. An agent accepting the request is different from confirmation that the restriction has been removed."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Check Settings > General > About > Carrier Lock and note the result.",
+        "Prepare the current IMEI and your activation confirmation.",
+        "Explain the date you need another carrier’s SIM or eSIM.",
+        "Ask for a case reference, any remaining action and how completion will be confirmed.",
+        "Recheck the phone after Bell confirms the unlock."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "travel-decision",
+      "text": "Which connection actually needs an unlock?"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Travel option",
+        "Carrier-lock question",
+        "Separate question"
+      ],
+      "rows": [
+        [
+          "Continue with the Bell line",
+          "You are not changing the line’s carrier",
+          "Does your Bell plan cover the destination and cost?"
+        ],
+        [
+          "Add another provider’s travel eSIM",
+          "Confirm the iPhone can accept another carrier",
+          "Does the exact model and plan meet the provider’s activation and coverage terms?"
+        ],
+        [
+          "Use a destination physical SIM",
+          "Confirm carrier permission first",
+          "Does the phone have a compatible SIM tray and network support?"
+        ],
+        [
+          "Use Wi-Fi while resolving service",
+          "Wi-Fi is not a carrier unlock",
+          "Do you have reliable access and the accounts needed for setup?"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Do not choose a travel package only because it advertises iPhone support. Ask its provider about your exact model, destination and activation conditions. Keep the original line available until you understand how the new plan handles data, calls and messages; a data-only plan may not replace your usual phone number."
+    },
+    {
+      "kind": "h2",
+      "id": "test",
+      "text": "Test the result in the right order"
+    },
+    {
+      "kind": "p",
+      "text": "Apple identifies No SIM restrictions in the About screen as the unlocked status. After the carrier confirms completion, follow Apple’s instructions to activate a different SIM or set up the new eSIM. This check is more useful than relying solely on an order email.",
+      "links": [
+        {
+          "label": "Apple’s carrier-unlock and activation instructions",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Save Bell’s completion response and check Carrier Lock again.",
+        "Follow the new provider’s installation instructions and confirm when its plan validity begins.",
+        "If the provider permits a pre-travel test, test the supported functions rather than assuming installation proves working coverage.",
+        "Record the provider’s support contact and retain access to your purchase confirmation."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Check the named travel provider’s activation and coverage terms before departure, including whether its SIM or eSIM can be tested or registered at home. Do not treat a purchase, download or installation as proof that the plan is active or that service will work at your arrival location. Keep a practical fallback, such as access to airport Wi-Fi, so you can contact the provider if setup fails."
+    },
+    {
+      "kind": "h2",
+      "id": "failure",
+      "text": "If the travel line still fails"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "What you see",
+        "Who to contact first"
+      ],
+      "rows": [
+        [
+          "Carrier Lock remains restricted after approval",
+          "Bell, with the current IMEI and case reference"
+        ],
+        [
+          "No SIM restrictions but eSIM installation fails",
+          "The travel-plan provider"
+        ],
+        [
+          "SIM PIN or PUK required",
+          "The provider that issued that SIM or eSIM"
+        ],
+        [
+          "iPhone Locked to Owner",
+          "The legitimate Apple Account owner through Apple’s process"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "A passcode reset, a SIM PIN recovery and a carrier unlock are different operations. Unlocking also does not clear lost/stolen blocking, pay a finance balance or cancel an existing contract. For a used handset, resolve ownership and blocking before spending money on travel connectivity.",
+      "links": [
+        {
+          "label": "Understand blacklist and carrier-lock differences",
+          "href": "/articles/blacklisted-iphone-unlock-carrier-lock-difference"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "paid-service",
+      "text": "Should you pay an unlock website before your flight?"
+    },
+    {
+      "kind": "p",
+      "text": "Start with Bell’s official route. A third party may help interpret a device report or submit a supported request, but cannot guarantee an exception or destination service. Read exactly what is being sold: a carrier report is not an unlock. Do not treat this informational guide as confirmation that Bell unlock orders are available at iUnlockMobile.",
+      "links": [
+        {
+          "label": "Compare report fields before ordering",
+          "href": "/services/imei-check"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Need help deciding whether the unresolved issue is carrier identification or travel-line setup? Contact support with the exact message before purchasing a report.",
+      "href": "/contact",
+      "label": "Ask about the right device check"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Can Bell unlock my iPhone before two days?",
+      "answer": "Bell’s page describes a two-day security lock and directs eligible customers who need an earlier request to 1 877 327-8151. The CRTC Wireless Code says provider-supplied devices must be unlocked and that a locked device must be unlocked or have the means to unlock it upon request at no charge. This guide does not make a case-specific legal conclusion or guarantee immediate completion; use both official routes to confirm your situation."
+    },
+    {
+      "question": "Does a Bell roaming plan require another-carrier unlocking?",
+      "answer": "Using your existing Bell line is different from adding another carrier. Check Bell’s destination coverage and plan terms separately."
+    },
+    {
+      "question": "Can I buy a travel eSIM before the unlock completes?",
+      "answer": "Check the provider’s purchase, validity, activation and coverage terms first. Test or confirm the SIM/eSIM on your exact phone where the provider allows before departure; do not assume that purchase or download proves activation or arrival coverage."
+    },
+    {
+      "question": "Will unlocking clear a lost or stolen block?",
+      "answer": "No. That record needs a separate official investigation and cannot be bypassed by a carrier unlock."
+    }
+  ],
+  "published": "2026-11-04",
+  "updated": "2026-11-05",
+  "minutes": 6
+},
+{
+  "published": "2026-11-03",
+  "updated": "2026-11-03",
+  "minutes": 6,
+  "slug": "rogers-iphone-unlock-sim-locked-guide",
+  "title": "Rogers iPhone Unlock: SIM Locked?",
+  "heading": "Rogers iPhone Unlock: What to Do When It Still Says SIM Locked",
+  "description": "Check your Rogers iPhone unlock status, identify the correct carrier record and prepare an official request before paying for help.",
+  "standfirst": "A Rogers SIM and a Rogers carrier lock are different evidence. Check the iPhone, its original purchase record and the official support route.",
+  "topic": "Rogers iPhone unlock",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "For a Rogers iPhone unlock, check Settings > General > About > Carrier Lock first. No SIM restrictions means the carrier lock is absent. If a restriction remains, confirm Rogers supplied the handset before requesting help; a Rogers SIM alone does not identify the original locking carrier.",
+      "links": [
+        {
+          "label": "Check Apple’s unlock instructions",
+          "href": "https://support.apple.com/en-ca/109316"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Read Carrier Lock on the actual phone, not a seller’s screenshot of a different device.",
+        "Rogers says new devices bought directly from it arrive unlocked.",
+        "A used or replacement iPhone needs its current IMEI matched to the purchase history.",
+        "A carrier unlock does not clear a blacklist, finance balance, passcode, SIM PIN or Activation Lock."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "rogers-route",
+      "text": "Which Rogers support route applies?"
+    },
+    {
+      "kind": "p",
+      "text": "Rogers currently offers unlocking for its directly purchased devices to active customers and customers whose account was cancelled within the last 12 months. Its published conditions require no past-due balance and no national lost/stolen blacklist entry. Cancelled accounts must also be paid in full and not cancelled for fraud. Rogers lists no charge or waiting period for these consumer categories; enterprise fees may differ. Contact its Wireless Billing & Payment team with the IMEI. These are eligibility conditions, not a promise of instant activation.",
+      "links": [
+        {
+          "label": "Read current Rogers eligibility and contact instructions",
+          "href": "https://www.rogers.com/support/mobility/device-unlocking-faqs"
+        }
+      ]
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Situation",
+        "Evidence to collect",
+        "Next action"
+      ],
+      "rows": [
+        [
+          "Bought new from Rogers",
+          "Invoice and current Carrier Lock result",
+          "Ask Rogers to investigate an unexpected restriction"
+        ],
+        [
+          "Bought used from another person",
+          "Original seller, country and matching IMEI",
+          "Have the seller establish the purchase record"
+        ],
+        [
+          "Using a Rogers SIM in an imported iPhone",
+          "Original overseas carrier and model",
+          "Contact the carrier responsible for the lock"
+        ],
+        [
+          "Replacement handset",
+          "Replacement paperwork and current IMEI",
+          "Have support check the replacement record"
+        ]
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "prepare-request",
+      "text": "Prepare a request that support can investigate"
+    },
+    {
+      "kind": "p",
+      "text": "A useful support request connects three things: the handset in your hand, the purchase record and the exact symptom. Avoid sending an old box number without checking it against the device. If there are two IMEIs, retain both labels and ask support which identifier it needs; do not assume an IMEI from a previous phone is interchangeable."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Record the current IMEI privately from the About screen.",
+        "Write down the exact Carrier Lock wording and iOS version.",
+        "Keep the invoice or replacement paperwork ready.",
+        "Explain whether you are the original purchaser, an active customer or a former customer.",
+        "Ask for a case reference and the next action if the record cannot be matched."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Suggested message: “This iPhone shows a carrier restriction in Settings. I believe it was supplied by Rogers because of the attached purchase record. Please confirm whether Rogers controls this IMEI, whether my account qualifies and what completion step applies.” Share identifiers only through the carrier’s verified support channel."
+    },
+    {
+      "kind": "h2",
+      "id": "code-or-activation",
+      "text": "Does a Rogers iPhone need an unlock code?"
+    },
+    {
+      "kind": "p",
+      "text": "Rogers distinguishes remote iPhone unlocking from code entry on other handsets. Do not copy an Android code-entry tutorial onto an iPhone. First obtain carrier confirmation, then follow Apple’s instructions for activating a different SIM or eSIM. If another SIM is unavailable, Apple describes a backup, erase and restore route after approval; erasing before approval cannot create carrier authorization.",
+      "links": [
+        {
+          "label": "Review the official iPhone completion process",
+          "href": "https://support.apple.com/en-ca/109316"
+        },
+        {
+          "label": "Understand iPhone unlock codes",
+          "href": "/articles/iphone-carrier-unlock-code-authorization-guide"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "still-not-working",
+      "text": "What if another SIM still does not work?"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Result",
+        "Meaning",
+        "Next check"
+      ],
+      "rows": [
+        [
+          "No SIM restrictions, but no service",
+          "An unlock is not the missing permission",
+          "Line activation, coverage and compatibility"
+        ],
+        [
+          "Carrier Lock still restricted",
+          "Completion or the submitted record needs checking",
+          "Ask the responsible carrier to verify the current IMEI"
+        ],
+        [
+          "SIM PIN or PUK prompt",
+          "The SIM line has its own security lock",
+          "Contact the SIM provider; do not guess codes"
+        ],
+        [
+          "iPhone Locked to Owner",
+          "Apple account ownership restriction",
+          "The legitimate owner must resolve it"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Keep a screenshot of the status after support says the request is complete. If the next carrier rejects the device, ask it to state the reason rather than assuming the original carrier has relocked it. A compatibility rejection, a lost-device block and a failed eSIM download call for different investigations.",
+      "links": [
+        {
+          "label": "Troubleshoot no service after unlocking",
+          "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "paid-help",
+      "text": "When should you consider paid help?"
+    },
+    {
+      "kind": "p",
+      "text": "Start with the official route and the on-device check. A third party may help interpret a report or organize a supported request, but cannot replace Rogers’s account decision or guarantee removal of a restriction. Before paying, establish the exact service, supported device, refusal terms and what evidence will demonstrate completion. A carrier report is information, not an unlock authorization."
+    },
+    {
+      "kind": "p",
+      "text": "iUnlockMobile’s report catalogue can help you compare available checks. Read the actual report fields before ordering, and contact support if you need help identifying which question to investigate. Do not assume Rogers unlock ordering is available from the existence of this guide.",
+      "links": [
+        {
+          "label": "Compare device reports",
+          "href": "/services/imei-check"
+        },
+        {
+          "label": "Find the original carrier",
+          "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Have an unexpected Rogers carrier-lock result? Share the exact wording and purchase history so support can help identify the next check. Keep passwords and full IMEIs out of public messages.",
+      "href": "/contact",
+      "label": "Ask about the correct carrier check"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Are all Rogers iPhones locked?",
+      "answer": "No. Rogers says new devices bought directly from it are unlocked. Check the individual iPhone rather than relying only on its network name."
+    },
+    {
+      "question": "Can Rogers unlock a phone supplied by another carrier?",
+      "answer": "Its published unlocking route is for devices purchased directly from Rogers. Trace the original supplier if your phone came from elsewhere."
+    },
+    {
+      "question": "Can an IMEI report unlock the iPhone?",
+      "answer": "No. A report provides information. Carrier approval and device activation are separate steps."
+    },
+    {
+      "question": "Does unlocking remove unpaid finance or a blacklist?",
+      "answer": "No. Payment obligations and lost/stolen blocking are separate from Carrier Lock."
+    }
+  ]
+},
+{
+  "published": "2026-11-03",
+  "updated": "2026-11-03",
+  "minutes": 6,
+  "slug": "iphone-blacklist-check-canada-before-buying",
+  "title": "iPhone Blacklist Check in Canada",
+  "heading": "iPhone Blacklist Check in Canada: What a Clean Result Cannot Prove",
+  "description": "Run an iPhone blacklist check in Canada before buying used. Learn what a clean result misses and which carrier and ownership checks to make.",
+  "standfirst": "A Canadian blacklist lookup answers a narrow lost-or-stolen question. Combine it with a matching IMEI, ownership checks and a purchase record.",
+  "topic": "Canadian used iPhone blacklist checks",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "An iPhone blacklist check in Canada can show whether an IMEI has been reported lost or stolen within the service’s coverage. A clear result is not proof of ownership, paid-off finance, carrier unlocking or future network access. Before buying, match the result to the actual phone and investigate those questions separately."
+    },
+    {
+      "kind": "h2",
+      "id": "key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Check the device’s IMEI, not just a number pasted into a listing.",
+        "Use DeviceCheck Canada’s consumer route for its Canadian lost/stolen lookup.",
+        "A clear result is a point-in-time finding with coverage and reporting limits.",
+        "Check Carrier Lock and Activation Lock separately before completing the purchase."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "canadian-lookup",
+      "text": "Start with the Canadian consumer lookup"
+    },
+    {
+      "kind": "p",
+      "text": "DeviceCheck Canada directs consumers buying a pre-owned device to check its IMEI for Canadian lost/stolen reports. A listed device cannot be used on participating Canadian networks. Its published disclaimer warns that a report may take up to 48 hours to appear and that billing-related carrier blocks may not appear on the shared blacklist. A device can also be added later.",
+      "links": [
+        {
+          "label": "Open DeviceCheck Canada’s consumer page",
+          "href": "https://www.devicecheck.ca/consumers/"
+        },
+        {
+          "label": "Read DeviceCheck’s published lookup limitations",
+          "href": "https://www.devicecheck.ca/businesses/device-lookup/"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "If a lookup does not load or returns an error, record the check as unavailable. Do not convert a blank response into “clean.” Ask the intended carrier or a report provider what sources and countries its check covers. An imported iPhone deserves checks relevant to its origin as well as the network you plan to use."
+    },
+    {
+      "kind": "h2",
+      "id": "match-device",
+      "text": "Match the result to the phone you are buying"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Ask the seller to show the IMEI on the actual iPhone’s About screen.",
+        "Compare the identifier with the receipt and any report you receive.",
+        "Keep IMEI and IMEI2 labels distinct on Dual SIM models; ask which identifiers the checker covers.",
+        "Record the date and result privately, without publishing a complete IMEI.",
+        "Resolve a mismatch before transferring payment."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "For a remote sale, a screenshot is supporting evidence rather than proof that the shipped phone is the same unit. Agree on the return process and inspect the received handset while that option is available. A fresh report on the wrong identifier does not answer the question you intended to ask."
+    },
+    {
+      "kind": "h2",
+      "id": "separate-checks",
+      "text": "Four checks that should not be combined into one verdict"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Check",
+        "Question it answers",
+        "What it does not establish"
+      ],
+      "rows": [
+        [
+          "Blacklist lookup",
+          "Is a covered lost/stolen report recorded?",
+          "Ownership, full account history or future status"
+        ],
+        [
+          "Carrier Lock in Settings",
+          "Is this iPhone restricted to a carrier?",
+          "Lost/stolen or finance clearance"
+        ],
+        [
+          "Setup and Activation Lock",
+          "Can the legitimate owner release the device for your setup?",
+          "Network compatibility or payment history"
+        ],
+        [
+          "Intended carrier compatibility check",
+          "Can this model and identifier use the planned service?",
+          "A guarantee that no later block will occur"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Apple identifies No SIM restrictions under Carrier Lock as the on-device unlocked result. That result does not replace a blacklist lookup. Apple’s used-iPhone guidance also says not to buy an Activation Locked phone; the Hello screen alone requires completing activation before you know the device can be set up.",
+      "links": [
+        {
+          "label": "Check Carrier Lock with Apple",
+          "href": "https://support.apple.com/en-ca/109316"
+        },
+        {
+          "label": "Read Apple’s pre-owned iPhone inspection guide",
+          "href": "https://support.apple.com/en-ca/104999"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "clean-but-risky",
+      "text": "Why “clean” can still leave an unresolved purchase risk"
+    },
+    {
+      "kind": "p",
+      "text": "Consider a seller who supplies a clear lookup, but cannot match the receipt to the phone. The report has answered one database question; the seller has not resolved the identity and ownership questions. Likewise, a phone that works on the seller’s line should still be tested for your intended setup. Decide based on the combined evidence rather than treating any one green status as a purchase guarantee."
+    },
+    {
+      "kind": "h3",
+      "id": "purchase-record",
+      "text": "Keep a useful purchase record"
+    },
+    {
+      "kind": "p",
+      "text": "Ask for a receipt identifying the seller, handset, agreed condition and return terms. Retain the listing and relevant messages. Keep these records private and collect only what is needed for the sale. If the seller will not allow reasonable checks, you can postpone the purchase instead of paying for more reports that cannot resolve ownership."
+    },
+    {
+      "kind": "h2",
+      "id": "blocked-result",
+      "text": "What to do with a blocked or conflicting result"
+    },
+    {
+      "kind": "p",
+      "text": "Pause the transaction if a lost/stolen entry appears. Ask the seller and relevant carrier to investigate through their official channels. Do not pay someone to alter an identifier or promise a blacklist bypass. If two reports disagree, compare their identifiers, timestamps and coverage before deciding which question remains unanswered."
+    },
+    {
+      "kind": "p",
+      "text": "If the phone is already yours, keep the order evidence and contact the seller promptly about the applicable return or dispute process. A network unlock cannot resolve a lost/stolen record. For a SIM PIN or PUK prompt, contact the SIM provider instead; for a forgotten passcode or Activation Lock, use Apple’s documented ownership and recovery route.",
+      "links": [
+        {
+          "label": "Separate blacklist blocking from carrier unlocking",
+          "href": "/articles/blacklisted-iphone-unlock-carrier-lock-difference"
+        },
+        {
+          "label": "Distinguish SIM PIN and carrier lock",
+          "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "report-choice",
+      "text": "Choose a paid report only for a specific unanswered question"
+    },
+    {
+      "kind": "p",
+      "text": "A paid report can be useful when its listed fields and coverage address something you still need to know. Check whether it reports carrier information, blacklist status or another device attribute, and read its delivery estimate and terms. Price alone does not establish coverage, and no report can certify every future event."
+    },
+    {
+      "kind": "p",
+      "text": "Use the check results to decide the next step: resolve ownership and blocking first, then investigate carrier eligibility only if Carrier Lock is restricted. Do not buy an unlock merely because a blacklist report is clear.",
+      "links": [
+        {
+          "label": "Compare available IMEI reports",
+          "href": "/services/imei-check"
+        },
+        {
+          "label": "Understand report limitations",
+          "href": "/articles/what-an-imei-check-tells-you"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Unsure which report answers your used-iPhone question? Compare the listed checks or send support the exact result wording before ordering.",
+      "href": "/contact",
+      "label": "Ask which device check you need"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Does a clean Canadian blacklist check mean an iPhone is unlocked?",
+      "answer": "No. Check Carrier Lock separately in Settings. A blacklist result concerns covered lost/stolen records, not permission to use another carrier."
+    },
+    {
+      "question": "Can an iPhone be blacklisted after I buy it?",
+      "answer": "Yes. A point-in-time check cannot prevent a later report or block. Keep purchase evidence and understand the seller’s return terms."
+    },
+    {
+      "question": "Does a Canadian check cover every country?",
+      "answer": "Do not assume worldwide coverage. Confirm the checker’s stated sources and countries, especially for imported phones."
+    },
+    {
+      "question": "Should I buy an iPhone that shows Locked to Owner?",
+      "answer": "Apple advises against buying an Activation Locked iPhone. The legitimate owner needs to resolve that restriction before the sale."
+    }
+  ]
+},
+  {
+  "slug": "unlock-telstra-phone-iphone-prepaid-guide",
+  "title": "Unlock a Telstra Phone",
+  "heading": "How to Unlock a Telstra Phone: iPhone and Pre-Paid Guide",
+  "description": "Learn how to unlock a Telstra phone, check an iPhone carrier lock, understand current Pre-Paid fees and complete the right request.",
+  "standfirst": "Telstra says it does not lock phones on month-to-month plans, while a Telstra Pre-Paid device may need an IMEI-based request and a fee based on service age.",
+  "published": "2026-11-02",
+  "updated": "2026-11-05",
+  "minutes": 11,
+  "topic": "Telstra phone and iPhone carrier unlock",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "To unlock a Telstra phone, first confirm that the handset—not the SIM—is actually network locked. On an iPhone, open Settings, General, About and read Service Provider Lock. No SIM restrictions means there is no carrier lock to remove. If the device is genuinely tied to Telstra, the correct route depends on whether it was sold for Pre-Paid, month-to-month, Post-paid or an Upfront plan.",
+      "links": [
+        {
+          "label": "Read Telstra’s current IMEI unlock instructions",
+          "href": "https://www.telstra.com.au/support/mobiles-devices/unlock-phone-imei"
+        },
+        {
+          "label": "Follow Apple’s current iPhone unlock guidance",
+          "href": "https://support.apple.com/en-au/109316"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Do not assume every Telstra phone is locked: Telstra says it does not lock devices on month-to-month plans.",
+        "For an iPhone, No SIM restrictions beside Service Provider Lock is Apple’s on-device confirmation that the phone is unlocked.",
+        "Telstra directs Pre-Paid unlock requests through the current device IMEI and says a fee may depend on how long the service has been active.",
+        "Telstra says it does not lock month-to-month plans on its network. If you’re on a Post-paid or Upfront Plan and believe your iPhone is locked to Telstra, contact Telstra with the current IMEI and relevant purchase or order evidence.",
+        "Carrier Lock is separate from a SIM PIN or PUK, screen passcode, Activation Lock, lost-device IMEI block, finance and eSIM activation."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-check-lock",
+      "text": "Check whether the Telstra phone is really locked"
+    },
+    {
+      "kind": "p",
+      "text": "The strongest iPhone check is built into iOS. Go to Settings, General, About, then find Service Provider Lock. Apple also uses the label Carrier Lock in some support material and regions. If the field says No SIM restrictions, stop: an unlock order will not fix a failed SIM, eSIM download, coverage problem or blocked IMEI."
+    },
+    {
+      "kind": "list",
+      "ordered": true,
+      "items": [
+        "Connect the iPhone to Wi-Fi and install any available carrier settings update.",
+        "Open Settings, tap General, then About.",
+        "Read the exact text beside Service Provider Lock or Carrier Lock.",
+        "If it says No SIM restrictions, troubleshoot the intended line instead of requesting another unlock.",
+        "If it says SIM locked, copy the IMEI or IMEI2 that belongs to the active line and keep the full number private.",
+        "Match the IMEI to the receipt, box or replacement record before contacting Telstra."
+      ]
+    },
+    {
+      "kind": "note",
+      "text": "Testing another active provider’s SIM can produce useful evidence, but it is not a perfect lock test. A new SIM can fail because of activation, coverage, compatibility or an IMEI block. The iPhone Service Provider Lock field is the clearer result."
+    },
+    {
+      "kind": "h3",
+      "id": "telstra-android-check",
+      "text": "If the Telstra phone is not an iPhone"
+    },
+    {
+      "kind": "p",
+      "text": "Telstra’s current support page suggests inserting a SIM from another provider, restarting the handset and checking whether the other provider appears. A valid-SIM error can indicate a network lock. Android wording and code entry vary by manufacturer, so use Telstra’s instructions for the exact model rather than an iPhone workflow."
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-plan-route",
+      "text": "Choose the Telstra unlock route by plan type"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Plan or device situation",
+        "What Telstra currently says",
+        "Best next step"
+      ],
+      "rows": [
+        [
+          "Month-to-month device",
+          "Telstra says these are not locked to its network",
+          "Verify No SIM restrictions or test another active SIM"
+        ],
+        [
+          "Post-paid or Upfront device",
+          "Telstra says it does not lock month-to-month plans on its network; if you’re on a Post-paid or Upfront Plan and believe your phone is locked to Telstra, contact Telstra",
+          "Contact Telstra with the order and current IMEI"
+        ],
+        [
+          "Telstra Pre-Paid device",
+          "It may need an IMEI-based unlock request",
+          "Find the current IMEI and ask Telstra to confirm eligibility and fee"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "A Telstra SIM working in the phone does not prove that the device is unlocked; it only shows that the current Telstra line can activate. For a used, imported or replacement phone, purchase country, seller history and replacement paperwork may help identify the record to ask Telstra or the original provider to review. The relevant provider must confirm which lock record applies to the current IMEI."
+    },
+    {
+      "kind": "h3",
+      "id": "telstra-record-troubleshooting",
+      "text": "Troubleshoot the device record separately"
+    },
+    {
+      "kind": "p",
+      "text": "The following checks are not Telstra eligibility rules. For a used, imported or replacement phone, the purchase country, seller history and replacement paperwork may help identify the record to ask Telstra or the original provider to review. The relevant provider must confirm which lock record applies to the current IMEI."
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Situation",
+        "What it may help you check",
+        "Next step"
+      ],
+      "rows": [
+        [
+          "Used phone",
+          "Purchase country, seller history and the current IMEI may help identify the record to review",
+          "Ask Telstra or the original provider to confirm the lock record for the current IMEI"
+        ],
+        [
+          "Imported iPhone",
+          "The original provider and country may be relevant to the record check",
+          "Ask the relevant provider to confirm whether it controls the lock"
+        ],
+        [
+          "Replacement iPhone",
+          "Replacement paperwork may help match the current IMEI to the record",
+          "Ask the provider to check the replacement record and current IMEI"
+        ]
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-prepaid-fees",
+      "text": "Current Telstra Pre-Paid unlock fees"
+    },
+    {
+      "kind": "p",
+      "text": "Telstra’s support page currently publishes three Pre-Paid fee bands. Treat these as a policy snapshot and confirm the amount with Telstra before paying, because the carrier—not a third party—decides which activation record and fee apply.",
+      "links": [
+        {
+          "label": "Confirm Telstra’s current fee and request instructions",
+          "href": "https://www.telstra.com.au/support/mobiles-devices/unlock-phone-imei"
+        }
+      ]
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Pre-Paid service history",
+        "Published fee",
+        "What to verify"
+      ],
+      "rows": [
+        [
+          "Never activated or active for six months or less",
+          "AUD 80",
+          "The activation date Telstra has against the IMEI"
+        ],
+        [
+          "Activated for six months to two years, as worded by Telstra",
+          "AUD 25",
+          "The service age and whether Telstra accepts the device record"
+        ],
+        [
+          "Active for more than two years",
+          "No unlocking fee",
+          "That the handset and service history match"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Telstra’s published fee bands overlap at exactly six months; ask Telstra to confirm the fee at that boundary rather than assuming the lower amount. Telstra says to call 13 22 00 and say “unlock device option” after finding the IMEI. Its page lists Monday to Friday, 9am to 8pm AEST, and warns that completion can take up to 7–10 days. It also recommends making a backup. Verify the current contact hours, fee and estimate on the official page when you submit because those details can change."
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-imei-request",
+      "text": "Prepare the IMEI request correctly"
+    },
+    {
+      "kind": "p",
+      "text": "The IMEI identifies the handset record; it is not an unlock code and it should not be posted publicly. On an iPhone, find it in Settings, General, About or by dialling *#06#. Dual-SIM models can show IMEI and IMEI2, so record which line is selected and ask Telstra which identifier its system expects."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "The exact Service Provider Lock wording from the iPhone About screen",
+        "The current handset IMEI or the specific IMEI2 requested by Telstra",
+        "The Telstra mobile number and the Pre-Paid activation or purchase history",
+        "The receipt, box or replacement paperwork when the IMEI has changed",
+        "A reachable contact method and the Telstra request or reference number"
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Some third-party IMEI services may report fields according to their stated sources, countries and time coverage. Treat any such result as supplementary information, not proof of current or future status; it does not replace Telstra's account or activation record and cannot approve a Telstra unlock or establish which fee band Telstra will apply. Check the service's coverage and limitations, and do not submit a full IMEI to a service you do not trust.",
+      "links": [
+        {
+          "label": "See what an IMEI check can and cannot tell you",
+          "href": "/articles/what-an-imei-check-tells-you"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-after-approval",
+      "text": "Finish and verify the Telstra iPhone unlock"
+    },
+    {
+      "kind": "p",
+      "text": "Apple says only the service provider can authorize an iPhone carrier unlock. After Telstra confirms completion, connect the iPhone to Wi-Fi and activate an active SIM or eSIM from a different provider. Then return to Settings, General, About. No SIM restrictions is the final proof; a payment receipt or support message alone is not."
+    },
+    {
+      "kind": "list",
+      "ordered": true,
+      "items": [
+        "Keep the Telstra reference number and the IMEI that was submitted.",
+        "Restart the iPhone while it is connected to Wi-Fi.",
+        "Insert or activate a different provider’s working SIM or eSIM.",
+        "Allow activation to complete, then recheck Service Provider Lock.",
+        "If the field still says SIM locked, ask Telstra to verify the exact IMEI and carrier authorization status."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Apple’s current instructions say that if no other SIM is available, you can back up, erase and restore the iPhone after the provider confirms the unlock. Do not erase first in the hope that a reset will remove Carrier Lock; a factory reset cannot authorize the carrier change.",
+      "links": [
+        {
+          "label": "Learn why a factory reset does not unlock an iPhone",
+          "href": "/articles/will-factory-reset-unlock-iphone-carrier"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-esim-travel",
+      "text": "Telstra eSIM and international-use checks"
+    },
+    {
+      "kind": "p",
+      "text": "An eSIM does not bypass Carrier Lock. To use a travel eSIM or a second provider on Dual SIM, Apple says the iPhone must not be locked to a service provider; check for No SIM restrictions under Service Provider Lock. If No SIM restrictions already appears but eSIM setup fails, work through the provider's activation or provisioning method: confirm the plan and provider support eSIM, connect to Wi-Fi or a hotspot, check carrier settings, turn the line off and on or restart as Apple directs, and check whether the Telstra eSIM profile is already installed. Telstra says a QR code works once and gives a My Telstra route if it is lost or not working; it also says a deleted or turned-off eSIM profile can be restored and that activation may take up to four hours in some cases. Check model, region and network compatibility as applicable. Contact the service provider with the exact error and the IMEI or EID it requests.",
+      "links": [
+        {
+          "label": "Apple: check Service Provider Lock and complete an approved unlock",
+          "href": "https://support.apple.com/en-au/109316"
+        },
+        {
+          "label": "Apple: troubleshoot eSIM setup",
+          "href": "https://support.apple.com/en-au/102478"
+        },
+        {
+          "label": "Telstra: activate and download an eSIM",
+          "href": "https://www.telstra.com.au/support/mobiles-devices/activate-a-service-on-esim"
+        },
+        {
+          "label": "Telstra: fix an eSIM issue",
+          "href": "https://www.telstra.com.au/support/mobiles-devices/fix-esim"
+        },
+        {
+          "label": "Apple: use eSIM while travelling internationally",
+          "href": "https://support.apple.com/en-au/118227"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-other-locks",
+      "text": "Do not confuse these Telstra and iPhone restrictions"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Prompt or symptom",
+        "What it controls",
+        "Correct owner"
+      ],
+      "rows": [
+        [
+          "SIM locked beside Service Provider Lock",
+          "Use with another carrier",
+          "Telstra if Telstra owns the handset lock"
+        ],
+        [
+          "SIM PIN or PUK requested",
+          "Access to one Telstra SIM or eSIM line",
+          "Telstra SIM support"
+        ],
+        [
+          "Forgotten iPhone passcode",
+          "Access to local device data",
+          "Apple’s documented reset process"
+        ],
+        [
+          "iPhone Locked to Owner",
+          "Apple Activation Lock and ownership",
+          "The legitimate owner or Apple’s documented route"
+        ],
+        [
+          "Lost or stolen IMEI block",
+          "Whether Australian networks accept the handset",
+          "The reporting provider that placed the block, through its required verification process"
+        ],
+        [
+          "Finance or account balance",
+          "Contract and payment obligations",
+          "The seller, lender or account holder"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Never guess a SIM PIN or PUK. Repeated wrong entries can disable the line and require a replacement SIM or eSIM. A PUK is not a network unlock code, and a carrier unlock cannot remove a screen passcode or Activation Lock.",
+      "links": [
+        {
+          "label": "Compare iPhone Carrier Lock, SIM PIN and PUK",
+          "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+        },
+        {
+          "label": "Read Apple’s SIM PIN and PUK guidance",
+          "href": "https://support.apple.com/en-au/118228"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "telstra-third-party",
+      "text": "Where a third-party Telstra unlock service fits"
+    },
+    {
+      "kind": "p",
+      "text": "A responsible service can help identify the likely carrier, organize the IMEI evidence and explain a supported submission route. It cannot override Telstra’s eligibility or fee decision, clear a valid lost-device block, settle finance, bypass Activation Lock or improve on an iPhone that already says No SIM restrictions."
+    },
+    {
+      "kind": "p",
+      "text": "Before paying any service, require it to name the carrier and country, explain what happens if Telstra refuses, and define No SIM restrictions as completion. Do not share an Apple Account password, Telstra password, SIM PIN or PUK.",
+      "links": [
+        {
+          "label": "Review the IMEI unlock service checklist",
+          "href": "/articles/imei-unlock-iphone-service-checklist"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Not sure whether the iPhone is locked to Telstra or whether the problem is SIM activation, eSIM provisioning or an IMEI block? Send the exact on-screen wording and purchase history without passwords or a publicly visible IMEI.",
+      "href": "/contact",
+      "label": "Review the correct Telstra route"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Are Telstra iPhones locked?",
+      "answer": "Not all Telstra iPhones are locked. Telstra says it does not lock month-to-month devices. Check Settings, General, About: No SIM restrictions beside Service Provider Lock means the iPhone is unlocked."
+    },
+    {
+      "question": "How much does it cost to unlock a Telstra Pre-Paid phone?",
+      "answer": "Telstra currently publishes AUD 80 for never-activated devices or services active six months or less, AUD 25 for its six-month-to-two-year band, and no fee after two years. Confirm the amount against the IMEI before paying, especially at the six-month boundary."
+    },
+    {
+      "question": "Can I unlock a Telstra iPhone with a code?",
+      "answer": "iPhone carrier authorization is normally applied through Telstra and Apple’s activation systems rather than typed into a network-code box. After Telstra confirms approval, activate another SIM or eSIM and verify No SIM restrictions."
+    },
+    {
+      "question": "Will resetting the iPhone remove the Telstra lock?",
+      "answer": "No. A factory reset cannot authorize a carrier unlock. Apple only recommends a backup, erase and restore after the service provider has confirmed approval when another SIM is unavailable."
+    },
+    {
+      "question": "Is a Telstra PUK the same as a network unlock?",
+      "answer": "No. A PUK restores access to a blocked Telstra SIM after wrong PIN attempts. Carrier Lock controls whether the handset can use another provider."
+    }
+  ]
+},
+  {
+  "slug": "optus-phone-unlock-iphone-prepaid-guide",
+  "title": "Optus Phone Unlock Guide",
+  "heading": "Optus Phone Unlock: iPhone and Prepaid Guide",
+  "description": "Use this Optus phone unlock guide to check an iPhone, compare current Prepaid fees and complete the official IMEI-based process safely.",
+  "standfirst": "Optus says iPhones running iOS 7 or later and devices bought with Postpaid plans are not network locked, so verify the handset before using its Prepaid unlock process.",
+  "published": "2026-11-02",
+  "updated": "2026-11-05",
+  "minutes": 11,
+  "topic": "Optus phone and iPhone carrier unlock",
+  "blocks": [
+    {
+      "kind": "p",
+      "text": "An Optus phone unlock is usually a Prepaid-device task, not a universal requirement for every Optus iPhone. Optus currently says iPhones running iOS 7 or later are not locked to its network and that devices bought with Postpaid plans are not locked. Start by checking the individual handset, because an old, used, imported or replacement iPhone can have a different carrier history.",
+      "links": [
+        {
+          "label": "Read Optus’s current network unlock policy",
+          "href": "https://www.optus.com.au/support/answer/how_to_unlock_your_mobile_device_from_the_optus_network_1399"
+        },
+        {
+          "label": "Open the official Optus Device Unlock page",
+          "href": "https://www.optus.com.au/prepaid/unlock-your-phone"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "optus-key-takeaways",
+      "text": "Key Takeaways"
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Optus says iPhones on iOS 7 or later are not locked to its network; verify the actual iPhone before paying for an unlock.",
+        "Optus says devices bought with Postpaid plans are not network locked, while its published unlock process is for Prepaid devices.",
+        "No SIM restrictions beside Service Provider Lock in Settings, General, About is Apple’s on-device confirmation that an iPhone is unlocked.",
+        "The Optus online process asks for the mobile number and IMEI and may require PayID when a fee applies.",
+        "Carrier Lock is different from a SIM PIN or PUK, passcode, Activation Lock, lost-device IMEI block, finance and eSIM provisioning."
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "optus-check-iphone",
+      "text": "Check the iPhone before starting an Optus unlock"
+    },
+    {
+      "kind": "p",
+      "text": "On the iPhone, open Settings, General, About and find Service Provider Lock. Apple may call the same field Carrier Lock in some regions. If it says No SIM restrictions, the iPhone is already unlocked. An Optus unlock form cannot repair a line that is inactive, a failed eSIM download, a coverage gap, incompatible radio bands or a blacklisted IMEI."
+    },
+    {
+      "kind": "list",
+      "ordered": true,
+      "items": [
+        "Connect to Wi-Fi, then open Settings, General, About.",
+        "Read and save the exact Service Provider Lock or Carrier Lock result.",
+        "If it says No SIM restrictions, do not order another unlock.",
+        "If it says SIM locked, copy the current IMEI and keep the full identifier private.",
+        "Match the IMEI to the Optus receipt, box or replacement paperwork.",
+        "Confirm whether Optus originally sold the handset and whether it was Prepaid or Postpaid."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Apple’s current Australian support page says only the service provider can unlock an iPhone. Optus’s page says iPhones running iOS 7 or later are not locked to Optus. If a modern Optus-supplied iPhone nevertheless says SIM locked, preserve the evidence and ask Optus to identify the record instead of assuming a generic unlock code will solve it.",
+      "links": [
+        {
+          "label": "Follow Apple’s current iPhone unlock instructions",
+          "href": "https://support.apple.com/en-au/109316"
+        },
+        {
+          "label": "Use four ways to check iPhone unlock status",
+          "href": "/articles/how-to-check-if-iphone-is-unlocked"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "optus-device-history",
+      "text": "Match the unlock route to the Optus device history"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Device history",
+        "Published Optus position",
+        "Correct first action"
+      ],
+      "rows": [
+        [
+          "iPhone on iOS 7 or later",
+          "Optus says it is not locked to the Optus network",
+          "Verify No SIM restrictions and troubleshoot the new line"
+        ],
+        [
+          "Phone bought with an Optus Postpaid plan",
+          "Optus says Postpaid devices are not locked",
+          "Contact Optus if the on-device result conflicts"
+        ],
+        [
+          "Optus Prepaid phone",
+          "It may be network locked and eligible for the Optus process",
+          "Use the Optus Device Unlock page with mobile number and IMEI"
+        ],
+        [
+          "Optus X Prepaid handset",
+          "Optus says its Optus X Prepaid range is locked",
+          "Follow the official Prepaid unlock route"
+        ],
+        [
+          "Used, imported or replacement iPhone",
+          "Its original seller or replacement record may control the lock",
+          "Trace the carrier, country and current IMEI first"
+        ]
+      ]
+    },
+    {
+      "kind": "note",
+      "text": "An Optus SIM working in a handset proves that the Optus line can activate. It does not prove the phone is unlocked for every other network. Read the iPhone lock field and confirm the original seller."
+    },
+    {
+      "kind": "p",
+      "text": "Optus separately identifies its Optus X Prepaid range as network locked. That range-specific statement should not replace the iPhone and Postpaid checks above.",
+      "links": [
+        {
+          "label": "Read Optus X handset guidance",
+          "href": "https://www.optus.com.au/support/answer/optus_x_handsets_availability_setup_performance_7828"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "optus-current-fees",
+      "text": "Current Optus Prepaid unlock fees"
+    },
+    {
+      "kind": "p",
+      "text": "Optus’s current policy ties the Prepaid fee to accumulated recharge and service age. These figures are a current policy snapshot, not a permanent promise. Check the official page again when submitting because Optus decides which history and fee apply to the IMEI.",
+      "links": [
+        {
+          "label": "Confirm Optus’s current Prepaid fee conditions",
+          "href": "https://www.optus.com.au/support/answer/how_to_unlock_your_mobile_device_from_the_optus_network_1399"
+        }
+      ]
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Current Optus condition",
+        "Published fee",
+        "Evidence to confirm"
+      ],
+      "rows": [
+        [
+          "At least AUD 80 accumulated recharge",
+          "No network unlock fee",
+          "Recharge total linked to the service"
+        ],
+        [
+          "Under AUD 80 recharge and active less than six months",
+          "AUD 80",
+          "Activation date and recharge history"
+        ],
+        [
+          "Under AUD 80 recharge and active more than six months",
+          "AUD 25",
+          "Activation date and recharge history"
+        ],
+        [
+          "Not currently an Optus customer",
+          "AUD 25 flat fee",
+          "That Optus sold and locked the device"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Optus’s page uses less than and more than six months without assigning the exact six-month boundary; confirm that case with Optus. The fee table applies to the Optus Prepaid unlock process. It should not be applied to a Postpaid phone that Optus says was never locked or to an iPhone that already shows No SIM restrictions. Ask Optus to reconcile any mismatch before paying."
+    },
+    {
+      "kind": "h2",
+      "id": "optus-official-process",
+      "text": "Use the official Optus phone unlock process"
+    },
+    {
+      "kind": "p",
+      "text": "Optus directs eligible Prepaid devices to its Network Unlock webpage. Customers on the Optus network, including wholesale customers, can also text MENU to 9999 and follow the prompts. The web flow asks for the Optus mobile number and IMEI; when a fee applies, Optus says PayID is used on the unlock website unless the 9999 flow can use a saved payment method."
+    },
+    {
+      "kind": "list",
+      "ordered": true,
+      "items": [
+        "Record the exact carrier-lock message and confirm that Optus originally sold the device.",
+        "Find the IMEI by dialling *#06# or opening Settings, General, About on iPhone.",
+        "For a dual-SIM handset, note both identifiers, but follow Optus’s instruction to enter IMEI 1 in its general unlock form.",
+        "Open the official Optus Device Unlock page or text MENU to 9999 while on the Optus network.",
+        "Review the fee shown against the service history before making a PayID payment.",
+        "Save the confirmation, reference and IMEI used for the request."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Optus says it can only remove a network lock from an Optus-sold device locked to its own network. If it cannot find a code for a valid Optus-sold handset, the carrier may request one from the manufacturer and tells users to check back after 5–10 business days. That manufacturer-code process mainly describes code-based phones; an iPhone uses carrier authorization through Apple’s activation system."
+    },
+    {
+      "kind": "h3",
+      "id": "optus-iphone-code",
+      "text": "Why an Optus iPhone should not ask you for a generic code"
+    },
+    {
+      "kind": "p",
+      "text": "Optus’s broad handset instructions describe inserting another SIM and typing a network unlock code. iPhone does not normally present that manufacturer-code workflow. Apple says the current provider applies the authorization, after which the iPhone activates with another SIM or eSIM. Do not enter random codes or share an Apple Account password with an unlock seller."
+    },
+    {
+      "kind": "h2",
+      "id": "optus-verify-completion",
+      "text": "Verify the Optus iPhone after approval"
+    },
+    {
+      "kind": "list",
+      "ordered": true,
+      "items": [
+        "Connect the iPhone to Wi-Fi and keep the Optus confirmation or request number.",
+        "Restart the phone after Optus confirms that its work is complete.",
+        "Insert or activate a working SIM or eSIM from a different provider.",
+        "Allow activation to finish, then open Settings, General, About.",
+        "Confirm that Service Provider Lock says No SIM restrictions."
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "If it still says SIM locked, ask Optus to verify that the request used the current handset IMEI rather than an old box, warranty replacement or another dual-SIM identifier. Apple notes that a provider request can take a few days. Completion is the on-device status, not only a payment receipt or text message."
+    },
+    {
+      "kind": "h2",
+      "id": "optus-esim-compatibility",
+      "text": "Optus eSIM, travel and compatibility checks"
+    },
+    {
+      "kind": "p",
+      "text": "Carrier authorization and eSIM provisioning are separate. If an iPhone says No SIM restrictions but a travel eSIM will not set up, check whether the iPhone model and intended provider support eSIM, whether the mobile plan and eSIM are active, and whether Wi-Fi or a hotspot is available as applicable. Follow Apple’s troubleshooting steps by toggling Airplane Mode, checking the line in Settings, restarting the iPhone and checking carrier settings in Settings > General > About. If setup still fails, contact the provider with the exact error message and relevant service or device identifiers, including the IMEI or EID. Treat any QR-code or EID/IMEI issue as a provider-specific finding to verify for that line and device, not as a general diagnosis from the symptom. Optus also warns that an unlocked handset may not be compatible with every other network.",
+      "links": [
+        {
+          "label": "Troubleshoot an unlocked iPhone with no service",
+          "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+        },
+        {
+          "label": "Prepare an unlocked iPhone for international use",
+          "href": "/articles/unlock-iphone-for-international-use-travel-checklist"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "optus-other-locks",
+      "text": "Do not confuse an Optus network lock with another restriction"
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Prompt or problem",
+        "What it controls",
+        "Correct owner"
+      ],
+      "rows": [
+        [
+          "SIM locked beside Service Provider Lock",
+          "Use with another carrier",
+          "Optus only if Optus sold and locked the handset"
+        ],
+        [
+          "SIM PIN or PUK requested",
+          "Access to one Optus SIM or eSIM line",
+          "Optus SIM support"
+        ],
+        [
+          "Forgotten screen passcode",
+          "Access to local phone data",
+          "Apple or the handset maker’s documented reset"
+        ],
+        [
+          "iPhone Locked to Owner",
+          "Apple Activation Lock and ownership",
+          "The legitimate owner or Apple’s documented route"
+        ],
+        [
+          "Lost or stolen IMEI block",
+          "May block calls, SMS and data on Australian networks, including with another SIM; separate from carrier lock",
+          "Contact the mobile service provider that received the report and applied the block; if the handset is found, ask that provider to review an unblock request"
+        ],
+        [
+          "Finance or account balance",
+          "Payment and ownership obligations",
+          "The seller, lender or account holder"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Optus explains that a PUK is used to unblock a SIM after incorrect PIN attempts. It does not unlock the handset for another network. Never keep guessing a SIM PIN or PUK because the line may become permanently disabled and need replacement.",
+      "links": [
+        {
+          "label": "Read Optus’s official PUK guidance",
+          "href": "https://www.optus.com.au/support/answer/how_to_get_your_puk_code_1341"
+        },
+        {
+          "label": "Compare iPhone Carrier Lock with SIM PIN and PUK",
+          "href": "/articles/sim-locked-iphone-carrier-lock-or-sim-pin"
+        },
+        {
+          "label": "Read Apple’s SIM PIN and PUK guidance",
+          "href": "https://support.apple.com/en-au/118228"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "optus-third-party",
+      "text": "Where a third-party Optus unlock service fits"
+    },
+    {
+      "kind": "p",
+      "text": "Start with Optus’s official Network Unlock webpage, or text MENU to 9999 if you are on the Optus Network. For an iPhone, Apple says only the current service provider can unlock it, and Optus says it can only remove a network lock from devices sold by Optus that are locked to its network. A third-party service is not the official Optus route; this guide does not endorse third-party claims or promise that any external service can change Optus’s decision, clear a valid lost-device block, settle finance, bypass Activation Lock or improve on an iPhone that already says No SIM restrictions."
+    },
+    {
+      "kind": "p",
+      "text": "If you consider an external service, read its exact scope, fees, identifier handling, refusal terms and refund terms yourself. Do not treat an external report or paid service as Optus approval or as a promise that an iPhone will be unlocked. Never share an Apple Account password, Optus password, SIM PIN or PUK.",
+      "links": [
+        {
+          "label": "Review the IMEI unlock service checklist",
+          "href": "/articles/imei-unlock-iphone-service-checklist"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Not sure whether Optus owns the lock or whether the issue is SIM activation, eSIM provisioning, compatibility or an IMEI block? Send the exact on-screen wording and purchase history without passwords or a publicly visible IMEI.",
+      "href": "/contact",
+      "label": "Review the correct Optus route"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Are Optus iPhones locked?",
+      "answer": "Optus currently says iPhones running iOS 7 or later are not locked to its network. Verify the actual handset in Settings, General, About; No SIM restrictions beside Service Provider Lock confirms it is unlocked."
+    },
+    {
+      "question": "How much is an Optus Prepaid phone unlock?",
+      "answer": "Optus currently publishes no fee after at least AUD 80 accumulated recharge, AUD 80 when under that total and active less than six months, AUD 25 after more than six months, and AUD 25 for a non-customer. Confirm the current result in the official flow."
+    },
+    {
+      "question": "Can I unlock an Optus phone online?",
+      "answer": "Optus provides an official Device Unlock webpage using the mobile number and IMEI. Customers on the Optus network can also text MENU to 9999 and follow the prompts."
+    },
+    {
+      "question": "Does an Optus iPhone need a network unlock code?",
+      "answer": "Normally no. iPhone carrier authorization is applied by the provider through Apple’s activation system. After approval, activate another SIM or eSIM and verify No SIM restrictions."
+    },
+    {
+      "question": "Why will another SIM not work if the iPhone is unlocked?",
+      "answer": "If the iPhone says No SIM restrictions, check whether the iPhone model and intended provider support eSIM, whether the mobile plan and eSIM are active, whether connectivity is available, and whether carrier settings are current. Toggle Airplane Mode, check the line, restart the iPhone and, if setup still fails, ask the provider to check the exact error with relevant identifiers such as the IMEI or EID. Do not treat a provider-specific QR-code or EID/IMEI issue as a general diagnosis or order another carrier unlock."
+    }
+  ]
+},
   {
       "slug": "unlock-lebara-phone-iphone-guide",
       "title": "Unlock a Lebara Phone",
