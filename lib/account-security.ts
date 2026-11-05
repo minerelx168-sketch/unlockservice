@@ -12,6 +12,13 @@ const OTP_SEND_WINDOW_SECONDS = 5 * 60
 
 type OtpPurpose = 'signup' | 'reset' | 'email_change'
 
+export class MarketingEmailError extends Error {
+  constructor(readonly status: number | null, readonly uncertain: boolean) {
+    super('Marketing email delivery failed.')
+    this.name = 'MarketingEmailError'
+  }
+}
+
 type VerificationRow = {
   user_id: number
   email_verified_at?: string | null
@@ -58,37 +65,61 @@ async function sendEmail(
   subject: string,
   html: string,
   text: string,
-  options: { replyTo?: string; idempotencyKey?: string } = {},
+  options: { replyTo?: string; idempotencyKey?: string; headers?: Record<string, string>; marketing?: boolean } = {},
 ) {
   requireEmailDelivery()
   /* A per-message reply-to for mail that is a conversation — a contact
      form is answered by replying to the customer, not to us. */
   const replyTo = options.replyTo?.trim() || process.env.IUNLOCKMOBILE_EMAIL_REPLY_TO?.trim()
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-      ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
-    },
-    body: JSON.stringify({
-      from: process.env.IUNLOCKMOBILE_EMAIL_FROM,
-      to: [to],
-      ...(replyTo ? { reply_to: replyTo } : {}),
-      subject,
-      html,
-      text,
-    }),
-    cache: 'no-store',
-    // Bound delivery attempts so an email cannot hold a worker indefinitely.
-    signal: AbortSignal.timeout(10_000),
-  })
+  let response: Response
+  try {
+    response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+        ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}),
+      },
+      body: JSON.stringify({
+        from: process.env.IUNLOCKMOBILE_EMAIL_FROM,
+        to: [to],
+        ...(replyTo ? { reply_to: replyTo } : {}),
+        subject,
+        html,
+        text,
+        ...(options.headers ? { headers: options.headers } : {}),
+      }),
+      cache: 'no-store',
+      ...(options.marketing ? { redirect: 'error' as const } : {}),
+      // Bound delivery attempts so an email cannot hold a worker indefinitely.
+      signal: AbortSignal.timeout(10_000),
+    })
+  } catch (error) {
+    if (options.marketing) throw new MarketingEmailError(null, true)
+    throw error
+  }
 
   if (!response.ok) {
     /* The status is the diagnostic. The body echoes the recipient address
        back, and a log line is not the place for one. */
+    if (options.marketing) {
+      const uncertain = response.status === 408 || response.status === 409 || response.status >= 500
+      throw new MarketingEmailError(response.status, uncertain)
+    }
     console.error('[account-security] email delivery failed', response.status)
     throw new AuthError('We could not send the email right now. Please try again.')
+  }
+
+  if (options.marketing) {
+    try {
+      const receipt: unknown = await response.json()
+      if (!receipt || typeof receipt !== 'object' || !('id' in receipt) || typeof receipt.id !== 'string' || !receipt.id.trim()) {
+        throw new Error('provider_receipt_missing')
+      }
+      return { providerMessageId: receipt.id }
+    } catch {
+      throw new MarketingEmailError(null, true)
+    }
   }
 }
 
@@ -107,6 +138,24 @@ export async function sendTransactionalEmail(
   options: { replyTo?: string; idempotencyKey?: string } = {},
 ) {
   await sendEmail(to, subject, html, text, options)
+}
+
+/** Marketing mail keeps the same Resend boundary and adds one-click unsubscribe headers. */
+export async function sendMarketingEmail(
+  to: string,
+  subject: string,
+  html: string,
+  text: string,
+  options: { idempotencyKey: string; unsubscribeUrl: string },
+): Promise<{ providerMessageId: string }> {
+  return (await sendEmail(to, subject, html, text, {
+    idempotencyKey: options.idempotencyKey,
+    marketing: true,
+    headers: {
+      'List-Unsubscribe': `<${options.unsubscribeUrl}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
+  })) as { providerMessageId: string }
 }
 
 function issueOtp(userId: number, purpose: OtpPurpose): string {

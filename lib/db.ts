@@ -738,9 +738,54 @@ function migrate(connection: Database.Database) {
     // Null preserves legacy wallet allocations and existing checkout amounts.
     addColumn(connection, 'guest_checkouts', 'card_order_price_cents INTEGER')
     addColumn(connection, 'guest_checkouts', 'tax_cents INTEGER NOT NULL DEFAULT 0')
-    addColumn(connection, 'guest_checkouts', 'checkout_link_sent_at TEXT')
-    addColumn(connection, 'guest_checkouts', 'checkout_link_next_at INTEGER NOT NULL DEFAULT 0')
-    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')
+	    addColumn(connection, 'guest_checkouts', 'checkout_link_sent_at TEXT')
+	    addColumn(connection, 'guest_checkouts', 'checkout_link_next_at INTEGER NOT NULL DEFAULT 0')
+	    connection.exec(`
+	      CREATE TABLE IF NOT EXISTS checkout_reminder_settings (
+	        key TEXT PRIMARY KEY,
+	        value TEXT NOT NULL
+	      );
+	      INSERT OR IGNORE INTO checkout_reminder_settings(key, value)
+	        VALUES ('migration_cutover_at_ms', CAST(strftime('%s','now') AS INTEGER) * 1000);
+
+	      CREATE TABLE IF NOT EXISTS checkout_reminder_suppressions (
+	        recipient_hash TEXT PRIMARY KEY,
+	        token_hash TEXT NOT NULL UNIQUE,
+	        suppressed_at TEXT,
+	        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+	      );
+
+	      CREATE TABLE IF NOT EXISTS checkout_payment_reminders (
+	        kind TEXT NOT NULL CHECK(kind IN ('guest','topup')),
+	        reference TEXT NOT NULL,
+	        user_id INTEGER NOT NULL REFERENCES users(id),
+	        consent_at TEXT NOT NULL,
+	        recipient_hash TEXT NOT NULL,
+	        token_hash TEXT NOT NULL,
+	        dedupe_hash TEXT,
+	        due_at INTEGER NOT NULL,
+	        expires_at INTEGER NOT NULL,
+	        lease_token TEXT,
+	        lease_until INTEGER NOT NULL DEFAULT 0,
+	        attempts INTEGER NOT NULL DEFAULT 0,
+	        send_accepted_at TEXT,
+	        send_provider_id TEXT,
+	        next_attempt_at INTEGER NOT NULL DEFAULT 0,
+	        idempotency_key TEXT NOT NULL UNIQUE,
+	        unresolved INTEGER NOT NULL DEFAULT 0 CHECK(unresolved IN (0,1)),
+	        unresolved_reason TEXT,
+	        suppressed INTEGER NOT NULL DEFAULT 0 CHECK(suppressed IN (0,1)),
+	        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+	        PRIMARY KEY(kind, reference)
+	      );
+      CREATE INDEX IF NOT EXISTS checkout_reminders_due
+        ON checkout_payment_reminders(due_at, next_attempt_at, lease_until)
+        WHERE send_accepted_at IS NULL AND unresolved = 0 AND suppressed = 0;
+      CREATE INDEX IF NOT EXISTS checkout_reminders_recipient
+        ON checkout_payment_reminders(recipient_hash, kind, send_accepted_at);
+    `)
+    addColumn(connection, 'checkout_payment_reminders', 'send_provider_id TEXT')
+	    connection.exec('CREATE UNIQUE INDEX IF NOT EXISTS guest_checkouts_crypto_invoice ON guest_checkouts(crypto_invoice_reference) WHERE crypto_invoice_reference IS NOT NULL')
     addColumn(connection, 'users', 'email_verified_at TEXT')
     addColumn(connection, 'users', 'banned_at TEXT')
     addColumn(connection, 'users', "avatar_style TEXT NOT NULL DEFAULT 'violet'")
@@ -1047,7 +1092,7 @@ function migrate(connection: Database.Database) {
       CREATE INDEX IF NOT EXISTS paid_reports_provider_reference
         ON paid_report_orders(provider_name, provider_order_id) WHERE provider_order_id IS NOT NULL;
     `)
-  })()
+  }).immediate()
 }
 
 	/** Idempotent: names and prices follow the catalog, ids never move. */
@@ -1206,4 +1251,3 @@ export function serviceCoversBrand(service: DeviceServiceRow, brandId: number): 
   if (!service.brand_ids) return true
   return service.brand_ids.split(',').map(Number).includes(brandId)
 }
-

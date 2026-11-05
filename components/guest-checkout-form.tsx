@@ -9,17 +9,18 @@ import { deviceEmail } from '@/lib/device-intent-value'
 import { guestCardQuote } from '@/lib/guest-card-quote'
 import { Icon } from './icons'
 
-export function GuestCheckoutForm({ product, initialImei, initialEmail = '', enabled, method, onMethodChange, cryptoEnabled, cryptoRoutes }: {
+export function GuestCheckoutForm({ product, initialImei, initialEmail = '', enabled, method, onMethodChange, cryptoEnabled, cryptoRoutes, reminderAllowed }: {
   product: { inputType: ServiceInputType; code: string; name: string; priceCents: number; domain: 'unlock' | 'imei_check' }
   initialImei: string; initialEmail?: string; enabled: boolean
   method: 'card' | 'crypto'; onMethodChange: (method: 'card' | 'crypto') => void
-  cryptoEnabled: boolean; cryptoRoutes: { id: string; label: string; asset: string }[]
+  cryptoEnabled: boolean; cryptoRoutes: { id: string; label: string; asset: string }[]; reminderAllowed: boolean
 }) {
   const field = identifierField(product.inputType)
   const [imei, setImei] = useState(initialImei), [email, setEmail] = useState(initialEmail), [busy, setBusy] = useState(false), [error, setError] = useState('')
   const [editing, setEditing] = useState(!serviceIdentifier(initialImei, product.inputType) || !deviceEmail(initialEmail))
   const key = useRef(''), lock = useRef(false)
   const [routeId, setRouteId] = useState(cryptoRoutes[0]?.id ?? '')
+  const [paymentReminderOptIn, setPaymentReminderOptIn] = useState(false)
   const isCrypto = method === 'crypto'
   const cardQuote = guestCardQuote(product.priceCents)
   const deliveryEmail = email
@@ -43,7 +44,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
       trackFunnelEvent('begin_checkout', { service_category: product.domain, value: (isCrypto ? product.priceCents : cardQuote.totalCents) / 100, currency: 'USD', payment_method: method })
       const analyticsContext = await paymentAnalyticsContext()
       const response = await fetch(isCrypto ? '/api/checkout/crypto' : '/api/checkout/guest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        productCode: product.code, imei, email: deliveryEmail, expectedPriceCents: product.priceCents, requestKey: key.current, acceptedTerms: true, analyticsContext, ...(isCrypto ? { routeId } : {}),
+        productCode: product.code, imei, email: deliveryEmail, expectedPriceCents: product.priceCents, requestKey: key.current, acceptedTerms: true, analyticsContext, ...(isCrypto ? { routeId } : {}), ...(reminderAllowed && !isCrypto ? { paymentReminderOptIn } : {}),
       }) })
       const data = await response.json()
       if (!response.ok || typeof data.url !== 'string') throw new Error(data.error || 'Unable to open checkout.')
@@ -65,6 +66,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     </>}
     {isCrypto ? <div className="guest-crypto-choice"><strong>Crypto · No fee · No minimum</strong><label htmlFor="guest-crypto-asset">Pay with</label><select id="guest-crypto-asset" value={routeId} disabled={busy || !cryptoEnabled} onChange={event => { setRouteId(event.target.value); key.current = '' }}>{cryptoRoutes.map(route => <option key={route.id} value={route.id}>{route.label}</option>)}</select><small>BNB Smart Chain (BEP-20) only. Network or exchange fees may apply.</small></div> : null}
     <label className="guest-agreement"><input type="checkbox" required disabled={busy} /><span>I own this device or am authorized to service it. I have checked the identifier and service requirements and agree to the <Link href="/terms" target="_blank">Terms</Link> and <Link href="/privacy" target="_blank">Privacy Policy</Link>.</span></label>
+    {reminderAllowed && !isCrypto ? <label className="guest-reminder"><input type="checkbox" checked={paymentReminderOptIn} onChange={event => setPaymentReminderOptIn(event.target.checked)} disabled={busy} /><span>Email me one payment reminder if this bill is unpaid after 5 minutes. You can unsubscribe anytime.</span></label> : null}
     {error ? <p role="alert" className="guest-error">{error}</p> : null}
     <button className="button button--primary" type="submit" disabled={busy || (isCrypto ? !cryptoEnabled || !routeId : !enabled)}>{busy ? 'Opening secure payment…' : isCrypto ? `Continue with crypto · ${formatUsd(product.priceCents)}` : `Pay ${formatUsd(cardQuote.totalCents)} by card`}</button>
     <button type="button" className="guest-payment-alternative" disabled={busy} onClick={changeMethod}><Icon name="wallet" /><span>{isCrypto ? `Pay ${formatUsd(cardQuote.totalCents)} by card` : 'Pay with crypto'}</span>{!isCrypto ? <span className="guest-no-fee">No fee · No minimum</span> : null}</button>
@@ -72,5 +74,3 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     {(isCrypto ? !cryptoEnabled : !enabled) ? <p role="status">{isCrypto ? 'Crypto' : 'Card'} checkout is temporarily unavailable. Please choose another payment method or <Link href="/support">contact support</Link>.</p> : null}
   </form>
 }
-
-

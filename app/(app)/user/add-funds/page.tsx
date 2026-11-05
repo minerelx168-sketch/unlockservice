@@ -9,6 +9,7 @@ import { listPaidReportProducts } from '@/lib/paid-reports'
 import { whopCheckoutEnabled, WHOP_MIN_CENTS, WHOP_MAX_CENTS } from '@/lib/whop'
 import { WhopPaymentForm } from '@/components/whop-payment-form'
 import { FundingMethodSelector } from '@/components/funding-method-selector'
+import { checkoutReminderConfigured } from '@/lib/checkout-reminders'
 
 export const metadata: Metadata = { title: 'Add funds' }
 export const dynamic = 'force-dynamic'
@@ -26,6 +27,8 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
   const ready = cryptoGateways.length > 0
   const onlyBep20 = GATEWAYS.length > 0 && GATEWAYS.every((gateway) => gateway.chainKind === 'evm' && gateway.chainId === 56)
   const cardReady = whopCheckoutEnabled()
+  const reminderAllowed = checkoutReminderConfigured() && ['customer','reseller'].includes(user.account_type)
+    && user.status==='active' && !user.banned_at && !!user.email_verified_at
 
   return (
     <>
@@ -71,7 +74,8 @@ export default async function AddFundsPage({ searchParams }: { searchParams: Pro
           <header><h2>Credit or debit card</h2><p className="t-small">Secure checkout powered by Whop</p></header>
           <div className="panel-body"><WhopPaymentForm csrfToken={session.csrfToken}
             minCents={WHOP_MIN_CENTS} maxCents={WHOP_MAX_CENTS}
-            initialCents={resellerTopup ? 10000 : shortfall > 0 ? Math.min(WHOP_MAX_CENTS, Math.max(WHOP_MIN_CENTS, shortfall)) : undefined} /></div>
+            initialCents={resellerTopup ? 10000 : shortfall > 0 ? Math.min(WHOP_MAX_CENTS, Math.max(WHOP_MIN_CENTS, shortfall)) : undefined}
+            reminderAllowed={reminderAllowed} /></div>
         </section> : undefined}
         cryptocurrency={ready ? <CryptoDepositFlow
           csrfToken={session.csrfToken}
