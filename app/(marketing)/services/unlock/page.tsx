@@ -1,3 +1,5 @@
+import { ServiceDirectory } from '@/components/service-directory'
+import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
 import { HeroPriceCheck, type PriceCheckProduct } from '@/components/hero-price-check'
@@ -60,6 +62,8 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
             <p className="t-small">If a direct card order cannot be delivered, the system initiates a refund to the original payment method. Bank processing time varies; payments requiring review are handled by support. Orders paid with existing account credit release that credit back to the balance.</p>
           </div>
         </div>
+        <p><Link href="/services/unlock/us">US carrier services: current availability and prices</Link></p>
+        <ServiceDirectory services={SERVICE_SPOKES.filter(service => service.domain === 'unlock')} title="Carrier-specific service details" />
         <div className="expect expect--wide">
           <h2>Three clear steps</h2>
           <ol>

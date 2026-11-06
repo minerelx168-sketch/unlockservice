@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...SERVICE_SPOKES.map(s => ({ url: `${origin}${s.path}` })),
     { url: `${origin}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${origin}/services`, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${origin}/services/unlock/us`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${origin}/services/unlock`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/services/imei-check`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/check`, changeFrequency: 'monthly', priority: 0.8 },
