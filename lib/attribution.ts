@@ -1,4 +1,4 @@
-export const ATTRIBUTION_MAX_AGE_SECONDS = 90 * 24 * 60 * 60
+export const ATTRIBUTION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60
 export const PENDING_ATTRIBUTION_MAX_AGE_SECONDS = 60 * 60
 export const CLICK_ID_FIELDS = ['gclid', 'gbraid', 'wbraid'] as const
 export type ClickIdField = (typeof CLICK_ID_FIELDS)[number]

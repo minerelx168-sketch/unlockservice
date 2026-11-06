@@ -125,7 +125,7 @@ export default async function TrackingHealth({ searchParams }: { searchParams: P
       </form>
     </section>
 
-    <section className="panel"><header><div><h2>Latest GA4 events</h2><p>One row per transaction and event. Value = gross margin (purchase) or 0 (top-up). “Fallback” = sent without a browser ID.</p></div></header>
+    <section className="panel"><header><div><h2>Latest GA4 events</h2><p>One row per transaction and event. New purchase values represent revenue; older events used gross margin. Top-up value remains 0. “Fallback” = sent without a browser ID.</p></div></header>
       {events.length ? <div className="analytics-table-wrap"><table className="analytics-table"><thead><tr>{eventHead.map(h => <th scope="col" key={h}>{h}</th>)}</tr></thead><tbody>{events.map(e => <tr key={e.transaction_id + e.event_name}>
         <td data-label={eventHead[0]}><div>{e.paid_at.replace('T', ' ').slice(0, 16)}</div></td>
         <td data-label={eventHead[1]}><div>{e.event_name}</div></td>

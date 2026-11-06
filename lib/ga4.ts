@@ -1,3 +1,4 @@
+import { stageAdsPurchase } from './ads-conversion-outbox'
 import { randomInt } from 'node:crypto'
 import { db } from './db'
 import { logPaymentFailure } from './payment-diagnostics'
@@ -72,6 +73,7 @@ export function recordCheckoutContext(kind: 'topup' | 'order' | 'paid_imei_repor
 }
 /** Withdrawal of consent on a signed-in account also covers checkouts not yet sent. */
 export function revokeCheckoutContext(userId: number) {
+  db().prepare(`UPDATE ads_conversion_outbox SET state='suppressed',click_id='' WHERE EXISTS (SELECT 1 FROM ga4_checkout_context c WHERE c.kind=ads_conversion_outbox.kind AND c.reference=ads_conversion_outbox.context_reference AND c.user_id=?)`).run(userId)
   db().prepare("UPDATE ga4_checkout_context SET consent='denied',gclid=NULL,gbraid=NULL,wbraid=NULL,landing_page=NULL,utm_source=NULL,utm_medium=NULL,utm_campaign=NULL WHERE user_id=?").run(userId)
 }
 export function checkoutContext(kind: string, reference: string) {
@@ -86,7 +88,7 @@ export function fallbackClientId(): string {
 export const validClientId = (value: unknown): value is string => typeof value === 'string' && /^\d{1,20}\.\d{1,20}$/.test(value)
 export const validSessionId = (value: unknown): value is string => typeof value === 'string' && /^\d{1,12}$/.test(value) && Number(value) > 0
 
-type EventRecord = { transactionId: string; eventName: 'purchase' | 'payment_completed'; kind: string; paidAt: string }
+type EventRecord = { transactionId: string; eventName: 'purchase' | 'payment_completed'; kind: string; paidAt: string; contextReference?: string }
 /** Atomic claim. False means this transaction/event was already handled. */
 export function claimEvent(event: EventRecord): boolean {
   return db().prepare(`INSERT OR IGNORE INTO ga4_events_sent(transaction_id,event_name,kind,state,paid_at) VALUES(?,?,?,'sending',?)`)
@@ -112,6 +114,7 @@ type SendDetails = { valueCents: number; paidCents: number; clientSource: 'ga' |
  * Measurement Protocol has no exactly-once guarantee.
  */
 export async function sendClaimedEvent(event: EventRecord, body: Record<string, unknown>, details: SendDetails): Promise<'submitted' | 'uncertain'> {
+  try { stageAdsPurchase(event, body) } catch { /* Ads staging cannot block verified payment measurement. */ }
   const config = ga4Config()
   let state: 'submitted' | 'uncertain' = 'uncertain'
   try {

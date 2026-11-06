@@ -62,6 +62,7 @@ export function authorizedGuestCheckout(reference: string, key: string) {
 export async function createGuestCheckout(input: {
   productCode: string; imei: string; email: string; requestKey: string; expectedPriceCents: number; authenticatedUserId?: number
   analytics?: { clientId: string; sessionId: string }
+  beforeCheckout?: (reference: string) => Promise<void>
 }) {
   const config = whopConfiguration()
   if (!config || !guestCheckoutEnabled()) throw new WhopPaymentError('Guest checkout is temporarily unavailable.', 503)
@@ -101,6 +102,7 @@ export async function createGuestCheckout(input: {
       config.accountId,config.productId,config.mode,validAnalytics ? a.clientId : null, validAnalytics ? a.sessionId : null,0,null,quote.fundingCents)
     return getGuestCheckout(reference)!
   }).immediate()
+  if (row.state === 'pending' && !row.checkout_url && input.beforeCheckout) await input.beforeCheckout(row.reference)
   if (row.state !== 'pending') return { url: guestOrderPath(row.reference), reference: row.reference }
   if (row.checkout_url) return { url: row.checkout_url, reference: row.reference }
   const total = guestCheckoutTotal(row)
@@ -287,7 +289,7 @@ async function guestAnalytics(row:GuestCheckout) {
   const started=markDeliveryStarted()
   const paidAt=row.paid_at ?? row.created_at
   if (toMicros(paidAt)<toMicros(started)) return
-  const event={transactionId:`guest-${row.reference}`,eventName:'purchase' as const,kind:'guest',paidAt}
+  const event={transactionId:`guest-${row.reference}`,eventName:'purchase' as const,kind:'guest',paidAt,contextReference:row.reference}
   if (alreadyHandled(event.transactionId,event.eventName)) return
   const context=checkoutContext('guest',row.reference)
   const buyer=row.customer_user_id ? db().prepare('SELECT account_type FROM users WHERE id=?').get(row.customer_user_id) as {account_type:string}|undefined : undefined
@@ -296,19 +298,19 @@ async function guestAnalytics(row:GuestCheckout) {
   if (skip) { skipEvent(event,skip); db().prepare("UPDATE guest_checkouts SET analytics_state='suppressed' WHERE reference=?").run(row.reference); return }
   if (!claimEvent(event)) return
   db().prepare("UPDATE guest_checkouts SET analytics_state='sending',analytics_attempted_at=datetime('now') WHERE reference=?").run(row.reference)
-  // The customer paid the service price (plus any fee); value is that price minus provider cost.
+  // Purchase revenue matches the charged item; gross margin is reported separately.
   const paidCents=(row.card_order_price_cents === null ? row.price_cents : guestCheckoutTotal(row)-row.tax_cents)
   const service=serviceForCode(row.product_code,row.product_name)
   const margin=marginCents(service.serviceId,row.card_order_price_cents ?? row.price_cents)
   const who=identity(row.client_id,row.session_id)
   const customerType=customerTypeFor(row.customer_user_id,row.email,paidAt,row.reference)
-  const params:Record<string,unknown>={transaction_id:event.transactionId,value:margin.valueCents/100,currency:'USD',engagement_time_msec:100,
+  const params:Record<string,unknown>={transaction_id:event.transactionId,value:paidCents/100, gross_margin:margin.known ? margin.valueCents/100 : undefined,currency:'USD',engagement_time_msec:100,
     payment_method:row.payment_method==='crypto'?'crypto':'card',customer_type:customerType,
     items:[{item_id:service.serviceId ?? row.product_code,item_name:service.name,item_category:service.category,price:paidCents/100,quantity:1}]}
   if (who.sessionId) params.session_id=who.sessionId
   const reasons=[who.source==='fallback'?'missing_client_id':null,margin.known?null:'margin_unknown'].filter(Boolean).join('; ')||null
   const state=await sendClaimedEvent(event,{client_id:who.clientId,timestamp_micros:toMicros(paidAt),non_personalized_ads:false,events:[{name:'purchase',params}]},
-    {valueCents:margin.valueCents,paidCents,clientSource:who.source,customerType,marginKnown:margin.known,reason:reasons})
+    {valueCents:paidCents,paidCents,clientSource:who.source,customerType,marginKnown:margin.known,reason:reasons})
   db().prepare('UPDATE guest_checkouts SET analytics_state=? WHERE reference=?').run(state,row.reference)
 }
 /** Run immediately after verified webhooks; durable paid state survives process restarts. */

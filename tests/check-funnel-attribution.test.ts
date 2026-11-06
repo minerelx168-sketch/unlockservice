@@ -109,7 +109,7 @@ test('remaining paid and payment hooks keep acceptance/verification distinct fro
   for (const path of ['components/payment-forms.tsx', 'components/payment-funnel-events.tsx']) assert.doesNotMatch(read(path), /GoogleAdsPurchaseConversion|'conversion'/)
   assert.match(read('lib/orders.ts'), /await snapshotWebsiteAttribution\('order', orderId, source\)/)
   assert.match(read('lib/paid-reports.ts'), /await snapshotWebsiteAttribution\('paid_report_order', row.id, source\)/)
-  assert.match(read('app/(auth)/privacy/page.tsx'), /90 days/)
+  assert.match(read('app/(auth)/privacy/page.tsx'), /30 days/)
 })
 
 test('consent route refuses missing/cross-site origin before reading cookies', async () => {
