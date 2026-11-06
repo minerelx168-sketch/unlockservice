@@ -42,6 +42,425 @@ export type Article = {
 
 const ARTICLES: Article[] = [
 {
+  "slug": "iphone-imei2-carrier-unlock-request",
+  "title": "iPhone IMEI2: Which Number for Unlock?",
+  "heading": "iPhone IMEI2: Which Number Should You Use for a Carrier Unlock?",
+  "description": "Understand iPhone IMEI2 before a carrier unlock: match device identifiers, avoid request errors, and separate eSIM activation from unlocking.",
+  "standfirst": "For an iPhone IMEI2 carrier unlock question, use the identifier requested by the locking carrier, not whichever number happens to pass a form. IMEI and IMEI2 identify cellular connections; EID and ICCID serve different purposes. Check the handset, preserve both labels, and ask support to resolve any record mismatch before paying.",
+  "published": "2026-11-06",
+  "updated": "2026-11-06",
+  "minutes": 6,
+  "topic": "iPhone IMEI2 and unlock requests",
+  "blocks": [
+    {
+      "kind": "list",
+      "items": [
+        "Copy identifiers from the current handset, keeping IMEI and IMEI2 labels attached.",
+        "A successful compatibility lookup is not an unlock approval.",
+        "Do not substitute an EID, ICCID or serial number into an IMEI field.",
+        "Resolve a rejected device record with the carrier before opening duplicate paid orders."
+      ],
+      "ordered": false
+    },
+    {
+      "kind": "h2",
+      "text": "What is the difference between IMEI, IMEI2, EID and ICCID?",
+      "id": "identifier-differences"
+    },
+    {
+      "kind": "p",
+      "text": "IMEI and IMEI2 are equipment identifiers associated with cellular connections on supported devices. EID identifies the embedded SIM hardware, while ICCID identifies a SIM or SIM profile. These numbers answer different support questions. A second IMEI is not a second ownership record or evidence of an independent unlock.",
+      "links": [
+        {
+          "label": "AT&T identifier reference",
+          "href": "https://www.att.com/wireless/imei-finder/"
+        }
+      ]
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Identifier",
+        "What it identifies",
+        "How to use it"
+      ],
+      "rows": [
+        [
+          "IMEI",
+          "Cellular equipment identity; normally 15 digits",
+          "Use when the carrier form requests IMEI."
+        ],
+        [
+          "IMEI2",
+          "Second equipment identity on supported devices",
+          "Keep its label and confirm which record support needs."
+        ],
+        [
+          "EID",
+          "Embedded SIM hardware identity; 32 digits",
+          "Supply for eSIM provisioning when requested."
+        ],
+        [
+          "ICCID",
+          "SIM card or downloaded SIM profile",
+          "Use to investigate the affected line or profile."
+        ],
+        [
+          "Serial number",
+          "Apple device identity",
+          "Use for repair history and device support."
+        ]
+      ]
+    },
+    {
+      "kind": "h2",
+      "text": "How do I collect the right numbers before submitting a request?",
+      "id": "collect-identifiers"
+    },
+    {
+      "kind": "p",
+      "text": "Start on the iPhone you actually want to unlock, especially after a repair or replacement. Record the labels alongside the numbers rather than copying an unlabelled screenshot. Compare the handset with the carrier account record and purchase paperwork, then resolve discrepancies before requesting an unlock or activating another line.",
+      "links": [
+        {
+          "label": "Apple identifier instructions",
+          "href": "https://support.apple.com/en-us/108037"
+        }
+      ]
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Open Settings > General > About on the current iPhone.",
+        "Scroll to the cellular identifiers and copy each requested number by touching and holding it.",
+        "Record the exact Carrier Lock result separately from the carrier name and identifier fields.",
+        "If support needs a screenshot, obscure unrelated identifiers before sharing through an official private channel.",
+        "Ask whether the unlock request expects IMEI or IMEI2 for this model and account record."
+      ],
+      "ordered": true
+    },
+    {
+      "kind": "p",
+      "text": "Treat the receipt as supporting evidence, not a substitute for the handset. For example, if an exchange receipt lists a replacement device, tell support that the original purchase IMEI and current IMEI differ. Do not edit the number until a web form accepts it.",
+      "links": [
+        {
+          "label": "Replacement iPhone checklist",
+          "href": "/articles/are-replacement-iphones-unlocked"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "text": "Which IMEI should I use if the unlock form rejects my phone?",
+      "id": "rejected-request"
+    },
+    {
+      "kind": "p",
+      "text": "Use the identifier the carrier asks for and have support investigate a rejected record. An error alone does not reveal whether the number is mistyped, belongs to a replacement, or is missing from the account. Switching identifiers without explanation can make the request history harder to reconcile."
+    },
+    {
+      "kind": "p",
+      "text": "A useful support message is: \u201cMy current iPhone shows IMEI ending in these four digits and IMEI2 ending in those four digits. Your unlock form rejected the requested identifier with this exact message. Which device record should this case use?\u201d Provide full identifiers only through the verified support channel when requested."
+    },
+    {
+      "kind": "p",
+      "text": "AT&T publishes an IMEI-based device-unlock route and separate eligibility requirements. Its requirements include payment and account conditions; a second identifier does not waive them. Check the current rules for the actual plan rather than applying a single waiting period to every iPhone.",
+      "links": [
+        {
+          "label": "Official AT&T unlock requirements",
+          "href": "https://www.att.com/deviceunlock/"
+        },
+        {
+          "label": "AT&T request-status guide",
+          "href": "/articles/att-iphone-unlock-request-status"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "text": "Does IMEI2 let me bypass Carrier Lock with an eSIM?",
+      "id": "esim-not-bypass"
+    },
+    {
+      "kind": "p",
+      "text": "Do not treat IMEI2 as a workaround for a locked iPhone. Equipment identifiers help the carrier locate or provision a device; they are not unlock permissions. After the locking carrier approves the unlock, the destination carrier must still support the iPhone model and complete activation of the chosen plan.",
+      "links": [
+        {
+          "label": "Apple unlock guidance",
+          "href": "https://support.apple.com/en-za/109316"
+        },
+        {
+          "label": "Apple eSIM setup",
+          "href": "https://support.apple.com/en-us/118669"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Separate the evidence into three questions: did the locking carrier approve this handset, does Carrier Lock show No SIM restrictions, and did the destination line activate? If the first two are resolved but activation fails, give the destination provider the exact error instead of buying another unlock."
+    },
+    {
+      "kind": "h2",
+      "text": "What should a third-party check or service confirm?",
+      "id": "service-scope"
+    },
+    {
+      "kind": "p",
+      "text": "Ask a third-party provider to explain which identifier it checks, what record the result covers, and whether the purchase is a report or an unlock request. A report supplies information; an intermediary may assist an eligible request. Neither changes carrier rules or makes a mismatched device record correct."
+    },
+    {
+      "kind": "p",
+      "text": "Carrier Lock, a SIM PIN/PUK prompt, the screen passcode and iCloud Activation Lock are separate restrictions. Lost-or-stolen blacklist status and unpaid finance also need separate investigation. A clean result for one identifier is not a guarantee about every restriction, account obligation or future activation.",
+      "links": [
+        {
+          "label": "SIM PIN and PUK guidance",
+          "href": "https://support.apple.com/en-us/118228"
+        },
+        {
+          "label": "Activation Lock support",
+          "href": "https://support.apple.com/en-us/108934"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Unsure which identifier a listed report needs? Contact iUnlockMobile with the report name and exact error before ordering. Do not send passwords.",
+      "href": "/contact",
+      "label": "Ask about the correct device record"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Should I use IMEI or IMEI2 to unlock my iPhone?",
+      "answer": "Use the identifier requested by the locking carrier for your device record. If the instructions are unclear or the form rejects it, ask support which labelled number to submit. Do not assume that whichever number passes a compatibility checker is the correct unlock record."
+    },
+    {
+      "question": "Can I unlock only IMEI2 and keep IMEI1 locked?",
+      "answer": "Do not buy a service on the assumption that the second identifier creates a separate unlock entitlement. Ask the locking carrier to confirm the handset\u2019s unlock status, then verify Carrier Lock on the iPhone and test the destination line after approval."
+    },
+    {
+      "question": "Is EID the same as IMEI2 on an iPhone?",
+      "answer": "No. EID identifies the embedded SIM hardware, while IMEI2 is a second equipment identifier on supported devices. Keep both labels when contacting support and supply each number only in the requested field. Neither number is an unlock code or a substitute for approval."
+    },
+    {
+      "question": "Why is my IMEI accepted for activation but rejected for unlocking?",
+      "answer": "The two forms may check different records and purposes. Compatibility or activation acceptance does not establish unlock eligibility. Save both results, confirm you are using the current handset\u2019s identifier, and ask the locking carrier to explain the rejection before submitting another request."
+    }
+  ]
+},
+{
+  "slug": "iphone-carrier-settings-update-sim-locked",
+  "title": "iPhone Carrier Settings Update: SIM Lock?",
+  "heading": "iPhone Carrier Settings Update: Can It Fix SIM Locked?",
+  "description": "Learn what an iPhone carrier settings update changes, how to check it, and why SIM Locked still needs carrier approval rather than an update.",
+  "standfirst": "An iPhone carrier settings update can improve network connectivity and enable supported features, but it does not replace carrier unlock approval. Check Carrier Lock separately from the carrier version. If the phone remains SIM Locked, contact the locking carrier; if it is unlocked, investigate the active line and network connection.",
+  "published": "2026-11-06",
+  "updated": "2026-11-06",
+  "minutes": 6,
+  "topic": "Carrier settings and SIM Lock",
+  "blocks": [
+    {
+      "kind": "list",
+      "items": [
+        "Carrier version and Carrier Lock are different fields with different meanings.",
+        "Install available updates through Settings, using the official onscreen prompt.",
+        "A new SIM or eSIM may need its carrier settings downloaded.",
+        "No update prompt is not evidence that the iPhone is locked.",
+        "Avoid paying for an unlock solely because cellular data stopped working."
+      ],
+      "ordered": false
+    },
+    {
+      "kind": "h2",
+      "text": "What does a carrier settings update actually change?",
+      "id": "what-changes"
+    },
+    {
+      "kind": "p",
+      "text": "Carrier settings configure how the iPhone works with its mobile network and can add support for features such as Wi-Fi Calling or 5G. They are not the carrier\u2019s eligibility decision. A newer version can be useful when troubleshooting connectivity without proving that a network restriction has been removed.",
+      "links": [
+        {
+          "label": "Apple carrier-settings guidance",
+          "href": "https://support.apple.com/en-eg/109324"
+        }
+      ]
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Item",
+        "What it tells you",
+        "What it does not prove"
+      ],
+      "rows": [
+        [
+          "Carrier settings version",
+          "Which network settings are installed",
+          "That the handset is carrier unlocked."
+        ],
+        [
+          "Carrier Lock",
+          "Whether the iPhone reports a network restriction",
+          "That a paid plan is active or funded."
+        ],
+        [
+          "iOS version",
+          "Which operating system is installed",
+          "That every carrier feature is supported."
+        ],
+        [
+          "eSIM profile",
+          "A cellular plan has been provisioned on the device",
+          "That the line is active or free of account issues."
+        ],
+        [
+          "Signal or SOS indicator",
+          "The present network connection state",
+          "The reason for failure or an unlock decision."
+        ]
+      ]
+    },
+    {
+      "kind": "h2",
+      "text": "How do I check for a carrier settings update?",
+      "id": "check-update"
+    },
+    {
+      "kind": "p",
+      "text": "Connect the iPhone to Wi-Fi or cellular service and open the About screen in Settings. Install an update if the device offers one. Record the carrier version before and after troubleshooting so support can compare the actual configuration, rather than guessing from a version number found on another phone.",
+      "links": [
+        {
+          "label": "Verizon iPhone update instructions",
+          "href": "https://www.verizon.com/support/knowledge-base-212894/"
+        }
+      ]
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Open Settings > General > About while connected.",
+        "Follow the carrier-settings prompt if one appears.",
+        "Find the version beside Carrier or the regional equivalent.",
+        "For multiple lines, identify which carrier and line the reported version belongs to.",
+        "Re-test the affected call or data task and note the exact outcome."
+      ],
+      "ordered": true
+    },
+    {
+      "kind": "p",
+      "text": "Do not use a downloaded \u201cunlock profile\u201d as a replacement for the official update prompt. A configuration file offered by an unrelated website is not evidence of carrier authorization. If support recommends a settings change, verify the instructions through that provider\u2019s official channel."
+    },
+    {
+      "kind": "h2",
+      "text": "Why does my iPhone still say SIM Locked after the update?",
+      "id": "still-locked"
+    },
+    {
+      "kind": "p",
+      "text": "A settings update and an unlock approval solve different problems. If Carrier Lock still reports SIM Locked, ask the locking carrier to check the unlock request for the current device. Supply the case reference and requested IMEI; do not infer approval from a changed version number or improved signal.",
+      "links": [
+        {
+          "label": "Apple network-unlock guidance",
+          "href": "https://support.apple.com/en-za/109316"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "For example, a phone may work normally with its original carrier after an update and still reject another provider. That result demonstrates service on the original network, not permission to switch. Follow the carrier\u2019s current eligibility route, including any applicable finance or account requirements.",
+      "links": [
+        {
+          "label": "Carrier eligibility guide",
+          "href": "/articles/iphone-carrier-unlock-eligibility"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "text": "What if there is no update prompt or the eSIM still fails?",
+      "id": "no-prompt"
+    },
+    {
+      "kind": "p",
+      "text": "An absent prompt does not diagnose the failure. Ask the active carrier whether the installed settings are current for your device, then investigate the affected line. Keep the exact error, model, iOS version and recent SIM changes together so support can separate provisioning, coverage and device problems efficiently."
+    },
+    {
+      "kind": "p",
+      "text": "For an eSIM setup problem, Apple recommends checking the line, toggling Airplane Mode, restarting and checking carrier settings. Work through the official sequence and recheck after each step. Keep the IMEI and EID available for the carrier, but do not delete a working profile as an improvised unlock attempt.",
+      "links": [
+        {
+          "label": "Apple eSIM troubleshooting",
+          "href": "https://support.apple.com/en-us/102478"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "When the phone says No SIM restrictions but shows SOS or No Service, check coverage, account status and the active line with the provider. Record whether calls, SMS and mobile data all fail or only one function fails; that distinction makes an escalation more useful.",
+      "links": [
+        {
+          "label": "Apple No Service troubleshooting",
+          "href": "https://support.apple.com/en-us/120000"
+        },
+        {
+          "label": "Unlocked iPhone troubleshooting",
+          "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "text": "Which locks and account issues need a different fix?",
+      "id": "different-fixes"
+    },
+    {
+      "kind": "p",
+      "text": "Read the exact message before choosing a remedy. A SIM PIN or PUK protects a SIM, a screen passcode protects access to the phone, and Activation Lock concerns its Apple Account. Blacklist records and unpaid finance raise separate carrier or ownership questions that a settings update does not settle."
+    },
+    {
+      "kind": "p",
+      "text": "Never guess a SIM PIN or PUK; ask the SIM provider for help. For Activation Lock, use the owner\u2019s legitimate account-removal process or Apple\u2019s proof-of-purchase support route when applicable. A carrier update is not a tool for removing either protection.",
+      "links": [
+        {
+          "label": "Apple SIM PIN guidance",
+          "href": "https://support.apple.com/en-us/118228"
+        },
+        {
+          "label": "Apple Activation Lock guidance",
+          "href": "https://support.apple.com/en-us/108934"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Before paying a third party, establish whether you need connectivity support, a device report or assistance with an eligible unlock request. Ask what the purchase delivers and whether your carrier and device are supported. An intermediary cannot turn a network-settings update into guaranteed unlock approval."
+    },
+    {
+      "kind": "cta",
+      "text": "Need help choosing the right next step? Tell iUnlockMobile the exact error and Carrier Lock result before purchasing a report or requesting service.",
+      "href": "/contact",
+      "label": "Discuss the message on your iPhone"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Will updating carrier settings unlock my iPhone?",
+      "answer": "A carrier settings update is not a substitute for the locking carrier\u2019s approval. Check the Carrier Lock field separately from the version number. If a restriction remains, ask the carrier about eligibility and request status before paying for another troubleshooting step."
+    },
+    {
+      "question": "Why is there no carrier settings update button on my iPhone?",
+      "answer": "The About screen offers an update when one is available; it is not a permanent unlock button. If no prompt appears, ask the active carrier whether your installed version is current. The absence of a prompt does not establish why a line is failing."
+    },
+    {
+      "question": "Does a new carrier version mean my iPhone is unlocked?",
+      "answer": "No. A carrier version describes installed network settings, not approval to switch networks. Record it for technical support, but check Carrier Lock separately. Also verify that the destination plan is active and supports your iPhone before treating a successful update as a completed switch."
+    },
+    {
+      "question": "Should I buy an unlock if my eSIM stops working after an update?",
+      "answer": "First check the exact error and the Carrier Lock result. If the phone reports No SIM restrictions, investigate the eSIM line, account and coverage with its provider. An additional unlock purchase is not a diagnosis and may not address the actual fault."
+    }
+  ]
+},
+{
   "slug": "telus-iphone-unlock-security-lock-guide",
   "title": "TELUS iPhone Unlock: Security Lock",
   "heading": "TELUS iPhone Unlock: Verify the Security Lock Before You Wait",
