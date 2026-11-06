@@ -1,8 +1,8 @@
 # Data Manager sender
 
-The existing GA4 worker stages consented paid purchases. A separate `unlockservice-ads.timer`
-drains the staging table every two minutes; the website/provider worker keeps running unchanged.
-Staging still depends on the existing GA4 worker being enabled. This release does not change bids,
+The dedicated worker discovers completed, charged purchases with consented checkout context and
+drains the staging table every two minutes. OCI staging does not require GA4 configuration or delivery.
+The website/provider worker continues completing orders as before. This release does not change bids,
 Primary/Secondary settings, or upload historical sales. Keep the offline action Secondary.
 
 ## Configuration
@@ -91,3 +91,25 @@ Official API references:
 - https://developers.google.com/data-manager/api/reference/rest/v1/events/ingest
 - https://developers.google.com/data-manager/api/reference/rest/v1/requestStatus/retrieve
 - https://developers.google.com/data-manager/api/devguides/quickstart/set-up-access
+
+
+## Checkout capture coverage
+
+Server capture is independent of GA4 browser IDs and GA4 diagnostics. Capture occurs before
+Whop card top-up creation, before guest crypto payment instructions are returned, on guest card
+checkout, on wallet order/report submission, on crypto top-up and on the legacy invoice form.
+Only granted consent retains click IDs. Organic/direct/AI visits may legitimately have no click ID;
+never synthesize one. Whop metadata retains the opaque invoice/order reference that joins to the
+server-side checkout context rather than copying raw identifiers into extra systems.
+
+`ads:status` also groups seven days of actual checkout records by kind and attribution status:
+missing_context, granted-with-gclid/braid, unknown/denied, and consented_without_ad_click.
+Historical missing_context rows cannot be repaired by guessing an ad click.
+Capture changes require deploying the website code as well as upgrading the independent worker.
+
+For the checkout-capture release, use `bash deploy/oci-checkouts.sh <full-reviewed-sha>`.
+It builds/tests a production-ancestry worktree before pausing the website briefly to swap the
+build and dependencies. It keeps untracked verification/backup files and creates a database
+backup plus a rollback branch. It then installs or upgrades the Ads worker, preserving an
+existing cutoff. If Google authentication fails during worker activation, the website may
+already be updated: inspect both service statuses rather than assuming an all-or-nothing deploy.

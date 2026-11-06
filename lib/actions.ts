@@ -1,5 +1,6 @@
 'use server'
 
+import { captureCheckoutContext } from './checkout-context-request'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import {
@@ -221,6 +222,7 @@ export async function createInvoiceAction(_: FormState, data: FormData): Promise
   let reference: string
   try {
     reference = createInvoice(found.user.id, String(data.get('gateway') ?? ''), cents).reference
+    await captureCheckoutContext('topup', reference, found.user.id, undefined)
   } catch (error) {
     if (error instanceof PaymentError) return { error: error.message }
     throw error

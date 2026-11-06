@@ -181,3 +181,23 @@ test('guest payment is checked against completed report, real charge and refunds
   process.env.ADS_DATA_MANAGER_MODE = 'live'
   assert.equal((await deliverAdsConversions(10, transport)).suppressed, 1)
 })
+
+test('OCI staging works with GA4 disabled, and does not stage top-ups or unpaid orders', async () => {
+  const row = fixture()
+  db().prepare('DELETE FROM ads_conversion_outbox').run()
+  process.env.GA4_SERVER_PAYMENTS_ENABLED = '0'
+  delete process.env.GA4_MP_API_SECRET
+  const { stageCompletedAdsPurchases } = await import('../lib/ads-purchase-staging')
+  // Other test fixtures remain in this DB; this one must be included exactly once.
+  stageCompletedAdsPurchases(Date.now() - 86400000, 500)
+  assert.ok(db().prepare('SELECT 1 FROM ads_conversion_outbox WHERE transaction_id=?').get(row.transactionId))
+  const first = (db().prepare('SELECT count(*) AS n FROM ads_conversion_outbox').get() as {n:number}).n
+  stageCompletedAdsPurchases(Date.now() - 86400000, 500)
+  assert.equal((db().prepare('SELECT count(*) AS n FROM ads_conversion_outbox').get() as {n:number}).n, first)
+  assert.equal(db().prepare("SELECT 1 FROM ads_conversion_outbox WHERE kind='topup'").get(), undefined)
+  const unpaid = fixture()
+  db().prepare('DELETE FROM ads_conversion_outbox WHERE transaction_id=?').run(unpaid.transactionId)
+  db().prepare("UPDATE orders SET status='processing' WHERE id=?").run(unpaid.id)
+  stageCompletedAdsPurchases(Date.now() - 86400000, 500)
+  assert.equal(db().prepare('SELECT 1 FROM ads_conversion_outbox WHERE transaction_id=?').get(unpaid.transactionId), undefined)
+})

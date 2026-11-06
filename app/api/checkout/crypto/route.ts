@@ -1,3 +1,4 @@
+import { captureCheckoutContext } from '@/lib/checkout-context-request'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createHash } from 'node:crypto'
@@ -24,6 +25,7 @@ export async function POST(request:Request) {
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const result=await createGuestCryptoCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       routeId:String(body.routeId??''),requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),
+      beforeCheckout:reference=>captureCheckoutContext('guest',reference,found?.user.id ?? null,found?.user.account_type==='admin' ? undefined : body.analyticsContext),
       analytics:consent && found?.user.account_type!=='admin' ? body.analyticsContext as {clientId:string;sessionId:string}|undefined : undefined})
     return reply(result)
   } catch(error) { return reply({error:error instanceof WhopPaymentError?error.message:'Crypto checkout is temporarily unavailable. Please retry; do not send funds.'},error instanceof WhopPaymentError?error.status:503) }

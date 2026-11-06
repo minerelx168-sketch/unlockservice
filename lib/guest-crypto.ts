@@ -19,6 +19,7 @@ export function guestCryptoPath(reference:string) { return guestOrderPath(refere
 export async function createGuestCryptoCheckout(input:{
   productCode:string; imei:string; email:string; requestKey:string; expectedPriceCents:number; routeId:string
   analytics?:{clientId:string;sessionId:string}
+  beforeCheckout?:(reference:string)=>Promise<void>
 }) {
   if (!guestCryptoEnabled()) throw new WhopPaymentError('Crypto checkout is temporarily unavailable.',503)
   const route=guestCryptoRoutes().find(candidate=>candidate.id===input.routeId)
@@ -53,6 +54,7 @@ export async function createGuestCryptoCheckout(input:{
       encryptPaidReportImei(imei,product.inputType),product.priceCents,route.id,invoice.reference,userId,validAnalytics?a.clientId:null,validAnalytics?a.sessionId:null)
     return getGuestCheckout(reference)!
   }).immediate()
+  if (input.beforeCheckout) { try { await input.beforeCheckout(row.reference) } catch { /* Optional measurement. */ } }
   return {url:row.state==='pending' ? guestCryptoPath(row.reference) : guestOrderPath(row.reference)}
 }
 

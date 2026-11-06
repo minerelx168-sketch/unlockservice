@@ -63,7 +63,7 @@ export function safeWhopCheckoutUrl(value: string, mode: 'live' | 'sandbox'): st
 }
 
 /** One locally owned invoice and one provider idempotency key across retries. */
-export async function createWhopCheckout(userId: number, amountCents: number, requestKey: string): Promise<WhopTopup> {
+export async function createWhopCheckout(userId: number, amountCents: number, requestKey: string, beforeCheckout?: (reference: string) => Promise<void>): Promise<WhopTopup> {
   const config = whopConfiguration()
   if (!config || !whopCheckoutEnabled()) throw new WhopPaymentError('Card payments are not available yet.', 503)
   if (!Number.isSafeInteger(amountCents) || amountCents < WHOP_MIN_CENTS || amountCents > WHOP_MAX_CENTS) {
@@ -94,6 +94,8 @@ export async function createWhopCheckout(userId: number, amountCents: number, re
       VALUES (?, ?, ?, ?, ?, ?)`).run(reference, userId, requestKey, config.accountId, config.productId, config.mode)
     return getWhopTopup(reference, userId)!
   }).immediate()
+  // Attribution survives provider failure and precedes any remotely payable checkout.
+  if (beforeCheckout) { try { await beforeCheckout(topup.invoice_reference) } catch { /* Measurement must not block payment. */ } }
   if (topup.checkout_url || topup.credited) return topup
   const subtotalCents = topup.credit_amount_cents + topup.fee_cents
 

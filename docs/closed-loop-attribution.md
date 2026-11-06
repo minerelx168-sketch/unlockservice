@@ -16,8 +16,8 @@ A separate, disabled-by-default sender now drains eligible staging rows using AD
 status reconciliation, consent/refund checks, retries and uncertain-send quarantine.
 No deployment or real-order delivery is implied by the existence of this code.
 
-Staging still follows the existing GA4 eligibility worker (GA4 must be enabled). No historical
-backfill is enabled. Keep the offline conversion Secondary during validation. Post-submission
+The standalone Ads worker also discovers eligible completed purchases independently of GA4. No historical
+backfill before the configured rollout cutoff is enabled. Keep the offline conversion Secondary during validation. Post-submission
 refunds/withdrawals are flagged for manual adjustment review; automatic retraction is not implemented.
 
 Official references:

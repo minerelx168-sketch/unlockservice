@@ -149,7 +149,12 @@ test('a network retry reuses the invoice and the provider idempotency key', asyn
   const userId = customer()
   const key = randomUUID()
   checkoutError = true
-  await assert.rejects(whop.createWhopCheckout(userId, 1000, key))
+  let capturedReference = ''
+  await assert.rejects(whop.createWhopCheckout(userId, 1000, key, async reference => {
+    capturedReference = reference
+    assert.equal(checkoutCalls.length, 0)
+  }))
+  assert.ok(capturedReference)
   checkoutError = false
   await whop.createWhopCheckout(userId, 1000, key)
   assert.equal(checkoutCalls.length, 2)

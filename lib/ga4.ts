@@ -64,7 +64,7 @@ export function recordCheckoutContext(kind: 'topup' | 'order' | 'paid_imei_repor
   consent: ConsentChoice, ip: string | null, clickIds: { gclid?: string; gbraid?: string; wbraid?: string } = {}, input: unknown = {}) {
   if (!reference || reference.length > 128) return
   const context = (input && typeof input === 'object' ? input : {}) as ContextInput
-  const granted = consent !== 'denied'
+  const granted = consent === 'granted'
   db().prepare(`INSERT OR IGNORE INTO ga4_checkout_context(kind,reference,user_id,consent,internal,gclid,gbraid,wbraid,landing_page,utm_source,utm_medium,utm_campaign)
     VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run(kind, reference, userId, consent, isInternalIp(ip) ? 1 : 0,
     granted ? clickIds.gclid ?? null : null, granted ? clickIds.gbraid ?? null : null, granted ? clickIds.wbraid ?? null : null,

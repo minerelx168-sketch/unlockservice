@@ -168,6 +168,17 @@ export function adsDeliveryStatus() {
     mode: adsDataManagerConfig()?.mode ?? 'disabled',
     staging: db().prepare('SELECT state,count(*) AS count FROM ads_conversion_outbox GROUP BY state').all(),
     delivery: db().prepare('SELECT state,reason,count(*) AS count FROM ads_conversion_delivery GROUP BY state,reason').all(),
-    needsReview: db().prepare('SELECT needs_review AS reason,count(*) AS count FROM ads_conversion_delivery WHERE needs_review IS NOT NULL GROUP BY needs_review').all()
+    needsReview: db().prepare('SELECT needs_review AS reason,count(*) AS count FROM ads_conversion_delivery WHERE needs_review IS NOT NULL GROUP BY needs_review').all(),
+    checkoutCoverage: db().prepare(`SELECT x.kind,
+      CASE WHEN c.reference IS NULL THEN 'missing_context' WHEN c.consent!='granted' THEN c.consent
+        WHEN c.gclid IS NOT NULL THEN 'gclid' WHEN c.wbraid IS NOT NULL OR c.gbraid IS NOT NULL THEN 'braid'
+        ELSE 'consented_without_ad_click' END AS attribution,count(*) AS count
+      FROM (
+        SELECT 'order' AS kind,idempotency_key AS reference,created_at FROM orders WHERE source='website'
+        UNION ALL SELECT 'paid_imei_report',idempotency_key,created_at FROM paid_report_orders WHERE source='website'
+        UNION ALL SELECT 'guest',reference,created_at FROM guest_checkouts
+        UNION ALL SELECT 'topup',i.reference,i.created_at FROM invoices i JOIN users u ON u.id=i.user_id WHERE u.account_type IN ('customer','reseller')
+      ) x LEFT JOIN ga4_checkout_context c ON c.kind=x.kind AND c.reference=x.reference
+      WHERE x.created_at>=datetime('now','-7 days') GROUP BY x.kind,attribution`).all()
   }
 }

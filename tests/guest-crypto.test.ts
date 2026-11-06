@@ -150,3 +150,12 @@ test('exhausted unique amount codes fail without creating an uncoded guest reque
   assert.equal(db.db().prepare("SELECT 1 FROM guest_checkouts g JOIN invoices i ON i.reference=g.crypto_invoice_reference WHERE i.payment_amount_e4 IS NULL").get(),undefined)
 })
 
+
+test('guest crypto captures attribution before returning payment instructions and survives capture failure',async()=>{
+  let captured=''
+  const first=await checkout(15,{beforeCheckout:async(reference:string)=>{captured=reference}})
+  assert.equal(captured,first.row.reference)
+  assert.ok(first.result.url)
+  const second=await checkout(15,{beforeCheckout:async()=>{throw new Error('optional capture failed')}})
+  assert.ok(second.result.url)
+})
