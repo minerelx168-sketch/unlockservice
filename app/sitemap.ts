@@ -1,3 +1,4 @@
+import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import type { MetadataRoute } from 'next'
 import { listArticles } from '@/lib/articles'
 import { unlockOrderingEnabled } from '@/lib/provider'
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic'
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = publicOrigin()
   return [
+    ...SERVICE_SPOKES.map(s => ({ url: `${origin}${s.path}` })),
     { url: `${origin}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${origin}/services`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/services/unlock`, changeFrequency: 'weekly', priority: 0.9 },
