@@ -1,3 +1,4 @@
+import { CheckoutReminderOpen } from '@/components/checkout-reminder-open'
 import { LocalTime } from '@/components/customer-time'
 import { PaymentFunnelEvents } from '@/components/payment-funnel-events'
 import type { Metadata } from 'next'
@@ -68,12 +69,13 @@ export default async function InvoicePage({
   if (invoice.gateway === 'whop_card') {
     const topup = getWhopTopup(reference, user.id)
     if (!topup) notFound()
-    return <>{topup.environment === 'live' ? <PaymentFunnelEvents reference={reference} settled={invoice.status === 'success' && Boolean(topup.credited)} paymentMethod="card" /> : null}<WhopInvoice topup={topup} /><p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p></>
+    return <>{topup.environment === 'live' ? <PaymentFunnelEvents reference={reference} settled={invoice.status === 'success' && Boolean(topup.credited)} paymentMethod="card" /> : null}<WhopInvoice topup={topup} csrfToken={session.csrfToken} /><p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p></>
   }
 
   if (invoice.payment_credit_policy === 'actual_received' && invoice.payment_chain_id === 56) {
     const deposit = await getCryptoDeposit(reference, user.id)
     return <>
+      {invoice.status === 'pending' ? <CheckoutReminderOpen kind="topup" reference={reference} csrfToken={session.csrfToken} /> : null}
       <div className="crypto-page-top"><Link href="/user/add-funds">← Add funds</Link><Link href="/user/payments">Payment history</Link></div>
       <p className="t-small">Request created: <LocalTime value={invoice.created_at} /></p>
       <section className="crypto-page-panel" aria-label="Crypto deposit">
@@ -111,6 +113,7 @@ export default async function InvoicePage({
 
   return (
     <>
+      {invoice.status === 'pending' && !expired ? <CheckoutReminderOpen kind="topup" reference={reference} csrfToken={session.csrfToken} /> : null}
       <PaymentFunnelEvents reference={invoice.reference} settled={settled} />
       <section className="payment-request-head">
         <div>

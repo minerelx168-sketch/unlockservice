@@ -1,4 +1,5 @@
 'use client'
+import { reportCheckoutReminderOpen } from '@/lib/checkout-reminder-client'
 import { paymentAnalyticsContext } from '@/lib/payment-analytics-client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -9,13 +10,14 @@ import { trackFunnelEventOnce } from '@/lib/funnel-analytics'
 
 const QUICK_AMOUNTS = [1, 10, 25, 50, 100]
 
-export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }: {
-  csrfToken: string; initialCents?: number; minCents: number; maxCents: number
+export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents, reminderAllowed }: {
+  csrfToken: string; initialCents?: number; minCents: number; maxCents: number; reminderAllowed: boolean
 }) {
   const router = useRouter()
   const [amount, setAmount] = useState(((initialCents ?? 1000) / 100).toFixed(2))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [paymentReminderOptIn, setPaymentReminderOptIn] = useState(false)
   const [customAmount, setCustomAmount] = useState(!QUICK_AMOUNTS.some(quick => quick * 100 === (initialCents ?? 1000)))
   const amountInput = useRef<HTMLInputElement>(null)
   const key = useRef<string | null>(null)
@@ -54,7 +56,7 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
     try {
       const response = await fetch('/api/payments/whop/checkout', { method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ csrfToken, amountCents, requestKey: key.current, analyticsContext: await paymentAnalyticsContext() }) })
+        body: JSON.stringify({ csrfToken, amountCents, requestKey: key.current, analyticsContext: await paymentAnalyticsContext(), ...(reminderAllowed ? { paymentReminderOptIn } : {}) }) })
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Could not create checkout.')
       if (!/^\/user\/invoice\/[a-f0-9]{32}$/.test(data.invoiceUrl)) throw new Error('Invalid invoice response.')
@@ -64,6 +66,7 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
         if (checkout.protocol !== 'https:' || !['whop.com', 'sandbox.whop.com'].includes(checkout.hostname)
           || checkout.username || checkout.password || checkout.port) throw new Error('Invalid checkout response.')
         if (checkout.hostname === 'whop.com') trackFunnelEventOnce('payment_request_created', reference, { service_category: 'account_credit', payment_method: 'card', status: 'created' })
+        reportCheckoutReminderOpen('topup', reference, { csrfToken })
         window.location.assign(checkout.href)
         return
       }
@@ -112,6 +115,7 @@ export function WhopPaymentForm({ csrfToken, initialCents, minCents, maxCents }:
         <p className="t-small">One-time purchase. Credit is added after payment verification.
           Review any applicable tax or fee on Whop before confirming payment.</p>
       </section>
+      {reminderAllowed ? <label className="funding-reminder"><input type="checkbox" checked={paymentReminderOptIn} onChange={event => setPaymentReminderOptIn(event.target.checked)} disabled={busy} /><span>Email me one payment reminder if this bill is unpaid after 5 minutes. You can unsubscribe anytime.</span></label> : null}
       {error ? <p className="alert alert--error" role="alert">{error}</p> : null}
       <button className="button button--accent funding-submit" type="submit" disabled={busy || !valid}>{busy ? 'Preparing checkout…' : 'Continue with card'}</button>
     </form>

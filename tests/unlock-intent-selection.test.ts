@@ -9,13 +9,14 @@ import { deviceDomain, deviceImei, deviceEmail } from '../lib/device-intent-valu
 import { withContinuation } from '../lib/continuation'
 
 // Execute the server action with boundary adapters; never call a provider or real cookies.
-function actionHarness(guestEnabled = false, cryptoEnabled = false, priceCents = 1000, accountType: string | null = null) {
+function actionHarness(guestEnabled = false, cryptoEnabled = false, priceCents = 1000, accountType: string | null = null, blocked = false) {
   const writes: unknown[][] = []
   const products = [{ productCode: 'UNLOCK_ACTIVE', status: 'available' }, { productCode: 'UNLOCK_PAUSED', status: 'coming_soon' }]
   const moduleRecord = { exports: {} as { showUnlockServicesAction: (state: object, form: FormData) => Promise<{ error?: string }>; continueDeviceServiceAction: (state: object, form: FormData) => Promise<{ error?: string }>; prepareSmallCardAccountAction: (value: {productCode:string;imei:string;email:string;domain:'unlock'|'imei_check'})=>Promise<{error?:string;url?:string}> } }
   const realRequire = createRequire(import.meta.url)
   const mocks: Record<string, unknown> = {
     'next/navigation': { redirect: (url: string) => { throw new Error(`REDIRECT:${url}`) } },
+    './unlock-eligibility': { getUnlockEligibility: () => ({ blocksCheckout: blocked, message: "This carrier isn't supported yet" }) },
     './auth': { currentSession: async () => accountType ? { user: { account_type: accountType } } : null },
     './guest-checkout': { guestCheckoutEnabled: () => guestEnabled },
     './guest-crypto': { guestCryptoEnabled: () => cryptoEnabled },
@@ -135,3 +136,12 @@ test('direct checkout account handoff returns a navigation URL without throwing 
 })
 
 
+
+test('trusted unsupported carrier blocks signed-in navigation before writing a checkout draft',async()=>{
+  const {continueAction,writes}=actionHarness(true,true,1000,'customer',true)
+  const data=form('49 015420 323751 8','UNLOCK_ACTIVE')
+  data.set('domain','unlock');data.set('email','buyer@example.test')
+  const result=await continueAction({},data)
+  assert.equal(result.error,"This carrier isn't supported yet")
+  assert.equal(writes.length,0)
+})
