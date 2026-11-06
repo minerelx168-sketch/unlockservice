@@ -1,3 +1,4 @@
+import { ServiceDirectory } from '@/components/service-directory'
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
@@ -67,6 +68,7 @@ export default function ServicesPage() {
             </article>
           </div>
 
+          <ServiceDirectory />
           <p className="t-micro service-hub-version">
             A report shows the phone’s status when it runs. It does not prove ownership or guarantee an unlock.
           </p>

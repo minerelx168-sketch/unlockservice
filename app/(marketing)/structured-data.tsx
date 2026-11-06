@@ -1,3 +1,4 @@
+import { serializeJsonLd } from '@/lib/json-ld'
 import { publicOrigin } from '@/lib/site'
 
 /**
@@ -38,10 +39,9 @@ export function StructuredData({ faq }: { faq: ReadonlyArray<{ question: string;
   return (
     <script
       type="application/ld+json"
-      /* Serialised rather than templated: JSON.stringify escapes anything in
-         the copy that would otherwise close the script tag early. */
+      /* Escape HTML delimiters in catalog text before embedding JSON-LD. */
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }),
+        __html: serializeJsonLd({ '@context': 'https://schema.org', '@graph': graph }),
       }}
     />
   )

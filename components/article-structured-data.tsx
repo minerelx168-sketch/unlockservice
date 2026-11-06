@@ -1,3 +1,4 @@
+import { serializeJsonLd } from '@/lib/json-ld'
 import type { Article } from '@/lib/articles'
 import { publicOrigin } from '@/lib/site'
 
@@ -63,7 +64,7 @@ export function ArticleStructuredData({ article }: { article: Article }) {
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }),
+        __html: serializeJsonLd({ '@context': 'https://schema.org', '@graph': graph }),
       }}
     />
   )

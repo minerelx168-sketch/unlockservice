@@ -37,7 +37,4 @@ export function serviceSpokeSchema(spoke: ServiceSpoke, products: PublicProvider
   }
 }
 
-/** Keep catalog text from closing the JSON-LD script element. */
-export function serializeServiceSchema(value: unknown): string {
-  return JSON.stringify(value).replace(/</g, '\\u003c')
-}
+export { serializeJsonLd as serializeServiceSchema } from './json-ld'

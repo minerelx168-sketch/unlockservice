@@ -1,3 +1,5 @@
+import { ServiceDirectory } from '@/components/service-directory'
+import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -72,7 +74,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <h1 className="t-section">{article.heading}</h1>
             <p className="t-lead">{article.standfirst}</p>
             <p className="t-micro article-meta">
-              Published {readable(article.published)}
+              By <Link href="/contact">iUnlockMobile</Link> · Published {readable(article.published)}
               {article.updated !== article.published ? ` · Updated ${readable(article.updated)}` : ''} ·{' '}
               {article.minutes} min read
             </p>
@@ -84,6 +86,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <div className="shell article-layout">
           <div className="article-content">
             <ArticleBody blocks={article.blocks} />
+            <ServiceDirectory
+              services={SERVICE_SPOKES.filter(service => service.domain === 'imei_check' || /\batt\b|at&t/i.test(`${article.slug} ${article.topic}`))}
+              title="Compare relevant service prices"
+            />
 
             {article.faq?.length ? (
               <div className="article-faq">
