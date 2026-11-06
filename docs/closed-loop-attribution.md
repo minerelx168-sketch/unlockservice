@@ -9,13 +9,16 @@
 - Existing verified-payment and completed-service gates remain. `purchase.value` now equals the sum of charged item prices, with known `gross_margin` reported separately. Card purchases retain their existing charged-item fee treatment; tax is excluded. Top-ups remain `payment_completed`, value zero. No historical events are replayed or rewritten.
 - Eligible, explicitly consented Google ad purchases are staged once in `ads_conversion_outbox`. These rows are NOT uploads. Organic/AI visits, unknown/denied consent and internal visits are excluded. GA4 delivery failure does not mark Ads as delivered.
 
-## Not enabled: Data Manager delivery
+## Data Manager delivery
 
-No Data Manager credentials or conversion destination have been configured or verified. No Ads API calls are made. The outbox is preparation only and currently follows the existing GA4 eligibility worker (GA4 must be enabled).
+A separate, disabled-by-default sender now drains eligible staging rows using ADC. See
+[data-manager-sender.md](data-manager-sender.md) for deployment, fixed rollout cutoff, validation,
+status reconciliation, consent/refund checks, retries and uncertain-send quarantine.
+No deployment or real-order delivery is implied by the existence of this code.
 
-To enable a production sender, configure server-only Google OAuth/Cloud authorization and the destination Ads account/conversion action. Validate revenue versus profit bidding, designate one purchase action for bidding (GA4 import or direct upload), and inspect custom goals to prevent duplicates. Do not change campaign bidding merely by deploying this code.
-
-Before sending any staged record, recheck consent, refund/dispute/review status, account, conversion time/window and destination. Implement durable leases, response diagnostics, idempotent transaction identifiers and refund adjustments. Do not bulk-send this table as-is: a payment can be refunded after staging. Signed-in consent withdrawal already suppresses and clears staged click IDs; anonymous withdrawal needs a verified checkout reference before historical records can be matched.
+Staging still follows the existing GA4 eligibility worker (GA4 must be enabled). No historical
+backfill is enabled. Keep the offline conversion Secondary during validation. Post-submission
+refunds/withdrawals are flagged for manual adjustment review; automatic retraction is not implemented.
 
 Official references:
 - https://developers.google.com/data-manager/api/devguides

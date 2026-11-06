@@ -44,6 +44,18 @@ CREATE TABLE IF NOT EXISTS ads_conversion_outbox (
  currency TEXT NOT NULL CHECK(currency='USD'), state TEXT NOT NULL CHECK(state IN ('awaiting_configuration','suppressed')),
  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+-- Additive delivery ledger: legacy staging rows and their CHECK constraint stay intact.
+CREATE TABLE IF NOT EXISTS ads_conversion_delivery (
+ transaction_id TEXT PRIMARY KEY REFERENCES ads_conversion_outbox(transaction_id),
+ destination TEXT NOT NULL,
+ state TEXT NOT NULL CHECK(state IN ('sending','retry','validated','accepted','delivered','rejected','uncertain','suppressed')),
+ attempts INTEGER NOT NULL DEFAULT 0, next_at INTEGER NOT NULL DEFAULT 0,
+ lease_until INTEGER NOT NULL DEFAULT 0, lease_token TEXT,
+ request_id TEXT, reason TEXT, needs_review TEXT,
+ checked_at INTEGER NOT NULL DEFAULT 0,
+ created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS ads_conversion_delivery_work ON ads_conversion_delivery(state,next_at);
 CREATE TABLE IF NOT EXISTS ga4_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 -- Daily figures from Google Ads / GA4 entered by an administrator until the APIs are connected.
 CREATE TABLE IF NOT EXISTS tracking_daily_manual (

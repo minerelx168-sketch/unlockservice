@@ -1,7 +1,7 @@
 import { db } from './db'
 import { validateClickId } from './attribution'
 
-/** Staging only: no external upload until a Data Manager destination is configured. */
+/** Stage once. The separate Data Manager worker rechecks eligibility before delivery. */
 export function stageAdsPurchase(event: { transactionId: string; eventName: string; kind: string; paidAt: string; contextReference?: string }, body: Record<string, unknown>) {
   if (event.eventName !== 'purchase' || !event.contextReference) return
   const context = db().prepare('SELECT consent,internal,gclid,gbraid,wbraid FROM ga4_checkout_context WHERE kind=? AND reference=?')
