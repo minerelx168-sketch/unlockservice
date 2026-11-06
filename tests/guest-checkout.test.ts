@@ -11,6 +11,7 @@ let guest:typeof import('../lib/guest-checkout'),db:typeof import('../lib/db'),c
 const originalFetch=globalThis.fetch,payments=new Map<string,Whop.Payment>()
 const emails:Record<string,unknown>[]=[],events:Record<string,unknown>[]=[],refunds:string[]=[]
 let providerCalls=0,checkoutCalls=0,emailFailure=false,providerFailure=false,providerUncertain=false
+let checkoutFailure=false
 before(async()=>{
   guest=await import('../lib/guest-checkout');db=await import('../lib/db');credits=await import('../lib/credits')
   db.db().prepare("UPDATE paid_report_products SET price_cents=1000,is_active=1 WHERE code='APPLE_CARRIER_LITE'").run()
@@ -19,8 +20,12 @@ before(async()=>{
     if(url.hostname==='api.whop.com') {
       if(url.pathname.endsWith('/checkout_configurations')) {
         checkoutCalls++
+        if(checkoutFailure) return Response.json({error:{message:'Simulated validation failure'}},{status:400})
         const body=JSON.parse(String(init?.body)),ref=body.metadata.guest_reference
         const quote=db.db().prepare('SELECT COALESCE(card_order_price_cents,price_cents+wallet_credit_cents)+fee_cents AS total FROM guest_checkouts WHERE reference=?').get(ref) as {total:number}
+        assert.ok(body.plan.title.length <= 30, 'Whop variant titles must not exceed 30 characters')
+        const service=db.db().prepare('SELECT product_name FROM guest_checkouts WHERE reference=?').get(ref) as {product_name:string}
+        assert.ok(body.plan.description.includes(service.product_name), 'Full service name remains disclosed')
         assert.equal(body.plan.initial_price,quote.total/100);assert.equal(body.plan.plan_type,'one_time')
         assert.equal(JSON.stringify(body).includes('490154203237518'),false)
         return Response.json({id:`ch_${ref}`,account_id:'biz_test',purchase_url:`https://whop.com/checkout/ch_${ref}`,plan:{...body.plan,id:`plan_${ref}`}})
@@ -49,6 +54,7 @@ async function checkout(extra:Record<string,unknown>={}) {
   const input={productCode:'APPLE_CARRIER_LITE',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:1000,...extra}
   const result=await guest.createGuestCheckout(input)
   const row=db.db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as import('../lib/guest-checkout').GuestCheckout
+  db.db().prepare("UPDATE guest_checkouts SET created_at=datetime('now','-3 minutes') WHERE reference=?").run(row.reference)
   return {input,result,row}
 }
 function payment(row:import('../lib/guest-checkout').GuestCheckout,overrides:Record<string,unknown>={}) {
@@ -70,6 +76,21 @@ test('guest checkout accepts no login, quotes exact service + 5%, validates pric
   assert.equal(guest.authorizedGuestCheckout(row.reference,key)?.reference,row.reference)
   assert.equal(guest.authorizedGuestCheckout(row.reference,'0'.repeat(64)),undefined)
   assert.equal(guest.authorizedGuestCheckout('0'.repeat(32),key),undefined)
+})
+test('long service names fit Whop title limits, retain full disclosure and replay one checkout',async()=>{
+  const original=db.db().prepare("SELECT name FROM paid_report_products WHERE code='APPLE_CARRIER_LITE'").get() as {name:string}
+  const full='Apple Carrier and SIM Lock Detailed Report — Long Service Name'
+  db.db().prepare("UPDATE paid_report_products SET name=? WHERE code='APPLE_CARRIER_LITE'").run(full)
+  try {
+    const before=checkoutCalls,{input,row}=await checkout()
+    assert.equal(row.product_name,full)
+    assert.ok(row.checkout_id)
+    await guest.createGuestCheckout(input)
+    assert.equal(checkoutCalls,before+1)
+    assert.equal((db.db().prepare('SELECT COUNT(*) AS n FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as {n:number}).n,1)
+  } finally {
+    db.db().prepare("UPDATE paid_report_products SET name=? WHERE code='APPLE_CARRIER_LITE'").run(original.name)
+  }
 })
 test('only verified full payment dispatches once, sends actual result by email and one purchase, not a topup',async()=>{
   const {row}=await checkout({analytics:{clientId:'123.456',sessionId:'1780000000'}}),before=providerCalls
@@ -265,4 +286,46 @@ test('inclusive card tax never adds to the quoted order total and excess collect
   assert.equal(guest.getGuestCheckout(row.reference)?.tax_cents,50)
   const other=await checkout(),q=payment(other.row,{tax_amount:m('0.50'),tax_behavior:'exclusive',total:m('11.00')})
   assert.throws(()=>guest.settleGuestPayment(q),/amount mismatch/)
+})
+
+test('failed checkout creation recovers the same row and emails its secure payment link once without dispatch',async()=>{
+  const input={productCode:'APPLE_CARRIER_LITE',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:1000}
+  checkoutFailure=true
+  try { await assert.rejects(guest.createGuestCheckout(input)) } finally { checkoutFailure=false }
+  const row=db.db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as import('../lib/guest-checkout').GuestCheckout
+  db.db().prepare("UPDATE guest_checkouts SET created_at=datetime('now','-3 minutes') WHERE reference=?").run(row.reference)
+  assert.equal(row.checkout_id,null)
+  const before=providerCalls,calls=checkoutCalls
+  const [a,b]=await Promise.all([guest.recoverGuestCheckoutLinks(3),guest.recoverGuestCheckoutLinks(3)])
+  assert.equal(a.recovered+b.recovered,1)
+  assert.equal(checkoutCalls,calls+1)
+  assert.equal(providerCalls,before)
+  assert.ok(guest.getGuestCheckout(row.reference)?.checkout_url)
+  assert.equal((db.db().prepare('SELECT COUNT(*) AS n FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as {n:number}).n,1)
+  const sent=emails.filter(e=>String(e.subject).includes('secure payment link')&&String(e.text).includes(row.reference))
+  assert.equal(sent.length,1)
+  assert.ok(String(sent[0].text).includes('$10.50 USD'))
+  assert.ok(String(sent[0].html).includes('Continue secure card payment'))
+  await guest.recoverGuestCheckoutLinks(3)
+  assert.equal(checkoutCalls,calls+1)
+})
+
+test('recovery revalidates the quote and does not blindly retry or rotate keys after another gateway failure',async()=>{
+  const input={productCode:'APPLE_CARRIER_LITE',imei:'490154203237518',email:`${randomUUID()}@example.test`,requestKey:randomUUID(),expectedPriceCents:1000}
+  checkoutFailure=true
+  try { await assert.rejects(guest.createGuestCheckout(input)) } finally { checkoutFailure=false }
+  const row=db.db().prepare('SELECT * FROM guest_checkouts WHERE request_key=?').get(input.requestKey) as import('../lib/guest-checkout').GuestCheckout
+  db.db().prepare("UPDATE guest_checkouts SET created_at=datetime('now','-3 minutes') WHERE reference=?").run(row.reference)
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1200 WHERE code='APPLE_CARRIER_LITE'").run()
+  const calls=checkoutCalls
+  assert.equal((await guest.recoverGuestCheckoutLinks(3)).recovered,0)
+  assert.equal(checkoutCalls,calls)
+  db.db().prepare("UPDATE paid_report_products SET price_cents=1000 WHERE code='APPLE_CARRIER_LITE'").run()
+  checkoutFailure=true
+  try { assert.equal((await guest.recoverGuestCheckoutLinks(3)).errors,1) } finally { checkoutFailure=false }
+  const failedCalls=checkoutCalls
+  assert.ok(guest.getGuestCheckout(row.reference)?.last_error)
+  await guest.recoverGuestCheckoutLinks(3)
+  assert.equal(checkoutCalls,failedCalls)
+  assert.equal(guest.getGuestCheckout(row.reference)?.checkout_link_sent_at,null)
 })

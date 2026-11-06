@@ -1,0 +1,25 @@
+.guest-reminder,
+.funding-reminder {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--color-text-muted, var(--muted));
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.guest-reminder {
+  padding: 3px 0 10px;
+}
+
+.funding-reminder {
+  margin: -2px 0 2px;
+}
+
+.guest-reminder input,
+.funding-reminder input {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+}
