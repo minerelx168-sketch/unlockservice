@@ -37,8 +37,8 @@ export function customerTypeFor(userId: number | null, email: string | null, pai
 }
 
 /**
- * purchase for services paid from account credit: value = gross margin of the
- * service (price charged minus provider cost), items[].price = amount charged.
+ * purchase for services paid from account credit: value = charged service revenue, matching items[].price.
+ * Known gross margin is a separate parameter, never revenue.
  */
 export async function deliverPurchaseAnalytics(limit=20) {
   const stats={submitted:0,uncertain:0,skipped:0,disabled:!serverPurchasesEnabled()}
@@ -62,7 +62,7 @@ export async function deliverPurchaseAnalytics(limit=20) {
   for(let i=0;i<Math.max(0,Math.min(50,limit));i++) {
     const row=db().prepare(eligible).get(started) as Candidate|undefined
     if(!row)break
-    const event={transactionId:`${row.kind==='order'?'unlock':'report'}-${row.order_id}`,eventName:'purchase' as const,kind:row.kind,paidAt:row.charged_at}
+    const event={transactionId:`${row.kind==='order'?'unlock':'report'}-${row.order_id}`,eventName:'purchase' as const,kind:row.kind,paidAt:row.charged_at,contextReference:row.idempotency_key ?? undefined}
     const context=row.idempotency_key ? checkoutContext(row.kind,row.idempotency_key) : undefined
     const skip=row.account_type==='admin' || isInternalEmail(row.email) || context?.internal ? 'internal_user'
       : row.capture_state==='suppressed' || context?.consent==='denied' ? 'consent_denied'
@@ -75,14 +75,14 @@ export async function deliverPurchaseAnalytics(limit=20) {
     const margin=marginCents(service.serviceId,row.price_cents)
     const who=identity(row.client_id,row.session_id)
     const customerType=customerTypeFor(row.user_id,row.email,row.charged_at)
-    const params:Record<string,unknown>={transaction_id:event.transactionId,value:margin.valueCents/100,currency:'USD',engagement_time_msec:100,
+    const params:Record<string,unknown>={transaction_id:event.transactionId,value:row.price_cents/100, gross_margin:margin.known ? margin.valueCents/100 : undefined,currency:'USD',engagement_time_msec:100,
       payment_method:'credit',customer_type:customerType,
       items:[{item_id:service.serviceId ?? row.product_code ?? `order:${row.order_id}`,item_name:service.name,item_category:service.category,price:row.price_cents/100,quantity:1}]}
     if(who.sessionId)params.session_id=who.sessionId
     const reasons=[who.source==='fallback'?'missing_client_id':null,margin.known?null:'margin_unknown'].filter(Boolean).join('; ')||null
     const state=await sendClaimedEvent(event,{client_id:who.clientId,...(who.source==='ga'?{user_id:String(row.user_id)}:{}),
       timestamp_micros:toMicros(row.charged_at),non_personalized_ads:false,events:[{name:'purchase',params}]},
-      {valueCents:margin.valueCents,paidCents:row.price_cents,clientSource:who.source,customerType,marginKnown:margin.known,reason:reasons})
+      {valueCents:row.price_cents,paidCents:row.price_cents,clientSource:who.source,customerType,marginKnown:margin.known,reason:reasons})
     stats[state]++
   }
   return stats

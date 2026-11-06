@@ -19,7 +19,8 @@ export async function captureCheckoutContext(kind: 'topup' | 'order' | 'paid_ime
     const fromCookie = consent === 'granted' ? parseAttributionCookie(jar.get(ATTRIBUTION_COOKIE)?.value) : null
     const fromPage = input && typeof input === 'object' ? input as Record<string, unknown> : {}
     for (const field of CLICK_ID_FIELDS) {
-      const id = fromCookie?.[field] ?? validateClickId(fromPage[field])
+      const hasCampaign = ['utmSource','utmMedium','utmCampaign'].some(key => typeof fromPage[key] === 'string' && fromPage[key])
+      const id = validateClickId(fromPage[field]) ?? (hasCampaign ? undefined : fromCookie?.[field])
       if (id) clickIds[field] = id
     }
     recordCheckoutContext(kind, reference, userId, consent, ip, clickIds, input)

@@ -36,6 +36,14 @@ CREATE TABLE IF NOT EXISTS ga4_checkout_context (
  created_at TEXT NOT NULL DEFAULT (datetime('now')),
  PRIMARY KEY(kind,reference)
 );
+-- Prepared purchases only. No sender is enabled by creating these records.
+CREATE TABLE IF NOT EXISTS ads_conversion_outbox (
+ transaction_id TEXT PRIMARY KEY, kind TEXT NOT NULL, context_reference TEXT NOT NULL,
+ click_id_type TEXT NOT NULL CHECK(click_id_type IN ('gclid','wbraid','gbraid')), click_id TEXT NOT NULL,
+ conversion_time TEXT NOT NULL, revenue_cents INTEGER NOT NULL, gross_margin_cents INTEGER,
+ currency TEXT NOT NULL CHECK(currency='USD'), state TEXT NOT NULL CHECK(state IN ('awaiting_configuration','suppressed')),
+ created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 CREATE TABLE IF NOT EXISTS ga4_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 -- Daily figures from Google Ads / GA4 entered by an administrator until the APIs are connected.
 CREATE TABLE IF NOT EXISTS tracking_daily_manual (

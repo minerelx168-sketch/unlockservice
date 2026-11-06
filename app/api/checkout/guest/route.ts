@@ -27,7 +27,8 @@ export async function POST(request:Request) {
     const context=body.analyticsContext as {clientId:string;sessionId:string}|undefined
     const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
-      analytics: consent && found?.user.account_type!=='admin' ? context : undefined})
+      analytics: consent && found?.user.account_type!=='admin' ? context : undefined,
+      beforeCheckout: reference => captureCheckoutContext('guest',reference,found?.user.id ?? null,found?.user.account_type==='admin' ? undefined : body.analyticsContext)})
     if(found?.user.account_type!=='admin') await captureCheckoutContext('guest',result.reference,found?.user.id ?? null,body.analyticsContext)
     after(() => sendGuestCheckoutLink(result.reference))
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})

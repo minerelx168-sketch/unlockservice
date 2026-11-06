@@ -1,3 +1,5 @@
+> Superseded for purchase values and attribution retention by [the November 6 update](closed-loop-attribution.md). New purchases send revenue as value, with known gross margin in a separate parameter. Historical events below used margin.
+
 # Verified payment measurement — Phase 0
 
 Google Ads receives `purchase` and `payment_completed` only for money that actually arrived from real customers, with `value` = gross margin. Everything is sent by the server payment worker (`scripts/poll-provider-jobs.ts`, run by `unlockservice-poll.timer`). No page sends a purchase or an Ads conversion.

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { PENDING_ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateClickId, type ClickIdField } from '@/lib/attribution'
 import { updateGoogleConsent } from '@/lib/google-consent-tracking'
-import { forgetLanding, rememberLanding } from '@/lib/landing-context'
+import { forgetLanding, rememberLanding, persistLanding } from '@/lib/landing-context'
 export function AnalyticsConsent() {
   const [consent, setConsent] = useState<'unknown' | 'granted' | 'denied'>('unknown')
   const [open, setOpen] = useState(false)
@@ -38,9 +38,9 @@ export function AnalyticsConsent() {
           const response = await fetch('/api/consent', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ consent: state, ...clicks.current }) })
           if (!response.ok || !active) return
           await response.json()
-          updateGoogleConsent('granted', clicks.current)
+          updateGoogleConsent('granted', clicks.current); persistLanding()
         } else {
-          updateGoogleConsent('granted', clicks.current)
+          updateGoogleConsent('granted', clicks.current); persistLanding()
         }
       }
     }).catch(() => { if (active) setOpen(true) })
@@ -55,6 +55,7 @@ export function AnalyticsConsent() {
       if (!response.ok) throw new Error('Unable to save your choice. Optional tracking remains disabled.')
       await response.json().catch(() => ({}))
       updateGoogleConsent(state, state === 'granted' ? clicks.current : {})
+      if (state === 'granted') persistLanding()
       setConsent(state); setOpen(false)
       if (state === 'denied') { clicks.current = {}; forgetLanding() }
     } catch (error) { setError(error instanceof Error ? error.message : 'Unable to save your choice.') } finally { setBusy(false) }
