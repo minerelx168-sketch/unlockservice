@@ -42,6 +42,431 @@ export type Article = {
 
 const ARTICLES: Article[] = [
 {
+  "slug": "att-transfer-pin-vs-iphone-carrier-unlock",
+  "title": "AT&T Transfer PIN vs iPhone Unlock",
+  "heading": "AT&T Transfer PIN: Does It Unlock Your iPhone?",
+  "description": "An AT&T transfer PIN moves your number, not your iPhone carrier lock. Learn which request to make and what to verify before switching networks.",
+  "standfirst": "An AT&T transfer PIN authorizes moving a phone number to another provider; it does not unlock an iPhone. Check device eligibility and Carrier Lock separately before switching. Keep the current line active during the number transfer, and use the correct AT&T account-type instructions when obtaining transfer credentials.",
+  "published": "2026-11-07",
+  "updated": "2026-11-07",
+  "minutes": 6,
+  "topic": "AT&T Transfer PIN vs iPhone Unlock",
+  "blocks": [
+    {
+      "kind": "list",
+      "items": [
+        "Separate the phone number transfer from permission to use the handset on another network.",
+        "Check Carrier Lock before relying on the same iPhone with a new provider.",
+        "Keep transfer credentials private and give them only to the intended receiving provider.",
+        "Use the correct instructions for consumer, business or prepaid service."
+      ],
+      "ordered": false
+    },
+    {
+      "kind": "h2",
+      "id": "different-jobs",
+      "text": "What is the difference between a transfer PIN and an iPhone unlock?"
+    },
+    {
+      "kind": "p",
+      "text": "A transfer PIN protects a request to move your telephone number. A carrier unlock changes whether the handset may use another provider. These are separate records and separate support tasks. Decide whether you are keeping the number, the iPhone, or both before starting either process."
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Task",
+        "Relevant information",
+        "What completion does not establish"
+      ],
+      "rows": [
+        [
+          "Number transfer",
+          "Phone number, account information and required transfer credentials",
+          "The old handset is unlocked"
+        ],
+        [
+          "iPhone carrier unlock",
+          "Device IMEI and carrier eligibility record",
+          "The number has moved"
+        ],
+        [
+          "New SIM or eSIM activation",
+          "Destination plan and requested device identifiers",
+          "Old account obligations are settled"
+        ],
+        [
+          "SIM PIN recovery",
+          "The issuing SIM provider\u2019s recovery process",
+          "Number transfer or carrier-unlock approval"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "AT&T tells customers to unlock the device before using it on another provider and warns against disconnecting the line before requesting a number transfer. Treat this as two coordinated checks rather than expecting the transfer PIN to perform both jobs.",
+      "links": [
+        {
+          "label": "AT&T transfer instructions",
+          "href": "https://www.att.com/support/article/wireless/KM1447526/"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "before-switching",
+      "text": "What should I check before switching with the same iPhone?"
+    },
+    {
+      "kind": "p",
+      "text": "Start with the handset and the destination plan, then arrange the number transfer. A working original SIM only proves service with that carrier. Record the iPhone\u2019s lock status and confirm the new provider accepts the model before choosing a transfer date or cancelling any existing service."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Open Settings > General > About > Carrier Lock.",
+        "If No SIM restrictions is absent, ask the locking carrier about device eligibility.",
+        "Ask the receiving provider to confirm compatibility and the physical SIM or eSIM activation route.",
+        "Keep the current line available while coordinating the number transfer.",
+        "Test incoming calls, outgoing calls, SMS and cellular data after the receiving provider confirms completion."
+      ],
+      "ordered": true
+    },
+    {
+      "kind": "p",
+      "text": "Apple identifies No SIM restrictions as the on-device unlocked status. AT&T\u2019s device-unlock process separately considers payment, account and device conditions. A PIN generated for a number transfer is not evidence that those requirements were met.",
+      "links": [
+        {
+          "label": "Apple carrier-unlock guidance",
+          "href": "https://support.apple.com/en-us/109316"
+        },
+        {
+          "label": "AT&T device eligibility",
+          "href": "https://www.att.com/deviceunlock/"
+        },
+        {
+          "label": "AT&T unlock request status guide",
+          "href": "/articles/att-iphone-unlock-request-status"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "get-correct-pin",
+      "text": "Which AT&T instructions apply to my transfer PIN?"
+    },
+    {
+      "kind": "p",
+      "text": "Identify the account type before following a PIN tutorial. AT&T publishes different routes for consumer wireless and business accounts, and says its prepaid accounts do not need a Number Transfer PIN. Use the current official instructions for your account instead of assuming every AT&T line uses the same credential."
+    },
+    {
+      "kind": "p",
+      "text": "For a consumer account, begin with AT&T\u2019s authenticated account instructions. Have the receiving provider identify the information it needs. If a request is already pending, tell that provider before generating replacement credentials so the case is not left using an obsolete PIN.",
+      "links": [
+        {
+          "label": "Current AT&T account-specific routes",
+          "href": "https://www.att.com/support/article/wireless/KM1447526/"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "transfer-failed",
+      "text": "What if the number moves but the iPhone will not activate?"
+    },
+    {
+      "kind": "p",
+      "text": "Ask which part failed: the number transfer, device unlock or destination-line activation. Record the exact message and keep each case reference separate. A completed port can coexist with a handset restriction or activation problem, so do not repeatedly request new transfer credentials to diagnose a device error."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Transfer rejected: ask the receiving provider which account detail or authorization needs correction.",
+        "SIM Locked in Carrier Lock: ask the locking carrier to review this handset.",
+        "No SIM restrictions but no service: ask the new provider about the active plan and provisioning.",
+        "SIM PIN or PUK prompt: contact the SIM issuer instead of entering a transfer PIN."
+      ],
+      "ordered": false
+    },
+    {
+      "kind": "p",
+      "text": "For eSIM support, keep the requested IMEI or EID available through the provider\u2019s private support channel. Do not post account credentials, full device identifiers or transfer PINs in a public troubleshooting discussion.",
+      "links": [
+        {
+          "label": "Apple eSIM troubleshooting",
+          "href": "https://support.apple.com/en-us/102478"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "service-scope",
+      "text": "Can an unlock service provide my transfer PIN?"
+    },
+    {
+      "kind": "p",
+      "text": "Obtain transfer credentials through the account provider\u2019s authorized process. A third-party report or unlock service is a different purchase and should explain its exact scope. It cannot replace account authorization, guarantee carrier eligibility, or make a phone-number transfer settle the original account\u2019s remaining financial obligations."
+    },
+    {
+      "kind": "p",
+      "text": "Carrier Lock, SIM PIN/PUK, a screen passcode and iCloud Activation Lock are different controls. Lost-or-stolen blacklist records and unpaid finance also require separate review. Neither transferring a number nor changing data settings clears those records or settles an account.",
+      "links": [
+        {
+          "label": "Apple SIM PIN guidance",
+          "href": "https://support.apple.com/en-us/118228"
+        },
+        {
+          "label": "Apple Activation Lock guidance",
+          "href": "https://support.apple.com/en-us/108794"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "If you are unsure which company controls the handset restriction, identify that question before buying a report. iUnlockMobile support can discuss a listed service\u2019s scope; do not send account passwords or transfer PINs with a general enquiry.",
+      "links": [
+        {
+          "label": "Identify the iPhone\u2019s carrier",
+          "href": "/articles/how-to-find-carrier-on-iphone-before-unlock"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Not sure whether the problem concerns the handset or the number transfer? Share the model, Carrier Lock result and error text with iUnlockMobile before ordering a report. Keep your transfer PIN private.",
+      "label": "Discuss the correct next check",
+      "href": "/contact"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Does my AT&T transfer PIN unlock my iPhone?",
+      "answer": "No. The PIN authorizes moving your phone number to another provider. Carrier unlocking is a separate device process controlled by the locking carrier. Check the iPhone\u2019s Carrier Lock field and resolve device eligibility before assuming the same handset will work after the number moves."
+    },
+    {
+      "question": "Should I cancel AT&T before transferring my number?",
+      "answer": "AT&T advises keeping the line active until you ask the new provider to transfer it. Disconnecting too early can interrupt the transfer process. Coordinate the switch with the receiving provider and separately confirm device compatibility, unlock status and any remaining account obligations."
+    },
+    {
+      "question": "Do AT&T prepaid customers need a Number Transfer PIN?",
+      "answer": "AT&T\u2019s current guidance says prepaid accounts do not require a Number Transfer PIN. That does not mean there are no transfer credentials or verification requirements. Ask the receiving provider which prepaid account details it needs and follow the current official AT&T instructions."
+    },
+    {
+      "question": "Can a transferred number work on a different unlocked phone?",
+      "answer": "Number portability and the original handset\u2019s lock are separate issues. Ask the receiving provider to activate the transferred number on the compatible device you intend to use. Verify that device\u2019s eligibility and plan support rather than assuming the original iPhone must be used."
+    }
+  ]
+},
+{
+  "slug": "iphone-apn-settings-after-carrier-unlock",
+  "title": "iPhone APN Settings After Carrier Unlock",
+  "heading": "iPhone APN Settings: Fix Data After a Carrier Unlock",
+  "description": "Check iPhone APN settings after a carrier unlock without confusing data configuration with SIM Locked. Follow carrier-approved checks for your line.",
+  "standfirst": "iPhone APN settings configure cellular data access; they do not authorize a carrier unlock. If calls work but data fails after switching providers, confirm the selected data line and ask that provider whether APN changes are required. Edit only the values your carrier or device administrator supplies.",
+  "published": "2026-11-07",
+  "updated": "2026-11-07",
+  "minutes": 6,
+  "topic": "iPhone APN Settings After Carrier Unlock",
+  "blocks": [
+    {
+      "kind": "list",
+      "items": [
+        "Verify Carrier Lock independently of cellular data settings.",
+        "A missing APN menu does not prove the iPhone is locked.",
+        "Use the destination carrier\u2019s current instructions for the specific plan.",
+        "Record the failure before changing settings, then test the same task again."
+      ],
+      "ordered": false
+    },
+    {
+      "kind": "h2",
+      "id": "what-apn-does",
+      "text": "What do iPhone APN settings control?"
+    },
+    {
+      "kind": "p",
+      "text": "APN means Access Point Name and concerns the route used for cellular data. It is a configuration question, not proof of permission to use another carrier. Treat a data-only failure differently from SIM Locked, a rejected eSIM installation or a phone that cannot connect to any network."
+    },
+    {
+      "kind": "table",
+      "head": [
+        "Observation",
+        "Question to investigate",
+        "Do not assume"
+      ],
+      "rows": [
+        [
+          "Calls work, mobile data fails",
+          "Data line, plan provisioning and carrier-approved APN",
+          "Another unlock must be purchased"
+        ],
+        [
+          "APN menu missing",
+          "Whether the carrier allows manual access",
+          "The phone is necessarily locked"
+        ],
+        [
+          "SIM Locked in Carrier Lock",
+          "The locking carrier\u2019s eligibility decision",
+          "An APN value can bypass the restriction"
+        ],
+        [
+          "eSIM installation fails",
+          "Supported activation route and requested identifiers",
+          "Changing an unrelated line\u2019s APN will fix it"
+        ]
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "Apple says APN viewing and editing depend on the carrier. Its guidance warns that incorrect values can disrupt data and cause additional charges. Use carrier instructions rather than a generic list copied from an unrelated plan.",
+      "links": [
+        {
+          "label": "Apple APN guidance",
+          "href": "https://support.apple.com/en-us/102483"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "before-editing",
+      "text": "What should I check before editing the APN?"
+    },
+    {
+      "kind": "p",
+      "text": "Identify the affected line and describe the failure precisely before changing configuration. Check whether calls, messages and mobile data all fail or only data fails. Keep a working connection available for support, and ask the destination provider whether the plan is active and the device has been correctly provisioned."
+    },
+    {
+      "kind": "list",
+      "items": [
+        "Check Settings > General > About > Carrier Lock.",
+        "Identify the intended cellular data line in Settings, especially with Dual SIM.",
+        "Temporarily test cellular data without relying on Wi-Fi, then restore your preferred connection.",
+        "Record the error, iPhone model, iOS version and recent SIM or eSIM changes.",
+        "Ask the carrier whether manual APN entry is needed for this exact plan."
+      ],
+      "ordered": true
+    },
+    {
+      "kind": "p",
+      "text": "If the phone already shows No SIM restrictions, use the receiving provider\u2019s activation and connectivity support first. Keep the IMEI, EID or ICCID available only if that provider requests the relevant identifier through its private support route.",
+      "links": [
+        {
+          "label": "Apple unlock-status check",
+          "href": "https://support.apple.com/en-us/109316"
+        },
+        {
+          "label": "Unlocked but no service guide",
+          "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "missing-menu",
+      "text": "Why can\u2019t I find Cellular Data Network on my iPhone?"
+    },
+    {
+      "kind": "p",
+      "text": "Your carrier may not expose manual APN controls. A missing Cellular Data Network menu therefore does not establish Carrier Lock or a faulty unlock. Ask the provider responsible for the affected line how its settings are delivered, and involve the device administrator when the phone is managed by an organization."
+    },
+    {
+      "kind": "p",
+      "text": "Where supported, Apple lists Settings > Cellular > Cellular Data Network, with regional variations under Mobile Data. If the option is absent, follow the carrier\u2019s route. Do not install an unknown configuration profile simply to make a menu appear.",
+      "links": [
+        {
+          "label": "Apple\u2019s supported menu paths",
+          "href": "https://support.apple.com/en-us/102483"
+        }
+      ]
+    },
+    {
+      "kind": "h2",
+      "id": "safe-change",
+      "text": "How should I change or restore an APN safely?"
+    },
+    {
+      "kind": "p",
+      "text": "Have the carrier confirm the exact fields and values before editing, and preserve its instructions with your support case. Change only the requested configuration, then repeat the original test. If it fails, report the outcome instead of cycling through internet APN lists or resetting unrelated device settings."
+    },
+    {
+      "kind": "p",
+      "text": "Apple documents a Reset Settings control within Cellular Data Network for restoring APN defaults where available. A configuration profile can supply its own defaults, so ask the administrator before changing managed settings. This APN control should not be confused with erasing the entire iPhone.",
+      "links": [
+        {
+          "label": "Apple APN reset instructions",
+          "href": "https://support.apple.com/en-us/102483"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "For example, tell support: \u201cCalls work on the new line, but cellular data fails with Wi-Fi off. Carrier Lock shows No SIM restrictions. Does this plan need manual APN entry, and which fields should I change?\u201d This separates your observation from an unproven explanation."
+    },
+    {
+      "kind": "h2",
+      "id": "not-unlock",
+      "text": "Can an APN profile remove SIM Locked or other restrictions?"
+    },
+    {
+      "kind": "p",
+      "text": "An APN profile is configuration, not carrier-unlock authorization. If the handset remains restricted, ask the locking carrier about eligibility instead. A third-party provider should distinguish a report from assistance with an eligible unlock request and explain limitations before you pay for something unrelated to the data fault."
+    },
+    {
+      "kind": "p",
+      "text": "Carrier Lock, SIM PIN/PUK, a screen passcode and iCloud Activation Lock are different controls. Lost-or-stolen blacklist records and unpaid finance also require separate review. Neither transferring a number nor changing data settings clears those records or settles an account.",
+      "links": [
+        {
+          "label": "Apple SIM PIN guidance",
+          "href": "https://support.apple.com/en-us/118228"
+        },
+        {
+          "label": "Apple Activation Lock guidance",
+          "href": "https://support.apple.com/en-us/108794"
+        }
+      ]
+    },
+    {
+      "kind": "p",
+      "text": "A carrier settings update and a manual APN change are also different operations. Keep the carrier version, the affected line and any manual edits in your support notes so the provider can understand what changed.",
+      "links": [
+        {
+          "label": "Carrier settings versus unlocking",
+          "href": "/articles/iphone-carrier-settings-update-sim-locked"
+        },
+        {
+          "label": "Apple carrier settings guidance",
+          "href": "https://support.apple.com/en-us/109324"
+        }
+      ]
+    },
+    {
+      "kind": "cta",
+      "text": "Unsure whether you need a carrier report or data troubleshooting? Tell iUnlockMobile the Carrier Lock result and which functions fail before ordering. Never send account passwords.",
+      "label": "Ask which check applies",
+      "href": "/contact"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Can changing APN settings unlock my iPhone?",
+      "answer": "No. APN settings configure cellular data access and do not replace the locking carrier\u2019s approval. If Carrier Lock still shows a restriction, use the carrier\u2019s eligibility process. A working data configuration on one network does not establish permission to activate another network."
+    },
+    {
+      "question": "Why is the APN menu missing on my unlocked iPhone?",
+      "answer": "The carrier controls whether manual APN viewing or editing is available. A missing menu is not proof of a carrier lock. Ask the provider for the affected line how its settings are delivered and whether manual configuration is required for your plan."
+    },
+    {
+      "question": "Why do calls work but mobile data does not after unlocking?",
+      "answer": "An unlocked phone still needs an active, correctly provisioned data plan and appropriate configuration. Confirm the selected data line, describe the exact failure and ask the receiving provider whether APN changes are required. Avoid assuming that a second unlock purchase will restore data."
+    },
+    {
+      "question": "Should I use an APN profile from an unlock website?",
+      "answer": "Use configuration supplied or verified by your carrier or authorized device administrator. An unrelated website\u2019s profile is not evidence of unlock approval or suitability for your plan. Confirm the purpose and required settings with the responsible provider before installing or changing any configuration."
+    }
+  ]
+},
+
+{
   "slug": "iphone-imei2-carrier-unlock-request",
   "title": "iPhone IMEI2: Which Number for Unlock?",
   "heading": "iPhone IMEI2: Which Number Should You Use for a Carrier Unlock?",
