@@ -41,6 +41,461 @@ export type Article = {
 }
 
 const ARTICLES: Article[] = [
+
+  {
+    "slug": "check-sealed-iphone-unlocked-before-opening",
+    "title": "Sealed iPhone Unlock Check Before Opening",
+    "heading": "How to Check If an iPhone Is Unlocked Without Opening the Box",
+    "description": "Learn how to check if an iPhone is unlocked without opening the box, what the IMEI can show, and what must wait for setup.",
+    "standfirst": "You cannot confirm an iPhone’s live Carrier Lock field from a sealed retail box alone. Use the package identifier, seller records and the claimed carrier to reduce risk, but require a return option. The decisive check appears after setup in Settings > General > About > Carrier Lock.",
+    "published": "2026-11-08",
+    "updated": "2026-11-08",
+    "minutes": 7,
+    "topic": "Sealed iPhone Unlock Check",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "The box barcode can supply an IMEI, EID or serial number, but it does not display the live Carrier Lock field.",
+          "Ask the seller to document the sales channel, carrier status, payment status and return terms before purchase.",
+          "Treat an IMEI report as one evidence source, not as carrier authorization or a guarantee of activation.",
+          "After opening, verify Carrier Lock, Activation Lock and destination-carrier compatibility as separate checks."
+        ],
+        "ordered": false
+      },
+      {
+        "kind": "h2",
+        "id": "sealed-limit",
+        "text": "Can you confirm Carrier Lock while an iPhone is sealed?"
+      },
+      {
+        "kind": "p",
+        "text": "Not from the packaging alone. A sealed box can expose device identifiers, while Apple’s definitive user-facing lock check is inside Settings. Before buying, combine the identifier with seller and carrier records, preserve the return terms, and avoid treating a box label as proof of an unlocked activation policy."
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Evidence available before opening",
+          "What it can support",
+          "What it cannot prove"
+        ],
+        "rows": [
+          [
+            "Original box barcode",
+            "Serial number, IMEI or EID for identification",
+            "Current Carrier Lock result"
+          ],
+          [
+            "Seller invoice or order record",
+            "Sales channel, purchase date and named buyer",
+            "That finance or carrier obligations are cleared"
+          ],
+          [
+            "Carrier confirmation tied to the IMEI",
+            "The carrier’s current account or unlock record",
+            "Compatibility with every destination network"
+          ],
+          [
+            "Third-party IMEI report",
+            "The fields and source coverage stated by that report",
+            "Carrier authorization, Activation Lock removal or future blacklist status"
+          ]
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Apple documents that the original packaging may show the serial number, EID and IMEI/MEID. Apple separately directs users to Settings > General > About for Carrier Lock, where “No SIM restrictions” indicates an unlocked iPhone. Those are different checks with different evidentiary value.",
+        "links": [
+          {
+            "label": "Apple’s identifier locations",
+            "href": "https://support.apple.com/en-us/108037"
+          },
+          {
+            "label": "Apple’s carrier-unlock check",
+            "href": "https://support.apple.com/en-us/109316"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "identifier-scope",
+        "text": "What can the box label and IMEI actually tell you?"
+      },
+      {
+        "kind": "p",
+        "text": "The identifier lets Apple, a carrier or a reporting service look up records associated with that device. Its usefulness depends on the data source and update time. It does not let a buyer infer every lock, payment, blacklist or compatibility condition from the digits printed on the package."
+      },
+      {
+        "kind": "list",
+        "ordered": true,
+        "items": [
+          "Ask for one clear photo showing the intact package and barcode label in the same frame.",
+          "Compare the model, storage, color and identifier with the invoice or carrier order record.",
+          "Ask the claimed selling carrier to confirm what it can disclose about unlock eligibility for that IMEI.",
+          "Confirm the seller’s written return window covers activation, Carrier Lock and destination-network tests.",
+          "Do not publish a complete IMEI, EID, serial number, receipt or account detail in a marketplace post."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "An IMEI report may help identify the model, original carrier or recorded device status when those fields are included. Read the report’s scope and timestamp. A clean result is not a promise that the phone is paid off, unlocked or accepted by a chosen carrier.",
+        "links": [
+          {
+            "label": "What an IMEI check can and cannot tell you",
+            "href": "/articles/what-an-imei-check-tells-you"
+          },
+          {
+            "label": "Checks before buying a used phone",
+            "href": "/articles/checks-before-buying-a-used-phone"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "seller-evidence",
+        "text": "Which seller evidence reduces the risk before purchase?"
+      },
+      {
+        "kind": "p",
+        "text": "Prefer records that connect the exact identifier to the seller, sales channel and return promise. A verbal claim such as “factory unlocked” is weaker than an original invoice plus written terms. If the seller refuses identifier verification or activation testing, the uncertainty remains with the buyer after payment."
+      },
+      {
+        "kind": "list",
+        "items": [
+          "A receipt or order page that matches the device description and seller identity.",
+          "A carrier case reference or written response that clearly identifies the question answered.",
+          "A return policy that permits opening, activation and a different-carrier test.",
+          "A payment method with a documented dispute process for misdescribed goods."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Do not confuse an intact seal with a guarantee about ownership or account status. Packaging can be replaced, labels can be photographed from another unit, and a device record can change later. Verify the IMEI shown by the iPhone against the package as soon as the return window begins."
+      },
+      {
+        "kind": "h2",
+        "id": "after-opening",
+        "text": "What should you check immediately after opening the iPhone?"
+      },
+      {
+        "kind": "p",
+        "text": "Start the return-window checks before transferring personal data. Confirm that the on-device identifiers match the box, inspect Carrier Lock, complete setup without another person’s Apple Account, and test the intended network. Record the results while the seller’s written remedy is still available if the description was inaccurate."
+      },
+      {
+        "kind": "list",
+        "ordered": true,
+        "items": [
+          "Compare the IMEI, EID and serial number in Settings > General > About with the package and invoice.",
+          "Read Carrier Lock; “No SIM restrictions” is Apple’s on-device unlocked status.",
+          "Complete setup and ensure the phone does not request the previous owner’s Apple Account through Activation Lock.",
+          "Ask the destination carrier to check the relevant IMEI or EID for plan and eSIM compatibility.",
+          "Test calls, messages and cellular data with the intended physical SIM or eSIM."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Apple’s preowned-iPhone guidance recommends checking Carrier Lock in Settings and ensuring the device is ready for a new owner. If the sealed phone was sold as unlocked but shows a carrier restriction, preserve the evidence and use the seller’s return process before purchasing an unrelated service.",
+        "links": [
+          {
+            "label": "Apple’s preowned iPhone checklist",
+            "href": "https://support.apple.com/en-us/104999"
+          },
+          {
+            "label": "How to check if an iPhone is unlocked",
+            "href": "/articles/how-to-check-if-iphone-is-unlocked"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "separate-controls",
+        "text": "Which iPhone restrictions are separate from Carrier Lock?"
+      },
+      {
+        "kind": "p",
+        "text": "Carrier Lock controls whether another compatible carrier may activate the iPhone. A SIM PIN/PUK protects a SIM, the screen passcode protects device access, and Activation Lock protects ownership. Blacklist entries and unpaid finance are separate records. One favorable check does not clear the others."
+      },
+      {
+        "kind": "p",
+        "text": "A third-party service should state which record or request it handles. It cannot turn a package identifier into ownership proof, remove an Apple Account lock, settle finance, guarantee a future blacklist result or force a carrier to accept an otherwise incompatible model.",
+        "links": [
+          {
+            "label": "Apple SIM PIN guidance",
+            "href": "https://support.apple.com/en-us/118228"
+          },
+          {
+            "label": "Apple Activation Lock guidance",
+            "href": "https://support.apple.com/en-us/108794"
+          },
+          {
+            "label": "Carrier lock and blacklist differences",
+            "href": "/articles/blacklisted-iphone-unlock-carrier-lock-difference"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Have the package IMEI but need to understand which report applies? Review the available device checks and their stated fields before ordering. Keep the full identifier private outside the secure order flow.",
+        "label": "Compare IMEI check options",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can I check if a sealed iPhone is unlocked by its IMEI?",
+        "answer": "An IMEI can support a carrier enquiry or a report, but it does not display the iPhone’s live Carrier Lock field by itself. Ask what source and timestamp the result uses. After opening, confirm the status in Settings > General > About and test the intended carrier."
+      },
+      {
+        "question": "Does the iPhone box say whether the phone is carrier locked?",
+        "answer": "The original package can show identifiers such as the serial number, EID or IMEI, but Apple does not present the box label as the Carrier Lock check. The user-facing status appears in Settings. Keep a return option if the phone cannot be activated before purchase."
+      },
+      {
+        "question": "Is a sealed iPhone automatically factory unlocked?",
+        "answer": "No. An intact seal describes packaging, not the carrier policy attached to the device. The sales channel, carrier agreement and device record determine the relevant status. Ask for matching purchase evidence and written return terms, then verify Carrier Lock immediately after setup."
+      },
+      {
+        "question": "What should I do if a sealed iPhone was sold as unlocked but is locked?",
+        "answer": "Save the listing, invoice, package photos and on-device Carrier Lock result. Contact the seller within the stated return period and ask the identified carrier about the record. Do not pay for an unrelated service before establishing whether the seller or carrier must correct the description."
+      }
+    ]
+  },
+  {
+    "slug": "will-unlocked-iphone-work-any-carrier",
+    "title": "Unlocked iPhone Carrier Compatibility",
+    "heading": "Will an Unlocked iPhone Work on Any Carrier?",
+    "description": "Will an unlocked iPhone work on any carrier? Check model bands, IMEI acceptance, SIM or eSIM support, plan features and device status first.",
+    "standfirst": "An unlocked iPhone can use another compatible carrier, but “unlocked” does not mean every network will accept every model. Confirm the exact model, regional cellular bands, IMEI eligibility, physical SIM or eSIM support, and plan features with the destination carrier before moving your number or paying for service.",
+    "published": "2026-11-08",
+    "updated": "2026-11-08",
+    "minutes": 7,
+    "topic": "Unlocked iPhone Carrier Compatibility",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Carrier Lock permission and network compatibility are separate decisions.",
+          "Use the exact iPhone model and IMEI or EID in the destination carrier’s current compatibility route.",
+          "Check physical SIM versus eSIM support for the purchase region and intended plan.",
+          "Confirm calls, messages, mobile data, 5G, VoLTE and hotspot features rather than testing signal alone."
+        ],
+        "ordered": false
+      },
+      {
+        "kind": "h2",
+        "id": "unlocked-vs-compatible",
+        "text": "Does unlocked mean compatible with every carrier?"
+      },
+      {
+        "kind": "p",
+        "text": "No. “No SIM restrictions” means the iPhone is not restricted to one carrier, but the destination network still decides whether it supports the exact model, identifiers and plan. Cellular bands, eSIM availability, certification, account rules and local coverage can all affect service after an unlock."
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Compatibility factor",
+          "Where to verify it",
+          "What a favorable result means"
+        ],
+        "rows": [
+          [
+            "Carrier Lock",
+            "Settings > General > About",
+            "The iPhone may use another compatible carrier"
+          ],
+          [
+            "Exact model and regional bands",
+            "Apple model and cellular specifications",
+            "The hardware includes relevant radio bands"
+          ],
+          [
+            "IMEI or EID acceptance",
+            "Destination carrier’s BYOD checker or support",
+            "The carrier currently recognizes that identifier for the requested activation path"
+          ],
+          [
+            "Physical SIM or eSIM",
+            "Apple SIM-type guidance and carrier plan rules",
+            "A supported activation method exists"
+          ],
+          [
+            "Plan features",
+            "Destination carrier’s current plan documentation",
+            "Requested features are offered for that device and plan"
+          ],
+          [
+            "Blacklist or finance record",
+            "Relevant carrier or stated report source",
+            "Only the record and timestamp actually checked"
+          ]
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Apple says an unlocked iPhone shows “No SIM restrictions,” while its cellular specifications list bands by model and region. Apple also notes that cellular capability depends on the network, model and location. The destination carrier remains the source for acceptance and supported plan features.",
+        "links": [
+          {
+            "label": "Apple carrier-unlock guidance",
+            "href": "https://support.apple.com/en-us/109316"
+          },
+          {
+            "label": "Apple cellular bands by model",
+            "href": "https://www.apple.com/iphone/cellular/"
+          },
+          {
+            "label": "Apple cellular setup guidance",
+            "href": "https://support.apple.com/guide/iphone/set-up-cellular-service-iph3f11fba92/ios"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "compatibility-check",
+        "text": "How do you check compatibility before switching carriers?"
+      },
+      {
+        "kind": "p",
+        "text": "Check the iPhone and the destination network before porting a number. Record the exact model, confirm Carrier Lock, and use the carrier’s current IMEI or EID checker. Then verify the plan, activation method and required features. Keep the existing line active until the receiving carrier confirms completion."
+      },
+      {
+        "kind": "list",
+        "ordered": true,
+        "items": [
+          "Open Settings > General > About and confirm Carrier Lock shows “No SIM restrictions.”",
+          "Record the model number and purchase region; do not rely on the marketing name alone.",
+          "Submit the requested IMEI or EID through the destination carrier’s official BYOD route.",
+          "Confirm whether the plan uses a physical SIM, eSIM Carrier Activation, QR code or carrier app.",
+          "Ask specifically about voice, SMS, mobile data, 5G, VoLTE, Wi-Fi Calling, hotspot and roaming.",
+          "Activate and test before cancelling the previous line or disposing of the old SIM."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "For example, T-Mobile’s BYOD route requests an IMEI and may use the EID for eSIM compatibility; AT&T separates device compatibility from unlock confirmation. These carrier tools answer a destination-network question. They do not replace the iPhone’s Carrier Lock check.",
+        "links": [
+          {
+            "label": "T-Mobile BYOD compatibility check",
+            "href": "https://www.t-mobile.com/resources/bring-your-own-phone"
+          },
+          {
+            "label": "AT&T BYOD guidance",
+            "href": "https://www.att.com/wireless/byod/"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "compatible-but-fails",
+        "text": "Why can a compatible unlocked iPhone still fail to connect?"
+      },
+      {
+        "kind": "p",
+        "text": "Compatibility is only one stage. The line must also be active and provisioned, the correct SIM or eSIM must be installed, and the selected data line must be enabled. A temporary outage, account block, APN configuration or incomplete number transfer can produce a failure without changing Carrier Lock."
+      },
+      {
+        "kind": "list",
+        "items": [
+          "SIM Not Supported or SIM Locked: recheck Carrier Lock and ask the locking carrier about the device record.",
+          "No Service or SOS: verify coverage, active plan, provisioning and the selected cellular line.",
+          "Calls work but data fails: ask the destination carrier about plan provisioning and approved APN settings.",
+          "eSIM cannot be added: confirm EID support, activation method and whether the carrier supports that model.",
+          "Some features are missing: confirm the carrier supports them on that model and plan."
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Avoid repeatedly buying unlocks for a provisioning problem. Record the exact message, affected function, Carrier Lock result, model and current carrier. That evidence helps the responsible carrier distinguish a device restriction from account activation or network configuration.",
+        "links": [
+          {
+            "label": "Unlocked iPhone with no service troubleshooting",
+            "href": "/articles/iphone-unlocked-but-no-service-troubleshooting"
+          },
+          {
+            "label": "iPhone APN settings after unlock",
+            "href": "/articles/iphone-apn-settings-after-carrier-unlock"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "sim-esim",
+        "text": "Do physical SIM and eSIM iPhones have the same options?"
+      },
+      {
+        "kind": "p",
+        "text": "No. SIM hardware varies by iPhone model and purchase region, and carrier eSIM support also varies by plan and location. An unlocked eSIM-only model still needs a destination carrier that supports its EID and activation method. A physical SIM slot cannot be added through carrier unlocking."
+      },
+      {
+        "kind": "p",
+        "text": "Apple maintains a model list showing which iPhones use eSIM only, eSIM plus nano-SIM, dual nano-SIM or older SIM formats. Check the exact model and region against that list, then verify the destination carrier’s eSIM process before buying a plan or traveling.",
+        "links": [
+          {
+            "label": "Apple SIM types by iPhone model",
+            "href": "https://support.apple.com/en-us/118569"
+          },
+          {
+            "label": "Apple eSIM carrier list",
+            "href": "https://support.apple.com/en-us/101569"
+          },
+          {
+            "label": "Dual SIM and carrier-lock guide",
+            "href": "/articles/iphone-dual-sim-two-carriers-unlock-guide"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "service-scope",
+        "text": "What can an unlock or IMEI service confirm?"
+      },
+      {
+        "kind": "p",
+        "text": "A service can provide only the report fields or carrier-request assistance it clearly describes. It cannot add missing radio bands, make an unsupported carrier accept a model, create a SIM tray, guarantee coverage or clear unrelated account records. Check compatibility with the destination carrier before ordering an unlock-related product."
+      },
+      {
+        "kind": "p",
+        "text": "Carrier Lock is also distinct from SIM PIN/PUK, the screen passcode, iCloud Activation Lock, blacklist status and unpaid finance. An unlock decision does not remove those controls or debts. A report must state its data source, scope and timestamp so the buyer can interpret it correctly.",
+        "links": [
+          {
+            "label": "Apple SIM PIN guidance",
+            "href": "https://support.apple.com/en-us/118228"
+          },
+          {
+            "label": "Apple Activation Lock guidance",
+            "href": "https://support.apple.com/en-us/108794"
+          },
+          {
+            "label": "IMEI unlock service checklist",
+            "href": "/articles/imei-unlock-iphone-service-checklist"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Not sure whether the obstacle is Carrier Lock or destination-network compatibility? Share the model, Carrier Lock result and intended carrier with iUnlockMobile before choosing a listed service. Keep full identifiers out of a general enquiry.",
+        "label": "Ask which check applies",
+        "href": "/contact"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Will an unlocked iPhone work on any carrier?",
+        "answer": "Not automatically. Unlocked means the phone is not restricted to one carrier. The destination network must still accept the exact model and IMEI, support its cellular bands and SIM or eSIM method, and offer the required features on the selected plan and location."
+      },
+      {
+        "question": "Can an unlocked iPhone be incompatible with a network?",
+        "answer": "Yes. A regional model may lack a relevant band or activation option, and a carrier may not certify or provision that identifier for every feature. Run the destination carrier’s current BYOD check and confirm voice, data, 5G, VoLTE, Wi-Fi Calling and hotspot support."
+      },
+      {
+        "question": "Does an unlocked eSIM iPhone work with every eSIM carrier?",
+        "answer": "No. The iPhone model must support eSIM, and the carrier must support that model, EID, plan and activation method in the relevant country. Check Apple’s model information and the carrier’s current eSIM route before purchasing or transferring a plan."
+      },
+      {
+        "question": "Why does my unlocked iPhone say SIM Not Supported?",
+        "answer": "First confirm Carrier Lock still shows “No SIM restrictions.” Then ask the destination carrier whether the SIM or eSIM is active, compatible and correctly provisioned for the exact model. SIM Not Supported can identify an unresolved carrier restriction, while other activation failures require different troubleshooting."
+      }
+    ]
+  }
+,
 {
   "slug": "att-transfer-pin-vs-iphone-carrier-unlock",
   "title": "AT&T Transfer PIN vs iPhone Unlock",
