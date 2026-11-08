@@ -9,13 +9,24 @@ export type AdsPurchase = {
 }
 export const timestamp = (value: string) => Date.parse(value.includes('T') ? value : value.replace(' ', 'T') + 'Z')
 
-/** Re-read financial and consent evidence immediately before every request. Fail closed. */
+export type VerifiedPurchase = Omit<AdsPurchase, 'click_id_type' | 'click_id'>
+
+/** Google-specific attribution remains mandatory for Google OCI. */
 export function adsIneligibleReason(row: AdsPurchase, startAt: number, now = Date.now()): string | null {
+  const reason = verifiedPurchaseIneligibleReason(row, startAt, now)
+  if (reason) return reason
+  const context = db().prepare('SELECT gclid,wbraid,gbraid FROM ga4_checkout_context WHERE kind=? AND reference=?')
+    .get(row.kind, row.context_reference) as Record<string, string | null>
+  if (!['gclid', 'wbraid', 'gbraid'].includes(row.click_id_type) || !validateClickId(row.click_id) || context[row.click_id_type] !== row.click_id) return 'click_id_mismatch'
+  return null
+}
+
+/** Re-read financial and consent evidence immediately before every request. Fail closed. */
+export function verifiedPurchaseIneligibleReason(row: VerifiedPurchase, startAt: number, now = Date.now()): string | null {
   if (row.state !== 'awaiting_configuration') return 'consent_or_staging_suppressed'
   const context = db().prepare('SELECT * FROM ga4_checkout_context WHERE kind=? AND reference=?')
     .get(row.kind, row.context_reference) as { consent: string; internal: number; user_id: number | null; gclid: string | null; wbraid: string | null; gbraid: string | null } | undefined
   if (context?.consent !== 'granted' || context.internal) return 'consent_or_internal'
-  if (!['gclid', 'wbraid', 'gbraid'].includes(row.click_id_type) || !validateClickId(row.click_id) || context[row.click_id_type] !== row.click_id) return 'click_id_mismatch'
   const paidAt = timestamp(row.conversion_time)
   if (!Number.isFinite(paidAt) || paidAt < startAt || paidAt > now || now - paidAt > 30 * 86400000) return 'outside_delivery_window'
   if (row.currency !== 'USD' || !Number.isSafeInteger(row.revenue_cents) || row.revenue_cents <= 0) return 'invalid_value'

@@ -56,6 +56,12 @@ CREATE TABLE IF NOT EXISTS ads_conversion_delivery (
  created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS ads_conversion_delivery_work ON ads_conversion_delivery(state,next_at);
+CREATE TABLE IF NOT EXISTS openai_conversion_delivery (
+ transaction_id TEXT PRIMARY KEY, kind TEXT NOT NULL, context_reference TEXT NOT NULL,
+ conversion_time TEXT NOT NULL, revenue_cents INTEGER NOT NULL, currency TEXT NOT NULL,
+ pixel_id TEXT NOT NULL, state TEXT NOT NULL, reason TEXT, needs_review TEXT,
+ created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 CREATE TABLE IF NOT EXISTS ga4_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 -- Daily figures from Google Ads / GA4 entered by an administrator until the APIs are connected.
 CREATE TABLE IF NOT EXISTS tracking_daily_manual (
@@ -748,6 +754,8 @@ function migrationApplied(connection: Database.Database, version: string): boole
 
 /** Additive compatibility migrations. Existing tables and financial rows remain readable. */
 function migrate(connection: Database.Database) {
+  addColumn(connection, 'ga4_checkout_context', 'oppref TEXT')
+  addColumn(connection, 'ga4_checkout_context', 'utm_content TEXT')
   connection.transaction(() => {
     addColumn(connection, 'guest_checkouts', "payment_method TEXT NOT NULL DEFAULT 'card'")
     addColumn(connection, 'guest_checkouts', 'crypto_invoice_reference TEXT REFERENCES invoices(reference)')

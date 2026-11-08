@@ -29,3 +29,8 @@ export function encodePendingAttribution(input: Partial<Record<ClickIdField, unk
   }
   return params.toString() || null
 }
+
+/** OpenAI click reference is opaque: retain exactly, never synthesize from UTMs. */
+export function validateOppref(value: unknown): string | undefined {
+  return typeof value === 'string' && /^[A-Za-z0-9._~+\/=-]{1,1024}$/.test(value) ? value : undefined
+}

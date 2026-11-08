@@ -1,3 +1,4 @@
+import { validateOppref } from './attribution'
 import { stageAdsPurchase } from './ads-conversion-outbox'
 import { randomInt } from 'node:crypto'
 import { db } from './db'
@@ -54,7 +55,7 @@ export function isInternalEmail(email: string | null | undefined): boolean {
 }
 
 export type ConsentChoice = 'granted' | 'denied' | 'unknown'
-type ContextInput = { landingPage?: unknown; utmSource?: unknown; utmMedium?: unknown; utmCampaign?: unknown }
+type ContextInput = { landingPage?: unknown; utmSource?: unknown; utmMedium?: unknown; utmCampaign?: unknown; utmContent?: unknown; oppref?: unknown }
 const SAFE_TEXT = /^[A-Za-z0-9._~+-]{1,80}$/
 const SAFE_PATH = /^\/[A-Za-z0-9/_.-]{0,159}$/
 const clean = (value: unknown, pattern: RegExp) => (typeof value === 'string' && pattern.test(value) ? value : null)
@@ -65,16 +66,17 @@ export function recordCheckoutContext(kind: 'topup' | 'order' | 'paid_imei_repor
   if (!reference || reference.length > 128) return
   const context = (input && typeof input === 'object' ? input : {}) as ContextInput
   const granted = consent === 'granted'
-  db().prepare(`INSERT OR IGNORE INTO ga4_checkout_context(kind,reference,user_id,consent,internal,gclid,gbraid,wbraid,landing_page,utm_source,utm_medium,utm_campaign)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run(kind, reference, userId, consent, isInternalIp(ip) ? 1 : 0,
+  db().prepare(`INSERT OR IGNORE INTO ga4_checkout_context(kind,reference,user_id,consent,internal,gclid,gbraid,wbraid,landing_page,utm_source,utm_medium,utm_campaign,utm_content,oppref)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(kind, reference, userId, consent, isInternalIp(ip) ? 1 : 0,
     granted ? clickIds.gclid ?? null : null, granted ? clickIds.gbraid ?? null : null, granted ? clickIds.wbraid ?? null : null,
     granted ? clean(context.landingPage, SAFE_PATH) : null, granted ? clean(context.utmSource, SAFE_TEXT) : null,
-    granted ? clean(context.utmMedium, SAFE_TEXT) : null, granted ? clean(context.utmCampaign, SAFE_TEXT) : null)
+    granted ? clean(context.utmMedium, SAFE_TEXT) : null, granted ? clean(context.utmCampaign, SAFE_TEXT) : null,
+    granted ? clean(context.utmContent, SAFE_TEXT) : null, granted ? validateOppref(context.oppref) ?? null : null)
 }
 /** Withdrawal of consent on a signed-in account also covers checkouts not yet sent. */
 export function revokeCheckoutContext(userId: number) {
   db().prepare(`UPDATE ads_conversion_outbox SET state='suppressed',click_id='' WHERE EXISTS (SELECT 1 FROM ga4_checkout_context c WHERE c.kind=ads_conversion_outbox.kind AND c.reference=ads_conversion_outbox.context_reference AND c.user_id=?)`).run(userId)
-  db().prepare("UPDATE ga4_checkout_context SET consent='denied',gclid=NULL,gbraid=NULL,wbraid=NULL,landing_page=NULL,utm_source=NULL,utm_medium=NULL,utm_campaign=NULL WHERE user_id=?").run(userId)
+  db().prepare("UPDATE ga4_checkout_context SET consent='denied',gclid=NULL,gbraid=NULL,wbraid=NULL,landing_page=NULL,utm_source=NULL,utm_medium=NULL,utm_campaign=NULL,utm_content=NULL,oppref=NULL WHERE user_id=?").run(userId)
 }
 export function checkoutContext(kind: string, reference: string) {
   return db().prepare('SELECT consent,internal FROM ga4_checkout_context WHERE kind=? AND reference=?').get(kind, reference) as

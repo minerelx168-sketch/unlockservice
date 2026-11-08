@@ -1,23 +1,24 @@
 'use client'
-import { ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateClickId } from './attribution'
+import { ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateOppref, validateClickId } from './attribution'
 const KEY = 'iunlockmobile:landing'
 const COOKIE = 'iunlockmobile_landing'
 const TEXT = /^[A-Za-z0-9._~+-]{1,80}$/
-export type LandingContext = { landingPage?: string; utmSource?: string; utmMedium?: string; utmCampaign?: string; gclid?: string; gbraid?: string; wbraid?: string }
+export type LandingContext = { landingPage?: string; utmSource?: string; utmMedium?: string; utmCampaign?: string; gclid?: string; gbraid?: string; wbraid?: string; oppref?: string; utmContent?: string }
 type Stored = { capturedAt: number; context: LandingContext }
 function clean(value: unknown): LandingContext {
   if (!value || typeof value !== 'object') return {}
   const input = value as Record<string, unknown>, result: LandingContext = {}
   for (const field of CLICK_ID_FIELDS) { const id = validateClickId(input[field]); if (id) result[field] = id }
-  for (const field of ['utmSource', 'utmMedium', 'utmCampaign'] as const) {
+  for (const field of ['utmSource', 'utmMedium', 'utmCampaign', 'utmContent'] as const) {
     const text = input[field]; if (typeof text === 'string' && TEXT.test(text)) result[field] = text
   }
   if (typeof input.landingPage === 'string' && /^\/[A-Za-z0-9/_.-]{0,159}$/.test(input.landingPage)) result.landingPage = input.landingPage
+  const oppref = validateOppref(input.oppref); if (oppref) result.oppref = oppref
   return result
 }
 export function parseStoredLanding(raw: string | null, now = Date.now()): Stored | null {
   try {
-    if (!raw || raw.length > 2048) return null
+    if (!raw || raw.length > 4096) return null
     const data = JSON.parse(raw)
     if (!Number.isSafeInteger(data.capturedAt) || data.capturedAt > now || now - data.capturedAt >= ATTRIBUTION_MAX_AGE_SECONDS * 1000) return null
     return { capturedAt: data.capturedAt, context: clean(data.context) }
@@ -43,9 +44,10 @@ export function persistLanding() {
 export function rememberLanding(pathname: string, params: URLSearchParams) {
   try {
     const clicks = Object.fromEntries(CLICK_ID_FIELDS.flatMap(field => { const id = validateClickId(params.get(field)); return id ? [[field, id]] : [] }))
+    const oppref = validateOppref(params.get('oppref'))
     const campaign = ['utm_source', 'utm_medium', 'utm_campaign'].some(key => TEXT.test(params.get(key) ?? ''))
-    if (stored() && !Object.keys(clicks).length && !campaign) return
-    const context = clean({ landingPage: pathname, utmSource: params.get('utm_source'), utmMedium: params.get('utm_medium'), utmCampaign: params.get('utm_campaign'), ...clicks })
+    if (stored() && !Object.keys(clicks).length && !campaign && !oppref) return
+    const context = clean({ landingPage: pathname, utmSource: params.get('utm_source'), utmMedium: params.get('utm_medium'), utmCampaign: params.get('utm_campaign'), utmContent: params.get('utm_content'), oppref, ...clicks })
     window.sessionStorage.setItem(KEY, JSON.stringify({ capturedAt: Date.now(), context }))
     persistLanding()
   } catch { /* Storage is optional. */ }
