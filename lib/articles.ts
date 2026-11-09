@@ -43,6 +43,363 @@ export type Article = {
 const ARTICLES: Article[] = [
 
   {
+    slug: 'carrier-refused-iphone-unlock-next-steps',
+    title: 'Carrier Refused iPhone Unlock',
+    heading: 'Can a Carrier Refuse to Unlock an iPhone?',
+    description: 'An iPhone carrier unlock can be refused when eligibility fails. Learn how to identify the reason, document it and use the right appeal route.',
+    standfirst: 'A carrier can refuse an iPhone unlock when the device does not meet its published policy, such as an unpaid balance, minimum service requirement, fraud flag or lost-device report. Ask for the exact failed rule, correct inaccurate records, then escalate through the carrier or the appropriate regulator in your country.',
+    published: '2026-11-09',
+    updated: '2026-11-09',
+    minutes: 9,
+    topic: 'iPhone Unlock Refusal',
+    blocks: [
+      {
+        kind: 'list',
+        items: [
+          'A refusal is a policy decision, not proof that the iPhone can never be unlocked.',
+          'Request the exact eligibility rule, device IMEI, account record and case number behind the decision.',
+          'Payoff, service time, account standing, ownership, fraud and lost-or-stolen records are separate checks.',
+          'Only the carrier controlling the lock can authorize Apple to remove it from an iPhone.',
+          'Escalation rights and regulator routes depend on the country and the carrier’s published terms.',
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'can-carrier-refuse',
+        text: 'When can a carrier refuse an iPhone unlock?',
+      },
+      {
+        kind: 'p',
+        text: 'A carrier may refuse when its published eligibility checks are not satisfied or when the request cannot be matched to a valid device and account record. Common categories include active financing, required service time, past-due balances, ownership uncertainty, fraud concerns, and an IMEI reported lost or stolen.',
+      },
+      {
+        kind: 'table',
+        head: ['Refusal category', 'Record to verify', 'Useful next step'],
+        rows: [
+          ['Device finance or contract', 'Installment balance, payoff date and final payment posting', 'Ask when the carrier system will recognize the completed obligation'],
+          ['Service-time rule', 'Activation date, plan type and any interruption in service', 'Compare the recorded dates with the current published policy'],
+          ['Account standing', 'Past-due amount, canceled-account balance or unresolved charge', 'Resolve the account issue and request a fresh eligibility review'],
+          ['Lost, stolen or fraud flag', 'IMEI status and the organization that placed the flag', 'Work with the reporting carrier or seller; an unlock does not clear a blacklist'],
+          ['Ownership or record mismatch', 'Receipt, order number, account holder and IMEI/IMEI2', 'Correct the identifier or provide the evidence the carrier requests'],
+          ['Corporate or managed device', 'Business account ownership and administrator approval', 'Ask the account administrator to release the device through its carrier channel'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Policies are not universal. For example, AT&T currently lists purchase age, payoff, account, fraud and device-status requirements, while T-Mobile publishes different postpaid and prepaid criteria. Check the policy that applies to the original selling carrier, plan and country on the date of your request.',
+        links: [
+          { label: 'AT&T device unlock requirements', href: 'https://www.att.com/deviceunlock/' },
+          { label: 'T-Mobile device unlock policy', href: 'https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'ask-after-denial',
+        text: 'What should you ask after an unlock denial?',
+      },
+      {
+        kind: 'p',
+        text: 'Ask for a reason that can be checked, not a generic “ineligible” response. Confirm the exact IMEI reviewed, the policy version, the failed condition, the date its source record was updated, and the case or request number. This creates a factual path to correction or escalation.',
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Open Settings > General > About and record the IMEI, IMEI2 if shown, EID, ICCID and Carrier Lock result without publishing them publicly.',
+          'Match the IMEI in the denial with the device, receipt, installment agreement and carrier account.',
+          'Ask the carrier to name the failed eligibility condition and link to the current policy.',
+          'Request the date and reference number for any payment, activation, blacklist or fraud record involved.',
+          'Save the request confirmation, denial message, chat transcript and case number.',
+          'Correct the source record, then submit a new request or appeal through the carrier’s formal support path.',
+        ],
+      },
+      {
+        kind: 'note',
+        text: 'Keep complete IMEI, EID, ICCID, account numbers, receipts and identity documents out of public forums. Share them only through the carrier’s authenticated support channel or a regulator’s official complaint form.',
+      },
+      {
+        kind: 'h2',
+        id: 'paid-off-refused',
+        text: 'Can a carrier refuse a paid-off iPhone?',
+      },
+      {
+        kind: 'p',
+        text: 'Yes. A zero device balance may satisfy one rule while other requirements remain. The carrier may still check service duration, account standing, ownership, fraud or lost-device status, and whether the payoff has posted to its unlock system. Ask which specific condition still fails.',
+      },
+      {
+        kind: 'p',
+        text: 'Do not assume a receipt marked paid proves every carrier record is clear. Compare the payoff date with the account balance and unlock portal. If the phone was bought used, the seller may need to resolve an obligation or report that the carrier cannot discuss with a new owner.',
+        links: [
+          { label: 'Financed iPhone unlock and payoff rules', href: '/articles/can-you-unlock-financed-iphone-before-payoff' },
+          { label: 'Used iPhone checks before purchase', href: '/articles/checks-before-buying-a-used-phone' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'who-can-unlock',
+        text: 'Can Apple or an unlock service override the refusal?',
+      },
+      {
+        kind: 'p',
+        text: 'Apple says only the current carrier can unlock an iPhone for another network. A legitimate third-party service can help identify the carrier, check records, explain requirements or submit an authorized request where supported. It cannot erase unpaid obligations, ownership disputes, blacklist reports or Activation Lock.',
+        links: [
+          { label: 'Apple’s official iPhone unlock guidance', href: 'https://support.apple.com/en-us/109316' },
+          { label: 'What an IMEI unlock service should do', href: '/articles/imei-unlock-iphone-service-checklist' },
+        ],
+      },
+      {
+        kind: 'table',
+        head: ['Message or restriction', 'Who controls it', 'Correct route'],
+        rows: [
+          ['Carrier Lock: SIM locked', 'Original carrier or network provider', 'Meet its policy and obtain carrier authorization'],
+          ['Locked SIM or PUK request', 'The SIM/eSIM issuer', 'Request the correct SIM PIN or PUK; do not guess'],
+          ['iPhone Locked to Owner', 'Apple Account owner or Apple with qualifying proof', 'Remove Activation Lock through Apple’s documented process'],
+          ['Screen passcode', 'Device owner through Apple recovery steps', 'Reset or restore the iPhone using Apple guidance'],
+          ['Blacklisted IMEI', 'The carrier or organization that filed the report', 'Resolve the underlying report; carrier unlock is a separate status'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Apple warns that guessing a SIM PIN or PUK can permanently lock the SIM or eSIM. Activation Lock is also a separate ownership protection linked to Find My and an Apple Account. Neither condition is removed by a carrier-unlock approval.',
+        links: [
+          { label: 'Apple SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+          { label: 'Apple Activation Lock guidance', href: 'https://support.apple.com/en-us/108934' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'escalate-refusal',
+        text: 'How do you escalate an incorrect refusal?',
+      },
+      {
+        kind: 'p',
+        text: 'First complete the carrier’s internal review with evidence tied to the correct IMEI and policy. If the record remains wrong, use the telecommunications complaint route for your country. In the United States, the FCC accepts cell-phone-unlocking complaints, but it does not replace the carrier’s eligibility review.',
+        links: [
+          { label: 'FCC consumer complaint center', href: 'https://consumercomplaints.fcc.gov/hc/en-us' },
+        ],
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Ask for a supervisor or specialized device-unlock review and supply the existing case number.',
+          'State the disputed fact, the carrier record you believe is wrong and the evidence that supports correction.',
+          'Request a written outcome and the next internal appeal route rather than opening unrelated duplicate cases.',
+          'If internal review ends without correction, use the regulator or ombudsman that covers the carrier and country.',
+          'Keep the complaint narrow: identify the device, policy condition, dates, evidence and resolution requested.',
+        ],
+      },
+      {
+        kind: 'cta',
+        text: 'Need to identify the original carrier or review an IMEI report before you challenge a refusal?',
+        href: '/services/imei-check',
+        label: 'Browse IMEI checks',
+      },
+    ],
+    faq: [
+      {
+        question: 'Can a carrier legally refuse to unlock my paid-off iPhone?',
+        answer: 'A paid-off balance may be only one eligibility condition. Rules differ by country and carrier, so verify service time, account standing, ownership, fraud and lost-device records under the current published policy. If the recorded facts are wrong, request correction and use the applicable complaint route.',
+      },
+      {
+        question: 'What should I do when my carrier says my iPhone is ineligible?',
+        answer: 'Ask which exact rule failed, which IMEI was reviewed, and when the source record was updated. Save the case number and denial. Match those details against your receipt, account, payoff and activation records, correct any mismatch, then request a formal review instead of repeatedly submitting identical requests.',
+      },
+      {
+        question: 'Can a third-party iPhone unlock service bypass a carrier denial?',
+        answer: 'A service cannot legitimately erase finance obligations, ownership disputes, blacklist reports or Activation Lock. It may identify the carrier, provide record checks or help with an authorized route where available. Apple states that only the current carrier can authorize an iPhone for use with another carrier.',
+      },
+      {
+        question: 'Will paying off my iPhone unlock it immediately?',
+        answer: 'Not necessarily. The payment must post to the carrier’s relevant systems, and other eligibility rules may still apply. Check the carrier portal and ask whether a waiting period or another condition remains. Then verify Settings > General > About > Carrier Lock rather than relying only on payment confirmation.',
+      },
+      {
+        question: 'Does a denied carrier unlock mean the IMEI is blacklisted?',
+        answer: 'No. A denial can result from financing, service duration, account standing, ownership or a record mismatch. A blacklist is a separate lost, stolen or fraud-related status. Ask the carrier which condition failed and which organization controls any reported IMEI flag before choosing the next step.',
+      },
+    ],
+  },
+
+  {
+    slug: 'network-provider-lock-iphone-meaning',
+    title: 'Network Provider Lock on iPhone',
+    heading: 'Network Provider Lock on iPhone: What Does It Mean?',
+    description: 'Network Provider Lock on iPhone shows whether other carriers are allowed. Learn how to read the status and separate it from SIM and account locks.',
+    standfirst: 'Network Provider Lock is the regional name for iPhone Carrier Lock. In Settings > General > About, “No SIM restrictions” means the iPhone is carrier-unlocked; “SIM locked” means the original network provider still restricts other SIM or eSIM profiles. This status does not identify the carrier or clear other device restrictions.',
+    published: '2026-11-09',
+    updated: '2026-11-09',
+    minutes: 8,
+    topic: 'Network Provider Lock',
+    blocks: [
+      {
+        kind: 'list',
+        items: [
+          'Network Provider Lock and Carrier Lock describe the same iPhone network restriction in different regional wording.',
+          '“No SIM restrictions” means the iPhone’s carrier-lock status is unlocked.',
+          '“SIM locked” means the original provider must authorize the carrier unlock.',
+          'The field does not prove blacklist, finance, Activation Lock or destination-network compatibility.',
+          'eSIM support, EID visibility and an installed carrier profile do not by themselves prove an unlocked iPhone.',
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'meaning',
+        text: 'What does Network Provider Lock mean on an iPhone?',
+      },
+      {
+        kind: 'p',
+        text: 'Network Provider Lock is Apple’s label in some English-speaking regions for the setting called Carrier Lock elsewhere. It reports whether iOS currently permits activation with another provider. The wording is about network authorization, not the SIM PIN, screen passcode, Apple Account or ownership status.',
+        links: [
+          { label: 'Apple network-provider unlock guidance', href: 'https://support.apple.com/en-ie/109316' },
+          { label: 'Apple carrier-unlock guidance', href: 'https://support.apple.com/en-us/109316' },
+        ],
+      },
+      {
+        kind: 'table',
+        head: ['Status or message', 'What it means', 'Who can resolve it'],
+        rows: [
+          ['Network Provider Lock: No SIM restrictions', 'Carrier authorization allows other supported networks', 'No carrier unlock is required; check compatibility and activation separately'],
+          ['Network Provider Lock: SIM locked', 'The iPhone remains restricted to its authorizing provider', 'The original carrier or network provider'],
+          ['Locked SIM or PUK requested', 'The SIM/eSIM security PIN is locked', 'The provider that issued that SIM or eSIM'],
+          ['iPhone Locked to Owner', 'Find My Activation Lock remains linked to an Apple Account', 'The account owner or Apple’s documented support route'],
+          ['SIM Not Supported or Invalid SIM', 'Carrier lock, inactive service, SIM fault or compatibility may be involved', 'Diagnose the exact status before requesting an unlock'],
+          ['Blacklisted or blocked IMEI', 'A lost, stolen or fraud report may prevent network service', 'The organization that placed the report'],
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'check-status',
+        text: 'How do you check Network Provider Lock on iPhone?',
+      },
+      {
+        kind: 'p',
+        text: 'Open the live status inside iOS rather than relying on a seller’s description. Go to Settings > General > About, wait for the page to load, and find Network Provider Lock or Carrier Lock. Record the exact text and iOS version before contacting the provider.',
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Connect the iPhone to Wi-Fi or cellular service and open Settings.',
+          'Tap General, then About.',
+          'Find Network Provider Lock or Carrier Lock; Apple uses different regional wording.',
+          'Read the value: “No SIM restrictions” means unlocked, while “SIM locked” requires provider action.',
+          'If the field is missing or unclear, restart, update iOS if appropriate and ask the original provider to verify the IMEI.',
+          'After an approved unlock, test a supported SIM or eSIM from another carrier and confirm calls, data and messaging.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'An IMEI report can help identify the likely original carrier or recorded status, but the report’s fields depend on its data source. Use the live Settings value and carrier confirmation as the decisive evidence for an iPhone carrier unlock.',
+        links: [
+          { label: 'Four ways to check if an iPhone is unlocked', href: '/articles/how-to-check-if-iphone-is-unlocked' },
+          { label: 'What an IMEI check can show', href: '/articles/what-an-imei-check-tells-you' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'sim-locked',
+        text: 'What should you do if it says SIM locked?',
+      },
+      {
+        kind: 'p',
+        text: 'Identify the provider that sold or last authorized the iPhone, then check that provider’s current unlock policy. Prepare the IMEI, proof of purchase, account details and payoff information. Submit the official request and verify the Settings field again after the provider confirms completion.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Do not enter random PINs or codes; iPhones normally receive carrier authorization rather than a generic network unlock code.',
+          'Check both IMEI and IMEI2 on Dual SIM models so the carrier reviews the identifier tied to its record.',
+          'Keep the EID and ICCID available when support is troubleshooting an eSIM profile, but do not post them publicly.',
+          'Ask whether the device must meet account, payoff, service-time, ownership, fraud or lost-device conditions.',
+          'Save the request number and the provider’s exact completion message before deleting a working SIM or eSIM.',
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'esim-status',
+        text: 'Can a network-locked iPhone use eSIM?',
+      },
+      {
+        kind: 'p',
+        text: 'A locked iPhone may use an eSIM from its authorized provider, but eSIM hardware support does not remove the carrier restriction. An EID only identifies the embedded SIM hardware. To add another provider, the iPhone must be unlocked, compatible and accepted by that provider’s activation system.',
+      },
+      {
+        kind: 'table',
+        head: ['Identifier or profile', 'Purpose', 'What it does not prove'],
+        rows: [
+          ['IMEI / IMEI2', 'Identifies cellular device interfaces for carrier records', 'Ownership, payoff or an unlocked status by itself'],
+          ['EID', 'Identifies eSIM hardware', 'That any carrier may activate an eSIM'],
+          ['ICCID', 'Identifies a physical SIM or eSIM profile', 'The iPhone’s carrier-lock status'],
+          ['Carrier Profile / settings', 'Configures network features such as voice, data and messaging', 'Carrier-unlock authorization'],
+          ['GSMA or carrier device status', 'May show recorded lost, stolen or block information', 'Activation Lock removal or universal network compatibility'],
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'separate-locks',
+        text: 'Which iPhone locks are unrelated to Network Provider Lock?',
+      },
+      {
+        kind: 'p',
+        text: 'Carrier authorization is only one layer. A SIM PIN protects a SIM or eSIM, a passcode protects local access, Activation Lock protects ownership through Find My, and an IMEI block affects network service. Solving one layer does not remove any of the others.',
+      },
+      {
+        kind: 'p',
+        text: 'If the status bar says “Locked SIM,” contact the issuer for the correct SIM PIN or PUK and never guess. If setup says “iPhone Locked to Owner,” the prior Apple Account must be removed through Apple’s documented ownership process. Neither message is fixed by a carrier unlock.',
+        links: [
+          { label: 'Apple SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+          { label: 'Apple Activation Lock removal', href: 'https://support.apple.com/en-us/108934' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'unlocked-no-service',
+        text: 'Why can an unlocked iPhone still reject a new network?',
+      },
+      {
+        kind: 'p',
+        text: '“No SIM restrictions” removes the carrier-policy barrier, but activation still depends on the iPhone model, radio bands, plan, eSIM support, regional variant, IMEI acceptance and network coverage. Diagnose those compatibility and provisioning layers before assuming the iPhone has become carrier-locked again.',
+      },
+      {
+        kind: 'p',
+        text: 'Confirm the new plan is active, install any carrier settings update, and ask the destination carrier whether it accepts the exact IMEI or IMEI2. If the SIM is inactive, the eSIM profile is incomplete or the model lacks required bands, another unlock request will not solve the connection problem.',
+        links: [
+          { label: 'Unlocked iPhone but no service troubleshooting', href: '/articles/iphone-unlocked-but-no-service-troubleshooting' },
+          { label: 'Will an unlocked iPhone work on any carrier?', href: '/articles/will-unlocked-iphone-work-any-carrier' },
+        ],
+      },
+      {
+        kind: 'cta',
+        text: 'Need an IMEI report to identify the likely carrier or review recorded device status before an unlock request?',
+        href: '/services/imei-check',
+        label: 'Browse IMEI checks',
+      },
+    ],
+    faq: [
+      {
+        question: 'What does Network Provider Lock mean on an iPhone?',
+        answer: 'It is Apple’s regional wording for Carrier Lock. In Settings > General > About, it reports whether the iPhone is authorized for other networks. “No SIM restrictions” means carrier-unlocked; “SIM locked” means the original provider still controls the authorization.',
+      },
+      {
+        question: 'Is Network Provider Lock the same as SIM Lock?',
+        answer: 'The Settings value “SIM locked” indicates a carrier restriction, but the status-bar message “Locked SIM” can mean a SIM PIN problem. Check where the message appears. Carrier Lock requires provider authorization; a SIM PIN or PUK must come from the issuer of that SIM or eSIM.',
+      },
+      {
+        question: 'How do I remove Network Provider Lock from my iPhone?',
+        answer: 'Identify the original provider, meet its current eligibility policy and submit its official unlock request. Apple states that only the current carrier can authorize the unlock. After confirmation, reconnect the iPhone, check Settings > General > About, and test a supported SIM or eSIM from another provider.',
+      },
+      {
+        question: 'Does No SIM restrictions mean my iPhone works with every carrier?',
+        answer: 'No. It confirms the carrier lock is removed, but the destination network must still support the exact iPhone model, bands, regional variant, IMEI, SIM or eSIM and plan. Coverage, provisioning, blacklist status and account activation can prevent service on an otherwise unlocked iPhone.',
+      },
+      {
+        question: 'Can I use a travel eSIM when Network Provider Lock says SIM locked?',
+        answer: 'Usually only an eSIM from the authorized provider can activate while the iPhone remains carrier-locked. eSIM capability and the EID do not override the restriction. Ask the original provider for an unlock before travel, then confirm “No SIM restrictions” and check the travel carrier’s model compatibility.',
+      },
+    ],
+  },
+
+  {
     "slug": "check-sealed-iphone-unlocked-before-opening",
     "title": "Sealed iPhone Unlock Check Before Opening",
     "heading": "How to Check If an iPhone Is Unlocked Without Opening the Box",
