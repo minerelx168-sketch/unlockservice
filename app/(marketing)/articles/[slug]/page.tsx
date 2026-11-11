@@ -1,3 +1,4 @@
+import { ArticleCarrierWidget } from '@/components/article-carrier-widget'
 import { ServiceDirectory } from '@/components/service-directory'
 import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import type { Metadata } from 'next'
@@ -73,6 +74,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="article-head">
             <h1 className="t-section">{article.heading}</h1>
             <p className="t-lead">{article.standfirst}</p>
+            {slug === 'how-to-find-carrier-on-iphone-before-unlock' && <ArticleCarrierWidget />}
             <p className="t-micro article-meta">
               By <Link href="/contact">iUnlockMobile</Link> · Published {readable(article.published)}
               {article.updated !== article.published ? ` · Updated ${readable(article.updated)}` : ''} ·{' '}

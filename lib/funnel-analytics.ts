@@ -33,6 +33,7 @@ const BLOCKED_KEY = /(imei|email|phone|wallet|csrf|token|transaction|order_id|pr
 export function allowlistedFunnelParams(input: Record<string, unknown>): Record<string, FunnelValue> {
   const result: Record<string, FunnelValue> = {}
   for (const [key, value] of Object.entries(input)) {
+    if (key === 'item_id' && value === '444') { result.item_id = value; continue }
     if (!ALLOWED_KEYS.has(key) || BLOCKED_KEY.test(key)) continue
     if (typeof value === 'string' && value.length <= 80 && /^[A-Za-z0-9_.:-]+$/.test(value)) result[key] = value
     else if (typeof value === 'number' && Number.isFinite(value) && Math.abs(value) < 1_000_000) result[key] = value
@@ -48,7 +49,10 @@ export function trackFunnelEvent(name: FunnelEventName, input: Record<string, un
   const params = allowlistedFunnelParams(input)
   const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag
   if (typeof gtag !== 'function') return false
-  try { gtag('event', name, params); return true } catch { return false }
+  const payload = name === 'begin_checkout' && params.item_id === '444' && typeof params.value === 'number'
+    ? { ...params, items: [{ item_id: '444', item_name: 'Apple Carrier (Lite)', price: params.value, quantity: 1 }] }
+    : params
+  try { gtag('event', name, payload); return true } catch { return false }
 }
 
 // References are used only locally for deduplication, never as event parameters.
