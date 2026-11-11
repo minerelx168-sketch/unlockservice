@@ -43,7 +43,10 @@ export function listPublicProviderProducts(domain: ProviderProductDomain): Publi
  */
 export function listStorefrontProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
   const byId = new Map(PROVIDER_PRODUCTS.map((product) => [product.serviceId, product]))
-  return directory.services.filter((entry) => entry.domain === domain && entry.serviceId !== '214').map((entry) => {
+  return directory.services.filter(entry =>
+    (entry.serviceId === '346' ? 'unlock' : entry.domain) === domain &&
+    entry.serviceId !== '214' && byId.get(entry.serviceId)?.status !== 'unavailable',
+  ).map((entry) => {
     const configured = byId.get(entry.serviceId)
     const productCode = configured?.productCode ?? `${domain === 'unlock' ? 'UNLOCK' : 'CHECK'}_${entry.serviceId}`
     const live = getPaidReportProduct(productCode)
@@ -54,7 +57,7 @@ export function listStorefrontProviderProducts(domain: ProviderProductDomain): P
       slug: configured?.slug ?? productCode.toLowerCase().replaceAll('_', '-'),
       name: serviceGroupLabel(entry.name),
       summary: configured?.summary ?? 'Contact us to confirm the requirements, price and delivery time for this service.',
-      group: serviceGroupLabel(entry.group),
+      group: serviceGroupLabel(entry.serviceId === '346' ? 'USA Networks' : entry.group),
       // Display section is separate from the existing processing and billing domain.
       domain: configured?.domain ?? domain,
       inputType: configured?.inputType ?? 'imei',

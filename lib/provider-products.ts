@@ -1,4 +1,5 @@
 import type { ServiceInputType } from './service-identifier'
+import { NOV12_PRICES, NOV12_VERSION, RETIRED_ATT_CODE } from './retail-update-nov12'
 import catalog from '@/catalog/provider-products.json'
 
 export type ProviderProductDomain = 'imei_check' | 'unlock'
@@ -21,8 +22,13 @@ export type ProviderProduct = {
   sortOrder: number
 }
 
-export const PROVIDER_PRODUCT_CATALOG_VERSION = catalog.version
-export const PROVIDER_PRODUCTS = catalog.products as ProviderProduct[]
+export const PROVIDER_PRODUCT_CATALOG_VERSION = NOV12_VERSION
+export const PROVIDER_PRODUCTS = (catalog.products as ProviderProduct[]).map(product => ({
+  ...product,
+  priceCents: NOV12_PRICES[product.productCode] ?? product.priceCents,
+  status: product.productCode === RETIRED_ATT_CODE ? 'unavailable' : product.status,
+  group: product.productCode === 'UNLOCK_346' ? 'USA Networks' : product.group,
+}))
 export const PUBLIC_PROVIDER_PRODUCTS = PROVIDER_PRODUCTS.filter(
   (product) => product.status === 'available' || product.status === 'coming_soon',
 )

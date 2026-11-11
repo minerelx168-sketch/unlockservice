@@ -391,3 +391,13 @@ test('live verified $100 credit upgrades permanently; card fees, pending and fai
   assert.equal((database.db().prepare('SELECT role FROM users WHERE id=?').get(badId) as {role:string}).role,'RETAIL')
   assert.equal(credits.getBalance(badId).availableCents,0)
 })
+
+test('Whop top-up metadata carries the first consented GCLID only, with the invoice reference', async()=>{
+  const {recordCheckoutContext}=await import('../lib/ga4')
+  const id=customer()
+  const row=await whop.createWhopCheckout(id,170,randomUUID(),async ref=>{
+    recordCheckoutContext('topup',ref,id,'granted',null,{gclid:'first.google-123'})
+    recordCheckoutContext('topup',ref,id,'granted',null,{gclid:'later.click'})
+  },'granted')
+  assert.deepEqual(checkoutCalls[0]?.body.metadata,{integration:'iunlockmobile-credit-v1',invoice_reference:row.invoice_reference,gclid:'first.google-123'})
+})

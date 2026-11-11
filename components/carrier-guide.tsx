@@ -17,12 +17,12 @@ const methods=[
 ]
 export function CarrierGuide({id,children}:{id:GuideKey;children?:React.ReactNode}){
  const g=guides[id],canada=id==='ca'||id==='sim',origin=publicOrigin(),url=origin+g.path
- const codes=canada?['UNLOCK_36','UNLOCK_39','UNLOCK_289']:['UNLOCK_718','UNLOCK_649']
+ const codes=canada?['UNLOCK_36','UNLOCK_39','UNLOCK_289']:['UNLOCK_346','UNLOCK_649']
  const products=[...listStorefrontProviderProducts('imei_check').filter(p=>['APPLE_CARRIER_LITE','APPLE_CARRIER_PRO'].includes(p.productCode)),...listStorefrontProviderProducts('unlock').filter(p=>codes.includes(p.productCode))]
  const available=products.filter(p=>p.status==='available'&&p.priceAvailable)
  const lite=available.find(p=>p.productCode==='APPLE_CARRIER_LITE'),unlocks=available.filter(p=>p.domain==='unlock')
  const rules:Record<string,string>={
- UNLOCK_718:'AT&T: check purchase age, payoff and account standing through the free portal. Prepaid has a separate service period.',
+ UNLOCK_346:'AT&T: check purchase age, payoff and account standing through the free portal. Prepaid has a separate service period.',
  UNLOCK_649:'C Spire: the account holder or an authorized user should confirm the requirements and request release.',
  UNLOCK_36:'Rogers / Fido: request free release from the supplying carrier. Check the policy before ordering for a used phone.',
  UNLOCK_39:'TELUS / Koodo: ask the supplying carrier first. Recheck the IMEI if the handset was replaced.',

@@ -10,6 +10,7 @@ Object.assign(process.env,{IUNLOCKMOBILE_DB:join(dir,'test.db'),IUNLOCKMOBILE_WH
 let guest:typeof import('../lib/guest-checkout'),db:typeof import('../lib/db'),credits:typeof import('../lib/credits')
 const originalFetch=globalThis.fetch,payments=new Map<string,Whop.Payment>()
 const emails:Record<string,unknown>[]=[],events:Record<string,unknown>[]=[],refunds:string[]=[]
+const whopMetadata=new Map<string,Record<string,unknown>>()
 let providerCalls=0,checkoutCalls=0,emailFailure=false,providerFailure=false,providerUncertain=false
 before(async()=>{
   guest=await import('../lib/guest-checkout');db=await import('../lib/db');credits=await import('../lib/credits')
@@ -20,6 +21,7 @@ before(async()=>{
       if(url.pathname.endsWith('/checkout_configurations')) {
         checkoutCalls++
         const body=JSON.parse(String(init?.body)),ref=body.metadata.guest_reference
+        whopMetadata.set(ref,body.metadata)
         const quote=db.db().prepare('SELECT COALESCE(card_order_price_cents,price_cents+wallet_credit_cents)+fee_cents AS total FROM guest_checkouts WHERE reference=?').get(ref) as {total:number}
         assert.equal(body.plan.initial_price,quote.total/100);assert.equal(body.plan.plan_type,'one_time')
         assert.equal(JSON.stringify(body).includes('490154203237518'),false)
@@ -265,4 +267,39 @@ test('inclusive card tax never adds to the quoted order total and excess collect
   assert.equal(guest.getGuestCheckout(row.reference)?.tax_cents,50)
   const other=await checkout(),q=payment(other.row,{tax_amount:m('0.50'),tax_behavior:'exclusive',total:m('11.00')})
   assert.throws(()=>guest.settleGuestPayment(q),/amount mismatch/)
+})
+
+
+test('guest hosted checkout sends consented GCLID on the original order but not revoked or internal clicks',async()=>{
+  const {recordCheckoutContext}=await import('../lib/ga4')
+  for(const [consent,internal] of [['granted',false],['denied',false],['granted',true]] as const) {
+    const {row}=await checkout({consent,beforeCheckout:async (ref:string)=>{
+      recordCheckoutContext('guest',ref,null,'granted',null,{gclid:'abc-DEF_987'})
+      if(internal)db.db().prepare("UPDATE ga4_checkout_context SET internal=1 WHERE kind='guest' AND reference=?").run(ref)
+    }})
+    const expected=consent==='granted'&&!internal?{gclid:'abc-DEF_987'}:{}
+    assert.deepEqual(whopMetadata.get(row.reference),{...expected,guest_reference:row.reference,order_id:row.reference,integration:'iunlockmobile-guest-v1'})
+  }
+})
+
+test('already-issued $5.24 card checkout for retired AT&T 718 refunds once and is never submitted as 346', async () => {
+  await assert.rejects(checkout({productCode:'UNLOCK_718',expectedPriceCents:499}),/not available/)
+  const { row:template }=await checkout()
+  const connection=db.db()
+  connection.prepare("INSERT OR IGNORE INTO paid_report_products(code,slug,name,summary,price_cents,is_active) VALUES('UNLOCK_718','unlock-718','AT&T','','499',0)").run()
+  // Model a hosted checkout that was issued before retirement and paid afterward.
+  connection.prepare("UPDATE guest_checkouts SET product_code='UNLOCK_718',product_name='AT&T',price_cents=499,card_order_price_cents=499,fee_cents=25 WHERE reference=?").run(template.reference)
+  const original=guest.getGuestCheckout(template.reference)!
+  assert.equal(guest.guestCheckoutTotal(original),524)
+  const paid=payment(original)
+  guest.settleGuestPayment(paid)
+  await cycle(original.reference)
+  await cycle(original.reference)
+  const final=guest.getGuestCheckout(original.reference)!
+  assert.equal(final.state,'refunded')
+  assert.equal(final.product_code,'UNLOCK_718')
+  assert.equal(final.report_id,null)
+  assert.equal(guest.guestCheckoutTotal(final),524)
+  assert.equal(refunds.filter(id=>id===paid.id).length,1)
+  assert.equal(connection.prepare('SELECT id FROM paid_report_orders WHERE user_id=? OR idempotency_key=?').get(final.user_id,'guest-'+final.reference), undefined)
 })

@@ -14,7 +14,7 @@ export function ServiceSpokePage({ spoke }: { spoke: ServiceSpoke }) {
   const products = listStorefrontProviderProducts(spoke.domain).filter(p => (spoke.codes as readonly string[]).includes(p.productCode))
     // The legacy AT&T summary contains conflicting turnaround percentages.
     // Publish the reviewed scope and current ETA instead of those statistics.
-    .map(p => p.productCode === 'UNLOCK_718' ? { ...p, summary: `${spoke.purpose} ${spoke.limits} Estimated delivery: ${p.etaLabel}.` } : p)
+    .map(p => p.productCode === 'UNLOCK_346' ? { ...p, summary: `${spoke.purpose} ${spoke.limits} Estimated delivery: ${p.etaLabel}.` } : p)
   const options: PriceCheckProduct[] = products.map(p => ({code:p.productCode,domain:p.domain,name:p.name,category:p.group,summary:p.summary,hasExample:p.hasExample,available:p.status==='available' && !!p.priceAvailable,inputType:p.inputType,priceCents:p.priceCents,priceAvailable:p.priceAvailable,etaLabel:p.etaLabel}))
   const available = options.filter(p => p.available)
   const schema = serviceSpokeSchema(spoke, products, publicOrigin())

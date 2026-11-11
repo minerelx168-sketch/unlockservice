@@ -209,6 +209,7 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
       '2026-09-provider-product-catalog-v3-strict-rollout',
       '2026-09-usdt-verified-amount-v1',
       '2026-10-reseller-wallet-v1',
+      '2026-11-12-retire-att-718-and-apple-case-retail',
     ],
   )
 
@@ -231,14 +232,14 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
 
 test('provider catalog separates approved paid products, the free reward and retired services', () => {
   assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 137)
-  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 128)
-  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 128)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 127)
+  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 127)
   assert.equal(providerProducts.providerProductByCode('APPLE_BASIC')?.status, 'free')
-  assert.equal(providerProducts.PROVIDER_PRODUCTS.filter(p => p.status === 'unavailable').length, 8)
+  assert.equal(providerProducts.PROVIDER_PRODUCTS.filter(p => p.status === 'unavailable').length, 9)
   assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map(p => p.productCode)).size, 137)
-  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter(p => p.domain === 'unlock').length, 61)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter(p => p.domain === 'unlock').length, 60)
   assert.ok(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.every(p => p.priceCents * 10_000 >= p.providerCostMicros * 1.3))
-  assert.deepEqual(database.db().prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products').get(), { total: 128, active: 128 })
+  assert.deepEqual(database.db().prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products').get(), { total: 127, active: 127 })
   assert.equal(providerProducts.etaMinutesFromLabel('1-10 sec'), 1)
   assert.equal(providerProducts.etaMinutesFromLabel('10 minutes-1 hour'), 60)
   assert.equal(providerProducts.etaMinutesFromLabel('Instant to 5 days'), 7_200)
@@ -844,7 +845,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     const freeChecksBefore = imeiChecks.listImeiChecks(alice.id).length
 
     const activeCatalog = paidReports.listPaidReportProducts()
-    assert.equal(activeCatalog.length, 128)
+    assert.equal(activeCatalog.length, 127)
     assert.equal(activeCatalog.every((product) => product.isActive), true)
     assert.equal(activeCatalog.every((product) => !product.providerReady), true)
     const seeded = paidReports.getPaidReportProduct('APPLE_CARRIER_LITE')
@@ -1654,11 +1655,11 @@ test('every guide is indexable, internally consistent, and links somewhere real'
   const sitemap = (await import('../app/sitemap')).default()
   const urls = new Set(sitemap.map((entry) => entry.url))
   for (const article of all) {
-    assert.ok(
-      [...urls].some((url) => url.endsWith(`/articles/${article.slug}`)),
-      `${article.slug} is missing from the sitemap`,
-    )
+    const canonical = article.slug === 'imei-unlock-iphone-service-checklist'
+      ? 'used-iphone-imei-unlock-legitimacy-checklist' : article.slug
+    assert.ok([...urls].some(url => url.endsWith('/articles/' + canonical)), canonical + ' is missing from the sitemap')
   }
+  assert.ok(![...urls].some(url => url.endsWith('/articles/imei-unlock-iphone-service-checklist')), 'redirected slug must not appear in the sitemap')
   assert.ok([...urls].some((url) => url.endsWith('/articles')), 'the index is missing from the sitemap')
 })
 
