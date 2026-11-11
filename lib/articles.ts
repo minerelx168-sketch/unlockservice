@@ -43,6 +43,393 @@ export type Article = {
 const ARTICLES: Article[] = [
 
   {
+    slug: 'unlock-iphone-before-switching-carriers',
+    title: 'Unlock iPhone Before Switching Carriers',
+    heading: 'Do I Need to Unlock My iPhone Before Switching Carriers?',
+    description: 'Do I need to unlock my phone before switching carriers? Follow the safe order for eligibility, compatibility, number porting and activation.',
+    standfirst: 'Unlock your iPhone before switching carriers if you plan to keep using that device on the new network. Confirm “No SIM restrictions,” check the destination carrier accepts the exact IMEI or EID, then port the number and activate the new SIM or eSIM. Porting alone does not unlock the iPhone.',
+    published: '2026-11-10',
+    updated: '2026-11-10',
+    minutes: 9,
+    topic: 'Switch Carriers With an iPhone',
+    blocks: [
+      {
+        kind: 'list',
+        items: [
+          'Complete the carrier-unlock check before porting if you will use the same iPhone on the new network.',
+          'Carrier Lock, destination-network compatibility and phone-number portability are separate approvals.',
+          'Keep the old line active until the receiving carrier confirms the number transfer and new service work.',
+          'A Number Transfer PIN, account PIN, SIM PIN and screen passcode have different purposes.',
+          'Record the IMEI, IMEI2, EID and ICCID privately so each carrier reviews the correct device or line.',
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'unlock-before-switch',
+        text: 'Do you need to unlock an iPhone before switching carriers?',
+      },
+      {
+        kind: 'p',
+        text: 'Yes, when you want to reuse that iPhone with a different carrier. The original carrier must authorize the device first, and the destination carrier must accept its hardware and identifiers. If you will use another phone, the number may be portable even though the old iPhone remains locked.',
+      },
+      {
+        kind: 'p',
+        text: 'Apple directs users to Settings > General > About, where “No SIM restrictions” beside Carrier Lock means the iPhone is unlocked. Apple also says only the current carrier can issue the authorization; a receiving carrier, new SIM or number transfer cannot create it.',
+        links: [
+          { label: 'Apple’s current iPhone unlock guidance', href: 'https://support.apple.com/en-us/109316' },
+        ],
+      },
+      {
+        kind: 'table',
+        head: ['Switching checkpoint', 'Question it answers', 'Who controls it'],
+        rows: [
+          ['Carrier Lock', 'May this iPhone activate with another carrier?', 'The original locking carrier'],
+          ['BYOD compatibility', 'Does the new carrier accept this model and IMEI or EID?', 'The destination carrier'],
+          ['Number portability', 'Can the phone number move to the new account?', 'The current and receiving providers under local rules'],
+          ['SIM or eSIM activation', 'Has the new plan been assigned and provisioned?', 'The destination carrier'],
+          ['Account settlement', 'What balance, contract or final bill remains?', 'The current carrier or finance provider'],
+          ['Device status', 'Is the IMEI reported lost, stolen or blocked?', 'The organization responsible for the report'],
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'safe-order',
+        text: 'What is the safest order for changing carriers?',
+      },
+      {
+        kind: 'p',
+        text: 'Use a sequence that preserves service while each dependency is checked. Confirm unlock eligibility and device compatibility first, collect transfer credentials second, ask the receiving carrier to port the number third, and cancel nothing manually until the new carrier confirms activation and the required services pass testing.',
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Open Settings > General > About and record Carrier Lock, IMEI, IMEI2 and EID without posting them publicly.',
+          'If Carrier Lock does not show “No SIM restrictions,” complete the original carrier’s current unlock process.',
+          'Use the destination carrier’s official BYOD checker for the exact IMEI or EID and intended plan.',
+          'Confirm whether activation uses a physical SIM, eSIM Carrier Activation, QR code, app or eSIM transfer.',
+          'Collect the account number, transfer PIN and other porting details from the current provider close to the switch date.',
+          'Ask the receiving carrier to submit the port while the old line is still active.',
+          'Test incoming and outgoing calls, SMS, mobile data, voicemail and any required features before closing support cases.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'AT&T’s current transfer guidance tells customers not to disconnect service before the new provider submits the transfer. T-Mobile and Verizon likewise tell switchers to unlock and check compatibility before bringing the same device. Follow the exact instructions for your own carriers and country.',
+        links: [
+          { label: 'AT&T number-transfer instructions', href: 'https://www.att.com/support/article/wireless/KM1447526/' },
+          { label: 'T-Mobile switching and unlock sequence', href: 'https://www.t-mobile.com/switch/keep-phone-switch-from-verizon-or-att' },
+          { label: 'Verizon BYOD requirements', href: 'https://www.verizon.com/support/bring-your-own-device-faqs/' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'port-vs-unlock',
+        text: 'Does porting your number unlock the iPhone?',
+      },
+      {
+        kind: 'p',
+        text: 'No. A port moves an eligible phone number between service providers; a carrier unlock changes which networks the handset may use. The number can move while the old iPhone stays locked, and an unlocked iPhone can switch service without keeping its previous number. Treat both workflows separately.',
+      },
+      {
+        kind: 'table',
+        head: ['Credential or status', 'What it authorizes', 'What it cannot do'],
+        rows: [
+          ['Number Transfer PIN', 'Permission to port a phone number', 'Remove Carrier Lock from the iPhone'],
+          ['Carrier Lock: No SIM restrictions', 'Use of other compatible carriers', 'Guarantee that a number is portable'],
+          ['SIM PIN / PUK', 'Access to one protected SIM or eSIM', 'Authorize a number port or carrier unlock'],
+          ['Account PIN or password', 'Access defined by that carrier account', 'Act as a universal transfer or unlock credential'],
+          ['Screen passcode', 'Local access to the iPhone', 'Remove Activation Lock or Carrier Lock'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'In the United States, the FCC describes phone-number porting and device unlocking as separate consumer topics. Other countries have their own portability and cancellation rules. Ask the receiving provider whether your number is eligible and which current account details it requires.',
+        links: [
+          { label: 'FCC unlocking and number-porting guidance', href: 'https://consumercomplaints.fcc.gov/hc/en-us' },
+          { label: 'AT&T Transfer PIN versus iPhone unlock', href: '/articles/att-transfer-pin-vs-iphone-carrier-unlock' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'esim-switch',
+        text: 'How should you handle SIM and eSIM during the switch?',
+      },
+      {
+        kind: 'p',
+        text: 'Keep the working line until the new carrier tells you when to transfer or replace it. An ICCID identifies a SIM profile, while the EID identifies eSIM hardware; neither proves the iPhone is unlocked. Deleting an eSIM early can remove working service without changing Carrier Lock.',
+      },
+      {
+        kind: 'p',
+        text: 'Apple supports several eSIM activation methods, including carrier activation, nearby-iPhone transfer, QR code and carrier apps, depending on provider support. When a transferred plan activates on the new iPhone, the previous SIM may deactivate. Follow the receiving carrier’s sequence instead of deleting profiles as a test.',
+        links: [
+          { label: 'Apple eSIM setup and transfer methods', href: 'https://support.apple.com/en-us/118669' },
+          { label: 'Apple warning about deleting an eSIM', href: 'https://support.apple.com/en-us/102421' },
+        ],
+      },
+      {
+        kind: 'note',
+        text: 'Do not publish a Number Transfer PIN, account PIN, full IMEI, EID or ICCID. Give sensitive identifiers only through authenticated carrier channels and replace a transfer PIN if the provider says it was exposed.',
+      },
+      {
+        kind: 'h2',
+        id: 'failed-switch',
+        text: 'What should you check if the switch fails?',
+      },
+      {
+        kind: 'p',
+        text: 'Start with the exact failed stage instead of buying another unlock. A rejected port concerns number or account data; “SIM locked” in Carrier Lock concerns the original carrier; “No SIM restrictions” with no service points to compatibility, provisioning, SIM, eSIM, plan or coverage with the destination carrier.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Port rejected: ask the receiving carrier which account number, ZIP code, transfer PIN or authorization failed.',
+          'Carrier Lock says SIM locked: return to the original carrier with the IMEI and unlock case number.',
+          'SIM Not Supported: verify Carrier Lock and whether the destination SIM or eSIM belongs to a supported carrier.',
+          'No SIM restrictions but no service: confirm the new plan is active, provisioned and selected for cellular data.',
+          'Locked SIM or PUK prompt: contact the issuer of that SIM or eSIM and do not guess codes.',
+          'iPhone Locked to Owner: use the legitimate Apple Account or Apple’s documented Activation Lock route.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Carrier Lock is separate from SIM PIN/PUK, screen passcode, Activation Lock, a GSMA or carrier blacklist record and unpaid finance. An unlock service can check defined records or help with a supported request; it cannot bypass those independent controls or guarantee destination-network acceptance.',
+        links: [
+          { label: 'Apple SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+          { label: 'Apple Activation Lock guidance', href: 'https://support.apple.com/en-us/108934' },
+          { label: 'Unlocked iPhone compatibility checklist', href: '/articles/will-unlocked-iphone-work-any-carrier' },
+        ],
+      },
+      {
+        kind: 'cta',
+        text: 'Need to identify the original carrier or review an IMEI report before switching networks?',
+        href: '/services/imei-check',
+        label: 'Browse IMEI checks',
+      },
+    ],
+    faq: [
+      {
+        question: 'Do I need to unlock my iPhone before switching carriers?',
+        answer: 'Yes, if you plan to use the same iPhone on a different carrier. Confirm “No SIM restrictions,” then check that the destination carrier accepts the model and IMEI or EID. If you will use another device, the number may still be portable while the old iPhone remains locked.',
+      },
+      {
+        question: 'Can I keep my phone number after unlocking my iPhone?',
+        answer: 'Unlocking does not cancel or transfer the number. Ask the receiving carrier whether the number is portable, keep the old line active, and supply the required account and transfer credentials. The new provider should manage the port; follow its confirmation before manually canceling service.',
+      },
+      {
+        question: 'Does a Number Transfer PIN unlock an iPhone?',
+        answer: 'No. A Number Transfer PIN authorizes a phone-number port. Carrier Lock is a separate device permission controlled by the original carrier. Never enter a transfer PIN as a SIM PIN, PUK, screen passcode or unlock code, and do not share it outside authenticated provider channels.',
+      },
+      {
+        question: 'Should I delete my eSIM before switching carriers?',
+        answer: 'Wait for instructions from the current and receiving carriers. Deleting an eSIM removes that profile but does not unlock the iPhone or necessarily cancel the plan. Keep working service until the port and replacement activation are confirmed, then remove the old profile at the correct stage.',
+      },
+      {
+        question: 'Why does my unlocked iPhone have no service after switching?',
+        answer: 'Check that the port completed, the new plan is active, the correct SIM or eSIM is installed, and the carrier accepts the exact model and IMEI. “No SIM restrictions” rules out one device restriction; it does not prove provisioning, compatibility, coverage or account activation.',
+      },
+    ],
+  },
+
+  {
+    slug: 'trade-in-carrier-locked-iphone-checklist',
+    title: 'Trade In a Carrier-Locked iPhone',
+    heading: 'Can You Trade In a Carrier-Locked iPhone?',
+    description: 'Can you trade in a locked iPhone? Identify Carrier Lock, Activation Lock, finance and blacklist status before accepting an offer or shipping it.',
+    standfirst: 'A carrier-locked iPhone may qualify for some trade-in programs, but acceptance is not universal. Check the buyer’s current regional terms and disclose the restriction. Activation Lock, an unknown passcode, unfinished repair, unpaid finance or a lost-and-stolen report can create separate eligibility, ownership and value problems.',
+    published: '2026-11-10',
+    updated: '2026-11-10',
+    minutes: 9,
+    topic: 'Carrier-Locked iPhone Trade-In',
+    blocks: [
+      {
+        kind: 'list',
+        items: [
+          'A carrier lock does not automatically answer whether a trade-in program will accept the iPhone.',
+          'Read the buyer’s current terms for your country, sales channel and promotion before accepting an estimate.',
+          'Carrier Lock, Activation Lock, passcode, blacklist, finance, repair and device-management status are different checks.',
+          'Back up the iPhone, remove personal accounts, erase it correctly and follow the buyer’s SIM or eSIM instructions.',
+          'Keep photos, serial records, IMEI evidence, offer terms and shipment tracking until the final inspection is complete.',
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'can-trade-in',
+        text: 'Can you trade in a carrier-locked iPhone?',
+      },
+      {
+        kind: 'p',
+        text: 'Sometimes, but the program decides. A carrier-locked iPhone can still be owned legitimately and function on its authorized network, yet a buyer may reject it, reduce the offer or accept it under separate conditions. Verify the exact regional terms instead of assuming one retailer’s rule applies everywhere.',
+      },
+      {
+        kind: 'p',
+        text: 'Apple’s trade-in preparation guidance focuses on backing up, erasing, removing accounts and handling cellular service. Separate Apple Trade In terms in at least one region expressly exclude carrier-contracted locked devices, showing why location-specific terms matter. Check the terms presented with your own quote.',
+        links: [
+          { label: 'Apple trade-in preparation', href: 'https://support.apple.com/en-us/102914' },
+          { label: 'Example of regional Apple Trade In terms', href: 'https://www.apple.com/mo/legal/sales-support/trade-in/mo/' },
+        ],
+      },
+      {
+        kind: 'table',
+        head: ['Condition described as “locked”', 'What it controls', 'Trade-in action'],
+        rows: [
+          ['Carrier Lock: SIM locked', 'Use with another carrier', 'Disclose it and check whether this program accepts carrier-locked devices'],
+          ['Activation Lock / iPhone Locked to Owner', 'Ownership protection through Find My', 'Remove it legitimately before transfer; do not submit another owner’s locked device'],
+          ['Unknown screen passcode', 'Local device access and erasure', 'Recover access or follow the program’s documented exception; do not guess'],
+          ['SIM PIN / PUK', 'Access to one SIM or eSIM profile', 'Contact the SIM issuer; it is not a handset carrier unlock'],
+          ['Lost, stolen or blocked IMEI', 'Network access and ownership risk', 'Resolve the report with its owner; disclose or stop the transaction'],
+          ['Unpaid finance or lease', 'Contractual ownership or payment obligation', 'Settle the responsible account and confirm title before trading'],
+          ['MDM or organization ownership', 'Administrative control and enrollment', 'Ask the organization to release the device through its authorized process'],
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'check-before-quote',
+        text: 'What should you check before accepting a trade-in quote?',
+      },
+      {
+        kind: 'p',
+        text: 'Identify the exact restriction, who owns the iPhone, and which records the buyer will inspect. A preliminary estimate can change after physical or database review. Read the offer’s expiry, condition questions, carrier-lock rule, finance requirement, return process and consequences if the final value is lower.',
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Open Settings > General > About and record the model, serial number, IMEI, IMEI2, EID and Carrier Lock privately.',
+          'Check whether Carrier Lock says “No SIM restrictions” or “SIM locked.”',
+          'Confirm the device is yours to transfer and that financing, lease, insurance replacement and account obligations are resolved.',
+          'Check the relevant carrier or GSMA-sourced status for lost, stolen or blocked records, noting the source and timestamp.',
+          'Review Parts and Service History for unfinished repairs and answer the buyer’s condition questions accurately.',
+          'Read the final inspection, revised-offer, return and data-handling terms before shipping or handing over the device.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'An IMEI report may show only the fields named by its provider and data source. A clean blacklist result does not prove payoff, ownership, Carrier Lock or trade-in acceptance. Keep each status separate and ask the buyer which evidence it actually uses.',
+        links: [
+          { label: 'What an IMEI check can and cannot tell you', href: '/articles/what-an-imei-check-tells-you' },
+          { label: 'Carrier lock versus blacklist status', href: '/articles/blacklisted-iphone-unlock-carrier-lock-difference' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'unlock-first',
+        text: 'Should you carrier-unlock the iPhone before trade-in?',
+      },
+      {
+        kind: 'p',
+        text: 'Unlock it first when the carrier offers an official eligible route and doing so will satisfy the buyer’s terms or broaden legitimate resale options. Do not pay for an unsupported promise. An unlock cannot remove Activation Lock, settle finance, clear a blacklist or guarantee a higher final valuation.',
+      },
+      {
+        kind: 'p',
+        text: 'Apple says only the current carrier can authorize an iPhone for another network. Check eligibility with the original carrier, save the approval, and confirm “No SIM restrictions” before describing the device as unlocked. If the carrier refuses, ask the trade-in program whether it accepts the restriction as-is.',
+        links: [
+          { label: 'Apple’s official carrier-unlock steps', href: 'https://support.apple.com/en-us/109316' },
+          { label: 'What to do after an unlock refusal', href: '/articles/carrier-refused-iphone-unlock-next-steps' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'prepare-device',
+        text: 'How do you prepare a locked iPhone for trade-in?',
+      },
+      {
+        kind: 'p',
+        text: 'Prepare the device only after preserving evidence and understanding the offer. Back up your data, unpair accessories, sign out where instructed, turn off Find My through the legitimate account, erase personal content, and follow the program’s physical SIM or eSIM directions. Keep shipment and handover proof.',
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Save the quote, declared condition, device identifiers, photos and applicable terms.',
+          'Back up the iPhone and transfer any data needed on the replacement device.',
+          'Unpair an Apple Watch and remove payment cards or other sensitive services as instructed.',
+          'Sign out and erase the iPhone through Apple’s documented process so Find My and Activation Lock are removed.',
+          'Remove a physical SIM; for eSIM, coordinate service transfer or suspension with the carrier before erasing the profile.',
+          'Remove cases and accessories only as the program directs, then photograph the packed device and label.',
+          'Retain the receipt, tracking, serial or IMEI record and final inspection outcome.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Apple advises against deleting an eSIM merely for troubleshooting, but says to erase it when selling, trading or giving away the device. If you erase an active eSIM, the carrier may need to issue a replacement. Deleting the profile does not cancel the plan or remove Carrier Lock.',
+        links: [
+          { label: 'Apple steps before selling or trading an iPhone', href: 'https://support.apple.com/en-us/109511' },
+          { label: 'Apple eSIM erasure guidance', href: 'https://support.apple.com/en-us/102421' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'activation-lock',
+        text: 'Why is Activation Lock different from Carrier Lock?',
+      },
+      {
+        kind: 'p',
+        text: 'Carrier Lock limits cellular-network choice; Activation Lock protects ownership through Find My and the Apple Account. A trade-in buyer may tolerate a network restriction under its terms but still require Activation Lock removed. Carrier authorization cannot remove another person’s Apple Account or ownership protection.',
+      },
+      {
+        kind: 'p',
+        text: 'If setup shows “iPhone Locked to Owner,” return to the legitimate account owner or Apple’s documented support route with qualifying proof. Do not buy a carrier unlock for that screen. A screen passcode, SIM PIN and PUK also require their own recovery paths.',
+        links: [
+          { label: 'Apple Activation Lock removal', href: 'https://support.apple.com/en-us/108934' },
+          { label: 'Apple SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'revised-offer',
+        text: 'What if the buyer reduces or rejects the trade-in?',
+      },
+      {
+        kind: 'p',
+        text: 'Compare the inspection reason with the condition you disclosed and the written terms. Ask whether the issue is carrier lock, Activation Lock, finance, blacklist status, damage, unfinished repair or model mismatch. Use the stated appeal or return route and do not authorize disposal before understanding your options.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Request the inspection category, photos or diagnostic result the program makes available.',
+          'Match the inspected serial number or IMEI with the device you submitted.',
+          'Compare the reason against your original answers and the program terms saved on the quote date.',
+          'If a carrier record is wrong, correct it with the responsible carrier before any permitted reassessment.',
+          'If the revised value is unacceptable, follow the return instructions and deadline in the offer.',
+        ],
+      },
+      {
+        kind: 'cta',
+        text: 'Need a clearly scoped IMEI report before disclosing a carrier-locked iPhone to a trade-in buyer?',
+        href: '/services/imei-check',
+        label: 'Browse IMEI checks',
+      },
+    ],
+    faq: [
+      {
+        question: 'Can I trade in a carrier-locked iPhone?',
+        answer: 'Possibly. Trade-in programs set different rules by country, channel and promotion. Disclose the Carrier Lock status and read the current terms attached to the quote. A carrier-locked device is different from an Activation-Locked, blacklisted, financed or organization-owned iPhone, which may trigger other restrictions.',
+      },
+      {
+        question: 'Does Apple accept a carrier-locked iPhone for trade-in?',
+        answer: 'Do not assume one worldwide rule. Apple’s preparation guidance and regional trade-in terms are separate, and at least one regional set of terms expressly excludes carrier-contracted locked devices. Use the eligibility questions and legal terms shown for your country and quote, or ask Apple before submitting it.',
+      },
+      {
+        question: 'Should I unlock my iPhone before trading it in?',
+        answer: 'Use the original carrier’s official route when the phone is eligible and the buyer’s terms benefit from an unlocked device. Confirm “No SIM restrictions” before describing it as unlocked. Avoid services claiming they can bypass finance, blacklist reports, Activation Lock or another owner’s account.',
+      },
+      {
+        question: 'Can I trade in an iPhone that says iPhone Locked to Owner?',
+        answer: 'That message is Activation Lock, not Carrier Lock. Remove it through the legitimate Apple Account owner or Apple’s documented support route with qualifying proof. A carrier unlock cannot remove it. Do not submit a device still linked to another person’s account as if ownership were clear.',
+      },
+      {
+        question: 'Does erasing an iPhone remove its carrier lock?',
+        answer: 'No. Erasing removes personal content and can turn off Find My and Activation Lock when completed by the legitimate account owner. Carrier Lock remains controlled by the original carrier. After erasure, “No SIM restrictions” still depends on carrier authorization, not the reset itself.',
+      },
+      {
+        question: 'Does a clean IMEI guarantee my trade-in will be accepted?',
+        answer: 'No. A report answers only its stated fields and source at the recorded time. The buyer may also inspect Carrier Lock, ownership, finance, Activation Lock, repairs, physical condition, model and identifiers. Review the program’s exact criteria and disclose anything the report does not establish.',
+      },
+    ],
+  },
+
+  {
     slug: 'carrier-refused-iphone-unlock-next-steps',
     title: 'Carrier Refused iPhone Unlock',
     heading: 'Can a Carrier Refuse to Unlock an iPhone?',
