@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "source": "Iunlockmobile Price sheet 2026-10-29",
+  "source": "Iunlockmobile Price sheet 2026-10-29; owner retail update for 690/973 on 2026-11-12",
   "currency": "USD",
   "gross_margin_usd": "retail_usd - cost_usd (before payment fee)",
   "ad_safe": "false = never reference in Google Ads keywords/ads/landing pages (policy: enabling dishonest behavior)"
@@ -266,8 +266,8 @@
    "name": "Apple Case History",
    "category": "GSX Services",
    "cost_usd": 0.6,
-   "retail_usd": 1.0,
-   "gross_margin_usd": 0.4,
+   "retail_usd": 1.95,
+   "gross_margin_usd": 1.35,
    "ad_safe": true
   },
   "266": {
@@ -314,8 +314,8 @@
    "name": "Apple Case History (Picture)",
    "category": "GSX Services (Picture)",
    "cost_usd": 0.65,
-   "retail_usd": 1.04,
-   "gross_margin_usd": 0.39,
+   "retail_usd": 1.95,
+   "gross_margin_usd": 1.30,
    "ad_safe": true
   },
   "944": {

@@ -1,3 +1,4 @@
+import { consentChoice } from '@/lib/checkout-context-request'
 import { snapshotPaymentAnalytics } from '@/lib/payment-analytics-request'
 import { NextResponse } from 'next/server'
 import { guard } from '@/lib/api'
@@ -14,7 +15,8 @@ export async function POST(request: Request) {
     const topup = await createWhopCheckout(found.user.id,
       typeof body.amountCents === 'number' ? body.amountCents : NaN,
       typeof body.requestKey === 'string' ? body.requestKey : '',
-      reference => snapshotPaymentAnalytics(reference, found.user.id, body.analyticsContext))
+      reference => snapshotPaymentAnalytics(reference, found.user.id, body.analyticsContext),
+      found.user.account_type === 'admin' ? 'denied' : await consentChoice())
     const checkoutUrl = topup.checkout_url && !topup.credited && topup.status !== 'refunded' && !topup.review_reason
       ? safeWhopCheckoutUrl(topup.checkout_url, topup.environment) : null
     return NextResponse.json({ success: true, invoiceUrl: `/user/invoice/${topup.invoice_reference}`, checkoutUrl },

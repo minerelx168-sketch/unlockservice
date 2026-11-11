@@ -8,6 +8,7 @@ import { serviceIdentifier, type ServiceInputType } from '../lib/service-identif
 import { decryptPaidReportImei, encryptPaidReportImei } from '../lib/paid-report-imei'
 import { parseDeviceIntent } from '../lib/device-intent-value'
 import { AVAILABLE_PROVIDER_PRODUCTS } from '../lib/provider-products'
+import { NOV12_PRICES } from '../lib/retail-update-nov12'
 import approved from '../catalog/owner-selling-prices-20261028.json'
 import directory from '../catalog/storefront-service-directory.json'
 
@@ -46,10 +47,10 @@ test('owner-approved prices match all current provider IDs and retain the requir
   const ids = new Set(directory.services.map(row => row.serviceId))
   const prices = new Map(approved.prices.map(row => [row.serviceId, row.sellingPriceCents]))
   assert.equal(ids.size, 129)
-  assert.equal(AVAILABLE_PROVIDER_PRODUCTS.length, 128)
+  assert.equal(AVAILABLE_PROVIDER_PRODUCTS.length, 127)
   for (const p of AVAILABLE_PROVIDER_PRODUCTS) {
     assert.ok(ids.has(p.serviceId))
-    assert.equal(p.priceCents, prices.get(p.serviceId))
+    assert.equal(p.priceCents, NOV12_PRICES[p.productCode] ?? prices.get(p.serviceId))
     assert.ok(p.priceCents * 1e6 >= p.providerCostMicros * 130)
   }
 })

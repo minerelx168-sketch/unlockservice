@@ -18,9 +18,9 @@ test('the supplier section boundary puts status checks before HLR and device ser
 test('the AT&T status and unlock service moves only its display section, never its checkout identity or retail price', () => {
   const product = PUBLIC_PROVIDER_PRODUCTS.find((entry) => entry.productCode === 'UNLOCK_346')!
   const before = structuredClone(product)
-  assert.equal(storefrontDomain(product), 'imei_check')
+  assert.equal(storefrontDomain(product), 'unlock')
   const grouped = groupServices([product])
-  assert.equal(grouped[0].group, 'Status Check Services')
+  assert.equal(grouped[0].group, 'USA Networks')
   assert.strictEqual(grouped[0].products[0], product)
   assert.equal(product.domain, 'unlock')
   assert.deepEqual(product, before)

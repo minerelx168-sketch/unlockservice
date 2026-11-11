@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path'
 import Database from 'better-sqlite3'
 import { BRANDS, CARRIERS, DEVICE_SERVICES } from './catalog'
 import { toCents } from './money'
+import { NOV12_PRICES, NOV12_VERSION, RETIRED_ATT_CODE } from './retail-update-nov12'
 import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 
 /**
@@ -722,6 +723,7 @@ export function db(): Database.Database {
 			  seedCatalog(connection)
 	      seedPaidReportCatalog(connection)
       applyProviderProductCatalogRollout(connection)
+      applyNovemberRetailUpdate(connection)
       migrateResellers(connection)
 
 	  handle = connection
@@ -1174,6 +1176,19 @@ function applyProviderProductCatalogRollout(connection: Database.Database) {
     }
     connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run(version)
   })()
+}
+
+// Existing databases keep their per-order snapshots and all other admin prices/activation flags.
+export function applyNovemberRetailUpdate(connection: Database.Database) {
+  connection.transaction(() => {
+    if (migrationApplied(connection, NOV12_VERSION)) return
+    const update = connection.prepare("UPDATE paid_report_products SET price_cents=?,updated_at=datetime('now') WHERE code=?")
+    for (const [code, cents] of Object.entries(NOV12_PRICES)) {
+      if (update.run(cents, code).changes !== 1) throw new Error('Missing retail product: ' + code)
+    }
+    connection.prepare("UPDATE paid_report_products SET is_active=0,updated_at=datetime('now') WHERE code=?").run(RETIRED_ATT_CODE)
+    connection.prepare('INSERT INTO schema_migrations(version) VALUES (?)').run(NOV12_VERSION)
+  }).immediate()
 }
 
 /* ---- catalog reads --------------------------------------------------- */

@@ -18,13 +18,13 @@ test('the complete directory uses our current retail prices and never exposes su
   const checks = listStorefrontProviderProducts('imei_check')
   const unlocks = listStorefrontProviderProducts('unlock')
   const all = [...checks, ...unlocks]
-  assert.equal(checks.length, 65)
+  assert.equal(checks.length, 64)
   assert.equal(unlocks.length, 63)
-  assert.equal(new Set(all.map((product) => product.productCode)).size, 128)
-  const moved = checks.find((product) => product.productCode === 'UNLOCK_346')!
+  assert.equal(new Set(all.map((product) => product.productCode)).size, 127)
+  const moved = unlocks.find((product) => product.productCode === 'UNLOCK_346')!
   assert.equal(moved.priceCents, retail)
   assert.equal(moved.domain, 'unlock')
-  assert.equal(unlocks.some((product) => product.productCode === moved.productCode), false)
+  assert.equal(checks.some((product) => product.productCode === moved.productCode), false)
   const allowed = ['domain', 'etaLabel', 'group', 'hasExample', 'inputType', 'name', 'priceAvailable', 'priceCents', 'productCode', 'slug', 'sortOrder', 'status', 'summary'].sort()
   for (const product of all) {
     assert.deepEqual(Object.keys(product).sort(), allowed)
@@ -44,3 +44,28 @@ test('the complete directory uses our current retail prices and never exposes su
   assert.ok(all.filter((product) => product.inputType !== 'imei').every((product) => product.status === 'coming_soon')) // Provider is disabled in this fixture.
 })
 
+
+test('retail cutover pauses only the old AT&T SKU and reprices three products once, without rewriting order quotes', async () => {
+  const { db, applyNovemberRetailUpdate } = await import('../lib/db')
+  const { NOV12_VERSION } = await import('../lib/retail-update-nov12')
+  const { getPaidReportProduct } = await import('../lib/paid-reports')
+  const { listStorefrontProviderProducts } = await import('../lib/public-provider-catalog')
+  const connection = db()
+  connection.prepare("INSERT INTO paid_report_products(code,slug,name,summary,price_cents,is_active) VALUES('UNLOCK_718','unlock-718','Legacy AT&T','',499,1)").run()
+  connection.prepare("INSERT INTO guest_checkouts(reference,request_key,email,product_code,product_name,imei_encrypted,price_cents,fee_cents,account_id,product_id,environment) VALUES('legacy','legacy','test@example.test','UNLOCK_718','AT&T','opaque',499,25,'account','product','sandbox')").run()
+  connection.prepare('DELETE FROM schema_migrations WHERE version=?').run(NOV12_VERSION)
+  connection.prepare("UPDATE paid_report_products SET price_cents=100 WHERE code='CHECK_690'").run()
+  connection.prepare("UPDATE paid_report_products SET price_cents=104,is_active=0 WHERE code='CHECK_973'").run()
+  applyNovemberRetailUpdate(connection)
+  assert.equal(getPaidReportProduct('UNLOCK_718')?.isActive, false)
+  assert.equal(getPaidReportProduct('UNLOCK_718')?.providerReady, false)
+  assert.ok(!listStorefrontProviderProducts('unlock').some(p=>p.productCode==='UNLOCK_718'))
+  assert.equal(getPaidReportProduct('UNLOCK_346')?.priceCents, 800)
+  assert.equal(getPaidReportProduct('CHECK_690')?.priceCents, 195)
+  assert.equal(getPaidReportProduct('CHECK_973')?.priceCents, 195)
+  assert.equal(getPaidReportProduct('CHECK_973')?.isActive, false)
+  assert.deepEqual(connection.prepare("SELECT price_cents,fee_cents FROM guest_checkouts WHERE reference='legacy'").get(),{price_cents:499,fee_cents:25})
+  connection.prepare("UPDATE paid_report_products SET price_cents=201 WHERE code='CHECK_690'").run()
+  applyNovemberRetailUpdate(connection)
+  assert.equal(getPaidReportProduct('CHECK_690')?.priceCents,201)
+})

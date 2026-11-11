@@ -1,3 +1,5 @@
+import { whopClickMetadata } from './whop-click-metadata'
+import type { ConsentChoice } from './ga4'
 import { alreadyHandled, checkoutContext, claimEvent, ga4Config, identity, isInternalEmail, markDeliveryStarted, sendClaimedEvent, skipEvent, toMicros } from './ga4'
 import { marginCents, serviceForCode } from './service-margins'
 import { customerTypeFor } from './purchase-analytics'
@@ -62,6 +64,7 @@ export function authorizedGuestCheckout(reference: string, key: string) {
 export async function createGuestCheckout(input: {
   productCode: string; imei: string; email: string; requestKey: string; expectedPriceCents: number; authenticatedUserId?: number
   analytics?: { clientId: string; sessionId: string }
+  consent?: ConsentChoice
   beforeCheckout?: (reference: string) => Promise<void>
 }) {
   const config = whopConfiguration()
@@ -114,7 +117,7 @@ export async function createGuestCheckout(input: {
       title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — one device service order. Total $${(total/100).toFixed(2)} USD, including our card fee and any applicable tax. No subscription.`,
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
-    metadata: { guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
+    metadata: { ...whopClickMetadata('guest', row.reference, input.consent ?? 'unknown'), guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
     payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false },
     redirect_url: publicOrigin() + guestOrderPath(row.reference),
   }, { idempotencyKey: `guest-checkout-${row.reference}` })

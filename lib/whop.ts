@@ -1,3 +1,5 @@
+import { whopClickMetadata } from './whop-click-metadata'
+import type { ConsentChoice } from './ga4'
 import { upgradeResellerAfterTopup } from './reseller-pricing'
 import { logPaymentFailure } from './payment-diagnostics'
 import { randomBytes } from 'node:crypto'
@@ -63,7 +65,7 @@ export function safeWhopCheckoutUrl(value: string, mode: 'live' | 'sandbox'): st
 }
 
 /** One locally owned invoice and one provider idempotency key across retries. */
-export async function createWhopCheckout(userId: number, amountCents: number, requestKey: string, beforeCheckout?: (reference: string) => Promise<void>): Promise<WhopTopup> {
+export async function createWhopCheckout(userId: number, amountCents: number, requestKey: string, beforeCheckout?: (reference: string) => Promise<void>, consent: ConsentChoice = 'unknown'): Promise<WhopTopup> {
   const config = whopConfiguration()
   if (!config || !whopCheckoutEnabled()) throw new WhopPaymentError('Card payments are not available yet.', 503)
   if (!Number.isSafeInteger(amountCents) || amountCents < WHOP_MIN_CENTS || amountCents > WHOP_MAX_CENTS) {
@@ -110,7 +112,7 @@ export async function createWhopCheckout(userId: number, amountCents: number, re
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true,
       three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
-    metadata: { invoice_reference: topup.invoice_reference, integration: 'iunlockmobile-credit-v1' },
+    metadata: { ...whopClickMetadata('topup', topup.invoice_reference, consent), invoice_reference: topup.invoice_reference, integration: 'iunlockmobile-credit-v1' },
     payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false },
     redirect_url: `${publicOrigin()}/user/invoice/${topup.invoice_reference}`,
   }, { idempotencyKey: `whop-topup-${topup.invoice_reference}` })
