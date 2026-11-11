@@ -4,7 +4,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async redirects() {
-    return [{ source: '/user', destination: '/user/check', permanent: false }]
+    return [
+      { source: '/article/imei-unlock-iphone-service-checklist', destination: '/articles/used-iphone-imei-unlock-legitimacy-checklist', statusCode: 301 },
+      { source: '/articles/imei-unlock-iphone-service-checklist', destination: '/articles/used-iphone-imei-unlock-legitimacy-checklist', statusCode: 301 },
+      { source: '/article/:slug*', destination: '/articles/:slug*', statusCode: 301 },
+      { source: '/user', destination: '/user/check', permanent: false }]
   },
   async headers() {
     return [{

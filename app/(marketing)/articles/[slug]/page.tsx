@@ -85,6 +85,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <section className="section">
         <div className="shell article-layout">
           <div className="article-content">
+            {slug==='how-to-find-carrier-on-iphone-before-unlock' && <p><Link href="/services/imei-check/apple-carrier-lock-status">Compare free checks with Lite and Pro carrier reports, see current prices, or enter your IMEI.</Link></p>}
             <ArticleBody blocks={article.blocks} />
             <ServiceDirectory
               services={SERVICE_SPOKES.filter(service => service.domain === 'imei_check' || /\batt\b|at&t/i.test(`${article.slug} ${article.topic}`))}

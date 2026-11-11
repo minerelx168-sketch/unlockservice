@@ -20,7 +20,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${origin}/services/imei-check`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/check`, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${origin}/articles`, changeFrequency: 'weekly', priority: 0.7 },
-    ...listArticles().map((article) => ({
+    ...(['/services/unlock/canada','/articles/used-iphone-imei-unlock-legitimacy-checklist','/articles/rogers-telus-sim-locked-us-iphone-in-canada'].map(path => ({url:origin+path}))),
+    ...listArticles().filter(a=>a.slug!=='imei-unlock-iphone-service-checklist').map((article) => ({
       url: `${origin}/articles/${article.slug}`,
       lastModified: new Date(`${article.updated}T00:00:00Z`),
       changeFrequency: 'monthly' as const,

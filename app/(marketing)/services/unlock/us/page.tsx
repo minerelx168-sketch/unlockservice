@@ -1,3 +1,4 @@
+import { CarrierGuide } from '@/components/carrier-guide'
 import spokeStyles from '@/styles/service-spoke.module.css'
 import Link from 'next/link'
 import styles from './us-unlock.module.css'
@@ -12,10 +13,9 @@ export default async function UsUnlock({searchParams}:{searchParams:Promise<{pro
   const services=listStorefrontProviderProducts('unlock').filter(p=>p.group==='USA Networks' && /\(Clean\)/i.test(p.name) && p.status==='available' && p.priceAvailable)
   const selected=services.find(p=>p.productCode===product)?.productCode
   const options:PriceCheckProduct[]=services.map(p=>({code:p.productCode,domain:p.domain,name:p.name,category:p.group,summary:p.summary,hasExample:p.hasExample,available:true,inputType:p.inputType,priceCents:p.priceCents,priceAvailable:true,etaLabel:p.etaLabel}))
-  return <section className={`section section--tint service-entry-section unlock-landing ${styles.page}`}><div className="shell">
+  return <CarrierGuide id="us"><section className={`section section--tint service-entry-section unlock-landing ${styles.page}`}><div className="shell">
     <nav className="service-breadcrumb" aria-label="Breadcrumb"><Link href="/services/unlock">Unlock services</Link><span>/</span><span>United States</span></nav>
     <nav className={spokeStyles.hubLinks} aria-label="Carrier details"><Link href="/services/unlock/us/att">AT&amp;T service: price, requirements and examples</Link></nav>
-    <div className="service-hero-copy"><span className="hero-chip">US carrier unlocking</span><h1 className="service-entry-title">Check the price.<br/><span className="accent">Keep your phone.</span></h1><p className="t-lead">Choose an available service below. See its price and delivery estimate before entering your IMEI and email.</p></div>
     <div className={`requirements-card ${styles.infoCard}`}><h2>For devices you own</h2><p>These services are for fully paid-off devices that meet the listed carrier requirements. We do not accept lost, stolen or blacklisted devices on this page. iUnlockMobile is an independent service, not affiliated with any carrier. Eligibility is confirmed during processing; an IMEI format check does not guarantee an unlock.</p></div>
     <section className={styles.services} aria-labelledby="us-services-title">
       <div className={styles.sectionHeading}><span className="kicker">Available services</span><h2 id="us-services-title">Choose your carrier service</h2><p>Compare the price and estimated delivery time, then continue with your device details.</p></div>
@@ -34,5 +34,5 @@ export default async function UsUnlock({searchParams}:{searchParams:Promise<{pro
     {services.length>0&&<div className={`hero-panel ${styles.orderPanel}`} id="us-order"><HeroPriceCheck key={selected??'us'} unlock={options} check={[]} ordering fixedDomain="unlock" initialProductCode={selected}/></div>}
     <div className={`requirements-card ${styles.infoCard}`}><h2>Payment and delivery</h2><p>Pay for this order by card or crypto. No wallet top-up is required for guest checkout. Processing starts after payment is verified. Your private tracking link and results are sent by email.</p><p>If a direct card order cannot be delivered, the system initiates a refund to the original payment method. Your bank controls when it appears on your statement. If the payment needs manual review, contact support with your order reference. Crypto refunds require support; orders paid with account credit return to that balance.</p><Link href="/support">Payment and refund help</Link></div>
     <p className={`service-guides ${styles.footerLinks}`}><Link href="/services/unlock">Browse all unlock services</Link> · <Link href="/track">Track your order</Link></p>
-  </div></section>
+  </div></section></CarrierGuide>
 }
