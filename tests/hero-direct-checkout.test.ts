@@ -10,6 +10,7 @@ function render(domain:'unlock'|'imei_check',imei='490154203237518',validEmail=t
   const navigate=()=>{},events:string[]=[],record={exports:{} as {HeroPriceCheck:(props:unknown)=>Element}}
   const jsx=(type:unknown,props:Record<string,unknown>)=>({type,props})
   const imports:Record<string,unknown>={
+    '@/lib/i18n/locale-context':{useLocale:()=>'en'},
     'next/navigation':{usePathname:()=>'/services/unlock'},
     '@/lib/i18n/route-map':{localeOf:()=>'en'},
     '@/lib/i18n/client':{useCopy:()=>(text:string)=>text,useIdentifierCopy:identifierField},

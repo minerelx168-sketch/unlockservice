@@ -20,7 +20,7 @@ test('new hero entry points use consented allowlisted funnel transport without r
   assert.match(transport, /allowlistedFunnelParams/)
 })
 test('homepage and FAQ qualify unlock compatibility and describe direct card and crypto orders', () => {
-  const home = read('app/(marketing)/page.tsx')
+  const home = read('components/storefront-home.tsx')
   assert.doesNotMatch(home, /Use any SIM|title: 'Permanent'|Financed\? Often still fine|Every other brand receives a code/)
   assert.match(home, /radio bands/)
   const text = FAQ.map((item) => item.answer).join(' ')

@@ -1,4 +1,5 @@
 'use client'
+import {useLocale} from '@/lib/i18n/locale-context'
 import {localeOf} from '@/lib/i18n/route-map'
 import {usePathname} from 'next/navigation'
 import {useIdentifierCopy,useCopy} from '@/lib/i18n/client'
@@ -18,7 +19,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
   method: 'card' | 'crypto'; onMethodChange: (method: 'card' | 'crypto') => void
   cryptoEnabled: boolean; cryptoRoutes: { id: string; label: string; asset: string }[]
 }) {
-  const t=useCopy(),locale=localeOf(usePathname())
+  const t=useCopy(),locale=useLocale()
   const field = useIdentifierCopy(product.inputType)
   const [imei, setImei] = useState(initialImei), [email, setEmail] = useState(initialEmail), [busy, setBusy] = useState(false), [error, setError] = useState('')
   const [editing, setEditing] = useState(!serviceIdentifier(initialImei, product.inputType) || !deviceEmail(initialEmail))

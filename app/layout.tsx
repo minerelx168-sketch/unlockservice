@@ -1,3 +1,7 @@
+import {cookies} from 'next/headers'
+import {LocaleProvider} from '@/lib/i18n/locale-context'
+import {effectiveLocale} from '@/lib/i18n/route-map'
+import {locales,markets} from '@/lib/geo-locales'
 import { currentSession } from '@/lib/auth'
 import { headers } from 'next/headers'
 import type { Metadata, Viewport } from 'next'
@@ -63,6 +67,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const requestHost = requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim() ?? requestHeaders.get('host') ?? ''
   const session = await currentSession()
   const requestPath = requestHeaders.get('x-continuation-path')?.split('?')[0] ?? '/'
+  const preference=(await cookies()).get('NEXT_LOCALE')?.value??'en'
+  const locale=effectiveLocale(requestPath,preference)
   // INTERNAL_IPS: the same team list the server-side conversion rules skip.
   const analyticsEnabled = analyticsHostAllowed(requestHost) && session?.user.account_type !== 'admin' && !requestPath.startsWith('/admin')
     && !isInternalIp(clientIp(requestHeaders))
@@ -72,7 +78,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const googleTagBootstrap = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('consent', 'default', {analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', region: ${JSON.stringify(CONSENT_REQUIRED_REGIONS)}}); gtag('consent', 'default', {analytics_storage: 'granted', ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', wait_for_update: 500}); gtag('set', 'ads_data_redaction', true); gtag('set', 'url_passthrough', false); var safeAnalyticsContext = (${safeAnalyticsPage.toString()})(location.href, document.referrer); gtag('set', safeAnalyticsContext); gtag('js', new Date()); gtag('config', '${googleAdsTag}', {...safeAnalyticsContext, send_page_view:false}); gtag('config', '${googleAnalyticsTag}', {...safeAnalyticsContext, send_page_view:false});`
 
   return (
-    <html dir={/^\/ar(?:\/|$)/.test(requestPath)?'rtl':undefined} lang={({ar:'ar',de:'de-AT',pt:'pt-BR',es:'es-MX','fr-ca':'fr-CA'} as Record<string,string>)[requestPath.split('/')[1]]??'en-US'} data-analytics-disabled={!analyticsEnabled ? 'true' : undefined} data-theme="light" suppressHydrationWarning>
+    <html dir={locale==='ar'?'rtl':'ltr'} lang={markets[locales.indexOf(locale)]} data-analytics-disabled={!analyticsEnabled ? 'true' : undefined} data-theme="light" suppressHydrationWarning>
       <head>
         {PRELOADED_FONTS.map((href) => (
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
@@ -81,7 +87,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {analyticsEnabled ? <script nonce={nonce} dangerouslySetInnerHTML={{ __html: googleTagBootstrap }} /> : null}
         {analyticsEnabled ? <script async nonce={nonce} src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsTag}`} /> : null}
       </head>
-      <body>{children}<GoogleAnalyticsNavigation /><CustomerEngagement /><AnalyticsConsent /></body>
+      <body><LocaleProvider value={preference}>{children}<GoogleAnalyticsNavigation /><CustomerEngagement /><AnalyticsConsent /></LocaleProvider></body>
     </html>
   )
 }

@@ -1,4 +1,5 @@
 'use client'
+import {useLocale} from '@/lib/i18n/locale-context'
 import {localeOf,prefixOf} from '@/lib/i18n/route-map'
 import {useCopy} from '@/lib/i18n/client'
 
@@ -41,7 +42,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [ta
  */
 export function SiteDrawer({ open, onClose, groups, links, isAuthenticated, accountSlot }: Props) {
   const t=useCopy()
-  const pathname = usePathname()
+  const pathname = usePathname(),l=useLocale()
   const panel = useRef<HTMLElement>(null)
   const closeButton = useRef<HTMLButtonElement>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -101,7 +102,7 @@ export function SiteDrawer({ open, onClose, groups, links, isAuthenticated, acco
         aria-label={t("Open navigation")}
       >
         <header className="drawer-head">
-          <Brand href={prefixOf(localeOf(pathname))} tagline={[t("Unlock"),t("Phone Check"),t("Track order")].join(" · ")}/>
+          <Brand href={prefixOf(l)} tagline={[t("Unlock"),t("Phone Check"),t("Track order")].join(" · ")}/>
           <button
             type="button"
             className="icon-action drawer-close"

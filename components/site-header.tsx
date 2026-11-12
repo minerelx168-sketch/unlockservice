@@ -1,4 +1,5 @@
 'use client'
+import {useLocale} from '@/lib/i18n/locale-context'
 import {useCopy} from '@/lib/i18n/client'
 
 import Link from 'next/link'
@@ -44,8 +45,8 @@ type Props = {
 export function SiteHeader({ articleLinks,isAuthenticated = false, drawerGroups, drawerLinks, accountSlot }: Props) {
   const t=useCopy()
   const pathname = usePathname()
-  const l=localeOf(pathname),ix=locales.indexOf(l)
-  const localized=(href:string)=>l==='en'?href:href==='/services/unlock'?paths[1][ix]:href==='/services/imei-check'?paths[0][ix]:href==='/articles'?prefixOf(l)+'/articles':href==='/services'?prefixOf(l):href
+  const l=useLocale(),ix=locales.indexOf(l)
+  const localized=(href:string)=>l==='en'?href:href==='/services/unlock'?paths[1][ix]:href==='/services/imei-check'?paths[0][ix]:href==='/articles'?prefixOf(l)+'/articles':href
   const navLabel=(href:string)=>href.includes('unlock')?t("Unlock"):href.includes('imei-check')?t("Phone Check"):href==='/articles'?t("Guides"):href==='/contact'?t("Contact us"):t("Track order")
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
@@ -53,11 +54,13 @@ export function SiteHeader({ articleLinks,isAuthenticated = false, drawerGroups,
   const accountLabel = isAuthenticated ? t("Account") : t("Sign in")
 
   /* The one way to the whole catalog, offered at the foot of each menu. */
-  const scopedGroups:DrawerGroup[]=l==='en'?drawerGroups:[{id:'unlock',label:t('Unlock'),icon:'lock',primary:{href:paths[1][ix],label:'AT&T · '+t('Unlock')},items:[{href:paths[2][ix],label:t('Canada')},{href:paths[4][ix],label:t('Austria')}]},{id:'check',label:t('Phone Check'),icon:'search',primary:{href:paths[0][ix],label:t('Carrier check')},items:[{href:paths[3][ix],label:t('Blacklist check')}]}]
-  const scopedLinks:DrawerLink[]=l==='en'?drawerLinks:[{href:prefixOf(l),label:t('Guides')},{href:'/track',label:t('Track order')},{href:'/support',label:t('Support')}]
+  const menuLabels = ['Unlock','Phone Check','Unlock my phone','Remove the network lock by IMEI','Check lock status first','How unlocking works','Track an unlock order','Browse all reports','Apple Free Check'] as const
+  const menuCopy=(s:string)=>{const key=menuLabels.find(k=>k===s);return key?t(key):s}
+  const scopedGroups:DrawerGroup[]=drawerGroups.map(g=>({...g,label:menuCopy(g.label),primary:{...g.primary,href:localized(g.primary.href),label:menuCopy(g.primary.label),note:g.primary.note?.replace(/services listed$/,t('services listed')).replace('Remove the network lock by IMEI',t('Remove the network lock by IMEI'))},items:g.items.map(item=>({...item,href:localized(item.href),label:menuCopy(item.label)}))}))
+  const scopedLinks:DrawerLink[]=l==='en'?drawerLinks:[{href:localized('/articles'),label:t('Guides')},{href:'/track',label:t('Track order')},{href:'/support',label:t('Support')}]
   const allServices = (
     <Link className="button button--primary" href={localized("/services")}>
-      <Icon name="grid" strokeWidth={1.9} />{t("Services")} </Link>
+      <Icon name="grid" strokeWidth={1.9} />{t("All services")} </Link>
   )
 
   return (

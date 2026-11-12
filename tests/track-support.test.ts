@@ -44,7 +44,7 @@ test('the sitemap lists the help centre and the tracking page', async () => {
 })
 
 test('the homepage and the help centre share one FAQ', () => {
-  const home = readFileSync(join(process.cwd(), 'app/(marketing)/page.tsx'), 'utf8')
+  const home = readFileSync(join(process.cwd(), 'components/storefront-home.tsx'), 'utf8')
   const support = readFileSync(join(process.cwd(), 'app/(marketing)/support/page.tsx'), 'utf8')
   assert.doesNotMatch(home, /const FAQ = \[/)
   assert.match(home, /from '@\/lib\/faq'/)

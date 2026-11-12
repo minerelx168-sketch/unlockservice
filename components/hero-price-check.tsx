@@ -1,4 +1,5 @@
 'use client'
+import {useLocale} from '@/lib/i18n/locale-context'
 import {usePathname} from 'next/navigation'
 import {localeOf} from '@/lib/i18n/route-map'
 import {useIdentifierCopy,useCopy} from '@/lib/i18n/client'
@@ -43,7 +44,7 @@ type Props = {
 type FieldError = { field: 'service' | 'imei' | 'email'; message: string }
 /** Select a service, add details once, then review before secure payment. */
 export function HeroPriceCheck({ unlock, check, ordering, homeUnlockMenu = false, fixedDomain, initialImei = '', initialProductCode, initialEmail = '' }: Props) {
-  const t=useCopy(),pageLocale=localeOf(usePathname())
+  const t=useCopy(),pageLocale=useLocale()
   const initialDomain = fixedDomain ?? (ordering && unlock.length ? 'unlock' : 'imei_check')
   const initialProduct = (initialDomain === 'unlock' ? unlock : check).find((product) => product.code === initialProductCode)
   const [domain, setDomain] = useState<Domain>(initialDomain)

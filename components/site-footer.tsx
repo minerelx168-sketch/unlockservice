@@ -1,4 +1,5 @@
 'use client'
+import {useLocale} from '@/lib/i18n/locale-context'
 import {usePathname} from 'next/navigation'
 import {localeOf} from '@/lib/i18n/route-map'
 import {LocalFooter} from './local-footer'
@@ -49,7 +50,7 @@ type Props = {
  * we accept. Deliberately quiet: the selling happened above the footer.
  */
 export function SiteFooter({ isAuthenticated = false, guides }: Props) {
-  if(localeOf(usePathname())!=="en")return <LocalFooter authenticated={isAuthenticated}/>
+  if(useLocale()!=="en")return <LocalFooter authenticated={isAuthenticated}/>
   return (
     <footer className="site-footer">
       <div className="shell">

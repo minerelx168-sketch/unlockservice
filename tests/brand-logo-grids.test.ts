@@ -7,9 +7,9 @@ import { BRANDS, CARRIERS } from '../lib/catalog'
 const read = (p: string) => fs.readFileSync(path.join(process.cwd(), p), 'utf8')
 
 test('network and brand grids use recognizable local marks, never initials placeholders', () => {
-  const home = read('app/(marketing)/page.tsx')
-  assert.match(home, /Carriers <span className="accent">We Unlock/)
-  assert.match(home, /Top Brands <span className="accent">We Support/)
+  const home = read('components/storefront-home.tsx')
+  assert.match(home, /t\("Carriers"\).*className="accent".*t\("We Unlock"\)/)
+  assert.match(home, /t\("Top Brands"\).*className="accent".*t\("We Support"\)/)
   assert.equal((home.match(/className="logo-grid"/g) || []).length, 2)
   assert.equal((home.match(/<BrandLogo name=/g) || []).length, 2)
   assert.doesNotMatch(home, /carrier\.name\.replace|brand\.name\.slice/)
@@ -36,7 +36,7 @@ test('responsive logo grids match reference column counts and remain scoped to l
 })
 
 test('homepage preserves public service entry points without publishing placeholder reviews', () => {
-  const home = read('app/(marketing)/page.tsx')
+  const home = read('components/storefront-home.tsx')
   assert.match(home, /<HeroPriceCheck unlock=/)
   assert.match(home, /listStorefrontProviderProducts\('unlock'\)/)
   assert.doesNotMatch(home, /Testimonials|SAMPLE_TESTIMONIALS|AggregateRating|ratingValue|reviewCount/)
