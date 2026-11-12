@@ -131,6 +131,14 @@ for attempt in $(seq 1 30); do
      sudo systemctl show unlockservice -p Environment
 BANNER
     fi
+    # A notification must never roll back a healthy release or hold the article publisher.
+    index_key="${INDEXNOW_KEY:-}"
+    if [ -z "$index_key" ] && sudo -n test -f "$ENV_FILE"; then
+      index_key="$(sudo -n sed -nE 's/^INDEXNOW_KEY=([A-Za-z0-9-]{8,128})$/\1/p' "$ENV_FILE" | head -n 1)"
+    fi
+    if [ -n "$index_key" ]; then
+      (cd "$APP_DIR" && INDEXNOW_KEY="$index_key" npm run indexnow:ping) || echo "IndexNow pending; deployment remains healthy."
+    fi
     exit 0
   fi
   sleep 1

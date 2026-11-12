@@ -32,7 +32,7 @@ export default function Page() {
  const url = publicOrigin()+path
  const graph = [
   {'@type':'Article','@id':url+'#article',headline:title,description,url,datePublished:date,dateModified:date,author:{'@type':'Organization',name:'iUnlockMobile'},hasPart:{'@id':url+'#comparison'},citation:[fcc,crtc,...rows.flatMap(r=>r.slice(4))]},
-  {'@type':'Dataset','@id':url+'#comparison',url:url+'#comparison',name:'Carrier policy comparison',description:'A qualitative comparison of published consumer SIM-lock policies, not a survey of phones or unlock success rates.',dateModified:date,variableMeasured:rows.map(([name,country,rule,action])=>({'@type':'PropertyValue',name:name+' ('+country+')',value:rule+' '+action}))},
+  {'@type':'Dataset','@id':url+'#comparison',url:url+'#comparison',name:'Carrier policy comparison',description:'A qualitative comparison of published consumer SIM-lock policies, not a survey of phones or unlock success rates.',dateModified:date,temporalCoverage:'2026',creator:{'@type':'Organization',name:'iUnlockMobile','@id':publicOrigin()+'/#organization'},license:publicOrigin()+'/terms',citation:['https://support.apple.com/en-us/109316',crtc,fcc,...rows.flatMap(r=>r.slice(4))],variableMeasured:rows.map(([name,country,rule,action])=>({'@type':'PropertyValue',name:name+' ('+country+')',value:rule+' '+action}))},
   {'@type':'FAQPage','@id':url+'#faq',mainEntity:faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text}}))}
  ]
  return <article><section className="section section--tint"><div className="shell"><nav className="service-breadcrumb"><Link href="/articles">Guides</Link><span>/</span>Buyer’s report</nav><div className="article-head">

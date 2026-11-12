@@ -3,6 +3,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  async rewrites() { return [{source:'/indexnow-key.txt',destination:'/api/indexnow-key'}] },
   async redirects() {
     return [
       { source: '/article/imei-unlock-iphone-service-checklist', destination: '/articles/used-iphone-imei-unlock-legitimacy-checklist', statusCode: 301 },

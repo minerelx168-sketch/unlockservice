@@ -15,7 +15,8 @@
     "provider:poll": "tsx scripts/poll-provider-jobs.ts",
     "notifications:deliver": "tsx scripts/deliver-order-notifications.ts",
     "ads:deliver": "node --import tsx scripts/deliver-ads-conversions.ts",
-    "ads:status": "node --import tsx scripts/deliver-ads-conversions.ts --status"
+    "ads:status": "node --import tsx scripts/deliver-ads-conversions.ts --status",
+    "indexnow:ping": "node scripts/ping-indexnow.mjs"
   },
   "dependencies": {
     "@types/better-sqlite3": "^9.6.0",
