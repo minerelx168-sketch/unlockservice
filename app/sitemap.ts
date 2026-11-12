@@ -1,3 +1,4 @@
+import {clusters} from '@/lib/landing-locales'
 import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import type { MetadataRoute } from 'next'
 import { listArticles } from '@/lib/articles'
@@ -12,6 +13,7 @@ export const dynamic = 'force-dynamic'
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = publicOrigin()
   return [
+    ...clusters.flatMap(c=>c.slice(1).map(path=>({url:origin+path}))),
     ...SERVICE_SPOKES.map(s => ({ url: `${origin}${s.path}` })),
     { url: `${origin}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${origin}/services`, changeFrequency: 'weekly', priority: 0.9 },
@@ -37,4 +39,3 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${origin}/terms`, changeFrequency: 'yearly', priority: 0.2 },
   ]
 }
-

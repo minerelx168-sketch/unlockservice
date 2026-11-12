@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useState, type ReactNode } from 'react'
+import {languageLinks, clusters} from '@/lib/landing-locales'
 import { Brand } from './brand'
 import { Icon, type IconName } from './icons'
 import { NavMenu } from './nav-menu'
@@ -91,6 +92,12 @@ export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks,
           </nav>
 
           <div className="header-actions">
+            <details key={pathname} style={{position:'relative'}}>
+              <summary aria-label="Language / Idioma / Langue" style={{display:'grid',placeItems:'center',minWidth:44,minHeight:44,cursor:'pointer',fontWeight:700}}>{pathname.startsWith('/fr-ca/')?'FR-CA':pathname.startsWith('/es/')?'ES':'EN'} ▾</summary>
+              <nav aria-label="Language" style={{position:'absolute',right:0,minWidth:165,padding:8,background:'var(--surface)',border:'1px solid var(--line)',borderRadius:12,zIndex:5}}>
+                {(['en-US','es-MX','fr-CA'] as const).map((l,i)=><a key={l} href={i===0 && !clusters.some(c=>c.includes(pathname))?'/':languageLinks(pathname)[l]} hrefLang={l} lang={l} style={{display:'block',padding:12}}>{['English','Español','Français (Canada)'][i]}</a>)}
+              </nav>
+            </details>
             <ThemeToggle />
             <Link className="icon-action header-help" href="/support" aria-label="Help centre">
               <Icon name="question" />
