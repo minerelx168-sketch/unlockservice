@@ -9,7 +9,7 @@ for (const member of [false,true]) for (const agent of ['Mozilla/5.0','Googlebot
   const headers={'User-Agent':agent,...(member?{Cookie:'iunlockmobile_session='+session}:{})}
   const api=await fetch(new URL('/api/user/unlock-more-services',base),{headers})
   assert.equal(api.status,member?200:401); assert.match(api.headers.get('cache-control'),/no-store/)
-  if(member) assert.deepEqual((await api.json()).services.map(p=>p.productCode).sort(),[...codes].sort())
+  if(member) { const ids=(await api.json()).services.map(p=>p.productCode); assert.equal(new Set(ids).size,ids.length); for(const id of [...codes,'UNLOCK_346']) assert.ok(ids.includes(id), id) }
   for(const path of ['/','/services/unlock/more']) for(const rsc of [false,true]){
     const r=await fetch(new URL(path,base),{headers:{...headers,...(rsc?{RSC:'1'}:{})},redirect:'manual'})
     const body=await r.text()

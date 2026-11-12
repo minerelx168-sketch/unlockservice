@@ -71,3 +71,9 @@ export function listStorefrontProviderProducts(domain: ProviderProductDomain, me
     }
   })
 }
+
+/** Only call after verifying a signed-in session. */
+export function listMemberUnlockDirectory() {
+  return [...listStorefrontProviderProducts('unlock'), ...listStorefrontProviderProducts('unlock', true)]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+}

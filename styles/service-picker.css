@@ -189,3 +189,8 @@
 .service-picker__option:focus-visible:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -3px; box-shadow: none; }
 .service-picker__close:focus-visible:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -3px; box-shadow: none; }
 .service-picker__chevron { transition: transform 180ms ease; }
+
+a.service-picker__close { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 52px; font-size: 1rem; text-decoration: underline; }
+.member-directory h2 { margin-block: 1.5rem .5rem; }
+.member-directory li { padding-block: .25rem; }
+.member-directory li a { display: inline-flex; align-items: center; min-height: 44px; }
