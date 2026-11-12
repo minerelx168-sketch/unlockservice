@@ -1,3 +1,4 @@
+export {}
 // Run after deploying: npx tsx scripts/submit-indexnow.ts [--submit] https://iunlockmobile.com/articles/...
 const origin = 'https://iunlockmobile.com'
 const key = '3034800b0c676bdc55c54c2b913f785d'
