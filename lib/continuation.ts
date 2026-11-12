@@ -5,6 +5,7 @@ export function safeContinuation(value: unknown): string | null {
   if (url.origin !== 'https://continuation.invalid') return null
   // Checkout resumes a saved browser draft. Only public catalog identity and
   // payment choice may travel through auth; never IMEI, email or private links.
+  if (url.pathname === '/services/unlock/more') return url.pathname
   if (url.pathname === '/checkout') {
     const product = url.searchParams.get('product')
     if (!product || !/^[A-Z0-9_]{2,64}$/.test(product)) return null
