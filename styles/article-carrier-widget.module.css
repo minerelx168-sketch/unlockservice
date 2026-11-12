@@ -1,3 +1,10 @@
 .card{width:min(100%,34rem);margin:1rem 0;padding:clamp(1rem,4vw,1.5rem);background:#101c31;color:#f8fafc;border-radius:1rem;text-align:left;box-sizing:border-box}
 .top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.4rem 1rem;color:#9ce6db;font-size:.85rem}.card h2{font-size:clamp(1.25rem,3vw,1.6rem);line-height:1.25;margin:.75rem 0}.card p,.card small{color:#d0dcee;line-height:1.5}.card a{text-decoration:underline;color:#a8d6ff}
 .form{display:grid;gap:.45rem;margin:1rem 0}.form label{color:#f8fafc;font-weight:600}.form input:not([type=hidden]){width:100%;min-width:0;box-sizing:border-box;border:1px solid #718197;border-radius:.55rem;background:#202e44;color:#fff;font-size:1rem;padding:.7rem}.form input::placeholder{color:#c1cbda}.form small{margin:0 0 .4rem}.form button{border:0;border-radius:.55rem;background:#2460c8;color:white;font-weight:700;min-height:46px;margin-top:.4rem;cursor:pointer}.form :focus-visible{outline:3px solid #8bdfff;outline-offset:2px}
+
+@media(max-width:640px){
+  .articleHero{padding-block-start:.75rem}
+  .articleHero :global(.article-head){gap:.5rem}
+  .articleHero .card{margin:.25rem 0 .75rem}
+  .articleHero :global(.service-breadcrumb){margin-block-end:.5rem}
+}
