@@ -43,6 +43,401 @@ export type Article = {
 const ARTICLES: Article[] = [
 
   {
+    slug: 'iphone-sim-unlock-chip-vs-carrier-unlock',
+    title: 'iPhone SIM Unlock Chip: What It Can Do',
+    heading: 'iPhone SIM Unlock Chip: Does It Remove Carrier Lock?',
+    description: 'Learn whether an iPhone SIM unlock chip removes Carrier Lock, how it differs from an official unlock, and what to verify first.',
+    standfirst: 'An iPhone SIM unlock chip is a physical adapter marketed to make some locked iPhones accept another physical SIM. It does not make the carrier record an official unlock. For a permanent, verifiable result, the original carrier must authorize the device and Settings must show “No SIM restrictions.”',
+    published: '2026-11-12',
+    updated: '2026-11-12',
+    minutes: 9,
+    topic: 'iPhone SIM Unlock Chips',
+    blocks: [
+      {
+        kind: 'h2',
+        id: 'key-takeaways',
+        text: 'Key takeaways',
+      },
+      {
+        kind: 'p',
+        text: 'Treat a SIM unlock chip as an accessory, not proof that Carrier Lock has been removed. Check the iPhone’s own status, confirm the original carrier and eligibility, and understand that a physical adapter cannot fit an eSIM-only model. Keep every lock type separate while troubleshooting.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Only the carrier that locked the iPhone can authorize an official carrier unlock.',
+          'Settings > General > About > Carrier Lock should say “No SIM restrictions” after an official unlock.',
+          'A SIM interposer or “unlock chip” does not prove the carrier’s device record changed.',
+          'A physical adapter cannot be installed in an iPhone that has no physical SIM tray.',
+          'SIM PIN/PUK, screen passcode, Activation Lock, IMEI blacklist status and device finance are separate issues.',
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'permanent-unlock',
+        text: 'Does an iPhone SIM unlock chip permanently remove Carrier Lock?',
+      },
+      {
+        kind: 'p',
+        text: 'No. A chip or interposer placed with a physical SIM does not itself authorize a carrier unlock. Apple states that only the current carrier can unlock an iPhone. The reliable proof is “No SIM restrictions” beside Carrier Lock in Settings, not one successful connection.',
+      },
+      {
+        kind: 'p',
+        text: 'Products described as SIM unlock chips, SIM interposers, R-SIM or Turbo SIM are marketplace accessories rather than an Apple carrier-unlock program. A phone may appear to register with a particular SIM and configuration while its official Carrier Lock status remains unchanged. Check that status before relying on the result.',
+        links: [
+          { label: 'Apple’s current carrier-unlock instructions', href: 'https://support.apple.com/en-us/109316' },
+        ],
+      },
+      {
+        kind: 'table',
+        head: ['Method or status', 'What it changes or shows', 'Permanent carrier authorization?'],
+        rows: [
+          ['Official carrier unlock', 'The locking carrier authorizes the device in its records', 'Yes, when completed and shown as No SIM restrictions'],
+          ['SIM unlock chip or interposer', 'A physical accessory is used with a particular nano-SIM setup', 'No proof of carrier authorization'],
+          ['New physical SIM or eSIM', 'Adds or activates a cellular plan', 'No; activation does not issue an unlock'],
+          ['SIM PIN / PUK', 'Protects access to one SIM or eSIM profile', 'No; it is unrelated to Carrier Lock'],
+          ['IMEI or GSMA status check', 'Reports defined device, carrier or blacklist data', 'No; a report does not change the record'],
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'verify-result',
+        text: 'How can you verify whether the iPhone is actually unlocked?',
+      },
+      {
+        kind: 'p',
+        text: 'Use the status built into iOS before testing a different line. Open Settings > General > About and find Carrier Lock. “No SIM restrictions” means the iPhone is unlocked. If it says “SIM locked” or lacks that result, contact the original carrier about its device record.',
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Open Settings, tap General, then tap About.',
+          'Read the value next to Carrier Lock; do not confuse it with the SIM PIN setting under Cellular.',
+          'Record the IMEI or IMEI2 privately if the carrier needs to identify the correct device.',
+          'If the carrier confirms approval, activate a supported SIM or eSIM from the new provider.',
+          'If activation fails despite “No SIM restrictions,” ask the new provider to check compatibility and provisioning.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'A message such as Invalid SIM or No SIM can also come from an inactive plan, SIM hardware, eSIM provisioning or carrier-settings problem. Apple recommends checking Carrier Lock, restarting, checking for a carrier-settings update and contacting the carrier before assuming every SIM alert is an unlock failure.',
+        links: [
+          { label: 'Apple’s Invalid SIM and No SIM checklist', href: 'https://support.apple.com/en-us/108914' },
+          { label: 'How to find an iPhone carrier before unlocking', href: '/articles/how-to-find-carrier-on-iphone-before-unlock' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'esim-only',
+        text: 'Can a SIM unlock chip work with an eSIM-only iPhone?',
+      },
+      {
+        kind: 'p',
+        text: 'No physical SIM adapter can be installed in a model without a SIM tray. Apple lists several regional iPhone models as eSIM-only, including recent United States models. Those devices require carrier authorization plus a compatible eSIM activation method; a physical interposer is not an option.',
+      },
+      {
+        kind: 'p',
+        text: 'An eSIM uses the iPhone’s EID and a digital carrier profile rather than a removable nano-SIM and ICCID card. It does not bypass Carrier Lock. Apple says an unlocked iPhone can use eSIM plans from other supporting carriers, while a locked iPhone still needs authorization from its current carrier.',
+        links: [
+          { label: 'Apple’s current list of eSIM-only iPhone models', href: 'https://support.apple.com/en-us/118569' },
+          { label: 'Apple’s worldwide eSIM carrier directory', href: 'https://support.apple.com/en-us/101569' },
+          { label: 'How to unlock an eSIM on iPhone', href: '/articles/how-to-unlock-esim-on-iphone' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'lock-types',
+        text: 'Which iPhone lock or restriction are you seeing?',
+      },
+      {
+        kind: 'p',
+        text: 'Read the exact wording and location of the alert before choosing a fix. Carrier Lock controls network eligibility; SIM PIN protects a line; the passcode protects local access; Activation Lock protects the Apple Account relationship; blacklist and finance records are separate carrier or reporting-system decisions.',
+      },
+      {
+        kind: 'table',
+        head: ['Message or issue', 'What it usually concerns', 'Correct owner of the next step'],
+        rows: [
+          ['Carrier Lock: SIM locked', 'The iPhone is restricted to the original carrier', 'Original locking carrier'],
+          ['Locked SIM / PUK request', 'A protected physical SIM or eSIM profile', 'Carrier that issued that line'],
+          ['iPhone Unavailable / passcode', 'Local device access', 'Device owner using Apple’s passcode recovery'],
+          ['iPhone Locked to Owner', 'Activation Lock and the linked Apple Account', 'Account owner or Apple’s documented support route'],
+          ['IMEI blocked or reported', 'Lost, stolen, fraud or other reporting status', 'Organization responsible for the report'],
+          ['Unpaid device balance', 'Contract or financing obligation', 'Carrier or finance provider'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Apple warns users not to guess a SIM PIN or PUK because repeated wrong entries can permanently lock that SIM or eSIM. Activation Lock also survives an erase and requires the linked Apple Account credentials or Apple’s supported proof-of-purchase process. Neither issue is fixed by a carrier-unlock accessory.',
+        links: [
+          { label: 'Apple SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+          { label: 'Apple Activation Lock guidance', href: 'https://support.apple.com/en-us/108794' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'before-buying',
+        text: 'What should you check before buying a SIM unlock chip?',
+      },
+      {
+        kind: 'p',
+        text: 'First identify the original carrier, iPhone model, SIM-tray type and current Carrier Lock value. Then check the carrier’s official eligibility route. A low-cost accessory does not settle unpaid finance, remove a blacklist report, create eSIM support or guarantee service on a destination network.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Confirm whether the model has a nano-SIM tray or is eSIM-only in its sales region.',
+          'Check Carrier Lock in Settings instead of relying on a seller’s screenshot or one test call.',
+          'Identify the original carrier and read its current eligibility rules for that account and device type.',
+          'Ask the destination carrier whether it accepts the exact model, IMEI or EID and desired plan.',
+          'Keep IMEI, EID, ICCID, account credentials and SIM PIN/PUK private.',
+          'Prefer an official unlock when the iPhone is eligible because its result is visible in iOS and is not tied to a physical adapter.',
+        ],
+      },
+      {
+        kind: 'note',
+        text: 'A third-party service can help identify a carrier or report defined IMEI data, and some services may submit supported carrier requests. It cannot promise a universal bypass, erase finance, remove Activation Lock, clear every blacklist record or make unsupported hardware compatible.',
+      },
+      {
+        kind: 'cta',
+        text: 'Need to identify the original carrier or review available IMEI report options before requesting an official unlock?',
+        href: '/services/imei-check',
+        label: 'Browse IMEI checks',
+      },
+    ],
+    faq: [
+      {
+        question: 'Does an iPhone SIM unlock chip permanently unlock the phone?',
+        answer: 'No. A physical chip or interposer does not prove that the original carrier changed its unlock record. Check Settings > General > About > Carrier Lock. A permanent official result should show “No SIM restrictions,” and Apple says only the current carrier can authorize that change.',
+      },
+      {
+        question: 'Will a SIM unlock chip work after an iPhone restart or iOS update?',
+        answer: 'Do not treat operation before or after a restart or update as proof of an official unlock. Accessory behavior can depend on the exact device, SIM and configuration. The stable verification is the Carrier Lock value in Settings and confirmation from the original carrier.',
+      },
+      {
+        question: 'Can I use an iPhone SIM unlock chip with eSIM?',
+        answer: 'A physical interposer cannot be installed in an eSIM-only iPhone because there is no SIM tray. An eSIM line also remains subject to the device’s Carrier Lock. The original carrier must authorize the unlock before another compatible carrier can activate its eSIM profile.',
+      },
+      {
+        question: 'Is “Locked SIM” the same as an iPhone carrier lock?',
+        answer: 'No. “Locked SIM” usually means the physical SIM or eSIM profile requires its PIN after a restart or removal. Carrier Lock controls which networks can activate the iPhone. Contact the line’s carrier for a SIM PIN or PUK, and do not guess either code.',
+      },
+      {
+        question: 'Can a SIM unlock chip remove Activation Lock or a blacklist?',
+        answer: 'No. Activation Lock links the iPhone to an Apple Account, while a blacklist record may reflect a lost, stolen or fraud report. A carrier-unlock accessory does not remove either control, settle device finance or replace the responsible organization’s documented review process.',
+      },
+    ],
+  },
+
+  {
+    slug: 'can-itunes-unlock-iphone-carrier-lock',
+    title: 'Can iTunes Unlock an iPhone Carrier Lock?',
+    heading: 'Can iTunes Unlock an iPhone From Its Carrier?',
+    description: 'Can iTunes unlock an iPhone carrier lock? Learn what Finder, Apple Devices and iTunes can do after carrier approval and how to verify it.',
+    standfirst: 'iTunes cannot authorize an iPhone carrier unlock. Only the carrier that locked the device can approve it. After approval, another SIM or eSIM normally completes activation; if no other SIM is available, Apple documents a backup, erase and restore path. Verify the result as “No SIM restrictions.”',
+    published: '2026-11-12',
+    updated: '2026-11-12',
+    minutes: 9,
+    topic: 'iTunes and iPhone Carrier Unlocks',
+    blocks: [
+      {
+        kind: 'h2',
+        id: 'key-takeaways',
+        text: 'Key takeaways',
+      },
+      {
+        kind: 'p',
+        text: 'Separate authorization from completion. The original carrier decides whether the IMEI is eligible and applies the unlock. Finder, Apple Devices or iTunes can erase and restore software, but they cannot approve the device. Confirm the final state in Settings before testing another carrier.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Apple cannot unlock an iPhone for another carrier; only the current carrier can authorize it.',
+          'A computer restore does not create carrier eligibility or change an unpaid-finance or blacklist decision.',
+          'After approval, a different supported SIM or eSIM is the normal activation path.',
+          'Apple documents backup, erase and restore when the carrier approved the unlock but no other SIM is available.',
+          'The verification point is Settings > General > About > Carrier Lock > No SIM restrictions.',
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'itunes-authorize',
+        text: 'Can iTunes unlock an iPhone from its carrier?',
+      },
+      {
+        kind: 'p',
+        text: 'No. iTunes, Finder and the Apple Devices app can restore iPhone software, but none can authorize a carrier unlock. Apple says only the current carrier can unlock the device. The carrier reviews eligibility and changes its record; the Apple software only helps with device setup or restoration.',
+      },
+      {
+        kind: 'p',
+        text: 'Do not pay for desktop software that promises to rewrite Carrier Lock universally. A legitimate workflow starts with the original carrier or a service that clearly supports that carrier’s documented process. The carrier may evaluate account standing, device finance and lost-or-stolen status before it approves the IMEI.',
+        links: [
+          { label: 'Apple’s official iPhone unlock guidance', href: 'https://support.apple.com/en-us/109316' },
+          { label: 'iPhone unlock software and jailbreak guide', href: '/articles/iphone-carrier-unlock-software-jailbreak-guide' },
+        ],
+      },
+      {
+        kind: 'table',
+        head: ['Action', 'What it can do', 'What it cannot do'],
+        rows: [
+          ['Carrier unlock authorization', 'Changes the device’s carrier-lock permission when approved', 'Be issued by iTunes, Finder or Apple Devices'],
+          ['Finder / Apple Devices restore', 'Erase the iPhone and reinstall current software', 'Create eligibility or approve an unlock'],
+          ['iTunes restore on a supported PC setup', 'Restore device software and settings from a backup', 'Bypass Carrier Lock or Activation Lock'],
+          ['Different SIM or eSIM activation', 'Complete setup on another compatible carrier after approval', 'Force an unlock when the carrier record is still locked'],
+          ['Recovery-mode passcode reset', 'Erase a device when the passcode is unavailable', 'Remove Carrier Lock or the linked Apple Account'],
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'restore-after-approval',
+        text: 'When does a computer restore appear in Apple’s unlock steps?',
+      },
+      {
+        kind: 'p',
+        text: 'A restore is a completion path after the carrier confirms approval, not a way to obtain approval. Apple tells users with another carrier’s SIM to insert it and activate. When no other SIM is available, Apple instead documents backing up, erasing and restoring the iPhone.',
+      },
+      {
+        kind: 'list',
+        ordered: true,
+        items: [
+          'Ask the original carrier to confirm that it approved the correct IMEI or IMEI2.',
+          'Create a current backup before erasing anything.',
+          'If you have another supported physical SIM, insert it and let the iPhone activate.',
+          'If the new provider uses eSIM, follow its carrier activation, QR code, app or transfer instructions.',
+          'If no other SIM is available, use Apple’s documented backup, erase and restore sequence.',
+          'After activation, open Settings > General > About and verify “No SIM restrictions.”',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Restoring deletes device information and settings before the backup is reapplied, so it should not be the first diagnostic step. Apple’s current factory-restore instructions use Finder on Mac or Apple Devices on Windows and advise creating a backup. iTunes remains documented for some PC configurations.',
+        links: [
+          { label: 'Apple’s factory-restore instructions', href: 'https://support.apple.com/en-us/118107' },
+          { label: 'Unlock an iPhone without another SIM after approval', href: '/articles/unlock-iphone-without-sim-card-after-approval' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'which-computer-app',
+        text: 'Should you use Finder, Apple Devices or iTunes?',
+      },
+      {
+        kind: 'p',
+        text: 'Use the Apple app supported by your computer and operating system. Apple’s current restore page directs Mac users to Finder and Windows users to Apple Devices. Apple also maintains iTunes restore instructions for supported PC setups. The choice of app does not change carrier-unlock authority.',
+      },
+      {
+        kind: 'table',
+        head: ['Computer setup', 'Apple restore interface', 'Carrier-unlock role'],
+        rows: [
+          ['Current Mac workflow', 'Finder', 'Restore only after approval when needed'],
+          ['Current Windows workflow', 'Apple Devices app', 'Restore only after approval when needed'],
+          ['Supported iTunes PC workflow', 'iTunes device Summary and Restore', 'Restore only; it cannot authorize the unlock'],
+          ['No computer, different carrier SIM available', 'Insert SIM and activate on iPhone', 'Completes activation after carrier approval'],
+          ['eSIM from another carrier', 'Carrier activation, transfer, QR code or app', 'Completes a supported profile activation after approval'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'A factory restore and a carrier unlock solve different problems. The restore reinstalls iOS and erases local data; the carrier unlock changes network authorization in the carrier’s system. If “SIM Not Supported” remains after confirmed approval, recheck the IMEI and unlock status with the carrier before restoring again.',
+        links: [
+          { label: 'Apple’s iTunes restore guide for PC', href: 'https://support.apple.com/guide/itunes/restore-to-factory-settings-itnsdb1fe305/windows' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'verify-completion',
+        text: 'How do you verify that the carrier unlock completed?',
+      },
+      {
+        kind: 'p',
+        text: 'Do not rely only on a restore-success screen or a desktop message. On the iPhone, open Settings > General > About and read Carrier Lock. “No SIM restrictions” is Apple’s verification. Then confirm that the destination carrier supports the model and has provisioned the intended SIM or eSIM.',
+      },
+      {
+        kind: 'list',
+        items: [
+          'Carrier Lock says No SIM restrictions: the official lock status is clear; troubleshoot the new line separately if service fails.',
+          'Carrier Lock still says SIM locked: ask the original carrier whether approval reached the correct IMEI.',
+          'SIM Not Supported appears: confirm the unlock record and whether the new SIM belongs to a compatible carrier.',
+          'No SIM or Invalid SIM appears: inspect the plan, SIM or eSIM, carrier settings and provisioning rather than repeating restores.',
+          'No cellular service with an unlocked status: ask the destination carrier to check compatibility, coverage and account activation.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'The IMEI identifies the device, the EID identifies eSIM hardware and an ICCID identifies a SIM profile. None is an unlock code. Give these identifiers only through trusted carrier or service channels, and make sure a support case refers to the same IMEI that iOS shows.',
+        links: [
+          { label: 'Apple’s Invalid SIM troubleshooting', href: 'https://support.apple.com/en-us/108914' },
+          { label: 'What an IMEI check can tell you', href: '/articles/what-an-imei-check-tells-you' },
+        ],
+      },
+      {
+        kind: 'h2',
+        id: 'restore-does-not-fix',
+        text: 'What problems will an iTunes restore not fix?',
+      },
+      {
+        kind: 'p',
+        text: 'A restore does not settle a financed device, reverse a lost-or-stolen report, supply a SIM PIN or PUK, or remove Activation Lock without the legitimate account process. It may erase a forgotten screen passcode, but that recovery remains separate from carrier authorization and network eligibility.',
+      },
+      {
+        kind: 'table',
+        head: ['Problem', 'Why restore is not the answer', 'Next step'],
+        rows: [
+          ['Unpaid device finance', 'The balance belongs to a carrier or finance agreement', 'Ask that provider for payoff and unlock eligibility'],
+          ['IMEI blacklist report', 'The reporting organization controls its record', 'Contact the carrier or organization responsible'],
+          ['SIM PIN / PUK', 'The code protects one SIM or eSIM profile', 'Contact the carrier that issued the line; do not guess'],
+          ['Activation Lock', 'The iPhone remains linked to an Apple Account', 'Use the owner’s credentials or Apple’s documented support path'],
+          ['Screen passcode', 'A reset can erase local access data but not other locks', 'Use Apple’s passcode recovery and restore your backup'],
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Apple explains that Activation Lock can remain effective even after an iPhone is erased. Apple also warns that repeated wrong SIM PIN or PUK guesses can permanently lock the SIM or eSIM. Handle both through their legitimate account or carrier routes rather than desktop unlock software.',
+        links: [
+          { label: 'Apple Activation Lock guidance', href: 'https://support.apple.com/en-us/108794' },
+          { label: 'Apple SIM PIN and PUK guidance', href: 'https://support.apple.com/en-us/118228' },
+        ],
+      },
+      {
+        kind: 'note',
+        text: 'Back up before any erase or restore. Confirm carrier approval first, because repeating a restore cannot create an authorization that is missing from the carrier’s device record.',
+      },
+      {
+        kind: 'cta',
+        text: 'Need to identify the original carrier or compare available IMEI checks before opening an unlock request?',
+        href: '/services/imei-check',
+        label: 'Browse IMEI checks',
+      },
+    ],
+    faq: [
+      {
+        question: 'Can iTunes carrier-unlock an iPhone by itself?',
+        answer: 'No. iTunes can back up and restore device software, but it cannot authorize Carrier Lock removal. Apple says only the current carrier can unlock an iPhone. Obtain carrier approval first, complete activation with another SIM, eSIM or documented restore path, then check for “No SIM restrictions.”',
+      },
+      {
+        question: 'Why did iTunes say my iPhone was unlocked after a restore?',
+        answer: 'A computer message may reflect activation after the carrier had already approved the device; the restore did not create that approval. Verify the lasting result on the iPhone at Settings > General > About > Carrier Lock. It should say “No SIM restrictions.”',
+      },
+      {
+        question: 'Do I need to restore my iPhone after the carrier approves an unlock?',
+        answer: 'Usually, activating a different supported SIM or eSIM is enough. Apple documents backup, erase and restore when the carrier has confirmed approval but you do not have another SIM to use. Check the current Apple guidance and back up before erasing anything.',
+      },
+      {
+        question: 'Should Windows users unlock an iPhone with iTunes or Apple Devices?',
+        answer: 'Neither app issues the unlock. Apple’s current factory-restore instructions direct Windows users to Apple Devices, while Apple still documents iTunes restore for supported PC setups. Use the app appropriate for your system only if a restore is needed after carrier approval.',
+      },
+      {
+        question: 'Can an iTunes restore remove Activation Lock or unpaid finance?',
+        answer: 'No. Activation Lock is tied to the Apple Account and can remain after an erase. Device finance belongs to the carrier or lender. A restore cannot settle the balance, clear a responsible party’s blacklist report, supply a SIM PUK or create carrier-unlock eligibility.',
+      },
+      {
+        question: 'What if Carrier Lock still says SIM locked after a restore?',
+        answer: 'Return to the original carrier with the IMEI and unlock case number. Ask whether it approved the correct device and whether any eligibility condition remains. Repeating the restore cannot repair a missing carrier authorization. Keep the new carrier’s compatibility and provisioning checks separate.',
+      },
+    ],
+  },
+
+  {
     slug: 'unlock-iphone-before-switching-carriers',
     title: 'Unlock iPhone Before Switching Carriers',
     heading: 'Do I Need to Unlock My iPhone Before Switching Carriers?',
