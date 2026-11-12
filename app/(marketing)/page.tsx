@@ -217,7 +217,7 @@ export default function HomePage() {
           </div>
 
           <div className="hero-panel">
-            <HeroPriceCheck unlock={unlockWidget} check={checkWidget} ordering={ordering} />
+            <HeroPriceCheck homeUnlockMenu unlock={unlockWidget} check={checkWidget} ordering={ordering} />
           </div>
 
           <div className="hero-extras">
@@ -491,4 +491,3 @@ export default function HomePage() {
     </>
   )
 }
-
