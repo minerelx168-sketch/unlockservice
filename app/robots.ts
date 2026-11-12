@@ -9,7 +9,7 @@ import { publicOrigin } from '@/lib/site'
  */
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: ['*', 'OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Perplexity-User', 'Claude-SearchBot', 'bingbot'].map(userAgent => ({
+    rules: ['*', 'OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'Perplexity-User', 'Claude-SearchBot', 'Claude-User', 'Googlebot', 'bingbot'].map(userAgent => ({
       userAgent, allow: '/', disallow: [
         '/user/', '/admin', '/api/', '/auth/', '/account', '/checkout', '/order/',
         '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/design-system',
