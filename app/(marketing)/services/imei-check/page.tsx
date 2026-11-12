@@ -1,3 +1,4 @@
+import { PublishedModelLinks } from '@/components/published-model-links'
 import spokeStyles from '@/styles/service-spoke.module.css'
 import Link from 'next/link'
 import { pageMetadata } from '@/lib/seo'
@@ -24,6 +25,7 @@ export default async function ImeiCheckServicesPage({ searchParams }: { searchPa
     <div className="shell">
       <nav className="service-breadcrumb" aria-label="Breadcrumb"><Link href="/services">Services</Link><span aria-hidden="true">/</span><span aria-current="page">Phone Check</span></nav>
       <nav className={spokeStyles.hubLinks} aria-label="Report guides"><Link href="/services/imei-check/apple-carrier-lock-status">Apple carrier and SIM-lock reports</Link><Link href="/services/imei-check/blacklist-status">Blacklist reports and prices</Link></nav>
+      <PublishedModelLinks hub="/services/imei-check"/>
       <div className="unlock-landing-grid">
         <div className="service-hero-copy unlock-landing-intro"><span className="hero-chip"><Icon name="search" />Phone Check reports</span><h1 className="service-entry-title">Know more about<br /><span className="accent">your phone.</span></h1><p className="t-lead">Choose the report you need, with its price and delivery time shown upfront. Review your order, pay once, and receive the full result online and by email.</p><ul className="service-micro" aria-label="Report facts"><li><Icon name="wallet" />Pay per report</li><li><Icon name="lock" />Secure checkout</li><li><Icon name="file" />Private results</li></ul></div>
         <div className="hero-panel unlock-landing-form" id="imei-check-browse">{query.start === '1' ? <ScrollTo targetId="imei-check-browse" /> : null}<HeroPriceCheck key={initialProductCode ?? 'unselected'} unlock={[]} check={quoteProducts} ordering={false} fixedDomain="imei_check" initialImei={intentImeiFor(intent, products.find((product) => product.productCode === initialProductCode)?.domain ?? 'imei_check')} initialProductCode={initialProductCode} initialEmail={intent?.productCode === initialProductCode ? intent?.email : undefined} /></div>

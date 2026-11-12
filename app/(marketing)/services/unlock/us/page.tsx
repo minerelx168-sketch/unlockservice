@@ -1,3 +1,4 @@
+import { PublishedModelLinks } from '@/components/published-model-links'
 import { CarrierGuide } from '@/components/carrier-guide'
 import spokeStyles from '@/styles/service-spoke.module.css'
 import Link from 'next/link'
@@ -15,6 +16,7 @@ export default async function UsUnlock({searchParams}:{searchParams:Promise<{pro
   const options:PriceCheckProduct[]=services.map(p=>({code:p.productCode,domain:p.domain,name:p.name,category:p.group,summary:p.summary,hasExample:p.hasExample,available:true,inputType:p.inputType,priceCents:p.priceCents,priceAvailable:true,etaLabel:p.etaLabel}))
   return <CarrierGuide id="us"><section className={`section section--tint service-entry-section unlock-landing ${styles.page}`}><div className="shell">
     <nav className="service-breadcrumb" aria-label="Breadcrumb"><Link href="/services/unlock">Unlock services</Link><span>/</span><span>United States</span></nav>
+    <PublishedModelLinks hub="/services/unlock/us"/>
     <nav className={spokeStyles.hubLinks} aria-label="Carrier details"><Link href="/services/unlock/us/att">AT&amp;T service: price, requirements and examples</Link></nav>
     <div className={`requirements-card ${styles.infoCard}`}><h2>For devices you own</h2><p>These services are for fully paid-off devices that meet the listed carrier requirements. We do not accept lost, stolen or blacklisted devices on this page. iUnlockMobile is an independent service, not affiliated with any carrier. Eligibility is confirmed during processing; an IMEI format check does not guarantee an unlock.</p></div>
     <section className={styles.services} aria-labelledby="us-services-title">

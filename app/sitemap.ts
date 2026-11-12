@@ -1,3 +1,4 @@
+import { getPublishedProgrammaticRoutes } from '@/lib/data/programmatic-rollout'
 import {toolList} from '@/lib/geo-tools'
 import {clusters} from '@/lib/landing-locales'
 import { SERVICE_SPOKES } from '@/lib/service-spokes'
@@ -14,6 +15,7 @@ export const dynamic = 'force-dynamic'
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = publicOrigin()
   return [
+    ...getPublishedProgrammaticRoutes().map(route => ({ url: origin + route.path, lastModified: new Date(route.publishedDate) })),
     { url: origin+'/reports/2026-used-iphone-carrier-lock-report', lastModified: new Date('2026-11-12') },
     ...([...new Set([...clusters.flatMap(c=>c.slice(1)), '/services/unlock/austria','/services/unlock/uk','/services/unlock/japan','/es','/fr-ca','/pt','/de','/ar','/tools', ...toolList.map(t=>'/tools/'+t.slug)])].map(path=>({url:origin+path}))),
     ...SERVICE_SPOKES.map(s => ({ url: `${origin}${s.path}` })),
