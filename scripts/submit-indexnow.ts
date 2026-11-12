@@ -9,7 +9,7 @@ async function main() {
   for (const raw of urls) {
     const u = new URL(raw)
     if (u.origin !== origin || u.href !== raw || u.search || u.hash || u.username || u.password ||
-        !/^\/(?:articles|services)(?:\/[a-z0-9-]+)*$/.test(u.pathname)) throw Error('Expected canonical public article/service URL')
+        !/^\/(?:articles|services|reports|es|fr-ca)(?:\/[a-z0-9-]+)*$/.test(u.pathname)) throw Error('Expected canonical public content URL')
   }
   async function read(path: string) {
     const r = await fetch(origin + path, { redirect: 'error', signal: AbortSignal.timeout(15000) })
