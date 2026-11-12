@@ -17,9 +17,12 @@ test('the complete directory uses our current retail prices and never exposes su
   assert.equal(db().prepare("UPDATE paid_report_products SET price_cents = ?, is_active = 1 WHERE code = 'UNLOCK_346'").run(retail).changes, 1)
   const checks = listStorefrontProviderProducts('imei_check')
   const unlocks = listStorefrontProviderProducts('unlock')
-  const all = [...checks, ...unlocks]
+  const members = listStorefrontProviderProducts('unlock', true)
+  assert.equal(members.length,9)
+  assert.ok(members.every(m => !unlocks.some(p=>p.productCode===m.productCode)))
+  const all = [...checks, ...unlocks, ...members]
   assert.equal(checks.length, 63)
-  assert.equal(unlocks.length, 58)
+  assert.equal(unlocks.length, 49)
   assert.equal(new Set(all.map((product) => product.productCode)).size, 121)
   for (const code of ['UNLOCK_718','UNLOCK_926','UNLOCK_25','CHECK_661','CHECK_904','CHECK_702','CHECK_696']) assert.ok(!all.some(p => p.productCode === code), code)
   const moved = unlocks.find((product) => product.productCode === 'UNLOCK_346')!
