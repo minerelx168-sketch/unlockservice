@@ -11,7 +11,7 @@ test('agent tools separate checksum and sales region from paid device status',()
  assert.throws(()=>invoke('quote',{sku:'718'}))
 })
 test('positive catalog and metadata projection cannot publish restricted services',()=>{
- const rows=quotes();assert.ok(rows.length>10);assert.ok(rows.some(x=>x.sku==='APPLE_CARRIER_LITE'&&x.card===1.79))
+ assert.match(discoveryText(false),/Canada eligible unlocks:[^;]+\$4\.99–\$26\.00/);const rows=quotes();assert.ok(rows.length>10);assert.ok(rows.some(x=>x.sku==='APPLE_CARRIER_LITE'&&x.card===1.79))
  for(const q of ['718','1000','MDM','Owner ID','Past Due'])assert.deepEqual(quotes('',q),[])
  for(const value of [discoveryText(true),discoveryText(false),JSON.stringify(rows)])assert.doesNotMatch(value,/lost|owner id|bypass|mdm|past due|bit\.ly|providerCost|UNLOCK_(718|1000)\b/i)
 })
