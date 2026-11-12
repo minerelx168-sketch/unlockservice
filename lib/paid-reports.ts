@@ -1,3 +1,4 @@
+import { DISABLED_PRODUCT_CODES } from './retail-update-nov12'
 import { accountPriceCents, isReseller, resellerPriceCents } from './reseller-pricing'
 import { serviceIdentifier, identifierField, type ServiceInputType } from './service-identifier'
 import { db } from './db'
@@ -543,7 +544,7 @@ export function listPaidReportProducts(userId?: number): PaidReportProduct[] {
     .prepare(`${PRODUCT_SELECT} WHERE is_active = 1 ORDER BY sort_order, code`)
     .all() as PaidReportProductRow[]
   const reseller = userId !== undefined && isReseller(userId)
-  return rows.map(row => productFromRow(row, reseller))
+  return rows.filter(row => !DISABLED_PRODUCT_CODES.has(row.code)).map(row => productFromRow(row, reseller))
 }
 
 export function getPaidReportProduct(code: string): PaidReportProduct | undefined {

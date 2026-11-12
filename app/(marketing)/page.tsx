@@ -143,8 +143,9 @@ export default function HomePage() {
   const checkProducts = listStorefrontProviderProducts('imei_check')
   const ordering = unlockOrderingEnabled() || unlockProducts.some((product) => product.status === 'available')
   const status = !ordering && serviceStatus()
-  const networks = new Set(CARRIERS.map((carrier) => carrier.name)).size
-  const countries = [...new Set(CARRIERS.map((carrier) => carrier.country))]
+  const unlockCarriers = CARRIERS.filter(c => !(c.country === 'United States' && ['T-Mobile', 'Verizon'].includes(c.name)))
+  const networks = new Set(unlockCarriers.map((carrier) => carrier.name)).size
+  const countries = [...new Set(unlockCarriers.map((carrier) => carrier.country))]
 
   const unlockWidget: PriceCheckProduct[] = unlockProducts.map((product) => ({
     code: product.productCode, domain: product.domain,
@@ -195,7 +196,7 @@ export default function HomePage() {
 
             <span className="hero-chip">
               <Icon name="shieldCheck" strokeWidth={2} />
-              Official carrier unlocks since 2016
+              Independent IMEI Diagnostics &amp; Clean Carrier Unlock Service
             </span>
 
             <h1 className="t-hero">
@@ -286,7 +287,7 @@ export default function HomePage() {
           </div>
 
           <ul className="logo-grid" aria-label="Networks">
-            {CARRIERS.map((carrier) => (
+            {unlockCarriers.map((carrier) => (
               <li key={carrier.id}>
                 <Link className="logo-card" href="/services/unlock">
                   <BrandLogo name={carrier.name} />

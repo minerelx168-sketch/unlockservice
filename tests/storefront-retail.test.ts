@@ -18,9 +18,10 @@ test('the complete directory uses our current retail prices and never exposes su
   const checks = listStorefrontProviderProducts('imei_check')
   const unlocks = listStorefrontProviderProducts('unlock')
   const all = [...checks, ...unlocks]
-  assert.equal(checks.length, 64)
-  assert.equal(unlocks.length, 63)
-  assert.equal(new Set(all.map((product) => product.productCode)).size, 127)
+  assert.equal(checks.length, 63)
+  assert.equal(unlocks.length, 58)
+  assert.equal(new Set(all.map((product) => product.productCode)).size, 121)
+  for (const code of ['UNLOCK_718','UNLOCK_926','UNLOCK_25','CHECK_661','CHECK_904','CHECK_702','CHECK_696']) assert.ok(!all.some(p => p.productCode === code), code)
   const moved = unlocks.find((product) => product.productCode === 'UNLOCK_346')!
   assert.equal(moved.priceCents, retail)
   assert.equal(moved.domain, 'unlock')

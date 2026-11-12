@@ -49,7 +49,7 @@ test('footer shows the requested payment labels and catalog counts remain derive
   assert.match(chrome, /listArticles\(\)/)
   const home = read('app/(marketing)/page.tsx')
   assert.doesNotMatch(home, /12\+ Years|1\.6M|Trustpilot|Watch Demo/i)
-  assert.match(home, /CARRIERS\.map/)
+  assert.match(home, /unlockCarriers\.map/)
   assert.match(home, /BRANDS\.map/)
 })
 
