@@ -232,14 +232,14 @@ test('additive migration preserves original rows and imports imeihub top-ups as 
 
 test('provider catalog separates approved paid products, the free reward and retired services', () => {
   assert.equal(providerProducts.PROVIDER_PRODUCTS.length, 137)
-  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 127)
-  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 127)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.length, 121)
+  assert.equal(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.length, 121)
   assert.equal(providerProducts.providerProductByCode('APPLE_BASIC')?.status, 'free')
-  assert.equal(providerProducts.PROVIDER_PRODUCTS.filter(p => p.status === 'unavailable').length, 9)
+  assert.equal(providerProducts.PROVIDER_PRODUCTS.filter(p => p.status === 'unavailable').length, 15)
   assert.equal(new Set(providerProducts.PROVIDER_PRODUCTS.map(p => p.productCode)).size, 137)
-  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter(p => p.domain === 'unlock').length, 60)
+  assert.equal(providerProducts.PUBLIC_PROVIDER_PRODUCTS.filter(p => p.domain === 'unlock').length, 58)
   assert.ok(providerProducts.AVAILABLE_PROVIDER_PRODUCTS.every(p => p.priceCents * 10_000 >= p.providerCostMicros * 1.3))
-  assert.deepEqual(database.db().prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products').get(), { total: 127, active: 127 })
+  assert.deepEqual(database.db().prepare('SELECT COUNT(*) AS total, SUM(is_active) AS active FROM paid_report_products').get(), { total: 121, active: 121 })
   assert.equal(providerProducts.etaMinutesFromLabel('1-10 sec'), 1)
   assert.equal(providerProducts.etaMinutesFromLabel('10 minutes-1 hour'), 60)
   assert.equal(providerProducts.etaMinutesFromLabel('Instant to 5 days'), 7_200)
@@ -845,7 +845,7 @@ test('paid IMEI reports stay separate from free checks and preserve escrow, priv
     const freeChecksBefore = imeiChecks.listImeiChecks(alice.id).length
 
     const activeCatalog = paidReports.listPaidReportProducts()
-    assert.equal(activeCatalog.length, 127)
+    assert.equal(activeCatalog.length, 121)
     assert.equal(activeCatalog.every((product) => product.isActive), true)
     assert.equal(activeCatalog.every((product) => !product.providerReady), true)
     const seeded = paidReports.getPaidReportProduct('APPLE_CARRIER_LITE')
