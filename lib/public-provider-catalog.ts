@@ -57,7 +57,7 @@ export function listStorefrontProviderProducts(domain: ProviderProductDomain, me
       productCode,
       slug: configured?.slug ?? productCode.toLowerCase().replaceAll('_', '-'),
       name: serviceGroupLabel(entry.name),
-      summary: configured?.summary ?? 'Contact us to confirm the requirements, price and delivery time for this service.',
+      summary: configured?.summary.split('\n').filter(line => !/https?:\/\/(?:www\.)?bit\.ly\//i.test(line)).join('\n').trim() ?? 'Contact us to confirm the requirements, price and delivery time for this service.',
       group: serviceGroupLabel(entry.serviceId === '346' ? 'USA Networks' : entry.group),
       // Display section is separate from the existing processing and billing domain.
       domain: configured?.domain ?? domain,
