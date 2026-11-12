@@ -3,7 +3,7 @@ import {createContext,useContext,useSyncExternalStore} from 'react'
 import {usePathname} from 'next/navigation'
 import {effectiveLocale} from './route-map'
 const LocaleCookie=createContext('en')
-export const LocaleProvider=LocaleCookie.Provider
+export function LocaleProvider({value,children}:{value:string;children:import('react').ReactNode}){return <LocaleCookie.Provider value={value}>{children}</LocaleCookie.Provider>}
 const subscribe=(cb:()=>void)=>{window.addEventListener('localechange',cb);return ()=>window.removeEventListener('localechange',cb)}
 export function useLocale(){
  const path=usePathname(),initial=useContext(LocaleCookie)
