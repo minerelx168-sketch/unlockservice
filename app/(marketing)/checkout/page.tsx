@@ -1,3 +1,4 @@
+import { isMemberUnlock } from '@/lib/member-unlocks'
 import { storefrontDomain } from '@/lib/service-groups'
 import Link from 'next/link'
 import { currentSession } from '@/lib/auth'
@@ -15,7 +16,9 @@ export default async function CheckoutPage({searchParams}:{searchParams:Promise<
   const params=await searchParams
   const product=getPaidReportProduct(params.product??'')
   if(!product || !product.providerReady || product.priceCents<=0) notFound()
-  if ((await currentSession())?.user.account_type === 'reseller') redirect(`/user/reports/new?product=${encodeURIComponent(product.code)}`)
+  const viewer = await currentSession()
+  if (!viewer && isMemberUnlock(product.code)) redirect('/login?next=/services/unlock/more')
+  if (viewer?.user.account_type === 'reseller') redirect(`/user/reports/new?product=${encodeURIComponent(product.code)}`)
   const intent = await readDeviceIntent()
   const deliveryLabel=[...CUSTOMER_IMEI_CHECK_PRODUCTS,...CUSTOMER_UNLOCK_PRODUCTS].find(entry=>entry.productCode===product.code)?.etaLabel ?? 'Confirmed for your selected service'
   return <section className="guest-shell">
@@ -24,5 +27,3 @@ export default async function CheckoutPage({searchParams}:{searchParams:Promise<
     <GuestCheckoutPanel product={{code:product.code,name:product.name,summary:product.summary,inputType:product.inputType,priceCents:product.priceCents,domain:product.domain}} deliveryLabel={deliveryLabel} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email??'':''} cardEnabled={guestCheckoutEnabled()} cryptoEnabled={guestCryptoEnabled()} cryptoRoutes={guestCryptoRoutes()} initialMethod={params.method==='crypto'?'crypto':'card'} />
   </section>
 }
-
-
