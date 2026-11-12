@@ -31,6 +31,7 @@ type Props = {
   unlock: PriceCheckProduct[]
   check: PriceCheckProduct[]
   ordering: boolean
+  homeUnlockMenu?: boolean
   fixedDomain?: Domain
   initialImei?: string
   initialProductCode?: string
@@ -38,7 +39,7 @@ type Props = {
 }
 type FieldError = { field: 'service' | 'imei' | 'email'; message: string }
 /** Select a service, add details once, then review before secure payment. */
-export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialImei = '', initialProductCode, initialEmail = '' }: Props) {
+export function HeroPriceCheck({ unlock, check, ordering, homeUnlockMenu = false, fixedDomain, initialImei = '', initialProductCode, initialEmail = '' }: Props) {
   const initialDomain = fixedDomain ?? (ordering && unlock.length ? 'unlock' : 'imei_check')
   const initialProduct = (initialDomain === 'unlock' ? unlock : check).find((product) => product.code === initialProductCode)
   const [domain, setDomain] = useState<Domain>(initialDomain)
@@ -105,7 +106,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
     {fixedDomain ? null : <fieldset className="device-browse-options" disabled={pending}><legend className="visually-hidden">What would you like to do?</legend>{(['unlock', 'imei_check'] as const).map((value) => <label key={value}><input type="radio" name="browseDomain" value={value} checked={domain === value} onChange={() => { setDomain(value); clearError() }} /><span><Icon name={value === 'unlock' ? 'lock' : 'search'} />{value === 'unlock' ? 'Unlock Phone' : 'Phone Check'}</span></label>)}</fieldset>}
     <ol className="price-check-steps" aria-label="Order steps">{['Service & price', 'Your details', 'Review & pay'].map((label, index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-done={step > index || undefined}><span aria-hidden="true">{index + 1}</span><span className="price-check-step-label">{label}</span></li>)}</ol>
     {products.length ? <>
-      <ServicePicker moreHref={domain === 'unlock' ? '/services/unlock/more' : undefined}
+      <ServicePicker moreHref={homeUnlockMenu && domain === 'unlock' ? '/services/unlock/more' : undefined}
         key={domain}
         id="pc-service"
         triggerRef={serviceInput}
