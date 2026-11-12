@@ -15,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const origin = publicOrigin()
   return [
     { url: origin+'/reports/2026-used-iphone-carrier-lock-report', lastModified: new Date('2026-11-12') },
-    ...([...new Set([...clusters.flatMap(c=>c.slice(1)), '/services/unlock/austria','/es','/fr-ca','/pt','/de','/ar','/tools', ...toolList.map(t=>'/tools/'+t.slug)])].map(path=>({url:origin+path}))),
+    ...([...new Set([...clusters.flatMap(c=>c.slice(1)), '/services/unlock/austria','/services/unlock/uk','/services/unlock/japan','/es','/fr-ca','/pt','/de','/ar','/tools', ...toolList.map(t=>'/tools/'+t.slug)])].map(path=>({url:origin+path}))),
     ...SERVICE_SPOKES.map(s => ({ url: `${origin}${s.path}` })),
     { url: `${origin}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${origin}/services`, changeFrequency: 'weekly', priority: 0.9 },

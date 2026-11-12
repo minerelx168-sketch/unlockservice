@@ -1,9 +1,8 @@
-import {Icon} from './icons'
-import {GuideHero} from '@/components/guide-ui'
 import {paths,locales,languages,type GeoLocale} from '@/lib/geo-locales'
 import {languageLinks} from '@/lib/landing-locales'
-import {geoOffers} from '@/lib/geo-offers'
-import {QuickImeiCheckCard} from './QuickImeiCheckCard'
+import {GuideLayout} from './guide-layout'
+import {listStorefrontProviderProducts} from '@/lib/public-provider-catalog'
+
 export const guideCopy:Record<string,string[]>={
  pt2:['Como desbloquear um iPhone importado do Canadá?','Verifique o bloqueio em Ajustes e identifique a operadora canadense antes de escolher o serviço. Quem comprou da operadora pode solicitar a liberação gratuita diretamente. Em aparelhos antigos, o contrato original ajuda a identificar a marca correta.','A regra canadense não libera automaticamente um aparelho vendido nos EUA.'],
  de2:['Kanadisches iPhone in Deutschland oder Österreich nutzen','Prüfen Sie die SIM-Sperre unter Einstellungen und fragen Sie den ursprünglichen Anbieter. Ein aktueller Kurzzeit-Sicherheitslock in Kanada unterscheidet sich von einer alten Vertragssperre. Ein US-Import bleibt dem ursprünglichen US-Netz zugeordnet.','Eine fehlende SIM-Schublade ist kein Beweis für eine Netzsperre.'],
@@ -27,6 +26,7 @@ const austria=[
  ['أي شركة نمساوية باعت هذا الآيفون؟','تحقق من العقد الأصلي قبل اختيار A1 أو Telering أو Drei. خيار EMEA مخصص لسياسة المنطقة المطابقة وليس لكل جهاز أوروبي.']]
 const copy=(i:number,l:GeoLocale)=>i===4?austria[locales.indexOf(l)]:guideCopy[l+i]
 export function marketMeta(i:number,l:GeoLocale){const [title,description]=copy(i,l);const url=paths[i][locales.indexOf(l)];return {title,description,alternates:{canonical:url,languages:languageLinks(url)}}}
-export function Market({i,l}:{i:number;l:GeoLocale}){const [title,intro,note]=copy(i,l);const unlock=i===1||i===2||i===4;const codes=i===2?['UNLOCK_289','UNLOCK_36','UNLOCK_39','UNLOCK_329']:i===4?['UNLOCK_87','UNLOCK_84','UNLOCK_384','UNLOCK_212']:i===1?['UNLOCK_346']:i===3?['BLACKLIST_FULL']:['APPLE_CARRIER_LITE']
+export function Market({i,l}:{i:number;l:GeoLocale}){const [title,intro,note]=copy(i,l);const unlock=i===1||i===2||i===4;const codes=i===2?['UNLOCK_289','UNLOCK_36','UNLOCK_39','UNLOCK_329','UNLOCK_410','UNLOCK_711']:i===4?['UNLOCK_87','UNLOCK_84','UNLOCK_384','UNLOCK_212']:i===1?['UNLOCK_346']:i===3?['BLACKLIST_FULL']:['APPLE_CARRIER_LITE']
  const badges={en:['Buyer guide','Review your service'],es:['Guía de compra','Revisa el servicio'],fr:['Guide d’achat','Vérifiez le service'],pt:['Guia de compra','Confira o serviço'],de:['Kaufberatung','Service prüfen'],ar:['دليل المشتري','مراجعة الخدمة']}
- return <article lang={l} className="guide-page shell"><GuideHero tag={badges[l][0]} title={title} icon={unlock?'unlockMark':'search'}><p>{intro}</p></GuideHero><div className="guide-work"><section className="guide-panel"><h2>{badges[l][1]}</h2><QuickImeiCheckCard locale={l} products={geoOffers(unlock?'unlock':'imei_check',codes)}/></section><aside className="guide-side"><span className="guide-tag"><Icon name="globe"/>{badges[l][0]}</span>{note&&<p>{note}</p>}{i===1&&<a href="https://www.att.com/deviceunlock/">AT&amp;T Device Unlock ↗</a>}<a href={l==='en'?'/':'/'+(l==='fr'?'fr-ca':l)}>{languages[locales.indexOf(l)]} · iUnlockMobile</a></aside></div></article>}
+ const domain=unlock?'unlock':'imei_check'
+ return <GuideLayout locale={l} title={title} intro={intro} note={note} tag={badges[l][0]} domain={domain} products={listStorefrontProviderProducts(domain).filter(p=>codes.includes(p.productCode))}>{i===1?<a href="https://www.att.com/deviceunlock/">AT&amp;T Device Unlock ↗</a>:<a href={l==='en'?'/':'/'+(l==='fr'?'fr-ca':l)}>{languages[locales.indexOf(l)]} · iUnlockMobile</a>}</GuideLayout>}

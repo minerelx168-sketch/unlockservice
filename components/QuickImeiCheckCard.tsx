@@ -14,7 +14,7 @@ export type Option={code:string;name:string;domain:string;cents:number}
 export function QuickImeiCheckCard({locale,products,imei}:{locale:GeoLocale;products:Option[];imei?:string}){
  const [state,action,pending]=useActionState(continueDeviceServiceAction,{});const l=labels[locale]
  if(!products.length)return <p>{l[3]}</p>
- return <form className="stack" action={action}><input type="hidden" name="domain" value={products[0].domain}/>
+ return <form className="price-check" action={action}><input type="hidden" name="domain" value={products[0].domain}/>
  <label className="field">{l[0]}<select name="productCode">{products.map(p=><option key={p.code} value={p.code}>{p.name} · ${(p.cents/100).toFixed(2)}</option>)}</select></label>
  <label className="field">IMEI<input key={imei} defaultValue={imei} dir="ltr" name="imei" inputMode="numeric" maxLength={15} pattern="[0-9]{15}" required/></label>
  <label className="field">{l[1]}<input type="email" name="email" dir="ltr" autoComplete="email" required/></label>{state.error&&<p role="alert">{state.error}</p>}<button className="button button--primary" disabled={pending}>{l[2]}</button><small>{l[4]}</small></form>

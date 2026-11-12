@@ -1,8 +1,9 @@
+import Link from 'next/link'
 import { ArticleCarrierWidget } from '@/components/article-carrier-widget'
 import { serializeJsonLd } from '@/lib/json-ld'
 import { pageMetadata } from '@/lib/seo'
 import { publicOrigin } from '@/lib/site'
-import s from '@/styles/service-spoke.module.css'
+import {GuideFaq} from '@/components/guide-faq'
 
 export const dynamic = 'force-dynamic'
 const path = '/reports/2026-used-iphone-carrier-lock-report'
@@ -34,12 +35,12 @@ export default function Page() {
   {'@type':'Dataset','@id':url+'#comparison',url:url+'#comparison',name:'Carrier policy comparison',description:'A qualitative comparison of published consumer SIM-lock policies, not a survey of phones or unlock success rates.',dateModified:date,variableMeasured:rows.map(([name,country,rule,action])=>({'@type':'PropertyValue',name:name+' ('+country+')',value:rule+' '+action}))},
   {'@type':'FAQPage','@id':url+'#faq',mainEntity:faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text}}))}
  ]
- return <article className={s.page}><div className="shell">
+ return <article><section className="section section--tint"><div className="shell"><nav className="service-breadcrumb"><Link href="/articles">Guides</Link><span>/</span>Buyer’s report</nav><div className="article-head">
  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd({'@context':'https://schema.org','@graph':graph})}}/>
- <header><span className="kicker">Buyer’s report · Reviewed November 12, 2026</span><h1>{title}</h1><p className="t-lead">{description}</p></header>
+ <span className="kicker">Buyer’s report</span><h1 className="t-section">{title}</h1><p className="t-lead">{description}</p><p className="t-micro article-meta">iUnlockMobile · Reviewed November 12, 2026</p>
  <p>With the phone in hand, open Settings → General → About. “No SIM restrictions” means you do not need a carrier unlock. If the phone is locked and the seller cannot identify the network, the optional check below can help.</p>
- <ArticleCarrierWidget/>
- <section><h2>What the regulators actually said</h2><p><a href={fcc}>FCC 24-77</a> proposed unlocking after 60 days from activation, with a fraud exception. That proposal is not a nationwide unlock deadline. Verizon’s own rule changed in January 2026; check the activation date before relying on older advice.</p><p><a href={crtc}>CRTC Telecom Notice of Consultation 2026-210</a> grants a conditional temporary stay. Providers using it must automatically unlock within two business days of purchase, unlock on customer request and explain the restriction. Some carrier help pages describe their process from activation; the regulator’s condition counts from purchase.</p></section>
- <section id="comparison"><h2>Carrier policy comparison</h2><p>A qualitative comparison of published consumer SIM-lock policies, not a survey of phones or unlock success rates.</p><div className={s.tableWrap} role="region" aria-label="Carrier policy comparison" tabIndex={0}><table><caption>Used iPhone eligibility by original carrier · November 2026</caption><thead><tr>{['Original carrier','Market','Lock and release rule','What a buyer should verify','Official policy'].map(h=><th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{rows.map(([name,country,rule,action,...sources])=><tr key={name}><th scope="row">{name}</th><td>{country}</td><td>{rule}</td><td>{action}</td><td>{sources.map(src=><p key={src}><a href={src}>{new URL(src).hostname.replace(/^www\./,'')}</a></p>)}</td></tr>)}</tbody></table></div></section>
- <section id="faq"><h2>Questions before buying</h2>{faq.map(([q,a])=><div key={q}><h3>{q}</h3><p>{a}</p></div>)}</section></div></article>
+ <ArticleCarrierWidget/></div></div></section><section className="section"><div className="shell article-layout"><div className="article-content">
+ <section id="policy"><h2>What the regulators actually said</h2><p><a href={fcc}>FCC 24-77</a> proposed unlocking after 60 days from activation, with a fraud exception. That proposal is not a nationwide unlock deadline. Verizon’s own rule changed in January 2026; check the activation date before relying on older advice.</p><p><a href={crtc}>CRTC Telecom Notice of Consultation 2026-210</a> grants a conditional temporary stay. Providers using it must automatically unlock within two business days of purchase, unlock on customer request and explain the restriction. Some carrier help pages describe their process from activation; the regulator’s condition counts from purchase.</p></section>
+ <section id="comparison"><h2>Carrier policy comparison</h2><p>A qualitative comparison of published consumer SIM-lock policies, not a survey of phones or unlock success rates.</p><div className="table-wrap" role="region" aria-label="Carrier policy comparison" tabIndex={0}><table><caption>Used iPhone eligibility by original carrier · November 2026</caption><thead><tr>{['Original carrier','Market','Lock and release rule','What a buyer should verify','Official policy'].map(h=><th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{rows.map(([name,country,rule,action,...sources])=><tr key={name}><th scope="row">{name}</th><td>{country}</td><td>{rule}</td><td>{action}</td><td>{sources.map(src=><p key={src}><a href={src}>{new URL(src).hostname.replace(/^www\./,'')}</a></p>)}</td></tr>)}</tbody></table></div></section>
+ <div className="article-faq" id="faq"><h2>Questions before buying</h2><GuideFaq rows={faq}/></div></div><aside className="article-aside"><details className="article-contents" open><summary>On this page</summary><nav aria-label="On this page"><ul>{[['policy','Regulatory guidance'],['comparison','Carrier comparison'],['faq','Questions before buying']].map(([id,label])=><li key={id}><a href={'#'+id}>{label}</a></li>)}</ul></nav></details></aside></div></section></article>
 }

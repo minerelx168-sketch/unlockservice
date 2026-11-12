@@ -16,8 +16,8 @@ export async function ArticleCarrierWidget() {
     return <aside><p>The quick carrier check is currently unavailable. <Link href="/services/imei-check/apple-carrier-lock-status">Compare carrier reports and free checks.</Link></p></aside>
   }
   const base = formatUsd(product.priceCents)
-  return <section className={styles.card} aria-labelledby="quick-carrier-title">
-    <div className={styles.top}><span>Apple Carrier Lite</span><strong>{[crypto && base+' crypto',card && formatUsd(guestCardQuote(product.priceCents).totalCents)+' card'].filter(Boolean).join(' / ')} · USD</strong></div>
+  return <section className={'hero-panel '+styles.card} aria-labelledby="quick-carrier-title">
+    <div className={styles.top}><span className="hero-chip">Apple Carrier Lite</span><strong>{[crypto && base+' crypto',card && formatUsd(guestCardQuote(product.priceCents).totalCents)+' card'].filter(Boolean).join(' / ')} · USD</strong></div>
     <h2 id="quick-carrier-title">Check your iPhone’s carrier and SIM lock</h2>
     <p>See the network policy and lock status reported for your IMEI before choosing an unlock service.</p>
     <ArticleCarrierForm method={card?'card':'crypto'} />

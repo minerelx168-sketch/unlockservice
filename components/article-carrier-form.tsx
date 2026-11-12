@@ -12,7 +12,7 @@ export function ArticleCarrierForm({method}:{method:'card'|'crypto'}) {
   const digits=imei.replace(/[\s-]/g,'')
   const valid=!!serviceIdentifier(imei)
   const meta={source:'article_carrier_widget',service_category:'imei_check',item_id:'444'}
-  return <form className={styles.form} action={action} aria-busy={pending}>
+  return <form className={'price-check '+styles.form} action={action} aria-busy={pending}>
     <input type="hidden" name="domain" value="imei_check"/><input type="hidden" name="productCode" value="APPLE_CARRIER_LITE"/><input type="hidden" name="paymentMethod" value={method}/>
     <label htmlFor="quick-imei">15-digit IMEI</label>
     <input id="quick-imei" name="imei" type="text" inputMode="numeric" required autoComplete="off" placeholder="Enter the number shown on your phone" aria-describedby="quick-imei-feedback" value={imei} onChange={e=>{
@@ -25,8 +25,8 @@ export function ArticleCarrierForm({method}:{method:'card'|'crypto'}) {
       if(raw.length===15&&lastChecked.current!==raw){lastChecked.current=raw;trackFunnelEvent('validation_result',{...meta,validation_status:ok?'success':'invalid'})}
     }}/>
     <small id="quick-imei-feedback" aria-live="polite">{!digits?'Dial *#06# or open Settings → General → About.':valid?'✓ Valid IMEI format':/^\d{1,14}$/.test(digits)?(15-digits.length)+' digits remaining':'Check the digits against your device.'}</small>
-    <label htmlFor="quick-email">Delivery email</label><input id="quick-email" name="email" type="email" autoComplete="email" required maxLength={254} placeholder="you@example.com"/>
-    <button type="submit" disabled={pending}>{pending?'Opening checkout…':'Continue to secure checkout →'}</button>
+    <span className="t-micro">{digits.replace(/\D/g,'').length}/15</span>{valid&&<div className="requirements-card"><strong>TAC {digits.slice(0,8)}</strong><p>Model: {['35838974','35782225','35739909'].includes(digits.slice(0,8))?'iPhone XR (reference match)':'Not identified offline'}</p><p>Carrier: <span className={styles.mask} aria-hidden="true">••••••••</span> · Available after lookup</p></div>}<label htmlFor="quick-email">Delivery email</label><input id="quick-email" name="email" type="email" autoComplete="email" required maxLength={254} placeholder="you@example.com"/>
+    <button className="button button--primary" type="submit" disabled={pending}>{pending?'Opening checkout…':'Continue to secure checkout →'}</button>
     {state.error&&<p role="alert">{state.error}</p>}
   </form>
 }
