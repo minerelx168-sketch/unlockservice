@@ -1,0 +1,3 @@
+import {languageLinks} from '@/lib/landing-locales'
+export const metadata={title:'Guías de compra y comprobación de iPhone',alternates:{canonical:'/es',languages:languageLinks('/es')}}
+export default function Page(){return <section lang="es" className="shell section stack"><h1>Guías de compra y comprobación de iPhone</h1><ul className="stack"><li><a href="/es/checar-imei-iphone">Identificar operadora</a></li><li><a href="/es/desbloquear-iphone-att">Liberar AT&T</a></li><li><a href="/es/desbloquear-iphone-canada">Operadoras de Canadá</a></li><li><a href="/es/verificar-reporte-robo-imei">Comprobar lista negra</a></li><li><a href="/es/desbloquear-iphone-austria">Operadoras de Austria</a></li></ul></section>}

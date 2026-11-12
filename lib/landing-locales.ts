@@ -1,10 +1,10 @@
-export const clusters = [
-  ['/services/imei-check/apple-carrier-lock-status','/es/checar-imei-iphone','/fr-ca/verifier-operateur-iphone-imei'],
-  ['/services/unlock/us/att','/es/desbloquear-iphone-att','/fr-ca/deverrouiller-iphone-att'],
-  ['/services/unlock/canada','/es/desbloquear-iphone-canada','/fr-ca/deverrouiller-iphone-canada'],
-  ['/services/imei-check/blacklist-status','/es/verificar-reporte-robo-imei','/fr-ca/verifier-liste-noire-imei-canada']
-]
-export function languageLinks(path:string){
-  const cluster=clusters.find(c=>c.includes(path)) ?? clusters[0]
-  return {'en-US':cluster[0],'en-CA':cluster[0],'es-MX':cluster[1],'es-US':cluster[1],'fr-CA':cluster[2],'x-default':cluster[0]}
+import {paths,markets,homePaths} from './geo-locales'
+export const clusters=paths
+export function languageLinks(path:string):Record<string,string>{
+ const row=paths.find(c=>c.includes(path))??(homePaths.includes(path)?homePaths:paths[0])
+ const links:Record<string,string>={'en-CA':row[0],'x-default':row[0]}
+ row.forEach((v,i)=>{links[markets[i]]=v})
+ if(row[4])links['de-DE']=row[4]
+ links['es-US']=row[1]
+ return links
 }

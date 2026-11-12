@@ -1,3 +1,4 @@
+import {toolList} from '@/lib/geo-tools'
 import {clusters} from '@/lib/landing-locales'
 import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import type { MetadataRoute } from 'next'
@@ -14,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const origin = publicOrigin()
   return [
     { url: origin+'/reports/2026-used-iphone-carrier-lock-report', lastModified: new Date('2026-11-12') },
-    ...clusters.flatMap(c=>c.slice(1).map(path=>({url:origin+path}))),
+    ...([...new Set([...clusters.flatMap(c=>c.slice(1)), '/services/unlock/austria','/es','/fr-ca','/pt','/de','/ar','/tools', ...toolList.map(t=>'/tools/'+t.slug)])].map(path=>({url:origin+path}))),
     ...SERVICE_SPOKES.map(s => ({ url: `${origin}${s.path}` })),
     { url: `${origin}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${origin}/services`, changeFrequency: 'weekly', priority: 0.9 },

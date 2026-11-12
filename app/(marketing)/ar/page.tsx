@@ -1,0 +1,3 @@
+import {languageLinks} from '@/lib/landing-locales'
+export const metadata={title:'دليل فحص آيفون مستعمل قبل الشراء',alternates:{canonical:'/ar',languages:languageLinks('/ar')}}
+export default function Page(){return <section lang="ar" className="shell section stack"><h1>دليل فحص آيفون مستعمل قبل الشراء</h1><ul className="stack"><li><a href="/ar/check-iphone-carrier-imei">معرفة الشبكة الأصلية</a></li><li><a href="/ar/unlock-att-iphone-usa">فتح شبكة AT&T</a></li><li><a href="/ar/unlock-canadian-iphone">الشبكات الكندية</a></li><li><a href="/ar/imei-blacklist-check">فحص القائمة السوداء</a></li><li><a href="/ar/unlock-iphone-austria">الشبكات النمساوية</a></li></ul></section>}

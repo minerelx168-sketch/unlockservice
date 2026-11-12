@@ -1,0 +1,3 @@
+import {languageLinks} from '@/lib/landing-locales'
+export const metadata={title:'Guides pour vérifier un iPhone usagé',alternates:{canonical:'/fr-ca',languages:languageLinks('/fr-ca')}}
+export default function Page(){return <section lang="fr" className="shell section stack"><h1>Guides pour vérifier un iPhone usagé</h1><ul className="stack"><li><a href="/fr-ca/verifier-operateur-iphone-imei">Identifier le réseau</a></li><li><a href="/fr-ca/deverrouiller-iphone-att">Déverrouiller AT&T</a></li><li><a href="/fr-ca/deverrouiller-iphone-canada">Réseaux au Canada</a></li><li><a href="/fr-ca/verifier-liste-noire-imei-canada">Vérifier la liste noire</a></li><li><a href="/fr-ca/deverrouiller-iphone-autriche">Réseaux en Autriche</a></li></ul></section>}

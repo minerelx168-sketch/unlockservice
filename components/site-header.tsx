@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useState, type ReactNode } from 'react'
+import {languages,markets,homePaths} from '@/lib/geo-locales'
 import {languageLinks, clusters} from '@/lib/landing-locales'
 import { Brand } from './brand'
 import { Icon, type IconName } from './icons'
@@ -93,9 +94,9 @@ export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks,
 
           <div className="header-actions">
             <details key={pathname} style={{position:'relative'}}>
-              <summary aria-label="Language / Idioma / Langue" style={{display:'grid',placeItems:'center',minWidth:44,minHeight:44,cursor:'pointer',fontWeight:700}}>{pathname.startsWith('/fr-ca/')?'FR-CA':pathname.startsWith('/es/')?'ES':'EN'} ▾</summary>
-              <nav aria-label="Language" style={{position:'absolute',right:0,minWidth:165,padding:8,background:'var(--surface)',border:'1px solid var(--line)',borderRadius:12,zIndex:5}}>
-                {(['en-US','es-MX','fr-CA'] as const).map((l,i)=><a key={l} href={i===0 && !clusters.some(c=>c.includes(pathname))?'/':languageLinks(pathname)[l]} hrefLang={l} lang={l} style={{display:'block',padding:12}}>{['English','Español','Français (Canada)'][i]}</a>)}
+              <summary aria-label="Choose language" style={{display:'grid',placeItems:'center',minWidth:44,minHeight:44,cursor:'pointer'}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></summary>
+              <nav aria-label="Language" style={{position:'absolute',insetInlineEnd:0,minWidth:180,padding:8,background:'var(--surface)',border:'1px solid var(--line)',borderRadius:12,zIndex:5}}>
+                {markets.map((tag,i)=><a key={tag} href={(clusters.some(c=>c.includes(pathname))?languageLinks(pathname)[tag]:null)??homePaths[i]} hrefLang={tag} lang={tag} style={{display:'block',padding:12}}>{languages[i]}</a>)}
               </nav>
             </details>
             <ThemeToggle />

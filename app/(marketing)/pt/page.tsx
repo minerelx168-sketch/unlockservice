@@ -1,0 +1,3 @@
+import {languageLinks} from '@/lib/landing-locales'
+export const metadata={title:'Guias de compra de iPhone importado',alternates:{canonical:'/pt',languages:languageLinks('/pt')}}
+export default function Page(){return <section lang="pt" className="shell section stack"><h1>Guias de compra de iPhone importado</h1><ul className="stack"><li><a href="/pt/verificar-operadora-iphone-imei">Identificar operadora</a></li><li><a href="/pt/desbloquear-iphone-att-eua">Desbloquear AT&T</a></li><li><a href="/pt/desbloquear-iphone-canada">Operadoras canadenses</a></li><li><a href="/pt/consultar-lista-negra-imei">Consultar lista negra</a></li><li><a href="/pt/desbloquear-iphone-austria">Operadoras austríacas</a></li></ul></section>}

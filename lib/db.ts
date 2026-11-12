@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS tracking_capture_diagnostics (
  PRIMARY KEY(kind,reference,user_id)
 );
 
+CREATE TABLE IF NOT EXISTS review_invites (recipient TEXT PRIMARY KEY, order_ref TEXT NOT NULL UNIQUE, reserved_at TEXT NOT NULL, review_request_sent_at TEXT);
 CREATE TABLE IF NOT EXISTS guest_checkouts (
   reference TEXT PRIMARY KEY,
   request_key TEXT NOT NULL UNIQUE,

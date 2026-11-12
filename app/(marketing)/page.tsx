@@ -1,3 +1,4 @@
+import {languageLinks} from '@/lib/landing-locales'
 import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { BrandLogo } from '@/components/brand-logo'
@@ -13,8 +14,8 @@ import { StructuredData } from './structured-data'
 const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   {
     icon: 'shield',
-    title: 'Not reported lost or stolen',
-    body: 'A lost-or-stolen report can block the unlock. Run a Phone Check first if unsure.',
+    title: 'Not reported missing or stolen',
+    body: 'A missing-device report can block the unlock. Run a Phone Check first if unsure.',
   },
   {
     icon: 'check',
@@ -64,7 +65,7 @@ const HUB: Array<{ icon: IconName; tint: string; title: string; body: string; hr
   {
     icon: 'shield',
     tint: ' icon-tile--moss',
-    title: 'Blacklist and lost-or-stolen',
+    title: 'Blacklist and missing-device',
     body: 'The one report to run before paying for a used phone.',
     href: '/services/imei-check',
   },
@@ -93,7 +94,7 @@ const HUB: Array<{ icon: IconName; tint: string; title: string; body: string; hr
 ]
 
 
-export const metadata = pageMetadata("/", "IMEI Phone Unlocking & Device Check Reports", "Compare IMEI phone unlock services and device reports. Review availability, prices and delivery estimates before ordering with iUnlockMobile.")
+export const metadata = {...pageMetadata("/", "IMEI Phone Unlocking & Device Check Reports", "Compare IMEI phone unlock services and device reports. Review availability, prices and delivery estimates before ordering with iUnlockMobile."),alternates:{canonical:'/',languages:languageLinks('/')}}
 
 /* Small, original line drawings for the three steps. */
 function StepArt({ kind }: { kind: 'imei' | 'review' | 'done' }) {
@@ -140,7 +141,9 @@ function StepArt({ kind }: { kind: 'imei' | 'review' | 'done' }) {
 
 export default function HomePage() {
   const unlockProducts = listStorefrontProviderProducts('unlock')
-  const checkProducts = listStorefrontProviderProducts('imei_check')
+  // Keep the homepage picker focused on general diagnostics. The full checks page retains its own catalog.
+  const checkProducts = listStorefrontProviderProducts('imei_check').filter(product =>
+    !/\b(?:lost|owner id|bypass|mdm)\b/i.test([product.name, product.group, product.summary].join(' ')))
   const ordering = unlockOrderingEnabled() || unlockProducts.some((product) => product.status === 'available')
   const status = !ordering && serviceStatus()
   const unlockCarriers = CARRIERS.filter(c => !(c.country === 'United States' && ['T-Mobile', 'Verizon'].includes(c.name)))

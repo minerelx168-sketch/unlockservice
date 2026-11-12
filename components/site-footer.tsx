@@ -81,6 +81,7 @@ export function SiteFooter({ isAuthenticated = false, guides }: Props) {
               ))}
               <li>
                 <Link href="/articles">All guides →</Link>
+                <Link href="/tools">Free iPhone tools →</Link>
               </li>
             </ul>
           </div>

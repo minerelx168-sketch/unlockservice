@@ -1,0 +1,39 @@
+'use client'
+import {useState} from 'react'
+import {validateImeiLuhn,extractTac,luhnSteps,decodeAppleModelNumber} from '../packages/apple-imei-utils/src'
+import {marketsByCountry,policies} from '@/lib/geo-tools'
+import {QuickImeiCheckCard,type Option} from './QuickImeiCheckCard'
+function Pick({label,items,value,change}:{label:string;items:string[];value:string;change:(v:string)=>void}){
+ return <label className="field">{label}<select value={value} onChange={e=>change(e.target.value)}>{items.map(v=><option key={v}>{v}</option>)}</select></label>
+}
+const periods=['Under 2 days','2–60 days','61–364 days','365+ days']
+function Eligibility(){
+ const [country,C]=useState('US'),[carrier,K]=useState('AT&T'),[owner,O]=useState('Original account holder'),[paid,P]=useState('Unknown'),[period,D]=useState(periods[0]),[plan,A]=useState('Postpaid')
+ const [url,rule]=policies[carrier], idx=periods.indexOf(period)
+ let advice='Check the official policy below. Only the carrier can confirm eligibility.'
+ if(country==='US' && plan==='Postpaid' && paid==='No')advice='Unpaid installments can block release. Ask the seller to settle the balance before paying for an unlock.'
+ else if(country==='US'&&carrier==='AT&T'&&plan==='Postpaid'&&idx<2)advice='The postpaid purchase-age threshold is not met if the phone was also bought within 60 days. Verify the purchase date, not just the activation date.'
+ else if(country==='US'&&plan==='Prepaid'&&idx<3&&['T-Mobile','Verizon'].includes(carrier))advice='Do not assume eligibility. Check the prepaid service period, activation date and any documented exception with the carrier.'
+ else if(owner==='Second-hand buyer'||paid==='Unknown')advice='Ask for the original carrier and proof of payoff. An IMEI carrier report may identify the network but cannot certify the debt balance.'
+ else if(country==='Canada'&&idx===0)advice='If this new phone has a temporary security lock, ask the original carrier for release now. Two business days are not the same as 48 clock hours.'
+ else advice='Start with a free request to the original carrier. Time and payment alone do not guarantee acceptance.'
+ return <><Pick label="Original market" items={Object.keys(marketsByCountry)} value={country} change={v=>{C(v);K(marketsByCountry[v][0])}}/><Pick label="Original carrier" items={marketsByCountry[country]} value={carrier} change={K}/><Pick label="Purchase history" items={['Original account holder','Second-hand buyer']} value={owner} change={O}/><Pick label="Plan" items={['Postpaid','Prepaid']} value={plan} change={A}/><Pick label="Time since activation" items={periods} value={period} change={D}/><Pick label="Device paid off?" items={['Unknown','Yes','No']} value={paid} change={P}/>
+ <section aria-live="polite"><h2>Your next step</h2><p>{advice}</p><p>{rule}</p><a href={url}>{carrier}: official policy and help ↗</a>{carrier==='AT&T'&&<p><a href="/services/unlock/us/att">Compare the clean AT&amp;T service if eligible</a></p>}</section>
+ <a href="/reports/2026-used-iphone-carrier-lock-report">US and Canadian policy comparison</a><a href="https://crtc.gc.ca/eng/archive/2026/2026-210.htm">CRTC 2026-210</a><a href="https://www.ofcom.org.uk/phones-and-broadband/mobile-phones/mobile-companies-now-banned-from-selling-locked-handsets">UK: Ofcom rule</a></>
+}
+const models:Record<string,string[]>={'iPhone 14':['A2649','A2881','A2882','A2884'],'iPhone 14 Plus':['A2632','A2885','A2886','A2888']}
+const dest:Record<string,string>={Canada:'en-ca',Mexico:'es-mx',Brazil:'pt-br',UK:'en-gb',Germany:'de-de',UAE:'en-ae'}
+function Bands(){
+ const [model,M]=useState('iPhone 14'),[origin,O]=useState('United States'),[country,C]=useState('Canada'),[band,B]=useState('Not known')
+ const origins=['United States','Japan','Germany / UK','China mainland'],i=origins.indexOf(origin),variant=models[model][i]
+ const chosen=['Not known','n28','n77','n78','n260','n261']
+ return <><Pick label="Model (supported offline profiles)" value={model} items={Object.keys(models)} change={M}/><Pick label="Country of original sale" value={origin} items={origins} change={O}/><Pick label="Destination" value={country} items={Object.keys(dest)} change={C}/><Pick label="Band advertised by your destination operator" value={band} items={chosen} change={B}/>
+ <section aria-live="polite"><h2>{model} · {variant} → {country}</h2><p>{i===0?'US variant: no physical SIM tray. Choose a provider that activates eSIM on imported devices.':i===3?'China mainland variant: two physical nano-SIMs; do not buy an eSIM-only plan for this model.':'Physical nano-SIM and eSIM supported. Confirm the plan permits eSIM transfer.'}</p><p>Selected sub-6 bands on this variant: n28, n77, n78. {i===0?'Also supports mmWave n260 and n261.':'US mmWave n260 and n261 are not listed for this variant.'}</p><p>{band==='Not known'?'Get the deployment band from your local operator before deciding.':(i===0||!['n260','n261'].includes(band))?'The selected band matches this hardware profile. Coverage is not guaranteed.':'The selected band is not listed for this variant.'}</p>{i===1&&<p>Test the shutter sound on the actual device. A sales suffix alone cannot predict its behavior in another country.</p>}{i===3&&<p>Check FaceTime feature availability for the mainland model separately; a radio-band match does not enable regional features.</p>}
+ <a href={'https://support.apple.com/'+dest[country]+'/101569'}>Check eSIM carriers for {country} with Apple ↗</a></section></>
+}
+export function FreeGeoTool({idx,products}:{idx:number;products:Option[]}){
+ const [input,S]=useState('');const decoded=decodeAppleModelNumber(input),steps=luhnSteps(input),tac=extractTac(input)
+ return <div className="stack"><section className="hero-panel stack">{idx===1?<Eligibility/>:idx===3?<Bands/>:<><label className="field">{idx===0?'Apple part number':'15-digit IMEI'}<input value={input} autoComplete="off" inputMode={idx===2?'numeric':'text'} maxLength={idx===2?15:16} placeholder={idx===0?'MU683LL/A':'15 digits'} onChange={e=>S(e.target.value)}/></label>
+ <div aria-live="polite">{input&&(idx===0?(decoded?<><h2>{decoded.part}</h2><p>Likely original channel: {decoded.origin??'Not mapped'}. Sales market: {decoded.region??'Not mapped'} ({decoded.regionCode}).</p>{decoded.prefix==='N'&&<p>A service replacement may retain the prior carrier policy. Check the replacement IMEI.</p>}<p>This convention cannot certify refurbishment or current condition. The sales code does not identify the locking carrier.</p></>:<p>Use the part number ending in /A, not an A-number or serial number.</p>):<><p>{steps.length?(validateImeiLuhn(input)?'Checksum passes.':'Checksum or identifier invalid.'):'Enter exactly 15 digits.'}</p>{steps.length>0&&<><p>Double every second digit from the left and subtract nine if the product exceeds nine.</p><ol>{steps.map((d,i)=><li key={i}>Position {i+1}: {input[i]} → {d}</li>)}</ol><p>Sum {steps.reduce((a,b)=>a+b,0)} · remainder {steps.reduce((a,b)=>a+b,0)%10}</p></>}{tac&&<p>TAC {tac}: {['35838974','35782225','35739909'].includes(tac)?'iPhone XR (reference match)':'No match in this limited offline list'}. <a href="https://cekimei.com/imei/apple/iphone-xr">TAC reference</a></p>}</>)}</div></>}</section>
+ <section className="hero-panel stack"><h2>Need a network report?</h2><p>The calculation above is free. Only continue below if you want to review a paid report.</p><QuickImeiCheckCard locale="en" products={products} imei={idx===2&&tac?input:undefined}/></section></div>
+}

@@ -1,0 +1,3 @@
+import {languageLinks} from '@/lib/landing-locales'
+export const metadata={title:'Gebrauchtes iPhone vor dem Kauf prüfen',alternates:{canonical:'/de',languages:languageLinks('/de')}}
+export default function Page(){return <section lang="de" className="shell section stack"><h1>Gebrauchtes iPhone vor dem Kauf prüfen</h1><ul className="stack"><li><a href="/de/iphone-simlock-betreiber-pruefen">Netzbetreiber ermitteln</a></li><li><a href="/de/att-iphone-usa-entsperren">AT&T entsperren</a></li><li><a href="/de/iphone-kanada-entsperren">Kanadische Betreiber</a></li><li><a href="/de/imei-blacklist-pruefung">Sperrliste prüfen</a></li><li><a href="/de/iphone-entsperren-oesterreich">Österreichische Betreiber</a></li></ul></section>}

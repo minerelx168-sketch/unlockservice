@@ -34,7 +34,7 @@ export const FAQ: FaqEntry[] = [
   {
     question: 'Can you unlock a phone that is still on contract?',
     answer:
-      'Eligibility depends on the carrier. An unpaid balance, an active contract or a lost-or-stolen report may prevent unlocking. If the carrier refuses the order, direct card payments are refunded to the original payment method; balance-paid orders release the reserved credit.',
+      'Eligibility depends on the carrier. An unpaid balance, an active contract or a missing-device report may prevent unlocking. If the carrier refuses the order, direct card payments are refunded to the original payment method; balance-paid orders release the reserved credit.',
   },
   {
     question: 'How can I pay for an order?',
