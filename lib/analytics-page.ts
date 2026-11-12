@@ -30,6 +30,14 @@ export function safeAnalyticsPage(href: string, referrer: string): AnalyticsPage
       // Campaign owners should use nonpersonal labels, e.g. autumn-unlock-2026.
       if (value && /^[a-z0-9][a-z0-9_.-]{0,79}$/i.test(value) && !/\d{13,}|[a-f0-9]{32,}/i.test(value.replace(/[_.-]/g, ''))) result[field] = value
     }
+    // Treat an OpenAI paid click as paid acquisition when no manual source
+    // or competing Google click exists. Never forward the opaque reference.
+    if (!privatePath && !current.searchParams.has('utm_source') && !current.searchParams.has('utm_medium')
+        && !['gclid', 'gbraid', 'wbraid'].some(k => current.searchParams.has(k))
+        && /^[A-Za-z0-9._~+\/=-]{1,1024}$/.test(current.searchParams.get('oppref') ?? '')) {
+      result.campaign_source = 'openai'
+      result.campaign_medium = 'paid'
+    }
     if (referrer) {
       const source = new URL(referrer)
       const sourceHost = source.hostname.toLowerCase().replace(/\.$/, '')

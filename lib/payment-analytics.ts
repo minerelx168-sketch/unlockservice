@@ -68,7 +68,7 @@ export async function deliverPaymentAnalytics(limit = 20) {
   for (let index = 0; index < Math.max(0, Math.min(50, limit)); index++) {
     const row = db().prepare(eligible).get(started) as (PaymentEvent & { account_type: string }) | undefined
     if (!row) break
-    const event = { transactionId: `topup-${row.invoice_reference}`, eventName: 'payment_completed' as const, kind: 'topup', paidAt: row.credited_at }
+    const event = { transactionId: `topup-${row.invoice_reference}`, eventName: 'payment_completed' as const, kind: 'topup', contextReference: row.invoice_reference, paidAt: row.credited_at }
     const context = checkoutContext('topup', row.invoice_reference)
     const skip = row.account_type === 'admin' || isInternalEmail(row.email) || context?.internal ? 'internal_user'
       : row.consent === 0 || context?.consent === 'denied' ? 'consent_denied' : null
