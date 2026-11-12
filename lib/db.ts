@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path'
 import Database from 'better-sqlite3'
 import { BRANDS, CARRIERS, DEVICE_SERVICES } from './catalog'
 import { toCents } from './money'
-import { NOV12_PRICES, NOV12_VERSION, RETIRED_ATT_CODE } from './retail-update-nov12'
+import { NOV12_PRICES, NOV12_VERSION, DISABLED_PRODUCT_CODES, RETIRED_ATT_CODE } from './retail-update-nov12'
 import { PAID_REPORT_PRODUCTS } from './paid-report-catalog'
 
 /**
@@ -724,6 +724,9 @@ export function db(): Database.Database {
 	      seedPaidReportCatalog(connection)
       applyProviderProductCatalogRollout(connection)
       applyNovemberRetailUpdate(connection)
+      // Retain historical orders and prices; disable new sales on upgraded databases.
+      const retire = connection.prepare("UPDATE paid_report_products SET is_active=0,updated_at=datetime('now') WHERE code=? AND is_active<>0")
+      connection.transaction(() => { for (const code of DISABLED_PRODUCT_CODES) retire.run(code) }).immediate()
       migrateResellers(connection)
 
 	  handle = connection
