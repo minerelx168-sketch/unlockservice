@@ -24,7 +24,7 @@ export async function POST(request:Request) {
     if(body.acceptedTerms!==true) throw new WhopPaymentError('Confirm the service requirements and terms before paying.')
     const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent ?? 'unknown'
     const found=await currentSession()
-    if (!found && isMemberUnlock(body.productCode)) throw new WhopPaymentError('Sign in to order this member service.',401)
+    if (!found && isMemberUnlock(String(body.productCode ?? ''))) throw new WhopPaymentError('Sign in to order this member service.',401)
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const context=body.analyticsContext as {clientId:string;sessionId:string}|undefined
     const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
