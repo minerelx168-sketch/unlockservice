@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic'
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = publicOrigin()
   return [
+    { url: origin+'/reports/2026-used-iphone-carrier-lock-report', lastModified: new Date('2026-11-12') },
     ...clusters.flatMap(c=>c.slice(1).map(path=>({url:origin+path}))),
     ...SERVICE_SPOKES.map(s => ({ url: `${origin}${s.path}` })),
     { url: `${origin}/`, changeFrequency: 'weekly', priority: 1 },
