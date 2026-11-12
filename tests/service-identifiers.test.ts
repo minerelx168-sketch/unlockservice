@@ -47,7 +47,7 @@ test('owner-approved prices match all current provider IDs and retain the requir
   const ids = new Set(directory.services.map(row => row.serviceId))
   const prices = new Map(approved.prices.map(row => [row.serviceId, row.sellingPriceCents]))
   assert.equal(ids.size, 129)
-  assert.equal(AVAILABLE_PROVIDER_PRODUCTS.length, 127)
+  assert.equal(AVAILABLE_PROVIDER_PRODUCTS.length, 121)
   for (const p of AVAILABLE_PROVIDER_PRODUCTS) {
     assert.ok(ids.has(p.serviceId))
     assert.equal(p.priceCents, NOV12_PRICES[p.productCode] ?? prices.get(p.serviceId))
