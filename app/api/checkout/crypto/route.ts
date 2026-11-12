@@ -1,3 +1,4 @@
+import { isMemberUnlock } from '@/lib/member-unlocks'
 import { captureCheckoutContext } from '@/lib/checkout-context-request'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
@@ -22,6 +23,7 @@ export async function POST(request:Request) {
     if(body.acceptedTerms!==true) throw new WhopPaymentError('Confirm the service requirements and terms before paying.')
     const consent=parseSignedConsent((await cookies()).get(CONSENT_COOKIE)?.value)?.consent==='granted'
     const found=await currentSession()
+    if (!found && isMemberUnlock(String(body.productCode ?? ''))) throw new WhopPaymentError('Sign in to order this member service.',401)
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
     const result=await createGuestCryptoCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
       routeId:String(body.routeId??''),requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),

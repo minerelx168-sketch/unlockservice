@@ -1,3 +1,4 @@
+import { isMemberUnlock } from '@/lib/member-unlocks'
 import directory from '@/catalog/storefront-service-directory.json'
 import { serviceGroupLabel } from './service-groups'
 import { CUSTOMER_IMEI_CHECK_PRODUCTS, CUSTOMER_UNLOCK_PRODUCTS } from './customer-provider-products'
@@ -17,7 +18,7 @@ export function listPublicProviderProducts(domain: ProviderProductDomain): Publi
   const orderable = new Map(
     listPaidReportProducts().map((product) => [product.code, product]),
   )
-  return products.map((product) => {
+  return products.filter(p => !isMemberUnlock(p.productCode)).map((product) => {
     const live = orderable.get(product.productCode)
     return {
       productCode: product.productCode,
@@ -41,11 +42,11 @@ export function listPublicProviderProducts(domain: ProviderProductDomain): Publi
  * Listing a service never enables a provider mapping, a new input flow or payment.
  * Newly listed services without a retail price remain view-only, with no invented quote.
  */
-export function listStorefrontProviderProducts(domain: ProviderProductDomain): PublicProviderProduct[] {
+export function listStorefrontProviderProducts(domain: ProviderProductDomain, membersOnly = false): PublicProviderProduct[] {
   const byId = new Map(PROVIDER_PRODUCTS.map((product) => [product.serviceId, product]))
   return directory.services.filter(entry =>
     (entry.serviceId === '346' ? 'unlock' : entry.domain) === domain &&
-    entry.serviceId !== '214' && byId.get(entry.serviceId)?.status !== 'unavailable',
+    isMemberUnlock('UNLOCK_' + entry.serviceId) === membersOnly && entry.serviceId !== '214' && byId.get(entry.serviceId)?.status !== 'unavailable',
   ).map((entry) => {
     const configured = byId.get(entry.serviceId)
     const productCode = configured?.productCode ?? `${domain === 'unlock' ? 'UNLOCK' : 'CHECK'}_${entry.serviceId}`
@@ -56,7 +57,7 @@ export function listStorefrontProviderProducts(domain: ProviderProductDomain): P
       productCode,
       slug: configured?.slug ?? productCode.toLowerCase().replaceAll('_', '-'),
       name: serviceGroupLabel(entry.name),
-      summary: configured?.summary ?? 'Contact us to confirm the requirements, price and delivery time for this service.',
+      summary: configured?.summary.split('\n').filter(line => !/https?:\/\/(?:www\.)?bit\.ly\//i.test(line)).join('\n').trim() ?? 'Contact us to confirm the requirements, price and delivery time for this service.',
       group: serviceGroupLabel(entry.serviceId === '346' ? 'USA Networks' : entry.group),
       // Display section is separate from the existing processing and billing domain.
       domain: configured?.domain ?? domain,
@@ -70,4 +71,3 @@ export function listStorefrontProviderProducts(domain: ProviderProductDomain): P
     }
   })
 }
-

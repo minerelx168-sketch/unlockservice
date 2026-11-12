@@ -25,6 +25,7 @@ export function serviceDisplayText(value: string) {
 
 /** A disclosure with native buttons keeps touch, keyboard and screen-reader behavior predictable. */
 export function ServicePicker({
+  moreHref,
   options,
   value,
   onChange,
@@ -33,6 +34,7 @@ export function ServicePicker({
   id,
   triggerRef: providedTriggerRef,
 }: {
+  moreHref?: string
   options: ServiceOption[]
   value: string
   onChange: (code: string) => void
@@ -174,7 +176,7 @@ export function ServicePicker({
             {query ? <button type="button" className="button button--secondary" onClick={() => { setQuery(''); searchRef.current?.focus() }}>Clear search</button> : null}
           </div>
         ) : null}
-        <button type="button" className="service-picker__close" onClick={close}>Close service list</button>
+         {moreHref ? <Link prefetch={false} className="service-picker__close" href={moreHref}>See More</Link> : <button type="button" className="service-picker__close" onClick={close}>Close service list</button>}
       </div>
     </div>
   )

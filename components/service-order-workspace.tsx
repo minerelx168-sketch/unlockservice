@@ -12,7 +12,7 @@ import { storefrontDomain } from '@/lib/service-groups'
 export async function ServiceOrderWorkspace({ domain, requestedProduct, fallbackImei }: { domain?: DeviceDomain; requestedProduct?: string; fallbackImei?: string }) {
   const [{ user, session }, intent] = await Promise.all([requireSession(), readDeviceIntent()])
   const orderable = new Map(listPaidReportProducts(user.id).map((product) => [product.code, product]))
-  const products = [...listStorefrontProviderProducts('imei_check'), ...listStorefrontProviderProducts('unlock')]
+  const products = [...listStorefrontProviderProducts('imei_check'), ...listStorefrontProviderProducts('unlock'), ...listStorefrontProviderProducts('unlock', true)]
   const selected = products.find((product) => product.productCode === requestedProduct)
   const initialDomain = (selected ? storefrontDomain(selected) : domain ?? intent?.domain) ?? 'imei_check'
   const title = initialDomain === 'unlock' ? 'Unlock services' : 'Phone Check'
@@ -44,4 +44,3 @@ export async function ServiceOrderWorkspace({ domain, requestedProduct, fallback
     </>
   )
 }
-
