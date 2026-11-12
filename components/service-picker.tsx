@@ -176,7 +176,7 @@ export function ServicePicker({
             {query ? <button type="button" className="button button--secondary" onClick={() => { setQuery(''); searchRef.current?.focus() }}>Clear search</button> : null}
           </div>
         ) : null}
-         {moreHref ? <Link prefetch={false} className="service-picker__close" href={moreHref}>See More <small>(members)</small></Link> : <button type="button" className="service-picker__close" onClick={close}>Close service list</button>}
+         {moreHref ? <Link prefetch={false} className="service-picker__close" href={moreHref}>See More</Link> : <button type="button" className="service-picker__close" onClick={close}>Close service list</button>}
       </div>
     </div>
   )
