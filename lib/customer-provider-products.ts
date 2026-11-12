@@ -1,3 +1,4 @@
+import { isMemberUnlock } from './member-unlocks'
 import { PUBLIC_PROVIDER_PRODUCTS, type ProviderProduct } from '@/lib/provider-products'
 
 function customerText(value: string) {
@@ -22,7 +23,7 @@ export const CUSTOMER_IMEI_CHECK_PRODUCTS = PUBLIC_PROVIDER_PRODUCTS
   .map(customerProduct)
 
 export const CUSTOMER_UNLOCK_PRODUCTS = PUBLIC_PROVIDER_PRODUCTS
-  .filter((product) => product.domain === 'unlock')
+  .filter((product) => product.domain === 'unlock' && !isMemberUnlock(product.productCode))
   .map(customerProduct)
 
 export const CUSTOMER_PRODUCT_COUNTS = {
