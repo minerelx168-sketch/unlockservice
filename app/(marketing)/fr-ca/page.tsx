@@ -1,4 +1,4 @@
-import {GuideHero,GuideTile} from '@/components/guide-ui'
+import {LocaleHome} from '@/components/locale-home'
 import {languageLinks} from '@/lib/landing-locales'
 export const metadata={title:'Guides pour vérifier un iPhone usagé',alternates:{canonical:'/fr-ca',languages:languageLinks('/fr-ca')}}
-export default function Page(){return <section className="section section--tint home-section" lang="fr-ca"><div className="shell"><GuideHero tag="Guide d’achat" title="Guides pour vérifier un iPhone usagé" icon="globe"><p>Choisissez ce que vous voulez vérifier avant d’acheter ou de déverrouiller un iPhone.</p></GuideHero><div className="hub-grid"><GuideTile href="/fr-ca/verifier-operateur-iphone-imei" title="Identifier le réseau" icon="search"/><GuideTile href="/fr-ca/deverrouiller-iphone-att" title="Déverrouiller AT&T" icon="unlockMark"/><GuideTile href="/fr-ca/deverrouiller-iphone-canada" title="Réseaux au Canada" icon="globe"/><GuideTile href="/fr-ca/verifier-liste-noire-imei-canada" title="Vérifier la liste noire" icon="shieldCheck"/><GuideTile href="/fr-ca/deverrouiller-iphone-autriche" title="Réseaux en Autriche" icon="device"/></div></div></section>}
+export default function Page(){return <LocaleHome locale="fr" title="Guides pour vérifier un iPhone usagé" intro="Choisissez ce que vous voulez vérifier avant d’acheter ou de déverrouiller un iPhone."/>}

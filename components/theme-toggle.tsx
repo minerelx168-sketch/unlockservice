@@ -1,4 +1,5 @@
 'use client'
+import {useCopy} from '@/lib/i18n/client'
 
 import { useEffect, useState } from 'react'
 import { Icon } from './icons'
@@ -13,6 +14,7 @@ export const THEME_STORAGE_KEY = 'iunlockmobile-theme'
  * the choice.
  */
 export function ThemeToggle() {
+  const t=useCopy()
   const [theme, setTheme] = useState<Theme>('light')
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export function ThemeToggle() {
       className="icon-action"
       onClick={toggle}
       aria-pressed={isDark}
-      aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+      aria-label={isDark ? t("Switch to light theme") : t("Switch to dark theme")}
     >
       <Icon name={isDark ? 'sun' : 'moon'} />
     </button>

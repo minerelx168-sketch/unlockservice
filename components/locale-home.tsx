@@ -1,0 +1,11 @@
+import {HeroPriceCheck} from './hero-price-check'
+import {orderOptions} from './guide-layout'
+import {listStorefrontProviderProducts} from '@/lib/public-provider-catalog'
+import {msg} from '@/lib/i18n/messages'
+import {localProduct} from '@/lib/i18n/catalog'
+import {paths,locales,type GeoLocale} from '@/lib/geo-locales'
+import {GuideTile} from './guide-ui'
+import {GuideFaq} from './guide-faq'
+import {serializeJsonLd} from '@/lib/json-ld'
+export function LocaleHome({locale:l,title,intro}:{locale:GeoLocale;title:string;intro:string}){const t=(k:Parameters<typeof msg>[1])=>msg(l,k),ix=locales.indexOf(l),faq=[[t('This phone is already unlocked. Do I need to pay?'),t('No. If Carrier Lock shows no SIM restrictions in Settings, a carrier unlock is unnecessary.')]];const opts=(d:'imei_check'|'unlock',codes:string[])=>orderOptions(listStorefrontProviderProducts(d).filter(p=>codes.includes(p.productCode))).map(p=>localProduct(p,l))
+return <><section className="hero home-hero"><div className="shell"><div className="hero-copy"><span className="hero-chip">iUnlockMobile · 2016</span><h1 className="t-hero">{title}</h1><p className="t-lead">{intro}</p></div><div className="hero-panel"><HeroPriceCheck ordering homeUnlockMenu check={opts('imei_check',['APPLE_CARRIER_LITE','BLACKLIST_FULL'])} unlock={opts('unlock',['UNLOCK_346','UNLOCK_36','UNLOCK_39','UNLOCK_87','UNLOCK_84','UNLOCK_384','UNLOCK_212'])}/></div></div></section><section className="section section--tint"><div className="shell"><h2 className="t-section">{t('Services')}</h2><div className="hub-grid">{[t('Carrier check'),'AT&T · '+t('Unlock'),t('Canada')+' · '+t('Unlock'),t('Blacklist check'),t('Austria')+' · '+t('Unlock')].map((name,i)=><GuideTile key={name} href={paths[i][ix]} title={name} icon={i===3?'shieldCheck':i===0?'search':'unlockMark'}/>)}</div></div></section><section id="faq" className="section"><div className="shell"><h2 className="t-section">{t('Common questions')}</h2><GuideFaq rows={faq}/></div></section><script type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd({'@context':'https://schema.org','@type':'FAQPage',mainEntity:faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text}}))})}}/></>}

@@ -1,4 +1,4 @@
-import {GuideHero,GuideTile} from '@/components/guide-ui'
+import {LocaleHome} from '@/components/locale-home'
 import {languageLinks} from '@/lib/landing-locales'
 export const metadata={title:'Gebrauchtes iPhone vor dem Kauf prüfen',alternates:{canonical:'/de',languages:languageLinks('/de')}}
-export default function Page(){return <section className="section section--tint home-section" lang="de"><div className="shell"><GuideHero tag="Kaufberatung" title="Gebrauchtes iPhone vor dem Kauf prüfen" icon="globe"><p>Wählen Sie, was Sie vor dem Kauf oder der Entsperrung eines importierten iPhones prüfen möchten.</p></GuideHero><div className="hub-grid"><GuideTile href="/de/iphone-simlock-betreiber-pruefen" title="Netzbetreiber ermitteln" icon="search"/><GuideTile href="/de/att-iphone-usa-entsperren" title="AT&T entsperren" icon="unlockMark"/><GuideTile href="/de/iphone-kanada-entsperren" title="Kanadische Betreiber" icon="globe"/><GuideTile href="/de/imei-blacklist-pruefung" title="Sperrliste prüfen" icon="shieldCheck"/><GuideTile href="/de/iphone-entsperren-oesterreich" title="Österreichische Betreiber" icon="device"/></div></div></section>}
+export default function Page(){return <LocaleHome locale="de" title="Gebrauchtes iPhone vor dem Kauf prüfen" intro="Wählen Sie, was Sie vor dem Kauf oder der Entsperrung eines importierten iPhones prüfen möchten."/>}

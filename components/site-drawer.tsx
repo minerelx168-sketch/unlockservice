@@ -1,4 +1,6 @@
 'use client'
+import {localeOf,prefixOf} from '@/lib/i18n/route-map'
+import {useCopy} from '@/lib/i18n/client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -38,6 +40,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [ta
  * close it, and the page behind does not scroll.
  */
 export function SiteDrawer({ open, onClose, groups, links, isAuthenticated, accountSlot }: Props) {
+  const t=useCopy()
   const pathname = usePathname()
   const panel = useRef<HTMLElement>(null)
   const closeButton = useRef<HTMLButtonElement>(null)
@@ -95,23 +98,23 @@ export function SiteDrawer({ open, onClose, groups, links, isAuthenticated, acco
         ref={panel}
         role="dialog"
         aria-modal="true"
-        aria-label="Site navigation"
+        aria-label={t("Open navigation")}
       >
         <header className="drawer-head">
-          <Brand />
+          <Brand href={prefixOf(localeOf(pathname))} tagline={[t("Unlock"),t("Phone Check"),t("Track order")].join(" · ")}/>
           <button
             type="button"
             className="icon-action drawer-close"
             ref={closeButton}
             onClick={onClose}
-            aria-label="Close navigation"
+            aria-label={t("Close navigation")}
           >
             <Icon name="cross" />
           </button>
         </header>
 
         <div className="drawer-body">
-          <p className="drawer-label">Services</p>
+          <p className="drawer-label">{t("Services")}</p>
           <ul className="drawer-list">
             {groups.map((group) => {
               const isOpen = expanded === group.id
@@ -160,32 +163,32 @@ export function SiteDrawer({ open, onClose, groups, links, isAuthenticated, acco
           <hr className="drawer-rule" />
 
           <div className="drawer-row">
-            <span className="drawer-label">Theme</span>
+            <span className="drawer-label">{t("Theme")}</span>
             <ThemeToggle />
           </div>
 
           <hr className="drawer-rule" />
 
-          <p className="drawer-label">Account</p>
+          <p className="drawer-label">{t("Account")}</p>
           <ul className="drawer-list">
             {isAuthenticated ? (
               <>
                 <li>
                   <Link className="drawer-item" href="/user/dashboard">
                     <Icon name="grid" strokeWidth={1.9} />
-                    <span>Dashboard</span>
+                    <span>{t("Dashboard")}</span>
                   </Link>
                 </li>
                 <li>
                   <Link className="drawer-item" href="/user/orders">
                     <Icon name="clock" strokeWidth={1.9} />
-                    <span>My orders</span>
+                    <span>{t("My orders")}</span>
                   </Link>
                 </li>
                 <li>
                   <Link className="drawer-item" href="/user/profile">
                     <Icon name="user" strokeWidth={1.9} />
-                    <span>Profile</span>
+                    <span>{t("Profile")}</span>
                   </Link>
                 </li>
                 {accountSlot ? <li className="drawer-slot">{accountSlot}</li> : null}
@@ -195,13 +198,13 @@ export function SiteDrawer({ open, onClose, groups, links, isAuthenticated, acco
                 <li>
                   <Link className="drawer-item" href="/login">
                     <Icon name="user" strokeWidth={1.9} />
-                    <span>Sign in</span>
+                    <span>{t("Sign in")}</span>
                   </Link>
                 </li>
                 <li>
                   <Link className="drawer-item drawer-item--accent" href="/register">
                     <Icon name="sparkle" strokeWidth={1.9} />
-                    <span>Create an account</span>
+                    <span>{t("Create an account")}</span>
                   </Link>
                 </li>
               </>

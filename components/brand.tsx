@@ -8,9 +8,9 @@ import { Icon } from './icons'
  * tagline says what the three things on offer are, in the order a buyer
  * meets them.
  */
-export function Brand({ tagline = 'Unlock · Check · Track' }: { tagline?: string }) {
+export function Brand({ tagline = 'Unlock · Check · Track',href='/' }: { tagline?: string;href?:string }) {
   return (
-    <Link className="brand" href="/">
+    <Link className="brand" href={href}>
       <span className="mark" aria-hidden="true">
         <Icon name="unlockMark" strokeWidth={1.9} />
       </span>

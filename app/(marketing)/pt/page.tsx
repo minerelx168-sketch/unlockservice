@@ -1,4 +1,4 @@
-import {GuideHero,GuideTile} from '@/components/guide-ui'
+import {LocaleHome} from '@/components/locale-home'
 import {languageLinks} from '@/lib/landing-locales'
 export const metadata={title:'Guias de compra de iPhone importado',alternates:{canonical:'/pt',languages:languageLinks('/pt')}}
-export default function Page(){return <section className="section section--tint home-section" lang="pt"><div className="shell"><GuideHero tag="Guia de compra" title="Guias de compra de iPhone importado" icon="globe"><p>Escolha o que verificar antes de comprar ou desbloquear um iPhone importado.</p></GuideHero><div className="hub-grid"><GuideTile href="/pt/verificar-operadora-iphone-imei" title="Identificar operadora" icon="search"/><GuideTile href="/pt/desbloquear-iphone-att-eua" title="Desbloquear AT&T" icon="unlockMark"/><GuideTile href="/pt/desbloquear-iphone-canada" title="Operadoras canadenses" icon="globe"/><GuideTile href="/pt/consultar-lista-negra-imei" title="Consultar lista negra" icon="shieldCheck"/><GuideTile href="/pt/desbloquear-iphone-austria" title="Operadoras austríacas" icon="device"/></div></div></section>}
+export default function Page(){return <LocaleHome locale="pt" title="Guias de compra de iPhone importado" intro="Escolha o que verificar antes de comprar ou desbloquear um iPhone importado."/>}

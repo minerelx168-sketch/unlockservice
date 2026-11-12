@@ -4,3 +4,4 @@
 .tool-calc .requirements-card{line-height:1.6;overflow-wrap:anywhere}
 [dir=rtl] :is(.service-breadcrumb,.hero-panel,th,td,caption){text-align:start}
 [dir=rtl] .link-arrow{transform:scaleX(-1)}
+.locale-switch{position:relative}.locale-switch summary{display:grid;place-items:center;min-height:44px;min-width:44px;cursor:pointer;list-style:none}.locale-switch summary::-webkit-details-marker{display:none}.locale-switch nav{position:absolute;inset-inline-end:0;min-width:180px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);z-index:5}.locale-switch a{display:block;padding:12px}

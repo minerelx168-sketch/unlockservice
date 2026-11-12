@@ -1,4 +1,5 @@
 'use client'
+import {useCopy} from '@/lib/i18n/client'
 
 import Link from 'next/link'
 import { useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
@@ -43,6 +44,7 @@ export function ServicePicker({
   id?: string
   triggerRef?: RefObject<HTMLButtonElement | null>
 }) {
+  const t=useCopy()
   const generatedId = useId()
   const pickerId = id ?? `service-picker-${generatedId}`
   const [expanded, setExpanded] = useState(false)
@@ -82,7 +84,7 @@ export function ServicePicker({
     }}>
       <div className="service-picker__label-row">
         <span id={`${pickerId}-label`}>{label}</span>
-        <span className="service-picker__count">{availableCount} available</span>
+        <span className="service-picker__count">{availableCount} · {t("Available")}</span>
       </div>
       <button
         ref={triggerRef}
@@ -97,23 +99,23 @@ export function ServicePicker({
       >
         <span className="service-picker__icon"><Icon name="grid" /></span>
         <span className="service-picker__selection" id={`${pickerId}-selection`}>
-          <strong>{selected ? serviceDisplayText(selected.name) : 'Choose a service'}</strong>
+          <strong>{selected ? serviceDisplayText(selected.name) : t("Choose a service")}</strong>
           <small>{selected
-            ? `${selected.priceAvailable === false ? 'Contact for price' : `${formatUsd(selected.priceCents)} USD`} · ${serviceDisplayText(selected.etaLabel)}${selected.available ? '' : ' · Unavailable online'}`
-            : 'Search by device, network or service name'}</small>
+            ? `${selected.priceAvailable === false ? t("Contact for price") : `${formatUsd(selected.priceCents)} USD`} · ${serviceDisplayText(selected.etaLabel)}${selected.available ? '' : ' · '+t("Unavailable online")}`
+            : t("Search by device, network or service name")}</small>
         </span>
         <span className="service-picker__affordance" aria-hidden="true">
-          <span>{selected ? 'Change' : 'Select'}</span>
+          <span>{selected ? t("Change") : t("Select")}</span>
           <span className="service-picker__chevron" />
         </span>
       </button>
-      {selected && !selected.available ? <p className="service-picker__inquiry"><Link href="/contact">Contact us about this service</Link></p> : null}
+      {selected && !selected.available ? <p className="service-picker__inquiry"><Link href="/contact">{t("Contact us")}</Link></p> : null}
       {selected?.hasExample && !open ? (
         <div className="service-picker__selected-example"><ServiceOutputExample productCode={selected.code} productName={serviceDisplayText(selected.name)} /></div>
       ) : null}
       <div className="service-picker__panel" id={`${pickerId}-panel`} hidden={!open}>
         <div className="service-picker__search">
-          <label htmlFor={`${pickerId}-search`}>Search services</label>
+          <label htmlFor={`${pickerId}-search`}>{t("Search services")}</label>
           <div className="service-picker__search-control">
             <Icon name="search" />
             <input
@@ -126,15 +128,15 @@ export function ServicePicker({
                 // Searching inside an order form must not submit that form.
                 if (event.key === 'Enter') event.preventDefault()
               }}
-              placeholder="Search services"
+              placeholder={t("Search services")}
               autoComplete="off"
               disabled={disabled}
               aria-controls={`${pickerId}-results`}
             />
           </div>
-          <p className="service-picker__results-count" role="status">{visible.length} services shown · Prices in USD</p>
+          <p className="service-picker__results-count" role="status">{visible.length} {t("services shown · Prices in USD")}</p>
         </div>
-        <ul className="service-picker__results" id={`${pickerId}-results`} aria-label={`${label} options`}>
+        <ul className="service-picker__results" id={`${pickerId}-results`} aria-label={label}>
           {groups.map(({ group, products }, groupIndex) => (
             <li className="service-picker__group" key={group}>
               <h3 className="service-picker__group-heading" id={`${pickerId}-group-${groupIndex}`}>
@@ -156,11 +158,11 @@ export function ServicePicker({
                     >
                       <span className="service-picker__option-copy">
                         <strong>{serviceDisplayText(option.name)}</strong>
-                        <small>{serviceDisplayText(option.etaLabel)} · {option.available ? 'Available' : 'Unavailable online'}</small>
+                        <small>{serviceDisplayText(option.etaLabel)} · {option.available ? t("Available") : t("Unavailable online")}</small>
                       </span>
                       <span className="service-picker__option-price" data-unpriced={option.priceAvailable === false || undefined}>
-                        <strong>{option.priceAvailable === false ? 'Contact for price' : formatUsd(option.priceCents)}</strong>
-                        {option.code === value ? <span><Icon name="checkSmall" /> Selected</span> : null}
+                        <strong>{option.priceAvailable === false ? t("Contact for price") : formatUsd(option.priceCents)}</strong>
+                        {option.code === value ? <span><Icon name="checkSmall" /> {t("Selected")}</span> : null}
                       </span>
                     </button>
                     {option.hasExample ? <div className="service-picker__example"><ServiceOutputExample productCode={option.code} productName={serviceDisplayText(option.name)} /></div> : null}
@@ -172,11 +174,11 @@ export function ServicePicker({
         </ul>
         {visible.length === 0 ? (
           <div className="service-picker__empty">
-            <p>{options.length === 0 ? 'No services are listed yet. Please check back soon.' : 'No services match your search. Try a device brand or network.'}</p>
-            {query ? <button type="button" className="button button--secondary" onClick={() => { setQuery(''); searchRef.current?.focus() }}>Clear search</button> : null}
+            <p>{options.length === 0 ? t("Unavailable online") : t("No services match your search. Try a device brand or network.")}</p>
+            {query ? <button type="button" className="button button--secondary" onClick={() => { setQuery(''); searchRef.current?.focus() }}>{t("Clear search")}</button> : null}
           </div>
         ) : null}
-         {moreHref ? <Link prefetch={false} className="service-picker__close" href={moreHref}>See More</Link> : <button type="button" className="service-picker__close" onClick={close}>Close service list</button>}
+         {moreHref ? <Link prefetch={false} className="service-picker__close" href={moreHref}>{t("See More")}</Link> : <button type="button" className="service-picker__close" onClick={close}>{t("Close service list")}</button>}
       </div>
     </div>
   )

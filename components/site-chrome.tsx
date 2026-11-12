@@ -1,3 +1,6 @@
+import {headers} from 'next/headers'
+import {localeOf} from '@/lib/i18n/route-map'
+import {msg} from '@/lib/i18n/messages'
 import { Icon } from './icons'
 import type { DrawerGroup, DrawerLink } from './site-drawer'
 import { SiteFooter } from './site-footer'
@@ -63,11 +66,12 @@ export async function PublicHeader() {
     { href: '/support', label: 'Support', icon: 'question' },
   ]
 
+  const locale=localeOf((await headers()).get("x-continuation-path")??"/")
   const accountSlot = isAuthenticated ? (
     <form action={logoutAction}>
       <button className="button button--quiet" type="submit">
         <Icon name="logout" strokeWidth={1.9} />
-        Sign out
+        {msg(locale,"Sign out")}
       </button>
     </form>
   ) : null

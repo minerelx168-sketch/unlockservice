@@ -90,7 +90,7 @@ export function NavMenu({ href, label, icon, group, active, footer }: Props) {
         className="nav-caret"
         aria-expanded={open}
         aria-controls={`${id}-menu`}
-        aria-label={`${label} menu`}
+        aria-label={label}
         onClick={() => setOpen((value) => !value)}
       >
         <Icon name="chevronDown" strokeWidth={2.2} />

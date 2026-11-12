@@ -1,10 +1,13 @@
 'use client'
+import {useCopy} from '@/lib/i18n/client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCallback, useState, type ReactNode } from 'react'
-import {languages,markets,homePaths} from '@/lib/geo-locales'
-import {languageLinks, clusters} from '@/lib/landing-locales'
+import {LocaleSwitch} from './locale-switch'
+import {locales,paths} from '@/lib/geo-locales'
+import {localeOf,prefixOf} from '@/lib/i18n/route-map'
+
 import { Brand } from './brand'
 import { Icon, type IconName } from './icons'
 import { NavMenu } from './nav-menu'
@@ -38,38 +41,42 @@ type Props = {
  * position:fixed, which would clip the sheet to 78px.
  */
 export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks, accountSlot }: Props) {
+  const t=useCopy()
   const pathname = usePathname()
+  const l=localeOf(pathname),ix=locales.indexOf(l)
+  const localized=(href:string)=>l==='en'?href:href==='/services/unlock'?paths[1][ix]:href==='/services/imei-check'?paths[0][ix]:href==='/services'||href==='/articles'?prefixOf(l):href
+  const navLabel=(href:string)=>href.includes('unlock')?t("Unlock"):href.includes('imei-check')?t("Phone Check"):href==='/articles'?t("Guides"):href==='/contact'?t("Contact us"):t("Track order")
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
   const accountHref = isAuthenticated ? '/user/dashboard' : '/login'
-  const accountLabel = isAuthenticated ? 'My account' : 'Sign in'
+  const accountLabel = isAuthenticated ? t("Account") : t("Sign in")
 
   /* The one way to the whole catalog, offered at the foot of each menu. */
+  const scopedGroups:DrawerGroup[]=l==='en'?drawerGroups:[{id:'unlock',label:t('Unlock'),icon:'lock',primary:{href:paths[1][ix],label:'AT&T · '+t('Unlock')},items:[{href:paths[2][ix],label:t('Canada')},{href:paths[4][ix],label:t('Austria')}]},{id:'check',label:t('Phone Check'),icon:'search',primary:{href:paths[0][ix],label:t('Carrier check')},items:[{href:paths[3][ix],label:t('Blacklist check')}]}]
+  const scopedLinks:DrawerLink[]=l==='en'?drawerLinks:[{href:prefixOf(l),label:t('Guides')},{href:'/track',label:t('Track order')},{href:'/support',label:t('Support')}]
   const allServices = (
-    <Link className="button button--primary" href="/services">
-      <Icon name="grid" strokeWidth={1.9} />
-      All services
-    </Link>
+    <Link className="button button--primary" href={localized("/services")}>
+      <Icon name="grid" strokeWidth={1.9} />{t("Services")} </Link>
   )
 
   return (
     <>
       <header className="site-header">
         <div className="shell">
-          <Brand />
+          <Brand href={prefixOf(l)} tagline={[t("Unlock"),t("Phone Check"),t("Track order")].join(" · ")}/>
 
-          <nav className="site-nav" id="site-nav" aria-label="Primary">
+          <nav className="site-nav" id="site-nav" aria-label={t("Services")}>
             {NAV.map((item) => {
-              const href = item.label === 'Order Tracking' && isAuthenticated ? '/user/orders' : item.href
+              const href = item.href === '/track' && isAuthenticated ? '/user/orders' : item.href
               // Keep the section highlighted while reading an individual article.
               const active = pathname === href || pathname.startsWith(`${href}/`)
-              const group = item.menu ? drawerGroups.find((entry) => entry.id === item.menu) : undefined
+              const group = item.menu ? scopedGroups.find((entry) => entry.id === item.menu) : undefined
               if (group) {
                 return (
                   <NavMenu
                     key={item.label}
-                    href={href}
-                    label={item.label}
+                    href={localized(href)}
+                    label={l==="en"?item.label:navLabel(item.href)}
                     icon={item.icon}
                     group={group}
                     active={active}
@@ -80,27 +87,22 @@ export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks,
               return (
                 <Link
                   key={item.label}
-                  href={href}
+                  href={localized(href)}
                   className={`nav-link${item.href === '/articles' ? ' nav-link--article' : ''}`}
                   data-active={active ? 'true' : undefined}
                   aria-current={href === pathname ? 'page' : undefined}
                 >
                   <Icon name={item.icon} strokeWidth={1.9} />
-                  <span>{item.label}</span>
+                  <span>{l==="en"?item.label:navLabel(item.href)}</span>
                 </Link>
               )
             })}
           </nav>
 
           <div className="header-actions">
-            <details key={pathname} style={{position:'relative'}}>
-              <summary aria-label="Choose language" style={{display:'grid',placeItems:'center',minWidth:44,minHeight:44,cursor:'pointer'}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></summary>
-              <nav aria-label="Language" style={{position:'absolute',insetInlineEnd:0,minWidth:180,padding:8,background:'var(--surface)',border:'1px solid var(--line)',borderRadius:12,zIndex:5}}>
-                {markets.map((tag,i)=><a key={tag} href={(clusters.some(c=>c.includes(pathname))?languageLinks(pathname)[tag]:null)??homePaths[i]} hrefLang={tag} lang={tag} style={{display:'block',padding:12}}>{languages[i]}</a>)}
-              </nav>
-            </details>
+            <LocaleSwitch/>
             <ThemeToggle />
-            <Link className="icon-action header-help" href="/support" aria-label="Help centre">
+            <Link className="icon-action header-help" href="/support" aria-label={t("Support")}>
               <Icon name="question" />
             </Link>
             {/* The one filled control in the header. The label collapses on
@@ -116,7 +118,7 @@ export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks,
               onClick={() => setOpen(true)}
               aria-expanded={open}
               aria-controls="site-drawer"
-              aria-label="Open navigation"
+              aria-label={t("Open navigation")}
             >
               <Icon name="menu" />
             </button>
@@ -127,21 +129,21 @@ export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks,
       <SiteDrawer
         open={open}
         onClose={close}
-        groups={drawerGroups}
-        links={drawerLinks}
+        groups={scopedGroups}
+        links={scopedLinks}
         isAuthenticated={isAuthenticated}
         accountSlot={accountSlot}
       />
 
-      <nav className="mobile-nav" aria-label="Mobile navigation" hidden={open}>
+      <nav className="mobile-nav" aria-label={t("Services")} hidden={open}>
         {([
-          { href: '/services/unlock', label: 'Unlock', icon: 'lock' },
-          { href: '/services/imei-check', label: 'Check', icon: 'search' },
-          { href: isAuthenticated ? '/user/orders' : '/track', label: 'Track', icon: 'clock' },
-          { href: accountHref, label: 'Account', icon: 'user' },
+          { href: '/services/unlock', label: t("Unlock"), icon: 'lock' },
+          { href: '/services/imei-check', label: t("Phone Check"), icon: 'search' },
+          { href: isAuthenticated ? '/user/orders' : '/track', label: t("Track order"), icon: 'clock' },
+          { href: accountHref, label: t("Account"), icon: 'user' },
         ] as Array<{ href: string; label: string; icon: IconName }>).map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`) || (pathname === '/' && item.label === 'Unlock')
-          return <Link key={item.label} href={item.href} data-active={active || undefined} aria-current={pathname === item.href ? 'page' : active ? 'location' : undefined}><Icon name={item.icon} /><span>{item.label}</span></Link>
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`) || (pathname === '/' && item.href === '/services/unlock')
+          return <Link key={item.label} href={localized(item.href)} data-active={active || undefined} aria-current={pathname === item.href ? 'page' : active ? 'location' : undefined}><Icon name={item.icon} /><span>{item.label}</span></Link>
         })}
       </nav>
 

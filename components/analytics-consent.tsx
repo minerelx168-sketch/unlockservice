@@ -1,9 +1,11 @@
 'use client'
+import {useCopy} from '@/lib/i18n/client'
 import { useEffect, useRef, useState } from 'react'
 import { PENDING_ATTRIBUTION_MAX_AGE_SECONDS, CLICK_ID_FIELDS, validateClickId, type ClickIdField } from '@/lib/attribution'
 import { updateGoogleConsent } from '@/lib/google-consent-tracking'
 import { forgetLanding, rememberLanding, persistLanding } from '@/lib/landing-context'
 export function AnalyticsConsent() {
+  const t=useCopy()
   const [consent, setConsent] = useState<'unknown' | 'granted' | 'denied'>('unknown')
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -62,13 +64,13 @@ export function AnalyticsConsent() {
   }
   return <>
     {open ? <div aria-hidden="true" style={{ height: noticeHeight }} /> : null}
-    <aside ref={noticeRef} className="analytics-consent" data-open={open} aria-label="Privacy choices">
-    {open ? <div className="cookie-banner" role="region" aria-label="Cookie notice" aria-busy={busy}>
-      <p>We use cookies to improve your experience.</p>
-      <button type="button" className="button button--primary cookie-accept" disabled={busy} onClick={() => void choose('granted')}>{busy ? 'Saving…' : 'Accept'}</button>
-      <button type="button" className="cookie-close" aria-label="Close cookie notice without accepting optional tracking" disabled={busy} onClick={() => void choose('denied')}>×</button>
-      {error ? <p className="cookie-error" role="alert">{error}</p> : null}
-    </div> : <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>Privacy choices{consent === 'denied' ? ' · optional tracking off' : ''}</button>}
+    <aside ref={noticeRef} className="analytics-consent" data-open={open} aria-label={t("Privacy choices")}>
+    {open ? <div className="cookie-banner" role="region" aria-label={t("Privacy choices")} aria-busy={busy}>
+      <p>{t("We use cookies to improve your experience.")}</p>
+      <button type="button" className="button button--primary cookie-accept" disabled={busy} onClick={() => void choose('granted')}>{busy ? t("Saving…") : t("Accept")}</button>
+      <button type="button" className="cookie-close" aria-label={t("Close cookie notice without accepting optional tracking")} disabled={busy} onClick={() => void choose('denied')}>×</button>
+      {error ? <p className="cookie-error" role="alert">{t("Try again")}</p> : null}
+    </div> : <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>{t("Privacy choices")}{consent === 'denied' ? " · "+t("optional tracking off") : ''}</button>}
   </aside>
   </>
 }

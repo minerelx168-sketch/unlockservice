@@ -1,4 +1,5 @@
 'use client'
+import {useCopy} from '@/lib/i18n/client'
 import { ProviderOutputText } from './provider-output-text'
 
 import { useEffect, useId, useRef, useState } from 'react'
@@ -35,6 +36,7 @@ export function ServiceOutputExample({ productCode, productName, className = '',
   /** The trigger's text. The accessible name always names the service. */
   label?: string
 }) {
+  const t=useCopy()
   const id = useId()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -113,11 +115,11 @@ export function ServiceOutputExample({ productCode, productName, className = '',
         className={`service-output-example__trigger ${className}`.trim()}
         aria-haspopup="dialog"
         aria-controls={`${id}-dialog`}
-        aria-label={`View example output for ${productName}`}
+        aria-label={`${t("View example output")}: ${productName}`}
         onClick={(event) => { event.stopPropagation(); openExample() }}
       >
         <Icon name="file" />
-        <span>{label}</span>
+        <span>{label==="View example output"?t("View example output"):label}</span>
       </button>
       <dialog
         ref={dialogRef}
@@ -141,25 +143,25 @@ export function ServiceOutputExample({ productCode, productName, className = '',
       >
         <div className="service-output-example__header">
           <div>
-            <p className="service-output-example__eyebrow">Example output</p>
+            <p className="service-output-example__eyebrow">{t("Example output")}</p>
             <h2 ref={titleRef} id={`${id}-title`} tabIndex={-1}>{productName}</h2>
           </div>
-          <button type="button" className="service-output-example__close" aria-label="Close example output" onClick={closeExample}>
+          <button type="button" className="service-output-example__close" aria-label={t("Back to service")} onClick={closeExample}>
             <Icon name="cross" />
           </button>
         </div>
         <div className="service-output-example__body" aria-busy={state.status === 'loading'}>
-          <p id={`${id}-description`} className="service-output-example__notice">Sample only. Your result depends on the device and service.</p>
+          <p id={`${id}-description`} className="service-output-example__notice">{t("Sample only. Your result depends on the device and service.")}</p>
           {state.status === 'loading' || state.status === 'idle' ? (
-            <p className="service-output-example__status" role="status">Loading example output…</p>
+            <p className="service-output-example__status" role="status">{t("Loading example output…")}</p>
           ) : null}
           {state.status === 'unavailable' ? (
-            <p className="service-output-example__status" role="status">An example is not available for this service yet.</p>
+            <p className="service-output-example__status" role="status">{t("An example is not available for this service yet.")}</p>
           ) : null}
           {state.status === 'error' ? (
             <div className="service-output-example__error">
-              <p role="alert">{state.message}</p>
-              <button type="button" className="button button--secondary" onClick={() => { void loadExample() }}>Try again</button>
+              <p role="alert">{t('Try again')}</p>
+              <button type="button" className="button button--secondary" onClick={() => { void loadExample() }}>{t("Try again")}</button>
             </div>
           ) : null}
           {state.status === 'ready' && state.productCode === productCode ? (
@@ -176,7 +178,7 @@ export function ServiceOutputExample({ productCode, productName, className = '',
           ) : null}
         </div>
         <div className="service-output-example__footer">
-          <button type="button" className="button button--secondary" onClick={closeExample}>Back to service</button>
+          <button type="button" className="button button--secondary" onClick={closeExample}>{t("Back to service")}</button>
         </div>
       </dialog>
     </>

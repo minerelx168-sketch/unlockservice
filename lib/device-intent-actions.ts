@@ -1,5 +1,7 @@
 'use server'
 
+import {prefixOf} from './i18n/route-map'
+import {locales,type GeoLocale} from './geo-locales'
 import { serviceIdentifier, identifierField } from './service-identifier'
 import { redirect } from 'next/navigation'
 import { currentSession } from './auth'
@@ -75,7 +77,8 @@ export async function continueDeviceServiceAction(_: IntentState, form: FormData
   await writeDeviceIntent(imei, product.domain, product.code, email ?? undefined, product.inputType)
   const target = `/user/reports/new?product=${encodeURIComponent(product.code)}`
   if ((await currentSession())?.user.account_type === 'reseller') redirect(target)
-  redirect(crypto || guestCheckoutEnabled() ? `/checkout?product=${encodeURIComponent(product.code)}${crypto ? '&method=crypto' : ''}` : target)
+  const requested=form.get('locale') as GeoLocale;const prefix=locales.includes(requested)&&requested!=='en'?prefixOf(requested):''
+  redirect(crypto || guestCheckoutEnabled() ? `${prefix}/checkout?product=${encodeURIComponent(product.code)}${crypto ? '&method=crypto' : ''}` : target)
 }
 
 /** Explicit URL result for client checkout handlers; registration is not payment. */
