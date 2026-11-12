@@ -105,7 +105,7 @@ export function HeroPriceCheck({ unlock, check, ordering, fixedDomain, initialIm
     {fixedDomain ? null : <fieldset className="device-browse-options" disabled={pending}><legend className="visually-hidden">What would you like to do?</legend>{(['unlock', 'imei_check'] as const).map((value) => <label key={value}><input type="radio" name="browseDomain" value={value} checked={domain === value} onChange={() => { setDomain(value); clearError() }} /><span><Icon name={value === 'unlock' ? 'lock' : 'search'} />{value === 'unlock' ? 'Unlock Phone' : 'Phone Check'}</span></label>)}</fieldset>}
     <ol className="price-check-steps" aria-label="Order steps">{['Service & price', 'Your details', 'Review & pay'].map((label, index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-done={step > index || undefined}><span aria-hidden="true">{index + 1}</span><span className="price-check-step-label">{label}</span></li>)}</ol>
     {products.length ? <>
-      <ServicePicker
+      <ServicePicker moreHref={domain === 'unlock' ? '/services/unlock/more' : undefined}
         key={domain}
         id="pc-service"
         triggerRef={serviceInput}
