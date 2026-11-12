@@ -23,6 +23,7 @@ const NAV: Array<{ href: string; label: string; icon: IconName; menu?: string }>
 ]
 
 type Props = {
+  articleLinks?:Record<string,string>
   isAuthenticated?: boolean
   drawerGroups: DrawerGroup[]
   drawerLinks: DrawerLink[]
@@ -40,11 +41,11 @@ type Props = {
  * header's backdrop-filter makes it the containing block for anything
  * position:fixed, which would clip the sheet to 78px.
  */
-export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks, accountSlot }: Props) {
+export function SiteHeader({ articleLinks,isAuthenticated = false, drawerGroups, drawerLinks, accountSlot }: Props) {
   const t=useCopy()
   const pathname = usePathname()
   const l=localeOf(pathname),ix=locales.indexOf(l)
-  const localized=(href:string)=>l==='en'?href:href==='/services/unlock'?paths[1][ix]:href==='/services/imei-check'?paths[0][ix]:href==='/services'||href==='/articles'?prefixOf(l):href
+  const localized=(href:string)=>l==='en'?href:href==='/services/unlock'?paths[1][ix]:href==='/services/imei-check'?paths[0][ix]:href==='/articles'?prefixOf(l)+'/articles':href==='/services'?prefixOf(l):href
   const navLabel=(href:string)=>href.includes('unlock')?t("Unlock"):href.includes('imei-check')?t("Phone Check"):href==='/articles'?t("Guides"):href==='/contact'?t("Contact us"):t("Track order")
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [])
@@ -100,7 +101,7 @@ export function SiteHeader({ isAuthenticated = false, drawerGroups, drawerLinks,
           </nav>
 
           <div className="header-actions">
-            <LocaleSwitch/>
+            <LocaleSwitch articleLinks={articleLinks}/>
             <ThemeToggle />
             <Link className="icon-action header-help" href="/support" aria-label={t("Support")}>
               <Icon name="question" />

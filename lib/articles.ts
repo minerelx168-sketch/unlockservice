@@ -19,7 +19,11 @@ export type ArticleBlock =
 
 export type ArticleFaq = { question: string; answer: string }
 
+export const articleLocales = ['en', 'es', 'fr-ca', 'pt', 'de', 'ar'] as const
+export type ArticleLocale = typeof articleLocales[number]
 export type Article = {
+  locale?: ArticleLocale
+  translationGroup?: string
   slug: string
   /**
    * The meta title. Kept short because app/layout.tsx appends
@@ -22382,17 +22386,111 @@ const ARTICLES: Article[] = [
   },
 ]
 
-export function listArticles(): Article[] {
-  return [...ARTICLES].sort((left, right) => right.published.localeCompare(left.published))
+// Daily publishing: add an Article to ARTICLES. A translated edition may use
+// its own slug; give matching editions the same stable translationGroup.
+const sellerGuideEditions = [
+  [
+    "en",
+    "match-imei-to-seller-listing",
+    "Buying used",
+    "Match an iPhone to the seller’s IMEI report",
+    "Before paying for a used iPhone, compare the identifier on the device with the identifier on the report. A screenshot of a clean result for a different phone tells you nothing about the phone in front of you.",
+    "Compare the same identifier",
+    "Open Settings → General → About. If the listing shows IMEI2, compare it with IMEI2 on the phone rather than the first IMEI. Compare all digits privately; matching only the last four is not enough.",
+    "What if the numbers differ?",
+    "Ask which identifier was checked and request a matching report. If you cannot establish that the result belongs to this device, postpone payment."
+  ],
+  [
+    "es",
+    "comparar-imei-con-anuncio",
+    "Compra de segunda mano",
+    "Cómo comparar el IMEI de un iPhone con el informe del vendedor",
+    "Antes de pagar por un iPhone usado, comprueba que el identificador del informe coincide con el del teléfono. Una captura con un resultado favorable de otro dispositivo no demuestra nada sobre el que vas a comprar.",
+    "Compara el mismo identificador",
+    "Abre Ajustes → General → Información. Si el anuncio muestra el IMEI2, compáralo con el IMEI2 del equipo. Comprueba todos los dígitos en privado; los cuatro últimos no bastan.",
+    "¿Qué hago si los números no coinciden?",
+    "Pregunta qué identificador se consultó y pide el informe correspondiente. Aplaza el pago si no puedes vincular el resultado con ese teléfono."
+  ],
+  [
+    "fr-ca",
+    "comparer-imei-et-annonce",
+    "Achat d’occasion",
+    "Comment comparer l’IMEI d’un iPhone au rapport du vendeur",
+    "Avant de payer un iPhone d’occasion, vérifiez que le numéro du rapport correspond à celui de l’appareil. Une capture d’écran rassurante pourrait concerner un autre téléphone.",
+    "Comparez le même identifiant",
+    "Ouvrez Réglages → Général → Informations. Si l’annonce indique l’IMEI2, comparez-le à l’IMEI2 du téléphone. Vérifiez tous les chiffres en privé, pas seulement les quatre derniers.",
+    "Que faire si les numéros diffèrent?",
+    "Demandez quel identifiant a servi à la vérification et exigez le rapport correspondant. Reportez le paiement si vous ne pouvez pas associer le résultat à cet appareil."
+  ],
+  [
+    "pt",
+    "comparar-imei-com-anuncio",
+    "Compra de usados",
+    "Como comparar o IMEI do iPhone com o relatório do vendedor",
+    "Antes de pagar por um iPhone usado, confira se o identificador do relatório é o mesmo que aparece no aparelho. Uma captura de tela favorável pode se referir a outro telefone.",
+    "Compare o mesmo identificador",
+    "Abra Ajustes → Geral → Sobre. Se o anúncio informar o IMEI2, compare com o IMEI2 do aparelho. Confira todos os dígitos em particular; os quatro últimos não bastam.",
+    "E se os números forem diferentes?",
+    "Pergunte qual identificador foi consultado e peça o relatório correspondente. Adie o pagamento se não conseguir vincular o resultado ao aparelho."
+  ],
+  [
+    "de",
+    "imei-mit-angebot-vergleichen",
+    "Gebrauchtkauf",
+    "So vergleichen Sie die iPhone-IMEI mit dem Bericht des Verkäufers",
+    "Prüfen Sie vor dem Kauf eines gebrauchten iPhones, ob die Kennung im Bericht zu diesem Gerät gehört. Ein unauffälliger Screenshot kann auch von einem anderen Telefon stammen.",
+    "Dieselbe Kennung vergleichen",
+    "Öffnen Sie Einstellungen → Allgemein → Info. Nennt das Angebot die IMEI2, vergleichen Sie diese mit der IMEI2 am Gerät. Gleichen Sie alle Ziffern vertraulich ab; die letzten vier reichen nicht aus.",
+    "Was tun bei unterschiedlichen Nummern?",
+    "Fragen Sie nach der geprüften Kennung und dem passenden Bericht. Verschieben Sie die Zahlung, wenn sich das Ergebnis nicht eindeutig diesem Gerät zuordnen lässt."
+  ],
+  [
+    "ar",
+    "match-imei-to-listing",
+    "شراء هاتف مستعمل",
+    "كيف تطابق رقم IMEI في آيفون مع تقرير البائع؟",
+    "قبل دفع ثمن آيفون مستعمل، تأكد من أن الرقم في التقرير يطابق الرقم الموجود على الجهاز نفسه. فقد تكون لقطة الشاشة التي يعرضها البائع لهاتف آخر.",
+    "قارن المعرّف نفسه",
+    "افتح الإعدادات ← عام ← حول. إذا ورد IMEI2 في الإعلان، فقارنه بالرقم IMEI2 في الجهاز. تحقّق من جميع الأرقام على انفراد؛ لا تكفي مطابقة آخر أربعة أرقام.",
+    "ماذا أفعل إذا اختلف الرقمان؟",
+    "اسأل البائع عن المعرّف الذي استُخدم للفحص واطلب التقرير المطابق. أجّل الدفع إذا تعذّر التأكد من أن النتيجة تخص الجهاز المعروض."
+  ]
+] as const
+const sellerInspectionNotes: ArticleBlock[] = [
+  {kind:'h2',id:'before-the-meeting',text:'Before meeting the seller'},
+  {kind:'p',text:'Ask which phone the seller plans to bring and which identifier they used when ordering the report. If a seller has several similar phones, a mix-up is possible even when everyone is acting in good faith. Ask for the date of the check as well. A result describes the identifier submitted at that time. It is not a promise about what a carrier or a previous owner might report later.'},
+  {kind:'p',text:'There is no need to post the full identifier publicly. For an initial conversation, the seller can cover most of the number. Explain that before you hand over money you will need to see the full number on the device and compare it with the full number on the report. If the seller does not want to share it remotely, offer to do the comparison together at the meeting.'},
+  {kind:'h2',id:'at-handover',text:'At handover: use the phone you are buying'},
+  {kind:'p',text:'Start with the handset itself. Have the seller open the information screen in front of you, rather than showing you another screenshot. A number on a box, receipt or SIM tray can help explain the history of a device, but packaging can be mixed up. Keep track of whether you are reading the first IMEI or the second one. A serial number, model number and EID are different identifiers; a match on one does not settle a mismatch on another.'},
+  {kind:'p',text:'Read the digits in small groups and compare each group with the same position in the report. Then do the comparison in reverse order to catch transposed digits. If a character is unclear because a photo is blurred, ask to see the original result. Do not substitute a guessed digit or assume that two matching model names mean the two records belong to the same physical handset.'},
+  {kind:'h2',id:'interpret',text:'What a match establishes'},
+  {kind:'p',text:'A match connects the number on the report to the number you inspected. It does not establish ownership, settle an installment balance, disable Activation Lock or guarantee that another network will accept the phone. Read the actual fields included in the report. If the report covers only carrier lock status, you still have a separate question about loss or theft. Decide which questions must be answered before the sale and give yourself time to walk away if a material one remains open.'},
+]
+for (const [locale,slug,topic,title,lead,heading,body,question,answer] of sellerGuideEditions) {
+  ARTICLES.push({locale,slug,topic,title,heading:title,description:locale==="en"?"Compare the IMEI on a used iPhone with the seller’s report, distinguish IMEI from IMEI2, and decide what to ask before you pay.":lead,standfirst:lead,
+    translationGroup:'match-seller-report',published:'2026-11-12',updated:'2026-11-12',minutes:1,
+    blocks:[{kind:'h2',id:'compare',text:heading},{kind:'p',text:body},...(locale==='en'?sellerInspectionNotes:[])],faq:[{question,answer}]})
 }
 
-export function getArticle(slug: string): Article | undefined {
-  return ARTICLES.find((article) => article.slug === slug)
+export const articleIndexPath = (locale:ArticleLocale='en') => (locale==='en'?'':'/'+locale)+'/articles'
+export const articlePath = (article:Article) => articleIndexPath(article.locale)+'/'+article.slug
+export function listArticles(locale:ArticleLocale='en'): Article[] {
+  return ARTICLES.filter(article=>(article.locale??'en')===locale).sort((a,b)=>b.published.localeCompare(a.published))
 }
-
-/** Everything except the one being read, oldest last. */
-export function relatedArticles(slug: string, limit = 2): Article[] {
-  return listArticles()
-    .filter((article) => article.slug !== slug)
-    .slice(0, limit)
+export function getArticle(slug:string,locale:ArticleLocale='en') {
+  return ARTICLES.find(a=>a.slug===slug && (a.locale??'en')===locale)
+}
+export function relatedArticles(slug:string,limit=2,locale:ArticleLocale='en') {
+  return listArticles(locale).filter(a=>a.slug!==slug).slice(0,limit)
+}
+export function articleLanguages(origin:string, article?:Article) {
+  const links:Record<string,string>={}
+  const tags={en:'en-US',es:'es-MX','fr-ca':'fr-CA',pt:'pt-BR',de:'de-AT',ar:'ar'}
+  for(const l of articleLocales){
+    const edition=article?.translationGroup && ARTICLES.find(a=>a.translationGroup===article.translationGroup && (a.locale??'en')===l)
+    if(article && !edition) continue
+    links[tags[l]]=origin+(edition?articlePath(edition):articleIndexPath(l))
+    if(l==='en')links['en-CA']=links['x-default']=links[tags[l]]
+  }
+  return links
 }

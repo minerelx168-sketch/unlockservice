@@ -13,7 +13,7 @@ function actionHarness(guestEnabled = false, cryptoEnabled = false, priceCents =
   const writes: unknown[][] = []
   const products = [{ productCode: 'UNLOCK_ACTIVE', status: 'available' }, { productCode: 'UNLOCK_PAUSED', status: 'coming_soon' }]
   const moduleRecord = { exports: {} as { showUnlockServicesAction: (state: object, form: FormData) => Promise<{ error?: string }>; continueDeviceServiceAction: (state: object, form: FormData) => Promise<{ error?: string }>; prepareSmallCardAccountAction: (value: {productCode:string;imei:string;email:string;domain:'unlock'|'imei_check'})=>Promise<{error?:string;url?:string}> } }
-  const realRequire = createRequire(import.meta.url)
+  const realRequire = createRequire(new URL('../lib/device-intent-actions.ts',import.meta.url))
   const mocks: Record<string, unknown> = {
     'next/navigation': { redirect: (url: string) => { throw new Error(`REDIRECT:${url}`) } },
     './auth': { currentSession: async () => accountType ? { user: { account_type: accountType } } : null },

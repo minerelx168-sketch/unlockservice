@@ -6,7 +6,7 @@ import type { DrawerGroup, DrawerLink } from './site-drawer'
 import { SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { logoutAction } from '@/lib/actions'
-import { listArticles } from '@/lib/articles'
+import { articleLanguages,getArticle,listArticles } from '@/lib/articles'
 import { currentSession } from '@/lib/auth'
 import { CARRIERS } from '@/lib/catalog'
 import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
@@ -30,6 +30,10 @@ async function chromeData() {
 export async function PublicHeader() {
   const { isAuthenticated, reports } = await chromeData()
 
+  const path=(await headers()).get('x-continuation-path')?.split('?')[0]??'/'
+  const match=path.match(/^\/(?:(es|fr-ca|pt|de|ar)\/)?articles(?:\/([^/]+))?\/?$/)
+  const current=match?.[2]?getArticle(match[2],match[1] as Parameters<typeof getArticle>[1]):undefined
+  const articleLinks=match && (!match[2]||current)?articleLanguages('',current):undefined
   const drawerGroups: DrawerGroup[] = [
     {
       id: 'unlock',
@@ -77,7 +81,7 @@ export async function PublicHeader() {
   ) : null
 
   return (
-    <SiteHeader
+    <SiteHeader articleLinks={articleLinks}
       isAuthenticated={isAuthenticated}
       drawerGroups={drawerGroups}
       drawerLinks={drawerLinks}

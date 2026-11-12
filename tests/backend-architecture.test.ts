@@ -270,7 +270,7 @@ test('redesigned services hub keeps Unlock and Phone Check catalogs on separate 
   assert.match(buttons, /\.button--secondary/)
   assert.match(header, /href: '\/services\/unlock', label: 'Unlock Service'/)
   assert.match(header, /href: '\/services\/imei-check', label: 'Phone Check'/)
-  assert.match(header, /className="button button--primary" href="\/services"/)
+  assert.match(header, /className="button button--primary" href=\{localized\("\/services"\)\}/)
 
   assert.match(servicesHub, /href="\/services\/imei-check"/)
   assert.match(servicesHub, /href="\/services\/unlock"/)

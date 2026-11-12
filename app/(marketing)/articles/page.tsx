@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
-import { listArticles } from '@/lib/articles'
+import { articleLanguages,listArticles } from '@/lib/articles'
 import { publicOrigin } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: 'Guides to IMEI checks and network unlocking',
   description:
     'Plain guides to what an IMEI check can tell you, what a network unlock does and does not do, and the checks worth running before buying a used phone.',
-  alternates: { canonical: '/articles' },
+  alternates: { canonical: '/articles',languages:articleLanguages(publicOrigin()) },
   openGraph: {
     type: 'website',
     url: `${publicOrigin()}/articles`,

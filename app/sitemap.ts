@@ -2,7 +2,7 @@ import {toolList} from '@/lib/geo-tools'
 import {clusters} from '@/lib/landing-locales'
 import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import type { MetadataRoute } from 'next'
-import { listArticles } from '@/lib/articles'
+import { articleLocales,articleIndexPath,articlePath,articleLanguages,listArticles } from '@/lib/articles'
 import { unlockOrderingEnabled } from '@/lib/provider'
 import { publicOrigin } from '@/lib/site'
 
@@ -23,10 +23,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${origin}/services/unlock`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/services/imei-check`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${origin}/check`, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${origin}/articles`, changeFrequency: 'weekly', priority: 0.7 },
+    ...articleLocales.map(locale=>({url:origin+articleIndexPath(locale),alternates:{languages:articleLanguages(origin)},priority:0.7})),
     ...(['/services/unlock/canada','/articles/used-iphone-imei-unlock-legitimacy-checklist','/articles/rogers-telus-sim-locked-us-iphone-in-canada'].map(path => ({url:origin+path}))),
-    ...listArticles().filter(a=>a.slug!=='imei-unlock-iphone-service-checklist').map((article) => ({
-      url: `${origin}/articles/${article.slug}`,
+    ...articleLocales.flatMap(l=>listArticles(l)).filter(a=>a.locale && a.locale!=='en' || a.slug!=='imei-unlock-iphone-service-checklist').map((article) => ({
+      url: origin+articlePath(article),
+      ...(article.translationGroup?{alternates:{languages:articleLanguages(origin,article)}}:{}),
       lastModified: new Date(`${article.updated}T00:00:00Z`),
       changeFrequency: 'monthly' as const,
       priority: 0.7,

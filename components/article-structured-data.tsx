@@ -1,5 +1,6 @@
 import { serializeJsonLd } from '@/lib/json-ld'
-import type { Article } from '@/lib/articles'
+import { articleIndexPath,articlePath,type Article } from '@/lib/articles'
+import {articleLabels} from '@/lib/article-labels'
 import { publicOrigin } from '@/lib/site'
 
 /**
@@ -12,7 +13,8 @@ import { publicOrigin } from '@/lib/site'
  */
 export function ArticleStructuredData({ article }: { article: Article }) {
   const origin = publicOrigin()
-  const url = `${origin}/articles/${article.slug}`
+  const locale=article.locale??"en",labels=articleLabels[locale]
+  const url = origin+articlePath(article)
 
   const graph: Record<string, unknown>[] = [
     {
@@ -29,7 +31,7 @@ export function ArticleStructuredData({ article }: { article: Article }) {
       description: article.description,
       datePublished: article.published,
       dateModified: article.updated,
-      inLanguage: 'en',
+      inLanguage: locale==='fr-ca'?'fr-CA':locale,
       mainEntityOfPage: { '@type': 'WebPage', '@id': url },
       /* The organisation is the author. Inventing a person with
          credentials to satisfy a checklist is exactly the kind of signal
@@ -41,8 +43,8 @@ export function ArticleStructuredData({ article }: { article: Article }) {
       '@type': 'BreadcrumbList',
       '@id': `${url}#breadcrumb`,
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: origin },
-        { '@type': 'ListItem', position: 2, name: 'Guides', item: `${origin}/articles` },
+        { '@type': 'ListItem', position: 1, name: labels[0], item: locale==='en'?origin:origin+'/'+locale },
+        { '@type': 'ListItem', position: 2, name: labels[1], item: origin+articleIndexPath(locale) },
         { '@type': 'ListItem', position: 3, name: article.title, item: url },
       ],
     },

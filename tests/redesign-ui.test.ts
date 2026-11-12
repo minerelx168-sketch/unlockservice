@@ -85,7 +85,7 @@ test('the two service links carry a menu built from the same groups as the drawe
   assert.match(header, /menu: 'unlock'/)
   assert.match(header, /menu: 'check'/)
   assert.match(header, /<NavMenu/)
-  assert.match(header, /href="\/support" aria-label="Help centre"/)
+  assert.match(header, /href="\/support" aria-label=\{t\("Support"\)\}/)
   const menu = read('components/nav-menu.tsx')
   assert.match(menu, /aria-expanded=\{open\}/)
   assert.match(menu, /event\.key !== 'Escape'/)
