@@ -1,3 +1,4 @@
+import { ArticleCarrierWidget } from '@/components/article-carrier-widget'
 import { ServiceDirectory } from '@/components/service-directory'
 import { SERVICE_SPOKES } from '@/lib/service-spokes'
 import type { Metadata } from 'next'
@@ -73,6 +74,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="article-head">
             <h1 className="t-section">{article.heading}</h1>
             <p className="t-lead">{article.standfirst}</p>
+            {slug === 'how-to-find-carrier-on-iphone-before-unlock' && <ArticleCarrierWidget />}
             <p className="t-micro article-meta">
               By <Link href="/contact">iUnlockMobile</Link> · Published {readable(article.published)}
               {article.updated !== article.published ? ` · Updated ${readable(article.updated)}` : ''} ·{' '}
@@ -85,6 +87,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <section className="section">
         <div className="shell article-layout">
           <div className="article-content">
+            {slug==='how-to-find-carrier-on-iphone-before-unlock' && <p><Link href="/services/imei-check/apple-carrier-lock-status">Compare free checks with Lite and Pro carrier reports, see current prices, or enter your IMEI.</Link></p>}
             <ArticleBody blocks={article.blocks} />
             <ServiceDirectory
               services={SERVICE_SPOKES.filter(service => service.domain === 'imei_check' || /\batt\b|at&t/i.test(`${article.slug} ${article.topic}`))}

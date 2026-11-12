@@ -40,7 +40,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
         if (!/^[a-f0-9-]{32,64}$/i.test(key.current)) key.current=crypto.randomUUID()
         try { sessionStorage.setItem(storageKey,JSON.stringify({key:key.current,expires:Date.now()+1800000})) } catch { /* Server request key still protects retries. */ }
       }
-      trackFunnelEvent('begin_checkout', { service_category: product.domain, value: (isCrypto ? product.priceCents : cardQuote.totalCents) / 100, currency: 'USD', payment_method: method })
+      trackFunnelEvent('begin_checkout', { ...(product.code==='APPLE_CARRIER_LITE'?{item_id:'444'}:{}), service_category: product.domain, value: (isCrypto ? product.priceCents : cardQuote.totalCents) / 100, currency: 'USD', payment_method: method })
       const analyticsContext = await paymentAnalyticsContext()
       const response = await fetch(isCrypto ? '/api/checkout/crypto' : '/api/checkout/guest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         productCode: product.code, imei, email: deliveryEmail, expectedPriceCents: product.priceCents, requestKey: key.current, acceptedTerms: true, analyticsContext, ...(isCrypto ? { routeId } : {}),

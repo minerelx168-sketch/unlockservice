@@ -1655,11 +1655,11 @@ test('every guide is indexable, internally consistent, and links somewhere real'
   const sitemap = (await import('../app/sitemap')).default()
   const urls = new Set(sitemap.map((entry) => entry.url))
   for (const article of all) {
-    assert.ok(
-      [...urls].some((url) => url.endsWith(`/articles/${article.slug}`)),
-      `${article.slug} is missing from the sitemap`,
-    )
+    const canonical = article.slug === 'imei-unlock-iphone-service-checklist'
+      ? 'used-iphone-imei-unlock-legitimacy-checklist' : article.slug
+    assert.ok([...urls].some(url => url.endsWith('/articles/' + canonical)), canonical + ' is missing from the sitemap')
   }
+  assert.ok(![...urls].some(url => url.endsWith('/articles/imei-unlock-iphone-service-checklist')), 'redirected slug must not appear in the sitemap')
   assert.ok([...urls].some((url) => url.endsWith('/articles')), 'the index is missing from the sitemap')
 })
 
