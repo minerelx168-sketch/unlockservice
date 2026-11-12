@@ -196,7 +196,7 @@ export default function HomePage() {
 
             <span className="hero-chip">
               <Icon name="shieldCheck" strokeWidth={2} />
-              Independent IMEI Diagnostics &amp; Clean Carrier Unlock Service
+              iUnlockmobile since 2016
             </span>
 
             <h1 className="t-hero">
