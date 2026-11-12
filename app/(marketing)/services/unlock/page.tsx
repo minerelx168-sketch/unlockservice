@@ -41,7 +41,7 @@ export default async function UnlockServicesPage({ searchParams }: { searchParam
             <span className="hero-chip"><Icon name="lock" />Network unlock services</span>
             <h1 className="service-entry-title">Keep your phone.<br /><span className="accent">Explore your options.</span></h1>
             <p className="t-lead">Choose the network your phone is locked to. See the price and delivery time first, then enter the required device details and your email to review your order. Choose card or crypto at checkout.</p>
-            <p><Link className="link-arrow" href="/services/unlock/us">US customer? View available US carrier services →</Link></p>
+            <p><Link className="link-arrow" href="/services/unlock/us">US carrier services →</Link> · <Link className="link-arrow" href="/services/unlock/canada">Canadian carrier services →</Link></p>
             <ul className="service-micro" aria-label="Unlock facts">
               <li><Icon name="bolt" />Remote service</li>
               <li><Icon name="wallet" />Pay per order</li>
