@@ -16,7 +16,8 @@
     "notifications:deliver": "tsx scripts/deliver-order-notifications.ts",
     "ads:deliver": "node --import tsx scripts/deliver-ads-conversions.ts",
     "ads:status": "node --import tsx scripts/deliver-ads-conversions.ts --status",
-    "indexnow:ping": "node scripts/ping-indexnow.mjs"
+    "indexnow:ping": "node scripts/ping-indexnow.mjs",
+    "geo:verify-bots": "node scripts/verify-ai-crawlers.mjs"
   },
   "dependencies": {
     "@types/better-sqlite3": "^9.6.0",
