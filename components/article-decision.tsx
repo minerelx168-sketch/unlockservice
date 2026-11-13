@@ -3,6 +3,9 @@ import { decisionsA } from '@/lib/guide-decisions-a'
 import { decisionsB } from '@/lib/guide-decisions-b'
 import { decisionsC } from '@/lib/guide-decisions-c'
 import { editionDecisions } from '@/lib/article-editions-evidence'
+import {readerQuestions} from '@/lib/article-reader-questions'
+import {ArticleOptionalQuote} from './article-optional-quote'
+import {ArticleObservation} from './article-observation'
 import styles from '@/styles/article-carrier-widget.module.css'
 
 const labels: Record<ArticleLocale, readonly [string,string,string,string]> = {
@@ -16,12 +19,16 @@ const labels: Record<ArticleLocale, readonly [string,string,string,string]> = {
 type Steps = readonly [string,string,string]
 type Source = {href:string;label:string}
 const decisions: Record<string,Steps> = {...decisionsA,...decisionsB,...decisionsC,...editionDecisions}
-export function DecisionPanel({steps,locale='en',sources}:{steps:Steps;locale?:ArticleLocale;sources:Source[]}) {
+export function DecisionPanel({slug,steps,locale='en',sources}:{slug:string;steps:Steps;locale?:ArticleLocale;sources:Source[]}) {
   const [title,...terms]=labels[locale]
-  return <section className={'article-decision '+styles.decision} aria-labelledby="article-decision-title">
-    <h2 id="article-decision-title">{title}</h2>
-    <dl>{steps.map((step,i)=><div key={terms[i]}><dt>{terms[i]}</dt><dd>{step}</dd></div>)}</dl>
+  return <section className={'article-decision article-evidence-preview '+styles.decision} aria-labelledby="article-decision-title">
+    <h2 id="article-decision-title">{readerQuestions[slug] ?? title}</h2>
+    <div className={'table-wrap '+styles.evidenceTable}><table aria-labelledby="article-decision-title"><tbody>
+      {steps.map((step,i)=><tr key={terms[i]}><th scope="row">{terms[i]}</th><td>{step}</td></tr>)}
+    </tbody></table></div>
     {sources.length>0 && <p>{sources.map((s,i)=><span key={s.href}>{i>0?' · ':''}<a href={s.href}>{s.label}</a></span>)}</p>}
+    <ArticleObservation slug={slug}/>
+    <ArticleOptionalQuote slug={slug} locale={locale}/>
   </section>
 }
 export function ArticleDecision({article}:{article:Article}) {
@@ -29,5 +36,5 @@ export function ArticleDecision({article}:{article:Article}) {
   if(!steps) return null
   const refs=article.blocks.flatMap(b=>b.kind==='p'?b.links??[]:[]).filter(s=>s.href.startsWith('https://') && !s.href.includes('iunlockmobile.com'))
   const sources=refs.filter((s,i)=>refs.findIndex(x=>x.href===s.href)===i).slice(0,2)
-  return <DecisionPanel steps={steps} locale={article.locale} sources={sources}/>
+  return <DecisionPanel slug={article.slug} steps={steps} locale={article.locale} sources={sources}/>
 }

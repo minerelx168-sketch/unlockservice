@@ -5,6 +5,7 @@ Fetch public HTML without running JS, following neither checkout nor tracking li
 Discover editions from both the committed catalog and the served sitemap. No third-party requests.
 """
 import argparse
+import hashlib
 from concurrent.futures import ThreadPoolExecutor
 from html.parser import HTMLParser
 import json
@@ -79,6 +80,43 @@ def catalog():
     return {path: (heading, alts) for path, heading, alts in data if path != OLD}
 
 
+
+# Fingerprint editorial text, source/anchor links, and topic headings on the two
+# controls. Exclude prices, availability, order UI, experiment assignments and
+# samples whose content can vary with the live product catalogue.
+def control_signature(path, doc):
+    output = [text(doc.find('.//h1')), text(cls(doc, 't-lead')[0])]
+    def include(el):
+        if el is None:
+            return
+        output.append(text(el))
+        output.extend([(text(a), a.get('href')) for a in el.iter('a')])
+    if path == CONTROL:
+        for name in ('article-body', 'article-faq'):
+            for el in cls(doc, name):
+                include(el)
+        card = next((el for el in cls(doc, 'requirements-card')
+                     if el.find(f".//a[@href='{SERVICE}#interpret-carrier-policy']") is not None), None)
+        if card is not None:
+            include(card)
+    else:
+        for s in doc.iter('section'):
+            h = s.find('h2')
+            if h is None:
+                continue
+            if s.get('id') in ('interpret-carrier-policy','faq') or text(h) in (
+                    'Start with the carrier’s free route', 'Four checks before paying a seller'):
+                include(s)
+            elif text(h) == 'Which check answers your question?':
+                # Only the editorial methods comparison; the second table contains changing prices.
+                include(h)
+                include(s.find('.//table'))
+            elif text(h) == 'How to read a carrier report':
+                include(h)
+                include(s.find('p'))
+    return hashlib.sha256(json.dumps(output, ensure_ascii=False).encode()).hexdigest()
+
+
 def audit(base, path, meta):
     doc = Document(fetch(base, path)).root
     errors = []
@@ -119,28 +157,73 @@ def audit(base, path, meta):
         if alts:
             actual = {l.get('hreflang'):urlsplit(l.get('href','')).path for l in doc.findall('.//link[@hreflang]')}
             need(all(actual.get(tag) == target for tag, target in alts.items()), 'catalog translation links')
-    tables = [e for e in doc.iter('table') if e.find('.//th') is not None and e.find('.//td') is not None]
-    need(bool(tables), 'semantic comparison table')
+    previews = cls(doc, 'article-evidence-preview')
+    preview_tables = {table for p in previews for table in p.iter('table')}
+    # The introductory card must supplement, not replace, the substantive body table.
+    bodies = cls(doc, 'article-body') if meta else [doc]
+    need(any(t not in preview_tables and t.find('.//th') is not None and t.find('.//td') is not None
+             for b in bodies for t in b.iter('table')), 'separate semantic evidence table in article body')
+    if path in {CONTROL, SERVICE}:
+        # Snapshot of the two reference pages from release 259ae5f.
+        expected = {CONTROL: '965ac5ccddd12e6048120d6ab2782b413f90bb6e23a2ed4f2ab8a7d1a50c9621',
+                    SERVICE: 'f4ba6b864cb1412e027362bbf2ff21d3c117fce5fbc8c522ab7ddc7aed266382'}
+        need(control_signature(path, doc) == expected[path], 'reference editorial text, FAQ and links unchanged')
+        need(not previews and not cls(doc, 'article-decision'), 'reference retained without an editorial preview')
     ids = {e.get('id') for e in doc.iter() if e.get('id')}
     if path == CONTROL:
         need(doc.find(f".//a[@href='{SERVICE}#interpret-carrier-policy']") is not None, 'benchmark crosslink')
     if path == SERVICE:
         need({'interpret-carrier-policy','APPLE_CARRIER_LITE'} <= ids, 'benchmark report and checkout anchors')
-    signature = None
+    signature = question = None
     if path not in {CONTROL, SERVICE}:
-        panels = cls(doc,'article-decision')
-        need(len(panels) == 1, 'exactly one editorial decision guide')
-        if panels:
-            p = panels[0]
-            steps = [text(i) for i in p.iter() if i.tag in ('li','dd')]
-            need(len(steps) >= 3 and len(set(steps)) == len(steps) and all(steps), 'distinct practical steps')
-            need(any(e.get('href','').startswith('https://') and text(e) for e in p.iter('a')), 'linked evidence in decision guide')
+        need(len(previews) == 1 and len(cls(doc, 'article-decision')) == 1, 'one above-form evidence preview')
+        if previews:
+            panel = previews[0]
+            panel_headings = list(panel.iter('h2'))
+            need(len(panel_headings) == 1, 'one specific reader question')
+            if panel_headings:
+                question = text(panel_headings[0])
+                need(bool(re.search(r'[?؟]$', question)), 'reader-facing question in the current language')
+                need(panel.get('aria-labelledby') == panel_headings[0].get('id') and bool(panel.get('aria-labelledby')),
+                     'preview labelled by its question')
+            tables = list(panel.iter('table'))
+            need(len(tables) == 1, 'one compact comparison table in preview')
+            if tables:
+                t = tables[0]
+                rows = t.findall('./tbody/tr')
+                need(2 <= len(rows) <= 5, 'two to five evidence rows in preview')
+                cells = [[el for el in r if el.tag in ('th','td')] for r in rows]
+                heads = t.findall('./thead/tr/th')
+                need(bool(heads) or all(row and row[0].tag == 'th' for row in cells), 'labelled evidence rows or columns')
+                need(all(len(row) >= 2 and all(text(e) for e in row) for row in cells), 'evidence cells with meaning')
+                signature = tuple(' '.join(text(el) for el in row) for row in cells)
+                need(len(set(signature)) == len(signature), 'distinct checks or evidence in preview')
+            need(any(external_source(a) for a in panel.iter('a')), 'linked external evidence in preview')
             if lead:
                 elements = list(doc.iter())
-                need(elements.index(p) > elements.index(lead[0]), 'answer precedes decision guide')
-            need(all(e.tag != 'form' for e in p.iter()), 'editorial panel separate from checkout')
-            signature = tuple(steps)
-    return errors, signature
+                element_idx = {el:i for i,el in enumerate(elements)}
+                need(element_idx[lead[0]] < element_idx[panel], 'answer comes before preview')
+                # Some checkout variants use a link and others a form; the widget can also be offline.
+                if meta:
+                    containers = cls(doc, 'article-head')
+                    need(any(panel in c.iter() for c in containers), 'preview inside article header')
+                else:
+                    containers = list(doc.iter('article'))
+                panel_nodes = set(panel.iter())
+                widgets = [n for c in containers if panel in c.iter() for n in c.iter()
+                           if n not in panel_nodes and
+                           (n.tag == 'form' or 'hero-panel' in (n.get('class') or '').split()
+                            or n.get('data-cro')=='CRO-01' or n.get('id')=='quick-carrier-title')]
+                need(all(element_idx[panel] < element_idx[w] for w in widgets), 'preview before order widget')
+            need(not list(panel.iter('form')), 'editorial preview is separate from checkout')
+    return errors, signature, question
+
+
+def external_source(a):
+    target = urlsplit(a.get('href', ''))
+    host = target.hostname or ''
+    return target.scheme == 'https' and bool(host) and not (host == 'iunlockmobile.com' or
+           host.endswith('.iunlockmobile.com')) and bool(text(a))
 
 
 def main():
@@ -162,16 +245,21 @@ def main():
         try:
             return p, *audit(base,p,records.get(p))
         except Exception as e:
-            return p,[str(e)],None
-    signatures = {}
+            return p,[str(e)],None,None
+    signatures, questions = {}, {}
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
-        for path, issues, sig in pool.map(visit, sorted(paths)):
+        for path, issues, sig, question in pool.map(visit, sorted(paths)):
             errors.extend(f'{path}: {e}' for e in issues)
+            if question:
+                key = ' '.join(question.casefold().split())
+                if key in questions:
+                    errors.append(f'{path}: repeats the focused question at {questions[key]}')
+                questions[key] = path
             if sig is not None:
                 if sig in signatures:
                     errors.append(f'{path}: repeated full decision guide from {signatures[sig]}')
                 signatures[sig] = path
-    print(f'{len(paths)-1} canonical articles; {len(signatures)} distinct decision guides; service control + legacy redirect; {len(errors)} issues')
+    print(f'{len(paths)-1} canonical articles; {len(questions)} unique reader questions; {len(signatures)} distinct evidence previews; protected article/service + legacy redirect; {len(errors)} issues')
     for error in errors:
         print(error)
     return int(bool(errors))

@@ -67,12 +67,12 @@ export function CarrierGuide({id,children,product}:{id:GuideKey;product?:string;
  const schema={'@context':'https://schema.org','@graph':[{'@type':'FAQPage','@id':url+'#faq',mainEntity:faq},...available.map(p=>{const sid=PROVIDER_PRODUCTS.find(x=>x.productCode===p.productCode)?.serviceId;return {'@type':'Product','@id':url+'#'+p.productCode,name:p.name,...(sid?{sku:itemIdFor(sid)}:{}),brand:{'@type':'Brand',name:'iUnlockMobile'},offers:{'@type':'Offer',price:(p.priceCents/100).toFixed(2),priceCurrency:'USD',url:url+'#'+p.productCode,availability:'https://schema.org/InStock',hasMerchantReturnPolicy:merchantReturnPolicy(origin)}}})]}
  return <article className={"section "+s.page}><div className="shell"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
  <nav className="service-breadcrumb"><Link href="/services">Services</Link><span>/</span>{canada?'Canada':'United States'}</nav><header className="service-hero-copy"><span className="hero-chip">{canada?'Canada':'United States'} · iPhone carrier guide</span><h1 className="service-entry-title">{g.title}</h1><p className="t-lead">{g.intro}</p></header>
- {id === 'used' && <DecisionPanel steps={[
+ {id === 'used' && <DecisionPanel slug="used-iphone-imei-unlock-legitimacy-checklist" steps={[
    'Ask the seller to erase the iPhone and show that setup can continue without the previous owner’s account.',
    'A clean blocklist check does not prove that Activation Lock is off or that the seller has paid the carrier.',
    'If setup requests the seller’s credentials, have them remove the device from their account before handing over payment.',
  ]} sources={[{label:'Apple’s used iPhone buying checklist',href:'https://support.apple.com/en-us/104999'}]}/>}
- {id === 'sim' && <DecisionPanel steps={[
+ {id === 'sim' && <DecisionPanel slug="rogers-telus-sim-locked-us-iphone-in-canada" steps={[
    'Read Carrier Lock on the handset, then check the purchase record to see whether a US or Canadian carrier supplied it.',
    'A Canadian network name while roaming identifies the network serving your line, not who can release an imported handset.',
    'If the device is restricted, contact the supplying carrier; if it is unrestricted, ask the Canadian provider to check activation for that model.',

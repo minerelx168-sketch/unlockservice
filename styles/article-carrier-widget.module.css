@@ -4,4 +4,4 @@
 
 .decision{width:100%;max-width:68ch;margin:1rem 0;padding:clamp(1rem,3vw,1.5rem);border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink);text-align:start}
 .decision h2{font-size:1.15rem;margin:0 0 .8rem;color:var(--ink-strong)}
-.decision dl{display:grid;gap:.75rem;margin:0}.decision dt{font-weight:700}.decision dd{margin:0;line-height:1.55}.decision p{margin:1rem 0 0;font-size:.9rem;overflow-wrap:anywhere}
+.evidenceTable{width:100%;margin:0}.evidenceTable table{width:100%;min-width:0;border-collapse:collapse}.evidenceTable th,.evidenceTable td{text-align:start;vertical-align:top;padding:.6rem .5rem;line-height:1.5;overflow-wrap:anywhere}.evidenceTable th{width:29%;font-weight:700}.evidenceTable tr+tr{border-top:1px solid var(--line-strong)}.decision p{margin:1rem 0 0;font-size:.9rem;overflow-wrap:anywhere}
