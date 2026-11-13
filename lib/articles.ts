@@ -47,6 +47,311 @@ export type Article = {
 const ARTICLES: Article[] = [
 
   {
+    "locale": "en",
+    "slug": "iphone-model-number-lookup-carrier-lock",
+    "title": "iPhone Model Number Lookup: LL/A vs A2849",
+    "heading": "iPhone model number lookup: what does LL/A tell a used buyer?",
+    "description": "Compare the part number, A-number and Carrier Lock screen on a used iPhone. Find out when you need an IMEI lookup to identify the locking carrier.",
+    "standfirst": "An iPhone model number lookup identifies the hardware you are buying. A part number ending in LL/A cannot tell you which carrier locked the phone. Tap Model Number in Settings to reveal the A-number, check Carrier Lock separately, and use an IMEI carrier report if the locking network is unknown.",
+    "topic": "Buying an imported iPhone",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Ask for the A-number when the shape of the SIM tray matters.",
+          "Read Carrier Lock on the handset before choosing a plan.",
+          "Look up the locking carrier only if the restriction is present and its source is unclear."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "read-both-numbers",
+        "text": "Why do I see LL/A where Apple lists an A-number?"
+      },
+      {
+        "kind": "p",
+        "text": "Apple puts two identifiers behind the same label. Open the About screen and the first value is the part number, which can end in LL/A. Tap that value once to display the hardware model number, then look up that number in Apple’s model directory.",
+        "links": [
+          {
+            "label": "Apple’s guide to the About screen",
+            "href": "https://support.apple.com/guide/iphone/get-information-about-your-iphone-iph3dd5fc7e/ios"
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "items": [
+          "Open Settings, then General, then About.",
+          "Find Model Number. Tap its value and record the A-number.",
+          "Scroll to Carrier Lock. Read that field independently of the model and the network name."
+        ],
+        "ordered": true
+      },
+      {
+        "kind": "h2",
+        "id": "compare-evidence",
+        "text": "Which number answers which buying question?"
+      },
+      {
+        "kind": "p",
+        "text": "Start with the decision you need to make. A buyer bringing a physical SIM needs the regional hardware specification. A buyer choosing a different network needs the current lock status. Two phones with the same A-number can give different answers to that second question."
+      },
+      {
+        "kind": "table",
+        "head": [
+          "What you have",
+          "What it identifies",
+          "What to check next"
+        ],
+        "rows": [
+          [
+            "Part number ending in LL/A",
+            "Apple product configuration",
+            "Tap it to reveal the A-number."
+          ],
+          [
+            "A2849 on iPhone 15 Pro Max",
+            "US and Puerto Rico variant, without a physical SIM tray",
+            "Confirm eSIM support for your intended plan."
+          ],
+          [
+            "A3105 on iPhone 15 Pro Max",
+            "Variant sold in Canada and Mexico among other markets, with a nano-SIM tray",
+            "Check the actual handset and its lock status."
+          ],
+          [
+            "Carrier Lock in iOS",
+            "Whether another carrier can be used",
+            "If restricted, establish which carrier can authorize release."
+          ],
+          [
+            "IMEI or IMEI2",
+            "An individual device radio identity",
+            "Use the identifier requested by the carrier or report."
+          ]
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "For example, a seller offers an iPhone 15 Pro Max for use with your existing nano-SIM. If Settings shows A2849, even an unlocked handset will need an eSIM plan. If it shows A3105, the tray answers the physical fit question. Carrier Lock still decides whether a different provider’s SIM is allowed.",
+        "links": [
+          {
+            "label": "Apple’s model and SIM tray directory",
+            "href": "https://support.apple.com/en-us/108044"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "identify-carrier",
+        "text": "What if the hardware fits but the iPhone says SIM locked?"
+      },
+      {
+        "kind": "p",
+        "text": "Ask the seller for the original carrier or purchase record. If that information is missing, choose an IMEI report that covers activation policy and locking network. A carrier name on the current line identifies a service connection and can differ from the network responsible for unlocking."
+      },
+      {
+        "kind": "h3",
+        "id": "read-policy",
+        "text": "How should I read a policy result?"
+      },
+      {
+        "kind": "p",
+        "text": "Read the field label before contacting a carrier. An original carrier describes the sale or initial policy. A Next Tether Policy, when supplied, concerns the policy expected on activation. If the report names several networks or returns an unknown policy, ask for clarification against that IMEI before filing a request.",
+        "links": [
+          {
+            "label": "Apple’s instructions for verifying an unlock",
+            "href": "https://support.apple.com/en-us/109316"
+          },
+          {
+            "label": "Compare Apple carrier and lock-status report fields",
+            "href": "/services/imei-check/apple-carrier-lock-status"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "If you have the A-number and still need the locking network, compare the carrier fields included in each IMEI report.",
+        "label": "Browse IMEI reports",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does LL/A mean my used iPhone is locked to AT&T?",
+        "answer": "No. Two handsets can share the same part number and have different carrier histories. Open the About screen to read Carrier Lock. If a restriction appears, ask for the purchase record or identify the locking network through an IMEI carrier report."
+      },
+      {
+        "question": "Can I put my physical SIM in an unlocked A2849?",
+        "answer": "The A2849 version of the iPhone 15 Pro Max has no nano-SIM tray. Ask your intended provider whether it can issue an eSIM for that handset on your particular plan. An unlock changes carrier eligibility, while the physical tray depends on the hardware."
+      },
+      {
+        "question": "Can the first eight digits of my IMEI identify the carrier?",
+        "answer": "The first eight digits form the Type Allocation Code, or TAC, which identifies a device type. Many handsets share it. For the lock on one particular handset, read its Carrier Lock field or use its full IMEI privately for a carrier policy lookup."
+      },
+      {
+        "question": "The seller shows No SIM restrictions. Do I still need the original carrier?",
+        "answer": "For the carrier lock question, that result on the handset is sufficient under Apple’s instructions. If you plan to import the phone, give the destination provider the hardware model and ask whether your plan supports the device and its SIM format."
+      }
+    ],
+    "published": "2026-11-13",
+    "updated": "2026-11-13",
+    "minutes": 4
+  },
+  {
+    "locale": "es",
+    "slug": "consultar-imei-iphone-importado-mexico",
+    "title": "Consultar el IMEI de un iPhone en México",
+    "heading": "Cómo consultar el IMEI de un iPhone importado antes de comprarlo en México",
+    "description": "Checa el IMEI de un iPhone de Estados Unidos en México, interpreta el resultado de la CRT y revisa si podrás activar una eSIM con tu compañía.",
+    "standfirst": "Al consultar el IMEI de un iPhone importado en México, la CRT te dice si ese identificador tiene un reporte de robo o extravío. Para saber si podrás activar tu línea, revisa también el bloqueo de operador en el iPhone y confirma que tu compañía admita la eSIM de ese modelo.",
+    "topic": "Compra de iPhone importado",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Haz la consulta de la CRT con el IMEI del equipo que tienes enfrente.",
+          "Revisa el bloqueo de operador antes de pagar por una línea.",
+          "Si el modelo no tiene bandeja, confirma que tu plan mexicano incluya activación por eSIM."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "consulta-crt",
+        "text": "¿Qué comprueba la consulta gratuita de la CRT?"
+      },
+      {
+        "kind": "p",
+        "text": "La Comisión Reguladora de Telecomunicaciones permite consultar desde México si un IMEI figura en la lista de equipos reportados por robo o extravío. El portal admite dos consultas diarias por usuario. Guarda el resultado con su fecha y anota si revisaste el IMEI o el IMEI2.",
+        "links": [
+          {
+            "label": "Consulta oficial de la CRT",
+            "href": "https://checkimei.crt.gob.mx/CheckIMEI/"
+          },
+          {
+            "label": "Alcance y límites de la consulta",
+            "href": "https://portal.crt.gob.mx/imei"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Qué quieres saber",
+          "Dónde revisarlo",
+          "Cómo interpretar el resultado"
+        ],
+        "rows": [
+          [
+            "¿Hay reporte de robo o extravío?",
+            "Consulta de IMEI de la CRT",
+            "El resultado corresponde al identificador consultado en ese momento."
+          ],
+          [
+            "¿Acepta una línea de otra compañía?",
+            "Configuración del iPhone, campo de bloqueo de operador",
+            "Sin restricciones de SIM indica que el equipo está desbloqueado."
+          ],
+          [
+            "¿A qué compañía solicito la liberación?",
+            "Comprobante de compra o informe de operador por IMEI",
+            "Busca la red de bloqueo identificada en los registros de activación."
+          ],
+          [
+            "¿Mi plan mexicano admite este modelo?",
+            "Área de activaciones de tu compañía",
+            "Confirma modelo, modalidad del plan y disponibilidad de eSIM."
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "equipo-importado",
+        "text": "¿Cómo reviso el equipo de Estados Unidos mientras estoy con el vendedor?"
+      },
+      {
+        "kind": "p",
+        "text": "Pídele al vendedor que abra la información del propio iPhone. Compara el identificador consultado con el que ves en pantalla y lee el campo de bloqueo de operador. Si el anuncio ofrece un teléfono para usar con chip físico, comprueba también que el modelo tenga bandeja."
+      },
+      {
+        "kind": "list",
+        "items": [
+          "Entra en Configuración, luego en General y en Información.",
+          "Ubica el IMEI. Si aparecen dos, usa exactamente el identificador que pide cada consulta.",
+          "Busca Bloqueo de operador y lee el resultado completo.",
+          "Toca el número de pieza para ver el modelo que empieza con A. Confírmalo con tu compañía."
+        ],
+        "ordered": true
+      },
+      {
+        "kind": "p",
+        "text": "Por ejemplo, el iPhone 15 Pro Max A2849 de Estados Unidos se activa por eSIM. Aunque el vendedor muestre una consulta sin reporte y el equipo esté liberado, necesitarás que tu compañía pueda activar tu plan en ese modelo.",
+        "links": [
+          {
+            "label": "Identifica el modelo con Apple",
+            "href": "https://support.apple.com/es-mx/108044"
+          },
+          {
+            "label": "Revisa el bloqueo de operador",
+            "href": "https://support.apple.com/es-mx/109316"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "bloqueo-origen",
+        "text": "¿A quién acudo si el IMEI sale sin reporte pero el iPhone sigue bloqueado?"
+      },
+      {
+        "kind": "p",
+        "text": "Si el equipo marca bloqueo de operador, pide al vendedor el comprobante donde figure la compañía de origen. Si falta ese dato, un informe de operador por IMEI puede identificar la red que aplicó la restricción. La solicitud de liberación corresponde a esa compañía."
+      },
+      {
+        "kind": "h3",
+        "id": "att-estados-unidos",
+        "text": "Si el comprobante dice AT&T de Estados Unidos"
+      },
+      {
+        "kind": "p",
+        "text": "Revisa los requisitos en el portal estadounidense de AT&T antes de iniciar la solicitud. Que tu línea mexicana también lleve el nombre AT&T no identifica quién vendió ese teléfono. Si el campo ya indica que está liberado, dirige la consulta al área de activación de eSIM de tu compañía mexicana.",
+        "links": [
+          {
+            "label": "Portal de liberación de AT&T en Estados Unidos",
+            "href": "https://www.att.com/deviceunlock/"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "¿El iPhone marca bloqueo y el vendedor desconoce la compañía de origen? Revisa qué datos incluye el informe antes de ingresar el IMEI.",
+        "label": "Consultar el operador de mi iPhone",
+        "href": "/es/checar-imei-iphone"
+      }
+    ],
+    "faq": [
+      {
+        "question": "¿Un IMEI sin reporte en México quiere decir que el iPhone ya está liberado?",
+        "answer": "Son verificaciones distintas. La CRT consulta reportes de robo o extravío asociados al identificador. En el propio iPhone puedes revisar el bloqueo de operador. Si aparece sin restricciones de SIM, el siguiente paso es confirmar la compatibilidad del modelo con tu plan."
+      },
+      {
+        "question": "¿Qué número ingreso si mi iPhone muestra IMEI, IMEI2 y EID?",
+        "answer": "Usa el IMEI del equipo que quieras consultar y conserva la etiqueta junto al resultado. Si revisaste el IMEI2, deja constancia de ello. El EID identifica el componente de eSIM y no sustituye al IMEI en la consulta de la CRT."
+      },
+      {
+        "question": "¿Puedo probar mi chip mexicano en un iPhone 15 Pro Max comprado en Estados Unidos?",
+        "answer": "Comprueba el número de modelo en Información. Si es A2849, ese iPhone carece de bandeja para un chip físico. Antes de comprarlo, pregunta a tu compañía si puede activar tu línea por eSIM y qué datos necesita para hacerlo."
+      },
+      {
+        "question": "¿Qué hago si no aparece el nombre del operador que bloqueó el iPhone?",
+        "answer": "Pide primero el comprobante de compra al vendedor. Si no identifica la red, revisa un informe por IMEI que incluya el operador de bloqueo cuando esté disponible. Si el resultado es indeterminado, acláralo antes de pagar o presentar una solicitud."
+      }
+    ],
+    "published": "2026-11-13",
+    "updated": "2026-11-13",
+    "minutes": 4
+  },
+
+  {
     slug: 'iphone-sim-unlock-chip-vs-carrier-unlock',
     title: 'iPhone SIM Unlock Chip: What It Can Do',
     heading: 'iPhone SIM Unlock Chip: Does It Remove Carrier Lock?',
