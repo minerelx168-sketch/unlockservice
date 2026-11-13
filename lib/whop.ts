@@ -16,7 +16,7 @@ import { cardFeeCents } from './card-fee'
 export const WHOP_API_VERSION = '2026-10-15-1'
 export const WHOP_MIN_CENTS = MIN_TOPUP_CENTS
 export const WHOP_MAX_CENTS = MAX_TOPUP_CENTS
-export const WHOP_EVENTS = ['payment.succeeded', 'payment.failed', 'payment.canceled',
+export const WHOP_EVENTS = ['payment.succeeded', 'payment.failed', 'payment.canceled', 'payment.refunded',
   'refund.created', 'refund.updated', 'dispute.created', 'dispute.updated', 'dispute_alert.created',
   'resolution_center_case.created', 'resolution_center_case.updated', 'resolution_center_case.decided'] as const
 
@@ -277,6 +277,10 @@ export async function processWhopEvents(limit = 10): Promise<{ processed: number
       const outcome = payment.metadata?.integration === 'iunlockmobile-guest-v1'
         ? (await import('./guest-checkout')).settleGuestPayment(payment)
         : settlePayment(payment, config)
+      // Measurement only, after settlement: one ledger row per payment ID, refunds applied cumulatively.
+      if (payment.metadata?.integration === 'iunlockmobile-guest-v1') {
+        try { (await import('./analytics/ai-revenue-ledger')).syncLedgerFromWhopPayment(payment) } catch { /* never affects settlement */ }
+      }
       db().prepare(`UPDATE whop_webhook_events SET state = ?, processed_at = datetime('now'), locked_until = NULL, last_error = NULL
         WHERE event_id = ?`).run(outcome === 'unmatched' ? 'unmatched' : 'processed', job.event_id)
       stats.processed++

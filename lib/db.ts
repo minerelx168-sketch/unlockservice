@@ -154,6 +154,43 @@ CREATE TABLE IF NOT EXISTS order_attribution (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (order_type, order_id)
 );
+CREATE TABLE IF NOT EXISTS order_ai_attribution (
+  order_ref TEXT PRIMARY KEY,
+  kind TEXT NOT NULL,
+  ai_source_ft TEXT NOT NULL,
+  ai_source_lt TEXT NOT NULL,
+  attribution_source TEXT NOT NULL,
+  attribution_confidence TEXT NOT NULL CHECK (attribution_confidence IN ('confirmed','probable','non_ai')),
+  raw_referrer TEXT, utm_source TEXT, utm_medium TEXT, utm_campaign TEXT,
+  landing_page_path TEXT, locale TEXT, sku_id TEXT, ga_client_id TEXT, ga_session_id TEXT,
+  captured_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS order_ai_attribution_created ON order_ai_attribution(created_at);
+CREATE TABLE IF NOT EXISTS ai_revenue_ledger (
+  payment_id TEXT PRIMARY KEY,
+  order_ref TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  sku_id TEXT,
+  attribution_source TEXT NOT NULL DEFAULT 'direct',
+  attribution_confidence TEXT NOT NULL DEFAULT 'non_ai' CHECK (attribution_confidence IN ('confirmed','probable','non_ai')),
+  landing_page_path TEXT, locale TEXT, country TEXT, customer_type TEXT,
+  gross_cents INTEGER NOT NULL CHECK (gross_cents >= 0),
+  tax_cents INTEGER NOT NULL DEFAULT 0,
+  net_collected_cents INTEGER NOT NULL,
+  payment_fee_cents INTEGER NOT NULL,
+  fee_estimated INTEGER NOT NULL DEFAULT 0,
+  supplier_cost_cents INTEGER NOT NULL,
+  cost_known INTEGER NOT NULL DEFAULT 1,
+  refunded_cents INTEGER NOT NULL DEFAULT 0,
+  gross_profit_cents INTEGER NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('succeeded','partially_refunded','refunded')),
+  paid_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS ai_revenue_ledger_paid ON ai_revenue_ledger(paid_at);
+CREATE INDEX IF NOT EXISTS ai_revenue_ledger_order ON ai_revenue_ledger(order_ref);
 CREATE TABLE IF NOT EXISTS users (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   username           TEXT    NOT NULL UNIQUE,

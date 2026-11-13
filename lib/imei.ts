@@ -53,3 +53,9 @@ export function maskIdentifier(value: string): string {
   if (trimmed.length <= 6) return trimmed
   return `${trimmed.slice(0, 2)}${'·'.repeat(Math.max(trimmed.length - 6, 1))}${trimmed.slice(-4)}`
 }
+
+/** Live IMEI field state: digits typed, and whether a full number passes the Luhn check. */
+export function imeiStatus(value: string): { digits: string; complete: boolean; valid: boolean } {
+  const digits = normalizeImei(value)
+  return { digits, complete: digits.length === IMEI_LENGTH, valid: digits.length === IMEI_LENGTH && luhnValid(digits) }
+}

@@ -3,6 +3,7 @@ import type { ConsentChoice } from './ga4'
 import { alreadyHandled, checkoutContext, claimEvent, ga4Config, identity, isInternalEmail, markDeliveryStarted, sendClaimedEvent, skipEvent, toMicros } from './ga4'
 import { marginCents, serviceForCode } from './service-margins'
 import { customerTypeFor } from './purchase-analytics'
+import { ledgerGa4Params, syncLedgerFromCryptoCheckouts } from './analytics/ai-revenue-ledger'
 import { logPaymentFailure } from './payment-diagnostics'
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Whop } from '@whop/sdk'
@@ -66,6 +67,8 @@ export async function createGuestCheckout(input: {
   analytics?: { clientId: string; sessionId: string }
   consent?: ConsentChoice
   beforeCheckout?: (reference: string) => Promise<void>
+  /** AI attribution fields for Whop metadata (lib/analytics/ai-attribution attributionMetadata). */
+  attributionMetadata?: Record<string, string>
 }) {
   const config = whopConfiguration()
   if (!config || !guestCheckoutEnabled()) throw new WhopPaymentError('Guest checkout is temporarily unavailable.', 503)
@@ -117,7 +120,7 @@ export async function createGuestCheckout(input: {
       title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — one device service order. Total $${(total/100).toFixed(2)} USD, including our card fee and any applicable tax. No subscription.`,
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
-    metadata: { ...whopClickMetadata('guest', row.reference, input.consent ?? 'unknown'), guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
+    metadata: { ...safeAttributionMetadata(input.attributionMetadata, row.reference, row.product_code), ...whopClickMetadata('guest', row.reference, input.consent ?? 'unknown'), guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
     payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false },
     redirect_url: publicOrigin() + guestOrderPath(row.reference),
   }, { idempotencyKey: `guest-checkout-${row.reference}` })
@@ -129,6 +132,18 @@ export async function createGuestCheckout(input: {
   db().prepare('UPDATE guest_checkouts SET checkout_id=?,plan_id=?,checkout_url=? WHERE reference=? AND checkout_id IS NULL')
     .run(checkout.id,checkout.plan.id,url,row.reference)
   return { url, reference: row.reference }
+}
+const ATTRIBUTION_KEYS = ['ai_source_ft', 'ai_source_lt', 'attribution_confidence', 'landing_page_path', 'locale', 'sku_id', 'ga_client_id', 'ga_session_id', 'internal_order_id']
+/** Only known keys and short safe values; settlement identity keys can never be overridden (they are spread last). */
+export function safeAttributionMetadata(input: Record<string, string> | undefined, reference: string, productCode: string): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const key of ATTRIBUTION_KEYS) {
+    const value = input?.[key]
+    if (typeof value === 'string' && /^[A-Za-z0-9._:\/-]{1,160}$/.test(value)) out[key] = value
+  }
+  out.internal_order_id = reference
+  if (!out.sku_id) out.sku_id = serviceForCode(productCode).serviceId ?? productCode
+  return out
 }
 function money(value: Whop.Money | null | undefined, optional=false) {
   if (!value && optional) return 0
@@ -311,6 +326,8 @@ async function guestAnalytics(row:GuestCheckout) {
     payment_method:row.payment_method==='crypto'?'crypto':'card',customer_type:customerType,
     items:[{item_id:service.serviceId ?? row.product_code,item_name:service.name,item_category:service.category,price:paidCents/100,quantity:1}]}
   if (who.sessionId) params.session_id=who.sessionId
+  // AI attribution and gross profit ride on the same transaction_id, so GA4 still deduplicates.
+  Object.assign(params,ledgerGa4Params(row.reference))
   const reasons=[who.source==='fallback'?'missing_client_id':null,margin.known?null:'margin_unknown'].filter(Boolean).join('; ')||null
   const state=await sendClaimedEvent(event,{client_id:who.clientId,timestamp_micros:toMicros(paidAt),non_personalized_ads:false,events:[{name:'purchase',params}]},
     {valueCents:paidCents,paidCents,clientSource:who.source,customerType,marginKnown:margin.known,reason:reasons})
@@ -334,6 +351,7 @@ export async function processPaidGuestCheckouts(limit=5) {
       stats.checked++
     } catch(error) { logPaymentFailure('guest.paid.dispatch',error); stats.errors++ }
   }
+  syncLedgerFromCryptoCheckouts(20)
   return stats
 }
 

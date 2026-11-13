@@ -12,3 +12,4 @@ catalog/provider-rollout-strict.json
 
 .DS_Store
 npm-debug.log*
+reports/ai-visibility/
