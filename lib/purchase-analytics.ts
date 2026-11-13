@@ -75,7 +75,7 @@ export async function deliverPurchaseAnalytics(limit=20) {
     const margin=marginCents(service.serviceId,row.price_cents)
     const who=identity(row.client_id,row.session_id)
     const customerType=customerTypeFor(row.user_id,row.email,row.charged_at)
-    const params:Record<string,unknown>={transaction_id:event.transactionId,value:row.price_cents/100, gross_margin:margin.known ? margin.valueCents/100 : undefined,currency:'USD',engagement_time_msec:100,
+    const params:Record<string,unknown>={page_location:'https://iunlockmobile.com/',transaction_id:event.transactionId,value:row.price_cents/100, gross_margin:margin.known ? margin.valueCents/100 : undefined,currency:'USD',engagement_time_msec:100,
       payment_method:'credit',customer_type:customerType,
       items:[{item_id:service.serviceId ?? row.product_code ?? `order:${row.order_id}`,item_name:service.name,item_category:service.category,price:row.price_cents/100,quantity:1}]}
     if(who.sessionId)params.session_id=who.sessionId
