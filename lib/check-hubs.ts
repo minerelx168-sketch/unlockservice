@@ -40,13 +40,14 @@ export const HUBS: Record<HubSlug, HubConfig> = {
   'verizon-us': {
     carrier: 'verizon',
     title: 'Verizon and Straight Talk unlock rules 2026: 60 days vs 365 days, and what to check first',
-    summary: 'Verizon postpaid phones bought on or after January 27, 2026 unlock automatically once paid in full; earlier purchases follow the 60-day rule. Verizon prepaid brands, including Straight Talk and TracFone, now require 365 days of paid, active service for phones activated on or after January 20, 2026, replacing the earlier 60-day rule.',
+    summary: 'Verizon postpaid devices bought from January 27, 2026 can unlock once paid in full. The 365-day paid-service rule starts January 27 for Verizon Prepaid and January 20 for Straight Talk and TracFone. Check the plan and activation date before estimating eligibility.',
     checks: ['VERIZON_USA_PRO', 'APPLE_CARRIER_LITE'],
     rows: [
       ['Postpaid, bought on or after January 27, 2026', 'Unlocks automatically once the device is paid in full through a secure payment method'],
       ['Postpaid, bought before January 27, 2026', '60 days after purchase'],
-      ['Prepaid / Straight Talk / TracFone, activated on or after January 20, 2026', '365 days of paid, active service'],
-      ['Prepaid, activated before January 20, 2026', '60 days after activation'],
+      ['Verizon Prepaid · 2026-01-27+', '365 days of paid, active service'],
+      ['Straight Talk / TracFone · 2026-01-20+', '365 days of paid, active service'],
+      ['Verizon Prepaid < 2026-01-27 · Straight Talk / TracFone < 2026-01-20', '60 days after activation'],
     ],
     sources: [...POLICY_SOURCES.verizon, ...POLICY_SOURCES.straightTalk],
     honesty: { heading: 'No legitimate shortcut — so check before you buy', body: 'There is no lawful third-party shortcut around a Verizon lock, and iUnlockMobile does not sell Verizon unlocks. Before paying for a used phone sold as an unlocked Verizon device, run the Verizon USA status check ({verizon}) for clean, lost or financed status together with the Apple Carrier Lite check ({price}) to see whether a prepaid 365-day lock still applies.' },

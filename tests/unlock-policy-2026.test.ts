@@ -25,12 +25,12 @@ test('six calendar months clamp to the last day of a short month', () => {
   assert.equal(addMonths('2025-12-31', 2), '2026-02-28')
 })
 
-test('Verizon prepaid / Straight Talk: 60 days before 2026-01-20, 365 days from it', () => {
-  const before = verizonEligibility('2026-01-19', 'prepaid', '2026-11-13')
+test('Straight Talk: 60 days before 2026-01-20, 365 days from it', () => {
+  const before = verizonEligibility('2026-01-19', 'straight-talk', '2026-11-13')
   assert.equal(before.rule, 'verizon_prepaid_60_days')
   assert.equal(before.eligibleOn, '2026-03-20')
   assert.equal(before.timeRequirementMet, true)
-  const from = verizonEligibility('2026-01-20', 'prepaid', '2026-11-13')
+  const from = verizonEligibility('2026-01-20', 'straight-talk', '2026-11-13')
   assert.equal(from.rule, 'verizon_prepaid_365_days')
   assert.equal(from.eligibleOn, '2027-01-20')
   assert.equal(from.daysRemaining, 68)
@@ -53,4 +53,9 @@ test('T-Mobile: 40 days postpaid, 365 days prepaid and Metro', () => {
 test('invalid dates are rejected rather than guessed', () => {
   assert.throws(() => cricketEligibility('2026-02-30', '2026-11-13'), RangeError)
   assert.throws(() => verizonEligibility('not-a-date', 'prepaid', '2026-11-13'), RangeError)
+})
+
+test('Verizon Prepaid switches on January 27, not January 20', () => {
+  assert.equal(verizonEligibility('2026-01-26', 'prepaid', '2026-11-13').waitDays, 60)
+  assert.equal(verizonEligibility('2026-01-27', 'prepaid', '2026-11-13').waitDays, 365)
 })

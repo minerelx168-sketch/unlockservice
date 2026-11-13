@@ -11,14 +11,10 @@ import styles from '@/styles/cro.module.css'
 
 export type HubOption = { code: string; name: string; priceCents: number }
 
-function luhn(digits: string): boolean {
-  let sum = 0
-  for (let index = 0; index < digits.length; index++) {
-    let value = Number(digits[digits.length - 1 - index])
-    if (index % 2 === 1) { value *= 2; if (value > 9) value -= 9 }
-    sum += value
-  }
-  return sum % 10 === 0
+import { luhnValid } from '@/lib/imei'
+
+function validDevice(digits: string) {
+  return /^\d{15}$/.test(digits) && !/^(\d)\1+$/.test(digits) && luhnValid(digits)
 }
 
 /**
@@ -32,9 +28,9 @@ export function HubOrderForm({ locale, options, teaser, initial }: { locale: Geo
   const [imei, setImei] = useState('')
   const [code, setCode] = useState(initial && options.some((option) => option.code === initial) ? initial : options[0]?.code ?? '')
   const shown = useRef(false)
-  const digits = imei.replace(/\D/g, '')
-  const complete = digits.length === 15
-  const valid = complete && luhn(digits)
+  const digits = imei.replace(/ /g, '')
+  const complete = digits.length >= 15
+  const valid = complete && validDevice(digits)
   const selected = options.find((option) => option.code === code) ?? options[0]
   if (!selected) return <p>{msg(locale, 'Unavailable online')}</p>
   return <form className={styles.form} action={action} aria-busy={pending}>
@@ -42,13 +38,13 @@ export function HubOrderForm({ locale, options, teaser, initial }: { locale: Geo
     <input type="hidden" name="locale" value={locale} />
     {options.length > 1 ? <label>{p2(locale, 'Report')}<select name="productCode" value={code} onChange={(event) => setCode(event.currentTarget.value)}>{options.map((option) => <option key={option.code} value={option.code}>{option.name} · {formatUsd(option.priceCents)}</option>)}</select></label> : <input type="hidden" name="productCode" value={selected.code} />}
     <label htmlFor="hub-imei">{p2(locale, '15-digit IMEI')}</label>
-    <input id="hub-imei" name="imei" type="text" dir="ltr" inputMode="numeric" autoComplete="off" required maxLength={20} placeholder="35xxxxxxxxxxxxx" value={imei}
+    <input id="hub-imei" name="imei" type="text" dir="ltr" inputMode="numeric" autoComplete="off" pattern="[0-9 ]{15,20}" required maxLength={20} placeholder="35xxxxxxxxxxxxx" value={imei}
       aria-invalid={complete && !valid} aria-describedby="hub-imei-note"
       onChange={(event) => {
         const next = event.currentTarget.value
         setImei(next)
-        const raw = next.replace(/\D/g, '')
-        if (teaser && raw.length === 15 && luhn(raw) && !shown.current) {
+        const raw = next.replace(/ /g, '')
+        if (teaser && raw.length === 15 && validDevice(raw) && !shown.current) {
           shown.current = true
           trackFunnelEvent('cro02_teaser_shown', { experiment_id: 'CRO-02', variant: 'B', service_category: 'imei_check' })
         }
@@ -57,7 +53,7 @@ export function HubOrderForm({ locale, options, teaser, initial }: { locale: Geo
     {teaser && valid ? <div className={styles.teaser} data-cro="CRO-02" aria-live="polite">
       <dl>
         <dt>✓</dt><dd>{p2(locale, 'IMEI checksum: valid (15 digits verified)')}</dd>
-        <dt>{p2(locale, 'Device family')}</dt><dd>{tacHint(digits) ?? p2(locale, 'Apple iOS / GSM device')}</dd>
+        <dt>{p2(locale, 'Device family')}</dt><dd>{tacHint(digits) ?? p2(locale, 'Model not identified')}</dd>
         <dt>{p2(locale, 'Locked network')}</dt><dd><span className={styles.blur} aria-hidden="true">••••••••••••</span></dd>
       </dl>
       <span className={styles.reveal}>{p2(locale, 'Reveal live carrier status — {price}', { price: formatUsd(selected.priceCents) })}</span>

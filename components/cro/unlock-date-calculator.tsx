@@ -8,7 +8,7 @@ import styles from '@/styles/cro.module.css'
 
 export type CalculatorCarrier = 'cricket' | 'verizon' | 'tmobile'
 
-const plans: Record<CalculatorCarrier, string[]> = { cricket: [], verizon: ['prepaid', 'postpaid'], tmobile: ['postpaid', 'prepaid', 'metro'] }
+const plans: Record<CalculatorCarrier, string[]> = { cricket: [], verizon: ['prepaid', 'straight-talk', 'postpaid'], tmobile: ['postpaid', 'prepaid', 'metro'] }
 
 /** $0, offline: date arithmetic over the published waiting periods only. */
 export function UnlockDateCalculator({ locale, carrier }: { locale: GeoLocale; carrier: CalculatorCarrier }) {
@@ -19,12 +19,12 @@ export function UnlockDateCalculator({ locale, carrier }: { locale: GeoLocale; c
   let result: Eligibility | null = null
   if (parseDate(date) && date <= today) {
     result = carrier === 'cricket' ? cricketEligibility(date, today)
-      : carrier === 'verizon' ? verizonEligibility(date, plan as 'prepaid' | 'postpaid', today)
+      : carrier === 'verizon' ? verizonEligibility(date, plan as 'prepaid' | 'straight-talk' | 'postpaid', today)
       : tmobileEligibility(date, plan as 'postpaid' | 'prepaid' | 'metro', today)
   }
   const tag = markets[locales.indexOf(locale)] ?? 'en-US'
   const readable = (value: string) => new Intl.DateTimeFormat(tag, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`))
-  const label = (value: string) => value === 'prepaid' ? p2(locale, 'Prepaid') : value === 'postpaid' ? p2(locale, 'Postpaid') : p2(locale, 'Metro by T-Mobile')
+  const label = (value: string) => value === 'straight-talk' ? 'Straight Talk / TracFone' : value === 'prepaid' ? (carrier === 'verizon' ? 'Verizon · ' : '') + p2(locale, 'Prepaid') : value === 'postpaid' ? p2(locale, 'Postpaid') : p2(locale, 'Metro by T-Mobile')
   return <div className={styles.calc}>
     <label htmlFor={id + 'date'}>{p2(locale, 'Purchase or activation date')}</label>
     <input id={id + 'date'} type="date" max={today} value={date} onChange={(event) => setDate(event.currentTarget.value)} />

@@ -9,15 +9,16 @@
  */
 export const POLICY_SOURCES = {
   cricket: ['https://www.cricketwireless.com/device-unlock', 'https://www.cricketwireless.com/support/account-management/device-unlock'],
-  verizon: ['https://www.verizon.com/about/consumer-safety/device-unlocking-policy'],
+  verizon: ['https://www.verizon.com/prepaid/device-unlock/', 'https://www.verizon.com/about/consumer-safety/device-unlocking-policy'],
   straightTalk: ['https://www.straighttalk.com/device/device-unlock'],
   tmobile: ['https://www.t-mobile.com/responsibility/consumer-info/policies/sim-unlock-policy'],
 } as const
 
 /** Cricket: purchases on or after this date need 365 days of paid service; earlier ones six months. */
 export const CRICKET_365_START = '2026-07-01'
-/** Verizon prepaid brands (Straight Talk, TracFone, Total, Visible prepaid…): activations on or after this date need 365 days. */
-export const VERIZON_PREPAID_365_START = '2026-01-20'
+/** Separate effective dates for Verizon Prepaid and Verizon Value brands. */
+export const VERIZON_PREPAID_365_START = '2026-01-27'
+export const VERIZON_VALUE_365_START = '2026-01-20'
 /** Verizon postpaid: devices bought on or after this date unlock once paid in full; earlier ones after 60 days. */
 export const VERIZON_POSTPAID_PAYOFF_START = '2026-01-27'
 
@@ -88,11 +89,11 @@ export function cricketEligibility(purchased: string, today: string): Eligibilit
   return timed('cricket_six_months', purchased, eligibleOn, today, daysBetween(purchased, eligibleOn))
 }
 
-export type VerizonPlan = 'prepaid' | 'postpaid'
+export type VerizonPlan = 'prepaid' | 'straight-talk' | 'postpaid'
 export function verizonEligibility(activated: string, plan: VerizonPlan, today: string): Eligibility {
   assertDates(activated, today)
-  if (plan === 'prepaid') {
-    return activated >= VERIZON_PREPAID_365_START
+  if (plan !== 'postpaid') {
+    return activated >= (plan === 'straight-talk' ? VERIZON_VALUE_365_START : VERIZON_PREPAID_365_START)
       ? timed('verizon_prepaid_365_days', activated, addDays(activated, 365), today, 365)
       : timed('verizon_prepaid_60_days', activated, addDays(activated, 60), today, 60)
   }
