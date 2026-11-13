@@ -1,5 +1,9 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server'
 import { QUOTE_COOKIE } from '@/lib/cookie-names'
+import { botHit, detectAiBot, logBotHit } from '@/lib/analytics/ai-bot-logger'
+import { isPublicContentPath, PUBLIC_ROBOTS } from '@/lib/public-robots'
+import { ATTR_FT_COOKIE, ATTR_LT_COOKIE, ATTR_MAX_AGE_SECONDS, classifyTouch, decodeTouch, encodeTouch, nextTouches } from '@/lib/analytics/ai-attribution'
+
 
 /**
  * Content-Security-Policy.
@@ -59,7 +63,14 @@ function policy(nonce: string, secure: boolean): string {
     .join('; ')
 }
 
-export function middleware(request: NextRequest) {
+export function middleware(request: NextRequest, event?: NextFetchEvent) {
+  /* IndexNow ownership proof at its default location, /<INDEXNOW_KEY>.txt.
+     Only the configured key is answered; every other name falls through to a 404. */
+  const keyFile = /^\/([A-Za-z0-9-]{8,128})\.txt$/.exec(request.nextUrl.pathname)?.[1]
+  const indexNowKey = process.env.INDEXNOW_KEY?.trim()
+  if (keyFile && indexNowKey && keyFile === indexNowKey) {
+    return new NextResponse(indexNowKey, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=300' } })
+  }
   const nonce = crypto.randomUUID().replaceAll('-', '')
   const forwardedProtocol = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim()
   const secure = (forwardedProtocol ?? request.nextUrl.protocol.replace(':', '')) === 'https'
@@ -89,6 +100,25 @@ export function middleware(request: NextRequest) {
   }
   if (path !== '/user/unlock' && path.startsWith('/user/') && request.cookies.has(QUOTE_COOKIE)) {
     response.cookies.set(QUOTE_COOKIE, '', { path: '/', maxAge: 0, httpOnly: true, secure })
+  }
+
+  /* Public content is rendered for every client alike: no login redirect, no
+     cookie requirement. Bots and people receive the same HTML. */
+  if (isPublicContentPath(path)) response.headers.set('X-Robots-Tag', PUBLIC_ROBOTS)
+
+  const bot = detectAiBot(request.headers.get('user-agent'))
+  if (bot) {
+    logBotHit(botHit(bot, path, 200, request.headers.get('cf-ipcountry')), event ? p => event.waitUntil(p) : undefined)
+  } else if (request.method === 'GET' && !path.startsWith('/api/') && !path.startsWith('/_next/')
+    && (request.headers.get('sec-fetch-dest') === 'document' || (request.headers.get('accept') ?? '').includes('text/html'))) {
+    // AI referral attribution: first touch once, last non-direct touch on every non-direct arrival.
+    try {
+      const touch = classifyTouch({ referrer: request.headers.get('referer'), url: request.nextUrl, ownHosts: [request.nextUrl.hostname, 'iunlockmobile.com'] })
+      const write = nextTouches({ ft: decodeTouch(request.cookies.get(ATTR_FT_COOKIE)?.value), lt: decodeTouch(request.cookies.get(ATTR_LT_COOKIE)?.value) }, touch)
+      const options = { path: '/', maxAge: ATTR_MAX_AGE_SECONDS, httpOnly: true, sameSite: 'lax' as const, secure }
+      if (write.ft) response.cookies.set(ATTR_FT_COOKIE, encodeTouch(write.ft), options)
+      if (write.lt) response.cookies.set(ATTR_LT_COOKIE, encodeTouch(write.lt), options)
+    } catch { /* Attribution is best effort and never blocks a page. */ }
   }
 
   return response
