@@ -3,6 +3,10 @@ import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
 import { storefrontAvailability } from '@/lib/storefront-availability'
+import { croAssignment } from '@/lib/cro/server'
+import { croQuickPills } from '@/lib/cro/quick-pills'
+import { CroImpression } from '@/components/cro/cro-impression'
+import croStyles from '@/styles/cro.module.css'
 
 
 
@@ -10,7 +14,9 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = pageMetadata("/services", "Phone Unlock & IMEI Check Services", "Compare phone unlocking and IMEI check services. Browse device requirements, report types, prices and availability before choosing a service.")
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const cro04 = await croAssignment('CRO-04')
+  const pills = cro04.variant === 'B' ? croQuickPills('en') : []
   const checks = storefrontAvailability('imei_check')
   const unlock = storefrontAvailability('unlock')
   return (
@@ -68,6 +74,8 @@ export default function ServicesPage() {
             </article>
           </div>
 
+          <CroImpression {...cro04} mobileOnly />
+          {pills.length ? <nav className={croStyles.pills} data-cro="CRO-04" aria-label="Quick picks"><span className={croStyles.pillsLabel}>Quick picks</span>{pills.map((pill) => <Link key={pill.code} className={croStyles.pill} href={`/checkout?product=${pill.code}`}>{pill.label}</Link>)}</nav> : null}
           <ServiceDirectory />
           <p className="t-micro service-hub-version">
             A report shows the phone’s status when it runs. It does not prove ownership or guarantee an unlock.

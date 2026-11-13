@@ -18,7 +18,7 @@ function entries(xml){if(!/<urlset\b/.test(xml))throw Error('Invalid sitemap');r
 const PUBLIC=/^\/(?:(?:es|fr-ca|pt|de|ar)(?:\/[a-z0-9-]+)*|services(?:\/[a-z0-9-]+)*|tools(?:\/[a-z0-9-]+)?|reports\/[a-z0-9-]+|articles(?:\/[a-z0-9-]+)?|check(?:\/[a-z0-9-]+)*)?\/?$/
 const maps=await Promise.all(['/sitemap.xml','/sitemap-models.xml'].map(get))
 const urls=[...new Set(maps.flatMap(entries).filter(r=>PUBLIC.test(r.path)&&!/^\/services\/unlock\/(?:catalog|more)$/.test(r.path)).map(r=>r.url))]
-for(const p of ['/','/es','/fr-ca','/pt','/de','/ar','/llms.txt','/llms-full.txt','/tools','/reports/2026-used-iphone-carrier-lock-report','/services/imei-check/apple-carrier-lock-status','/services/unlock/us','/services/unlock/canada','/es/checar-imei-iphone','/fr-ca/deverrouiller-iphone-canada'])if(!urls.includes(origin+p))urls.push(origin+p)
+for(const p of ['/','/es','/fr-ca','/pt','/de','/ar','/llms.txt','/llms-full.txt','/tools','/reports/2026-used-iphone-carrier-lock-report','/services/imei-check/apple-carrier-lock-status','/services/unlock/us','/services/unlock/canada','/es/checar-imei-iphone','/fr-ca/deverrouiller-iphone-canada','/check/t-mobile-us','/check/verizon-us','/check/cricket-wireless','/services/unlock/us/att'])if(!urls.includes(origin+p))urls.push(origin+p)
 if(!urls.length)throw Error('No eligible URLs')
 if(dry){console.log(urls.join('\n'));console.log(`\n${urls.length} URLs (dry run, nothing submitted)`);process.exit(0)}
 // Prefer the default key location (/<key>.txt); fall back to /indexnow-key.txt.

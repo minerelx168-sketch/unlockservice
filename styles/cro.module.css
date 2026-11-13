@@ -1,0 +1,32 @@
+/* CRO-01..05 surfaces. Tokens only, so both themes come for free. */
+.banner{display:flex;gap:.6rem;align-items:flex-start;margin:0 0 .75rem;padding:.65rem .85rem;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink);font-size:.9rem;line-height:1.45}
+.banner strong{color:var(--primary)}
+.pills{display:none;flex-wrap:wrap;gap:.5rem;margin:0 0 .75rem}
+.pillsLabel{flex-basis:100%;font-size:.8rem;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;min-height:44px;padding:.45rem .85rem;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--ink-strong);font:inherit;font-size:.88rem;text-decoration:none;cursor:pointer}
+.pill[aria-pressed='true']{border-color:var(--primary);color:var(--primary)}
+@media (max-width:640px){.pills{display:flex}}
+.bump{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:start;margin:.75rem 0;padding:.75rem .9rem;border:1px dashed var(--primary);border-radius:var(--radius-md);background:var(--surface);color:var(--ink);cursor:pointer}
+.bump input{margin-top:.2rem;width:1.1rem;height:1.1rem}
+.bump strong{display:block;color:var(--ink-strong)}
+.bump small{color:var(--muted)}
+.teaser{display:grid;gap:.25rem;margin:.5rem 0;padding:.75rem .9rem;border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--surface);font-size:.9rem}
+.teaser dl{display:grid;grid-template-columns:auto 1fr;gap:.25rem .75rem;margin:0}
+.teaser dt{color:var(--muted)}
+.teaser dd{margin:0;color:var(--ink-strong)}
+.blur{filter:blur(5px);user-select:none}
+.reveal{justify-self:start;font-size:.85rem;color:var(--primary);font-weight:600}
+.control{display:grid;gap:.5rem;width:min(100%,40rem);margin:1rem 0;text-align:start}
+.control h2,.control p{margin:0}
+.form{display:grid;gap:.5rem;min-width:0}
+.form input,.form select{font:inherit;min-width:0;width:100%;padding:.75rem 1rem;color:var(--ink-strong);background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius-md);min-height:48px}
+.calc{display:grid;gap:.6rem}
+.calc fieldset{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.75rem}
+.calcResult{padding:.75rem .9rem;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--line-strong)}
+.calcResult p{margin:.15rem 0}
+
+.calc,.calc fieldset,.form label{min-inline-size:0}
+.calc input[type=date]{box-sizing:border-box;max-inline-size:100%;min-height:44px;padding:.5rem .75rem;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius-md)}
+.calc fieldset label{display:inline-flex;align-items:center;min-height:44px;gap:.4rem;cursor:pointer}
+.form :focus-visible,.calc :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+@media(max-width:640px){.form input,.form select,.calc input[type=date]{font-size:16px}}

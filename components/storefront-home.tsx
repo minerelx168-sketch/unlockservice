@@ -13,6 +13,10 @@ import { serviceStatus, unlockOrderingEnabled } from '@/lib/provider'
 import { listStorefrontProviderProducts } from '@/lib/public-provider-catalog'
 import { quickPicks } from '@/lib/quick-picks'
 import { StructuredData } from '@/app/(marketing)/structured-data'
+import { croAssignment } from '@/lib/cro/server'
+import { croQuickPills } from '@/lib/cro/quick-pills'
+import { p2 } from '@/lib/i18n/phase2'
+import { CroImpression } from '@/components/cro/cro-impression'
 
 const ELIGIBILITY: Array<{ icon: IconName; title: string; body: string }> = [
   {
@@ -142,7 +146,9 @@ function StepArt({ kind }: { kind: 'imei' | 'review' | 'done' }) {
   )
 }
 
-export function StorefrontHome({locale}:{locale:GeoLocale}) {
+export async function StorefrontHome({locale}:{locale:GeoLocale}) {
+  const cro04 = await croAssignment('CRO-04')
+  const pills = cro04.variant === 'B' ? croQuickPills(locale) : []
   const t=(key:string)=>homeText(locale,key)
   const ix=locales.indexOf(locale)
   const url=(path:string)=>locale==='en'?path:path==='/articles'?homePaths[ix]+'/articles':path==='/services/unlock'?paths[1][ix]:path==='/services/imei-check'?paths[0][ix]:path
@@ -223,7 +229,8 @@ export function StorefrontHome({locale}:{locale:GeoLocale}) {
           </div>
 
           <div className="hero-panel">
-            <HeroPriceCheck unlock={unlockWidget.map(p=>localProduct({...p,summary:p.summary??'',etaLabel:formatServiceMeta(p.etaLabel,locale),category:formatServiceMeta(p.category,locale)},locale))} homeUnlockMenu check={checkWidget.map(p=>localProduct({...p,summary:p.summary??'',etaLabel:formatServiceMeta(p.etaLabel,locale),category:formatServiceMeta(p.category,locale)},locale))} ordering={ordering} />
+            <HeroPriceCheck unlock={unlockWidget.map(p=>localProduct({...p,summary:p.summary??'',etaLabel:formatServiceMeta(p.etaLabel,locale),category:formatServiceMeta(p.category,locale)},locale))} homeUnlockMenu check={checkWidget.map(p=>localProduct({...p,summary:p.summary??'',etaLabel:formatServiceMeta(p.etaLabel,locale),category:formatServiceMeta(p.category,locale)},locale))} ordering={ordering} quickPills={pills} quickPillsLabel={p2(locale, 'Quick picks')} />
+            <CroImpression {...cro04} mobileOnly />
           </div>
 
           <div className="hero-extras">

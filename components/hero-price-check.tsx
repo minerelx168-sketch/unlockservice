@@ -14,6 +14,10 @@ import { formatUsd } from '@/lib/money'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import { Icon } from './icons'
 import { ServicePicker } from './service-picker'
+import croStyles from '@/styles/cro.module.css'
+
+/** CRO-04 variant B: one-tap shortcuts shown above the picker on phones only. */
+export type QuickPill = { code: string; domain: 'unlock' | 'imei_check'; label: string }
 
 /** Public catalog fields only; prices are checked again by the order flow. */
 export type PriceCheckProduct = {
@@ -40,10 +44,12 @@ type Props = {
   initialImei?: string
   initialProductCode?: string
   initialEmail?: string
+  quickPills?: QuickPill[]
+  quickPillsLabel?: string
 }
 type FieldError = { field: 'service' | 'imei' | 'email'; message: string }
 /** Select a service, add details once, then review before secure payment. */
-export function HeroPriceCheck({ unlock, check, ordering, homeUnlockMenu = false, fixedDomain, initialImei = '', initialProductCode, initialEmail = '' }: Props) {
+export function HeroPriceCheck({ unlock, check, ordering, homeUnlockMenu = false, fixedDomain, initialImei = '', initialProductCode, initialEmail = '', quickPills = [], quickPillsLabel = '' }: Props) {
   const t=useCopy(),pageLocale=useLocale()
   const initialDomain = fixedDomain ?? (ordering && unlock.length ? 'unlock' : 'imei_check')
   const initialProduct = (initialDomain === 'unlock' ? unlock : check).find((product) => product.code === initialProductCode)
@@ -110,6 +116,10 @@ export function HeroPriceCheck({ unlock, check, ordering, homeUnlockMenu = false
     <input type="hidden" name="domain" value={orderDomain} />
     {fixedDomain ? null : <fieldset className="device-browse-options" disabled={pending}><legend className="visually-hidden">{t("What would you like to do?")}</legend>{(['unlock', 'imei_check'] as const).map((value) => <label key={value}><input type="radio" name="browseDomain" value={value} checked={domain === value} onChange={() => { setDomain(value); clearError() }} /><span><Icon name={value === 'unlock' ? 'lock' : 'search'} />{value === 'unlock' ? t("Unlock") : t("Phone Check")}</span></label>)}</fieldset>}
     <ol className="price-check-steps" aria-label={t("Review & pay")}>{[t("Service & price"), t("Your details"), t("Review & pay")].map((label, index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-done={step > index || undefined}><span aria-hidden="true">{index + 1}</span><span className="price-check-step-label">{label}</span></li>)}</ol>
+    {quickPills.length ? <div className={croStyles.pills} data-cro="CRO-04" role="group" aria-label={quickPillsLabel}><span className={croStyles.pillsLabel}>{quickPillsLabel}</span>{quickPills.filter((pill) => (pill.domain === 'unlock' ? unlock : check).some((product) => product.code === pill.code)).map((pill) => <button key={pill.code} type="button" className={croStyles.pill} aria-pressed={service[pill.domain] === pill.code && domain === pill.domain} disabled={pending} onClick={() => {
+      setDomain(pill.domain); setService((current) => ({ ...current, [pill.domain]: pill.code })); clearError()
+      trackFunnelEvent('service_selection', { service_category: pill.domain, source: 'cro04_pill' })
+    }}>{pill.label}</button>)}</div> : null}
     {products.length ? <>
       <ServicePicker moreHref={homeUnlockMenu && domain === 'unlock' ? '/services/unlock/more' : undefined}
         key={domain}

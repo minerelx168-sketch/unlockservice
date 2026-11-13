@@ -10,7 +10,7 @@ export const AI_CRAWLERS = [
 ] as const
 
 /** Public machine-readable surfaces under /api that crawlers and agents may read. */
-export const PUBLIC_ALLOW = ['/', '/llms.txt', '/llms-full.txt', '/openapi.json', '/api/agent/', '/api/mcp$', '/tools/', '/reports/', '/articles/', '/services/']
+export const PUBLIC_ALLOW = ['/', '/llms.txt', '/llms-full.txt', '/openapi.json', '/api/agent/', '/api/mcp$', '/tools/', '/reports/', '/articles/', '/services/', '/check/', '/feeds/', '/api/product-card/']
 
 /**
  * Reduce crawling of account, admin and transactional routes. These directives

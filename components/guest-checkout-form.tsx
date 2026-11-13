@@ -3,7 +3,7 @@ import {useLocale} from '@/lib/i18n/locale-context'
 import {localeOf} from '@/lib/i18n/route-map'
 import {usePathname} from 'next/navigation'
 import {useIdentifierCopy,useCopy} from '@/lib/i18n/client'
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { formatUsd } from '@/lib/money'
 import { serviceIdentifier, identifierField, type ServiceInputType } from '@/lib/service-identifier'
@@ -13,17 +13,20 @@ import { deviceEmail } from '@/lib/device-intent-value'
 import { guestCardQuote } from '@/lib/guest-card-quote'
 import { Icon } from './icons'
 
-export function GuestCheckoutForm({ product, initialImei, initialEmail = '', enabled, method, onMethodChange, cryptoEnabled, cryptoRoutes }: {
+export function GuestCheckoutForm({ product, initialImei, initialEmail = '', enabled, method, onMethodChange, cryptoEnabled, cryptoRoutes, orderBump = false }: {
   product: { inputType: ServiceInputType; code: string; name: string; priceCents: number; domain: 'unlock' | 'imei_check' }
   initialImei: string; initialEmail?: string; enabled: boolean
   method: 'card' | 'crypto'; onMethodChange: (method: 'card' | 'crypto') => void
   cryptoEnabled: boolean; cryptoRoutes: { id: string; label: string; asset: string }[]
+  orderBump?: boolean
 }) {
   const t=useCopy(),locale=useLocale()
   const field = useIdentifierCopy(product.inputType)
   const [imei, setImei] = useState(initialImei), [email, setEmail] = useState(initialEmail), [busy, setBusy] = useState(false), [error, setError] = useState('')
   const [editing, setEditing] = useState(!serviceIdentifier(initialImei, product.inputType) || !deviceEmail(initialEmail))
   const key = useRef(''), lock = useRef(false)
+  // A changed selection (the CRO-05 upgrade) is a different checkout request.
+  useEffect(() => { key.current = '' }, [orderBump, product.priceCents])
   const [routeId, setRouteId] = useState(cryptoRoutes[0]?.id ?? '')
   const isCrypto = method === 'crypto'
   const cardQuote = guestCardQuote(product.priceCents)
@@ -38,7 +41,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
     lock.current = true; setBusy(true); setError('')
     try {
       if (!key.current) {
-        const bytes=new TextEncoder().encode(`${product.code}:${imei.trim()}:${deliveryEmail.trim().toLowerCase()}:${method}:${routeId}:${product.priceCents}`)
+        const bytes=new TextEncoder().encode(`${product.code}:${imei.trim()}:${deliveryEmail.trim().toLowerCase()}:${method}:${routeId}:${product.priceCents}:${orderBump ? 'bump' : ''}`)
         const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(n=>n.toString(16).padStart(2,'0')).join('')
         const storageKey=`iunlockmobile-checkout:${digest}`
         try { const saved=JSON.parse(sessionStorage.getItem(storageKey) || 'null'); if (saved?.expires>Date.now() && typeof saved.key==='string') key.current=saved.key } catch { /* Optional browser storage. */ }
@@ -48,7 +51,7 @@ export function GuestCheckoutForm({ product, initialImei, initialEmail = '', ena
       trackFunnelEvent('begin_checkout', { ...(product.code==='APPLE_CARRIER_LITE'?{item_id:'444'}:{}), service_category: product.domain, value: (isCrypto ? product.priceCents : cardQuote.totalCents) / 100, currency: 'USD', payment_method: method })
       const analyticsContext = await paymentAnalyticsContext()
       const response = await fetch(isCrypto ? '/api/checkout/crypto' : '/api/checkout/guest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        productCode: product.code, imei, email: deliveryEmail, expectedPriceCents: product.priceCents, requestKey: key.current, acceptedTerms: true, analyticsContext, ...(isCrypto ? { routeId } : {}),
+        productCode: product.code, imei, email: deliveryEmail, expectedPriceCents: product.priceCents, requestKey: key.current, acceptedTerms: true, analyticsContext, ...(orderBump ? { orderBump: true } : {}), ...(isCrypto ? { routeId } : {}),
       }) })
       const data = await response.json()
       if (!response.ok || typeof data.url !== 'string') throw new Error(data.error || 'Unable to open checkout.')

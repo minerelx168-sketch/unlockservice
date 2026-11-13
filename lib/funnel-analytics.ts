@@ -20,6 +20,8 @@ export const FUNNEL_EVENTS = [
   'payment_viewed',
   'payment_completed',
   'payment_verification_requested',
+  'experiment_impression',
+  'cro02_teaser_shown',
 ] as const
 export type FunnelEventName = (typeof FUNNEL_EVENTS)[number]
 
@@ -27,6 +29,7 @@ type FunnelValue = string | number | boolean
 const ALLOWED_KEYS = new Set([
   'event_category', 'service_category', 'validation_status',
   'status', 'currency', 'value', 'payment_method', 'source', 'consent',
+  'experiment_id', 'variant',
 ])
 const BLOCKED_KEY = /(imei|email|phone|wallet|csrf|token|transaction|order_id|provider_id|customer|user|address|name)/i
 
