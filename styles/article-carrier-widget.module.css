@@ -1,3 +1,7 @@
 .card{width:min(100%,40rem);margin:1rem 0;text-align:start;display:grid;gap:1rem;color:var(--ink);background:var(--surface)}
 .card h2,.card p{margin:0}.top{display:flex;gap:.75rem;align-items:center;justify-content:space-between;flex-wrap:wrap}.top strong{color:var(--primary)}.form{min-width:0}.form input{font:inherit;min-width:0;width:100%;padding:.8rem 1rem;color:var(--ink-strong);background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius-md);min-height:48px}.mask{filter:blur(2px);user-select:none}.card small{color:var(--muted)}
 @media(max-width:640px){.articleHero{padding-block-start:.75rem}.articleHero :global(.article-head){gap:.5rem}.articleHero .card{margin:.25rem 0 .75rem}}
+
+.decision{width:100%;max-width:68ch;margin:1rem 0;padding:clamp(1rem,3vw,1.5rem);border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink);text-align:start}
+.decision h2{font-size:1.15rem;margin:0 0 .8rem;color:var(--ink-strong)}
+.decision dl{display:grid;gap:.75rem;margin:0}.decision dt{font-weight:700}.decision dd{margin:0;line-height:1.55}.decision p{margin:1rem 0 0;font-size:.9rem;overflow-wrap:anywhere}

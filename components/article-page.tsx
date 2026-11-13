@@ -1,3 +1,6 @@
+import {ArticleDecision} from './article-decision'
+import {enrichArticle} from '@/lib/article-evidence'
+import {enrichEdition} from '@/lib/article-editions-evidence'
 import {articleLabels} from '@/lib/article-labels'
 import {QuickImeiCheckCard} from './QuickImeiCheckCard'
 import {geoOffers} from '@/lib/geo-offers'
@@ -51,8 +54,9 @@ function readable(date: string, locale:ArticleLocale) {
 
 export async function ArticlePage({ params,locale }: { params: Promise<{ slug: string }>;locale:ArticleLocale }) {
   const { slug } = await params
-  const article = getArticle(slug,locale)
-  if (!article) notFound()
+  const record = getArticle(slug,locale)
+  if (!record) notFound()
+  const article = locale === 'en' ? enrichArticle(record) : enrichEdition(record)
 
   const labels=articleLabels[locale],index=articleIndexPath(locale)
   const contents = article.blocks.filter((block) => block.kind === 'h2')
@@ -75,6 +79,7 @@ export async function ArticlePage({ params,locale }: { params: Promise<{ slug: s
           <div className="article-head">
             <h1 className="t-section">{article.heading}</h1>
             <p className="t-lead">{article.standfirst}</p>
+            <ArticleDecision article={article} />
             <ArticleCta locale={locale==="fr-ca"?"fr":locale}>{locale==="en"?<ArticleCarrierWidget />:<div className="hero-panel"><QuickImeiCheckCard locale={locale==="fr-ca"?"fr":locale} products={geoOffers("imei_check",["APPLE_CARRIER_LITE"])}/></div>}</ArticleCta>
             <p className="t-micro article-meta">
               <Link href="/contact">iUnlockMobile</Link> · {labels[2]} {readable(article.published,locale)}

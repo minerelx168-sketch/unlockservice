@@ -1,3 +1,4 @@
+import {DecisionPanel} from './article-decision'
 import {GuideFaq} from './guide-faq'
 import Link from 'next/link'
 import { ArticleCarrierWidget } from './article-carrier-widget'
@@ -66,6 +67,16 @@ export function CarrierGuide({id,children,product}:{id:GuideKey;product?:string;
  const schema={'@context':'https://schema.org','@graph':[{'@type':'FAQPage','@id':url+'#faq',mainEntity:faq},...available.map(p=>{const sid=PROVIDER_PRODUCTS.find(x=>x.productCode===p.productCode)?.serviceId;return {'@type':'Product','@id':url+'#'+p.productCode,name:p.name,...(sid?{sku:itemIdFor(sid)}:{}),brand:{'@type':'Brand',name:'iUnlockMobile'},offers:{'@type':'Offer',price:(p.priceCents/100).toFixed(2),priceCurrency:'USD',url:url+'#'+p.productCode,availability:'https://schema.org/InStock',hasMerchantReturnPolicy:merchantReturnPolicy(origin)}}})]}
  return <article className={"section "+s.page}><div className="shell"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
  <nav className="service-breadcrumb"><Link href="/services">Services</Link><span>/</span>{canada?'Canada':'United States'}</nav><header className="service-hero-copy"><span className="hero-chip">{canada?'Canada':'United States'} · iPhone carrier guide</span><h1 className="service-entry-title">{g.title}</h1><p className="t-lead">{g.intro}</p></header>
+ {id === 'used' && <DecisionPanel steps={[
+   'Ask the seller to erase the iPhone and show that setup can continue without the previous owner’s account.',
+   'A clean blocklist check does not prove that Activation Lock is off or that the seller has paid the carrier.',
+   'If setup requests the seller’s credentials, have them remove the device from their account before handing over payment.',
+ ]} sources={[{label:'Apple’s used iPhone buying checklist',href:'https://support.apple.com/en-us/104999'}]}/>}
+ {id === 'sim' && <DecisionPanel steps={[
+   'Read Carrier Lock on the handset, then check the purchase record to see whether a US or Canadian carrier supplied it.',
+   'A Canadian network name while roaming identifies the network serving your line, not who can release an imported handset.',
+   'If the device is restricted, contact the supplying carrier; if it is unrestricted, ask the Canadian provider to check activation for that model.',
+ ]} sources={[{label:'Apple: check whether your iPhone is unlocked',href:'https://support.apple.com/en-us/109316'}]}/>}
  {id === 'carrier' && <CarrierReportReader />}
  {id==='ca'&&<div className="requirements-card"><p>Choose the original Canadian network. Confirm ownership, payment status and carrier eligibility before ordering.</p></div>}{id==='ca'?<CanadaUnlockServices services={unlocks} product={product}/>:id==='sim'||id==='used'?<ArticleCarrierWidget/>:<div className={s.facts}><div className={s.card}><GuideOrder anchor="order" domain="imei_check" initial="APPLE_CARRIER_LITE" options={orderOptions(available.filter(p=>p.domain==='imei_check'))}/></div></div>}
  <section><h2>Which check answers your question?</h2><div className={s.tableWrap} role="region" aria-label="Compare verification methods" tabIndex={0}><table><caption>What you can learn before paying</caption><thead><tr>{['Method','Cost','What it verifies','What it cannot establish'].map(c=><th scope="col" key={c}>{c}</th>)}</tr></thead><tbody>{methods.map(([m,c,a,b])=><tr key={m}><th scope="row">{m}</th><td>{c}</td><td>{a}</td><td>{b}</td></tr>)}</tbody></table></div>
