@@ -278,7 +278,8 @@ test('guest hosted checkout sends consented GCLID on the original order but not 
       if(internal)db.db().prepare("UPDATE ga4_checkout_context SET internal=1 WHERE kind='guest' AND reference=?").run(ref)
     }})
     const expected=consent==='granted'&&!internal?{gclid:'abc-DEF_987'}:{}
-    assert.deepEqual(whopMetadata.get(row.reference),{...expected,guest_reference:row.reference,order_id:row.reference,integration:'iunlockmobile-guest-v1'})
+    // Attribution metadata (internal order id + SKU) rides along; consent still gates the GCLID.
+    assert.deepEqual(whopMetadata.get(row.reference),{...expected,internal_order_id:row.reference,sku_id:'444',guest_reference:row.reference,order_id:row.reference,integration:'iunlockmobile-guest-v1'})
   }
 })
 
