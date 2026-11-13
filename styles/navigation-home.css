@@ -163,3 +163,17 @@
 @media (min-width:768px) { .logo-section .logo-grid { grid-template-columns: repeat(4,minmax(0,1fr)); } }
 @media (min-width:1024px) { .logo-section .logo-grid { grid-template-columns: repeat(5,minmax(0,1fr)); } }
 @media (prefers-reduced-motion:reduce) { .logo-grid .logo-card { transition: none; } .logo-card:hover,.logo-card:focus-visible { transform: none; } }
+
+/* Keep the shared navigation in one row, including longer translated labels. */
+.site-header .shell { flex-wrap: nowrap; }
+.site-header .site-nav { flex-wrap: nowrap; }
+.site-header .header-actions { margin-inline: auto 0; }
+@media (min-width: 1321px) {
+  .site-header .shell { gap: 12px; padding-inline: clamp(18px, 1.5vw, 28px); }
+  .site-header .brand { flex: 0 1 auto; min-width: 0; }
+  .site-header .brand > span:last-child { min-width: 0; }
+  .site-header .brand-tagline { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .site-header .site-nav { flex: 0 0 auto; }
+  .site-header .nav-link { white-space: nowrap; padding-inline: 7px; }
+  .site-header .header-actions { gap: 8px; }
+}
