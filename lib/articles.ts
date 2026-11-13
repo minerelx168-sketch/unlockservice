@@ -15043,7 +15043,7 @@ const ARTICLES: Article[] = [
             "Check Carrier Lock first. If it says No SIM restrictions, Apple considers the iPhone unlocked, so there is no carrier lock to identify.",
             "The carrier or network shown for an active SIM or eSIM may describe the current line or carrier connection, not the provider record that controls a lock.",
             "A receipt, order, account record, or financing document may connect the device to a seller or account, but matching evidence and the carrier's own records determine how much it proves.",
-            "Treat any third-party IMEI report as a lead rather than proof of the locking carrier or unlock eligibility. Do not pay for an unlock request solely because a lookup displays a carrier name.",
+            "An IMEI carrier-lock report reads the network and lock policy recorded for that IMEI in the device's activation records. Use it to identify the locking carrier, then confirm eligibility against that carrier's published unlock rules before ordering an unlock for the matching network.",
             "If the iPhone shows more than one IMEI or other cellular identifier, keep the available identifiers private and ask the carrier which one it needs for the affected activation or record."
           ]
         },
