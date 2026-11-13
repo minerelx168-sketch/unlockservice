@@ -74,7 +74,7 @@ export async function ArticlePage({ params,locale }: { params: Promise<{ slug: s
           <div className="article-head">
             <h1 className="t-section">{article.heading}</h1>
             <p className="t-lead">{article.standfirst}</p>
-            {locale==="en"?<ArticleCarrierWidget />:<div className="hero-panel"><QuickImeiCheckCard locale={locale==="fr-ca"?"fr":locale} products={geoOffers("imei_check",["APPLE_CARRIER_LITE"])}/></div>}
+            {locale==="en"?<ArticleCarrierWidget />:<section className={"hero-panel "+widgetStyles.card} aria-label="Apple Carrier Lite"><QuickImeiCheckCard heading locale={locale==="fr-ca"?"fr":locale} products={geoOffers("imei_check",["APPLE_CARRIER_LITE"])}/></section>}
             <p className="t-micro article-meta">
               <Link href="/contact">iUnlockMobile</Link> · {labels[2]} {readable(article.published,locale)}
               {article.updated !== article.published ? ` · ${labels[3]} ${readable(article.updated,locale)}` : ''} ·{' '}

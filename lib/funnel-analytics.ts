@@ -8,6 +8,7 @@ export const FUNNEL_EVENTS = [
   'order_summary_requested',
   'order_preview_continue',
   'imei_input_started',
+  'imei_widget_submit',
   'unlock_imei_submitted',
   'validation_result',
   'service_selection',

@@ -12,7 +12,7 @@ export function ArticleCarrierForm({method}:{method:'card'|'crypto'}) {
   const digits=imei.replace(/[\s-]/g,'')
   const valid=!!serviceIdentifier(imei)
   const meta={source:'article_carrier_widget',service_category:'imei_check',item_id:'444'}
-  return <form className={'price-check '+styles.form} action={action} aria-busy={pending}>
+  return <form className={'price-check '+styles.form} action={action} aria-busy={pending} data-widget="quick-imei-check" onSubmit={()=>trackFunnelEvent('imei_widget_submit',{...meta,currency:'USD',validation_status:valid?'success':'invalid'})}>
     <input type="hidden" name="domain" value="imei_check"/><input type="hidden" name="productCode" value="APPLE_CARRIER_LITE"/><input type="hidden" name="paymentMethod" value={method}/>
     <label htmlFor="quick-imei">15-digit IMEI</label>
     <input id="quick-imei" name="imei" type="text" inputMode="numeric" required autoComplete="off" placeholder="Enter the number shown on your phone" aria-describedby="quick-imei-feedback" value={imei} onChange={e=>{

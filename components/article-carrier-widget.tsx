@@ -19,7 +19,7 @@ export async function ArticleCarrierWidget() {
   return <section className={'hero-panel '+styles.card} aria-labelledby="quick-carrier-title">
     <div className={styles.top}><span className="hero-chip">Apple Carrier Lite</span><strong>{[crypto && base+' crypto',card && formatUsd(guestCardQuote(product.priceCents).totalCents)+' card'].filter(Boolean).join(' / ')} · USD</strong></div>
     <h2 id="quick-carrier-title">Check your iPhone’s carrier and SIM lock</h2>
-    <p>See the network policy and lock status reported for your IMEI before choosing an unlock service.</p>
+    <p>iOS only says “SIM Locked” — it never names the carrier. A {base} IMEI check shows the locking network so you don’t order the wrong unlock or buy a phone still tied to a contract.</p>
     <ArticleCarrierForm method={card?'card':'crypto'} />
     <small>Already unlocked? You don’t need to buy an unlock. If the report shows a restriction, <Link href="/services/unlock">compare eligible unlock services</Link>.</small>
   </section>
