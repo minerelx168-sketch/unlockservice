@@ -1,3 +1,4 @@
+import {headers} from 'next/headers'
 import Link from 'next/link'
 import { ArticleCarrierWidget } from '@/components/article-carrier-widget'
 import { serializeJsonLd } from '@/lib/json-ld'
@@ -28,15 +29,15 @@ const faq = [
  ['Can I ask a Canadian provider to unlock a new phone before two business days?', 'Yes. A provider using the CRTC temporary stay must honour a customer’s unlock request and automatically unlock within two business days of purchase. The stay permits a short lock; it does not require every provider to impose one.'],
  ['Does an IMEI carrier report unlock a phone or prove it is paid off?', 'No. The report identifies the reported carrier policy and SIM-lock status. Ask the original carrier about financing and eligibility, and check lost or stolen status separately before paying the seller.']
 ]
-export default function Page() {
+export default async function Page() {
  const url = publicOrigin()+path
  const graph = [
   {'@type':'Article','@id':url+'#article',headline:title,description,url,datePublished:date,dateModified:date,author:{'@type':'Organization',name:'iUnlockMobile'},hasPart:{'@id':url+'#comparison'},citation:[fcc,crtc,...rows.flatMap(r=>r.slice(4))]},
-  {'@type':'Dataset','@id':url+'#comparison',url:url+'#comparison',name:'Carrier policy comparison',description:'A qualitative comparison of published consumer SIM-lock policies, not a survey of phones or unlock success rates.',dateModified:date,temporalCoverage:'2026',creator:{'@type':'Organization',name:'iUnlockMobile','@id':publicOrigin()+'/#organization'},license:publicOrigin()+'/terms',citation:['https://support.apple.com/en-us/109316',crtc,fcc,...rows.flatMap(r=>r.slice(4))],variableMeasured:rows.map(([name,country,rule,action])=>({'@type':'PropertyValue',name:name+' ('+country+')',value:rule+' '+action}))},
+  {'@type':'Dataset','@id':url+'#comparison',url:url+'#comparison',name:'Carrier policy comparison',description:'A qualitative comparison of published consumer SIM-lock policies, not a survey of phones or unlock success rates.',dateModified:date,temporalCoverage:'2026',isAccessibleForFree:true,creator:{'@type':'Organization',name:'iUnlockMobile','@id':publicOrigin()+'/#organization'},license:publicOrigin()+'/terms',citation:['https://support.apple.com/en-ca/109316',crtc,fcc,...rows.flatMap(r=>r.slice(4))],variableMeasured:rows.map(([name,country,rule,action])=>({'@type':'PropertyValue',name:name+' ('+country+')',value:rule+' '+action}))},
   {'@type':'FAQPage','@id':url+'#faq',mainEntity:faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text}}))}
  ]
  return <article><section className="section section--tint"><div className="shell"><nav className="service-breadcrumb"><Link href="/articles">Guides</Link><span>/</span>Buyer’s report</nav><div className="article-head">
- <script type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd({'@context':'https://schema.org','@graph':graph})}}/>
+ <script nonce={(await headers()).get('x-nonce') ?? undefined} type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd({'@context':'https://schema.org','@graph':graph})}}/>
  <span className="kicker">Buyer’s report</span><h1 className="t-section">{title}</h1><p className="t-lead">{description}</p><p className="t-micro article-meta">iUnlockMobile · Reviewed November 12, 2026</p>
  <p>With the phone in hand, open Settings → General → About. “No SIM restrictions” means you do not need a carrier unlock. If the phone is locked and the seller cannot identify the network, the optional check below can help.</p>
  <ArticleCarrierWidget/></div></div></section><section className="section"><div className="shell article-layout"><div className="article-content">

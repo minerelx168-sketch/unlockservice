@@ -16,7 +16,7 @@ export function StructuredData({ faq }: { faq: ReadonlyArray<{ question: string;
       '@id': `${origin}/#organization`,
       name: 'iUnlockMobile',
       url: origin,
-      sameAs: (process.env.ORGANIZATION_SAME_AS ?? '').split(',').flatMap(raw=>{
+      sameAs: (process.env.NEXT_PUBLIC_ORG_SAME_AS ?? process.env.ORGANIZATION_SAME_AS ?? '').split(',').flatMap(raw=>{
         try {const u=new URL(raw.trim()); return u.protocol==='https:' && !u.username && !u.password && /^(www\.)?(github\.com|trustpilot\.com|youtube\.com|x\.com)$/.test(u.hostname) && u.pathname.length>1 ? [u.href] : []}catch{return []}
       }),
       logo: `${origin}/logo-mark.svg`,
