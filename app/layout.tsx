@@ -18,6 +18,9 @@ import { safeAnalyticsPage } from '@/lib/analytics-page'
 const DESCRIPTION =
   'Compare phone network-unlock services and device reports by IMEI. Review carrier eligibility, service prices and delivery estimates before ordering; refused services release reserved account credit.'
 
+const BING_VERIFICATION = /^[A-Za-z0-9]{8,64}$/.test(process.env.NEXT_PUBLIC_BING_VERIFICATION?.trim() ?? '')
+  ? process.env.NEXT_PUBLIC_BING_VERIFICATION!.trim() : null
+
 export const metadata: Metadata = {
   metadataBase: new URL(publicOrigin()),
   title: {
@@ -35,6 +38,8 @@ export const metadata: Metadata = {
     url: '/',
   },
   twitter: { card: 'summary_large_image' },
+  // Bing Webmaster Tools ownership: <meta name="msvalidate.01"> only when configured.
+  ...(BING_VERIFICATION ? { verification: { other: { 'msvalidate.01': BING_VERIFICATION } } } : {}),
 }
 
 export const viewport: Viewport = {
