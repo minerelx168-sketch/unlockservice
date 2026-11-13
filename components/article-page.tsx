@@ -88,7 +88,16 @@ export async function ArticlePage({ params,locale }: { params: Promise<{ slug: s
       <section className="section">
         <div className="shell article-layout">
           <div className="article-content">
-            {locale==='en' && slug==='how-to-find-carrier-on-iphone-before-unlock' && <p><Link href="/services/imei-check/apple-carrier-lock-status">Compare free checks with Lite and Pro carrier reports, see current prices, or enter your IMEI.</Link></p>}
+            {locale === 'en' && slug === 'how-to-find-carrier-on-iphone-before-unlock' && (
+              <aside className="requirements-card">
+                <h2>Does your carrier report name two different networks?</h2>
+                <p>Read the initial and applied policies separately. An old carrier name can remain on a report after the phone is unlocked. A service-picker policy can leave the locking network unresolved.</p>
+                <Link href="/services/imei-check/apple-carrier-lock-status#interpret-carrier-policy">
+                  Match your result to a carrier policy example
+                </Link>
+                <p><Link href="/services/imei-check/apple-carrier-lock-status">Compare Lite and Pro carrier reports and current prices</Link></p>
+              </aside>
+            )}
             <ArticleBody blocks={article.blocks} />
             {locale==="en" && <ServiceDirectory
               services={SERVICE_SPOKES.filter(service => service.domain === 'imei_check' || /\batt\b|at&t/i.test(`${article.slug} ${article.topic}`))}

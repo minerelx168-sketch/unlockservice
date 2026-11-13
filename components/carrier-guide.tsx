@@ -22,6 +22,34 @@ const methods=[
  ['Original carrier','Free unlock request for eligible devices','Eligibility on its own network; may request account details','Who sold an unidentified handset'],
  ['Apple Carrier Lite / Pro','See prices below','Reported network policy and SIM lock; Pro can also report Find My','Proof of ownership or a complete blacklist search'],
 ]
+function CarrierReportReader() {
+  return (
+    <section id="interpret-carrier-policy" aria-labelledby="policy-reader-title">
+      <h2 id="policy-reader-title">Which carrier should I contact? Read your iPhone policy result</h2>
+      <p>Choose the line that matches your screen or report. You can interpret these examples without entering your IMEI.</p>
+      <div className="faq-list">
+        <details className="faq-item">
+          <summary>My iPhone says SIM locked, with no carrier name</summary>
+          <p>Open Settings → General → About. The Carrier Lock field tells you whether the phone is restricted. The network beside your SIM identifies the active line. Ask the seller which carrier supplied the handset. If the purchase record is missing, <a href="#APPLE_CARRIER_LITE">compare the carrier fields and report prices</a>.</p>
+        </details>
+        <details className="faq-item">
+          <summary>My report names an initial carrier but the applied policy says Unlock</summary>
+          <p>Example from our report catalog: an iPhone 11 lists UK T-Mobile Orange as its initial policy, Unlock as its applied and next policies, and EE as the carrier name. The initial policy records an earlier state. Check Carrier Lock on the handset today. If it says “No SIM restrictions,” ask your intended carrier about activating your plan.</p>
+        </details>
+        <details className="faq-item">
+          <summary>My next tether policy says US Loaner and Service Picker</summary>
+          <p>In our iPhone 12 Pro Max example, the report says Locked and gives a service-picker policy. That label does not identify a single retail carrier. Ask the seller for the service replacement paperwork and original purchase record before submitting a carrier-specific request.</p>
+        </details>
+        <details className="faq-item">
+          <summary>I see No SIM restrictions but my new eSIM will not activate</summary>
+          <p>Apple uses that field to confirm that an iPhone is unlocked. Ask the destination provider to verify the exact model and provision your plan. For an imported phone, <Link href="/tools/us-esim-band-compatibility-checker">check the model and eSIM requirements</Link>.</p>
+        </details>
+      </div>
+      <p><a href="https://support.apple.com/en-us/109316">Apple’s carrier lock instructions</a></p>
+    </section>
+  )
+}
+
 export function CarrierGuide({id,children,product}:{id:GuideKey;product?:string;children?:React.ReactNode}){
  const g=guides[id],canada=id==='ca'||id==='sim',origin=publicOrigin(),url=origin+g.path
  const codes=canada?['UNLOCK_39','UNLOCK_36','UNLOCK_289','UNLOCK_329','UNLOCK_410','UNLOCK_711']:['UNLOCK_346','UNLOCK_649']
@@ -38,6 +66,7 @@ export function CarrierGuide({id,children,product}:{id:GuideKey;product?:string;
  const schema={'@context':'https://schema.org','@graph':[{'@type':'FAQPage','@id':url+'#faq',mainEntity:faq},...available.map(p=>{const sid=PROVIDER_PRODUCTS.find(x=>x.productCode===p.productCode)?.serviceId;return {'@type':'Product','@id':url+'#'+p.productCode,name:p.name,...(sid?{sku:itemIdFor(sid)}:{}),brand:{'@type':'Brand',name:'iUnlockMobile'},offers:{'@type':'Offer',price:(p.priceCents/100).toFixed(2),priceCurrency:'USD',url:url+'#'+p.productCode,availability:'https://schema.org/InStock',hasMerchantReturnPolicy:merchantReturnPolicy(origin)}}})]}
  return <article className={"section "+s.page}><div className="shell"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
  <nav className="service-breadcrumb"><Link href="/services">Services</Link><span>/</span>{canada?'Canada':'United States'}</nav><header className="service-hero-copy"><span className="hero-chip">{canada?'Canada':'United States'} · iPhone carrier guide</span><h1 className="service-entry-title">{g.title}</h1><p className="t-lead">{g.intro}</p></header>
+ {id === 'carrier' && <CarrierReportReader />}
  {id==='ca'&&<div className="requirements-card"><p>Choose the original Canadian network. Confirm ownership, payment status and carrier eligibility before ordering.</p></div>}{id==='ca'?<CanadaUnlockServices services={unlocks} product={product}/>:id==='sim'||id==='used'?<ArticleCarrierWidget/>:<div className={s.facts}><div className={s.card}><GuideOrder anchor="order" domain="imei_check" initial="APPLE_CARRIER_LITE" options={orderOptions(available.filter(p=>p.domain==='imei_check'))}/></div></div>}
  <section><h2>Which check answers your question?</h2><div className={s.tableWrap} role="region" aria-label="Compare verification methods" tabIndex={0}><table><caption>What you can learn before paying</caption><thead><tr>{['Method','Cost','What it verifies','What it cannot establish'].map(c=><th scope="col" key={c}>{c}</th>)}</tr></thead><tbody>{methods.map(([m,c,a,b])=><tr key={m}><th scope="row">{m}</th><td>{c}</td><td>{a}</td><td>{b}</td></tr>)}</tbody></table></div>
  <div className={s.tableWrap} role="region" aria-label="Compare service prices" tabIndex={0}><table><caption>Independent services · current USD quotes</caption><thead><tr>{['Service','Base','Direct card','Estimated delivery','Free route and limits','Ordering'].map(c=><th scope="col" key={c}>{c}</th>)}</tr></thead><tbody>{products.map(p=><tr key={p.productCode} id={p.productCode}><th scope="row">{p.name}</th><td>{p.priceAvailable?formatUsd(p.priceCents):'Not quoted'}</td><td>{p.priceAvailable?formatUsd(guestCardQuote(p.priceCents).totalCents):'Not quoted'}</td><td>{p.etaLabel}</td><td>{rules[p.productCode]??(p.domain==='unlock'?'Ask the original carrier about eligibility before ordering.':'Read Carrier Lock in iOS for free. A report does not unlock the device.')}</td><td>{available.includes(p)?<Link href={p.domain==='imei_check'?'/services/imei-check?product='+p.productCode:!canada?'/services/unlock/us?product='+p.productCode+'#us-order':'/services/unlock/canada?product='+p.productCode+'#ca-order'}>Review service</Link>:'Unavailable'}</td></tr>)}</tbody></table></div></section>
