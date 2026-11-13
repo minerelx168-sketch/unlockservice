@@ -1,0 +1,58 @@
+name: AI visibility baseline
+
+on:
+  schedule:
+    - cron: '0 13 * * 1'   # Mondays 13:00 UTC: full 100-prompt baseline
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'full_100 = all 100 prompts, top_20 = 20 highest-opportunity prompts'
+        type: choice
+        options: [full_100, top_20]
+        default: full_100
+      cluster:
+        description: 'Optional cluster letter or name (A–F), overrides mode'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-visibility
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest   # GitHub-hosted US runners
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate prompts
+        run: |
+          python3 -m py_compile ai_visibility_tracker.py
+          python3 ai_visibility_tracker.py --dry-run
+      - name: Run tracker
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MODE: ${{ inputs.mode || 'full_100' }}
+          CLUSTER: ${{ inputs.cluster }}
+        run: |
+          args=()
+          if [ -n "$CLUSTER" ]; then args+=(--cluster "$CLUSTER")
+          elif [ "$MODE" = "top_20" ]; then args+=(--top 20); fi
+          python3 ai_visibility_tracker.py "${args[@]}" --out reports/ai-visibility
+          cat reports/ai-visibility/*.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ai-visibility-${{ github.run_id }}
+          path: reports/ai-visibility/
+          retention-days: 90
+          if-no-files-found: warn
