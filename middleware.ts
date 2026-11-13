@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { QUOTE_COOKIE } from '@/lib/cookie-names'
+import { AI_REFERRAL_COOKIE, CRO_COOKIE, CRO_COOKIE_MAX_AGE, CRO_HEADER, AI_HEADER, detectAiReferral, validAiReferral, validVisitorId } from '@/lib/cro/experiments'
 
 /**
  * Content-Security-Policy.
@@ -71,6 +72,17 @@ export function middleware(request: NextRequest) {
   // Overwrite any supplied value; the session guard only trusts this request's URL.
   headers.set('x-continuation-path', `${request.nextUrl.pathname}${request.nextUrl.search}`)
 
+  /* CRO bucketing. The visitor id is minted here, before the first render,
+     so a server component can pick the variant on the very first request and
+     the page never swaps layout after hydration. Only documents need it. */
+  const isDocument = request.method === 'GET' && !request.nextUrl.pathname.startsWith('/api/') && !request.nextUrl.pathname.startsWith('/feeds/')
+  const existingVisitor = validVisitorId(request.cookies.get(CRO_COOKIE)?.value)
+  const mintedVisitor = !existingVisitor && isDocument ? crypto.randomUUID().replaceAll('-', '') : null
+  headers.set(CRO_HEADER, existingVisitor ?? mintedVisitor ?? '')
+  const existingAi = validAiReferral(request.cookies.get(AI_REFERRAL_COOKIE)?.value)
+  const detectedAi = !existingAi && isDocument ? detectAiReferral(request.headers.get('referer'), request.nextUrl.searchParams.get('utm_source')) : null
+  headers.set(AI_HEADER, existingAi ?? detectedAi ?? '')
+
   const response = NextResponse.next({ request: { headers } })
   response.headers.set('content-security-policy', csp)
 
@@ -90,6 +102,9 @@ export function middleware(request: NextRequest) {
   if (path !== '/user/unlock' && path.startsWith('/user/') && request.cookies.has(QUOTE_COOKIE)) {
     response.cookies.set(QUOTE_COOKIE, '', { path: '/', maxAge: 0, httpOnly: true, secure })
   }
+  if (mintedVisitor) response.cookies.set(CRO_COOKIE, mintedVisitor, { path: '/', maxAge: CRO_COOKIE_MAX_AGE, httpOnly: true, sameSite: 'lax', secure })
+  // Session cookie: the AI referral describes this visit, not the visitor.
+  if (detectedAi) response.cookies.set(AI_REFERRAL_COOKIE, detectedAi, { path: '/', httpOnly: true, sameSite: 'lax', secure })
 
   return response
 }

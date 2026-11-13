@@ -154,6 +154,21 @@ CREATE TABLE IF NOT EXISTS order_attribution (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (order_type, order_id)
 );
+-- CRO experiments. One row per (visitor, experiment) on first exposure; the
+-- visitor id is a random opaque cookie value, never derived from a person.
+CREATE TABLE IF NOT EXISTS cro_exposures (
+ visitor TEXT NOT NULL, experiment TEXT NOT NULL, variant TEXT NOT NULL CHECK(variant IN ('A','B')),
+ first_at TEXT NOT NULL DEFAULT (datetime('now')),
+ PRIMARY KEY(visitor,experiment)
+);
+-- The variants a checkout was opened under, written when the checkout is created.
+-- Paid state is read from guest_checkouts, which only the verified webhook settles.
+CREATE TABLE IF NOT EXISTS cro_checkouts (
+ reference TEXT PRIMARY KEY, visitor TEXT NOT NULL, variants TEXT NOT NULL,
+ product_code TEXT NOT NULL, order_bump INTEGER NOT NULL DEFAULT 0 CHECK(order_bump IN (0,1)),
+ created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS cro_checkouts_visitor ON cro_checkouts(visitor);
 CREATE TABLE IF NOT EXISTS users (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   username           TEXT    NOT NULL UNIQUE,

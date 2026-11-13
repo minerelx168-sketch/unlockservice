@@ -23,6 +23,7 @@ function render(domain:'unlock'|'imei_check',imei='490154203237518',validEmail=t
     '@/lib/funnel-analytics':{trackFunnelEvent:(name:string)=>events.push(name)},
     'next/link':{default:'a'},'@/components/service-description':{ServiceDescription:'description'},
     './icons':{Icon:'icon'},'./service-picker':{ServicePicker:'picker'},
+    '@/styles/cro.module.css':{default:{}},
   }
   const code=ts.transpileModule(readFileSync('components/hero-price-check.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText
   vm.runInNewContext(code,{module:record,exports:record.exports,require:(name:string)=>{if(!(name in imports)) throw new Error(`Unexpected import ${name}`);return imports[name]}})

@@ -14,6 +14,12 @@ import { guestCryptoEnabled, guestCryptoRoutes } from '@/lib/guest-crypto'
 import { CUSTOMER_IMEI_CHECK_PRODUCTS, CUSTOMER_UNLOCK_PRODUCTS } from '@/lib/customer-provider-products'
 import { GuestCheckoutPanel } from '@/components/guest-checkout-panel'
 import '@/styles/guest-checkout.css'
+import { croAssignment } from '@/lib/cro/server'
+import { ORDER_BUMP_FROM, ORDER_BUMP_TO } from '@/lib/cro/experiments'
+import { CroImpression } from '@/components/cro/cro-impression'
+import { AiPriceBanner } from '@/components/cro/ai-price-banner'
+import { p2 } from '@/lib/i18n/phase2'
+import { formatUsd } from '@/lib/money'
 export const dynamic='force-dynamic'
 export const metadata={title:'Secure service checkout | iUnlockMobile',robots:{index:false,follow:false},referrer:'no-referrer' as const}
 export default async function CheckoutPage({searchParams}:{searchParams:Promise<{product?:string;method?:string}>}) {
@@ -27,9 +33,16 @@ export default async function CheckoutPage({searchParams}:{searchParams:Promise<
   const intent = await readDeviceIntent()
   const deliveryLabel=[...CUSTOMER_IMEI_CHECK_PRODUCTS,...CUSTOMER_UNLOCK_PRODUCTS].find(entry=>entry.productCode===product.code)?.etaLabel ?? 'Confirmed for your selected service'
   const translated=localProduct({...product,etaLabel:deliveryLabel},l)
+  /* CRO-05: only a Lite order can be upgraded, and only while Pro is orderable. */
+  const pro=product.code===ORDER_BUMP_FROM ? getPaidReportProduct(ORDER_BUMP_TO) : undefined
+  const bumpEligible=Boolean(pro?.providerReady && pro.priceCents>product.priceCents)
+  const cro05=bumpEligible ? await croAssignment('CRO-05') : null
+  const bump=pro && cro05?.variant==='B' ? {name:'Apple Carrier Pro',priceCents:pro.priceCents,label:p2(l,'Upgrade to Apple Carrier Pro (+{diff})',{diff:formatUsd(pro.priceCents-product.priceCents)}),detail:p2(l,'Adds iCloud (Find My) status and SIM configuration to the same report. Your IMEI and email stay as entered.')} : undefined
   return <section className="guest-shell">
     <Link className="guest-back" href={l==='en'?(storefrontDomain(product)==='unlock'?'/services/unlock':'/services/imei-check'):routeFor(storefrontDomain(product)==='unlock'?'/services/unlock/us/att':'/services/imei-check',l)}>← {t('Services')}</Link>
     <div className="guest-heading"><span className="eyebrow">{t('Secure checkout')}</span><h1>{t('Review and pay')}</h1><p>{t('No account needed. Your result and private tracking link arrive by email.')}</p></div>
-    <GuestCheckoutPanel product={{code:product.code,name:translated.name,summary:translated.summary,inputType:product.inputType,priceCents:product.priceCents,domain:product.domain}} deliveryLabel={translated.etaLabel} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email??'':''} cardEnabled={guestCheckoutEnabled()} cryptoEnabled={guestCryptoEnabled()} cryptoRoutes={guestCryptoRoutes()} initialMethod={params.method==='crypto'?'crypto':'card'} />
+    {cro05 ? <CroImpression {...cro05} /> : null}
+    {product.code===ORDER_BUMP_FROM ? <AiPriceBanner locale={l} priceCents={product.priceCents} /> : null}
+    <GuestCheckoutPanel bump={bump} product={{code:product.code,name:translated.name,summary:translated.summary,inputType:product.inputType,priceCents:product.priceCents,domain:product.domain}} deliveryLabel={translated.etaLabel} initialImei={intent?.productCode===product.code?intent.imei:''} initialEmail={intent?.productCode===product.code?intent.email??'':''} cardEnabled={guestCheckoutEnabled()} cryptoEnabled={guestCryptoEnabled()} cryptoRoutes={guestCryptoRoutes()} initialMethod={params.method==='crypto'?'crypto':'card'} />
   </section>
 }

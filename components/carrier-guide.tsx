@@ -11,6 +11,9 @@ import { publicOrigin } from '@/lib/site'
 import { GuideOrder } from './guide-order'
 import { orderOptions } from './guide-layout'
 import s from '@/styles/service-spoke.module.css'
+import { PROVIDER_PRODUCTS } from '@/lib/provider-products'
+import { itemIdFor } from '@/lib/acp-feed'
+import { merchantReturnPolicy } from '@/lib/acp-feed-live'
 
 const methods=[
  ['iOS Settings','Free','Carrier Lock field; requires the phone','Locking network, theft reports, payoff'],
@@ -32,7 +35,7 @@ export function CarrierGuide({id,children,product}:{id:GuideKey;product?:string;
  UNLOCK_39:'TELUS / Koodo: ask the supplying carrier first. Recheck the IMEI if the handset was replaced.',
  UNLOCK_289:'Videotron: ask the carrier first. A Canadian service cannot release a US carrier’s lock.'}
  const faq=g.faq.map(([name,text])=>({'@type':'Question',name,acceptedAnswer:{'@type':'Answer',text}}))
- const schema={'@context':'https://schema.org','@graph':[{'@type':'FAQPage','@id':url+'#faq',mainEntity:faq},...available.map(p=>({'@type':p.domain==='unlock'?'Service':'Product','@id':url+'#'+p.productCode,name:p.name,offers:{'@type':'Offer',price:(p.priceCents/100).toFixed(2),priceCurrency:'USD',url:url+'#'+p.productCode,availability:'https://schema.org/InStock'}}))]}
+ const schema={'@context':'https://schema.org','@graph':[{'@type':'FAQPage','@id':url+'#faq',mainEntity:faq},...available.map(p=>{const sid=PROVIDER_PRODUCTS.find(x=>x.productCode===p.productCode)?.serviceId;return {'@type':'Product','@id':url+'#'+p.productCode,name:p.name,...(sid?{sku:itemIdFor(sid)}:{}),brand:{'@type':'Brand',name:'iUnlockMobile'},offers:{'@type':'Offer',price:(p.priceCents/100).toFixed(2),priceCurrency:'USD',url:url+'#'+p.productCode,availability:'https://schema.org/InStock',hasMerchantReturnPolicy:merchantReturnPolicy(origin)}}})]}
  return <article className={"section "+s.page}><div className="shell"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/>
  <nav className="service-breadcrumb"><Link href="/services">Services</Link><span>/</span>{canada?'Canada':'United States'}</nav><header className="service-hero-copy"><span className="hero-chip">{canada?'Canada':'United States'} · iPhone carrier guide</span><h1 className="service-entry-title">{g.title}</h1><p className="t-lead">{g.intro}</p></header>
  {id==='ca'&&<div className="requirements-card"><p>Choose the original Canadian network. Confirm ownership, payment status and carrier eligibility before ordering.</p></div>}{id==='ca'?<CanadaUnlockServices services={unlocks} product={product}/>:id==='sim'||id==='used'?<ArticleCarrierWidget/>:<div className={s.facts}><div className={s.card}><GuideOrder anchor="order" domain="imei_check" initial="APPLE_CARRIER_LITE" options={orderOptions(available.filter(p=>p.domain==='imei_check'))}/></div></div>}

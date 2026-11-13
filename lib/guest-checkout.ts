@@ -61,10 +61,21 @@ export function authorizedGuestCheckout(reference: string, key: string) {
   return getGuestCheckout(reference)
 }
 
+/** Only the two known experiment keys, bounded; identity keys written after them always win. */
+function croMetadata(input: Record<string, string> | undefined): Record<string, string> {
+  if (!input) return {}
+  const result: Record<string, string> = {}
+  if (typeof input.cro_variants === 'string' && /^[A-Z0-9:,-]{1,200}$/.test(input.cro_variants)) result.cro_variants = input.cro_variants
+  if (input.order_bump_accepted === 'true' || input.order_bump_accepted === 'false') result.order_bump_accepted = input.order_bump_accepted
+  return result
+}
+
 export async function createGuestCheckout(input: {
   productCode: string; imei: string; email: string; requestKey: string; expectedPriceCents: number; authenticatedUserId?: number
   analytics?: { clientId: string; sessionId: string }
   consent?: ConsentChoice
+  /** Experiment strings (cro_variants, order_bump_accepted); never used to accept a payment. */
+  metadata?: Record<string, string>
   beforeCheckout?: (reference: string) => Promise<void>
 }) {
   const config = whopConfiguration()
@@ -117,7 +128,7 @@ export async function createGuestCheckout(input: {
       title: row.product_name.slice(0,120), description: row.wallet_credit_cents > 0 ? `One device service order. Service $${(row.price_cents/100).toFixed(2)}, account credit $${(row.wallet_credit_cents/100).toFixed(2)}, card fee $${(row.fee_cents/100).toFixed(2)}. No subscription.` : `iUnlockMobile — one device service order. Total $${(total/100).toFixed(2)} USD, including our card fee and any applicable tax. No subscription.`,
       visibility: 'hidden', stock: 1, unlimited_stock: false, force_create_new_plan: true, three_ds_level: 'mandate_challenge',
       payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false } },
-    metadata: { ...whopClickMetadata('guest', row.reference, input.consent ?? 'unknown'), guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
+    metadata: { ...croMetadata(input.metadata), ...whopClickMetadata('guest', row.reference, input.consent ?? 'unknown'), guest_reference: row.reference, order_id: row.reference, integration: 'iunlockmobile-guest-v1' },
     payment_method_configuration: { enabled: ['card'], disabled: [], include_platform_defaults: false },
     redirect_url: publicOrigin() + guestOrderPath(row.reference),
   }, { idempotencyKey: `guest-checkout-${row.reference}` })

@@ -11,6 +11,7 @@ import { CONSENT_COOKIE } from '@/lib/cookie-names'
 import { parseSignedConsent } from '@/lib/order-attribution'
 import { currentSession } from '@/lib/auth'
 import { captureCheckoutContext } from '@/lib/checkout-context-request'
+import { croCheckout } from '@/lib/cro/checkout'
 export const runtime='nodejs'
 export const dynamic='force-dynamic'
 export async function POST(request:Request) {
@@ -26,13 +27,15 @@ export async function POST(request:Request) {
     const found=await currentSession()
     if (!found && isMemberUnlock(String(body.productCode ?? ''))) throw new WhopPaymentError('Sign in to order this member service.',401)
     if(found?.user.account_type==='reseller') throw new WhopPaymentError('Use your reseller wallet to order at reseller prices.',409)
+    const cro=await croCheckout(String(body.productCode??''),body.orderBump)
     const context=body.analyticsContext as {clientId:string;sessionId:string}|undefined
-    const result=await createGuestCheckout({productCode:String(body.productCode??''),imei:String(body.imei??''),email:String(body.email??''),
+    const result=await createGuestCheckout({productCode:cro.productCode,metadata:cro.metadata,imei:String(body.imei??''),email:String(body.email??''),
       requestKey:String(body.requestKey??''),expectedPriceCents:Number(body.expectedPriceCents),authenticatedUserId:found?.user.id,
       consent: found?.user.account_type==='admin' ? 'denied' : consent,
       analytics: consent !== 'denied' && found?.user.account_type!=='admin' ? context : undefined,
       beforeCheckout: reference => captureCheckoutContext('guest',reference,found?.user.id ?? null,found?.user.account_type==='admin' ? undefined : body.analyticsContext)})
     if(found?.user.account_type!=='admin') await captureCheckoutContext('guest',result.reference,found?.user.id ?? null,body.analyticsContext)
+    cro.record(result.reference)
     after(() => sendGuestCheckoutLink(result.reference))
     return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}})
   } catch(error) {
