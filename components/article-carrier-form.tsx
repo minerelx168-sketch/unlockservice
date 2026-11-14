@@ -2,18 +2,19 @@
 import { useActionState, useRef, useState } from 'react'
 import { continueDeviceServiceAction } from '@/lib/device-intent-actions'
 import { serviceIdentifier } from '@/lib/service-identifier'
+import { carrierFunnelItem, type CarrierBoxCode } from '@/lib/article-report-offer'
 import { trackFunnelEvent } from '@/lib/funnel-analytics'
 import styles from '@/styles/article-carrier-widget.module.css'
 
-export function ArticleCarrierForm({method}:{method:'card'|'crypto'}) {
+export function ArticleCarrierForm({method,productCode}:{method:'card'|'crypto';productCode:CarrierBoxCode}) {
   const [state,action,pending]=useActionState(continueDeviceServiceAction,{})
   const [imei,setImei]=useState('')
   const started=useRef(false), lastChecked=useRef('')
   const digits=imei.replace(/[\s-]/g,'')
   const valid=!!serviceIdentifier(imei)
-  const meta={source:'article_carrier_widget',service_category:'imei_check',item_id:'444'}
+  const meta={source:'article_carrier_widget',service_category:'imei_check',item_id:carrierFunnelItem(productCode)?.id}
   return <form className={'price-check '+styles.form} action={action} aria-busy={pending}>
-    <input type="hidden" name="domain" value="imei_check"/><input type="hidden" name="productCode" value="APPLE_CARRIER_LITE"/><input type="hidden" name="paymentMethod" value={method}/>
+    <input type="hidden" name="domain" value="imei_check"/><input type="hidden" name="productCode" value={productCode}/><input type="hidden" name="paymentMethod" value={method}/>
     <label htmlFor="quick-imei">15-digit IMEI</label>
     <input id="quick-imei" name="imei" type="text" inputMode="numeric" required autoComplete="off" placeholder="Enter the number shown on your phone" aria-describedby="quick-imei-feedback" value={imei} onChange={e=>{
       const raw=e.currentTarget.value.replace(/[\s-]/g,'')

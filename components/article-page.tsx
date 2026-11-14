@@ -2,10 +2,7 @@ import {ArticleDecision} from './article-decision'
 import {enrichArticle} from '@/lib/article-evidence'
 import {enrichEdition} from '@/lib/article-editions-evidence'
 import {articleLabels} from '@/lib/article-labels'
-import {QuickImeiCheckCard} from './QuickImeiCheckCard'
-import {geoOffers} from '@/lib/geo-offers'
 import widgetStyles from '@/styles/article-carrier-widget.module.css'
-import { ArticleCarrierWidget } from '@/components/article-carrier-widget'
 import { ArticleCta } from '@/components/cro/article-cta'
 import { ServiceDirectory } from '@/components/service-directory'
 import { SERVICE_SPOKES } from '@/lib/service-spokes'
@@ -80,7 +77,7 @@ export async function ArticlePage({ params,locale }: { params: Promise<{ slug: s
             <h1 className="t-section">{article.heading}</h1>
             <p className="t-lead">{article.standfirst}</p>
             <ArticleDecision article={article} />
-            <ArticleCta locale={locale==="fr-ca"?"fr":locale}>{locale==="en"?<ArticleCarrierWidget />:<div className="hero-panel"><QuickImeiCheckCard locale={locale==="fr-ca"?"fr":locale} products={geoOffers("imei_check",["APPLE_CARRIER_LITE"])}/></div>}</ArticleCta>
+            <ArticleCta locale={locale==="fr-ca"?"fr":locale} />
             <p className="t-micro article-meta">
               <Link href="/contact">iUnlockMobile</Link> · {labels[2]} {readable(article.published,locale)}
               {article.updated !== article.published ? ` · ${labels[3]} ${readable(article.updated,locale)}` : ''} ·{' '}

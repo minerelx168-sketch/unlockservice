@@ -1,3 +1,4 @@
+import type { CarrierBoxCode } from '@/lib/article-report-offer'
 import { connection } from 'next/server'
 import Link from 'next/link'
 import { getPaidReportProduct } from '@/lib/paid-reports'
@@ -8,19 +9,19 @@ import { formatUsd } from '@/lib/money'
 import { ArticleCarrierForm } from './article-carrier-form'
 import styles from '@/styles/article-carrier-widget.module.css'
 
-export async function ArticleCarrierWidget() {
+export async function ArticleCarrierWidget({ productCode = 'APPLE_CARRIER_LITE' }: { productCode?: CarrierBoxCode } = {}) {
   await connection() // Availability and retail prices must be read at request time.
-  const product = getPaidReportProduct('APPLE_CARRIER_LITE')
+  const product = getPaidReportProduct(productCode)
   const card = guestCheckoutEnabled(), crypto = guestCryptoEnabled()
   if (!product?.providerReady || !product.isActive || product.priceCents <= 0 || !(card || crypto)) {
     return <aside><p>The quick carrier check is currently unavailable. <Link href="/services/imei-check/apple-carrier-lock-status">Compare carrier reports and free checks.</Link></p></aside>
   }
   const base = formatUsd(product.priceCents)
   return <section className={'hero-panel '+styles.card} aria-labelledby="quick-carrier-title">
-    <div className={styles.top}><span className="hero-chip">Apple Carrier Lite</span><strong>{[crypto && base+' crypto',card && formatUsd(guestCardQuote(product.priceCents).totalCents)+' card'].filter(Boolean).join(' / ')} · USD</strong></div>
+    <div className={styles.top}><span className="hero-chip">{productCode === 'APPLE_CARRIER_LITE' ? 'Apple Carrier Lite' : product.name}</span><strong>{[crypto && base+' crypto',card && formatUsd(guestCardQuote(product.priceCents).totalCents)+' card'].filter(Boolean).join(' / ')} · USD</strong></div>
     <h2 id="quick-carrier-title">Check your iPhone’s carrier and SIM lock</h2>
     <p>See the network policy and lock status reported for your IMEI before choosing an unlock service.</p>
-    <ArticleCarrierForm method={card?'card':'crypto'} />
+    <ArticleCarrierForm productCode={productCode} method={card?'card':'crypto'} />
     <small>Already unlocked? You don’t need to buy an unlock. If the report shows a restriction, <Link href="/services/unlock">compare eligible unlock services</Link>.</small>
   </section>
 }
