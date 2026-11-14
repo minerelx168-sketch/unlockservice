@@ -83,6 +83,24 @@ export function checkoutContext(kind: string, reference: string) {
     { consent: ConsentChoice; internal: number } | undefined
 }
 
+/** Never export a raw ad click reference or customer/device identifier. */
+export function checkoutMarketingLabels(kind: string, reference: string) {
+  const row = db().prepare(`SELECT
+    CASE WHEN (gclid IS NOT NULL OR gbraid IS NOT NULL OR wbraid IS NOT NULL) AND oppref IS NOT NULL THEN 'multiple'
+         WHEN gclid IS NOT NULL OR gbraid IS NOT NULL OR wbraid IS NOT NULL THEN 'google_ads'
+         WHEN oppref IS NOT NULL THEN 'openai_ads' ELSE 'no_click_id' END AS checkout_click_channel,
+    utm_source,utm_medium,utm_campaign,utm_content FROM ga4_checkout_context
+    WHERE kind=? AND reference=? AND consent='granted' AND internal=0`).get(kind,reference) as
+    { checkout_click_channel: string; utm_source:string|null; utm_medium:string|null; utm_campaign:string|null; utm_content:string|null } | undefined
+  if (!row) return undefined
+  const labels: Record<string,string> = { checkout_click_channel:row.checkout_click_channel }
+  for (const key of ['utm_source','utm_medium','utm_campaign','utm_content'] as const) {
+    const value=row[key]
+    if (value && /^[a-z0-9][a-z0-9_.-]{0,79}$/i.test(value) && !/\d{13,}|[a-f0-9]{32,}/i.test(value.replace(/[_.-]/g,''))) labels['checkout_'+key]=value
+  }
+  return labels
+}
+
 /** GA-format random client ID for sales whose browser ID was not captured. */
 export function fallbackClientId(): string {
   return `${randomInt(1_000_000_000, 2_147_483_647)}.${Math.floor(Date.now() / 1000)}`
@@ -117,6 +135,16 @@ type SendDetails = { valueCents: number; paidCents: number; clientSource: 'ga' |
  */
 export async function sendClaimedEvent(event: EventRecord, body: Record<string, unknown>, details: SendDetails): Promise<'submitted' | 'uncertain'> {
   try { stageAdsPurchase(event, body) } catch { /* Ads staging cannot block verified payment measurement. */ }
+  // Add descriptive fields to the existing event; do not change its GA session,
+  // value, transaction ID, or the payload staged for other ad destinations.
+  if (event.contextReference) {
+    try {
+      const labels = checkoutMarketingLabels(event.kind, event.contextReference)
+      const events = body.events
+      if (labels && Array.isArray(events)) body = { ...body, events: events.map(entry =>
+        entry?.name === event.eventName ? { ...entry, params: { ...entry.params, ...labels } } : entry) }
+    } catch { /* Optional attribution must not prevent verified payment reporting. */ }
+  }
   const config = ga4Config()
   let state: 'submitted' | 'uncertain' = 'uncertain'
   try {
