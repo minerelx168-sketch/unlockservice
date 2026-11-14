@@ -48,6 +48,275 @@ const ARTICLES: Article[] = [
 
   {
     "locale": "en",
+    "slug": "docomo-imei-check-used-iphone-japan",
+    "title": "Docomo IMEI Check for a Used iPhone",
+    "heading": "Docomo IMEI check: can this used Japanese iPhone take my SIM?",
+    "description": "Compare a Docomo network restriction result with Carrier Lock on a used Japanese iPhone. Learn which check to run before buying it for use abroad.",
+    "topic": "Buying a Japanese iPhone",
+    "standfirst": "A Docomo IMEI check tells you whether a handset is subject to a network use restriction on Docomo. To see whether the iPhone accepts another carrier’s SIM, read Carrier Lock in Settings. Before buying a Japanese import, match both results to the handset and check that your destination carrier supports its model.",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Use the IMEI from the actual iPhone in Docomo’s network restriction checker.",
+          "Read Carrier Lock on the handset even when the listing says “SIM-free.”",
+          "Use the model’s release date when applying Docomo’s August 2021 SIM policy."
+        ],
+        "ordered": false
+      },
+      {
+        "kind": "h2",
+        "id": "check-docomo",
+        "text": "Where do I check the IMEI in a Japanese auction listing?"
+      },
+      {
+        "kind": "p",
+        "text": "Ask the seller to open the About screen and match the IMEI to the listing in private. From Docomo’s English support page, follow Network Use Restrictions Mobile Phone Confirmation to its Japanese checker. Keep the result, the date and which identifier you checked together.",
+        "links": [
+          {
+            "label": "Open Docomo’s official checker directory",
+            "href": "https://www.docomo.ne.jp/english/support/trouble/"
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "items": [
+          "Open Settings → General → About. Find IMEI and, if present, IMEI2. Record which one the seller supplied.",
+          "Enter the matching handset identifier in the Docomo checker. Read the explanation beside the result.",
+          "On the same iPhone, read Carrier Lock. Apple uses “No SIM restrictions” for an unlocked handset."
+        ],
+        "ordered": true
+      },
+      {
+        "kind": "h2",
+        "id": "compare-results",
+        "text": "Why can a SIM-free iPhone still need a Docomo check?"
+      },
+      {
+        "kind": "p",
+        "text": "The SIM policy controls whether the iPhone will accept a different carrier. Docomo’s restriction database answers whether Docomo restricts that handset on its network. A seller can accurately show an unlocked iPhone while leaving the second question unanswered. Use the following checks before agreeing a price.",
+        "links": [
+          {
+            "label": "Apple’s Carrier Lock instructions",
+            "href": "https://support.apple.com/en-us/109316"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Evidence",
+          "What it answers",
+          "Buying decision"
+        ],
+        "rows": [
+          [
+            "Docomo IMEI result",
+            "Network use restriction recorded by Docomo",
+            "If restricted, pause the sale and have the seller address the record with Docomo."
+          ],
+          [
+            "Carrier Lock in About",
+            "Whether iOS reports a SIM restriction",
+            "If restricted, establish the locking network before contacting a carrier."
+          ],
+          [
+            "A-number and destination carrier’s device check",
+            "Whether the model and intended plan are supported",
+            "Confirm voice service and physical SIM or eSIM support with the destination carrier."
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "release-date",
+        "text": "Does the August 2021 rule cover a used Docomo iPhone?"
+      },
+      {
+        "kind": "p",
+        "text": "Docomo says models released on or after August 27, 2021 were supplied without a SIM lock. The relevant date is the model’s release, so buying an older model secondhand this year does not bring it under that rule. Read the actual phone’s Carrier Lock field before arranging service.",
+        "links": [
+          {
+            "label": "Docomo’s release-date rule",
+            "href": "https://www.docomo.ne.jp/english/support/procedure/simcard/unlock_dcm/"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "For example, a seller lists an older model as a recent purchase and includes a favorable Docomo network result. Ask to see Carrier Lock. If it shows a restriction and the seller cannot document the original network, an IMEI carrier lookup can identify the network when its activation policy record names one."
+      },
+      {
+        "kind": "p",
+        "text": "Suppose the seller sends a screenshot showing a working Docomo line. That demonstrates service on that line at the time of the screenshot. It does not test your travel eSIM. Ask for the Carrier Lock reading, then ask your destination carrier to check the model against the plan you actually intend to activate.",
+        "links": [
+          { "label": "Read the Apple carrier lock report fields", "href": "/services/imei-check/apple-carrier-lock-status" }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "If the phone shows a SIM restriction and the original carrier is unclear, check which network the activation record identifies.",
+        "label": "Compare IMEI carrier reports",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does a favorable Docomo result mean my home SIM will work?",
+        "answer": "You still need the Carrier Lock reading on the iPhone and confirmation from your home carrier that the model is supported on your plan. Docomo’s checker reports on use of its own network. It cannot run an activation test with your SIM abroad."
+      },
+      {
+        "question": "What if Docomo cannot find the IMEI I entered?",
+        "answer": "Read the digits from the handset again and match the exact identifier used in the listing. Ask the seller for the original sales network or documentation. An inconclusive search gives you no basis for calling the phone unrestricted or attributing it to Docomo."
+      },
+      {
+        "question": "Does buying a Japanese iPhone in 2026 settle its lock status?",
+        "answer": "Look up when Docomo released that model and inspect the handset itself. The carrier’s published cutoff concerns models released from August 27, 2021 onward. The date on a secondhand receipt tells you when this seller bought or sold this particular unit."
+      },
+      {
+        "question": "Can an IMEI report tell me whom to contact about a SIM lock?",
+        "answer": "A carrier report can identify a network if the activation or tether policy record names it. Read the policy label and the reported lock status together. If the record is generic or inconclusive, use the original sales paperwork and ask the carrier to verify eligibility."
+      }
+    ],
+    "published": "2026-11-14",
+    "updated": "2026-11-14",
+    "minutes": 3
+  },
+
+  {
+    "locale": "pt",
+    "slug": "consultar-imei-iphone-celular-seguro",
+    "title": "Consultar IMEI do iPhone no Celular Seguro",
+    "heading": "Como consultar o IMEI do iPhone no Celular Seguro antes da compra",
+    "description": "Confira o IMEI e o IMEI2 de um iPhone usado no Celular Seguro e veja como verificar se um aparelho importado aceita o chip da sua operadora.",
+    "topic": "Compra de iPhone usado no Brasil",
+    "standfirst": "Para consultar um iPhone usado no Celular Seguro, pegue os números no próprio aparelho e pesquise cada IMEI separadamente. A consulta mostra se há alerta para aquele número. Se o iPhone veio dos Estados Unidos, confira também o bloqueio de operadora nos Ajustes antes de contratar um plano brasileiro.",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Confira o IMEI e o IMEI2 na presença do vendedor.",
+          "Guarde o resultado de cada consulta com a data e a identificação do campo consultado.",
+          "Se aparecer um alerta, suspenda a compra e siga a orientação do Ministério da Justiça."
+        ],
+        "ordered": false
+      },
+      {
+        "kind": "h2",
+        "id": "dois-imeis",
+        "text": "Como consultar os dois IMEIs do mesmo iPhone?"
+      },
+      {
+        "kind": "p",
+        "text": "Abra a tela Sobre no iPhone que você pretende levar. Se aparecerem IMEI e IMEI2, faça duas consultas no Celular Seguro, uma para cada número de quinze dígitos. Assim você consegue dizer exatamente qual deles foi consultado se o resultado apresentado pelo vendedor for diferente.",
+        "links": [
+          {
+            "label": "Consulta pública do Celular Seguro",
+            "href": "https://consulta-celularseguro.mj.gov.br/ConsultaPublica"
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "items": [
+          "Acesse Ajustes → Geral → Sobre. Localize os campos IMEI e IMEI2.",
+          "Abra a consulta oficial, informe o primeiro IMEI e confira a resposta. Repita com o segundo, se houver.",
+          "Volte à tela Sobre e procure Bloqueio de Operadora. A indicação “Sem restrições” informa que o iPhone está desbloqueado para uso com outra operadora."
+        ],
+        "ordered": true
+      },
+      {
+        "kind": "h2",
+        "id": "resultados",
+        "text": "O que cada resultado diz sobre um iPhone importado?"
+      },
+      {
+        "kind": "p",
+        "text": "O Celular Seguro reúne alertas de roubo, furto ou extravio. Já o campo Bloqueio de Operadora informa se o iPhone aceita outras operadoras. Para decidir se vale fechar a compra, leia cada resposta junto com a pergunta que ela resolve, principalmente quando o aparelho veio de fora.",
+        "links": [
+          {
+            "label": "Como o Ministério da Justiça descreve a consulta",
+            "href": "https://www.gov.br/mj/pt-br/acesso-a-informacao/acoes-e-programas/celular-seguro/consultar-celulares-com-restricao"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Onde conferir",
+          "O que o resultado informa",
+          "Como usar na compra"
+        ],
+        "rows": [
+          [
+            "Celular Seguro, um IMEI por vez",
+            "Existência de alerta para o número consultado",
+            "Se houver alerta em qualquer um dos números, interrompa a negociação."
+          ],
+          [
+            "Bloqueio de Operadora, nos Ajustes",
+            "Se o iPhone está liberado para outra operadora",
+            "Se houver bloqueio, identifique a operadora de origem."
+          ],
+          [
+            "Operadora brasileira do plano",
+            "Se o modelo e o plano admitem a ativação pretendida",
+            "Em um modelo sem bandeja, confirme que a operadora fornece eSIM para o seu plano."
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "chip-brasileiro",
+        "text": "Sem alerta no Brasil, por que verificar a operadora de origem?"
+      },
+      {
+        "kind": "p",
+        "text": "Imagine um iPhone trazido dos Estados Unidos com os dois IMEIs sem alerta. Se os Ajustes indicarem bloqueio de operadora, ainda falta descobrir qual rede pode autorizar a liberação. O nome da operadora que aparece ao lado da linha instalada não basta para identificar quem aplicou o bloqueio.",
+        "links": [
+          {
+            "label": "Orientações da Apple sobre o bloqueio de operadora",
+            "href": "https://support.apple.com/pt-br/109316"
+          }
+        ]
+      },
+      {
+        "kind": "p",
+        "text": "Se o vendedor disser que o aparelho veio da AT&T, peça o comprovante de compra. Quando a origem continuar incerta, a consulta por IMEI pode identificar a operadora pelo registro de ativação, desde que ele informe o nome da rede. A decisão sobre a liberação cabe à operadora responsável."
+      },
+      {
+        "kind": "cta",
+        "text": "Os Ajustes indicam bloqueio e o vendedor desconhece a rede de origem? Consulte o registro do aparelho antes de pedir a liberação.",
+        "label": "Verificar a operadora do iPhone pelo IMEI",
+        "href": "/pt/verificar-operadora-iphone-imei"
+      }
+    ],
+    "faq": [
+      {
+        "question": "O vendedor me mandou só o IMEI2. Posso fechar a compra?",
+        "answer": "Peça para conferir os campos da tela Sobre no aparelho que você vai receber. Se houver dois IMEIs, consulte os dois individualmente. Uma resposta sem alerta para o IMEI2 descreve aquele número naquele momento e deixa o primeiro IMEI por conferir."
+      },
+      {
+        "question": "Posso colocar o EID no campo de IMEI do Celular Seguro?",
+        "answer": "Use o número de quinze dígitos identificado como IMEI ou IMEI2. O EID identifica o componente usado para o eSIM e tem outra finalidade. Se estiver copiando da tela Sobre, confira o nome do campo antes de enviar a consulta."
+      },
+      {
+        "question": "O que faço se apenas um dos números mostrar alerta?",
+        "answer": "Suspenda a compra e guarde a resposta com a indicação do número consultado. Um resultado sem alerta no outro campo não anula o primeiro. O Ministério da Justiça orienta procurar a Polícia Civil quando a consulta aponta IMEI bloqueado ou com restrição."
+      },
+      {
+        "question": "Um iPhone americano sem bandeja aceita meu plano brasileiro?",
+        "answer": "Confira primeiro se a tela Sobre mostra que o aparelho está sem restrições de operadora. Depois informe o modelo exato à sua operadora brasileira e confirme se ela ativa eSIM no seu plano. São verificações separadas da consulta de alertas pelo IMEI."
+      }
+    ],
+    "published": "2026-11-14",
+    "updated": "2026-11-14",
+    "minutes": 3
+  },
+
+  {
+    "locale": "en",
     "slug": "iphone-model-number-lookup-carrier-lock",
     "title": "iPhone Model Number Lookup: LL/A vs A2849",
     "heading": "iPhone model number lookup: what does LL/A tell a used buyer?",
