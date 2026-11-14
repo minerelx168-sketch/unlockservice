@@ -45,6 +45,679 @@ export type Article = {
 }
 
 const ARTICLES: Article[] = [
+  {
+    "locale": "en",
+    "slug": "android-iphone-esim-transfer-qr-direction",
+    "title": "Android to iPhone: Which QR Code?",
+    "heading": "Moving an Android line to iPhone: which phone scans the QR code?",
+    "description": "Tell a transfer code displayed on an iPhone from a carrier activation code, then test the moved line before setting your Android phone aside.",
+    "standfirst": "Open Add eSIM on the receiving iPhone and check who supplied the QR code. A code shown by Transfer from Android pairs the phones. A code issued by your carrier installs its plan. If the transfer option is missing, ask the carrier which activation method it supports for your devices.",
+    "published": "2026-11-14",
+    "updated": "2026-11-14",
+    "minutes": 3,
+    "topic": "eSIM transfer",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Android scans the transfer code on iPhone.",
+          "Check the transferred number with a call."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "check",
+        "text": "Who supplied the code?"
+      },
+      {
+        "kind": "p",
+        "text": "Start with the screen that produced the square. In Apple’s direct transfer flow, select Transfer from Android on the iPhone, then scan its display with the Android camera. If the carrier sent an activation code instead, follow its instructions on the receiving iPhone. Keep both devices available.",
+        "links": [
+          {
+            "label": "Apple transfer instructions",
+            "href": "https://support.apple.com/en-us/123878"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Evidence",
+          "What it confirms",
+          "Still unknown",
+          "Next step"
+        ],
+        "rows": [
+          [
+            "iPhone displays a transfer QR",
+            "Pairing invitation",
+            "Whether the line has moved",
+            "Scan with Android"
+          ],
+          [
+            "Carrier provides an activation QR",
+            "Installation method",
+            "Whether activation completed",
+            "Follow carrier instructions on iPhone"
+          ],
+          [
+            "Call connects on the selected number",
+            "Outgoing voice works",
+            "Incoming calls and data",
+            "Test separately"
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "next-step",
+        "text": "Why does the old phone lose service?"
+      },
+      {
+        "kind": "p",
+        "text": "Apple explains that completing the move deactivates the transferred SIM on Android. Select the transferred number on the iPhone before making a test call. If the old line has stopped working and the new one cannot call, use Wi-Fi to contact your carrier about the transfer."
+      },
+      {
+        "kind": "h3",
+        "id": "example",
+        "text": "Worked example"
+      },
+      {
+        "kind": "p",
+        "text": "Suppose the iPhone displays a square after you choose Transfer from Android. Opening Camera on that same phone will not advance the transfer. Scan with Android and select your number there. If pairing fails, use Apple’s alternative pairing instructions or ask your carrier to issue an activation.",
+        "links": [
+          {
+            "label": "Activation methods",
+            "href": "https://support.apple.com/en-us/118669"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "support",
+        "text": "How do I leave the old phone ready for a retry?"
+      },
+      {
+        "kind": "p",
+        "text": "Keep the Android charged, connected and available until the receiving phone can place and receive calls on the transferred number. Leave its profile in place while you identify which transfer method your provider supports. Removing it yourself can turn a pairing question into a replacement request."
+      },
+      {
+        "kind": "p",
+        "text": "Before starting, check the provider and software requirements in Apple’s transfer instructions. If either handset falls outside the supported combination, tell the carrier you are moving an existing number between platforms. Ask whether it will send an activation notification to the iPhone or provide a code separately. Note which device should display the prompt and which device must confirm it."
+      },
+      {
+        "kind": "p",
+        "text": "After setup, turn Wi-Fi off briefly to test cellular data if your plan includes it. A webpage loading over home Wi-Fi cannot confirm the mobile line was activated. On an iPhone with two plans, also select the moved line for data so the other plan cannot mask a failed test. If you reach support, describe the last completed screen and which phone can still receive a call.",
+        "links": [
+          {
+            "label": "Inspect the carrier report fields",
+            "href": "/services/imei-check/apple-carrier-lock-status"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Compare available reports if the locking network is still unclear.",
+        "label": "Browse phone reports",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can I scan an emailed code with Android?",
+        "answer": "Check the sender and what the message asks you to install. If the carrier issued an activation code for the new iPhone, follow the carrier’s instructions there. Scanning the transfer screen with Android belongs to a different setup method."
+      },
+      {
+        "question": "What if Transfer from Android never appears?",
+        "answer": "Check Apple’s current list of supported phones, software and carriers. Ask your existing carrier whether it can activate the number on the iPhone directly or issue a QR code. Keep the current line available while arranging the move."
+      },
+      {
+        "question": "Does copying photos transfer my number?",
+        "answer": "Seeing your photos or contacts on the iPhone confirms that content arrived. Open Cellular to see whether the plan is present, select the number for a test call and check incoming calls before relying on the new phone."
+      },
+      {
+        "question": "Can a lock report restore the old line?",
+        "answer": "Only your mobile provider can check which SIM currently carries your subscription and arrange a new activation. A carrier report can help with a separate question if the receiving iPhone shows a SIM restriction and you cannot identify the carrier responsible."
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "slug": "iphone-second-line-no-service-during-call",
+    "title": "Second iPhone Line Drops During Calls",
+    "heading": "Second iPhone line shows No Service during a call: which settings should I check?",
+    "description": "Check why one iPhone line loses service during calls on the other. Compare idle and in-call readings before changing Wi-Fi Calling settings.",
+    "standfirst": "Open Control Center before a call, during it and after you hang up. If the second line loses service only during the call, check Wi-Fi Calling for that number and which line supplies data. If service stays absent afterward, ask the affected carrier to check the line separately.",
+    "published": "2026-11-14",
+    "updated": "2026-11-14",
+    "minutes": 3,
+    "topic": "Dual SIM",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Compare both lines before and after a call.",
+          "Check Wi-Fi Calling on the line that misses calls."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "check",
+        "text": "When does the second line disappear?"
+      },
+      {
+        "kind": "p",
+        "text": "Make a short call on the first number while someone else calls the second. Watch both network labels in Control Center and check voicemail after hanging up. Apple shows that the unused line can display No Service during a call. Record whether its signal returns afterward.",
+        "links": [
+          {
+            "label": "Apple’s Dual SIM examples",
+            "href": "https://support.apple.com/en-us/109317"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Evidence",
+          "What it confirms",
+          "Still unknown",
+          "Next step"
+        ],
+        "rows": [
+          [
+            "Both lines available while idle",
+            "Both can register here",
+            "Simultaneous call handling",
+            "Test during a call"
+          ],
+          [
+            "Second line drops only during call",
+            "Availability depends on call state",
+            "Wi-Fi Calling support",
+            "Check second number"
+          ],
+          [
+            "Second line remains unavailable",
+            "Problem persists when idle",
+            "Account or coverage issue",
+            "Contact provider"
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "next-step",
+        "text": "Which setting changes the outcome?"
+      },
+      {
+        "kind": "p",
+        "text": "Check whether the second carrier supports Wi-Fi Calling and whether it is enabled for that line. Under Cellular Data, check which line supplies data and whether switching is allowed. Repeat the same call with Wi-Fi connected. Ask the carrier about plan charges before changing roaming settings."
+      },
+      {
+        "kind": "h3",
+        "id": "example",
+        "text": "Apple’s example"
+      },
+      {
+        "kind": "p",
+        "text": "One illustration shows a carrier in use and the other line showing No Service. Another shows the second line using Wi-Fi Calling. If your second line stays unavailable after hanging up, check whether that line is turned on and registered.",
+        "links": [
+          {
+            "label": "Carrier Lock instructions",
+            "href": "https://support.apple.com/en-us/109316"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "support",
+        "text": "What should I tell support after testing?"
+      },
+      {
+        "kind": "p",
+        "text": "Write down which number was on the call, which number missed the incoming call and whether the second signal returned after hanging up. This gives support a repeatable symptom. Include the Wi-Fi connection state and the selected data line so the carrier can interpret both tests."
+      },
+      {
+        "kind": "p",
+        "text": "Use the same location and the same calling numbers on each attempt. Start with both lines idle. Have someone call the second number and confirm it rings. Then place a call on the first line and ask that person to repeat the incoming call. Record whether they heard ringing or voicemail and what appeared in Control Center."
+      },
+      {
+        "kind": "p",
+        "text": "If the second line also fails the idle test, open its individual settings and verify it is enabled. Ask the provider whether the subscription is active and whether there is coverage where you tested. A screenshot of signal bars taken during the first call cannot settle either question. When sharing results, use labels such as Personal and Work instead of publishing phone numbers.",
+        "links": [
+          {
+            "label": "Compare carrier lock fields",
+            "href": "/services/imei-check/apple-carrier-lock-status"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Compare available reports if the locking network is still unclear.",
+        "label": "Browse phone reports",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Does voicemail on my second number mean the iPhone is locked?",
+        "answer": "Voicemail during a call can reflect how the second line receives calls when the first line is busy. Compare an incoming call while idle with one during a call, then check Wi-Fi Calling support for the affected number."
+      },
+      {
+        "question": "Where do I enable Wi-Fi Calling for the right number?",
+        "answer": "Open Cellular in Settings, select the number that misses calls and inspect its Wi-Fi Calling option. If the option is missing or activation fails, ask that number’s carrier whether the feature is available for your account and location."
+      },
+      {
+        "question": "Will data switching change my usage?",
+        "answer": "The iPhone can use a different line for cellular data during a voice call when switching is enabled. Check which plan supplies that data and the terms for your location. Test using Wi-Fi first if roaming costs are unclear."
+      },
+      {
+        "question": "When is a device carrier check relevant?",
+        "answer": "If a different carrier’s line never registers, inspect Carrier Lock under General and About. An unlocked reading directs attention back to activation and coverage. If a restriction is shown and the network is unknown, inspect the carrier field separately."
+      }
+    ]
+  },
+  {
+    "locale": "fr-ca",
+    "slug": "bell-iphone-option-convertir-esim-absente",
+    "title": "Bell sur iPhone : conversion eSIM absente",
+    "heading": "L’option Convertir en eSIM est absente sur mon iPhone Bell : que vérifier?",
+    "description": "Vous gardez votre numéro Bell sur le même iPhone? Vérifiez la ligne sélectionnée et le moment de retirer la carte si la conversion est offerte.",
+    "standfirst": "Sur votre iPhone, ouvrez Réglages, puis Réseau cellulaire, et touchez votre numéro Bell. Si l’option Convertir en eSIM apparaît, vous pouvez lancer la conversion de cette ligne sur le même appareil. Si elle manque, gardez la carte physique en place et demandez à Bell quelle méthode convient à votre abonnement.",
+    "published": "2026-11-14",
+    "updated": "2026-11-14",
+    "minutes": 3,
+    "topic": "Bell Mobilité",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Sélectionnez votre numéro Bell.",
+          "Gardez la carte physique jusqu’à l’activation."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "check",
+        "text": "Où chercher le bouton de conversion?"
+      },
+      {
+        "kind": "p",
+        "text": "Commencez par la fiche de votre numéro dans Réseau cellulaire. Bell y situe la commande de conversion sur les appareils compatibles. Si vous utilisez deux lignes, vérifiez le numéro associé à chaque étiquette. Le nom Personnel ou Travail peut avoir été choisi lors de la configuration.",
+        "links": [
+          {
+            "label": "Marche à suivre de Bell",
+            "href": "https://soutien.bell.ca/mobilite/telephones_intelligents_et_internet_sans_fil/comment_changer_ma_carte_sim_ou_ma_carte_sim_integree"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Observation",
+          "Ce que cela confirme",
+          "Ce qui reste à vérifier",
+          "Prochaine étape"
+        ],
+        "rows": [
+          [
+            "Convertir en eSIM apparaît",
+            "Conversion offerte",
+            "Activation terminée ou non",
+            "Suivre les indications"
+          ],
+          [
+            "Seule la commande Ajouter une eSIM apparaît",
+            "Possibilité d’ajouter un forfait",
+            "Conversion de cette ligne",
+            "Consulter Bell"
+          ],
+          [
+            "Appel reçu sur le numéro converti",
+            "Réception vérifiée",
+            "Données cellulaires",
+            "Tester sans Wi-Fi"
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "next-step",
+        "text": "Quand retirer la carte physique?"
+      },
+      {
+        "kind": "p",
+        "text": "Bell indique de retirer la carte une fois son service actif sur votre appareil. Avant de ranger la carte, vérifiez que la ligne affichée correspond au numéro attendu. Avec deux lignes, choisissez explicitement le numéro Bell pour appeler, puis demandez à quelqu’un de vous rappeler."
+      },
+      {
+        "kind": "h3",
+        "id": "example",
+        "text": "Exemple fictif"
+      },
+      {
+        "kind": "p",
+        "text": "Une cliente de Montréal ouvre la fiche Travail et cherche le bouton pour convertir son numéro personnel Bell. Elle revient à la liste et compare les numéros. Si la commande manque aussi sur la bonne fiche, elle garde sa carte et fait vérifier son abonnement par Bell.",
+        "links": [
+          {
+            "label": "Assistance Apple",
+            "href": "https://support.apple.com/fr-ca/109316"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "support",
+        "text": "Que préparer pour le soutien de Bell?"
+      },
+      {
+        "kind": "p",
+        "text": "Notez le modèle exact de votre iPhone, la version du logiciel et le nom des commandes visibles sur la fiche de votre ligne. Expliquez que vous voulez garder le même numéro sur le même appareil. Bell pourra ainsi distinguer une conversion d’un transfert vers un autre téléphone."
+      },
+      {
+        "kind": "p",
+        "text": "Si vous avez deux forfaits, vérifiez lequel fournit les données avant votre essai. Une page qui se charge pendant que votre iPhone utilise le Wi-Fi ne permet pas de confirmer l’activation de votre ligne Bell. Essayez aussi de recevoir un appel sur le numéro converti.",
+        "links": [
+          {
+            "label": "Consultez les champs du rapport",
+            "href": "/services/imei-check/apple-carrier-lock-status"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Comparez les rapports si la compagnie responsable de la restriction demeure inconnue.",
+        "label": "Voir les rapports disponibles",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Faut-il retirer ma carte pour faire apparaître le bouton?",
+        "answer": "Bell place le retrait de la carte après l’activation de son service. Laissez-la en place pendant la vérification. Si le bouton manque sur la fiche du bon numéro, communiquez avec Bell en précisant le modèle de votre iPhone."
+      },
+      {
+        "question": "Ajouter une eSIM et convertir ma ligne, est-ce la même démarche?",
+        "answer": "La commande d’ajout propose des méthodes pour installer un forfait. Pour convertir votre carte Bell sur le même appareil, ouvrez d’abord la fiche du numéro actuel. Confirmez auprès de Bell quelle méthode conserve votre service si la conversion est absente."
+      },
+      {
+        "question": "Comment savoir si mon essai utilise la bonne ligne?",
+        "answer": "Sur un iPhone à deux numéros, sélectionnez la ligne Bell pour appeler un proche et faites-lui confirmer le numéro affiché. Demandez ensuite un rappel sur ce numéro. Vérifiez les données séparément avec le Wi-Fi désactivé et la ligne Bell sélectionnée."
+      },
+      {
+        "question": "Un rapport de verrouillage peut-il activer mon forfait?",
+        "answer": "Bell doit confirmer l’activation de votre numéro et la méthode de conversion offerte. Un rapport de verrouillage répond à une autre question lorsque vous voulez utiliser une deuxième compagnie et que l’iPhone affiche une restriction dont vous ignorez l’origine."
+      }
+    ]
+  },
+  {
+    "locale": "es",
+    "slug": "borre-esim-iphone-recuperar-linea-mexico",
+    "title": "Borré mi eSIM del iPhone en México",
+    "heading": "Borré mi eSIM del iPhone: ¿recupero el perfil o cancelo el plan?",
+    "description": "Revisa si la línea sigue en Datos celulares, qué pedir a tu operador en México y cómo comprobar que las llamadas entran al número recuperado.",
+    "standfirst": "Abre Configuración y entra en Datos celulares para ver si tu número todavía aparece. Si borraste la eSIM, Apple indica que debes pedir otra a tu operador. Si lo que buscas es dejar de pagar el plan, solicita la cancelación por separado y conserva la confirmación.",
+    "published": "2026-11-14",
+    "updated": "2026-11-14",
+    "minutes": 3,
+    "topic": "eSIM en México",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Distingue una línea apagada de un perfil borrado.",
+          "Consulta el cobro por separado."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "check",
+        "text": "¿Qué cambia cuando desaparece el perfil?"
+      },
+      {
+        "kind": "p",
+        "text": "La eSIM instalada permite que el teléfono use esa línea. Al borrarla, el perfil desaparece del equipo. El estado del contrato sigue en los sistemas de tu compañía. Antes de contratar otro plan, pregunta si tu número sigue activo y qué procedimiento corresponde para recuperarlo.",
+        "links": [
+          {
+            "label": "Apple sobre borrar una eSIM",
+            "href": "https://support.apple.com/es-mx/102421"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "Lo que ves",
+          "Qué confirma",
+          "Qué falta saber",
+          "Siguiente paso"
+        ],
+        "rows": [
+          [
+            "Línea desactivada",
+            "El perfil sigue visible",
+            "Estado de servicio",
+            "Enciende la línea"
+          ],
+          [
+            "Perfil borrado",
+            "Falta la configuración local",
+            "Estado del número",
+            "Pide reposición"
+          ],
+          [
+            "Cargo registrado",
+            "Hay un cobro",
+            "Vigencia o fecha de baja",
+            "Revisa el periodo"
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "next-step",
+        "text": "¿Cómo compruebo que recuperé el número correcto?"
+      },
+      {
+        "kind": "p",
+        "text": "Cuando la compañía te entregue el método de activación, instala la eSIM y revisa la lista de líneas. Selecciona el número recuperado para llamar y pide que te devuelvan la llamada a ese número. Si tienes otra línea instalada, una prueba de navegación podría estar usando sus datos."
+      },
+      {
+        "kind": "h3",
+        "id": "example",
+        "text": "Ejemplo hipotético"
+      },
+      {
+        "kind": "p",
+        "text": "Una persona en México borra su eSIM de Telcel y todavía puede abrir páginas mediante una segunda línea. Eso confirma que tiene conexión, pero queda pendiente comprobar el número de Telcel. Desde otro teléfono llama a ese número y consulta con Telcel la reposición y el estado del plan.",
+        "links": [
+          {
+            "label": "Configuración de eSIM",
+            "href": "https://support.apple.com/es-mx/118669"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "support",
+        "text": "¿Qué conviene preparar para atención a clientes?"
+      },
+      {
+        "kind": "p",
+        "text": "Anota si el número aparece en Datos celulares, cuándo dejó de funcionar y si otra línea sigue activa en el equipo. Al hablar con tu compañía, especifica que deseas recuperar el mismo número. Si tu objetivo es cancelar el servicio, pide la fecha efectiva por separado."
+      },
+      {
+        "kind": "p",
+        "text": "Para verificar los datos, selecciona la línea recuperada y desconecta el Wi-Fi durante la prueba. Si solo compruebas que una página carga, podrías estar utilizando el otro plan. Anota por separado si funcionan las llamadas entrantes, las salientes y los datos.",
+        "links": [
+          {
+            "label": "Consulta los campos del informe",
+            "href": "/services/imei-check/apple-carrier-lock-status"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Compara los informes si aún desconoces la red que aplicó la restricción.",
+        "label": "Ver informes disponibles",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "¿Borrar la eSIM cancela mi plan mensual?",
+        "answer": "Para cancelar el servicio tienes que comunicarte con tu operador. Pide la fecha efectiva de la baja y revisa el periodo de cualquier cargo pendiente. La ausencia del número en Datos celulares solo describe lo que tiene instalado tu iPhone."
+      },
+      {
+        "question": "¿Necesito otra eSIM si la línea todavía aparece apagada?",
+        "answer": "Abre la ficha del número y revisa si puedes activar esa línea. Una línea apagada y un perfil eliminado requieren pasos distintos. Si la línea se enciende pero sigue sin servicio, pide que tu compañía revise su activación."
+      },
+      {
+        "question": "¿Sirve escanear otra vez el código anterior?",
+        "answer": "Consulta primero con la compañía que emitió el código. Apple indica que, después de borrar una eSIM, debes contactar al operador para obtener otra. Usa el método que te asigne para tu número y evita compartir públicamente el código."
+      },
+      {
+        "question": "¿Qué hago si el iPhone rechaza una eSIM de otra compañía?",
+        "answer": "Revisa el bloqueo del operador en Configuración, General, Información. Si el equipo admite otras redes, consulta la activación con la nueva compañía. Si aparece una restricción y desconoces la red responsable, el campo de operador de un informe puede orientarte."
+      }
+    ]
+  },
+  {
+    "locale": "en",
+    "slug": "mainland-china-local-esim-iphone-model",
+    "title": "Can My iPhone Use a Mainland China eSIM?",
+    "heading": "My iPhone is unlocked: can I activate a mainland Chinese carrier eSIM?",
+    "description": "Check the exact Apple model number before visiting a carrier store in mainland China, and distinguish a local mobile plan from a roaming travel eSIM.",
+    "standfirst": "In Settings, open General and About, then tap Model Number to reveal the A-number. Compare it with Apple’s list for mainland Chinese carrier eSIMs. An unlocked reading answers the carrier restriction question. For a local subscription, confirm the exact model and the in-store activation process before buying a plan.",
+    "published": "2026-11-14",
+    "updated": "2026-11-14",
+    "minutes": 3,
+    "topic": "Travel eSIM",
+    "blocks": [
+      {
+        "kind": "list",
+        "items": [
+          "Read the A-number on the handset.",
+          "Check local activation requirements with the store."
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "check",
+        "text": "Which model number does the store need?"
+      },
+      {
+        "kind": "p",
+        "text": "Use the A-number displayed after tapping Model Number. Apple identifies supported mainland models individually, so a matching product name on a shop listing is insufficient. Compare the number directly with the current Apple list and ask the local carrier about the plan you intend to activate.",
+        "links": [
+          {
+            "label": "Apple’s mainland requirements",
+            "href": "https://support.apple.com/en-us/123879"
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "head": [
+          "What you see",
+          "What it confirms",
+          "Still unknown",
+          "Next step"
+        ],
+        "rows": [
+          [
+            "Product name matches",
+            "Same family",
+            "Regional hardware",
+            "Read the A-number"
+          ],
+          [
+            "A-number matches list",
+            "Listed mainland model",
+            "Plan approval",
+            "Contact store"
+          ],
+          [
+            "Travel plan connects",
+            "Roaming works here",
+            "Local subscription eligibility",
+            "Check mainland requirements"
+          ]
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "next-step",
+        "text": "What should I confirm before a store visit?"
+      },
+      {
+        "kind": "p",
+        "text": "Apple directs customers activating a mainland carrier eSIM to a carrier store with a supported model. Its instructions cover setup, backing up or transferring existing data, bringing identification and bringing an existing SIM when applicable. Ask the store what it needs for your specific subscription before traveling."
+      },
+      {
+        "kind": "h3",
+        "id": "example",
+        "text": "Worked example"
+      },
+      {
+        "kind": "p",
+        "text": "Suppose a visitor uses a foreign travel eSIM in Shanghai and wants a China Unicom plan on the same phone. Loading a map proves that the travel connection works. It leaves the local activation question open. Check the A-number against Apple’s mainland list before arranging a store visit.",
+        "links": [
+          {
+            "label": "Carrier restriction check",
+            "href": "https://support.apple.com/en-us/109316"
+          }
+        ]
+      },
+      {
+        "kind": "h2",
+        "id": "support",
+        "text": "What if the seller only knows the retail name?"
+      },
+      {
+        "kind": "p",
+        "text": "Ask the seller to open About on the phone you intend to buy and tap the model number field. A photo showing just the product family leaves the hardware variant unresolved. The A-number is sufficient for the model comparison, so other device identifiers can stay covered."
+      },
+      {
+        "kind": "p",
+        "text": "Decide what you need on arrival. A visitor who only wants internet access may already have a roaming arrangement, while someone seeking a mainland subscription needs to confirm local activation. Ask the provider whether the product being offered is a local subscription or a travel plan and whether it supplies the voice or messaging features you actually need."
+      },
+      {
+        "kind": "p",
+        "text": "If the model does not appear on Apple’s current list, share the A-number with the carrier before committing to a store visit. If it does appear, keep a note of the match and ask what to bring. Neither the model lookup nor an unlocked reading confirms that an individual account has been approved or that a specific shop can complete activation that day.",
+        "links": [
+          {
+            "label": "Inspect the carrier lock report",
+            "href": "/services/imei-check/apple-carrier-lock-status"
+          }
+        ]
+      },
+      {
+        "kind": "cta",
+        "text": "Compare available reports if the locking network is still unclear.",
+        "label": "Browse phone reports",
+        "href": "/services/imei-check"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is an unlocked iPhone automatically on the mainland eSIM list?",
+        "answer": "An unlocked reading tells you the iPhone has no carrier SIM restriction. Apple separately identifies models that can activate a mainland carrier eSIM. Compare the exact A-number and confirm the store procedure before depending on a local plan."
+      },
+      {
+        "question": "Why does Settings show a number beginning with a different letter?",
+        "answer": "The first value beside Model Number can be the part number. Tap it once to display the hardware model number beginning with A. Compare that value with the mainland list instead of matching the retail name or storage size."
+      },
+      {
+        "question": "Does a working travel eSIM prove a local plan will activate?",
+        "answer": "A working travel plan confirms service through that provider’s roaming arrangement at that location. A mainland subscription is a different activation decision. Ask the local carrier to check your model and the requirements for obtaining the particular plan."
+      },
+      {
+        "question": "Can a carrier report tell me which store will activate my phone?",
+        "answer": "Store arrangements and plan availability come from the local carrier. A carrier report can help identify an unresolved device restriction when buying a used iPhone, but it cannot establish a store’s inventory, verify your documents or issue a local subscription."
+      }
+    ]
+  },
+
 
   {
     "locale": "en",
